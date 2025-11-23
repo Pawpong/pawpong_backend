@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 
 import { Banner, BannerDocument } from '../../schema/banner.schema';
 import { Faq, FaqDocument } from '../../schema/faq.schema';
+import { Breeder, BreederDocument } from '../../schema/breeder.schema';
+import { AvailablePet, AvailablePetDocument } from '../../schema/available-pet.schema';
 import { StorageService } from '../../common/storage/storage.service';
 import { BannerResponseDto } from './dto/response/banner-response.dto';
 import { FaqResponseDto } from './dto/response/faq-response.dto';
@@ -19,6 +21,8 @@ export class HomeService {
     constructor(
         @InjectModel(Banner.name) private bannerModel: Model<BannerDocument>,
         @InjectModel(Faq.name) private faqModel: Model<FaqDocument>,
+        @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
+        @InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>,
         private readonly storageService: StorageService,
     ) {}
 
@@ -102,5 +106,65 @@ export class HomeService {
             userType: faq.userType,
             order: faq.order,
         }));
+    }
+
+    /**
+     * 분양 가능한 반려동물 목록 조회
+     * AvailablePet 컬렉션에서 직접 조회
+     */
+    async getAvailablePets(limit: number = 10): Promise<any[]> {
+        this.logger.log(`[getAvailablePets] 분양 가능한 반려동물 ${limit}개 조회 시작`);
+
+        // AvailablePet 컬렉션에서 분양 가능한 개체 조회
+        const pets = await this.availablePetModel
+            .find({
+                status: 'available',
+                isActive: true,
+            })
+            .populate('breederId', 'name profile')
+            .limit(limit)
+            .sort({ createdAt: -1 }) // 최신순
+            .lean()
+            .exec();
+
+        this.logger.log(`[getAvailablePets] ${pets.length}개의 분양 가능 반려동물 조회 완료`);
+
+        // 응답 DTO로 변환
+        const result = pets.map((pet: any) => {
+            const breeder = pet.breederId || {};
+            return {
+                petId: pet._id.toString(),
+                name: pet.name,
+                breed: pet.breed,
+                breederId: breeder._id ? breeder._id.toString() : '',
+                breederName: breeder.name || '브리더 정보 없음',
+                price: pet.price || 0,
+                mainPhoto:
+                    pet.photos && pet.photos.length > 0
+                        ? this.storageService.generateSignedUrl(pet.photos[0], 60)
+                        : 'https://via.placeholder.com/300',
+                ageInMonths: this.calculateAgeInMonths(pet.birthDate),
+                location: {
+                    city: breeder.profile?.location?.city || '',
+                    district: breeder.profile?.location?.district || '',
+                },
+            };
+        });
+
+        this.logger.log(`[getAvailablePets] ${result.length}개의 분양 가능 반려동물 반환`);
+
+        return result;
+    }
+
+    /**
+     * 생년월일로부터 개월수 계산
+     */
+    private calculateAgeInMonths(birthDate: Date | string): number {
+        if (!birthDate) return 0;
+        const birth = new Date(birthDate);
+        const now = new Date();
+        const months =
+            (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
+        return Math.max(0, months);
     }
 }

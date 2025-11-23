@@ -62,14 +62,16 @@ export class BreederExploreService {
         }
 
         // 강아지 크기 필터 (강아지일 때만)
-        if (petType === 'dog' && dogSize && dogSize.length > 0) {
-            filter['availablePets.size'] = { $in: dogSize };
-        }
+        // TODO: availablePets는 별도 컬렉션이므로 추후 구현
+        // if (petType === 'dog' && dogSize && dogSize.length > 0) {
+        //     filter['availablePets.size'] = { $in: dogSize };
+        // }
 
         // 고양이 털 길이 필터 (고양이일 때만)
-        if (petType === 'cat' && catFurLength && catFurLength.length > 0) {
-            filter['availablePets.furLength'] = { $in: catFurLength };
-        }
+        // TODO: availablePets는 별도 컬렉션이므로 추후 구현
+        // if (petType === 'cat' && catFurLength && catFurLength.length > 0) {
+        //     filter['availablePets.furLength'] = { $in: catFurLength };
+        // }
 
         // 지역 필터
         if (province && province.length > 0 && city && city.length > 0) {
@@ -83,12 +85,8 @@ export class BreederExploreService {
             filter['profile.location.district'] = { $in: city };
         }
 
-        // 입양 가능 여부 필터
-        if (isAdoptionAvailable === true) {
-            filter['availablePets'] = {
-                $elemMatch: { status: 'available' },
-            };
-        }
+        // 입양 가능 여부 필터는 후처리로 수행 (별도 컬렉션이므로)
+        // availablePets는 별도 컬렉션이므로 브리더 조회 후 필터링
 
         // 브리더 레벨 필터
         if (breederLevel && breederLevel.length > 0) {
