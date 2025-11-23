@@ -74,10 +74,14 @@ async function bootstrap(): Promise<void> {
     // CORS 설정
     app.enableCors({
         origin: [
-            // 개발 환경
+            // 개발 환경 - 서비스 프론트엔드
             'http://localhost:3000',
             'http://localhost:3001',
             'http://localhost:3002',
+            // 개발 환경 - 어드민 프론트엔드
+            'http://localhost:5173',
+            'http://localhost:5174',
+            'http://localhost:5175',
             // Pawpong 프론트엔드 (추후 도메인 설정)
             'https://pawpongdev.vercel.app',
             'https://pawpong.co.kr',
