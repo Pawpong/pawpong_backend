@@ -258,6 +258,7 @@ export class ApplicationCreateRequestDto {
         maxLength: 1500,
         required: false,
     })
+    @IsOptional()
     @IsString()
     @MaxLength(1500, { message: '선호 반려동물 설명은 최대 1500자까지 입력 가능합니다.' })
     preferredPetDescription?: string;
@@ -274,6 +275,7 @@ export class ApplicationCreateRequestDto {
         example: '2개월 후 (2025년 3월 예정)',
         required: false,
     })
+    @IsOptional()
     @IsString()
     desiredAdoptionTiming?: string;
 
@@ -290,6 +292,7 @@ export class ApplicationCreateRequestDto {
         maxLength: 1500,
         required: false,
     })
+    @IsOptional()
     @IsString()
     @MaxLength(1500, { message: '추가 문의사항은 최대 1500자까지 입력 가능합니다.' })
     additionalNotes?: string;
