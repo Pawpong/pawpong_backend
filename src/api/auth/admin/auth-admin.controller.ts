@@ -17,7 +17,7 @@ import { AdminLoginResponseDto } from '../dto/response/admin-login-response.dto'
  * @tag Auth Admin - 관리자 인증
  */
 @ApiTags('인증 관리 (Admin)')
-@Controller('auth/admin')
+@Controller('auth-admin')
 export class AuthAdminController {
     constructor(private readonly authAdminService: AuthAdminService) {}
 
