@@ -2,13 +2,15 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { Banner, BannerDocument } from '../../schema/banner.schema';
+import { StorageService } from '../../common/storage/storage.service';
+
 import { Faq, FaqDocument } from '../../schema/faq.schema';
+import { Banner, BannerDocument } from '../../schema/banner.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
 import { AvailablePet, AvailablePetDocument } from '../../schema/available-pet.schema';
-import { StorageService } from '../../common/storage/storage.service';
-import { BannerResponseDto } from './dto/response/banner-response.dto';
+
 import { FaqResponseDto } from './dto/response/faq-response.dto';
+import { BannerResponseDto } from './dto/response/banner-response.dto';
 
 /**
  * 홈페이지 서비스
@@ -19,10 +21,10 @@ export class HomeService {
     private readonly logger = new Logger(HomeService.name);
 
     constructor(
-        @InjectModel(Banner.name) private bannerModel: Model<BannerDocument>,
         @InjectModel(Faq.name) private faqModel: Model<FaqDocument>,
-        @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
+        @InjectModel(Banner.name) private bannerModel: Model<BannerDocument>,
         @InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>,
+
         private readonly storageService: StorageService,
     ) {}
 
@@ -33,11 +35,7 @@ export class HomeService {
     async getActiveBanners(): Promise<BannerResponseDto[]> {
         this.logger.log('[getActiveBanners] 배너 목록 조회 시작');
 
-        const banners = await this.bannerModel
-            .find({ isActive: true })
-            .sort({ order: 1 })
-            .lean()
-            .exec();
+        const banners = await this.bannerModel.find({ isActive: true }).sort({ order: 1 }).lean().exec();
 
         this.logger.log(`[getActiveBanners] ${banners.length}개의 배너 조회 완료`);
 
@@ -111,9 +109,12 @@ export class HomeService {
     /**
      * 분양 가능한 반려동물 목록 조회
      * AvailablePet 컬렉션에서 직접 조회
+     * @param limit 조회 개수 (기본: 10, 최대: 50)
      */
     async getAvailablePets(limit: number = 10): Promise<any[]> {
-        this.logger.log(`[getAvailablePets] 분양 가능한 반려동물 ${limit}개 조회 시작`);
+        // 최대 조회 개수 제한 (최대 50개)
+        const validLimit = Math.min(limit, 50);
+        this.logger.log(`[getAvailablePets] 분양 가능한 반려동물 ${validLimit}개 조회 시작`);
 
         // AvailablePet 컬렉션에서 분양 가능한 개체 조회
         const pets = await this.availablePetModel
@@ -122,7 +123,7 @@ export class HomeService {
                 isActive: true,
             })
             .populate('breederId', 'name profile')
-            .limit(limit)
+            .limit(validLimit)
             .sort({ createdAt: -1 }) // 최신순
             .lean()
             .exec();
@@ -163,8 +164,7 @@ export class HomeService {
         if (!birthDate) return 0;
         const birth = new Date(birthDate);
         const now = new Date();
-        const months =
-            (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
+        const months = (now.getFullYear() - birth.getFullYear()) * 12 + (now.getMonth() - birth.getMonth());
         return Math.max(0, months);
     }
 }

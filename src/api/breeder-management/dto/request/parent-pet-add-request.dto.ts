@@ -29,7 +29,6 @@ export class ParentPetAddDto {
     @IsString()
     @IsNotEmpty()
     breed: string;
-
     /**
      * 성별
      * @example "male"

@@ -5,15 +5,11 @@ import { BreederController } from './breeder.controller';
 import { BreederService } from './breeder.service';
 import { BreederExploreService } from './breeder-explore.service';
 
-import { BreederDatabaseModule, AdopterDatabaseModule } from '../../common/database/database.module';
 import { StorageModule } from '../../common/storage/storage.module';
+import { BreederDatabaseModule, AdopterDatabaseModule } from '../../common/database/database.module';
 
 @Module({
-    imports: [
-        BreederDatabaseModule,
-        AdopterDatabaseModule,
-        StorageModule,
-    ],
+    imports: [BreederDatabaseModule, AdopterDatabaseModule, StorageModule],
     controllers: [BreederController],
     providers: [BreederService, BreederExploreService],
     exports: [BreederService, BreederExploreService],

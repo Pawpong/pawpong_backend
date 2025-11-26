@@ -1,12 +1,6 @@
-import {
-    ExceptionFilter,
-    Catch,
-    ArgumentsHost,
-    HttpException,
-    HttpStatus,
-    Logger,
-} from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
 import { Request, Response } from 'express';
+
 import { ApiResponseDto } from '../dto/response/api-response.dto';
 
 /**
@@ -43,9 +37,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         }
 
         // 에러 로깅
-        this.logger.error(
-            `[${request.method}] ${request.url} - ${status} - ${errorMessage}`,
-        );
+        this.logger.error(`[${request.method}] ${request.url} - ${status} - ${errorMessage}`);
 
         // ApiResponseDto 형식으로 응답
         const errorResponse = ApiResponseDto.error(errorMessage, status);
@@ -66,21 +58,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
 
-        const status =
-            exception instanceof HttpException
-                ? exception.getStatus()
-                : HttpStatus.INTERNAL_SERVER_ERROR;
+        const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        const message =
-            exception instanceof Error
-                ? exception.message
-                : 'Internal server error';
+        const message = exception instanceof Error ? exception.message : 'Internal server error';
 
         // 에러 로깅
-        this.logger.error(
-            `[${request.method}] ${request.url} - ${status} - ${message}`,
-            exception.stack,
-        );
+        this.logger.error(`[${request.method}] ${request.url} - ${status} - ${message}`, exception.stack);
 
         // ApiResponseDto 형식으로 응답
         const errorResponse = ApiResponseDto.error(message, status);

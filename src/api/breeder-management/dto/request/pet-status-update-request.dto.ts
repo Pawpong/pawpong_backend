@@ -1,5 +1,6 @@
 import { IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+
 import { PetStatus } from '../../../../common/enum/user.enum';
 
 /**

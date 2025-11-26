@@ -59,12 +59,14 @@ export class AdopterAdminService {
      * BreederReview 컬렉션에서 isReported가 true인 후기들을 조회합니다.
      *
      * @param adminId 관리자 고유 ID
-     * @param page 페이지 번호
-     * @param limit 페이지당 항목 수
+     * @param pageStr 페이지 번호 (문자열)
+     * @param limitStr 페이지당 항목 수 (문자열)
      * @returns 신고된 후기 목록과 페이지네이션 정보
      * @throws ForbiddenException 권한 없음
      */
-    async getReviewReports(adminId: string, page: number = 1, limit: number = 10): Promise<any> {
+    async getReviewReports(adminId: string, pageStr: string = '1', limitStr: string = '10'): Promise<any> {
+        const page = parseInt(pageStr, 10) || 1;
+        const limit = parseInt(limitStr, 10) || 10;
         const admin = await this.adminModel.findById(adminId);
         if (!admin || !admin.permissions.canManageReports) {
             throw new ForbiddenException('Access denied');

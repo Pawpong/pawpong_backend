@@ -23,13 +23,9 @@ export class LoggingInterceptor implements NestInterceptor {
         const { method, url, ip, headers, cookies, body } = request;
 
         // 요청 정보 로깅
-        this.logger.log(
-            `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-        );
+        this.logger.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
         this.logger.log(`→ Request: ${method} ${url}`);
-        this.logger.log(
-            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`,
-        );
+        this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
         this.logger.log(`  IP: ${ip}`);
 
         // Bearer 토큰 로깅
@@ -71,9 +67,7 @@ export class LoggingInterceptor implements NestInterceptor {
             this.logger.log(`  Content-Type: ${headers['content-type']}`);
         }
 
-        this.logger.log(
-            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`,
-        );
+        this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
 
         // 응답은 로깅하지 않음 (사용자 요청)
         return next.handle();

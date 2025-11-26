@@ -2,11 +2,7 @@ import { Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import {
-    VerificationStatus,
-    UserStatus,
-    ApplicationStatus,
-} from '../../../common/enum/user.enum';
+import { VerificationStatus, UserStatus, ApplicationStatus } from '../../../common/enum/user.enum';
 
 import { Admin, AdminDocument } from '../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';

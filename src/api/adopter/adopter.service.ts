@@ -41,10 +41,12 @@ import { AdopterProfileResponseDto } from './dto/response/adopter-profile-respon
 @Injectable()
 export class AdopterService {
     constructor(
+        private storageService: StorageService,
+
         private adopterRepository: AdopterRepository,
         private breederRepository: BreederRepository,
         private availablePetManagementRepository: AvailablePetManagementRepository,
-        private storageService: StorageService,
+
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(BreederReview.name) private breederReviewModel: Model<BreederReviewDocument>,
         @InjectModel(AdoptionApplication.name) private adoptionApplicationModel: Model<AdoptionApplicationDocument>,
@@ -502,6 +504,8 @@ export class AdopterService {
             const breeder = review.breederId;
             return {
                 reviewId: review._id.toString(),
+                applicationId: review.applicationId?.toString() || null,
+                breederId: breeder?._id?.toString() || null,
                 breederNickname: breeder?.nickname || '알 수 없음',
                 breederProfileImage: breeder?.profileImageFileName
                     ? this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60)

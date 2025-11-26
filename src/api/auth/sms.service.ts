@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import CoolsmsMessageService from 'coolsms-node-sdk';
+
 import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
 
@@ -50,11 +51,9 @@ export class SmsService {
 
         const existingCode = this.verificationCodes.get(normalizedPhone);
         if (existingCode && !this.isExpired(existingCode.expiresAt)) {
-            const remainingTime = Math.ceil(
-                (existingCode.expiresAt.getTime() - Date.now()) / 1000 / 60
-            );
+            const remainingTime = Math.ceil((existingCode.expiresAt.getTime() - Date.now()) / 1000 / 60);
             throw new BadRequestException(
-                `이미 발송된 인증코드가 있습니다. ${remainingTime}분 후에 재발송 가능합니다.`
+                `이미 발송된 인증코드가 있습니다. ${remainingTime}분 후에 재발송 가능합니다.`,
             );
         }
 
@@ -125,7 +124,7 @@ export class SmsService {
 
         if (verification.code !== code) {
             throw new BadRequestException(
-                `인증번호가 일치하지 않습니다. (${verification.attempts}/${this.MAX_ATTEMPTS})`
+                `인증번호가 일치하지 않습니다. (${verification.attempts}/${this.MAX_ATTEMPTS})`,
             );
         }
 

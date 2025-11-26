@@ -1,6 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { IsString, IsBoolean, IsOptional, IsArray, IsIn } from 'class-validator';
-import { StandardQuestionResponseDto } from '../response/standard-question-response.dto';
 
 class UpdateStandardQuestionFields {
     @ApiProperty({ description: '질문 타입', example: 'text', required: false })

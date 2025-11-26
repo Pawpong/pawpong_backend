@@ -1,7 +1,6 @@
-import { Controller, Get, Post, Query, Body, Param, UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
+import { Controller, Get, Post, Query, Body, Param } from '@nestjs/common';
+
 import { CurrentUser } from '../../common/decorator/user.decorator';
-import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../common/decorator/swagger.decorator';
 
 import { BreederService } from './breeder.service';
@@ -9,17 +8,19 @@ import { BreederExploreService } from './breeder-explore.service';
 
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
 import { SearchBreederRequestDto } from './dto/request/search-breeder-request.dto';
-import { BreederSearchResponseDto } from './dto/response/breeder-search-response.dto';
-import { BreederProfileResponseDto } from './dto/response/breeder-profile-response.dto';
-import { BreederCardResponseDto } from './dto/response/breeder-card-response.dto';
+import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
-import { BreederReviewsResponseDto, BreederReviewItemDto } from './dto/response/breeder-reviews-response.dto';
 import { PetDetailResponseDto } from './dto/response/pet-detail-response.dto';
-import { PetsListResponseDto, PetItemDto } from './dto/response/pets-list-response.dto';
+import { BreederCardResponseDto } from './dto/response/breeder-card-response.dto';
+import { BreederSearchResponseDto } from './dto/response/breeder-search-response.dto';
 import { ParentPetListResponseDto } from './dto/response/parent-pet-list.dto';
-import { PublicApplicationFormResponseDto } from './dto/response/public-application-form.dto';
-import { BreederSwaggerDocs } from './swagger';
+import { BreederProfileResponseDto } from './dto/response/breeder-profile-response.dto';
 import { BreederExploreResponseDto } from './dto/response/breeder-explore-response.dto';
+import { PublicApplicationFormResponseDto } from './dto/response/public-application-form.dto';
+import { PetsListResponseDto, PetItemDto } from './dto/response/pets-list-response.dto';
+import { BreederReviewsResponseDto, BreederReviewItemDto } from './dto/response/breeder-reviews-response.dto';
+
+import { BreederSwaggerDocs } from './swagger';
 
 @ApiController('브리더')
 @Controller('breeder')
@@ -147,7 +148,9 @@ export class BreederController {
         responseType: PublicApplicationFormResponseDto,
         isPublic: true,
     })
-    async getApplicationForm(@Param('id') breederId: string): Promise<ApiResponseDto<PublicApplicationFormResponseDto>> {
+    async getApplicationForm(
+        @Param('id') breederId: string,
+    ): Promise<ApiResponseDto<PublicApplicationFormResponseDto>> {
         const result = await this.breederService.getApplicationForm(breederId);
         return ApiResponseDto.success(result, '입양 신청 폼 구조가 조회되었습니다.');
     }

@@ -6,13 +6,14 @@ import { VerificationStatus, PetStatus } from '../../common/enum/user.enum';
 
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
 import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
-import { BreederReview, BreederReviewDocument } from '../../schema/breeder-review.schema';
 import { ParentPet, ParentPetDocument } from '../../schema/parent-pet.schema';
+import { AvailablePet, AvailablePetDocument } from '../../schema/available-pet.schema';
+import { BreederReview, BreederReviewDocument } from '../../schema/breeder-review.schema';
 
+import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
 import { BreederSearchResponseDto } from './dto/response/breeder-search-response.dto';
 import { BreederProfileResponseDto } from './dto/response/breeder-profile-response.dto';
-import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
 
 @Injectable()
 export class BreederService {
@@ -21,6 +22,7 @@ export class BreederService {
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
         @InjectModel(BreederReview.name) private breederReviewModel: Model<BreederReviewDocument>,
         @InjectModel(ParentPet.name) private parentPetModel: Model<ParentPetDocument>,
+        @InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>,
     ) {}
 
     async searchBreeders(searchDto: BreederSearchRequestDto): Promise<BreederSearchResponseDto> {
@@ -255,10 +257,11 @@ export class BreederService {
 
         // 2. BreederReview 컬렉션에서 조회 (참조 방식)
         const skip = (page - 1) * limit;
+        const breederOid = new Types.ObjectId(breederId); // ObjectId 변환
 
         const [reviews, total] = await Promise.all([
             this.breederReviewModel
-                .find({ breederId, isVisible: true })
+                .find({ breederId: breederOid, isVisible: true }) // ObjectId로 쿼리
                 .sort({ writtenAt: -1 }) // 최신순 정렬
                 .skip(skip)
                 .limit(limit)
@@ -266,7 +269,7 @@ export class BreederService {
                 .populate('applicationId', 'petName') // 입양 신청의 반려동물 이름 조회
                 .lean()
                 .exec(),
-            this.breederReviewModel.countDocuments({ breederId, isVisible: true }).exec(),
+            this.breederReviewModel.countDocuments({ breederId: breederOid, isVisible: true }).exec(), // ObjectId로 쿼리
         ]);
 
         // 3. 응답 데이터 포맷팅
@@ -384,7 +387,7 @@ export class BreederService {
 
         // ParentPet 컬렉션에서 활성화된 부모견/부모묘 조회
         const parentPets = await this.parentPetModel
-            .find({ breederId, isActive: true })
+            .find({ breederId: new Types.ObjectId(breederId), isActive: true })
             .lean();
 
         // 데이터 변환 (사진 URL은 fileName 그대로 반환, 필요시 Signed URL 생성은 클라이언트에서 처리)
@@ -417,35 +420,53 @@ export class BreederService {
             throw new BadRequestException('올바르지 않은 브리더 ID 형식입니다.');
         }
 
-        const breeder = await this.breederModel.findById(breederId).select('availablePets').lean();
-
+        // 브리더 존재 확인
+        const breeder = await this.breederModel.findById(breederId).select('_id').lean();
         if (!breeder) {
             throw new BadRequestException('브리더를 찾을 수 없습니다.');
         }
 
-        let allPets = (breeder as any).availablePets?.filter((pet: any) => pet.isActive) || [];
+        // AvailablePet 컬렉션에서 조회
+        const breederOid = new Types.ObjectId(breederId);
 
         // 상태별 카운트 계산
-        const availableCount = allPets.filter((p: any) => p.status === 'available').length;
-        const reservedCount = allPets.filter((p: any) => p.status === 'reserved').length;
-        const adoptedCount = allPets.filter((p: any) => p.status === 'adopted').length;
+        const availableCount = await this.availablePetModel.countDocuments({
+            breederId: breederOid,
+            isActive: true,
+            status: 'available',
+        });
+        const reservedCount = await this.availablePetModel.countDocuments({
+            breederId: breederOid,
+            isActive: true,
+            status: 'reserved',
+        });
+        const adoptedCount = await this.availablePetModel.countDocuments({
+            breederId: breederOid,
+            isActive: true,
+            status: 'adopted',
+        });
 
-        // 상태 필터링
+        // 필터 조건
+        const filter: any = { breederId: breederOid, isActive: true };
         if (status) {
-            allPets = allPets.filter((pet: any) => pet.status === status);
+            filter.status = status;
         }
 
-        const total = allPets.length;
+        // 전체 개수
+        const total = await this.availablePetModel.countDocuments(filter);
 
-        // 페이지네이션
+        // 페이지네이션 조회
         const skip = (page - 1) * limit;
-        const pets = allPets.slice(skip, skip + limit).map((pet: any) => {
+        const pets = await this.availablePetModel.find(filter).skip(skip).limit(limit).lean();
+
+        // 데이터 변환
+        const items = pets.map((pet: any) => {
             const birthDate = new Date(pet.birthDate);
             const now = new Date();
             const ageInMonths = Math.floor((now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
 
             return {
-                petId: pet.petId,
+                petId: pet._id.toString(),
                 name: pet.name,
                 breed: pet.breed,
                 gender: pet.gender,
@@ -464,7 +485,7 @@ export class BreederService {
         const totalPages = Math.ceil(total / limit);
 
         return {
-            items: pets,
+            items,
             pagination: {
                 currentPage: page,
                 pageSize: limit,
@@ -486,20 +507,118 @@ export class BreederService {
      */
     private getStandardQuestions() {
         return [
-            { id: 'privacyConsent', type: 'checkbox', label: '개인정보 수집 및 이용에 동의하시나요?', required: true, order: 1, isStandard: true },
-            { id: 'selfIntroduction', type: 'textarea', label: '간단하게 자기소개 부탁드려요 (성별, 연령대, 거주지, 생활 패턴 등)', required: true, order: 2, isStandard: true },
-            { id: 'familyMembers', type: 'text', label: '함께 거주하는 가족 구성원을 알려주세요', required: true, order: 3, isStandard: true },
-            { id: 'allFamilyConsent', type: 'checkbox', label: '모든 가족 구성원들이 입양에 동의하셨나요?', required: true, order: 4, isStandard: true },
-            { id: 'allergyTestInfo', type: 'text', label: '본인을 포함한 모든 가족 구성원분들께서 알러지 검사를 마치셨나요?', required: true, order: 5, isStandard: true },
-            { id: 'timeAwayFromHome', type: 'text', label: '평균적으로 집을 비우는 시간은 얼마나 되나요?', required: true, order: 6, isStandard: true },
-            { id: 'livingSpaceDescription', type: 'textarea', label: '아이와 함께 지내게 될 공간을 소개해 주세요', required: true, order: 7, isStandard: true },
-            { id: 'previousPetExperience', type: 'textarea', label: '현재 함께하는, 또는 이전에 함께했던 반려동물에 대해 알려주세요', required: true, order: 8, isStandard: true },
-            { id: 'canProvideBasicCare', type: 'checkbox', label: '정기 예방접종·건강검진·훈련 등 기본 케어를 책임지고 해주실 수 있나요?', required: true, order: 9, isStandard: true },
-            { id: 'canAffordMedicalExpenses', type: 'checkbox', label: '예상치 못한 질병이나 사고 등으로 치료비가 발생할 경우 감당 가능하신가요?', required: true, order: 10, isStandard: true },
-            { id: 'neuteringConsent', type: 'checkbox', label: '모든 아이들은 중성화 후 분양되거나, 입양 후 중성화를 진행해야 합니다. 동의하십니까?', required: true, order: 11, isStandard: true },
-            { id: 'preferredPetDescription', type: 'textarea', label: '마음에 두신 아이가 있으신가요? (특징: 성별, 타입, 외모, 컬러패턴, 성격 등)', required: false, order: 12, isStandard: true },
-            { id: 'desiredAdoptionTiming', type: 'text', label: '원하시는 입양 시기가 있나요?', required: false, order: 13, isStandard: true },
-            { id: 'additionalNotes', type: 'textarea', label: '마지막으로 궁금하신 점이나 남기시고 싶으신 말씀이 있나요?', required: false, order: 14, isStandard: true },
+            {
+                id: 'privacyConsent',
+                type: 'checkbox',
+                label: '개인정보 수집 및 이용에 동의하시나요?',
+                required: true,
+                order: 1,
+                isStandard: true,
+            },
+            {
+                id: 'selfIntroduction',
+                type: 'textarea',
+                label: '간단하게 자기소개 부탁드려요 (성별, 연령대, 거주지, 생활 패턴 등)',
+                required: true,
+                order: 2,
+                isStandard: true,
+            },
+            {
+                id: 'familyMembers',
+                type: 'text',
+                label: '함께 거주하는 가족 구성원을 알려주세요',
+                required: true,
+                order: 3,
+                isStandard: true,
+            },
+            {
+                id: 'allFamilyConsent',
+                type: 'checkbox',
+                label: '모든 가족 구성원들이 입양에 동의하셨나요?',
+                required: true,
+                order: 4,
+                isStandard: true,
+            },
+            {
+                id: 'allergyTestInfo',
+                type: 'text',
+                label: '본인을 포함한 모든 가족 구성원분들께서 알러지 검사를 마치셨나요?',
+                required: true,
+                order: 5,
+                isStandard: true,
+            },
+            {
+                id: 'timeAwayFromHome',
+                type: 'text',
+                label: '평균적으로 집을 비우는 시간은 얼마나 되나요?',
+                required: true,
+                order: 6,
+                isStandard: true,
+            },
+            {
+                id: 'livingSpaceDescription',
+                type: 'textarea',
+                label: '아이와 함께 지내게 될 공간을 소개해 주세요',
+                required: true,
+                order: 7,
+                isStandard: true,
+            },
+            {
+                id: 'previousPetExperience',
+                type: 'textarea',
+                label: '현재 함께하는, 또는 이전에 함께했던 반려동물에 대해 알려주세요',
+                required: true,
+                order: 8,
+                isStandard: true,
+            },
+            {
+                id: 'canProvideBasicCare',
+                type: 'checkbox',
+                label: '정기 예방접종·건강검진·훈련 등 기본 케어를 책임지고 해주실 수 있나요?',
+                required: true,
+                order: 9,
+                isStandard: true,
+            },
+            {
+                id: 'canAffordMedicalExpenses',
+                type: 'checkbox',
+                label: '예상치 못한 질병이나 사고 등으로 치료비가 발생할 경우 감당 가능하신가요?',
+                required: true,
+                order: 10,
+                isStandard: true,
+            },
+            {
+                id: 'neuteringConsent',
+                type: 'checkbox',
+                label: '모든 아이들은 중성화 후 분양되거나, 입양 후 중성화를 진행해야 합니다. 동의하십니까?',
+                required: true,
+                order: 11,
+                isStandard: true,
+            },
+            {
+                id: 'preferredPetDescription',
+                type: 'textarea',
+                label: '마음에 두신 아이가 있으신가요? (특징: 성별, 타입, 외모, 컬러패턴, 성격 등)',
+                required: false,
+                order: 12,
+                isStandard: true,
+            },
+            {
+                id: 'desiredAdoptionTiming',
+                type: 'text',
+                label: '원하시는 입양 시기가 있나요?',
+                required: false,
+                order: 13,
+                isStandard: true,
+            },
+            {
+                id: 'additionalNotes',
+                type: 'textarea',
+                label: '마지막으로 궁금하신 점이나 남기시고 싶으신 말씀이 있나요?',
+                required: false,
+                order: 14,
+                isStandard: true,
+            },
         ];
     }
 

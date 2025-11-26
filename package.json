@@ -39,7 +39,8 @@
     "seed:questions": "ts-node src/scripts/seed-all.ts --only-questions",
     "seed:breeds": "ts-node src/scripts/seed-all.ts --only-breeds",
     "seed:banners": "ts-node src/scripts/seed-all.ts --only-banners",
-    "seed:faqs": "ts-node src/scripts/seed-all.ts --only-faqs"
+    "seed:faqs": "ts-node src/scripts/seed-all.ts --only-faqs",
+    "create:admin": "ts-node scripts/create-admin.ts"
   },
   "dependencies": {
     "@google-cloud/storage": "^7.17.1",
