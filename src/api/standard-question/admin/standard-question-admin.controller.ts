@@ -8,12 +8,13 @@ import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 
 import { StandardQuestionAdminService } from './standard-question-admin.service';
 
-import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
-import { StandardQuestionResponseDto } from './dto/response/standard-question-response.dto';
 import { UpdateStandardQuestionDto } from './dto/request/update-standard-question.dto';
-import { ToggleStandardQuestionStatusDto } from './dto/request/toggle-standard-question-status.dto';
+import { StandardQuestionResponseDto } from './dto/response/standard-question-response.dto';
 import { ReorderStandardQuestionsDto } from './dto/request/reorder-standard-questions.dto';
-import { STANDARD_QUESTION_ADMIN_REQUEST_EXAMPLES, StandardQuestionAdminSwaggerDocs } from './swagger';
+import { ToggleStandardQuestionStatusDto } from './dto/request/toggle-standard-question-status.dto';
+import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
+
+import { StandardQuestionAdminSwaggerDocs } from './swagger';
 
 /**
  * 표준 질문 Admin 컨트롤러
@@ -38,8 +39,7 @@ export class StandardQuestionAdminController {
         responseType: [StandardQuestionResponseDto],
     })
     async getAllStandardQuestions(@CurrentUser() user: any): Promise<ApiResponseDto<StandardQuestionResponseDto[]>> {
-        const questions = await this.standardQuestionAdminService.getAllQuestions();
-        const result = questions.map((q) => new StandardQuestionResponseDto(q));
+        const result = await this.standardQuestionAdminService.getAllQuestions();
         return ApiResponseDto.success(result, '표준 질문 목록이 조회되었습니다.');
     }
 
@@ -53,8 +53,7 @@ export class StandardQuestionAdminController {
         @Param('id') id: string,
         @Body() updateData: UpdateStandardQuestionDto,
     ): Promise<ApiResponseDto<StandardQuestionResponseDto>> {
-        const question = await this.standardQuestionAdminService.updateQuestion(id, updateData);
-        const result = new StandardQuestionResponseDto(question);
+        const result = await this.standardQuestionAdminService.updateQuestion(id, updateData);
         return ApiResponseDto.success(result, '표준 질문이 수정되었습니다.');
     }
 
@@ -68,8 +67,7 @@ export class StandardQuestionAdminController {
         @Param('id') id: string,
         @Body() statusData: ToggleStandardQuestionStatusDto,
     ): Promise<ApiResponseDto<StandardQuestionResponseDto>> {
-        const question = await this.standardQuestionAdminService.toggleQuestionStatus(id, statusData.isActive);
-        const result = new StandardQuestionResponseDto(question);
+        const result = await this.standardQuestionAdminService.toggleQuestionStatus(id, statusData.isActive);
         return ApiResponseDto.success(result, '표준 질문 상태가 변경되었습니다.');
     }
 

@@ -19,8 +19,6 @@ import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/ado
                 const uri = configService.get<string>('MONGODB_URI');
                 console.log('[DatabaseModule] MongoDB URI:', uri ? uri.replace(/:[^:]*@/, ':****@') : 'NOT SET');
 
-                const isDevelopment = process.env.NODE_ENV !== 'production';
-
                 return {
                     uri: uri,
                     connectionFactory: (connection) => {

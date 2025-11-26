@@ -1,11 +1,11 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
-import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
+import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
 
 import { DistrictService } from './district.service';
 
-import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
-import { GetDistrictsResponseDto } from '../dto/response/get-districts-response.dto';
+import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
+import { GetDistrictsResponseDto } from './dto/response/get-districts-response.dto';
 
 @ApiController('지역 관리')
 @Controller('districts')

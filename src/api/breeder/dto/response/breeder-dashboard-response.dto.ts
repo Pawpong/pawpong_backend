@@ -11,7 +11,7 @@ export class BreederVerificationInfoDto {
     @ApiProperty({
         description: '인증 상태',
         example: 'approved',
-        enum: ['pending', 'approved', 'rejected']
+        enum: ['pending', 'approved', 'rejected'],
     })
     verificationStatus: string;
 
@@ -22,7 +22,7 @@ export class BreederVerificationInfoDto {
     @ApiProperty({
         description: '구독 플랜',
         example: 'premium',
-        enum: ['basic', 'premium', 'enterprise']
+        enum: ['basic', 'premium', 'enterprise'],
     })
     subscriptionPlan: string;
 
@@ -34,7 +34,7 @@ export class BreederVerificationInfoDto {
         description: '인증 신청 일시',
         example: '2024-01-10T10:30:00.000Z',
         format: 'date-time',
-        required: false
+        required: false,
     })
     submittedAt?: Date;
 
@@ -46,7 +46,7 @@ export class BreederVerificationInfoDto {
         description: '인증 검토 일시',
         example: '2024-01-12T14:20:00.000Z',
         format: 'date-time',
-        required: false
+        required: false,
     })
     reviewedAt?: Date;
 
@@ -57,7 +57,7 @@ export class BreederVerificationInfoDto {
     @ApiProperty({
         description: '거부 사유',
         example: '서류가 불완전합니다.',
-        required: false
+        required: false,
     })
     rejectionReason?: string;
 }
@@ -72,7 +72,7 @@ export class BreederDashboardStatsDto {
      */
     @ApiProperty({
         description: '총 받은 입양 신청 수',
-        example: 148
+        example: 148,
     })
     totalApplicationCount: number;
 
@@ -82,7 +82,7 @@ export class BreederDashboardStatsDto {
      */
     @ApiProperty({
         description: '처리 대기 신청 수',
-        example: 12
+        example: 12,
     })
     pendingApplicationCount: number;
 
@@ -92,7 +92,7 @@ export class BreederDashboardStatsDto {
      */
     @ApiProperty({
         description: '완료된 입양 수',
-        example: 95
+        example: 95,
     })
     completedAdoptionCount: number;
 
@@ -102,7 +102,7 @@ export class BreederDashboardStatsDto {
      */
     @ApiProperty({
         description: '평균 평점',
-        example: 4.6
+        example: 4.6,
     })
     averageRating: number;
 
@@ -112,7 +112,7 @@ export class BreederDashboardStatsDto {
      */
     @ApiProperty({
         description: '총 후기 수',
-        example: 78
+        example: 78,
     })
     totalReviewCount: number;
 
@@ -122,7 +122,7 @@ export class BreederDashboardStatsDto {
      */
     @ApiProperty({
         description: '프로필 조회 수',
-        example: 2340
+        example: 2340,
     })
     profileViewCount: number;
 }
@@ -136,7 +136,7 @@ export class BreederDashboardResponseDto {
      * 브리더 프로필 정보
      */
     @ApiProperty({
-        description: '브리더 프로필 정보'
+        description: '브리더 프로필 정보',
     })
     profileInfo: {
         /**
@@ -150,7 +150,7 @@ export class BreederDashboardResponseDto {
      */
     @ApiProperty({
         description: '브리더 통계 정보',
-        type: BreederDashboardStatsDto
+        type: BreederDashboardStatsDto,
     })
     statisticsInfo: BreederDashboardStatsDto;
 
@@ -159,7 +159,7 @@ export class BreederDashboardResponseDto {
      */
     @ApiProperty({
         description: '최근 입양 신청 목록',
-        type: Array
+        type: Array,
     })
     recentApplicationList: Array<{
         /**
@@ -190,7 +190,7 @@ export class BreederDashboardResponseDto {
      */
     @ApiProperty({
         description: '분양 가능한 반려동물 수',
-        example: 8
+        example: 8,
     })
     availablePetCount: number;
 }

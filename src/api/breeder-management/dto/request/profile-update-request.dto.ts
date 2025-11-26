@@ -1,16 +1,17 @@
 import {
-    IsString,
-    IsArray,
-    IsOptional,
-    IsNumber,
     IsEnum,
+    IsArray,
+    IsNumber,
+    IsString,
     IsNotEmpty,
+    IsOptional,
+    Min,
     MaxLength,
     ValidateNested,
-    Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
+
 import { PetType } from '../../../../common/enum/user.enum';
 
 /**

@@ -326,10 +326,7 @@ export async function seedBreeder(
  * const { petId } = await seedAvailablePet(app, breederId);
  * ```
  */
-export async function seedAvailablePet(
-    app: INestApplication,
-    breederId: string,
-): Promise<{ petId: string }> {
+export async function seedAvailablePet(app: INestApplication, breederId: string): Promise<{ petId: string }> {
     const connection = app.get<Connection>(getConnectionToken());
     const breederCollection = connection.collection('breeders');
 
@@ -349,7 +346,9 @@ export async function seedAvailablePet(
         isAvailable: true,
     };
 
-    await breederCollection.updateOne({ _id: new ObjectId(breederId) }, { $push: { availablePets: availablePet } } as any);
+    await breederCollection.updateOne({ _id: new ObjectId(breederId) }, {
+        $push: { availablePets: availablePet },
+    } as any);
 
     return { petId };
 }
@@ -461,11 +460,7 @@ export async function seedBreederReview(
  * await seedFavorite(app, adopterId, breederId);
  * ```
  */
-export async function seedFavorite(
-    app: INestApplication,
-    adopterId: string,
-    breederId: string,
-): Promise<void> {
+export async function seedFavorite(app: INestApplication, adopterId: string, breederId: string): Promise<void> {
     const connection = app.get<Connection>(getConnectionToken());
     const favoriteCollection = connection.collection('favorites');
 

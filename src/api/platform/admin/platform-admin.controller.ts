@@ -9,8 +9,8 @@ import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { PlatformAdminService } from './platform-admin.service';
 
 import { StatsFilterRequestDto } from './dto/request/stats-filter-request.dto';
-import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
+import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
 
 /**
  * 플랫폼 Admin 컨트롤러

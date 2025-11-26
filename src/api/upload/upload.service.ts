@@ -1,0 +1,171 @@
+import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+
+import { StorageService } from '../../common/storage/storage.service';
+
+import { Breeder, BreederDocument } from '../../schema/breeder.schema';
+import { ParentPet, ParentPetDocument } from '../../schema/parent-pet.schema';
+import { AvailablePet, AvailablePetDocument } from '../../schema/available-pet.schema';
+
+import { UploadResponseDto } from './dto/response/upload-response.dto';
+
+@Injectable()
+export class UploadService {
+    // 허용되는 이미지 MIME 타입
+    private readonly allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+    constructor(
+        private readonly storageService: StorageService,
+
+        @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
+        @InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>,
+        @InjectModel(ParentPet.name) private parentPetModel: Model<ParentPetDocument>,
+    ) {}
+
+    /**
+     * 대표 사진 업로드
+     * 브리더의 대표 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 3장, 각 5MB)
+     */
+    async uploadRepresentativePhotos(files: Express.Multer.File[], user: any): Promise<UploadResponseDto[]> {
+        // 파일 존재 여부 검증
+        if (!files || files.length === 0) {
+            throw new BadRequestException('파일이 업로드되지 않았습니다.');
+        }
+
+        // 권한 검증
+        if (user.role !== 'breeder') {
+            throw new ForbiddenException('브리더만 대표 사진을 업로드할 수 있습니다.');
+        }
+
+        // 파일 개수 검증 (최대 3장)
+        if (files.length > 3) {
+            throw new BadRequestException('대표 사진은 최대 3장까지 업로드 가능합니다.');
+        }
+
+        // 각 파일 크기 및 타입 검증
+        for (const file of files) {
+            if (file.size > 5 * 1024 * 1024) {
+                throw new BadRequestException('파일 크기는 5MB를 초과할 수 없습니다.');
+            }
+            if (!this.allowedMimeTypes.includes(file.mimetype)) {
+                throw new BadRequestException('이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp)');
+            }
+        }
+
+        // 스토리지 업로드
+        const results = await this.storageService.uploadMultipleFiles(files, 'representative');
+        const fileNames = results.map((r) => r.fileName);
+
+        // DB 업데이트: profile.representativePhotos 배열에 추가
+        await this.breederModel.findByIdAndUpdate(user.userId, {
+            $set: { 'profile.representativePhotos': fileNames },
+        });
+
+        // 응답 DTO 생성
+        return results.map((result, index) => new UploadResponseDto(result.cdnUrl, result.fileName, files[index].size));
+    }
+
+    /**
+     * 분양 개체 사진 업로드
+     * 분양 개체의 사진 1장을 업로드하고 자동으로 DB에 저장합니다.
+     */
+    async uploadAvailablePetPhotos(petId: string, file: Express.Multer.File, user: any): Promise<UploadResponseDto> {
+        // 파일 존재 여부 검증
+        if (!file) {
+            throw new BadRequestException('파일이 업로드되지 않았습니다.');
+        }
+
+        // 권한 검증
+        if (user.role !== 'breeder') {
+            throw new ForbiddenException('브리더만 분양 개체 사진을 업로드할 수 있습니다.');
+        }
+
+        // 해당 petId가 본인 소유인지 확인
+        const pet = await this.availablePetModel.findOne({ _id: petId, breederId: user.userId });
+        if (!pet) {
+            throw new BadRequestException('해당 분양 개체를 찾을 수 없습니다.');
+        }
+
+        // 스토리지 업로드
+        const result = await this.storageService.uploadFile(file, 'pets/available');
+
+        // DB 업데이트: photos 배열에 1개만 저장
+        await this.availablePetModel.findByIdAndUpdate(petId, { $set: { photos: [result.fileName] } });
+
+        return new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
+    }
+
+    /**
+     * 부모견/묘 사진 업로드
+     * 부모견/묘의 사진 1장을 업로드하고 자동으로 DB에 저장합니다.
+     */
+    async uploadParentPetPhotos(petId: string, file: Express.Multer.File, user: any): Promise<UploadResponseDto> {
+        // 파일 존재 여부 검증
+        if (!file) {
+            throw new BadRequestException('파일이 업로드되지 않았습니다.');
+        }
+
+        // 권한 검증
+        if (user.role !== 'breeder') {
+            throw new ForbiddenException('브리더만 부모견/묘 사진을 업로드할 수 있습니다.');
+        }
+
+        // 해당 petId가 본인 소유인지 확인
+        const pet = await this.parentPetModel.findOne({ _id: petId, breederId: user.userId });
+        if (!pet) {
+            throw new BadRequestException('해당 부모견/묘를 찾을 수 없습니다.');
+        }
+
+        // 스토리지 업로드
+        const result = await this.storageService.uploadFile(file, 'pets/parent');
+
+        // DB 업데이트: photos 배열에 1개만 저장
+        await this.parentPetModel.findByIdAndUpdate(petId, { $set: { photos: [result.fileName] } });
+
+        return new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
+    }
+
+    /**
+     * 단일 파일 업로드
+     * 단일 파일을 Google Cloud Storage에 업로드합니다.
+     */
+    async uploadSingle(file: Express.Multer.File, folder?: string): Promise<UploadResponseDto> {
+        // 파일 존재 여부 검증
+        if (!file) {
+            throw new BadRequestException('파일이 없습니다.');
+        }
+
+        const result = await this.storageService.uploadFile(file, folder);
+
+        return new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
+    }
+
+    /**
+     * 다중 파일 업로드
+     * 다중 파일을 Google Cloud Storage에 업로드합니다. (최대 10개)
+     */
+    async uploadMultiple(files: Express.Multer.File[], folder?: string): Promise<UploadResponseDto[]> {
+        // 파일 존재 여부 검증
+        if (!files || files.length === 0) {
+            throw new BadRequestException('파일이 없습니다.');
+        }
+
+        const results = await this.storageService.uploadMultipleFiles(files, folder);
+
+        return results.map((result, index) => new UploadResponseDto(result.cdnUrl, result.fileName, files[index].size));
+    }
+
+    /**
+     * 파일 삭제
+     * Google Cloud Storage에서 파일을 삭제합니다.
+     */
+    async deleteFile(fileName: string): Promise<void> {
+        // 파일명 존재 여부 검증
+        if (!fileName) {
+            throw new BadRequestException('파일명이 없습니다.');
+        }
+
+        await this.storageService.deleteFile(fileName);
+    }
+}

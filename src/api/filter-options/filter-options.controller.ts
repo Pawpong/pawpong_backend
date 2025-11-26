@@ -1,15 +1,17 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiTags, ApiOperation } from '@nestjs/swagger';
-import { FilterOptionsService } from './filter-options.service';
-import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
+
 import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
+
+import { FilterOptionsService } from './filter-options.service';
+
+import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import {
-    AllFilterOptionsResponseDto,
-    BreederLevelOptionDto,
     SortOptionDto,
     DogSizeOptionDto,
     CatFurLengthOptionDto,
+    BreederLevelOptionDto,
     AdoptionStatusOptionDto,
+    AllFilterOptionsResponseDto,
 } from './dto/response/filter-options-response.dto';
 
 @ApiController('필터 옵션')

@@ -4,7 +4,6 @@
  * 다양한 품종, 지역으로 필터 테스트 가능
  * representativePhotos는 picsum.photos를 사용하여 다양한 이미지 제공 (개발 환경)
  */
-
 export const MOCK_BREEDERS = [
     // 강아지 브리더 20개
     {
@@ -120,7 +119,8 @@ export const MOCK_BREEDERS = [
                 type: 'adoption',
                 adopterName: '김민준',
                 rating: 5,
-                content: '건강하고 예쁜 아이를 분양받았습니다. 너무 감사해요! 브리더님이 정말 친절하시고 분양 후에도 계속 연락주셔서 감동받았어요.',
+                content:
+                    '건강하고 예쁜 아이를 분양받았습니다. 너무 감사해요! 브리더님이 정말 친절하시고 분양 후에도 계속 연락주셔서 감동받았어요.',
                 photos: ['https://picsum.photos/seed/review-maltese-1/600/400'],
                 isVisible: true,
             },
@@ -279,7 +279,8 @@ export const MOCK_BREEDERS = [
                 type: 'adoption',
                 adopterName: '강도윤',
                 rating: 5,
-                content: '푸들 전문답게 정말 건강하고 예쁜 아이를 분양받았어요. 털 관리 방법까지 자세히 알려주셔서 감사합니다!',
+                content:
+                    '푸들 전문답게 정말 건강하고 예쁜 아이를 분양받았어요. 털 관리 방법까지 자세히 알려주셔서 감사합니다!',
                 photos: ['https://picsum.photos/seed/review-poodle-1/600/400'],
                 isVisible: true,
             },

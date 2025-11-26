@@ -8,23 +8,15 @@ import {
     UploadedFiles,
     Body,
     Param,
-    BadRequestException,
-    ForbiddenException,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes } from '@nestjs/swagger';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
 import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
 
-import { StorageService } from '../../common/storage/storage.service';
-
-import { Breeder, BreederDocument } from '../../schema/breeder.schema';
-import { ParentPet, ParentPetDocument } from '../../schema/parent-pet.schema';
-import { AvailablePet, AvailablePetDocument } from '../../schema/available-pet.schema';
+import { UploadService } from './upload.service';
 
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { UploadResponseDto } from './dto/response/upload-response.dto';
@@ -32,13 +24,7 @@ import { UploadResponseDto } from './dto/response/upload-response.dto';
 @ApiController('업로드')
 @Controller('upload')
 export class UploadController {
-    constructor(
-        private readonly storageService: StorageService,
-
-        @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
-        @InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>,
-        @InjectModel(ParentPet.name) private parentPetModel: Model<ParentPetDocument>,
-    ) {}
+    constructor(private readonly uploadService: UploadService) {}
 
     @Post('representative-photos')
     @UseGuards(JwtAuthGuard)
@@ -54,42 +40,7 @@ export class UploadController {
         @UploadedFiles() files: Express.Multer.File[],
         @CurrentUser() user: any,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
-        if (!files || files.length === 0) {
-            throw new BadRequestException('파일이 업로드되지 않았습니다.');
-        }
-
-        if (user.role !== 'breeder') {
-            throw new ForbiddenException('브리더만 대표 사진을 업로드할 수 있습니다.');
-        }
-
-        // 파일 개수 검증 (최대 3장)
-        if (files.length > 3) {
-            throw new BadRequestException('대표 사진은 최대 3장까지 업로드 가능합니다.');
-        }
-
-        // 각 파일 크기 및 타입 검증
-        const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-        for (const file of files) {
-            if (file.size > 5 * 1024 * 1024) {
-                throw new BadRequestException('파일 크기는 5MB를 초과할 수 없습니다.');
-            }
-            if (!allowedMimeTypes.includes(file.mimetype)) {
-                throw new BadRequestException('이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp)');
-            }
-        }
-
-        const results = await this.storageService.uploadMultipleFiles(files, 'representative');
-        const fileNames = results.map((r) => r.fileName);
-
-        // DB 업데이트: profile.representativePhotos 배열에 추가
-        await this.breederModel.findByIdAndUpdate(user.userId, {
-            $set: { 'profile.representativePhotos': fileNames },
-        });
-
-        const responses = results.map(
-            (result, index) => new UploadResponseDto(result.cdnUrl, result.fileName, files[index].size),
-        );
-
+        const responses = await this.uploadService.uploadRepresentativePhotos(files, user);
         return ApiResponseDto.success(responses, '대표 사진이 업로드되고 저장되었습니다.');
     }
 
@@ -108,27 +59,7 @@ export class UploadController {
         @UploadedFile() file: Express.Multer.File,
         @CurrentUser() user: any,
     ): Promise<ApiResponseDto<UploadResponseDto>> {
-        if (!file) {
-            throw new BadRequestException('파일이 업로드되지 않았습니다.');
-        }
-
-        if (user.role !== 'breeder') {
-            throw new ForbiddenException('브리더만 분양 개체 사진을 업로드할 수 있습니다.');
-        }
-
-        // 해당 petId가 본인 소유인지 확인
-        const pet = await this.availablePetModel.findOne({ _id: petId, breederId: user.userId });
-        if (!pet) {
-            throw new BadRequestException('해당 분양 개체를 찾을 수 없습니다.');
-        }
-
-        const result = await this.storageService.uploadFile(file, 'pets/available');
-
-        // DB 업데이트: photos 배열에 1개만 저장
-        await this.availablePetModel.findByIdAndUpdate(petId, { $set: { photos: [result.fileName] } });
-
-        const response = new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
-
+        const response = await this.uploadService.uploadAvailablePetPhotos(petId, file, user);
         return ApiResponseDto.success(response, '분양 개체 사진이 업로드되고 저장되었습니다.');
     }
 
@@ -147,27 +78,7 @@ export class UploadController {
         @UploadedFile() file: Express.Multer.File,
         @CurrentUser() user: any,
     ): Promise<ApiResponseDto<UploadResponseDto>> {
-        if (!file) {
-            throw new BadRequestException('파일이 업로드되지 않았습니다.');
-        }
-
-        if (user.role !== 'breeder') {
-            throw new ForbiddenException('브리더만 부모견/묘 사진을 업로드할 수 있습니다.');
-        }
-
-        // 해당 petId가 본인 소유인지 확인
-        const pet = await this.parentPetModel.findOne({ _id: petId, breederId: user.userId });
-        if (!pet) {
-            throw new BadRequestException('해당 부모견/묘를 찾을 수 없습니다.');
-        }
-
-        const result = await this.storageService.uploadFile(file, 'pets/parent');
-
-        // DB 업데이트: photos 배열에 1개만 저장
-        await this.parentPetModel.findByIdAndUpdate(petId, { $set: { photos: [result.fileName] } });
-
-        const response = new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
-
+        const response = await this.uploadService.uploadParentPetPhotos(petId, file, user);
         return ApiResponseDto.success(response, '부모견/묘 사진이 업로드되고 저장되었습니다.');
     }
 
@@ -184,14 +95,7 @@ export class UploadController {
         @UploadedFile() file: Express.Multer.File,
         @Body('folder') folder?: string,
     ): Promise<ApiResponseDto<UploadResponseDto>> {
-        if (!file) {
-            throw new BadRequestException('파일이 없습니다.');
-        }
-
-        const result = await this.storageService.uploadFile(file, folder);
-
-        const response = new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
-
+        const response = await this.uploadService.uploadSingle(file, folder);
         return ApiResponseDto.success(response, '파일 업로드 성공');
     }
 
@@ -208,16 +112,7 @@ export class UploadController {
         @UploadedFiles() files: Express.Multer.File[],
         @Body('folder') folder?: string,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
-        if (!files || files.length === 0) {
-            throw new BadRequestException('파일이 없습니다.');
-        }
-
-        const results = await this.storageService.uploadMultipleFiles(files, folder);
-
-        const responses = results.map(
-            (result, index) => new UploadResponseDto(result.cdnUrl, result.fileName, files[index].size),
-        );
-
+        const responses = await this.uploadService.uploadMultiple(files, folder);
         return ApiResponseDto.success(responses, `${files.length}개 파일 업로드 성공`);
     }
 
@@ -228,12 +123,7 @@ export class UploadController {
         isPublic: true,
     })
     async deleteFile(@Body('fileName') fileName: string): Promise<ApiResponseDto<null>> {
-        if (!fileName) {
-            throw new BadRequestException('파일명이 없습니다.');
-        }
-
-        await this.storageService.deleteFile(fileName);
-
+        await this.uploadService.deleteFile(fileName);
         return ApiResponseDto.success(null, '파일 삭제 성공');
     }
 }

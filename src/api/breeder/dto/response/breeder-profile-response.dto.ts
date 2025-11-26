@@ -10,7 +10,7 @@ export class BreederLocationDto {
      */
     @ApiProperty({
         description: '도시명',
-        example: '서울'
+        example: '서울',
     })
     cityName: string;
 
@@ -20,7 +20,7 @@ export class BreederLocationDto {
      */
     @ApiProperty({
         description: '구/군명',
-        example: '강남구'
+        example: '강남구',
     })
     districtName: string;
 
@@ -31,7 +31,7 @@ export class BreederLocationDto {
     @ApiProperty({
         description: '상세 주소',
         example: '테헤란로 123',
-        required: false
+        required: false,
     })
     detailAddress?: string;
 }
@@ -46,7 +46,7 @@ export class BreederPriceRangeDto {
      */
     @ApiProperty({
         description: '최소 가격 (원)',
-        example: 500000
+        example: 500000,
     })
     minPrice: number;
 
@@ -56,7 +56,7 @@ export class BreederPriceRangeDto {
      */
     @ApiProperty({
         description: '최대 가격 (원)',
-        example: 2000000
+        example: 2000000,
     })
     maxPrice: number;
 }
@@ -71,7 +71,7 @@ export class BreederProfileInfoDto {
      */
     @ApiProperty({
         description: '브리더 소개 설명',
-        example: '20년 경력의 전문 브리더입니다'
+        example: '20년 경력의 전문 브리더입니다',
     })
     profileDescription: string;
 
@@ -80,7 +80,7 @@ export class BreederProfileInfoDto {
      */
     @ApiProperty({
         description: '위치 정보',
-        type: BreederLocationDto
+        type: BreederLocationDto,
     })
     locationInfo: BreederLocationDto;
 
@@ -91,7 +91,7 @@ export class BreederProfileInfoDto {
     @ApiProperty({
         description: '브리더 사진 URL 배열',
         example: ['https://example.com/photo1.jpg'],
-        type: [String]
+        type: [String],
     })
     profilePhotos: string[];
 
@@ -100,7 +100,7 @@ export class BreederProfileInfoDto {
      */
     @ApiProperty({
         description: '분양 가격대 정보',
-        type: BreederPriceRangeDto
+        type: BreederPriceRangeDto,
     })
     priceRangeInfo: BreederPriceRangeDto;
 
@@ -111,7 +111,7 @@ export class BreederProfileInfoDto {
     @ApiProperty({
         description: '전문 분야 (품종)',
         example: ['골든 리트리버', '래브라도'],
-        type: [String]
+        type: [String],
     })
     specializationAreas: string[];
 
@@ -122,7 +122,7 @@ export class BreederProfileInfoDto {
     @ApiProperty({
         description: '경력 연수',
         example: 20,
-        required: false
+        required: false,
     })
     experienceYears?: number;
 }
@@ -137,7 +137,7 @@ export class BreederStatsDto {
      */
     @ApiProperty({
         description: '총 신청 수',
-        example: 150
+        example: 150,
     })
     totalApplicationCount: number;
 
@@ -147,7 +147,7 @@ export class BreederStatsDto {
      */
     @ApiProperty({
         description: '성사된 입양 수',
-        example: 85
+        example: 85,
     })
     completedAdoptionCount: number;
 
@@ -157,7 +157,7 @@ export class BreederStatsDto {
      */
     @ApiProperty({
         description: '평균 평점',
-        example: 4.5
+        example: 4.5,
     })
     averageRatingScore: number;
 
@@ -167,7 +167,7 @@ export class BreederStatsDto {
      */
     @ApiProperty({
         description: '총 후기 수',
-        example: 42
+        example: 42,
     })
     totalReviewCount: number;
 
@@ -177,7 +177,7 @@ export class BreederStatsDto {
      */
     @ApiProperty({
         description: '프로필 조회수',
-        example: 1250
+        example: 1250,
     })
     profileViewCount: number;
 }
@@ -193,7 +193,7 @@ export class BreederVerificationDto {
     @ApiProperty({
         description: '인증 상태',
         example: 'approved',
-        enum: ['pending', 'approved', 'rejected']
+        enum: ['pending', 'approved', 'rejected'],
     })
     verificationStatus: string;
 }
@@ -209,7 +209,7 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '브리더 고유 ID',
-        example: '507f1f77bcf86cd799439011'
+        example: '507f1f77bcf86cd799439011',
     })
     breederId: string;
 
@@ -219,7 +219,7 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '브리더 이름',
-        example: '김브리더'
+        example: '김브리더',
     })
     breederName: string;
 
@@ -229,7 +229,7 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '브리더 이메일',
-        example: 'breeder@example.com'
+        example: 'breeder@example.com',
     })
     breederEmail: string;
 
@@ -240,7 +240,7 @@ export class BreederProfileResponseDto {
     @ApiProperty({
         description: '프로필 이미지 URL',
         example: 'https://example.com/profile.jpg',
-        required: false
+        required: false,
     })
     profileImageFileName?: string;
 
@@ -249,7 +249,7 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '브리더 프로필 상세 정보',
-        type: BreederProfileInfoDto
+        type: BreederProfileInfoDto,
     })
     profileInfo: BreederProfileInfoDto;
 
@@ -259,7 +259,7 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '부모견/부모묘 정보',
-        type: Array
+        type: Array,
     })
     parentPetInfo: any[];
 
@@ -269,7 +269,7 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '분양 가능한 반려동물 정보',
-        type: Array
+        type: Array,
     })
     availablePetInfo: any[];
 
@@ -279,7 +279,7 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '후기 정보',
-        type: Array
+        type: Array,
     })
     reviewInfo: any[];
 
@@ -288,7 +288,7 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '브리더 통계 정보',
-        type: BreederStatsDto
+        type: BreederStatsDto,
     })
     statsInfo: BreederStatsDto;
 
@@ -297,7 +297,7 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '브리더 인증 정보',
-        type: BreederVerificationDto
+        type: BreederVerificationDto,
     })
     verificationInfo: BreederVerificationDto;
 }

@@ -166,42 +166,6 @@ export class AdopterRepository {
     }
 
     /**
-     * ❌ 제거됨: addApplication
-     * 이유: AdoptionApplication 컬렉션에서 직접 생성
-     * 대체: new AdoptionApplicationModel().save()
-     */
-
-    /**
-     * ❌ 제거됨: updateApplicationStatus
-     * 이유: AdoptionApplication 컬렉션에서 직접 업데이트
-     * 대체: AdoptionApplicationModel.findByIdAndUpdate()
-     */
-
-    /**
-     * ❌ 제거됨: addReview
-     * 이유: BreederReview 컬렉션에서 직접 생성
-     * 대체: new BreederReviewModel().save()
-     */
-
-    /**
-     * ❌ 제거됨: markReviewWritten
-     * 이유: 후기 작성 여부는 AdoptionApplication 컬렉션에서 관리
-     * 대체: AdoptionApplicationModel.findByIdAndUpdate({ isReviewWritten: true })
-     */
-
-    /**
-     * ❌ 제거됨: findApplicationById
-     * 이유: AdoptionApplication 컬렉션에서 직접 조회
-     * 대체: AdoptionApplicationModel.findOne({ _id, adopterId })
-     */
-
-    /**
-     * ❌ 제거됨: findExistingApplication
-     * 이유: AdoptionApplication 컬렉션에서 직접 조회
-     * 대체: AdoptionApplicationModel.findOne({ adopterId, breederId, status })
-     */
-
-    /**
      * 기존 즐겨찾기 브리더 확인
      * 중복 즐겨찾기 방지를 위한 검증용
      *

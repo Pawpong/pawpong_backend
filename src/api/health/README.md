@@ -2,118 +2,93 @@
 
 ## 개요
 
-시스템 상태 모니터링과 헬스체크 기능을 제공하는 도메인입니다. 서버, 데이터베이스, 외부 서비스의 상태를 확인하고 시스템의 전반적인 건강 상태를 보고합니다.
+시스템 상태 모니터링과 헬스체크 기능을 제공하는 도메인입니다. 서버의 기본 상태와 가동 시간을 확인할 수 있습니다.
 
 ## 주요 기능
 
 - 기본 서버 상태 확인
-- 데이터베이스 연결 상태 확인
-- 외부 서비스 의존성 확인
-- 시스템 리소스 사용량 모니터링
-- 서비스 가용성 체크
+- 서비스 버전 정보 제공
+- 환경 정보 확인
+- 서버 가동 시간 (uptime) 확인
 
-## API 엔드포인트
+## API 엔드포인트 (1개)
 
-### 기본 헬스체크
+### GET /api/health
 
-- `GET /api/health` - 기본 서버 상태 확인
-- `GET /api/health/detailed` - 상세 헬스체크 정보
-- `GET /api/health/ready` - 서비스 준비 상태 확인
-- `GET /api/health/live` - 서버 살아있음 확인
+서버의 기본 상태와 시스템 정보를 반환합니다.
 
-### 의존성 확인
-
-- `GET /api/health/database` - 데이터베이스 연결 상태
-- `GET /api/health/redis` - Redis 캐시 서버 상태 (추후)
-- `GET /api/health/external` - 외부 서비스 연결 상태
-
-## 응답 형식
+**Response:**
 
 ```json
 {
-  "status": "ok" | "error" | "warning",
-  "timestamp": "2024-01-15T10:30:00.000Z",
-  "uptime": 123456789,
-  "version": "1.0.0",
-  "environment": "production",
-  "checks": {
-    "database": {
-      "status": "ok",
-      "responseTime": "25ms",
-      "details": "MongoDB connection healthy"
-    },
-    "memory": {
-      "status": "ok",
-      "used": "256MB",
-      "free": "512MB",
-      "usage": "33%"
-    }
-  }
+  "success": true,
+  "code": 200,
+  "data": {
+    "status": "healthy",
+    "timestamp": "2025-01-15T10:30:00.000Z",
+    "service": "Pawpong Backend",
+    "version": "1.0.0-MVP",
+    "environment": "production",
+    "uptime": 123456
+  },
+  "message": "시스템이 정상 작동 중입니다.",
+  "timestamp": "2025-01-15T10:30:00.000Z"
 }
 ```
 
-## 상태 코드
+**응답 필드:**
 
-- **OK (200)**: 모든 시스템이 정상 작동
-- **Warning (200)**: 일부 비필수 서비스에 문제 있음
-- **Error (503)**: 핵심 시스템에 장애 발생
+- `status`: 서버 상태 (항상 "healthy")
+- `timestamp`: 현재 시각 (ISO 8601)
+- `service`: 서비스 이름
+- `version`: 서비스 버전
+- `environment`: 실행 환경 (development, production 등)
+- `uptime`: 서버 가동 시간 (초 단위)
 
-## 모니터링 항목
+## 사용 사례
 
-- 서버 응답 시간
-- 메모리 사용량
-- CPU 사용률
-- 디스크 사용량
-- 활성 연결 수
-- 데이터베이스 응답 시간
+### 로드 밸런서 헬스체크
 
-## 알림 임계값
+```bash
+# 로드 밸런서에서 주기적으로 호출
+GET /api/health
+```
 
-- CPU 사용률 85% 초과 시 경고
-- 메모리 사용량 90% 초과 시 경고
-- 디스크 사용량 95% 초과 시 경고
-- 데이터베이스 응답 시간 1초 초과 시 경고
+### Kubernetes Liveness Probe
 
-## 로그 기록
+```yaml
+livenessProbe:
+  httpGet:
+    path: /api/health
+    port: 8082
+  initialDelaySeconds: 30
+  periodSeconds: 10
+```
 
-- 헬스체크 요청 및 결과 로깅
-- 시스템 상태 변화 추적
-- 장애 발생 및 복구 기록
-- 성능 지표 변화 모니터링
+### 모니터링 시스템
+
+```bash
+# Uptime 모니터링 툴에서 주기적으로 호출
+curl http://localhost:8082/api/health
+```
 
 ## 접근 권한
 
-- 기본 헬스체크는 인증 불필요
-- 상세 정보는 관리자 권한 필요
-- 내부 모니터링 시스템 전용 엔드포인트
-
-## 보안 고려사항
-
-- 민감한 시스템 정보 노출 방지
-- 서버 내부 구조 정보 제한
-- 과도한 헬스체크 요청 제한
-- DDoS 공격 대비 Rate limiting
-
-## 외부 도구 연동
-
-- Kubernetes liveness/readiness probe
-- Load balancer 헬스체크
-- 모니터링 도구 (Prometheus, Grafana)
-- 알림 시스템 (Slack, 이메일)
+- 인증 불필요 (공개 API)
+- 모든 사용자/시스템에서 접근 가능
 
 ## 의존성
 
-- MongoDB 연결 모듈
-- 시스템 리소스 모니터링 라이브러리
-- 외부 서비스 연결 테스트
+- 없음 (독립적으로 동작)
 
 ## 확장 계획
 
-- 실시간 메트릭 스트리밍
-- 사용자 정의 헬스체크 규칙
-- 자동 복구 메커니즘
-- 성능 트렌드 분석
-- 예측적 장애 감지
+향후 필요시 다음 기능 추가 가능:
+
+- 데이터베이스 연결 상태 확인
+- 외부 서비스 의존성 확인
+- 메모리/CPU 사용량 모니터링
+- 상세 헬스체크 엔드포인트 (`/api/health/detailed`)
 
 ## 테스트 실행
 
