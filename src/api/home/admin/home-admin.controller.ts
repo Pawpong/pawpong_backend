@@ -26,8 +26,6 @@ import { FaqResponseDto } from '../dto/response/faq-response.dto';
 export class HomeAdminController {
     constructor(private readonly homeAdminService: HomeAdminService) {}
 
-    // ==================== 배너 관리 ====================
-
     @Get('banners')
     @ApiOperation({
         summary: '배너 전체 목록 조회 (관리자)',
@@ -74,8 +72,6 @@ export class HomeAdminController {
         await this.homeAdminService.deleteBanner(bannerId);
         return ApiResponseDto.success(null, '배너가 삭제되었습니다.');
     }
-
-    // ==================== FAQ 관리 ====================
 
     @Get('faqs')
     @ApiOperation({

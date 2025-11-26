@@ -22,7 +22,8 @@ export class ApplicationFormDataDto {
      */
     @ApiProperty({
         description: '자기소개 (성별, 연령대, 거주지, 결혼 계획, 생활 패턴 등)',
-        example: '안녕하세요. 30대 남성이며 서울 강남구에 거주하고 있습니다. 재택근무를 하고 있어 반려동물과 충분한 시간을 보낼 수 있습니다.',
+        example:
+            '안녕하세요. 30대 남성이며 서울 강남구에 거주하고 있습니다. 재택근무를 하고 있어 반려동물과 충분한 시간을 보낼 수 있습니다.',
     })
     selfIntroduction: string;
 
@@ -72,7 +73,8 @@ export class ApplicationFormDataDto {
      */
     @ApiProperty({
         description: '거주 공간 소개',
-        example: '거실과 안방을 자유롭게 이용할 수 있습니다. 거실은 약 20평 크기이며, 캣타워와 스크래처를 설치할 예정입니다.',
+        example:
+            '거실과 안방을 자유롭게 이용할 수 있습니다. 거실은 약 20평 크기이며, 캣타워와 스크래처를 설치할 예정입니다.',
     })
     livingSpaceDescription: string;
 
@@ -82,7 +84,8 @@ export class ApplicationFormDataDto {
      */
     @ApiProperty({
         description: '반려동물 경험',
-        example: '5년 전 고양이 한 마리를 키웠습니다. 러시안블루 품종이었으며, 매우 온순한 성격이었습니다. 수명을 다해 무지개다리를 건넜습니다.',
+        example:
+            '5년 전 고양이 한 마리를 키웠습니다. 러시안블루 품종이었으며, 매우 온순한 성격이었습니다. 수명을 다해 무지개다리를 건넜습니다.',
     })
     previousPetExperience: string;
 }

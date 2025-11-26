@@ -66,7 +66,9 @@ export class AuthAdopterRepository {
      * 입양자 정보 업데이트
      */
     async update(id: string, updateData: Partial<Adopter>): Promise<AdopterDocument | null> {
-        return this.adopterModel.findByIdAndUpdate(id, updateData, { new: true }).exec() as Promise<AdopterDocument | null>;
+        return this.adopterModel
+            .findByIdAndUpdate(id, updateData, { new: true })
+            .exec() as Promise<AdopterDocument | null>;
     }
 
     /**

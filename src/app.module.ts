@@ -3,23 +3,24 @@ import { ConfigModule } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 
 import { winstonConfig } from './common/config/winston.config';
+
 import { CustomLoggerService } from './common/logger/custom-logger.service';
 
-import { DatabaseModule } from './common/database/database.module';
 import { AuthModule } from './api/auth/auth.module';
 import { HomeModule } from './api/home/home.module';
-import { HomeAdminModule } from './api/home/admin/home-admin.module';
 import { BreedModule } from './api/breed/breed.module';
 import { HealthModule } from './api/health/health.module';
 import { UploadModule } from './api/upload/upload.module';
 import { BreederModule } from './api/breeder/breeder.module';
 import { AdopterModule } from './api/adopter/adopter.module';
 import { DistrictModule } from './api/district/district.module';
+import { DatabaseModule } from './common/database/database.module';
 import { UserAdminModule } from './api/user/admin/user-admin.module';
+import { HomeAdminModule } from './api/home/admin/home-admin.module';
 import { PlatformAdminModule } from './api/platform/admin/platform-admin.module';
+import { FilterOptionsModule } from './api/filter-options/filter-options.module';
 import { StandardQuestionModule } from './api/standard-question/standard-question.module';
 import { BreederManagementModule } from './api/breeder-management/breeder-management.module';
-import { FilterOptionsModule } from './api/filter-options/filter-options.module';
 
 @Module({
     imports: [

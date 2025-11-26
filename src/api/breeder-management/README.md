@@ -114,7 +114,7 @@
 }
 ```
 
-### 7. 부모견/부모묘 정보 수정 PUT /api/breeder-management/parent-pets/:petId
+### 7. 부모견/부모묘 정보 수정 PATCH /api/breeder-management/parent-pets/:petId
 
 등록된 부모 반려동물의 정보를 수정합니다.
 
@@ -143,7 +143,7 @@
 }
 ```
 
-### 10. 분양 가능한 반려동물 정보 수정 PUT /api/breeder-management/available-pets/:petId
+### 10. 분양 가능한 반려동물 정보 수정 PATCH /api/breeder-management/available-pets/:petId
 
 등록된 분양 반려동물의 정보를 수정합니다.
 
@@ -255,7 +255,7 @@
 
 - **커스텀 질문**: 브리더가 자유롭게 추가/삭제 가능
 
-### 19. 입양 신청 폼 수정 PUT /api/breeder-management/application-form
+### 19. 입양 신청 폼 수정 PATCH /api/breeder-management/application-form
 
 브리더가 커스텀 질문을 추가/수정/삭제합니다.
 
@@ -307,10 +307,10 @@
 - GET /api/breeder-management/verification: 2개 테스트
 - POST /api/breeder-management/verification: 3개 테스트
 - POST /api/breeder-management/parent-pets: 3개 테스트
-- PUT /api/breeder-management/parent-pets/:petId: 3개 테스트
+- PATCH /api/breeder-management/parent-pets/:petId: 3개 테스트
 - DELETE /api/breeder-management/parent-pets/:petId: 3개 테스트
 - POST /api/breeder-management/available-pets: 4개 테스트
-- PUT /api/breeder-management/available-pets/:petId: 3개 테스트
+- PATCH /api/breeder-management/available-pets/:petId: 3개 테스트
 - PATCH /api/breeder-management/available-pets/:petId/status: 3개 테스트
 - DELETE /api/breeder-management/available-pets/:petId: 3개 테스트
 - GET /api/breeder-management/applications: 3개 테스트
@@ -319,7 +319,7 @@
 - GET /api/breeder-management/my-pets: 4개 테스트
 - GET /api/breeder-management/my-reviews: 4개 테스트
 - GET /api/breeder-management/application-form: 2개 테스트
-- PUT /api/breeder-management/application-form: 4개 테스트
+- PATCH /api/breeder-management/application-form: 4개 테스트
 - 통합 시나리오: 1개 테스트 (전체 플로우 검증)
 
 ```bash
