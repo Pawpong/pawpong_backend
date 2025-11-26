@@ -3,6 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { StandardQuestion, StandardQuestionDocument } from '../../../schema/standard-question.schema';
+
+import { StandardQuestionResponseDto } from './dto/response/standard-question-response.dto';
+
 import { STANDARD_QUESTIONS } from '../../../common/data/standard-questions.data';
 
 /**
@@ -19,10 +22,11 @@ export class StandardQuestionAdminService {
 
     /**
      * 모든 표준 질문 조회 (관리자용 - 비활성화 포함)
-     * @returns 모든 표준 질문 목록
+     * @returns 모든 표준 질문 목록 (DTO 형태)
      */
-    async getAllQuestions(): Promise<StandardQuestionDocument[]> {
-        return this.standardQuestionModel.find().sort({ order: 1 }).exec() as any;
+    async getAllQuestions(): Promise<StandardQuestionResponseDto[]> {
+        const questions = await this.standardQuestionModel.find().sort({ order: 1 }).exec();
+        return questions.map((q) => new StandardQuestionResponseDto(q)) as unknown as StandardQuestionResponseDto[];
     }
 
     /**
@@ -38,9 +42,9 @@ export class StandardQuestionAdminService {
      * 표준 질문 수정 (관리자 전용)
      * @param id 질문 ID
      * @param updateData 수정할 데이터
-     * @returns 수정된 질문
+     * @returns 수정된 질문 (DTO 형태)
      */
-    async updateQuestion(id: string, updateData: Partial<StandardQuestion>): Promise<StandardQuestionDocument> {
+    async updateQuestion(id: string, updateData: Partial<StandardQuestion>): Promise<StandardQuestionResponseDto> {
         const question = await this.standardQuestionModel.findOne({ id });
         if (!question) {
             throw new BadRequestException('해당 질문을 찾을 수 없습니다.');
@@ -50,23 +54,25 @@ export class StandardQuestionAdminService {
         delete updateData.id;
 
         Object.assign(question, updateData);
-        return question.save() as any;
+        const savedQuestion = await question.save();
+        return new StandardQuestionResponseDto(savedQuestion);
     }
 
     /**
      * 표준 질문 활성화/비활성화 (관리자 전용)
      * @param id 질문 ID
      * @param isActive 활성화 여부
-     * @returns 수정된 질문
+     * @returns 수정된 질문 (DTO 형태)
      */
-    async toggleQuestionStatus(id: string, isActive: boolean): Promise<StandardQuestionDocument> {
+    async toggleQuestionStatus(id: string, isActive: boolean): Promise<StandardQuestionResponseDto> {
         const question = await this.standardQuestionModel.findOne({ id });
         if (!question) {
             throw new BadRequestException('해당 질문을 찾을 수 없습니다.');
         }
 
         question.isActive = isActive;
-        return question.save() as any;
+        const savedQuestion = await question.save();
+        return new StandardQuestionResponseDto(savedQuestion);
     }
 
     /**

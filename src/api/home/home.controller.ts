@@ -55,13 +55,9 @@ export class HomeController {
         description: 'FAQ 목록 조회 성공',
         type: [FaqResponseDto],
     })
-    async getFaqs(
-        @Query('userType') userType: string = 'adopter',
-    ): Promise<ApiResponseDto<FaqResponseDto[]>> {
+    async getFaqs(@Query('userType') userType: string = 'adopter'): Promise<ApiResponseDto<FaqResponseDto[]>> {
         const faqs =
-            userType === 'breeder'
-                ? await this.homeService.getBreederFaqs()
-                : await this.homeService.getAdopterFaqs();
+            userType === 'breeder' ? await this.homeService.getBreederFaqs() : await this.homeService.getAdopterFaqs();
         return ApiResponseDto.success(faqs, 'FAQ 목록이 조회되었습니다.');
     }
 
@@ -84,10 +80,8 @@ export class HomeController {
         status: 200,
         description: '분양 가능한 반려동물 목록 조회 성공',
     })
-    async getAvailablePets(
-        @Query('limit') limit: number = 10,
-    ): Promise<ApiResponseDto<any[]>> {
-        const pets = await this.homeService.getAvailablePets(Math.min(limit, 50));
+    async getAvailablePets(@Query('limit') limit: number = 10): Promise<ApiResponseDto<any[]>> {
+        const pets = await this.homeService.getAvailablePets(limit);
         return ApiResponseDto.success(pets, '분양중인 아이들이 조회되었습니다.');
     }
 }

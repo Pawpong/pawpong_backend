@@ -42,7 +42,7 @@ export class AdopterAdminController {
         @Query('page') page: string = '1',
         @Query('limit') limit: string = '10',
     ): Promise<ApiResponseDto<PaginationResponseDto<ReviewReportItemDto>>> {
-        const result = await this.adopterAdminService.getReviewReports(user.userId, parseInt(page), parseInt(limit));
+        const result = await this.adopterAdminService.getReviewReports(user.userId, page, limit);
         return ApiResponseDto.success(result, '후기 신고 목록이 조회되었습니다.');
     }
 

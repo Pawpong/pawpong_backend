@@ -1,7 +1,7 @@
 import { Module, forwardRef } from '@nestjs/common';
 
-import { BreederManagementController } from './breeder-management.controller';
 import { BreederAdminController } from './admin/breeder-admin.controller';
+import { BreederManagementController } from './breeder-management.controller';
 
 import { BreederManagementService } from './breeder-management.service';
 import { BreederAdminService } from './admin/breeder-admin.service';

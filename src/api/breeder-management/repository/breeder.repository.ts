@@ -2,8 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 import { VerificationStatus } from '../../../common/enum/user.enum';
+
+import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 
 /**
  * Breeder Repository

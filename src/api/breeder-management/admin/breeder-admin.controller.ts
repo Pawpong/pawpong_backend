@@ -32,8 +32,8 @@ import { ApplicationMonitoringResponseDto } from './dto/response/application-mon
  */
 @ApiController('브리더 관리 (Admin)')
 @Controller('breeder-admin')
-@UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class BreederAdminController {
     constructor(private readonly breederAdminService: BreederAdminService) {}
 
@@ -100,7 +100,7 @@ export class BreederAdminController {
         @Query('page') page: string = '1',
         @Query('limit') limit: string = '10',
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederReportItemDto>>> {
-        const result = await this.breederAdminService.getBreederReports(user.userId, parseInt(page), parseInt(limit));
+        const result = await this.breederAdminService.getBreederReports(user.userId, page, limit);
         return ApiResponseDto.success(result, '브리더 신고 목록이 조회되었습니다.');
     }
 

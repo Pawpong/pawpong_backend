@@ -14,10 +14,14 @@ import { AuthAdopterRepository } from './repository/auth-adopter.repository';
 import { AuthBreederRepository } from './repository/auth-breeder.repository';
 
 import { RefreshTokenRequestDto } from './dto/request/refresh-token-request.dto';
+import { SocialCompleteRequestDto } from './dto/request/social-complete-request.dto';
+import { RegisterBreederRequestDto } from './dto/request/register-breeder-request.dto';
 import { RegisterAdopterRequestDto } from './dto/request/register-adopter-request.dto';
 import { AuthResponseDto } from './dto/response/auth-response.dto';
 import { TokenResponseDto } from './dto/response/token-response.dto';
+import { LogoutResponseDto } from './dto/response/logout-response.dto';
 import { RegisterAdopterResponseDto } from './dto/response/register-adopter-response.dto';
+import { RegisterBreederResponseDto } from './dto/response/register-breeder-response.dto';
 import { VerificationDocumentsResponseDto } from './dto/response/verification-documents-response.dto';
 
 /**
@@ -236,13 +240,146 @@ export class AuthService {
     }
 
     /**
-     * 로그아웃 시 Refresh 토큰을 제거합니다.
+     * 로그아웃 시 Refresh 토큰을 제거하고 응답 DTO를 반환합니다.
      */
-    async logout(userId: string, role: string): Promise<void> {
+    async logout(userId: string, role: string): Promise<LogoutResponseDto> {
         if (role === 'adopter') {
             await this.authAdopterRepository.updateRefreshToken(userId, null);
         } else if (role === 'breeder') {
             await this.authBreederRepository.updateRefreshToken(userId, null);
+        }
+
+        return {
+            success: true,
+            loggedOutAt: new Date().toISOString(),
+            message: '로그아웃되었습니다.',
+        };
+    }
+
+    /**
+     * 환경에 따른 프론트엔드 URL 반환
+     * - NODE_ENV가 development이면 로컬 프론트엔드 URL 반환
+     * - NODE_ENV가 production이면 프로덕션 프론트엔드 URL 반환
+     */
+    getFrontendUrl(referer?: string, origin?: string): string {
+        const nodeEnv = this.configService.get<string>('NODE_ENV') || 'development';
+        const isLocalEnv = nodeEnv === 'development';
+
+        // 추가로 referer 체크 (일반 API 호출 시 더 정확한 판단)
+        const refererStr = referer || origin || '';
+        const isLocalReferer = refererStr.includes('localhost') || refererStr.includes('127.0.0.1');
+
+        // development 환경이거나 localhost에서 요청한 경우 로컬 URL 반환
+        if (isLocalEnv || isLocalReferer) {
+            return this.configService.get<string>('FRONTEND_URL_LOCAL') || 'http://localhost:3000';
+        } else {
+            return this.configService.get<string>('FRONTEND_URL_PROD') || 'https://pawpong-frontend.vercel.app';
+        }
+    }
+
+    /**
+     * OAuth 콜백 시 쿠키 설정 옵션 반환
+     */
+    getCookieOptions(): { isProduction: boolean; cookieOptions: any } {
+        const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+
+        return {
+            isProduction,
+            cookieOptions: {
+                httpOnly: true,
+                secure: isProduction,
+                sameSite: 'lax' as const,
+                path: '/',
+            },
+        };
+    }
+
+    /**
+     * 소셜 로그인 회원가입 완료 처리 (검증 포함)
+     * 컨트롤러의 completeSocialRegistration 로직을 서비스로 이동
+     */
+    async completeSocialRegistrationValidated(
+        dto: SocialCompleteRequestDto,
+    ): Promise<RegisterAdopterResponseDto | RegisterBreederResponseDto> {
+        if (dto.role === 'adopter') {
+            // 입양자 회원가입 필수 필드 검증
+            if (!dto.nickname) {
+                throw new BadRequestException('입양자 회원가입 시 닉네임은 필수입니다.');
+            }
+
+            const adopterDto: RegisterAdopterRequestDto = {
+                tempId: dto.tempId,
+                email: dto.email,
+                nickname: dto.nickname,
+                phone: dto.phone,
+                marketingAgreed: dto.marketingAgreed,
+            };
+            return this.registerAdopter(adopterDto);
+        } else if (dto.role === 'breeder') {
+            // 브리더 회원가입 필수 필드 검증
+            if (!dto.phone) {
+                throw new BadRequestException('브리더 회원가입 시 전화번호는 필수입니다.');
+            }
+            if (!dto.breederName) {
+                throw new BadRequestException('브리더 회원가입 시 브리더명은 필수입니다.');
+            }
+            if (!dto.city) {
+                throw new BadRequestException('브리더 회원가입 시 시/도는 필수입니다.');
+            }
+            if (!dto.petType) {
+                throw new BadRequestException('브리더 회원가입 시 브리딩 동물 종류는 필수입니다.');
+            }
+            if (!dto.breeds || dto.breeds.length === 0) {
+                throw new BadRequestException('브리더 회원가입 시 품종 목록은 필수입니다.');
+            }
+            if (!dto.plan) {
+                throw new BadRequestException('브리더 회원가입 시 플랜은 필수입니다.');
+            }
+            if (!dto.level) {
+                throw new BadRequestException('브리더 회원가입 시 레벨은 필수입니다.');
+            }
+
+            const breederDto: RegisterBreederRequestDto = {
+                tempId: dto.tempId,
+                provider: dto.provider,
+                email: dto.email,
+                phoneNumber: dto.phone,
+                breederName: dto.breederName,
+                breederLocation: {
+                    city: dto.city,
+                    district: dto.district,
+                },
+                animal: dto.petType,
+                breeds: dto.breeds,
+                plan: dto.plan,
+                level: dto.level,
+                agreements: {
+                    termsOfService: true,
+                    privacyPolicy: true,
+                    marketingConsent: dto.marketingAgreed ?? false,
+                },
+            };
+            return this.registerBreeder(breederDto);
+        } else {
+            throw new BadRequestException('유효하지 않은 역할입니다.');
+        }
+    }
+
+    /**
+     * 파일 업로드 검증 (프로필 이미지)
+     */
+    validateProfileImageFile(file: Express.Multer.File): void {
+        if (!file) {
+            throw new BadRequestException('파일이 업로드되지 않았습니다.');
+        }
+    }
+
+    /**
+     * 파일 업로드 검증 (브리더 서류)
+     */
+    validateBreederDocumentFiles(files: Express.Multer.File[]): void {
+        if (!files || files.length === 0) {
+            throw new BadRequestException('파일이 업로드되지 않았습니다.');
         }
     }
 
@@ -286,7 +423,9 @@ export class AuthService {
         let adopter = await this.authAdopterRepository.findBySocialAuth(profile.provider, profile.providerId);
 
         // 디버깅: 조회 결과 로깅
-        this.logger.log(`[handleSocialLogin] Adopter 조회 결과: ${adopter ? '찾음 - ' + adopter.emailAddress : '없음'}`);
+        this.logger.log(
+            `[handleSocialLogin] Adopter 조회 결과: ${adopter ? '찾음 - ' + adopter.emailAddress : '없음'}`,
+        );
 
         // 디버깅: 이메일로 사용자 조회하여 socialAuthInfo 확인
         if (!adopter) {
@@ -317,7 +456,9 @@ export class AuthService {
         let breeder = await this.authBreederRepository.findBySocialAuth(profile.provider, profile.providerId);
 
         // 디버깅: 조회 결과 로깅
-        this.logger.log(`[handleSocialLogin] Breeder 조회 결과: ${breeder ? '찾음 - ' + breeder.emailAddress : '없음'}`);
+        this.logger.log(
+            `[handleSocialLogin] Breeder 조회 결과: ${breeder ? '찾음 - ' + breeder.emailAddress : '없음'}`,
+        );
 
         if (breeder) {
             // 기존 사용자 로그인
