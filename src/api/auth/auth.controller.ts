@@ -12,11 +12,9 @@ import {
     UseInterceptors,
     UploadedFiles,
     UploadedFile,
-    BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ConfigService } from '@nestjs/config';
 import { ApiConsumes } from '@nestjs/swagger';
 import type { Response } from 'express';
 
@@ -25,14 +23,14 @@ import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decor
 import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard';
 
-import { AuthService } from './auth.service';
 import { SmsService } from './sms.service';
+import { AuthService } from './auth.service';
 
 import { RefreshTokenRequestDto } from './dto/request/refresh-token-request.dto';
 import { CheckNicknameRequestDto } from './dto/request/check-nickname-request.dto';
+import { SocialCompleteRequestDto } from './dto/request/social-complete-request.dto';
 import { RegisterAdopterRequestDto } from './dto/request/register-adopter-request.dto';
 import { RegisterBreederRequestDto } from './dto/request/register-breeder-request.dto';
-import { SocialCompleteRequestDto } from './dto/request/social-complete-request.dto';
 import { UploadBreederDocumentsRequestDto } from './dto/request/upload-breeder-documents-request.dto';
 import { SendVerificationCodeRequestDto, VerifyCodeRequestDto } from './dto/request/phone-verification-request.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
@@ -41,9 +39,9 @@ import { LogoutResponseDto } from './dto/response/logout-response.dto';
 import { UploadResponseDto } from '../upload/dto/response/upload-response.dto';
 import { RegisterAdopterResponseDto } from './dto/response/register-adopter-response.dto';
 import { RegisterBreederResponseDto } from './dto/response/register-breeder-response.dto';
+import { SocialCheckUserResponseDto } from './dto/response/social-check-user-response.dto';
 import { PhoneVerificationResponseDto } from './dto/response/phone-verification-response.dto';
 import { VerificationDocumentsResponseDto } from './dto/response/verification-documents-response.dto';
-import { SocialCheckUserResponseDto } from './dto/response/social-check-user-response.dto';
 
 @ApiController('인증')
 @Controller('auth')
@@ -51,24 +49,7 @@ export class AuthController {
     constructor(
         private readonly authService: AuthService,
         private readonly smsService: SmsService,
-        private readonly configService: ConfigService,
     ) {}
-
-    /**
-     * 요청의 출처(Referer 헤더)를 확인하여 적절한 프론트엔드 URL 반환
-     * - localhost에서 요청: 로컬 프론트엔드 URL 반환
-     * - 프로덕션에서 요청: 프로덕션 프론트엔드 URL 반환
-     */
-    private getFrontendUrl(req: any): string {
-        const referer = req.headers.referer || req.headers.origin || '';
-        const isLocalRequest = referer.includes('localhost') || referer.includes('127.0.0.1');
-
-        if (isLocalRequest) {
-            return this.configService.get<string>('FRONTEND_URL_LOCAL') || 'http://localhost:3000';
-        } else {
-            return this.configService.get<string>('FRONTEND_URL_PROD') || 'https://pawpong-frontend.vercel.app';
-        }
-    }
 
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
@@ -93,12 +74,7 @@ export class AuthController {
         isPublic: false,
     })
     async logout(@CurrentUser() user: any): Promise<ApiResponseDto<LogoutResponseDto>> {
-        await this.authService.logout(user.userId, user.role);
-        const response: LogoutResponseDto = {
-            success: true,
-            loggedOutAt: new Date().toISOString(),
-            message: '로그아웃되었습니다.',
-        };
+        const response = await this.authService.logout(user.userId, user.role);
         return ApiResponseDto.success(response, '로그아웃되었습니다.');
     }
 
@@ -132,8 +108,6 @@ export class AuthController {
         return ApiResponseDto.success(new PhoneVerificationResponseDto(result.success, result.message));
     }
 
-    // ===== 소셜 로그인 =====
-
     @Get('google')
     @UseGuards(AuthGuard('google'))
     @ApiEndpoint({
@@ -149,7 +123,7 @@ export class AuthController {
     @UseGuards(AuthGuard('google'))
     async googleCallback(@Req() req, @Res() res: Response) {
         const result = await this.authService.handleSocialLogin(req.user);
-        const frontendUrl = this.getFrontendUrl(req); // ✅ 동적 URL 결정
+        const frontendUrl = this.authService.getFrontendUrl(req.headers.referer, req.headers.origin);
 
         if (result.needsAdditionalInfo) {
             // 신규 사용자 - /signup으로 리다이렉트
@@ -158,16 +132,14 @@ export class AuthController {
         } else {
             // 기존 사용자 - 로그인 처리 (토큰 발급)
             const tokens = await this.authService.generateSocialLoginTokens(result.user);
-
-            // HttpOnly 쿠키에 토큰 저장
-            const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+            const { isProduction } = this.authService.getCookieOptions();
 
             res.cookie('accessToken', tokens.accessToken, {
                 httpOnly: true,
                 secure: isProduction,
                 sameSite: 'lax',
                 path: '/',
-                maxAge: 24 * 60 * 60 * 1000, // 24시간
+                maxAge: 24 * 60 * 60 * 1000,
             });
 
             res.cookie('refreshToken', tokens.refreshToken, {
@@ -175,7 +147,7 @@ export class AuthController {
                 secure: isProduction,
                 sameSite: 'lax',
                 path: '/',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+                maxAge: 7 * 24 * 60 * 60 * 1000,
             });
 
             res.cookie('userRole', result.user.role, {
@@ -183,10 +155,9 @@ export class AuthController {
                 secure: isProduction,
                 sameSite: 'lax',
                 path: '/',
-                maxAge: 24 * 60 * 60 * 1000, // 24시간
+                maxAge: 24 * 60 * 60 * 1000,
             });
 
-            // 토큰 없이 프론트엔드로 리다이렉트
             const redirectUrl = `${frontendUrl}/explore`;
             return res.redirect(redirectUrl);
         }
@@ -207,7 +178,7 @@ export class AuthController {
     @UseGuards(AuthGuard('naver'))
     async naverCallback(@Req() req, @Res() res: Response) {
         const result = await this.authService.handleSocialLogin(req.user);
-        const frontendUrl = this.getFrontendUrl(req); // ✅ 동적 URL 결정
+        const frontendUrl = this.authService.getFrontendUrl(req.headers.referer, req.headers.origin);
 
         if (result.needsAdditionalInfo) {
             // 신규 사용자 - /signup으로 리다이렉트
@@ -216,16 +187,14 @@ export class AuthController {
         } else {
             // 기존 사용자 - 로그인 처리 (토큰 발급)
             const tokens = await this.authService.generateSocialLoginTokens(result.user);
-
-            // HttpOnly 쿠키에 토큰 저장
-            const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+            const { isProduction } = this.authService.getCookieOptions();
 
             res.cookie('accessToken', tokens.accessToken, {
                 httpOnly: true,
                 secure: isProduction,
                 sameSite: 'lax',
                 path: '/',
-                maxAge: 24 * 60 * 60 * 1000, // 24시간
+                maxAge: 24 * 60 * 60 * 1000,
             });
 
             res.cookie('refreshToken', tokens.refreshToken, {
@@ -233,7 +202,7 @@ export class AuthController {
                 secure: isProduction,
                 sameSite: 'lax',
                 path: '/',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+                maxAge: 7 * 24 * 60 * 60 * 1000,
             });
 
             res.cookie('userRole', result.user.role, {
@@ -241,10 +210,9 @@ export class AuthController {
                 secure: isProduction,
                 sameSite: 'lax',
                 path: '/',
-                maxAge: 24 * 60 * 60 * 1000, // 24시간
+                maxAge: 24 * 60 * 60 * 1000,
             });
 
-            // 토큰 없이 프론트엔드로 리다이렉트
             const redirectUrl = `${frontendUrl}/explore`;
             return res.redirect(redirectUrl);
         }
@@ -265,7 +233,7 @@ export class AuthController {
     @UseGuards(AuthGuard('kakao'))
     async kakaoCallback(@Req() req, @Res() res: Response) {
         const result = await this.authService.handleSocialLogin(req.user);
-        const frontendUrl = this.getFrontendUrl(req); // ✅ 동적 URL 결정
+        const frontendUrl = this.authService.getFrontendUrl(req.headers.referer, req.headers.origin);
 
         if (result.needsAdditionalInfo) {
             // 신규 사용자 - /signup으로 리다이렉트
@@ -275,16 +243,14 @@ export class AuthController {
         } else {
             // 기존 사용자 - 로그인 처리 (토큰 발급)
             const tokens = await this.authService.generateSocialLoginTokens(result.user);
-
-            // HttpOnly 쿠키에 토큰 저장
-            const isProduction = this.configService.get<string>('NODE_ENV') === 'production';
+            const { isProduction } = this.authService.getCookieOptions();
 
             res.cookie('accessToken', tokens.accessToken, {
                 httpOnly: true,
                 secure: isProduction,
                 sameSite: 'lax',
                 path: '/',
-                maxAge: 24 * 60 * 60 * 1000, // 24시간
+                maxAge: 24 * 60 * 60 * 1000,
             });
 
             res.cookie('refreshToken', tokens.refreshToken, {
@@ -292,7 +258,7 @@ export class AuthController {
                 secure: isProduction,
                 sameSite: 'lax',
                 path: '/',
-                maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+                maxAge: 7 * 24 * 60 * 60 * 1000,
             });
 
             res.cookie('userRole', result.user.role, {
@@ -300,10 +266,9 @@ export class AuthController {
                 secure: isProduction,
                 sameSite: 'lax',
                 path: '/',
-                maxAge: 24 * 60 * 60 * 1000, // 24시간
+                maxAge: 24 * 60 * 60 * 1000,
             });
 
-            // 토큰 없이 프론트엔드로 리다이렉트
             const redirectUrl = `${frontendUrl}/explore`;
             return res.redirect(redirectUrl);
         }
@@ -354,70 +319,10 @@ export class AuthController {
     async completeSocialRegistration(
         @Body() dto: SocialCompleteRequestDto,
     ): Promise<ApiResponseDto<RegisterAdopterResponseDto | RegisterBreederResponseDto>> {
-        if (dto.role === 'adopter') {
-            // 입양자 회원가입 필수 필드 검증
-            if (!dto.nickname) {
-                throw new BadRequestException('입양자 회원가입 시 닉네임은 필수입니다.');
-            }
-
-            const adopterDto: RegisterAdopterRequestDto = {
-                tempId: dto.tempId,
-                email: dto.email,
-                nickname: dto.nickname,
-                phone: dto.phone,
-                marketingAgreed: dto.marketingAgreed,
-            };
-            const result = await this.authService.registerAdopter(adopterDto);
-            return ApiResponseDto.success(result, '입양자 회원가입이 완료되었습니다.');
-        } else if (dto.role === 'breeder') {
-            // 브리더 회원가입 필수 필드 검증
-            if (!dto.phone) {
-                throw new BadRequestException('브리더 회원가입 시 전화번호는 필수입니다.');
-            }
-            if (!dto.breederName) {
-                throw new BadRequestException('브리더 회원가입 시 브리더명은 필수입니다.');
-            }
-            if (!dto.city) {
-                throw new BadRequestException('브리더 회원가입 시 시/도는 필수입니다.');
-            }
-            if (!dto.petType) {
-                throw new BadRequestException('브리더 회원가입 시 브리딩 동물 종류는 필수입니다.');
-            }
-            if (!dto.breeds || dto.breeds.length === 0) {
-                throw new BadRequestException('브리더 회원가입 시 품종 목록은 필수입니다.');
-            }
-            if (!dto.plan) {
-                throw new BadRequestException('브리더 회원가입 시 플랜은 필수입니다.');
-            }
-            if (!dto.level) {
-                throw new BadRequestException('브리더 회원가입 시 레벨은 필수입니다.');
-            }
-
-            const breederDto: RegisterBreederRequestDto = {
-                tempId: dto.tempId,
-                provider: dto.provider, // ✅ 소셜 로그인 제공자 추가
-                email: dto.email,
-                phoneNumber: dto.phone,
-                breederName: dto.breederName,
-                breederLocation: {
-                    city: dto.city,
-                    district: dto.district,
-                },
-                animal: dto.petType,
-                breeds: dto.breeds,
-                plan: dto.plan,
-                level: dto.level,
-                agreements: {
-                    termsOfService: true, // 소셜 로그인 시 기본 동의로 처리
-                    privacyPolicy: true,
-                    marketingConsent: dto.marketingAgreed ?? false,
-                },
-            };
-            const result = await this.authService.registerBreeder(breederDto);
-            return ApiResponseDto.success(result, '브리더 회원가입이 완료되었습니다.');
-        } else {
-            throw new BadRequestException('유효하지 않은 역할입니다.');
-        }
+        const result = await this.authService.completeSocialRegistrationValidated(dto);
+        const message =
+            dto.role === 'adopter' ? '입양자 회원가입이 완료되었습니다.' : '브리더 회원가입이 완료되었습니다.';
+        return ApiResponseDto.success(result, message);
     }
 
     @Post('check-email')
@@ -504,9 +409,7 @@ export class AuthController {
         responseType: RegisterAdopterResponseDto,
         isPublic: true,
     })
-    async registerAdopter(
-        @Body() dto: RegisterAdopterRequestDto,
-    ): Promise<ApiResponseDto<RegisterAdopterResponseDto>> {
+    async registerAdopter(@Body() dto: RegisterAdopterRequestDto): Promise<ApiResponseDto<RegisterAdopterResponseDto>> {
         const result = await this.authService.registerAdopter(dto);
         return ApiResponseDto.success(result, '입양자 회원가입이 완료되었습니다.');
     }
@@ -577,19 +480,16 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
         @Query('tempId') tempId?: string,
         @CurrentUser() user?: any,
     ): Promise<ApiResponseDto<UploadResponseDto>> {
-        if (!file) {
-            throw new BadRequestException('파일이 업로드되지 않았습니다.');
-        }
+        this.authService.validateProfileImageFile(file);
 
         const result = await this.authService.uploadProfileImage(file, user, tempId);
-
         const response = new UploadResponseDto(result.cdnUrl, result.fileName, result.size);
 
         const message = user
             ? '프로필 이미지가 업로드되고 저장되었습니다.'
             : tempId
-            ? '프로필 이미지가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.'
-            : '프로필 이미지가 업로드되었습니다. 회원가입 시 응답의 filename 필드를 profileImage에 사용하세요.';
+              ? '프로필 이미지가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.'
+              : '프로필 이미지가 업로드되었습니다. 회원가입 시 응답의 filename 필드를 profileImage에 사용하세요.';
 
         return ApiResponseDto.success(response, message);
     }
@@ -655,9 +555,7 @@ documentUrls에 filename 필드 값을 넣는 경우
         @Body() dto: UploadBreederDocumentsRequestDto,
         @Query('tempId') tempId?: string,
     ): Promise<ApiResponseDto<VerificationDocumentsResponseDto>> {
-        if (!files || files.length === 0) {
-            throw new BadRequestException('파일이 업로드되지 않았습니다.');
-        }
+        this.authService.validateBreederDocumentFiles(files);
 
         const result = await this.authService.uploadBreederDocuments(files, dto.types, dto.level, tempId);
 
@@ -667,5 +565,4 @@ documentUrls에 filename 필드 값을 넣는 경우
 
         return ApiResponseDto.success(result.response, message);
     }
-
 }

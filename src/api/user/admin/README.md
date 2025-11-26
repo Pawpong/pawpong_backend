@@ -9,26 +9,29 @@
 ## 주요 기능
 
 ### 1. 관리자 프로필 관리
+
 - 관리자 본인의 프로필 정보 조회
 - 활동 로그 확인 (최근 10개)
 
 ### 2. 통합 사용자 관리
+
 - 입양자(Adopter)와 브리더(Breeder)를 통합하여 조회
 - 사용자 검색 및 필터링 (role, status, keyword)
 - 페이지네이션 지원
 
 ### 3. 사용자 상태 변경
+
 - 사용자 계정 활성화/정지 처리
 - 입양자 및 브리더의 상태 관리
 - 관리자 활동 로그 자동 기록
 
 ## API 엔드포인트
 
-| 메서드 | 경로 | 설명 | 권한 |
-|--------|------|------|------|
-| GET | `/api/user-admin/profile` | 관리자 프로필 조회 | Admin |
-| GET | `/api/user-admin/users` | 통합 사용자 목록 조회 | Admin |
-| PUT | `/api/user-admin/users/:userId/status` | 사용자 상태 변경 | Admin |
+| 메서드 | 경로                                   | 설명                  | 권한  |
+| ------ | -------------------------------------- | --------------------- | ----- |
+| GET    | `/api/user-admin/profile`              | 관리자 프로필 조회    | Admin |
+| GET    | `/api/user-admin/users`                | 통합 사용자 목록 조회 | Admin |
+| PUT    | `/api/user-admin/users/:userId/status` | 사용자 상태 변경      | Admin |
 
 ## 파일 구조
 
@@ -54,12 +57,14 @@ src/api/user/admin/
 ### 1. 관리자 프로필 조회
 
 **Request:**
+
 ```http
 GET /api/user-admin/profile
 Authorization: Bearer {JWT_TOKEN}
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -86,42 +91,45 @@ Authorization: Bearer {JWT_TOKEN}
 ### 2. 사용자 목록 조회
 
 **Request:**
+
 ```http
 GET /api/user-admin/users?userRole=adopter&accountStatus=active&searchKeyword=김&pageNumber=1&itemsPerPage=10
 Authorization: Bearer {JWT_TOKEN}
 ```
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "code": 200,
-  "data": {
-    "users": [
-      {
-        "userId": "507f1f77bcf86cd799439012",
-        "userName": "김입양자",
-        "emailAddress": "adopter@example.com",
-        "userRole": "adopter",
-        "accountStatus": "active",
-        "lastLoginAt": "2025-01-14T15:20:00.000Z",
-        "createdAt": "2025-01-01T10:00:00.000Z"
-      }
-    ],
-    "total": 100,
-    "page": 1,
-    "totalPages": 10,
-    "hasNext": true,
-    "hasPrev": false
-  },
-  "message": "사용자 목록이 조회되었습니다.",
-  "timestamp": "2025-01-15T10:30:00.000Z"
+    "success": true,
+    "code": 200,
+    "data": {
+        "users": [
+            {
+                "userId": "507f1f77bcf86cd799439012",
+                "userName": "김입양자",
+                "emailAddress": "adopter@example.com",
+                "userRole": "adopter",
+                "accountStatus": "active",
+                "lastLoginAt": "2025-01-14T15:20:00.000Z",
+                "createdAt": "2025-01-01T10:00:00.000Z"
+            }
+        ],
+        "total": 100,
+        "page": 1,
+        "totalPages": 10,
+        "hasNext": true,
+        "hasPrev": false
+    },
+    "message": "사용자 목록이 조회되었습니다.",
+    "timestamp": "2025-01-15T10:30:00.000Z"
 }
 ```
 
 ### 3. 사용자 상태 변경
 
 **Request:**
+
 ```http
 PUT /api/user-admin/users/507f1f77bcf86cd799439012/status?role=adopter
 Authorization: Bearer {JWT_TOKEN}
@@ -134,26 +142,29 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
-  "success": true,
-  "code": 200,
-  "data": {
-    "message": "adopter status updated to suspended"
-  },
-  "message": "사용자 상태가 변경되었습니다.",
-  "timestamp": "2025-01-15T10:30:00.000Z"
+    "success": true,
+    "code": 200,
+    "data": {
+        "message": "adopter status updated to suspended"
+    },
+    "message": "사용자 상태가 변경되었습니다.",
+    "timestamp": "2025-01-15T10:30:00.000Z"
 }
 ```
 
 ## 주요 기능 설명
 
 ### 통합 사용자 조회 로직
+
 - 입양자와 브리더를 하나의 목록으로 통합 조회
 - 각 모델의 필드 차이를 통일된 DTO로 변환
 - 역할별 필터링 지원 (userRole: 'adopter' | 'breeder' | undefined)
 
 ### 활동 로그 자동 기록
+
 - 모든 관리자 작업은 자동으로 로그에 기록됩니다
 - 작업 유형: `SUSPEND_USER`, `ACTIVATE_USER`
 - 로그에는 대상, 사유, 시간이 포함됩니다

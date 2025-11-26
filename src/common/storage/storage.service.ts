@@ -20,6 +20,7 @@ export class StorageService {
 
             const projectId = this.configService.get<string>('GCP_PROJECT_ID');
             const keyFilePath = this.configService.get<string>('GCP_KEYFILE_PATH');
+
             this.bucketName = this.configService.get<string>('GCP_BUCKET_NAME') || '';
             this.cdnBaseUrl = this.configService.get<string>('CDN_BASE_URL') || '';
             this.cdnKeyName = this.configService.get<string>('CDN_KEY_NAME') || '';

@@ -59,7 +59,9 @@ export class AuthBreederRepository {
      * 브리더 정보 업데이트
      */
     async update(id: string, updateData: Partial<Breeder>): Promise<BreederDocument | null> {
-        return this.breederModel.findByIdAndUpdate(id, updateData, { new: true }).exec() as Promise<BreederDocument | null>;
+        return this.breederModel
+            .findByIdAndUpdate(id, updateData, { new: true })
+            .exec() as Promise<BreederDocument | null>;
     }
 
     /**
