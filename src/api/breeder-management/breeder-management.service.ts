@@ -851,19 +851,11 @@ export class BreederManagementService {
                 isStandard: true,
             },
             {
-                id: 'neuteringConsent',
-                type: 'checkbox',
-                label: '모든 아이들은 중성화 후 분양되거나, 입양 후 중성화를 진행해야 합니다. 동의하십니까?',
-                required: true,
-                order: 11,
-                isStandard: true,
-            },
-            {
                 id: 'preferredPetDescription',
                 type: 'textarea',
                 label: '마음에 두신 아이가 있으신가요? (특징: 성별, 타입, 외모, 컬러패턴, 성격 등)',
                 required: false,
-                order: 12,
+                order: 11,
                 isStandard: true,
             },
             {
@@ -871,7 +863,7 @@ export class BreederManagementService {
                 type: 'text',
                 label: '원하시는 입양 시기가 있나요?',
                 required: false,
-                order: 13,
+                order: 12,
                 isStandard: true,
             },
             {
@@ -879,10 +871,10 @@ export class BreederManagementService {
                 type: 'textarea',
                 label: '마지막으로 궁금하신 점이나 남기시고 싶으신 말씀이 있나요?',
                 required: false,
-                order: 14,
+                order: 13,
                 isStandard: true,
             },
-        ]; // 총 14개 표준 질문
+        ]; // 총 13개 표준 질문
     }
 
     /**

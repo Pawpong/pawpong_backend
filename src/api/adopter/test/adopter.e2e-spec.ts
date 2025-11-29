@@ -137,7 +137,6 @@ describe('Adopter API E2E Tests (Simple)', () => {
                 previousPetExperience: '5년 전 고양이 한 마리를 키웠습니다',
                 canProvideBasicCare: true,
                 canAffordMedicalExpenses: true,
-                neuteringConsent: true,
                 preferredPetDescription: '활발하고 사람을 좋아하는 포메라니안',
                 desiredAdoptionTiming: '2개월 후 예정',
                 additionalNotes: '첫 입양이라 긴장되지만 최선을 다하겠습니다',

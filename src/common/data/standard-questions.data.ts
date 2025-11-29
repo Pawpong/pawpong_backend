@@ -1,5 +1,5 @@
 /**
- * 표준 입양 신청 폼 질문 데이터 (14개)
+ * 표준 입양 신청 폼 질문 데이터 (13개)
  * Figma 디자인 기반 - 모든 브리더에게 공통으로 적용되는 필수 질문들
  */
 export const STANDARD_QUESTIONS = [
@@ -94,20 +94,11 @@ export const STANDARD_QUESTIONS = [
         description: '반려동물 의료비는 예상보다 높을 수 있습니다.',
     },
     {
-        id: 'neuteringConsent',
-        type: 'checkbox',
-        label: '모든 아이들은 중성화 후 분양되거나, 입양 후 중성화를 진행해야 합니다. 동의하십니까?',
-        required: true,
-        order: 11,
-        isActive: true,
-        description: '중성화는 반려동물의 건강과 행복을 위해 권장됩니다.',
-    },
-    {
         id: 'preferredPetDescription',
         type: 'textarea',
         label: '마음에 두신 아이가 있으신가요? (특징: 성별, 타입, 외모, 컬러패턴, 성격 등)',
         required: false,
-        order: 12,
+        order: 11,
         isActive: true,
         placeholder: '예: 암컷, 활발한 성격, 갈색 털',
     },
@@ -116,7 +107,7 @@ export const STANDARD_QUESTIONS = [
         type: 'text',
         label: '원하시는 입양 시기가 있나요?',
         required: false,
-        order: 13,
+        order: 12,
         isActive: true,
         placeholder: '예: 즉시, 1개월 후, 상담 후 결정',
     },
@@ -125,7 +116,7 @@ export const STANDARD_QUESTIONS = [
         type: 'textarea',
         label: '마지막으로 궁금하신 점이나 남기시고 싶으신 말씀이 있나요?',
         required: false,
-        order: 14,
+        order: 13,
         isActive: true,
         placeholder: '자유롭게 작성해주세요.',
     },

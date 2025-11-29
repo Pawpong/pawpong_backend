@@ -501,7 +501,7 @@ export class BreederService {
     }
 
     /**
-     * 표준 입양 신청 폼 질문 14개 (Figma 디자인 기반 - 수정 불가)
+     * 표준 입양 신청 폼 질문 13개 (Figma 디자인 기반 - 수정 불가)
      *
      * 모든 브리더에게 자동으로 포함되는 필수 질문들입니다.
      */
@@ -588,19 +588,11 @@ export class BreederService {
                 isStandard: true,
             },
             {
-                id: 'neuteringConsent',
-                type: 'checkbox',
-                label: '모든 아이들은 중성화 후 분양되거나, 입양 후 중성화를 진행해야 합니다. 동의하십니까?',
-                required: true,
-                order: 11,
-                isStandard: true,
-            },
-            {
                 id: 'preferredPetDescription',
                 type: 'textarea',
                 label: '마음에 두신 아이가 있으신가요? (특징: 성별, 타입, 외모, 컬러패턴, 성격 등)',
                 required: false,
-                order: 12,
+                order: 11,
                 isStandard: true,
             },
             {
@@ -608,7 +600,7 @@ export class BreederService {
                 type: 'text',
                 label: '원하시는 입양 시기가 있나요?',
                 required: false,
-                order: 13,
+                order: 12,
                 isStandard: true,
             },
             {
@@ -616,7 +608,7 @@ export class BreederService {
                 type: 'textarea',
                 label: '마지막으로 궁금하신 점이나 남기시고 싶으신 말씀이 있나요?',
                 required: false,
-                order: 14,
+                order: 13,
                 isStandard: true,
             },
         ];
@@ -626,7 +618,7 @@ export class BreederService {
      * 입양 신청 폼 조회 (표준 + 커스텀 질문) - 공개 API
      *
      * 입양자가 특정 브리더의 입양 신청 폼 구조를 조회합니다.
-     * 표준 14개 질문은 자동으로 포함되며, 브리더가 추가한 커스텀 질문도 함께 반환합니다.
+     * 표준 13개 질문은 자동으로 포함되며, 브리더가 추가한 커스텀 질문도 함께 반환합니다.
      *
      * @param breederId 브리더 ID
      * @returns 전체 폼 구조 (표준 + 커스텀 질문)
