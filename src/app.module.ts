@@ -21,6 +21,7 @@ import { PlatformAdminModule } from './api/platform/admin/platform-admin.module'
 import { FilterOptionsModule } from './api/filter-options/filter-options.module';
 import { StandardQuestionModule } from './api/standard-question/standard-question.module';
 import { BreederManagementModule } from './api/breeder-management/breeder-management.module';
+import { NotificationModule } from './api/notification/notification.module';
 
 @Module({
     imports: [
@@ -44,6 +45,7 @@ import { BreederManagementModule } from './api/breeder-management/breeder-manage
         DistrictModule,
         BreedModule,
         FilterOptionsModule,
+        NotificationModule,
     ],
     controllers: [],
     providers: [CustomLoggerService],

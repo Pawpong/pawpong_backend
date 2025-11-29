@@ -11,6 +11,7 @@ import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.sch
 import { BreederReview, BreederReviewSchema } from '../../schema/breeder-review.schema';
 import { BreederReport, BreederReportSchema } from '../../schema/breeder-report.schema';
 import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
+import { Notification, NotificationSchema } from '../../schema/notification.schema';
 
 @Module({
     imports: [
@@ -101,3 +102,11 @@ export class BreederDatabaseModule {}
     exports: [MongooseModule],
 })
 export class AdminDatabaseModule {}
+
+@Module({
+    imports: [
+        MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }]),
+    ],
+    exports: [MongooseModule],
+})
+export class NotificationDatabaseModule {}
