@@ -162,7 +162,6 @@ export class AdopterService {
                 // 추가된 Figma 디자인 기반 필드들
                 canProvideBasicCare: dto.canProvideBasicCare,
                 canAffordMedicalExpenses: dto.canAffordMedicalExpenses,
-                neuteringConsent: dto.neuteringConsent,
                 preferredPetDescription: dto.preferredPetDescription,
                 desiredAdoptionTiming: dto.desiredAdoptionTiming,
                 additionalNotes: dto.additionalNotes,
