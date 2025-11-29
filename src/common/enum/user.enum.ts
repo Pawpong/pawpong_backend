@@ -134,3 +134,14 @@ export enum StatsType {
     WEEKLY = 'weekly',
     MONTHLY = 'monthly',
 }
+
+export enum NotificationType {
+    PROFILE_REVIEW = 'profile_review', // 프로필 심사
+    PROFILE_RE_REVIEW = 'profile_re_review', // 프로필 재심사
+    MATCHING = 'matching', // 매칭
+}
+
+export enum RecipientType {
+    ADOPTER = 'adopter',
+    BREEDER = 'breeder',
+}
