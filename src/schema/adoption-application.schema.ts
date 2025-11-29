@@ -116,13 +116,6 @@ export class StandardApplicationData {
     canAffordMedicalExpenses: boolean;
 
     /**
-     * 중성화 동의 여부
-     * 중성화 후 분양 또는 입양 후 중성화 진행에 동의
-     */
-    @Prop({ required: true })
-    neuteringConsent: boolean;
-
-    /**
      * 마음에 두신 아이 또는 원하는 특징 (선택사항, 최대 1500자)
      * 특정 아이 또는 성별, 타입, 외모, 컬러패턴, 성격 등 원하는 특징
      */

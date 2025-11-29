@@ -231,21 +231,6 @@ export class ApplicationCreateRequestDto {
     canAffordMedicalExpenses: boolean;
 
     /**
-     * 중성화 동의 여부
-     *
-     * 모든 아이들은 중성화 후 분양되거나, 입양 후 중성화를 진행해야 합니다
-     *
-     * @example true
-     */
-    @ApiProperty({
-        description: '모든 아이들은 중성화 후 분양되거나, 입양 후 중성화를 진행해야 합니다. 동의하십니까?',
-        example: true,
-    })
-    @IsBoolean()
-    @IsNotEmpty()
-    neuteringConsent: boolean;
-
-    /**
      * 마음에 두신 아이 또는 원하는 특징 (선택사항, 최대 1500자)
      *
      * 특정 아이가 있거나, 원하는 특징(성별, 타입, 외모, 컬러패턴, 성격 등)을 자유롭게 기술
