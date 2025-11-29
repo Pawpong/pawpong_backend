@@ -1,6 +1,6 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray, IsEnum, IsBoolean, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsArray, IsEnum, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform, Type } from 'class-transformer';
+import { Type } from 'class-transformer';
 
 /**
  * 반려동물 등록 요청 DTO
@@ -147,23 +147,6 @@ export class PetAddRequestDto {
     @IsOptional()
     @IsString()
     parentPetId?: string;
-
-    /**
-     * 중성화 여부
-     * @example false
-     */
-    @ApiProperty({
-        description: '중성화 여부',
-        example: false,
-    })
-    @IsBoolean()
-    @Transform(({ value }) => {
-        if (typeof value === 'string') {
-            return value === 'true';
-        }
-        return value;
-    })
-    isNeutered: boolean;
 
     /**
      * 분양 가능 시작일 (YYYY-MM-DD 형식)
