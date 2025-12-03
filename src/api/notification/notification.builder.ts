@@ -1,18 +1,54 @@
 import { NotificationType, RecipientType } from '../../common/enum/user.enum';
 import { NotificationItemDto } from './dto/response/notification-response.dto';
 
+export interface EmailData {
+    to: string;
+    subject: string;
+    html: string;
+}
+
+export interface NotificationCreateData {
+    recipientId: string;
+    recipientType: RecipientType;
+    type: NotificationType;
+    title: string;
+    content: string;
+    relatedId?: string;
+    relatedType?: string;
+}
+
+export interface NotificationSendResult {
+    notification: NotificationItemDto;
+    emailSent: boolean;
+}
+
 /**
  * 알림 빌더
  *
  * 다른 서비스에서 알림을 쉽게 생성할 수 있도록 빌더 패턴을 제공합니다.
+ * 서비스 알림과 이메일을 동시에 발송할 수 있습니다.
  *
  * @example
+ * // 서비스 알림만 발송
  * await this.notificationService
  *     .to(breederId, RecipientType.BREEDER)
- *     .type(NotificationType.PROFILE_REVIEW)
- *     .title('프로필 심사 완료')
- *     .content('프로필 심사가 완료되었습니다.')
- *     .related(applicationId, 'application')
+ *     .type(NotificationType.NEW_REVIEW)
+ *     .title('새로운 후기')
+ *     .content('후기가 등록되었습니다.')
+ *     .send();
+ *
+ * @example
+ * // 서비스 알림 + 이메일 동시 발송
+ * await this.notificationService
+ *     .to(breederId, RecipientType.BREEDER)
+ *     .type(NotificationType.BREEDER_APPROVED)
+ *     .title('입점 승인')
+ *     .content('브리더 입점이 승인되었습니다.')
+ *     .withEmail({
+ *         to: breederEmail,
+ *         subject: '[포퐁] 브리더 입점 승인',
+ *         html: emailHtml,
+ *     })
  *     .send();
  */
 export class NotificationBuilder {
@@ -21,17 +57,11 @@ export class NotificationBuilder {
     private notificationContent: string;
     private relatedResourceId?: string;
     private relatedResourceType?: string;
+    private emailData?: EmailData;
 
     constructor(
-        private readonly createFn: (data: {
-            recipientId: string;
-            recipientType: RecipientType;
-            type: NotificationType;
-            title: string;
-            content: string;
-            relatedId?: string;
-            relatedType?: string;
-        }) => Promise<NotificationItemDto>,
+        private readonly createFn: (data: NotificationCreateData) => Promise<NotificationItemDto>,
+        private readonly sendEmailFn: (data: EmailData) => Promise<boolean>,
         private readonly recipientId: string,
         private readonly recipientType: RecipientType,
     ) {}
@@ -71,9 +101,18 @@ export class NotificationBuilder {
     }
 
     /**
-     * 알림 전송
+     * 이메일 발송 설정 (선택적)
+     * 서비스 알림과 함께 이메일도 발송합니다.
      */
-    async send(): Promise<NotificationItemDto> {
+    withEmail(emailData: EmailData): this {
+        this.emailData = emailData;
+        return this;
+    }
+
+    /**
+     * 알림 전송 (서비스 알림 + 이메일)
+     */
+    async send(): Promise<NotificationSendResult> {
         if (!this.notificationType) {
             throw new Error('알림 타입이 설정되지 않았습니다.');
         }
@@ -84,7 +123,8 @@ export class NotificationBuilder {
             throw new Error('알림 내용이 설정되지 않았습니다.');
         }
 
-        return this.createFn({
+        // 1. 서비스 알림 저장
+        const notification = await this.createFn({
             recipientId: this.recipientId,
             recipientType: this.recipientType,
             type: this.notificationType,
@@ -93,5 +133,16 @@ export class NotificationBuilder {
             relatedId: this.relatedResourceId,
             relatedType: this.relatedResourceType,
         });
+
+        // 2. 이메일 발송 (설정된 경우에만)
+        let emailSent = false;
+        if (this.emailData) {
+            emailSent = await this.sendEmailFn(this.emailData);
+        }
+
+        return {
+            notification,
+            emailSent,
+        };
     }
 }
