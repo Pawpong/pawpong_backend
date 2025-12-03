@@ -6,6 +6,7 @@ import { ApiEndpoint } from '../../../common/decorator/swagger.decorator';
 import { AuthAdminService } from './auth-admin.service';
 
 import { AdminLoginRequestDto } from '../dto/request/admin-login-request.dto';
+import { RefreshTokenRequestDto } from '../dto/request/refresh-token-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { AdminLoginResponseDto } from '../dto/response/admin-login-response.dto';
 
@@ -73,5 +74,45 @@ export class AuthAdminController {
     async loginAdmin(@Body() dto: AdminLoginRequestDto): Promise<ApiResponseDto<AdminLoginResponseDto>> {
         const result = await this.authAdminService.loginAdmin(dto.email, dto.password);
         return ApiResponseDto.success(result, '관리자 로그인이 완료되었습니다.');
+    }
+
+    /**
+     * 관리자 토큰 갱신
+     *
+     * Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.
+     * 만료된 Access Token을 갱신할 때 사용합니다.
+     *
+     * @param dto - 리프레시 토큰 요청 DTO
+     * @returns 새로운 Access Token
+     *
+     * @throws UnauthorizedException - 리프레시 토큰이 유효하지 않을 때
+     *
+     * @example
+     * POST /api/auth-admin/refresh
+     * {
+     *   "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+     * }
+     *
+     * Response:
+     * {
+     *   "success": true,
+     *   "code": 200,
+     *   "data": {
+     *     "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+     *   },
+     *   "message": "토큰이 갱신되었습니다.",
+     *   "timestamp": "2025-01-15T10:35:00.000Z"
+     * }
+     */
+    @Post('refresh')
+    @HttpCode(HttpStatus.OK)
+    @ApiEndpoint({
+        summary: '관리자 토큰 갱신',
+        description: 'Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.',
+        isPublic: true,
+    })
+    async refreshAdminToken(@Body() dto: RefreshTokenRequestDto): Promise<ApiResponseDto<{ accessToken: string }>> {
+        const result = await this.authAdminService.refreshAdminToken(dto.refreshToken);
+        return ApiResponseDto.success(result, '토큰이 갱신되었습니다.');
     }
 }

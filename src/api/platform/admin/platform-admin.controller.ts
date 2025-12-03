@@ -11,6 +11,7 @@ import { PlatformAdminService } from './platform-admin.service';
 import { StatsFilterRequestDto } from './dto/request/stats-filter-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
+import { MvpStatsResponseDto } from './dto/response/mvp-stats-response.dto';
 
 /**
  * 플랫폼 Admin 컨트롤러
@@ -38,5 +39,18 @@ export class PlatformAdminController {
     ): Promise<ApiResponseDto<AdminStatsResponseDto>> {
         const result = await this.platformAdminService.getStats(user.userId, filter);
         return ApiResponseDto.success(result, '시스템 통계가 조회되었습니다.');
+    }
+
+    @Get('mvp-stats')
+    @ApiEndpoint({
+        summary: 'MVP 통계 조회',
+        description:
+            'MVP 단계에서 필요한 핵심 통계 정보를 조회합니다 (활성 사용자, 상담/입양 신청, 필터 사용, 브리더 재제출)',
+        responseType: MvpStatsResponseDto,
+        isPublic: false,
+    })
+    async getMvpStats(@CurrentUser() user: any): Promise<ApiResponseDto<MvpStatsResponseDto>> {
+        const result = await this.platformAdminService.getMvpStats(user.userId);
+        return ApiResponseDto.success(result, 'MVP 통계가 조회되었습니다.');
     }
 }

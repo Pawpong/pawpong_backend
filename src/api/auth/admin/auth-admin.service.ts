@@ -94,4 +94,65 @@ export class AuthAdminService {
             refreshToken,
         };
     }
+
+    /**
+     * 관리자 토큰 갱신
+     *
+     * Refresh Token을 검증하고 새로운 Access Token을 발급합니다.
+     *
+     * @param refreshToken - 리프레시 토큰
+     * @returns 새로운 Access Token
+     *
+     * @throws UnauthorizedException - 리프레시 토큰이 유효하지 않을 때
+     *
+     * @example
+     * ```typescript
+     * const result = await authAdminService.refreshAdminToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...');
+     * console.log(result.accessToken); // 새로운 JWT access token
+     * ```
+     */
+    async refreshAdminToken(refreshToken: string): Promise<{ accessToken: string }> {
+        this.logger.logStart('refreshAdminToken', '관리자 토큰 갱신 시작');
+
+        try {
+            // Refresh Token 검증
+            const payload = this.jwtService.verify(refreshToken);
+
+            // 관리자 정보 확인 (role이 admin인지 검증)
+            if (payload.role !== 'admin') {
+                this.logger.logError('refreshAdminToken', '관리자 권한 없음', new Error('관리자 토큰이 아닙니다'));
+                throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+            }
+
+            // 관리자가 여전히 활성 상태인지 확인
+            const admin = await this.authAdminRepository.findActiveByEmail(payload.email);
+
+            if (!admin) {
+                this.logger.logError('refreshAdminToken', '관리자 조회 실패', new Error('관리자를 찾을 수 없습니다'));
+                throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+            }
+
+            // 새로운 Access Token 생성
+            const newPayload = {
+                sub: payload.sub,
+                email: payload.email,
+                role: payload.role,
+                adminLevel: payload.adminLevel,
+            };
+
+            const accessToken = this.jwtService.sign(newPayload, {
+                expiresIn: '1h',
+            });
+
+            this.logger.logSuccess('refreshAdminToken', '관리자 토큰 갱신 성공', {
+                adminId: payload.sub,
+                email: payload.email,
+            });
+
+            return { accessToken };
+        } catch (error) {
+            this.logger.logError('refreshAdminToken', '토큰 갱신 실패', error);
+            throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+        }
+    }
 }
