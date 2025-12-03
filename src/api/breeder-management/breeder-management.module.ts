@@ -20,8 +20,8 @@ import { BreederDatabaseModule } from '../../common/database/database.module';
     imports: [BreederDatabaseModule, AdminDatabaseModule, StorageModule, forwardRef(() => AdopterModule)],
     controllers: [BreederManagementController, BreederAdminController],
     providers: [
-        BreederManagementService,
         BreederAdminService,
+        BreederManagementService,
         BreederRepository,
         ParentPetRepository,
         AdoptionApplicationRepository,

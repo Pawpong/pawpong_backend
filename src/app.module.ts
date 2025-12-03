@@ -22,6 +22,7 @@ import { FilterOptionsModule } from './api/filter-options/filter-options.module'
 import { StandardQuestionModule } from './api/standard-question/standard-question.module';
 import { BreederManagementModule } from './api/breeder-management/breeder-management.module';
 import { NotificationModule } from './api/notification/notification.module';
+import { AnnouncementModule } from './api/announcement/announcement.module';
 
 @Module({
     imports: [
@@ -46,6 +47,7 @@ import { NotificationModule } from './api/notification/notification.module';
         BreedModule,
         FilterOptionsModule,
         NotificationModule,
+        AnnouncementModule,
     ],
     controllers: [],
     providers: [CustomLoggerService],
