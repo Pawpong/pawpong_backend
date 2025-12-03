@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
 
 import { Roles } from '../../../common/decorator/roles.decorator';
 import { CurrentUser } from '../../../common/decorator/user.decorator';
@@ -12,12 +12,18 @@ import { ReportActionRequestDto } from './dto/request/report-action-request.dto'
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
 import { BreederVerificationRequestDto } from './dto/request/breeder-verification-request.dto';
 import { ApplicationMonitoringRequestDto } from './dto/request/application-monitoring-request.dto';
+import { BreederLevelChangeRequestDto } from './dto/request/breeder-level-change-request.dto';
+import { BreederSuspendRequestDto } from './dto/request/breeder-suspend-request.dto';
+import { BreederRemindRequestDto } from './dto/request/breeder-remind-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { BreederReportItemDto } from './dto/response/breeder-report-list.dto';
 import { ReportActionResponseDto } from './dto/response/report-action-response.dto';
 import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
 import { ApplicationMonitoringResponseDto } from './dto/response/application-monitoring-response.dto';
+import { BreederLevelChangeResponseDto } from './dto/response/breeder-level-change-response.dto';
+import { BreederSuspendResponseDto } from './dto/response/breeder-suspend-response.dto';
+import { BreederRemindResponseDto } from './dto/response/breeder-remind-response.dto';
 
 /**
  * 브리더 관리 Admin 컨트롤러
@@ -124,5 +130,55 @@ export class BreederAdminController {
             reportAction,
         );
         return ApiResponseDto.success(result, '신고 처리가 완료되었습니다.');
+    }
+
+    @Patch('level/:breederId')
+    @ApiEndpoint({
+        summary: '브리더 레벨 변경',
+        description: '승인된 브리더의 레벨을 뉴 ↔ 엘리트로 변경합니다.',
+        responseType: BreederLevelChangeResponseDto,
+        isPublic: false,
+    })
+    async changeBreederLevel(
+        @CurrentUser() user: any,
+        @Param('breederId') breederId: string,
+        @Body() levelData: BreederLevelChangeRequestDto,
+    ): Promise<ApiResponseDto<BreederLevelChangeResponseDto>> {
+        const result = await this.breederAdminService.changeBreederLevel(user.userId, breederId, levelData);
+        return ApiResponseDto.success(result, '브리더 레벨이 변경되었습니다.');
+    }
+
+    @Post('suspend/:breederId')
+    @ApiEndpoint({
+        summary: '브리더 제재 처리 (영구정지)',
+        description: '브리더 계정을 영구정지 처리하고 알림을 발송합니다.',
+        responseType: BreederSuspendResponseDto,
+        isPublic: false,
+    })
+    async suspendBreeder(
+        @CurrentUser() user: any,
+        @Param('breederId') breederId: string,
+        @Body() suspendData: BreederSuspendRequestDto,
+    ): Promise<ApiResponseDto<BreederSuspendResponseDto>> {
+        const result = await this.breederAdminService.suspendBreeder(user.userId, breederId, suspendData);
+        return ApiResponseDto.success(result, '브리더 계정이 영구정지 처리되었습니다.');
+    }
+
+    @Post('remind')
+    @ApiEndpoint({
+        summary: '리마인드 알림 발송',
+        description: '서류 미제출 브리더들에게 리마인드 알림을 발송합니다. (서비스 알림 + 이메일 알림)',
+        responseType: BreederRemindResponseDto,
+        isPublic: false,
+    })
+    async sendRemindNotifications(
+        @CurrentUser() user: any,
+        @Body() remindData: BreederRemindRequestDto,
+    ): Promise<ApiResponseDto<BreederRemindResponseDto>> {
+        const result = await this.breederAdminService.sendRemindNotifications(user.userId, remindData);
+        return ApiResponseDto.success(
+            result,
+            `${result.successCount}명에게 리마인드 알림이 발송되었습니다.`,
+        );
     }
 }
