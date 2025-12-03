@@ -5,6 +5,7 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
 
 import { NotificationService } from './notification.service';
+
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import {
     NotificationListResponseDto,
@@ -22,19 +23,14 @@ export class NotificationController {
     @Get()
     @ApiEndpoint({
         summary: '알림 목록 조회 (초기 로딩)',
-        description:
-            '신규 알림(읽지 않은 알림)은 전체 반환, 읽은 알림은 첫 페이지(10개)만 반환합니다.',
+        description: '신규 알림(읽지 않은 알림)은 전체 반환, 읽은 알림은 첫 페이지(10개)만 반환합니다.',
         responseType: NotificationListResponseDto,
     })
     async getNotifications(
         @CurrentUser() user: any,
         @Query('limit') limit: number = 10,
     ): Promise<ApiResponseDto<NotificationListResponseDto>> {
-        const result = await this.notificationService.getNotifications(
-            user.userId,
-            user.userType,
-            Number(limit),
-        );
+        const result = await this.notificationService.getNotifications(user.userId, user.userType, Number(limit));
         return ApiResponseDto.success(result, '알림 목록이 조회되었습니다.');
     }
 

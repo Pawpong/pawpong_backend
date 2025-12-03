@@ -8,9 +8,11 @@ import { Admin, AdminDocument } from '../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
 import { SystemStats, SystemStatsDocument } from '../../../schema/system-stats.schema';
+import { AdoptionApplication, AdoptionApplicationDocument } from '../../../schema/adoption-application.schema';
 
 import { StatsFilterRequestDto } from './dto/request/stats-filter-request.dto';
 import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
+import { MvpStatsResponseDto } from './dto/response/mvp-stats-response.dto';
 
 /**
  * 플랫폼 Admin 서비스
@@ -31,6 +33,7 @@ export class PlatformAdminService {
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
         @InjectModel(SystemStats.name) private systemStatsModel: Model<SystemStatsDocument>,
+        @InjectModel(AdoptionApplication.name) private adoptionApplicationModel: Model<AdoptionApplicationDocument>,
     ) {}
 
     /**
@@ -192,6 +195,178 @@ export class PlatformAdminService {
                 resolvedReportCount: resolvedReports,
                 pendingReportCount: pendingReports,
                 dismissedReportCount: dismissedReports,
+            },
+        };
+    }
+
+    /**
+     * MVP 통계 조회
+     *
+     * MVP 단계에서 필요한 핵심 통계 정보를 조회합니다:
+     * - 최근 7/14/28일간 활성 사용자 통계
+     * - 최근 7/14/28일간 상담/입양 신청 통계
+     * - 필터 사용 통계 (지역/품종)
+     * - 브리더 서류 재제출 비율
+     *
+     * @param adminId 관리자 고유 ID
+     * @returns MVP 통계
+     */
+    async getMvpStats(adminId: string): Promise<MvpStatsResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canViewStatistics) {
+            throw new ForbiddenException('통계 조회 권한이 없습니다.');
+        }
+
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const fourteenDaysAgo = new Date(now.getTime() - 14 * 24 * 60 * 60 * 1000);
+        const twentyEightDaysAgo = new Date(now.getTime() - 28 * 24 * 60 * 60 * 1000);
+
+        // 1. 활성 사용자 통계 (최근 로그인 기준)
+        const [adopters7Days, adopters14Days, adopters28Days, breeders7Days, breeders14Days, breeders28Days] =
+            await Promise.all([
+                this.adopterModel.countDocuments({
+                    accountStatus: UserStatus.ACTIVE,
+                    lastLoginAt: { $gte: sevenDaysAgo },
+                }),
+                this.adopterModel.countDocuments({
+                    accountStatus: UserStatus.ACTIVE,
+                    lastLoginAt: { $gte: fourteenDaysAgo },
+                }),
+                this.adopterModel.countDocuments({
+                    accountStatus: UserStatus.ACTIVE,
+                    lastLoginAt: { $gte: twentyEightDaysAgo },
+                }),
+                this.breederModel.countDocuments({
+                    accountStatus: UserStatus.ACTIVE,
+                    lastLoginAt: { $gte: sevenDaysAgo },
+                }),
+                this.breederModel.countDocuments({
+                    accountStatus: UserStatus.ACTIVE,
+                    lastLoginAt: { $gte: fourteenDaysAgo },
+                }),
+                this.breederModel.countDocuments({
+                    accountStatus: UserStatus.ACTIVE,
+                    lastLoginAt: { $gte: twentyEightDaysAgo },
+                }),
+            ]);
+
+        // 2. 상담/입양 신청 통계 (AdoptionApplication 컬렉션 사용)
+        const [consultations7Days, consultations14Days, consultations28Days, adoptions7Days, adoptions14Days, adoptions28Days] =
+            await Promise.all([
+                this.adoptionApplicationModel.countDocuments({
+                    applicationType: 'consultation',
+                    createdAt: { $gte: sevenDaysAgo },
+                }),
+                this.adoptionApplicationModel.countDocuments({
+                    applicationType: 'consultation',
+                    createdAt: { $gte: fourteenDaysAgo },
+                }),
+                this.adoptionApplicationModel.countDocuments({
+                    applicationType: 'consultation',
+                    createdAt: { $gte: twentyEightDaysAgo },
+                }),
+                this.adoptionApplicationModel.countDocuments({
+                    applicationType: 'adoption',
+                    createdAt: { $gte: sevenDaysAgo },
+                }),
+                this.adoptionApplicationModel.countDocuments({
+                    applicationType: 'adoption',
+                    createdAt: { $gte: fourteenDaysAgo },
+                }),
+                this.adoptionApplicationModel.countDocuments({
+                    applicationType: 'adoption',
+                    createdAt: { $gte: twentyEightDaysAgo },
+                }),
+            ]);
+
+        // 3. 필터 사용 통계 - 브리더 프로필에서 집계
+        // 지역별 브리더 분포 (가장 많이 검색될 가능성이 높은 지역)
+        const topLocations = await this.breederModel.aggregate([
+            {
+                $match: {
+                    'verification.status': VerificationStatus.APPROVED,
+                },
+            },
+            {
+                $group: {
+                    _id: '$profile.location.city',
+                    count: { $sum: 1 },
+                },
+            },
+            { $sort: { count: -1 } },
+            { $limit: 10 },
+        ]);
+
+        // 품종별 분양 가능한 반려동물 분포
+        const topBreeds = await this.breederModel.aggregate([
+            { $unwind: '$availablePets' },
+            {
+                $group: {
+                    _id: '$availablePets.breed',
+                    count: { $sum: 1 },
+                },
+            },
+            { $sort: { count: -1 } },
+            { $limit: 10 },
+        ]);
+
+        // 4. 브리더 서류 재제출 통계
+        const rejectedBreeders = await this.breederModel.find({
+            'verification.status': VerificationStatus.REJECTED,
+        });
+
+        const resubmittedBreeders = await this.breederModel.find({
+            'verification.status': { $in: [VerificationStatus.REVIEWING, VerificationStatus.APPROVED] },
+            'verification.previousStatus': VerificationStatus.REJECTED,
+        });
+
+        const resubmittedAndApproved = await this.breederModel.countDocuments({
+            'verification.status': VerificationStatus.APPROVED,
+            'verification.previousStatus': VerificationStatus.REJECTED,
+        });
+
+        const totalRejections = rejectedBreeders.length + resubmittedBreeders.length;
+        const resubmissions = resubmittedBreeders.length;
+        const resubmissionRate = totalRejections > 0 ? (resubmissions / totalRejections) * 100 : 0;
+        const resubmissionApprovalRate = resubmissions > 0 ? (resubmittedAndApproved / resubmissions) * 100 : 0;
+
+        return {
+            activeUserStats: {
+                adopters7Days,
+                adopters14Days,
+                adopters28Days,
+                breeders7Days,
+                breeders14Days,
+                breeders28Days,
+            },
+            consultationStats: {
+                consultations7Days,
+                consultations14Days,
+                consultations28Days,
+                adoptions7Days,
+                adoptions14Days,
+                adoptions28Days,
+            },
+            filterUsageStats: {
+                topLocations: topLocations.map((loc) => ({
+                    filterType: 'location',
+                    filterValue: loc._id || 'Unknown',
+                    usageCount: loc.count,
+                })),
+                topBreeds: topBreeds.map((breed) => ({
+                    filterType: 'breed',
+                    filterValue: breed._id || 'Unknown',
+                    usageCount: breed.count,
+                })),
+                emptyResultFilters: [], // MVP에서는 추후 로깅 시스템 추가 시 구현
+            },
+            breederResubmissionStats: {
+                totalRejections,
+                resubmissions,
+                resubmissionRate: Math.round(resubmissionRate),
+                resubmissionApprovals: resubmittedAndApproved,
+                resubmissionApprovalRate: Math.round(resubmissionApprovalRate),
             },
         };
     }

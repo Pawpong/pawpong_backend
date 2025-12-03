@@ -42,11 +42,13 @@ export class HomeService {
         return banners.map((banner) => ({
             bannerId: banner._id.toString(),
             imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24), // 24시간 유효
+            imageFileName: banner.imageFileName,
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,
             description: banner.description,
             order: banner.order,
+            isActive: banner.isActive !== false, // 기본값 true
         }));
     }
 

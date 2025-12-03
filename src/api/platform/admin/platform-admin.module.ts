@@ -9,6 +9,7 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
 import { SystemStats, SystemStatsSchema } from '../../../schema/system-stats.schema';
+import { AdoptionApplication, AdoptionApplicationSchema } from '../../../schema/adoption-application.schema';
 
 /**
  * 플랫폼 Admin 모듈
@@ -23,6 +24,7 @@ import { SystemStats, SystemStatsSchema } from '../../../schema/system-stats.sch
             { name: Breeder.name, schema: BreederSchema },
             { name: Adopter.name, schema: AdopterSchema },
             { name: SystemStats.name, schema: SystemStatsSchema },
+            { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
         ]),
     ],
     controllers: [PlatformAdminController],

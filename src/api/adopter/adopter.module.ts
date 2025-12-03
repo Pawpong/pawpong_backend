@@ -13,6 +13,7 @@ import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/ado
 
 import { StorageModule } from '../../common/storage/storage.module';
 import { NotificationModule } from '../notification/notification.module';
+import { MailModule } from '../../common/mail/mail.module';
 import { AdopterDatabaseModule, AdminDatabaseModule } from '../../common/database/database.module';
 import { BreederManagementModule } from '../breeder-management/breeder-management.module';
 
@@ -21,6 +22,7 @@ import { BreederManagementModule } from '../breeder-management/breeder-managemen
         AdopterDatabaseModule,
         AdminDatabaseModule,
         StorageModule,
+        MailModule,
         NotificationModule,
         forwardRef(() => BreederManagementModule),
         MongooseModule.forFeature([{ name: AdoptionApplication.name, schema: AdoptionApplicationSchema }]),
