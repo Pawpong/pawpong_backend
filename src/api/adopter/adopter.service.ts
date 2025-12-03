@@ -3,9 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
 
-import { ApplicationStatus, ReportStatus } from '../../common/enum/user.enum';
+import { ApplicationStatus, ReportStatus, NotificationType, RecipientType } from '../../common/enum/user.enum';
 
 import { StorageService } from '../../common/storage/storage.service';
+import { MailTemplateService } from '../../common/mail/mail-template.service';
+import { NotificationService } from '../notification/notification.service';
 
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
 import { BreederReview, BreederReviewDocument } from '../../schema/breeder-review.schema';
@@ -44,6 +46,8 @@ import { AccountDeleteResponseDto } from './dto/response/account-delete-response
 export class AdopterService {
     constructor(
         private storageService: StorageService,
+        private mailTemplateService: MailTemplateService,
+        private notificationService: NotificationService,
 
         private adopterRepository: AdopterRepository,
         private breederRepository: BreederRepository,
@@ -174,8 +178,39 @@ export class AdopterService {
 
         const savedApplication = await newApplication.save();
 
-        // 8. 응답 데이터 구성 (Mapper 패턴 사용)
+        // 8. 브리더에게 새 상담 신청 알림 및 이메일 발송
+        await this.sendNewApplicationNotification(breeder);
+
+        // 9. 응답 데이터 구성 (Mapper 패턴 사용)
         return AdopterMapper.toApplicationCreateResponse(savedApplication, breeder.name, pet?.name);
+    }
+
+    /**
+     * 새 상담 신청 알림 및 이메일 발송 (빌더 통합)
+     * @private
+     */
+    private async sendNewApplicationNotification(breeder: any): Promise<void> {
+        const breederId = breeder._id.toString();
+        const emailContent = breeder.emailAddress
+            ? this.mailTemplateService.getNewApplicationEmail(breeder.name)
+            : null;
+
+        const builder = this.notificationService
+            .to(breederId, RecipientType.BREEDER)
+            .type(NotificationType.NEW_APPLICATION)
+            .title('💬 새로운 입양 상담 신청이 도착했어요!')
+            .content('지금 확인해보세요.')
+            .related(breederId, 'applications');
+
+        if (emailContent && breeder.emailAddress) {
+            builder.withEmail({
+                to: breeder.emailAddress,
+                subject: emailContent.subject,
+                html: emailContent.html,
+            });
+        }
+
+        await builder.send();
     }
 
     /**
@@ -249,6 +284,9 @@ export class AdopterService {
         // 8. 브리더 통계 업데이트
         await this.breederRepository.incrementReviewCount(application.breederId.toString());
 
+        // 9. 브리더에게 새 후기 알림 발송 (이메일 없음, 서비스 알림만)
+        await this.sendNewReviewNotification(application.breederId.toString());
+
         return {
             reviewId: (savedReview._id as any).toString(),
             applicationId: applicationId,
@@ -256,6 +294,20 @@ export class AdopterService {
             reviewType: reviewType,
             writtenAt: savedReview.writtenAt.toISOString(),
         };
+    }
+
+    /**
+     * 새 후기 등록 알림 발송 (서비스 알림만, 이메일 없음)
+     * @private
+     */
+    private async sendNewReviewNotification(breederId: string): Promise<void> {
+        await this.notificationService
+            .to(breederId, RecipientType.BREEDER)
+            .type(NotificationType.NEW_REVIEW)
+            .title('⭐ 새로운 후기가 등록되었어요!')
+            .content('브리더 프로필에서 후기를 확인해보세요.')
+            .related(breederId, 'profile')
+            .send();
     }
 
     /**

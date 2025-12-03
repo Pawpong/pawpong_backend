@@ -13,11 +13,18 @@ import { AvailablePetManagementRepository } from './repository/available-pet-man
 
 import { AdopterModule } from '../adopter/adopter.module';
 import { StorageModule } from '../../common/storage/storage.module';
+import { NotificationModule } from '../notification/notification.module';
 import { AdminDatabaseModule } from '../../common/database/database.module';
 import { BreederDatabaseModule } from '../../common/database/database.module';
 
 @Module({
-    imports: [BreederDatabaseModule, AdminDatabaseModule, StorageModule, forwardRef(() => AdopterModule)],
+    imports: [
+        BreederDatabaseModule,
+        AdminDatabaseModule,
+        StorageModule,
+        NotificationModule,
+        forwardRef(() => AdopterModule),
+    ],
     controllers: [BreederManagementController, BreederAdminController],
     providers: [
         BreederAdminService,

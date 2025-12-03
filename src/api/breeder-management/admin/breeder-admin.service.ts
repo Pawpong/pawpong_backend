@@ -3,9 +3,18 @@ import { InjectModel } from '@nestjs/mongoose';
 import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
 
-import { VerificationStatus, ReportStatus, AdminAction, AdminTargetType } from '../../../common/enum/user.enum';
+import {
+    VerificationStatus,
+    ReportStatus,
+    AdminAction,
+    AdminTargetType,
+    NotificationType,
+    RecipientType,
+} from '../../../common/enum/user.enum';
 
 import { StorageService } from '../../../common/storage/storage.service';
+import { MailTemplateService } from '../../../common/mail/mail-template.service';
+import { NotificationService } from '../../notification/notification.service';
 
 import { ReportActionRequestDto } from './dto/request/report-action-request.dto';
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
@@ -38,6 +47,8 @@ export class BreederAdminService {
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(BreederReport.name) private breederReportModel: Model<BreederReportDocument>,
         private readonly storageService: StorageService,
+        private readonly mailTemplateService: MailTemplateService,
+        private readonly notificationService: NotificationService,
     ) {}
 
     /**
@@ -192,7 +203,72 @@ export class BreederAdminService {
             `Breeder verification ${verificationData.verificationStatus}`,
         );
 
+        // 알림 및 이메일 발송
+        await this.sendVerificationNotification(breeder, verificationData);
+
         return { message: `Breeder verification ${verificationData.verificationStatus}` };
+    }
+
+    /**
+     * 브리더 인증 결과 알림 및 이메일 발송
+     * @private
+     */
+    private async sendVerificationNotification(
+        breeder: BreederDocument,
+        verificationData: BreederVerificationRequestDto,
+    ): Promise<void> {
+        const breederId = (breeder._id as any).toString();
+        const breederName = breeder.name;
+        const breederEmail = breeder.emailAddress;
+
+        if (verificationData.verificationStatus === VerificationStatus.APPROVED) {
+            // 승인 알림 + 이메일 발송 (빌더 통합)
+            const emailContent = breederEmail
+                ? this.mailTemplateService.getBreederApprovalEmail(breederName)
+                : null;
+
+            const builder = this.notificationService
+                .to(breederId, RecipientType.BREEDER)
+                .type(NotificationType.BREEDER_APPROVED)
+                .title('🎉 포퐁 브리더 입점이 승인되었습니다!')
+                .content('지금 프로필을 세팅하고 아이들 정보를 등록해보세요.')
+                .related(breederId, 'home');
+
+            if (emailContent && breederEmail) {
+                builder.withEmail({
+                    to: breederEmail,
+                    subject: emailContent.subject,
+                    html: emailContent.html,
+                });
+            }
+
+            await builder.send();
+        } else if (verificationData.verificationStatus === VerificationStatus.REJECTED) {
+            // 반려 알림 + 이메일 발송 (빌더 통합)
+            const rejectionReasons = verificationData.rejectionReason
+                ? verificationData.rejectionReason.split('\n').filter((r) => r.trim())
+                : [];
+            const emailContent = breederEmail
+                ? this.mailTemplateService.getBreederRejectionEmail(breederName, rejectionReasons)
+                : null;
+
+            const builder = this.notificationService
+                .to(breederId, RecipientType.BREEDER)
+                .type(NotificationType.BREEDER_REJECTED)
+                .title('🐾 브리더 입점 심사 결과, 보완이 필요합니다.')
+                .content('자세한 사유는 이메일을 확인해주세요.')
+                .related(breederId, 'home');
+
+            if (emailContent && breederEmail) {
+                builder.withEmail({
+                    to: breederEmail,
+                    subject: emailContent.subject,
+                    html: emailContent.html,
+                });
+            }
+
+            await builder.send();
+        }
     }
 
     /**
@@ -533,8 +609,27 @@ export class BreederAdminService {
 
                 // 서류 미제출 상태 확인
                 if (breeder.verification?.status === VerificationStatus.PENDING) {
-                    // TODO: 서비스 알림 + 이메일 알림 발송 (알림 시스템 구현 후 추가)
-                    // await this.notificationService.sendReminder(breeder);
+                    // 서비스 알림 + 이메일 발송 (빌더 통합)
+                    const emailContent = breeder.emailAddress
+                        ? this.mailTemplateService.getDocumentReminderEmail(breeder.name)
+                        : null;
+
+                    const builder = this.notificationService
+                        .to(breederId, RecipientType.BREEDER)
+                        .type(NotificationType.DOCUMENT_REMINDER)
+                        .title('📄 브리더 입점 절차가 아직 완료되지 않았어요!')
+                        .content('필요한 서류들을 제출하시면 입양자에게 프로필이 공개됩니다.')
+                        .related(breederId, 'verification');
+
+                    if (emailContent && breeder.emailAddress) {
+                        builder.withEmail({
+                            to: breeder.emailAddress,
+                            subject: emailContent.subject,
+                            html: emailContent.html,
+                        });
+                    }
+
+                    await builder.send();
 
                     await this.logAdminActivity(
                         adminId,
