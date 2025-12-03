@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsString, IsNotEmpty, IsEnum, IsOptional } from 'class-validator';
+
 import { NotificationType, RecipientType } from '../../../../common/enum/user.enum';
 
 export class CreateNotificationDto {

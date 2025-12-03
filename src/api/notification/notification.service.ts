@@ -8,8 +8,8 @@ import { NotificationBuilder, EmailData } from './notification.builder';
 import { MailService } from '../../common/mail/mail.service';
 import { CreateNotificationDto } from './dto/request/create-notification.dto';
 import {
-    NotificationListResponseDto,
     NotificationItemDto,
+    NotificationListResponseDto,
     ReadNotificationsResponseDto,
 } from './dto/response/notification-response.dto';
 
@@ -90,11 +90,7 @@ export class NotificationService {
      * - 신규 알림(읽지 않은 알림): 전체 반환
      * - 읽은 알림: 첫 페이지만 (10개)
      */
-    async getNotifications(
-        userId: string,
-        userType: string,
-        limit: number = 10,
-    ): Promise<NotificationListResponseDto> {
+    async getNotifications(userId: string, userType: string, limit: number = 10): Promise<NotificationListResponseDto> {
         if (!Types.ObjectId.isValid(userId)) {
             throw new BadRequestException('올바르지 않은 사용자 ID 형식입니다.');
         }
@@ -202,14 +198,16 @@ export class NotificationService {
             throw new BadRequestException('올바르지 않은 알림 ID 형식입니다.');
         }
 
-        const notification = await this.notificationModel.findOneAndUpdate(
-            {
-                _id: new Types.ObjectId(notificationId),
-                recipientId: new Types.ObjectId(userId),
-            },
-            { $set: { isRead: true } },
-            { new: true },
-        ).lean();
+        const notification = await this.notificationModel
+            .findOneAndUpdate(
+                {
+                    _id: new Types.ObjectId(notificationId),
+                    recipientId: new Types.ObjectId(userId),
+                },
+                { $set: { isRead: true } },
+                { new: true },
+            )
+            .lean();
 
         if (!notification) {
             throw new BadRequestException('알림을 찾을 수 없습니다.');
