@@ -16,9 +16,10 @@ import { AdminLoginResponseDto } from '../dto/response/admin-login-response.dto'
 @Injectable()
 export class AuthAdminService {
     constructor(
-        private readonly authAdminRepository: AuthAdminRepository,
-        private readonly jwtService: JwtService,
         private readonly logger: CustomLoggerService,
+        private readonly jwtService: JwtService,
+
+        private readonly authAdminRepository: AuthAdminRepository,
     ) {}
 
     /**
