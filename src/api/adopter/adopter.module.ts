@@ -12,6 +12,7 @@ import { AdopterRepository } from './adopter.repository';
 import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
 
 import { StorageModule } from '../../common/storage/storage.module';
+import { NotificationModule } from '../notification/notification.module';
 import { AdopterDatabaseModule, AdminDatabaseModule } from '../../common/database/database.module';
 import { BreederManagementModule } from '../breeder-management/breeder-management.module';
 
@@ -20,6 +21,7 @@ import { BreederManagementModule } from '../breeder-management/breeder-managemen
         AdopterDatabaseModule,
         AdminDatabaseModule,
         StorageModule,
+        NotificationModule,
         forwardRef(() => BreederManagementModule),
         MongooseModule.forFeature([{ name: AdoptionApplication.name, schema: AdoptionApplicationSchema }]),
     ],
