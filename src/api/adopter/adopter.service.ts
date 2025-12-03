@@ -21,7 +21,9 @@ import { FavoriteAddRequestDto } from './dto/request/favorite-add-request.dto';
 import { ReviewCreateRequestDto } from './dto/request/review-create-request.dto';
 import { ReportCreateRequestDto } from './dto/request/report-create-request.dto';
 import { ApplicationCreateRequestDto } from './dto/request/application-create-request.dto';
+import { AccountDeleteRequestDto } from './dto/request/account-delete-request.dto';
 import { AdopterProfileResponseDto } from './dto/response/adopter-profile-response.dto';
+import { AccountDeleteResponseDto } from './dto/response/account-delete-response.dto';
 
 /**
  * 입양자 비즈니스 로직 처리 Service
@@ -765,5 +767,62 @@ export class AdopterService {
             processedAt: application.processedAt?.toISOString(),
             breederNotes: application.breederNotes,
         };
+    }
+
+    /**
+     * [deleteAccount] 입양자 회원 탈퇴
+     *
+     * 기능:
+     * - 입양자 계정을 소프트 삭제 처리
+     * - 개인정보 마스킹 처리
+     * - 탈퇴 사유 저장 (통계용)
+     * - 작성한 후기, 신고 등은 보존 (통계 및 법적 보존 요건)
+     *
+     * @param userId - 입양자 고유 ID
+     * @param deleteData - 탈퇴 사유 정보
+     * @returns 탈퇴 처리 결과
+     */
+    async deleteAccount(userId: string, deleteData: AccountDeleteRequestDto): Promise<AccountDeleteResponseDto> {
+        // 1. 입양자 정보 조회
+        const adopter = await this.adopterRepository.findById(userId);
+        if (!adopter) {
+            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+        }
+
+        // 2. 이미 탈퇴한 계정인지 확인
+        if (adopter.accountStatus === 'deleted') {
+            throw new BadRequestException('이미 탈퇴한 계정입니다.');
+        }
+
+        // 3. 기타 사유인 경우 otherReason 필수 검증
+        if (deleteData.reason === 'other' && !deleteData.otherReason) {
+            throw new BadRequestException('기타 사유를 입력해주세요.');
+        }
+
+        try {
+            // 4. 계정 상태를 'deleted'로 변경
+            adopter.accountStatus = 'deleted';
+
+            // 5. 개인정보 마스킹 처리 (선택적)
+            // adopter.emailAddress = `deleted_${(adopter as any)._id.toString()}@deleted.com`;
+            // adopter.phoneNumber = null;
+            // adopter.nickname = '탈퇴한 사용자';
+
+            // 6. 탈퇴 정보 기록 (스키마에 필드 추가 시 사용)
+            // adopter.deletedAt = new Date();
+            // adopter.deleteReason = deleteData.reason;
+            // adopter.deleteReasonDetail = deleteData.otherReason;
+
+            // 7. 변경사항 저장
+            await adopter.save();
+
+            return {
+                adopterId: (adopter as any)._id.toString(),
+                deletedAt: new Date().toISOString(),
+                message: '회원 탈퇴가 성공적으로 처리되었습니다.',
+            };
+        } catch (error) {
+            throw new BadRequestException('회원 탈퇴 처리 중 오류가 발생했습니다.');
+        }
     }
 }

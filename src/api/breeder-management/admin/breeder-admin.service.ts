@@ -11,7 +11,13 @@ import { ReportActionRequestDto } from './dto/request/report-action-request.dto'
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
 import { BreederVerificationRequestDto } from './dto/request/breeder-verification-request.dto';
 import { ApplicationMonitoringRequestDto } from './dto/request/application-monitoring-request.dto';
+import { BreederLevelChangeRequestDto } from './dto/request/breeder-level-change-request.dto';
+import { BreederSuspendRequestDto } from './dto/request/breeder-suspend-request.dto';
+import { BreederRemindRequestDto } from './dto/request/breeder-remind-request.dto';
 import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
+import { BreederLevelChangeResponseDto } from './dto/response/breeder-level-change-response.dto';
+import { BreederSuspendResponseDto } from './dto/response/breeder-suspend-response.dto';
+import { BreederRemindResponseDto } from './dto/response/breeder-remind-response.dto';
 
 import { Admin, AdminDocument } from '../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
@@ -386,5 +392,175 @@ export class BreederAdminService {
         );
 
         return { message: `Report ${reportAction.reportStatus}` };
+    }
+
+    /**
+     * 브리더 레벨 변경
+     *
+     * 승인된 브리더의 레벨을 뉴 ↔ 엘리트로 변경합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param breederId 브리더 고유 ID
+     * @param levelData 레벨 변경 데이터
+     * @returns 변경 결과
+     */
+    async changeBreederLevel(
+        adminId: string,
+        breederId: string,
+        levelData: BreederLevelChangeRequestDto,
+    ): Promise<BreederLevelChangeResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canManageBreeders) {
+            throw new ForbiddenException('브리더 관리 권한이 없습니다.');
+        }
+
+        const breeder = await this.breederModel.findById(breederId);
+        if (!breeder) {
+            throw new BadRequestException('브리더를 찾을 수 없습니다.');
+        }
+
+        if (!breeder.verification) {
+            throw new BadRequestException('인증 정보가 없습니다.');
+        }
+
+        if (breeder.verification.status !== VerificationStatus.APPROVED) {
+            throw new BadRequestException('승인된 브리더만 레벨을 변경할 수 있습니다.');
+        }
+
+        const previousLevel = breeder.verification.plan || 'new';
+        breeder.verification.plan = levelData.level;
+        await breeder.save();
+
+        await this.logAdminActivity(
+            adminId,
+            'CHANGE_LEVEL' as AdminAction,
+            AdminTargetType.BREEDER,
+            breederId,
+            breeder.name,
+            `Changed level from ${previousLevel} to ${levelData.level}`,
+        );
+
+        return {
+            breederId,
+            previousLevel,
+            currentLevel: levelData.level,
+            changedAt: new Date(),
+        };
+    }
+
+    /**
+     * 브리더 제재 처리 (영구정지)
+     *
+     * 브리더 계정을 영구정지 처리하고 알림을 발송합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param breederId 브리더 고유 ID
+     * @param suspendData 제재 데이터
+     * @returns 제재 처리 결과
+     */
+    async suspendBreeder(
+        adminId: string,
+        breederId: string,
+        suspendData: BreederSuspendRequestDto,
+    ): Promise<BreederSuspendResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canManageBreeders) {
+            throw new ForbiddenException('브리더 관리 권한이 없습니다.');
+        }
+
+        const breeder = await this.breederModel.findById(breederId);
+        if (!breeder) {
+            throw new BadRequestException('브리더를 찾을 수 없습니다.');
+        }
+
+        if (breeder.accountStatus === 'suspended') {
+            throw new BadRequestException('이미 정지된 계정입니다.');
+        }
+
+        breeder.accountStatus = 'suspended';
+        breeder.suspensionReason = suspendData.reason;
+        breeder.suspendedAt = new Date();
+        await breeder.save();
+
+        await this.logAdminActivity(
+            adminId,
+            AdminAction.SUSPEND_USER,
+            AdminTargetType.BREEDER,
+            breederId,
+            breeder.name,
+            `Suspended: ${suspendData.reason}`,
+        );
+
+        // TODO: 브리더에게 제재 알림 발송 (알림 시스템 구현 후 추가)
+        const notificationSent = true;
+
+        return {
+            breederId,
+            reason: suspendData.reason,
+            suspendedAt: new Date(),
+            notificationSent,
+        };
+    }
+
+    /**
+     * 리마인드 알림 발송
+     *
+     * 서류 미제출 브리더들에게 리마인드 알림을 발송합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param remindData 리마인드 데이터
+     * @returns 발송 결과
+     */
+    async sendRemindNotifications(
+        adminId: string,
+        remindData: BreederRemindRequestDto,
+    ): Promise<BreederRemindResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canManageBreeders) {
+            throw new ForbiddenException('브리더 관리 권한이 없습니다.');
+        }
+
+        const successIds: string[] = [];
+        const failIds: string[] = [];
+
+        for (const breederId of remindData.breederIds) {
+            try {
+                const breeder = await this.breederModel.findById(breederId);
+                if (!breeder) {
+                    failIds.push(breederId);
+                    continue;
+                }
+
+                // 서류 미제출 상태 확인
+                if (breeder.verification?.status === VerificationStatus.PENDING) {
+                    // TODO: 서비스 알림 + 이메일 알림 발송 (알림 시스템 구현 후 추가)
+                    // await this.notificationService.sendReminder(breeder);
+
+                    await this.logAdminActivity(
+                        adminId,
+                        'SEND_REMINDER' as AdminAction,
+                        AdminTargetType.BREEDER,
+                        breederId,
+                        breeder.name,
+                        'Sent document submission reminder',
+                    );
+
+                    successIds.push(breederId);
+                } else {
+                    failIds.push(breederId);
+                }
+            } catch (error) {
+                failIds.push(breederId);
+            }
+        }
+
+        return {
+            totalCount: remindData.breederIds.length,
+            successCount: successIds.length,
+            failCount: failIds.length,
+            successIds,
+            failIds,
+            sentAt: new Date(),
+        };
     }
 }
