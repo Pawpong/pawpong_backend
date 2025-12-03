@@ -92,6 +92,18 @@ export class User {
     accountStatus: string;
 
     /**
+     * 계정 정지 사유 (accountStatus가 suspended일 때만)
+     */
+    @Prop()
+    suspensionReason?: string;
+
+    /**
+     * 계정 정지 일시 (accountStatus가 suspended일 때만)
+     */
+    @Prop()
+    suspendedAt?: Date;
+
+    /**
      * 마지막 로그인 일시
      */
     @Prop({ default: Date.now })

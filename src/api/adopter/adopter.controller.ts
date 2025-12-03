@@ -13,6 +13,7 @@ import { ReviewCreateRequestDto } from './dto/request/review-create-request.dto'
 import { ReportCreateRequestDto } from './dto/request/report-create-request.dto';
 import { ReviewReportRequestDto } from './dto/request/review-report-request.dto';
 import { ApplicationCreateRequestDto } from './dto/request/application-create-request.dto';
+import { AccountDeleteRequestDto } from './dto/request/account-delete-request.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { MyReviewItemDto } from './dto/response/my-review-item.dto';
 import { MyReviewDetailDto } from './dto/response/my-review-detail.dto';
@@ -29,6 +30,7 @@ import { ApplicationDetailResponseDto } from './dto/response/application-detail-
 import { ApplicationListItemResponseDto } from './dto/response/application-list-item-response.dto';
 import { AdopterProfileUpdateResponseDto } from './dto/response/profile-update-response.dto';
 import { FavoriteListResponseDto, FavoriteBreederDataDto } from './dto/response/favorite-list-response.dto';
+import { AccountDeleteResponseDto } from './dto/response/account-delete-response.dto';
 
 @ApiController('입양자')
 @Controller('adopter')
@@ -317,5 +319,34 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
     ): Promise<ApiResponseDto<MyReviewDetailDto>> {
         const result = await this.adopterService.getReviewDetail(user.userId, reviewId);
         return ApiResponseDto.success(result, '후기 세부 정보가 조회되었습니다.');
+    }
+
+    @Delete('account')
+    @ApiEndpoint({
+        summary: '회원 탈퇴',
+        description: `입양자 계정을 탈퇴합니다.
+
+**탈퇴 처리:**
+- 계정 정보 소프트 삭제 (status: 'deleted')
+- 작성한 후기, 신고, 즐겨찾기 등 모든 데이터 보존 (통계용)
+- 개인정보는 마스킹 처리
+- 탈퇴 후 30일 동안 복구 가능 (추후 구현)
+- 30일 이후 완전 삭제 (추후 구현)
+
+**탈퇴 사유:**
+- service_dissatisfaction: 서비스 불만족
+- privacy_concern: 개인정보 우려
+- low_usage: 이용 빈도 낮음
+- adoption_completed: 분양 완료
+- other: 기타 (otherReason 필수)`,
+        responseType: AccountDeleteResponseDto,
+        isPublic: false,
+    })
+    async deleteAccount(
+        @CurrentUser() user: any,
+        @Body() deleteData: AccountDeleteRequestDto,
+    ): Promise<ApiResponseDto<AccountDeleteResponseDto>> {
+        const result = await this.adopterService.deleteAccount(user.userId, deleteData);
+        return ApiResponseDto.success(result, '회원 탈퇴가 완료되었습니다.');
     }
 }
