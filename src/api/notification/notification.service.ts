@@ -4,7 +4,8 @@ import { Model, Types } from 'mongoose';
 
 import { Notification, NotificationDocument } from '../../schema/notification.schema';
 import { NotificationType, RecipientType } from '../../common/enum/user.enum';
-import { NotificationBuilder } from './notification.builder';
+import { NotificationBuilder, EmailData } from './notification.builder';
+import { MailService } from '../../common/mail/mail.service';
 import { CreateNotificationDto } from './dto/request/create-notification.dto';
 import {
     NotificationListResponseDto,
@@ -16,17 +17,33 @@ import {
 export class NotificationService {
     constructor(
         @InjectModel(Notification.name) private notificationModel: Model<NotificationDocument>,
+        private readonly mailService: MailService,
     ) {}
 
     /**
      * 알림 빌더 시작
      *
      * @example
+     * // 서비스 알림만 발송
      * await this.notificationService
      *     .to(breederId, RecipientType.BREEDER)
      *     .type(NotificationType.PROFILE_REVIEW)
      *     .title('프로필 심사 완료')
      *     .content('프로필 심사가 완료되었습니다.')
+     *     .send();
+     *
+     * @example
+     * // 서비스 알림 + 이메일 동시 발송
+     * await this.notificationService
+     *     .to(breederId, RecipientType.BREEDER)
+     *     .type(NotificationType.BREEDER_APPROVED)
+     *     .title('입점 승인')
+     *     .content('브리더 입점이 승인되었습니다.')
+     *     .withEmail({
+     *         to: breederEmail,
+     *         subject: '[포퐁] 브리더 입점 승인',
+     *         html: emailHtml,
+     *     })
      *     .send();
      */
     to(recipientId: string, recipientType: RecipientType): NotificationBuilder {
@@ -42,6 +59,9 @@ export class NotificationService {
                     relatedType: data.relatedType,
                 });
                 return this.transformToDto(notification);
+            },
+            async (emailData: EmailData) => {
+                return this.mailService.sendMail(emailData);
             },
             recipientId,
             recipientType,

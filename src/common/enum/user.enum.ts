@@ -139,6 +139,19 @@ export enum NotificationType {
     PROFILE_REVIEW = 'profile_review', // 프로필 심사
     PROFILE_RE_REVIEW = 'profile_re_review', // 프로필 재심사
     MATCHING = 'matching', // 매칭
+
+    // 브리더 입점 관련
+    BREEDER_APPROVED = 'breeder_approved', // 브리더 입점 승인
+    BREEDER_REJECTED = 'breeder_rejected', // 브리더 입점 반려
+
+    // 상담 신청 관련
+    NEW_APPLICATION = 'new_application', // 새로운 상담 신청
+
+    // 리마인드 관련
+    DOCUMENT_REMINDER = 'document_reminder', // 서류 미제출 리마인드
+
+    // 후기 관련
+    NEW_REVIEW = 'new_review', // 새로운 후기 등록
 }
 
 export enum RecipientType {
