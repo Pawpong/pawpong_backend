@@ -14,6 +14,7 @@ import { AvailablePetManagementRepository } from './repository/available-pet-man
 import { AdopterModule } from '../adopter/adopter.module';
 import { StorageModule } from '../../common/storage/storage.module';
 import { NotificationModule } from '../notification/notification.module';
+import { MailModule } from '../../common/mail/mail.module';
 import { AdminDatabaseModule } from '../../common/database/database.module';
 import { BreederDatabaseModule } from '../../common/database/database.module';
 
@@ -22,6 +23,7 @@ import { BreederDatabaseModule } from '../../common/database/database.module';
         BreederDatabaseModule,
         AdminDatabaseModule,
         StorageModule,
+        MailModule,
         NotificationModule,
         forwardRef(() => AdopterModule),
     ],

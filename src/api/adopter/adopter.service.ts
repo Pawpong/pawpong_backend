@@ -6,6 +6,7 @@ import { Model } from 'mongoose';
 import { ApplicationStatus, ReportStatus, NotificationType, RecipientType } from '../../common/enum/user.enum';
 
 import { StorageService } from '../../common/storage/storage.service';
+import { MailService } from '../../common/mail/mail.service';
 import { MailTemplateService } from '../../common/mail/mail-template.service';
 import { NotificationService } from '../notification/notification.service';
 
@@ -46,6 +47,7 @@ import { AccountDeleteResponseDto } from './dto/response/account-delete-response
 export class AdopterService {
     constructor(
         private storageService: StorageService,
+        private mailService: MailService,
         private mailTemplateService: MailTemplateService,
         private notificationService: NotificationService,
 

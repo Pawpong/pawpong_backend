@@ -141,8 +141,14 @@ export class StorageService {
 
     /**
      * CDN Signed URL 생성 (GCP Cloud CDN)
+     * 개발 환경: http/https로 시작하는 외부 URL은 그대로 반환
      */
     generateSignedUrl(fileName: string, expirationMinutes: number = 60): string {
+        // 외부 URL(http/https)은 그대로 반환 (개발 환경)
+        if (fileName.startsWith('http://') || fileName.startsWith('https://')) {
+            return fileName;
+        }
+
         const url = `${this.cdnBaseUrl}/${fileName}`;
         const expiration = Math.round(new Date().getTime() / 1000) + expirationMinutes * 60;
         const decodedKey = URLSafeBase64.decode(this.cdnPrivateKey);

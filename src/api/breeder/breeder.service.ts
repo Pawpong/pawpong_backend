@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { VerificationStatus, PetStatus } from '../../common/enum/user.enum';
+import { StorageService } from '../../common/storage/storage.service';
 
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
 import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
@@ -23,6 +24,7 @@ export class BreederService {
         @InjectModel(BreederReview.name) private breederReviewModel: Model<BreederReviewDocument>,
         @InjectModel(ParentPet.name) private parentPetModel: Model<ParentPetDocument>,
         @InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>,
+        private readonly storageService: StorageService,
     ) {}
 
     async searchBreeders(searchDto: BreederSearchRequestDto): Promise<BreederSearchResponseDto> {
@@ -115,7 +117,12 @@ export class BreederService {
             specialization: breeder.profile?.specialization || '',
             averageRating: breeder.stats?.averageRating || 0,
             totalReviews: breeder.stats?.totalReviews || 0,
-            profilePhotos: breeder.profile?.photos || [],
+            profileImage: breeder.profileImageFileName
+                ? this.storageService.generateSignedUrl(breeder.profileImageFileName, 60 * 24)
+                : undefined,
+            profilePhotos: (breeder.profile?.representativePhotos || []).map((photo: string) =>
+                this.storageService.generateSignedUrl(photo, 60 * 24),
+            ),
             verificationStatus: breeder.verification?.status || 'pending',
             availablePets: breeder.availablePets?.length || 0,
         }));
@@ -167,6 +174,16 @@ export class BreederService {
     }
 
     private transformToResponseDto(breeder: any, isFavorited: boolean = false): any {
+        // 프로필 이미지 signed URL 생성 (User 스키마의 profileImageFileName 사용)
+        const profileImageUrl = breeder.profileImageFileName
+            ? this.storageService.generateSignedUrl(breeder.profileImageFileName, 60 * 24)
+            : undefined;
+
+        // 대표 사진들 signed URL 생성
+        const representativePhotoUrls = (breeder.profile?.representativePhotos || []).map((photo: string) =>
+            this.storageService.generateSignedUrl(photo, 60 * 24),
+        );
+
         return {
             breederId: breeder._id.toString(),
             breederName: breeder.name,
@@ -176,11 +193,11 @@ export class BreederService {
                 ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
                 : '',
             priceRange: breeder.priceDisplay === 'range' ? breeder.priceRange : undefined,
-            profileImage: breeder.profileImage,
+            profileImage: profileImageUrl,
             favoriteCount: breeder.stats?.totalFavorites || 0,
             isFavorited: isFavorited,
             description: breeder.profile?.description || '',
-            representativePhotos: breeder.profile?.representativePhotos || [],
+            representativePhotos: representativePhotoUrls,
             availablePets: (breeder.availablePets?.filter((pet: any) => pet.isActive) || []).map((pet: any) => ({
                 petId: pet.petId,
                 name: pet.name,
