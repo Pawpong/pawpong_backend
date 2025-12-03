@@ -25,6 +25,16 @@ export class BannerResponseDto {
     imageUrl: string;
 
     /**
+     * 배너 이미지 파일명 (경로 포함)
+     * @example "banners/3384fec2-7e9a-4467-aba5-6b61b1c52cb2.jpg"
+     */
+    @ApiProperty({
+        description: '배너 이미지 파일명',
+        example: 'banners/3384fec2-7e9a-4467-aba5-6b61b1c52cb2.jpg',
+    })
+    imageFileName: string;
+
+    /**
      * 링크 타입
      * @example "internal"
      */
@@ -76,4 +86,14 @@ export class BannerResponseDto {
         example: 1,
     })
     order: number;
+
+    /**
+     * 활성화 여부
+     * @example true
+     */
+    @ApiProperty({
+        description: '활성화 여부',
+        example: true,
+    })
+    isActive: boolean;
 }

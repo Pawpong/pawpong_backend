@@ -41,11 +41,13 @@ export class HomeAdminService {
         return banners.map((banner) => ({
             bannerId: banner._id.toString(),
             imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
+            imageFileName: banner.imageFileName,
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,
             description: banner.description,
             order: banner.order,
+            isActive: banner.isActive !== false, // 기본값 true
         }));
     }
 
@@ -62,11 +64,13 @@ export class HomeAdminService {
         return {
             bannerId: String(newBanner._id),
             imageUrl: this.storageService.generateSignedUrl(newBanner.imageFileName, 60 * 24),
+            imageFileName: newBanner.imageFileName,
             linkType: newBanner.linkType,
             linkUrl: newBanner.linkUrl,
             title: newBanner.title,
             description: newBanner.description,
             order: newBanner.order,
+            isActive: newBanner.isActive !== false, // 기본값 true
         };
     }
 
@@ -87,11 +91,13 @@ export class HomeAdminService {
         return {
             bannerId: banner._id.toString(),
             imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
+            imageFileName: banner.imageFileName,
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,
             description: banner.description,
             order: banner.order,
+            isActive: banner.isActive !== false, // 기본값 true
         };
     }
 
