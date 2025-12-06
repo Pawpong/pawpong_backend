@@ -703,18 +703,18 @@ export class BreederManagementService {
         };
 
         return {
-            id: (breeder._id as any).toString(),
-            name: breeder.name,
-            email: breeder.emailAddress,
-            phone: breeder.phoneNumber,
-            profileImage: profileImageFileName,
-            status: breeder.accountStatus,
-            verification: verificationWithSignedUrls,
-            profile: breeder.profile,
-            parentPets,
-            availablePets: availablePetsData,
+            breederId: (breeder._id as any).toString(),
+            breederName: breeder.name,
+            breederEmail: breeder.emailAddress,
+            breederPhone: breeder.phoneNumber,
+            profileImageFileName: profileImageFileName,
+            accountStatus: breeder.accountStatus,
+            verificationInfo: verificationWithSignedUrls,
+            profileInfo: breeder.profile,
+            parentPetInfo: parentPets,
+            availablePetInfo: availablePetsData,
             applicationForm: breeder.applicationForm,
-            stats: breeder.stats,
+            statsInfo: breeder.stats,
         };
     }
 
