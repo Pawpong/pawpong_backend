@@ -157,13 +157,22 @@ export class BreederService {
         //     throw new BadRequestException('브리더 프로필을 찾을 수 없습니다.');
         // }
 
-        // Check if user has favorited this breeder
+        // Check if user has favorited this breeder (입양자 또는 브리더 모두 지원)
         let isFavorited = false;
         if (userId) {
-            const adopter = await this.adopterModel.findById(userId).select('favorite_breeder_list').lean();
+            // 먼저 입양자에서 조회
+            const adopter = await this.adopterModel.findById(userId).select('favoriteBreederList').lean();
 
             if (adopter && adopter.favoriteBreederList) {
                 isFavorited = adopter.favoriteBreederList.some((fav: any) => fav.favoriteBreederId === breederId);
+            } else {
+                // 입양자가 아니면 브리더에서 조회
+                const breederUser = await this.breederModel.findById(userId).select('favoriteBreederList').lean();
+                if (breederUser && (breederUser as any).favoriteBreederList) {
+                    isFavorited = (breederUser as any).favoriteBreederList.some(
+                        (fav: any) => fav.favoriteBreederId === breederId,
+                    );
+                }
             }
 
             // Increment profile view count if user is logged in
