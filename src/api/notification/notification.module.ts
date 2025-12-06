@@ -9,10 +9,7 @@ import { Notification, NotificationSchema } from '../../schema/notification.sche
 import { MailModule } from '../../common/mail/mail.module';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }]),
-        MailModule,
-    ],
+    imports: [MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }]), MailModule],
     controllers: [NotificationController],
     providers: [NotificationService],
     exports: [NotificationService],

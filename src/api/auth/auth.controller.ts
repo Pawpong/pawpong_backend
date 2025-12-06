@@ -49,7 +49,7 @@ export class AuthController {
     constructor(
         private readonly authService: AuthService,
         private readonly smsService: SmsService,
-    ) { }
+    ) {}
 
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
@@ -69,12 +69,29 @@ export class AuthController {
     @HttpCode(HttpStatus.OK)
     @ApiEndpoint({
         summary: '로그아웃',
-        description: 'Refresh 토큰을 무효화하여 로그아웃 처리합니다.',
+        description: 'Refresh 토큰을 무효화하고 인증 쿠키를 삭제하여 로그아웃 처리합니다.',
         responseType: LogoutResponseDto,
         isPublic: false,
     })
-    async logout(@CurrentUser() user: any): Promise<ApiResponseDto<LogoutResponseDto>> {
+    async logout(
+        @CurrentUser() user: any,
+        @Res({ passthrough: true }) res: Response,
+    ): Promise<ApiResponseDto<LogoutResponseDto>> {
         const response = await this.authService.logout(user.userId, user.role);
+
+        // HTTP-only 쿠키 삭제 (maxAge: 0으로 설정하여 즉시 만료)
+        const cookieOptions = {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax' as const,
+            path: '/',
+            maxAge: 0,
+        };
+
+        res.cookie('accessToken', '', cookieOptions);
+        res.cookie('refreshToken', '', cookieOptions);
+        res.cookie('userRole', '', { ...cookieOptions, httpOnly: false });
+
         return ApiResponseDto.success(response, '로그아웃되었습니다.');
     }
 
@@ -401,16 +418,14 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
         @Query('tempId') tempId?: string,
         @CurrentUser() user?: any,
     ): Promise<ApiResponseDto<UploadResponseDto>> {
-
-
         const result = await this.authService.uploadProfileImage(file, user, tempId);
         const response = new UploadResponseDto(result.cdnUrl, result.fileName, result.size);
 
         const message = user
             ? '프로필 이미지가 업로드되고 저장되었습니다.'
             : tempId
-                ? '프로필 이미지가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.'
-                : '프로필 이미지가 업로드되었습니다. 회원가입 시 응답의 filename 필드를 profileImage에 사용하세요.';
+              ? '프로필 이미지가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.'
+              : '프로필 이미지가 업로드되었습니다. 회원가입 시 응답의 filename 필드를 profileImage에 사용하세요.';
 
         return ApiResponseDto.success(response, message);
     }
@@ -476,8 +491,6 @@ documentUrls에 filename 필드 값을 넣는 경우
         @Body() dto: UploadBreederDocumentsRequestDto,
         @Query('tempId') tempId?: string,
     ): Promise<ApiResponseDto<VerificationDocumentsResponseDto>> {
-
-
         const result = await this.authService.uploadBreederDocuments(files, dto.types, dto.level, tempId);
 
         const message = tempId
