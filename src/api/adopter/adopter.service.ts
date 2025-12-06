@@ -317,64 +317,119 @@ export class AdopterService {
     /**
      * 즐겨찾기 브리더 추가
      * 브리더 기본 정보를 캐시하여 빠른 조회 지원
+     * 입양자 및 브리더 모두 사용 가능
      *
      * 비즈니스 규칙:
      * - 중복 즐겨찾기 방지
      * - 브리더 기본 정보 스냅샷 저장
      * - 실시간 브리더 정보 반영
      *
-     * @param userId 입양자 고유 ID
+     * @param userId 사용자 고유 ID (입양자 또는 브리더)
      * @param addFavoriteDto 즐겨찾기 추가 데이터
+     * @param userRole 사용자 역할 ('adopter' | 'breeder')
      * @returns 성공 메시지
      * @throws ConflictException 이미 즐겨찾기된 브리더
      */
-    async addFavorite(userId: string, addFavoriteDto: FavoriteAddRequestDto): Promise<any> {
+    async addFavorite(userId: string, addFavoriteDto: FavoriteAddRequestDto, userRole?: string): Promise<any> {
         const { breederId } = addFavoriteDto;
 
-        const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+        // 역할에 따라 적절한 사용자 조회
+        let user: any;
+        if (userRole === 'breeder') {
+            user = await this.breederRepository.findById(userId);
+            if (!user) {
+                throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+            }
+        } else {
+            user = await this.adopterRepository.findById(userId);
+            if (!user) {
+                throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            }
         }
 
-        const breeder = await this.breederRepository.findById(breederId);
-        if (!breeder) {
+        const targetBreeder = await this.breederRepository.findById(breederId);
+        if (!targetBreeder) {
             throw new BadRequestException('해당 브리더를 찾을 수 없습니다.');
         }
 
         // 중복 즐겨찾기 검증
-        const existingFavorite = await this.adopterRepository.findExistingFavorite(userId, breederId);
+        const favoriteList = user.favoriteBreederList || [];
+        const existingFavorite = favoriteList.find((fav: any) => fav.favoriteBreederId === breederId);
         if (existingFavorite) {
             throw new ConflictException('이미 즐겨찾기에 추가된 브리더입니다.');
         }
 
         // 즐겨찾기 데이터 구성 (Mapper 패턴 사용)
-        const favorite = AdopterMapper.toFavoriteBreeder(breederId, breeder);
+        const favorite = AdopterMapper.toFavoriteBreeder(breederId, targetBreeder);
 
-        await this.adopterRepository.addFavoriteBreeder(userId, favorite);
+        // 역할에 따라 적절한 레포지토리 사용
+        if (userRole === 'breeder') {
+            console.log('[AdopterService.addFavorite] Adding favorite for breeder:', userId);
+            console.log('[AdopterService.addFavorite] favorite data:', JSON.stringify(favorite));
+            const result = await this.breederModel
+                .findByIdAndUpdate(
+                    userId,
+                    {
+                        $push: { favoriteBreederList: favorite },
+                        $set: { updatedAt: new Date() },
+                    },
+                    { new: true },
+                )
+                .exec();
+            console.log(
+                '[AdopterService.addFavorite] Updated breeder favoriteBreederList:',
+                JSON.stringify(result?.favoriteBreederList),
+            );
+        } else {
+            await this.adopterRepository.addFavoriteBreeder(userId, favorite);
+        }
 
         return { message: '브리더를 즐겨찾기에 추가했습니다.' };
     }
 
     /**
      * 즐겨찾기 브리더 제거
+     * 입양자 및 브리더 모두 사용 가능
      *
-     * @param userId 입양자 고유 ID
+     * @param userId 사용자 고유 ID (입양자 또는 브리더)
      * @param breederId 제거할 브리더 ID
+     * @param userRole 사용자 역할 ('adopter' | 'breeder')
      * @returns 성공 메시지
      * @throws BadRequestException 존재하지 않는 즐겨찾기
      */
-    async removeFavorite(userId: string, breederId: string): Promise<any> {
-        const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+    async removeFavorite(userId: string, breederId: string, userRole?: string): Promise<any> {
+        // 역할에 따라 적절한 사용자 조회
+        let user: any;
+        if (userRole === 'breeder') {
+            user = await this.breederRepository.findById(userId);
+            if (!user) {
+                throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+            }
+        } else {
+            user = await this.adopterRepository.findById(userId);
+            if (!user) {
+                throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            }
         }
 
-        const existingFavorite = await this.adopterRepository.findExistingFavorite(userId, breederId);
+        // 즐겨찾기 존재 여부 확인
+        const favoriteList = user.favoriteBreederList || [];
+        const existingFavorite = favoriteList.find((fav: any) => fav.favoriteBreederId === breederId);
         if (!existingFavorite) {
             throw new BadRequestException('즐겨찾기 목록에서 해당 브리더를 찾을 수 없습니다.');
         }
 
-        await this.adopterRepository.removeFavoriteBreeder(userId, breederId);
+        // 역할에 따라 적절한 레포지토리 사용
+        if (userRole === 'breeder') {
+            await this.breederModel
+                .findByIdAndUpdate(userId, {
+                    $pull: { favoriteBreederList: { favoriteBreederId: breederId } },
+                    $set: { updatedAt: new Date() },
+                })
+                .exec();
+        } else {
+            await this.adopterRepository.removeFavoriteBreeder(userId, breederId);
+        }
 
         return { message: '즐겨찾기에서 브리더를 제거했습니다.' };
     }
@@ -382,20 +437,40 @@ export class AdopterService {
     /**
      * 즐겨찾기 브리더 목록 조회
      * 페이지네이션을 지원하며, 브리더의 최신 정보와 함께 반환
+     * 입양자 및 브리더 모두 사용 가능
      *
-     * @param userId 입양자 고유 ID
+     * @param userId 사용자 고유 ID (입양자 또는 브리더)
      * @param page 페이지 번호 (기본값: 1)
      * @param limit 페이지당 항목 수 (기본값: 10)
+     * @param userRole 사용자 역할 ('adopter' | 'breeder')
      * @returns 즐겨찾기 브리더 목록과 페이지네이션 정보
-     * @throws BadRequestException 존재하지 않는 입양자
+     * @throws BadRequestException 존재하지 않는 사용자
      */
-    async getFavoriteList(userId: string, page: number = 1, limit: number = 10): Promise<any> {
-        const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-        }
+    async getFavoriteList(userId: string, page: number = 1, limit: number = 10, userRole?: string): Promise<any> {
+        let favorites: any[];
+        let total: number;
 
-        const { favorites, total } = await this.adopterRepository.findFavoriteList(userId, page, limit);
+        if (userRole === 'breeder') {
+            const breeder = await this.breederRepository.findById(userId);
+            if (!breeder) {
+                throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+            }
+
+            // 브리더의 즐겨찾기 목록에서 페이지네이션 적용
+            const allFavorites = breeder.favoriteBreederList || [];
+            total = allFavorites.length;
+            const startIndex = (page - 1) * limit;
+            favorites = allFavorites.slice(startIndex, startIndex + limit);
+        } else {
+            const adopter = await this.adopterRepository.findById(userId);
+            if (!adopter) {
+                throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            }
+
+            const result = await this.adopterRepository.findFavoriteList(userId, page, limit);
+            favorites = result.favorites;
+            total = result.total;
+        }
 
         // 각 즐겨찾기 브리더의 최신 정보 조회 (Mapper 패턴 사용)
         const favoriteListWithDetails = await Promise.all(
@@ -409,8 +484,6 @@ export class AdopterService {
                 }
             }),
         );
-
-        const totalPages = Math.ceil(total / limit);
 
         return new PaginationBuilder<any>()
             .setItems(favoriteListWithDetails)

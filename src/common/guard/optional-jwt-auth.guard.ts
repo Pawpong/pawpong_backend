@@ -8,9 +8,15 @@ import { AuthGuard } from '@nestjs/passport';
  */
 @Injectable()
 export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
+    canActivate(context: ExecutionContext) {
+        console.log('[OptionalJwtAuthGuard] canActivate called');
+        return super.canActivate(context);
+    }
+
     handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
         // 토큰이 없거나 유효하지 않아도 에러를 던지지 않음
         // user가 undefined이면 비로그인 사용자로 처리
+        console.log('[OptionalJwtAuthGuard] handleRequest - user:', JSON.stringify(user));
         return user;
     }
 }

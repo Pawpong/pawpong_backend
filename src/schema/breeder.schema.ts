@@ -1,6 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { User } from './user.schema';
+import { FavoriteBreederInfo } from './adopter.schema';
 
 export type BreederDocument = Breeder & Document;
 
@@ -293,6 +294,12 @@ export class Breeder extends User {
      */
     @Prop({ type: BreederStats, default: () => new BreederStats() })
     stats: BreederStats;
+
+    /**
+     * 즐겨찾기 브리더 목록 (브리더도 다른 브리더를 찜할 수 있음)
+     */
+    @Prop({ type: [FavoriteBreederInfo], default: [] })
+    favoriteBreederList: FavoriteBreederInfo[];
 }
 
 /**
