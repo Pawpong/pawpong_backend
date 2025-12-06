@@ -27,6 +27,8 @@ import { BreederVerificationResponseDto } from './dto/response/breeder-verificat
 import { BreederLevelChangeResponseDto } from './dto/response/breeder-level-change-response.dto';
 import { BreederSuspendResponseDto } from './dto/response/breeder-suspend-response.dto';
 import { BreederRemindResponseDto } from './dto/response/breeder-remind-response.dto';
+import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
+import { PaginationBuilder } from '../../../common/dto/pagination/pagination-builder.dto';
 
 import { Admin, AdminDocument } from '../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
@@ -49,7 +51,7 @@ export class BreederAdminService {
         private readonly storageService: StorageService,
         private readonly mailTemplateService: MailTemplateService,
         private readonly notificationService: NotificationService,
-    ) {}
+    ) { }
 
     /**
      * 관리자 활동 로그 기록
@@ -86,7 +88,10 @@ export class BreederAdminService {
      * @param filter 검색 필터 (status, city, keyword, pagination)
      * @returns 승인 대기 브리더 목록
      */
-    async getPendingBreederVerifications(adminId: string, filter: BreederSearchRequestDto): Promise<any> {
+    async getPendingBreederVerifications(
+        adminId: string,
+        filter: BreederSearchRequestDto,
+    ): Promise<PaginationResponseDto<BreederVerificationResponseDto>> {
         const admin = await this.adminModel.findById(adminId);
         if (!admin || !admin.permissions.canManageBreeders) {
             throw new ForbiddenException('Access denied');
@@ -123,33 +128,109 @@ export class BreederAdminService {
             this.breederModel.countDocuments(query),
         ]);
 
-        return {
-            breeders: breeders.map(
-                (breeder): BreederVerificationResponseDto => ({
-                    breederId: (breeder._id as any).toString(),
-                    breederName: breeder.name,
-                    emailAddress: breeder.emailAddress,
-                    verificationInfo: {
-                        verificationStatus: breeder.verification?.status || 'pending',
-                        subscriptionPlan: breeder.verification?.plan || 'basic',
-                        submittedAt: breeder.verification?.submittedAt,
-                        // fileName을 동적으로 Signed URL로 변환 (1시간 유효)
-                        documentUrls:
-                            breeder.verification?.documents?.map((doc) =>
-                                this.storageService.generateSignedUrl(doc.fileName, 60),
-                            ) || [],
-                        isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
-                    },
-                    profileInfo: breeder.profile,
-                    createdAt: (breeder as any).createdAt,
-                }),
-            ),
-            total,
-            page: pageNumber,
-            totalPages: Math.ceil(total / itemsPerPage),
-            hasNext: pageNumber < Math.ceil(total / itemsPerPage),
-            hasPrev: pageNumber > 1,
-        };
+        const items = breeders.map(
+            (breeder): BreederVerificationResponseDto => ({
+                breederId: (breeder._id as any).toString(),
+                breederName: breeder.name,
+                emailAddress: breeder.emailAddress,
+                verificationInfo: {
+                    verificationStatus: breeder.verification?.status || 'pending',
+                    subscriptionPlan: breeder.verification?.plan || 'basic',
+                    submittedAt: breeder.verification?.submittedAt,
+                    // fileName을 동적으로 Signed URL로 변환 (1시간 유효)
+                    documentUrls:
+                        breeder.verification?.documents?.map((doc) =>
+                            this.storageService.generateSignedUrl(doc.fileName, 60),
+                        ) || [],
+                    isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
+                },
+                profileInfo: breeder.profile,
+                createdAt: (breeder as any).createdAt,
+            }),
+        );
+
+        return new PaginationBuilder<BreederVerificationResponseDto>()
+            .setItems(items)
+            .setPage(pageNumber)
+            .setTake(itemsPerPage)
+            .setTotalCount(total)
+            .build();
+    }
+
+    /**
+     * 브리더 목록 조회 (통합 검색)
+     *
+     * @param adminId 관리자 고유 ID
+     * @param filter 검색 필터
+     * @returns 브리더 목록
+     */
+    async getBreeders(
+        adminId: string,
+        filter: BreederSearchRequestDto,
+    ): Promise<PaginationResponseDto<BreederVerificationResponseDto>> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canManageBreeders) {
+            throw new ForbiddenException('Access denied');
+        }
+
+        const {
+            verificationStatus,
+            cityName,
+            searchKeyword,
+            pageNumber = 1,
+            itemsPerPage = 10,
+        } = filter;
+
+        const query: any = {};
+
+        if (verificationStatus) {
+            query['verification.status'] = verificationStatus;
+        }
+
+        if (cityName) {
+            query['profile.location.city'] = cityName;
+        }
+
+        if (searchKeyword) {
+            query.$or = [{ name: new RegExp(searchKeyword, 'i') }, { email: new RegExp(searchKeyword, 'i') }];
+        }
+
+        const skip = (pageNumber - 1) * itemsPerPage;
+
+        const [breeders, total] = await Promise.all([
+            this.breederModel
+                .find(query)
+                .select('name email verification profile createdAt accountStatus suspensionReason suspendedAt')
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(itemsPerPage)
+                .lean(),
+            this.breederModel.countDocuments(query),
+        ]);
+
+        const items = breeders.map(
+            (breeder): BreederVerificationResponseDto => ({
+                breederId: (breeder._id as any).toString(),
+                breederName: breeder.name,
+                emailAddress: breeder.emailAddress,
+                verificationInfo: {
+                    verificationStatus: breeder.verification?.status || 'pending',
+                    subscriptionPlan: breeder.verification?.plan || 'basic',
+                    submittedAt: breeder.verification?.submittedAt,
+                    documentUrls: [], // 목록 조회시에는 불필요
+                    isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
+                },
+                profileInfo: breeder.profile,
+                createdAt: (breeder as any).createdAt,
+            }),
+        );
+
+        return new PaginationBuilder<BreederVerificationResponseDto>()
+            .setItems(items)
+            .setPage(pageNumber)
+            .setTake(itemsPerPage)
+            .setTotalCount(total)
+            .build();
     }
 
     /**

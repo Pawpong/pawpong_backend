@@ -14,6 +14,7 @@ import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { AdminProfileResponseDto } from './dto/response/admin-profile-response.dto';
 import { UserManagementResponseDto } from './dto/response/user-management-response.dto';
 import { UserStatusUpdateResponseDto } from './dto/response/user-status-update-response.dto';
+import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 
 /**
  * 사용자 관리 Admin 컨트롤러
@@ -28,7 +29,7 @@ import { UserStatusUpdateResponseDto } from './dto/response/user-status-update-r
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
 export class UserAdminController {
-    constructor(private readonly userAdminService: UserAdminService) {}
+    constructor(private readonly userAdminService: UserAdminService) { }
 
     @Get('profile')
     @ApiEndpoint({
@@ -52,7 +53,7 @@ export class UserAdminController {
     async getUsers(
         @CurrentUser() user: any,
         @Query() filter: UserSearchRequestDto,
-    ): Promise<ApiResponseDto<UserManagementResponseDto[]>> {
+    ): Promise<ApiResponseDto<PaginationResponseDto<UserManagementResponseDto>>> {
         const result = await this.userAdminService.getUsers(user.userId, filter);
         return ApiResponseDto.success(result, '사용자 목록이 조회되었습니다.');
     }

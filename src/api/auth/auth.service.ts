@@ -365,23 +365,7 @@ export class AuthService {
         }
     }
 
-    /**
-     * 파일 업로드 검증 (프로필 이미지)
-     */
-    validateProfileImageFile(file: Express.Multer.File): void {
-        if (!file) {
-            throw new BadRequestException('파일이 업로드되지 않았습니다.');
-        }
-    }
 
-    /**
-     * 파일 업로드 검증 (브리더 서류)
-     */
-    validateBreederDocumentFiles(files: Express.Multer.File[]): void {
-        if (!files || files.length === 0) {
-            throw new BadRequestException('파일이 업로드되지 않았습니다.');
-        }
-    }
 
     /**
      * 이메일 중복 체크 - 입양자와 브리더 모두 확인
@@ -797,9 +781,84 @@ export class AuthService {
                 userId: user.userId,
                 email: user.email,
                 name: user.name,
-                role: user.role,
+                profileImage: user.profileImage,
             },
         };
+    }
+
+    /**
+     * 소셜 로그인 콜백 처리 (컨트롤러 로직 이동)
+     * - 신규 사용자: 회원가입 페이지로 리다이렉트 URL 생성
+     * - 기존 사용자: 토큰 생성 및 쿠키 설정 정보 반환
+     */
+    async processSocialLoginCallback(
+        userProfile: any,
+        referer?: string,
+        origin?: string,
+    ): Promise<{
+        redirectUrl: string;
+        cookies?: { name: string; value: string; options: any }[];
+    }> {
+        const result = await this.handleSocialLogin(userProfile);
+        const frontendUrl = this.getFrontendUrl(referer, origin);
+
+        if (result.needsAdditionalInfo) {
+            // 신규 사용자 - /signup으로 리다이렉트
+            const params: Record<string, string> = {
+                tempId: result.tempUserId || '',
+                provider: userProfile.provider || '',
+                email: userProfile.email || '',
+                name: userProfile.name || '',
+                profileImage: userProfile.profileImage || '',
+            };
+
+            if (userProfile.needsEmail) {
+                params.needsEmail = 'true';
+            }
+
+            const queryParams = new URLSearchParams(params);
+
+            return {
+                redirectUrl: `${frontendUrl}/signup?${queryParams.toString()}`,
+            };
+        } else {
+            // 기존 사용자 - 로그인 처리 (토큰 발급)
+            const tokens = await this.generateSocialLoginTokens(result.user);
+            const { isProduction, cookieOptions } = this.getCookieOptions();
+
+            const cookies = [
+                {
+                    name: 'accessToken',
+                    value: tokens.accessToken,
+                    options: {
+                        ...cookieOptions,
+                        maxAge: 24 * 60 * 60 * 1000, // 1일
+                    },
+                },
+                {
+                    name: 'refreshToken',
+                    value: tokens.refreshToken,
+                    options: {
+                        ...cookieOptions,
+                        maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+                    },
+                },
+                {
+                    name: 'userRole',
+                    value: result.user.role,
+                    options: {
+                        ...cookieOptions,
+                        httpOnly: false, // 프론트엔드에서 읽을 수 있어야 함
+                        maxAge: 24 * 60 * 60 * 1000, // 1일
+                    },
+                },
+            ];
+
+            return {
+                redirectUrl: `${frontendUrl}/explore`,
+                cookies,
+            };
+        }
     }
 
     /**
@@ -1355,16 +1414,7 @@ export class AuthService {
             tempId: tempId || 'N/A',
         });
 
-        // 파일 크기 검증 (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            throw new BadRequestException('파일 크기는 5MB를 초과할 수 없습니다.');
-        }
-
-        // 파일 타입 검증
-        const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-        if (!allowedMimeTypes.includes(file.mimetype)) {
-            throw new BadRequestException('이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp)');
-        }
+        this.validateProfileImageFile(file);
 
         // GCP Storage에 업로드
         const result = await this.storageService.uploadFile(file, 'profiles');
@@ -1414,6 +1464,19 @@ export class AuthService {
         };
     }
 
+    private validateProfileImageFile(file: Express.Multer.File): void {
+        // 파일 크기 검증 (5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            throw new BadRequestException('파일 크기는 5MB를 초과할 수 없습니다.');
+        }
+
+        // 파일 타입 검증
+        const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+        if (!allowedMimeTypes.includes(file.mimetype)) {
+            throw new BadRequestException('이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp)');
+        }
+    }
+
     /**
      * 브리더 인증 서류 업로드 (회원가입 시 사용)
      * New/Elite 레벨에 따라 필수 서류 검증
@@ -1432,6 +1495,71 @@ export class AuthService {
             tempId: tempId || 'N/A',
         });
 
+        this.validateBreederDocumentFiles(files, types, level);
+
+        // 파일 업로드
+        const uploadedDocuments: Array<{
+            type: string;
+            url: string;
+            filename: string;
+            size: number;
+            uploadedAt: Date;
+        }> = [];
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const type = types[i];
+
+            // 파일 업로드 (임시 폴더에 저장, 회원가입 완료 시 브리더 ID 폴더로 이동 가능)
+            const result = await this.storageService.uploadFile(file, `documents/verification/temp/${level}`);
+
+            uploadedDocuments.push({
+                type,
+                url: result.cdnUrl, // 응답용 Signed URL
+                filename: result.fileName, // DB 저장용 파일명
+                size: file.size,
+                uploadedAt: new Date(),
+            });
+
+            this.logger.logSuccess('uploadBreederDocuments', `서류 업로드 완료 (${i + 1}/${files.length})`, {
+                level,
+                type,
+                fileName: result.fileName,
+            });
+        }
+
+        this.logger.logSuccess('uploadBreederDocuments', `${level} 레벨 인증 서류 업로드 완료`, {
+            totalCount: uploadedDocuments.length,
+            level,
+        });
+
+        // tempId가 있으면 임시 저장소에 보관
+        if (tempId) {
+            const existing = this.tempUploads.get(tempId) || { createdAt: new Date() };
+            this.tempUploads.set(tempId, {
+                ...existing,
+                documents: uploadedDocuments.map((doc) => ({
+                    fileName: doc.filename,
+                    type: doc.type,
+                })),
+                createdAt: existing.createdAt, // 기존 생성 시간 유지
+            });
+            this.logger.logSuccess('uploadBreederDocuments', 'tempId로 서류 정보 임시 저장 완료', {
+                tempId,
+                documentCount: uploadedDocuments.length,
+                tempUploadsSize: this.tempUploads.size,
+            });
+        }
+
+        const response = new VerificationDocumentsResponseDto(uploadedDocuments, uploadedDocuments);
+
+        return {
+            response,
+            count: uploadedDocuments.length,
+        };
+    }
+
+    private validateBreederDocumentFiles(files: Express.Multer.File[], types: string[], level: 'new' | 'elite'): void {
         if (!files || files.length === 0) {
             throw new BadRequestException('파일이 업로드되지 않았습니다.');
         }
@@ -1520,66 +1648,5 @@ export class AuthService {
                 );
             }
         }
-
-        // 파일 업로드
-        const uploadedDocuments: Array<{
-            type: string;
-            url: string;
-            filename: string;
-            size: number;
-            uploadedAt: Date;
-        }> = [];
-
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const type = types[i];
-
-            // 파일 업로드 (임시 폴더에 저장, 회원가입 완료 시 브리더 ID 폴더로 이동 가능)
-            const result = await this.storageService.uploadFile(file, `documents/verification/temp/${level}`);
-
-            uploadedDocuments.push({
-                type,
-                url: result.cdnUrl, // 응답용 Signed URL
-                filename: result.fileName, // DB 저장용 파일명
-                size: file.size,
-                uploadedAt: new Date(),
-            });
-
-            this.logger.logSuccess('uploadBreederDocuments', `서류 업로드 완료 (${i + 1}/${files.length})`, {
-                level,
-                type,
-                fileName: result.fileName,
-            });
-        }
-
-        this.logger.logSuccess('uploadBreederDocuments', `${level} 레벨 인증 서류 업로드 완료`, {
-            totalCount: uploadedDocuments.length,
-            level,
-        });
-
-        // tempId가 있으면 임시 저장소에 보관
-        if (tempId) {
-            const existing = this.tempUploads.get(tempId) || { createdAt: new Date() };
-            this.tempUploads.set(tempId, {
-                ...existing,
-                documents: uploadedDocuments.map((doc) => ({
-                    fileName: doc.filename,
-                    type: doc.type,
-                })),
-                createdAt: existing.createdAt, // 기존 생성 시간 유지
-            });
-            this.logger.logSuccess('uploadBreederDocuments', 'tempId로 서류 정보 임시 저장 완료', {
-                tempId,
-                documentCount: uploadedDocuments.length,
-                tempUploadsSize: this.tempUploads.size,
-            });
-        }
-
-        const response = new VerificationDocumentsResponseDto(uploadedDocuments, uploadedDocuments);
-
-        return {
-            response,
-            count: uploadedDocuments.length,
-        };
     }
 }

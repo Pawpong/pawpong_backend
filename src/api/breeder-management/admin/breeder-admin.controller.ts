@@ -25,6 +25,7 @@ import { BreederLevelChangeResponseDto } from './dto/response/breeder-level-chan
 import { BreederSuspendResponseDto } from './dto/response/breeder-suspend-response.dto';
 import { BreederRemindResponseDto } from './dto/response/breeder-remind-response.dto';
 
+
 /**
  * 브리더 관리 Admin 컨트롤러
  *
@@ -41,7 +42,22 @@ import { BreederRemindResponseDto } from './dto/response/breeder-remind-response
 @Roles('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class BreederAdminController {
-    constructor(private readonly breederAdminService: BreederAdminService) {}
+    constructor(private readonly breederAdminService: BreederAdminService) { }
+
+    @Get('breeders')
+    @ApiEndpoint({
+        summary: '브리더 목록 조회 (통합 검색)',
+        description: '전체 브리더 목록을 조회합니다. 상태, 도시, 키워드 필터링을 지원합니다.',
+        responseType: BreederVerificationResponseDto,
+        isPublic: false,
+    })
+    async getBreeders(
+        @CurrentUser() user: any,
+        @Query() filter: BreederSearchRequestDto,
+    ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
+        const result = await this.breederAdminService.getBreeders(user.userId, filter);
+        return ApiResponseDto.success(result, '브리더 목록이 조회되었습니다.');
+    }
 
     @Get('verification/pending')
     @ApiEndpoint({
@@ -53,7 +69,7 @@ export class BreederAdminController {
     async getPendingBreederVerifications(
         @CurrentUser() user: any,
         @Query() filter: BreederSearchRequestDto,
-    ): Promise<ApiResponseDto<BreederVerificationResponseDto[]>> {
+    ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
         const result = await this.breederAdminService.getPendingBreederVerifications(user.userId, filter);
         return ApiResponseDto.success(result, '승인 대기 브리더 목록이 조회되었습니다.');
     }

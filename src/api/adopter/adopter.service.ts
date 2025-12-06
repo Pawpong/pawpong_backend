@@ -27,6 +27,8 @@ import { ApplicationCreateRequestDto } from './dto/request/application-create-re
 import { AccountDeleteRequestDto } from './dto/request/account-delete-request.dto';
 import { AdopterProfileResponseDto } from './dto/response/adopter-profile-response.dto';
 import { AccountDeleteResponseDto } from './dto/response/account-delete-response.dto';
+import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
+import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
 
 /**
  * 입양자 비즈니스 로직 처리 Service
@@ -58,7 +60,7 @@ export class AdopterService {
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(BreederReview.name) private breederReviewModel: Model<BreederReviewDocument>,
         @InjectModel(AdoptionApplication.name) private adoptionApplicationModel: Model<AdoptionApplicationDocument>,
-    ) {}
+    ) { }
 
     /**
      * 입양 신청서 제출 처리
@@ -410,17 +412,12 @@ export class AdopterService {
 
         const totalPages = Math.ceil(total / limit);
 
-        return {
-            items: favoriteListWithDetails,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: total,
-                totalPages,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1,
-            },
-        };
+        return new PaginationBuilder<any>()
+            .setItems(favoriteListWithDetails)
+            .setPage(page)
+            .setTake(limit)
+            .setTotalCount(total)
+            .build();
     }
 
     /**
@@ -575,17 +572,12 @@ export class AdopterService {
 
         const totalPages = Math.ceil(total / limit);
 
-        return {
-            items: formattedReviews,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: total,
-                totalPages,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1,
-            },
-        };
+        return new PaginationBuilder<any>()
+            .setItems(formattedReviews)
+            .setPage(page)
+            .setTake(limit)
+            .setTotalCount(total)
+            .build();
     }
 
     /**
@@ -767,17 +759,12 @@ export class AdopterService {
         // 페이지네이션 정보 계산
         const totalPages = Math.ceil(totalItems / limit);
 
-        return {
-            items,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems,
-                totalPages,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1,
-            },
-        };
+        return new PaginationBuilder<any>()
+            .setItems(items)
+            .setPage(page)
+            .setTake(limit)
+            .setTotalCount(totalItems)
+            .build();
     }
 
     /**
