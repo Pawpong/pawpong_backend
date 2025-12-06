@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
+import { MongooseModule } from '@nestjs/mongoose';
 
 import { winstonConfig } from '../../common/config/winston.config';
 import { JwtStrategy } from '../../common/strategy/jwt.strategy';
@@ -22,22 +23,30 @@ import { AuthAdminRepository } from './repository/auth-admin.repository';
 import { AuthAdopterRepository } from './repository/auth-adopter.repository';
 import { AuthBreederRepository } from './repository/auth-breeder.repository';
 
+import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
+import { Breeder, BreederSchema } from '../../schema/breeder.schema';
+import { Admin, AdminSchema } from '../../schema/admin.schema';
+
 import { StorageModule } from '../../common/storage/storage.module';
-import { AuthDatabaseModule } from '../../common/database/database.module';
 
 @Module({
     imports: [
-        AuthDatabaseModule,
+        MongooseModule.forFeature([
+            { name: Adopter.name, schema: AdopterSchema },
+            { name: Breeder.name, schema: BreederSchema },
+            { name: Admin.name, schema: AdminSchema },
+        ]),
         StorageModule,
         PassportModule,
         WinstonModule.forRoot(winstonConfig),
         JwtModule.registerAsync({
-            useFactory: async (configService: ConfigService) => ({
-                secret: configService.get<string>('JWT_SECRET'),
-                signOptions: {
-                    expiresIn: configService.get<string>('JWT_EXPIRATION'),
-                },
-            }),
+            useFactory: async (configService: ConfigService) =>
+                ({
+                    secret: configService.get<string>('JWT_SECRET'),
+                    signOptions: {
+                        expiresIn: configService.get<string>('JWT_EXPIRATION') || '24h',
+                    },
+                }) as any,
             inject: [ConfigService],
         }),
     ],
