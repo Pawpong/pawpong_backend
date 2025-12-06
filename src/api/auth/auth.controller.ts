@@ -49,7 +49,7 @@ export class AuthController {
     constructor(
         private readonly authService: AuthService,
         private readonly smsService: SmsService,
-    ) {}
+    ) { }
 
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
@@ -122,45 +122,19 @@ export class AuthController {
     @Get('google/callback')
     @UseGuards(AuthGuard('google'))
     async googleCallback(@Req() req, @Res() res: Response) {
-        const result = await this.authService.handleSocialLogin(req.user);
-        const frontendUrl = this.authService.getFrontendUrl(req.headers.referer, req.headers.origin);
+        const { redirectUrl, cookies } = await this.authService.processSocialLoginCallback(
+            req.user,
+            req.headers.referer,
+            req.headers.origin,
+        );
 
-        if (result.needsAdditionalInfo) {
-            // 신규 사용자 - /signup으로 리다이렉트
-            const redirectUrl = `${frontendUrl}/signup?tempId=${result.tempUserId}&provider=google&email=${req.user.email}&name=${req.user.name}&profileImage=${req.user.profileImage || ''}`;
-            return res.redirect(redirectUrl);
-        } else {
-            // 기존 사용자 - 로그인 처리 (토큰 발급)
-            const tokens = await this.authService.generateSocialLoginTokens(result.user);
-            const { isProduction } = this.authService.getCookieOptions();
-
-            res.cookie('accessToken', tokens.accessToken, {
-                httpOnly: true,
-                secure: isProduction,
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 24 * 60 * 60 * 1000,
+        if (cookies) {
+            cookies.forEach((cookie) => {
+                res.cookie(cookie.name, cookie.value, cookie.options);
             });
-
-            res.cookie('refreshToken', tokens.refreshToken, {
-                httpOnly: true,
-                secure: isProduction,
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            });
-
-            res.cookie('userRole', result.user.role, {
-                httpOnly: false,
-                secure: isProduction,
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 24 * 60 * 60 * 1000,
-            });
-
-            const redirectUrl = `${frontendUrl}/explore`;
-            return res.redirect(redirectUrl);
         }
+
+        return res.redirect(redirectUrl);
     }
 
     @Get('naver')
@@ -177,45 +151,19 @@ export class AuthController {
     @Get('naver/callback')
     @UseGuards(AuthGuard('naver'))
     async naverCallback(@Req() req, @Res() res: Response) {
-        const result = await this.authService.handleSocialLogin(req.user);
-        const frontendUrl = this.authService.getFrontendUrl(req.headers.referer, req.headers.origin);
+        const { redirectUrl, cookies } = await this.authService.processSocialLoginCallback(
+            req.user,
+            req.headers.referer,
+            req.headers.origin,
+        );
 
-        if (result.needsAdditionalInfo) {
-            // 신규 사용자 - /signup으로 리다이렉트
-            const redirectUrl = `${frontendUrl}/signup?tempId=${result.tempUserId}&provider=naver&email=${req.user.email}&name=${req.user.name}&profileImage=${req.user.profileImage || ''}`;
-            return res.redirect(redirectUrl);
-        } else {
-            // 기존 사용자 - 로그인 처리 (토큰 발급)
-            const tokens = await this.authService.generateSocialLoginTokens(result.user);
-            const { isProduction } = this.authService.getCookieOptions();
-
-            res.cookie('accessToken', tokens.accessToken, {
-                httpOnly: true,
-                secure: isProduction,
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 24 * 60 * 60 * 1000,
+        if (cookies) {
+            cookies.forEach((cookie) => {
+                res.cookie(cookie.name, cookie.value, cookie.options);
             });
-
-            res.cookie('refreshToken', tokens.refreshToken, {
-                httpOnly: true,
-                secure: isProduction,
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            });
-
-            res.cookie('userRole', result.user.role, {
-                httpOnly: false,
-                secure: isProduction,
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 24 * 60 * 60 * 1000,
-            });
-
-            const redirectUrl = `${frontendUrl}/explore`;
-            return res.redirect(redirectUrl);
         }
+
+        return res.redirect(redirectUrl);
     }
 
     @Get('kakao')
@@ -232,46 +180,19 @@ export class AuthController {
     @Get('kakao/callback')
     @UseGuards(AuthGuard('kakao'))
     async kakaoCallback(@Req() req, @Res() res: Response) {
-        const result = await this.authService.handleSocialLogin(req.user);
-        const frontendUrl = this.authService.getFrontendUrl(req.headers.referer, req.headers.origin);
+        const { redirectUrl, cookies } = await this.authService.processSocialLoginCallback(
+            req.user,
+            req.headers.referer,
+            req.headers.origin,
+        );
 
-        if (result.needsAdditionalInfo) {
-            // 신규 사용자 - /signup으로 리다이렉트
-            const needsEmail = req.user.needsEmail ? '&needsEmail=true' : '';
-            const redirectUrl = `${frontendUrl}/signup?tempId=${result.tempUserId}&provider=kakao&email=${req.user.email}&name=${req.user.name}&profileImage=${req.user.profileImage || ''}${needsEmail}`;
-            return res.redirect(redirectUrl);
-        } else {
-            // 기존 사용자 - 로그인 처리 (토큰 발급)
-            const tokens = await this.authService.generateSocialLoginTokens(result.user);
-            const { isProduction } = this.authService.getCookieOptions();
-
-            res.cookie('accessToken', tokens.accessToken, {
-                httpOnly: true,
-                secure: isProduction,
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 24 * 60 * 60 * 1000,
+        if (cookies) {
+            cookies.forEach((cookie) => {
+                res.cookie(cookie.name, cookie.value, cookie.options);
             });
-
-            res.cookie('refreshToken', tokens.refreshToken, {
-                httpOnly: true,
-                secure: isProduction,
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 7 * 24 * 60 * 60 * 1000,
-            });
-
-            res.cookie('userRole', result.user.role, {
-                httpOnly: false,
-                secure: isProduction,
-                sameSite: 'lax',
-                path: '/',
-                maxAge: 24 * 60 * 60 * 1000,
-            });
-
-            const redirectUrl = `${frontendUrl}/explore`;
-            return res.redirect(redirectUrl);
         }
+
+        return res.redirect(redirectUrl);
     }
 
     @Post('social/complete')
@@ -480,7 +401,7 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
         @Query('tempId') tempId?: string,
         @CurrentUser() user?: any,
     ): Promise<ApiResponseDto<UploadResponseDto>> {
-        this.authService.validateProfileImageFile(file);
+
 
         const result = await this.authService.uploadProfileImage(file, user, tempId);
         const response = new UploadResponseDto(result.cdnUrl, result.fileName, result.size);
@@ -488,8 +409,8 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
         const message = user
             ? '프로필 이미지가 업로드되고 저장되었습니다.'
             : tempId
-              ? '프로필 이미지가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.'
-              : '프로필 이미지가 업로드되었습니다. 회원가입 시 응답의 filename 필드를 profileImage에 사용하세요.';
+                ? '프로필 이미지가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.'
+                : '프로필 이미지가 업로드되었습니다. 회원가입 시 응답의 filename 필드를 profileImage에 사용하세요.';
 
         return ApiResponseDto.success(response, message);
     }
@@ -555,7 +476,7 @@ documentUrls에 filename 필드 값을 넣는 경우
         @Body() dto: UploadBreederDocumentsRequestDto,
         @Query('tempId') tempId?: string,
     ): Promise<ApiResponseDto<VerificationDocumentsResponseDto>> {
-        this.authService.validateBreederDocumentFiles(files);
+
 
         const result = await this.authService.uploadBreederDocuments(files, dto.types, dto.level, tempId);
 

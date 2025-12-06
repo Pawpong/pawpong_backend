@@ -12,6 +12,8 @@ import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
 import { UserSearchRequestDto } from './dto/request/user-search-request.dto';
 import { UserManagementRequestDto } from './dto/request/user-management-request.dto';
 import { UserManagementResponseDto } from './dto/response/user-management-response.dto';
+import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
+import { PaginationBuilder } from '../../../common/dto/pagination/pagination-builder.dto';
 
 /**
  * 사용자 관리 Admin 서비스
@@ -27,7 +29,7 @@ export class UserAdminService {
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
-    ) {}
+    ) { }
 
     /**
      * 관리자 활동 로그 기록
@@ -90,7 +92,10 @@ export class UserAdminService {
      * @param filter 검색 필터 (role, status, keyword, pagination)
      * @returns 사용자 목록
      */
-    async getUsers(adminId: string, filter: UserSearchRequestDto): Promise<any> {
+    async getUsers(
+        adminId: string,
+        filter: UserSearchRequestDto,
+    ): Promise<PaginationResponseDto<UserManagementResponseDto>> {
         const admin = await this.adminModel.findById(adminId);
         if (!admin || !admin.permissions.canManageUsers) {
             throw new ForbiddenException('Access denied');
@@ -152,25 +157,25 @@ export class UserAdminService {
             total += breederTotal;
         }
 
-        return {
-            users: users.map(
-                (user): UserManagementResponseDto => ({
-                    userId: (user._id as any).toString(),
-                    userName: user.full_name || user.name,
-                    emailAddress: user.email_address || user.email,
-                    userRole: user.role,
-                    accountStatus: user.account_status || user.status,
-                    lastLoginAt: user.last_activity_at || user.lastLoginAt,
-                    createdAt: user.created_at || user.createdAt,
-                    statisticsInfo: user.stats,
-                }),
-            ),
-            total,
-            page: pageNumber,
-            totalPages: Math.ceil(total / itemsPerPage),
-            hasNext: pageNumber < Math.ceil(total / itemsPerPage),
-            hasPrev: pageNumber > 1,
-        };
+        const items = users.map(
+            (user): UserManagementResponseDto => ({
+                userId: (user._id as any).toString(),
+                userName: user.full_name || user.name,
+                emailAddress: user.email_address || user.email,
+                userRole: user.role,
+                accountStatus: user.account_status || user.status,
+                lastLoginAt: user.last_activity_at || user.lastLoginAt,
+                createdAt: user.created_at || user.createdAt,
+                statisticsInfo: user.stats,
+            }),
+        );
+
+        return new PaginationBuilder<UserManagementResponseDto>()
+            .setItems(items)
+            .setPage(pageNumber)
+            .setTake(itemsPerPage)
+            .setTotalCount(total)
+            .build();
     }
 
     /**
