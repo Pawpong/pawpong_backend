@@ -245,7 +245,12 @@ export class AdopterMapper {
      * @param updateData 프로필 업데이트 요청 데이터
      * @returns 매핑된 업데이트 데이터
      */
-    static toProfileUpdateData(updateData: { name?: string; phone?: string; profileImage?: string; marketingConsent?: boolean }): any {
+    static toProfileUpdateData(updateData: {
+        name?: string;
+        phone?: string;
+        profileImage?: string;
+        marketingConsent?: boolean;
+    }): any {
         const mappedData: any = {};
         if (updateData.name) mappedData.fullName = updateData.name;
         if (updateData.phone) mappedData.phoneNumber = updateData.phone;

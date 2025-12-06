@@ -252,33 +252,39 @@ export class PlatformAdminService {
             ]);
 
         // 2. 상담/입양 신청 통계 (AdoptionApplication 컬렉션 사용)
-        const [consultations7Days, consultations14Days, consultations28Days, adoptions7Days, adoptions14Days, adoptions28Days] =
-            await Promise.all([
-                this.adoptionApplicationModel.countDocuments({
-                    applicationType: 'consultation',
-                    createdAt: { $gte: sevenDaysAgo },
-                }),
-                this.adoptionApplicationModel.countDocuments({
-                    applicationType: 'consultation',
-                    createdAt: { $gte: fourteenDaysAgo },
-                }),
-                this.adoptionApplicationModel.countDocuments({
-                    applicationType: 'consultation',
-                    createdAt: { $gte: twentyEightDaysAgo },
-                }),
-                this.adoptionApplicationModel.countDocuments({
-                    applicationType: 'adoption',
-                    createdAt: { $gte: sevenDaysAgo },
-                }),
-                this.adoptionApplicationModel.countDocuments({
-                    applicationType: 'adoption',
-                    createdAt: { $gte: fourteenDaysAgo },
-                }),
-                this.adoptionApplicationModel.countDocuments({
-                    applicationType: 'adoption',
-                    createdAt: { $gte: twentyEightDaysAgo },
-                }),
-            ]);
+        const [
+            consultations7Days,
+            consultations14Days,
+            consultations28Days,
+            adoptions7Days,
+            adoptions14Days,
+            adoptions28Days,
+        ] = await Promise.all([
+            this.adoptionApplicationModel.countDocuments({
+                applicationType: 'consultation',
+                createdAt: { $gte: sevenDaysAgo },
+            }),
+            this.adoptionApplicationModel.countDocuments({
+                applicationType: 'consultation',
+                createdAt: { $gte: fourteenDaysAgo },
+            }),
+            this.adoptionApplicationModel.countDocuments({
+                applicationType: 'consultation',
+                createdAt: { $gte: twentyEightDaysAgo },
+            }),
+            this.adoptionApplicationModel.countDocuments({
+                applicationType: 'adoption',
+                createdAt: { $gte: sevenDaysAgo },
+            }),
+            this.adoptionApplicationModel.countDocuments({
+                applicationType: 'adoption',
+                createdAt: { $gte: fourteenDaysAgo },
+            }),
+            this.adoptionApplicationModel.countDocuments({
+                applicationType: 'adoption',
+                createdAt: { $gte: twentyEightDaysAgo },
+            }),
+        ]);
 
         // 3. 필터 사용 통계 - 브리더 프로필에서 집계
         // 지역별 브리더 분포 (가장 많이 검색될 가능성이 높은 지역)
