@@ -176,7 +176,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Body() addFavoriteDto: FavoriteAddRequestDto,
     ): Promise<ApiResponseDto<FavoriteAddResponseDto>> {
-        const result = await this.adopterService.addFavorite(user.userId, addFavoriteDto);
+        const result = await this.adopterService.addFavorite(user.userId, addFavoriteDto, user.role);
         return ApiResponseDto.success(result, '즐겨찾기에 성공적으로 추가되었습니다.');
     }
 
@@ -191,7 +191,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Param('breederId') breederId: string,
     ): Promise<ApiResponseDto<FavoriteRemoveResponseDto>> {
-        const result = await this.adopterService.removeFavorite(user.userId, breederId);
+        const result = await this.adopterService.removeFavorite(user.userId, breederId, user.role);
         return ApiResponseDto.success(result, '즐겨찾기에서 성공적으로 삭제되었습니다.');
     }
 
@@ -209,7 +209,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 10,
     ): Promise<ApiResponseDto<PaginationResponseDto<FavoriteBreederDataDto>>> {
-        const result = await this.adopterService.getFavoriteList(user.userId, Number(page), Number(limit));
+        const result = await this.adopterService.getFavoriteList(user.userId, Number(page), Number(limit), user.role);
         return ApiResponseDto.success(result, '즐겨찾기 목록이 조회되었습니다.');
     }
 
