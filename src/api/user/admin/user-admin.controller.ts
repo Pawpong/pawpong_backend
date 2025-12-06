@@ -29,7 +29,7 @@ import { PaginationResponseDto } from '../../../common/dto/pagination/pagination
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
 export class UserAdminController {
-    constructor(private readonly userAdminService: UserAdminService) { }
+    constructor(private readonly userAdminService: UserAdminService) {}
 
     @Get('profile')
     @ApiEndpoint({

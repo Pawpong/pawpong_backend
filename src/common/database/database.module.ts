@@ -104,9 +104,7 @@ export class BreederDatabaseModule {}
 export class AdminDatabaseModule {}
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }]),
-    ],
+    imports: [MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }])],
     exports: [MongooseModule],
 })
 export class NotificationDatabaseModule {}
