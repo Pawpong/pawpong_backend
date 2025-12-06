@@ -25,7 +25,7 @@ export class BreederService {
         @InjectModel(ParentPet.name) private parentPetModel: Model<ParentPetDocument>,
         @InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>,
         private readonly storageService: StorageService,
-    ) {}
+    ) { }
 
     async searchBreeders(searchDto: BreederSearchRequestDto): Promise<BreederSearchResponseDto> {
         const {
@@ -302,17 +302,12 @@ export class BreederService {
 
         const totalPages = Math.ceil(total / limit);
 
-        return {
-            items: formattedReviews,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: total,
-                totalPages,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1,
-            },
-        };
+        return new PaginationBuilder<any>()
+            .setItems(formattedReviews)
+            .setPage(page)
+            .setTake(limit)
+            .setTotalCount(total)
+            .build();
     }
 
     /**
@@ -359,19 +354,19 @@ export class BreederService {
             healthRecords: pet.healthRecords || [],
             father: father
                 ? {
-                      petId: father.petId,
-                      name: father.name,
-                      breed: father.breed,
-                      photo: father.photos?.[0] || '',
-                  }
+                    petId: father.petId,
+                    name: father.name,
+                    breed: father.breed,
+                    photo: father.photos?.[0] || '',
+                }
                 : undefined,
             mother: mother
                 ? {
-                      petId: mother.petId,
-                      name: mother.name,
-                      breed: mother.breed,
-                      photo: mother.photos?.[0] || '',
-                  }
+                    petId: mother.petId,
+                    name: mother.name,
+                    breed: mother.breed,
+                    photo: mother.photos?.[0] || '',
+                }
                 : undefined,
             availableFrom: pet.availableFrom,
             microchipNumber: pet.microchipNumber,
@@ -501,16 +496,15 @@ export class BreederService {
 
         const totalPages = Math.ceil(total / limit);
 
+        const paginationResponse = new PaginationBuilder<any>()
+            .setItems(items)
+            .setPage(page)
+            .setTake(limit)
+            .setTotalCount(total)
+            .build();
+
         return {
-            items,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: total,
-                totalPages,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1,
-            },
+            ...paginationResponse,
             availableCount,
             reservedCount,
             adoptedCount,
