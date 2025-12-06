@@ -12,6 +12,8 @@ import { ProfileUpdateRequestDto } from './dto/request/profile-update-request.dt
 import { VerificationSubmitRequestDto } from './dto/request/verification-submit-request.dto';
 import { ApplicationStatusUpdateRequestDto } from './dto/request/application-status-update-request.dto';
 import { BreederDashboardResponseDto } from '../breeder/dto/response/breeder-dashboard-response.dto';
+import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
+import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
 
 import { BreederRepository } from './repository/breeder.repository';
 import { AdopterRepository } from '../adopter/adopter.repository';
@@ -45,7 +47,7 @@ export class BreederManagementService {
         private parentPetRepository: ParentPetRepository,
         private availablePetRepository: AvailablePetManagementRepository,
         private adoptionApplicationRepository: AdoptionApplicationRepository,
-    ) {}
+    ) { }
 
     /**
      * 브리더 대시보드 데이터 조회
@@ -279,9 +281,9 @@ export class BreederManagementService {
             description: availablePetDto.description || '',
             parentInfo: availablePetDto.parentInfo
                 ? {
-                      mother: availablePetDto.parentInfo.mother as any,
-                      father: availablePetDto.parentInfo.father as any,
-                  }
+                    mother: availablePetDto.parentInfo.mother as any,
+                    father: availablePetDto.parentInfo.father as any,
+                }
                 : undefined,
         });
 
@@ -382,17 +384,12 @@ export class BreederManagementService {
     async getReceivedApplications(userId: string, page: number = 1, limit: number = 10): Promise<any> {
         const { applications, total } = await this.adoptionApplicationRepository.findByBreederId(userId, page, limit);
 
-        return {
-            applications,
-            pagination: {
-                currentPage: page,
-                totalPages: Math.ceil(total / limit),
-                totalItems: total,
-                itemsPerPage: limit,
-                hasNextPage: (page - 1) * limit + limit < total,
-                hasPrevPage: page > 1,
-            },
-        };
+        return new PaginationBuilder<any>()
+            .setItems(applications)
+            .setPage(page)
+            .setTake(limit)
+            .setTotalCount(total)
+            .build();
     }
 
     /**
@@ -676,16 +673,15 @@ export class BreederManagementService {
 
         const totalPages = Math.ceil(total / limit);
 
+        const paginationResponse = new PaginationBuilder<any>()
+            .setItems(items)
+            .setPage(page)
+            .setTake(limit)
+            .setTotalCount(total)
+            .build();
+
         return {
-            items,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: total,
-                totalPages,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1,
-            },
+            ...paginationResponse,
             availableCount,
             reservedCount,
             adoptedCount,
@@ -746,16 +742,15 @@ export class BreederManagementService {
 
         const totalPages = Math.ceil(total / limit);
 
+        const paginationResponse = new PaginationBuilder<any>()
+            .setItems(reviews)
+            .setPage(page)
+            .setTake(limit)
+            .setTotalCount(total)
+            .build();
+
         return {
-            items: reviews,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: total,
-                totalPages,
-                hasNextPage: page < totalPages,
-                hasPrevPage: page > 1,
-            },
+            ...paginationResponse,
             averageRating: breeder.stats?.averageRating || 0,
             totalReviews: total,
             visibleReviews: visibleCount,
