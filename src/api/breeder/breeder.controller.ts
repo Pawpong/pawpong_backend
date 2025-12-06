@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Query, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Query, Body, Param, UseGuards } from '@nestjs/common';
 
 import { CurrentUser } from '../../common/decorator/user.decorator';
+import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard';
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../common/decorator/swagger.decorator';
 
 import { BreederService } from './breeder.service';
@@ -44,6 +45,7 @@ export class BreederController {
     }
 
     @Post('explore')
+    @UseGuards(OptionalJwtAuthGuard)
     @ApiPaginatedEndpoint({
         ...BreederSwaggerDocs.exploreBreeders,
         responseType: BreederExploreResponseDto,

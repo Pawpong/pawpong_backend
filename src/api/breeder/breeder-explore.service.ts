@@ -125,12 +125,29 @@ export class BreederExploreService {
         ]);
         let totalItems = totalCount;
 
-        // 사용자의 찜 목록 가져오기
+        // 사용자의 찜 목록 가져오기 (입양자 또는 브리더 모두 지원)
         let favoritedBreederIds: string[] = [];
         if (userId) {
+            console.log('[BreederExploreService] userId:', userId);
+            // 먼저 입양자에서 조회
             const adopter = await this.adopterModel.findById(userId).lean();
+            console.log('[BreederExploreService] adopter found:', !!adopter);
             if (adopter) {
                 favoritedBreederIds = adopter.favoriteBreederList?.map((f) => f.favoriteBreederId) || [];
+                console.log('[BreederExploreService] adopter favoriteBreederIds:', favoritedBreederIds);
+            } else {
+                // 입양자가 아니면 브리더에서 조회
+                const breederUser = await this.breederModel.findById(userId).lean();
+                console.log('[BreederExploreService] breederUser found:', !!breederUser);
+                if (breederUser) {
+                    console.log(
+                        '[BreederExploreService] breederUser.favoriteBreederList:',
+                        (breederUser as any).favoriteBreederList,
+                    );
+                    favoritedBreederIds =
+                        (breederUser as any).favoriteBreederList?.map((f: any) => f.favoriteBreederId) || [];
+                    console.log('[BreederExploreService] breeder favoriteBreederIds:', favoritedBreederIds);
+                }
             }
         }
 
@@ -172,7 +189,13 @@ export class BreederExploreService {
                     display: 'range',
                 },
                 favoriteCount: breeder.stats?.totalFavorites || 0,
-                isFavorited: favoritedBreederIds.includes(breeder._id.toString()),
+                isFavorited: (() => {
+                    const isFav = favoritedBreederIds.includes(breeder._id.toString());
+                    if (isFav) {
+                        console.log(`[BreederExploreService] Breeder ${breeder._id.toString()} is favorited!`);
+                    }
+                    return isFav;
+                })(),
                 representativePhotos: representativePhotos,
                 profileImage: profileImage,
                 totalReviews: breeder.stats?.totalReviews || 0,
