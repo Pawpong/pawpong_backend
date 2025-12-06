@@ -29,7 +29,7 @@ export class UserAdminService {
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
-    ) { }
+    ) {}
 
     /**
      * 관리자 활동 로그 기록

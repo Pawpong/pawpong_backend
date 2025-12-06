@@ -25,7 +25,6 @@ import { BreederLevelChangeResponseDto } from './dto/response/breeder-level-chan
 import { BreederSuspendResponseDto } from './dto/response/breeder-suspend-response.dto';
 import { BreederRemindResponseDto } from './dto/response/breeder-remind-response.dto';
 
-
 /**
  * 브리더 관리 Admin 컨트롤러
  *
@@ -42,7 +41,7 @@ import { BreederRemindResponseDto } from './dto/response/breeder-remind-response
 @Roles('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class BreederAdminController {
-    constructor(private readonly breederAdminService: BreederAdminService) { }
+    constructor(private readonly breederAdminService: BreederAdminService) {}
 
     @Get('breeders')
     @ApiEndpoint({
@@ -192,9 +191,6 @@ export class BreederAdminController {
         @Body() remindData: BreederRemindRequestDto,
     ): Promise<ApiResponseDto<BreederRemindResponseDto>> {
         const result = await this.breederAdminService.sendRemindNotifications(user.userId, remindData);
-        return ApiResponseDto.success(
-            result,
-            `${result.successCount}명에게 리마인드 알림이 발송되었습니다.`,
-        );
+        return ApiResponseDto.success(result, `${result.successCount}명에게 리마인드 알림이 발송되었습니다.`);
     }
 }

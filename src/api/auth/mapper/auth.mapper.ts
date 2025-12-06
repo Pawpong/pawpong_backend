@@ -59,7 +59,8 @@ export class AuthMapper {
             breederId: savedBreeder._id.toString(),
             email: savedBreeder.emailAddress,
             breederName: savedBreeder.name,
-            breederLocation: `${savedBreeder.profile?.location?.city || ''} ${savedBreeder.profile?.location?.district || ''}`.trim(),
+            breederLocation:
+                `${savedBreeder.profile?.location?.city || ''} ${savedBreeder.profile?.location?.district || ''}`.trim(),
             animal: savedBreeder.petType,
             breeds: savedBreeder.breeds,
             plan: savedBreeder.verification.plan,

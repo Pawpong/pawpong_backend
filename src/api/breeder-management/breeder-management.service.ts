@@ -11,7 +11,9 @@ import { AvailablePetAddDto } from './dto/request/available-pet-add-request.dto'
 import { ProfileUpdateRequestDto } from './dto/request/profile-update-request.dto';
 import { VerificationSubmitRequestDto } from './dto/request/verification-submit-request.dto';
 import { ApplicationStatusUpdateRequestDto } from './dto/request/application-status-update-request.dto';
+import { SubmitDocumentsRequestDto } from './dto/request/submit-documents-request.dto';
 import { BreederDashboardResponseDto } from '../breeder/dto/response/breeder-dashboard-response.dto';
+import { UploadDocumentsResponseDto, UploadedDocumentDto } from './dto/response/upload-documents-response.dto';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
 
@@ -47,7 +49,7 @@ export class BreederManagementService {
         private parentPetRepository: ParentPetRepository,
         private availablePetRepository: AvailablePetManagementRepository,
         private adoptionApplicationRepository: AdoptionApplicationRepository,
-    ) { }
+    ) {}
 
     /**
      * 브리더 대시보드 데이터 조회
@@ -281,9 +283,9 @@ export class BreederManagementService {
             description: availablePetDto.description || '',
             parentInfo: availablePetDto.parentInfo
                 ? {
-                    mother: availablePetDto.parentInfo.mother as any,
-                    father: availablePetDto.parentInfo.father as any,
-                }
+                      mother: availablePetDto.parentInfo.mother as any,
+                      father: availablePetDto.parentInfo.father as any,
+                  }
                 : undefined,
         });
 
@@ -505,6 +507,114 @@ export class BreederManagementService {
         await this.breederRepository.updateVerification(userId, verification);
 
         return { message: '브리더 인증 신청이 성공적으로 제출되었습니다. 관리자 검토 후 결과를 알려드립니다.' };
+    }
+
+    /**
+     * 브리더 인증 서류 업로드
+     * 인증된 브리더가 인증 서류를 업로드
+     *
+     * @param userId 브리더 고유 ID
+     * @param files 업로드할 파일들
+     * @param types 파일 타입 배열
+     * @param level 브리더 레벨
+     * @returns 업로드 결과
+     */
+    async uploadVerificationDocuments(
+        userId: string,
+        files: Express.Multer.File[],
+        types: string[],
+        level: 'new' | 'elite',
+    ): Promise<UploadDocumentsResponseDto> {
+        const breeder = await this.breederRepository.findById(userId);
+        if (!breeder) {
+            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+        }
+
+        if (!files || files.length === 0) {
+            throw new BadRequestException('업로드할 파일이 없습니다.');
+        }
+
+        if (files.length !== types.length) {
+            throw new BadRequestException('파일 수와 타입 수가 일치하지 않습니다.');
+        }
+
+        const uploadedDocuments: UploadedDocumentDto[] = [];
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const type = types[i];
+
+            // 폴더 경로: verification/{breederId}
+            const folder = `verification/${userId}`;
+
+            // 타입을 파일 이름에 포함시키기 위해 originalname 수정
+            const ext = file.originalname.split('.').pop() || 'pdf';
+            file.originalname = `${type}_${Date.now()}.${ext}`;
+
+            // GCS에 업로드
+            const uploadResult = await this.storageService.uploadFile(file, folder);
+
+            // Signed URL 생성 (미리보기용, 1시간)
+            const signedUrl = this.storageService.generateSignedUrl(uploadResult.fileName, 60);
+
+            uploadedDocuments.push({
+                type,
+                url: signedUrl,
+                fileName: uploadResult.fileName,
+                size: file.size,
+            });
+        }
+
+        return new UploadDocumentsResponseDto(uploadedDocuments.length, level, uploadedDocuments);
+    }
+
+    /**
+     * 브리더 인증 서류 제출 (간소화된 버전)
+     * 업로드된 서류를 제출하여 인증 신청
+     *
+     * @param userId 브리더 고유 ID
+     * @param dto 제출 데이터
+     * @returns 성공 메시지
+     */
+    async submitVerificationDocuments(userId: string, dto: SubmitDocumentsRequestDto): Promise<any> {
+        const breeder = await this.breederRepository.findById(userId);
+        if (!breeder) {
+            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+        }
+
+        if (breeder.verification?.status === VerificationStatus.APPROVED) {
+            throw new BadRequestException('이미 인증이 완료된 브리더입니다.');
+        }
+
+        // 필수 서류 검증
+        const requiredTypes =
+            dto.level === 'new' ? ['idCard', 'businessLicense'] : ['idCard', 'businessLicense', 'contractSample'];
+
+        const submittedTypes = dto.documents.map((d) => d.type);
+        const missingTypes = requiredTypes.filter((t) => !submittedTypes.includes(t));
+
+        if (missingTypes.length > 0) {
+            throw new BadRequestException(`필수 서류가 누락되었습니다: ${missingTypes.join(', ')}`);
+        }
+
+        // 문서 정보 변환
+        const documents = dto.documents.map((doc) => ({
+            type: doc.type,
+            fileName: doc.fileName,
+            uploadedAt: new Date(),
+        }));
+
+        const verification = {
+            status: VerificationStatus.REVIEWING,
+            level: dto.level,
+            submittedAt: new Date(),
+            documents,
+            submittedByEmail: dto.submittedByEmail || false,
+        };
+
+        await this.breederRepository.updateVerification(userId, verification);
+
+        return { message: '입점 서류 제출이 완료되었습니다. 관리자 검토 후 결과를 알려드립니다.' };
     }
 
     /**

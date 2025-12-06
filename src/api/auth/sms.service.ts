@@ -21,6 +21,8 @@ export class SmsService {
     private verificationCodes: Map<string, VerificationCode> = new Map();
     private readonly MAX_ATTEMPTS = 5;
     private readonly CODE_EXPIRY_MINUTES = 3;
+    // 관리자 전화번호 화이트리스트 (중복 가입 허용)
+    private readonly ADMIN_PHONE_WHITELIST = ['01065456502'];
 
     constructor(
         private readonly configService: ConfigService,
@@ -38,15 +40,20 @@ export class SmsService {
     async sendVerificationCode(phone: string): Promise<{ success: boolean; message: string }> {
         const normalizedPhone = this.normalizePhoneNumber(phone);
 
-        // 전화번호 중복 체크 (입양자 + 브리더)
-        const existingAdopter = await this.adopterModel.findOne({ phoneNumber: normalizedPhone }).exec();
-        if (existingAdopter) {
-            throw new BadRequestException('이미 등록된 전화번호입니다.');
-        }
+        // 관리자 전화번호 화이트리스트 체크 (중복 허용)
+        const isWhitelisted = this.ADMIN_PHONE_WHITELIST.includes(normalizedPhone);
 
-        const existingBreeder = await this.breederModel.findOne({ phone: normalizedPhone }).exec();
-        if (existingBreeder) {
-            throw new BadRequestException('이미 등록된 전화번호입니다.');
+        // 전화번호 중복 체크 (화이트리스트에 없는 경우만)
+        if (!isWhitelisted) {
+            const existingAdopter = await this.adopterModel.findOne({ phoneNumber: normalizedPhone }).exec();
+            if (existingAdopter) {
+                throw new BadRequestException('이미 등록된 전화번호입니다.');
+            }
+
+            const existingBreeder = await this.breederModel.findOne({ phone: normalizedPhone }).exec();
+            if (existingBreeder) {
+                throw new BadRequestException('이미 등록된 전화번호입니다.');
+            }
         }
 
         const existingCode = this.verificationCodes.get(normalizedPhone);

@@ -365,8 +365,6 @@ export class AuthService {
         }
     }
 
-
-
     /**
      * 이메일 중복 체크 - 입양자와 브리더 모두 확인
      */

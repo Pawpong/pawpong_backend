@@ -1,4 +1,20 @@
-import { Controller, Post, Get, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
+import {
+    Controller,
+    Post,
+    Get,
+    Patch,
+    Delete,
+    Body,
+    Param,
+    Query,
+    UseGuards,
+    UseInterceptors,
+    UploadedFiles,
+    HttpCode,
+    HttpStatus,
+} from '@nestjs/common';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes } from '@nestjs/swagger';
 
 import { Roles } from '../../common/decorator/roles.decorator';
 import { CurrentUser } from '../../common/decorator/user.decorator';
@@ -17,6 +33,8 @@ import { ApplicationsGetRequestDto } from './dto/request/applications-fetch-requ
 import { VerificationSubmitRequestDto } from './dto/request/verification-submit-request.dto';
 import { ApplicationFormUpdateRequestDto } from './dto/request/application-form-update-request.dto';
 import { ApplicationStatusUpdateRequestDto } from './dto/request/application-status-update-request.dto';
+import { UploadDocumentsRequestDto } from './dto/request/upload-documents-request.dto';
+import { SubmitDocumentsRequestDto } from './dto/request/submit-documents-request.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { PetAddResponseDto } from './dto/response/pet-add-response.dto';
@@ -35,6 +53,7 @@ import { ReceivedApplicationListResponseDto } from '../breeder/dto/response/rece
 import { ApplicationStatusUpdateResponseDto } from './dto/response/application-status-update-response.dto';
 import { MyPetsListResponseDto, MyPetItemDto } from './dto/response/my-pets-list-response.dto';
 import { MyReviewsListResponseDto, MyReviewItemDto } from './dto/response/my-reviews-list-response.dto';
+import { UploadDocumentsResponseDto } from './dto/response/upload-documents-response.dto';
 
 @ApiController('브리더 관리')
 @Controller('breeder-management')
@@ -108,6 +127,83 @@ export class BreederManagementController {
     ): Promise<ApiResponseDto<VerificationSubmitResponseDto>> {
         const result = await this.breederManagementService.submitVerification(user.userId, verificationData);
         return ApiResponseDto.success(result, '인증 신청이 성공적으로 제출되었습니다.');
+    }
+
+    @Post('verification/upload')
+    @HttpCode(HttpStatus.OK)
+    @ApiConsumes('multipart/form-data')
+    @ApiEndpoint({
+        summary: '브리더 인증 서류 업로드',
+        description: `브리더 입점 인증 서류를 업로드합니다.
+
+**New 레벨 (필수 2개):**
+- idCard: 신분증 사본
+- businessLicense: 동물생산업 등록증
+
+**Elite 레벨 (필수 4개):**
+- idCard: 신분증 사본
+- businessLicense: 동물생산업 등록증
+- contractSample: 표준 입양계약서 샘플
+- breederCertificate: 브리더 인증 서류 (강아지: breederDogCertificate, 고양이: breederCatCertificate)
+
+**요청 형식:**
+- files: 파일 배열
+- types: 서류 타입 JSON 배열 (예: ["idCard","businessLicense"])
+- level: 브리더 레벨 ("new" 또는 "elite")
+
+**응답:**
+- fileName: 파일 경로 (서류 제출 시 사용)
+- url: 미리보기용 Signed URL (1시간 유효)`,
+        responseType: UploadDocumentsResponseDto,
+        isPublic: false,
+    })
+    @UseInterceptors(
+        FilesInterceptor('files', 10, {
+            limits: {
+                fileSize: 10 * 1024 * 1024, // 10MB
+                files: 10,
+            },
+        }),
+    )
+    async uploadVerificationDocuments(
+        @CurrentUser() user: any,
+        @UploadedFiles() files: Express.Multer.File[],
+        @Body() dto: UploadDocumentsRequestDto,
+    ): Promise<ApiResponseDto<UploadDocumentsResponseDto>> {
+        const result = await this.breederManagementService.uploadVerificationDocuments(
+            user.userId,
+            files,
+            dto.types,
+            dto.level,
+        );
+        return ApiResponseDto.success(
+            result,
+            `${dto.level} 레벨 브리더 인증 서류 ${result.count}개가 업로드되었습니다.`,
+        );
+    }
+
+    @Post('verification/submit')
+    @HttpCode(HttpStatus.OK)
+    @ApiEndpoint({
+        summary: '브리더 인증 서류 제출 (간소화)',
+        description: `업로드된 서류를 제출하여 인증 신청합니다.
+
+**프론트엔드 플로우:**
+1. POST /verification/upload로 파일 업로드 → fileName 획득
+2. 이 엔드포인트로 fileName들을 제출
+
+**요청 형식:**
+- level: 브리더 레벨 ("new" 또는 "elite")
+- documents: 서류 목록 [{ type, fileName }]`,
+        responseType: VerificationSubmitResponseDto,
+        isPublic: false,
+    })
+    async submitVerificationDocuments(
+        @CurrentUser() user: any,
+        @Body() dto: SubmitDocumentsRequestDto,
+    ): Promise<ApiResponseDto<VerificationSubmitResponseDto>> {
+        const result = await this.breederManagementService.submitVerificationDocuments(user.userId, dto);
+        return ApiResponseDto.success(result, '입점 서류 제출이 완료되었습니다.');
     }
 
     @Post('parent-pets')

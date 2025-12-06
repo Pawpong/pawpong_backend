@@ -156,9 +156,10 @@ export class MailTemplateService {
      * [2] 브리더 입점 반려 이메일
      */
     getBreederRejectionEmail(breederName: string, rejectionReasons: string[]): { subject: string; html: string } {
-        const reasonsHtml = rejectionReasons.length > 0
-            ? `<ul class="reason-list">${rejectionReasons.map(r => `<li>${r}</li>`).join('')}</ul>`
-            : '<p>자세한 사유는 관리자에게 문의해주세요.</p>';
+        const reasonsHtml =
+            rejectionReasons.length > 0
+                ? `<ul class="reason-list">${rejectionReasons.map((r) => `<li>${r}</li>`).join('')}</ul>`
+                : '<p>자세한 사유는 관리자에게 문의해주세요.</p>';
 
         const content = `
             <h2>안녕하세요, ${breederName}님.</h2>
