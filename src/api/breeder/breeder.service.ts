@@ -25,7 +25,7 @@ export class BreederService {
         @InjectModel(ParentPet.name) private parentPetModel: Model<ParentPetDocument>,
         @InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>,
         private readonly storageService: StorageService,
-    ) { }
+    ) {}
 
     async searchBreeders(searchDto: BreederSearchRequestDto): Promise<BreederSearchResponseDto> {
         const {
@@ -354,19 +354,19 @@ export class BreederService {
             healthRecords: pet.healthRecords || [],
             father: father
                 ? {
-                    petId: father.petId,
-                    name: father.name,
-                    breed: father.breed,
-                    photo: father.photos?.[0] || '',
-                }
+                      petId: father.petId,
+                      name: father.name,
+                      breed: father.breed,
+                      photo: father.photos?.[0] || '',
+                  }
                 : undefined,
             mother: mother
                 ? {
-                    petId: mother.petId,
-                    name: mother.name,
-                    breed: mother.breed,
-                    photo: mother.photos?.[0] || '',
-                }
+                      petId: mother.petId,
+                      name: mother.name,
+                      breed: mother.breed,
+                      photo: mother.photos?.[0] || '',
+                  }
                 : undefined,
             availableFrom: pet.availableFrom,
             microchipNumber: pet.microchipNumber,

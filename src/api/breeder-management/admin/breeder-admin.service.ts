@@ -51,7 +51,7 @@ export class BreederAdminService {
         private readonly storageService: StorageService,
         private readonly mailTemplateService: MailTemplateService,
         private readonly notificationService: NotificationService,
-    ) { }
+    ) {}
 
     /**
      * 관리자 활동 로그 기록
@@ -173,13 +173,7 @@ export class BreederAdminService {
             throw new ForbiddenException('Access denied');
         }
 
-        const {
-            verificationStatus,
-            cityName,
-            searchKeyword,
-            pageNumber = 1,
-            itemsPerPage = 10,
-        } = filter;
+        const { verificationStatus, cityName, searchKeyword, pageNumber = 1, itemsPerPage = 10 } = filter;
 
         const query: any = {};
 
@@ -304,9 +298,7 @@ export class BreederAdminService {
 
         if (verificationData.verificationStatus === VerificationStatus.APPROVED) {
             // 승인 알림 + 이메일 발송 (빌더 통합)
-            const emailContent = breederEmail
-                ? this.mailTemplateService.getBreederApprovalEmail(breederName)
-                : null;
+            const emailContent = breederEmail ? this.mailTemplateService.getBreederApprovalEmail(breederName) : null;
 
             const builder = this.notificationService
                 .to(breederId, RecipientType.BREEDER)

@@ -60,7 +60,7 @@ export class AdopterService {
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(BreederReview.name) private breederReviewModel: Model<BreederReviewDocument>,
         @InjectModel(AdoptionApplication.name) private adoptionApplicationModel: Model<AdoptionApplicationDocument>,
-    ) { }
+    ) {}
 
     /**
      * 입양 신청서 제출 처리
