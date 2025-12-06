@@ -134,17 +134,17 @@ export class AuthService {
         };
 
         // Access 토큰 (.env JWT_EXPIRATION 설정 사용, 기본값 24시간)
-        const jwtExpiration = this.configService.get<string>('JWT_EXPIRATION') || '24h';
+        const jwtExpiration = (this.configService.get<string>('JWT_EXPIRATION') || '24h') as string;
         const accessToken = this.jwtService.sign(payload, {
-            expiresIn: jwtExpiration,
+            expiresIn: jwtExpiration as any,
         });
 
         // Refresh 토큰 (.env JWT_REFRESH_EXPIRATION 설정 사용, 기본값 7일)
-        const jwtRefreshExpiration = this.configService.get<string>('JWT_REFRESH_EXPIRATION') || '7d';
+        const jwtRefreshExpiration = (this.configService.get<string>('JWT_REFRESH_EXPIRATION') || '7d') as string;
         const refreshToken = this.jwtService.sign(
             { ...payload, type: 'refresh' },
             {
-                expiresIn: jwtRefreshExpiration,
+                expiresIn: jwtRefreshExpiration as any,
             },
         );
 
