@@ -20,8 +20,15 @@ export class RolesGuard implements CanActivate {
         const { user } = context.switchToHttp().getRequest();
         console.log('[RolesGuard] user:', JSON.stringify(user));
         console.log('[RolesGuard] user.role:', user?.role);
-        const hasRole = requiredRoles.some((role) => user?.role === role);
-        console.log('[RolesGuard] hasRole:', hasRole);
+
+        // 브리더도 adopter 권한의 API 사용 가능 (찜하기 등)
+        const effectiveRoles = [user?.role];
+        if (user?.role === 'breeder') {
+            effectiveRoles.push('adopter');
+        }
+
+        const hasRole = requiredRoles.some((role) => effectiveRoles.includes(role));
+        console.log('[RolesGuard] effectiveRoles:', effectiveRoles, 'hasRole:', hasRole);
         return hasRole;
     }
 }
