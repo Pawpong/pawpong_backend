@@ -387,6 +387,14 @@ export class AuthService {
     }
 
     /**
+     * 브리더 상호명 중복 체크
+     */
+    async checkBreederNameDuplicate(breederName: string): Promise<boolean> {
+        const breeder = await this.authBreederRepository.findByBreederName(breederName);
+        return !!breeder;
+    }
+
+    /**
      * 소셜 로그인 처리 - 사용자 조회 또는 임시 생성
      */
     async handleSocialLogin(profile: {

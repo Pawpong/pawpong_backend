@@ -48,6 +48,13 @@ export class AuthBreederRepository {
     }
 
     /**
+     * 브리더 상호명(name)으로 브리더 조회
+     */
+    async findByBreederName(name: string): Promise<BreederDocument | null> {
+        return this.breederModel.findOne({ name }).exec() as Promise<BreederDocument | null>;
+    }
+
+    /**
      * 브리더 생성
      */
     async create(breederData: Partial<Breeder>): Promise<BreederDocument> {
