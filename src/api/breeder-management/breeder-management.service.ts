@@ -154,6 +154,9 @@ export class BreederManagementService {
         if (updateData.specializationTypes) {
             profileUpdateData['profile.specialization'] = updateData.specializationTypes;
         }
+        if (updateData.breeds) {
+            profileUpdateData['breeds'] = updateData.breeds;
+        }
         if (updateData.experienceYears !== undefined) {
             profileUpdateData['profile.experienceYears'] = updateData.experienceYears;
         }
@@ -162,6 +165,9 @@ export class BreederManagementService {
                 min: updateData.priceRangeInfo.minimumPrice,
                 max: updateData.priceRangeInfo.maximumPrice,
             };
+        }
+        if (updateData.profileImage) {
+            profileUpdateData['profileImageFileName'] = updateData.profileImage;
         }
 
         await this.breederRepository.updateProfile(userId, profileUpdateData);
@@ -703,6 +709,31 @@ export class BreederManagementService {
             })),
         };
 
+        // profile.representativePhotos를 Signed URL로 변환
+        const profileWithSignedUrls = breeder.profile
+            ? {
+                  ...breeder.profile,
+                  representativePhotos: this.storageService.generateSignedUrls(
+                      breeder.profile.representativePhotos || [],
+                      60,
+                  ),
+              }
+            : breeder.profile;
+
+        // parentPets의 photoFileName을 Signed URL로 변환
+        const parentPetsWithSignedUrls = (parentPets || []).map((pet: any) => ({
+            ...pet.toObject ? pet.toObject() : pet,
+            petId: (pet._id || pet.petId)?.toString(),
+            photoFileName: this.storageService.generateSignedUrlSafe(pet.photoFileName, 60),
+        }));
+
+        // availablePets의 photos를 Signed URL로 변환
+        const availablePetsWithSignedUrls = (availablePetsData || []).map((pet: any) => ({
+            ...pet,
+            petId: (pet._id || pet.petId)?.toString(),
+            photos: this.storageService.generateSignedUrls(pet.photos || [], 60),
+        }));
+
         return {
             breederId: (breeder._id as any).toString(),
             breederName: breeder.name,
@@ -711,9 +742,10 @@ export class BreederManagementService {
             profileImageFileName: profileImageFileName,
             accountStatus: breeder.accountStatus,
             verificationInfo: verificationWithSignedUrls,
-            profileInfo: breeder.profile,
-            parentPetInfo: parentPets,
-            availablePetInfo: availablePetsData,
+            profileInfo: profileWithSignedUrls,
+            breeds: breeder.breeds || [],
+            parentPetInfo: parentPetsWithSignedUrls,
+            availablePetInfo: availablePetsWithSignedUrls,
             applicationForm: breeder.applicationForm,
             statsInfo: breeder.stats,
         };

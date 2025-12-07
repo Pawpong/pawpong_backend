@@ -167,6 +167,21 @@ export class ProfileUpdateRequestDto {
     specializationTypes?: PetType[];
 
     /**
+     * 세부 품종명 (견종/묘종)
+     * @example ["보더콜리", "푸들", "비숑프리제"]
+     */
+    @ApiProperty({
+        description: '세부 품종명 (견종/묘종, 최대 5개)',
+        example: ['보더콜리', '푸들', '비숑프리제'],
+        type: [String],
+        required: false,
+    })
+    @IsArray()
+    @IsString({ each: true })
+    @IsOptional()
+    breeds?: string[];
+
+    /**
      * 경력 연수
      * @example 20
      */
@@ -181,4 +196,17 @@ export class ProfileUpdateRequestDto {
     @IsOptional()
     @Min(0)
     experienceYears?: number;
+
+    /**
+     * 프로필 이미지 파일명 (GCS 버킷 경로)
+     * @example "profile-images/abc123.jpeg"
+     */
+    @ApiProperty({
+        description: '프로필 이미지 파일명',
+        example: 'profile-images/abc123.jpeg',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    profileImage?: string;
 }

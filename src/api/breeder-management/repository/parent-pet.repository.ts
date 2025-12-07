@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { ParentPet, ParentPetDocument } from '../../../schema/parent-pet.schema';
 
@@ -28,7 +28,10 @@ export class ParentPetRepository {
      * @returns ParentPet 또는 null
      */
     async findByIdAndBreeder(id: string, breederId: string): Promise<ParentPetDocument | null> {
-        return this.parentPetModel.findOne({ _id: id, breederId }).exec() as any;
+        return this.parentPetModel.findOne({
+            _id: new Types.ObjectId(id),
+            breederId: new Types.ObjectId(breederId)
+        }).exec() as any;
     }
 
     /**
@@ -38,7 +41,7 @@ export class ParentPetRepository {
      * @returns ParentPet 배열
      */
     async findByBreederId(breederId: string, isActive?: boolean): Promise<ParentPetDocument[]> {
-        const query: any = { breederId };
+        const query: any = { breederId: new Types.ObjectId(breederId) };
         if (isActive !== undefined) {
             query.isActive = isActive;
         }
@@ -80,6 +83,9 @@ export class ParentPetRepository {
      * @returns ParentPet 수
      */
     async countByBreeder(breederId: string): Promise<number> {
-        return this.parentPetModel.countDocuments({ breederId, isActive: true });
+        return this.parentPetModel.countDocuments({
+            breederId: new Types.ObjectId(breederId),
+            isActive: true
+        });
     }
 }

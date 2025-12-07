@@ -54,16 +54,16 @@ export class ParentPetAddDto {
     birthDate: string;
 
     /**
-     * 부모견/부모묘 사진 파일명
+     * 부모견/부모묘 사진 파일명 (선택)
      * @example "parents/uuid.jpg"
      */
-    @ApiProperty({
+    @ApiPropertyOptional({
         description: '부모견/부모묘 사진 파일명',
         example: 'parents/uuid.jpg',
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    photoFileName: string;
+    photoFileName?: string;
 
     /**
      * 소개 (선택)

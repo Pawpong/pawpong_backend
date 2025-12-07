@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { PetStatus } from '../../../common/enum/user.enum';
 
@@ -30,7 +30,10 @@ export class AvailablePetManagementRepository {
      * @returns AvailablePet 또는 null
      */
     async findByIdAndBreeder(id: string, breederId: string): Promise<AvailablePetDocument | null> {
-        return this.availablePetModel.findOne({ _id: id, breederId }).exec() as any;
+        return this.availablePetModel.findOne({
+            _id: new Types.ObjectId(id),
+            breederId: new Types.ObjectId(breederId)
+        }).exec() as any;
     }
 
     /**
@@ -51,7 +54,7 @@ export class AvailablePetManagementRepository {
         const { status, includeInactive = false, page = 1, limit = 20 } = options;
 
         // 필터 조건 구성
-        const filter: any = { breederId };
+        const filter: any = { breederId: new Types.ObjectId(breederId) };
         if (!includeInactive) {
             filter.isActive = true;
         }
@@ -77,7 +80,11 @@ export class AvailablePetManagementRepository {
      * @returns AvailablePet 수
      */
     async countByStatus(breederId: string, status: PetStatus, isActive: boolean = true): Promise<number> {
-        return this.availablePetModel.countDocuments({ breederId, status, isActive });
+        return this.availablePetModel.countDocuments({
+            breederId: new Types.ObjectId(breederId),
+            status,
+            isActive
+        });
     }
 
     /**
@@ -86,7 +93,10 @@ export class AvailablePetManagementRepository {
      * @returns 비활성화된 AvailablePet 수
      */
     async countInactive(breederId: string): Promise<number> {
-        return this.availablePetModel.countDocuments({ breederId, isActive: false });
+        return this.availablePetModel.countDocuments({
+            breederId: new Types.ObjectId(breederId),
+            isActive: false
+        });
     }
 
     /**
