@@ -69,23 +69,42 @@ export class AdopterService {
      * 입양자와 브리더 양쪽에서 이 컬렉션을 참조합니다.
      *
      * 비즈니스 규칙:
-     * - 입양자 계정 상태 확인 필수
+     * - 입양자 또는 브리더 계정 상태 확인 필수
      * - 브리더 존재 여부 검증
      * - 반려동물 ID는 선택사항 (특정 개체 또는 전체 상담)
      * - 개인정보 수집 동의 필수
      * - 중복 신청 방지 검증 (같은 브리더에게 대기 중인 신청이 있는 경우)
      *
-     * @param userId 입양자 고유 ID (JWT에서 추출)
+     * @param userId 신청자 고유 ID (JWT에서 추출)
      * @param dto 입양 신청 데이터 (Figma 디자인 기반 필드)
+     * @param userRole 사용자 역할 ('adopter' | 'breeder')
      * @returns 생성된 신청서 정보
      * @throws BadRequestException 잘못된 요청 데이터
      * @throws ConflictException 중복 신청 시도
      */
-    async createApplication(userId: string, dto: ApplicationCreateRequestDto): Promise<any> {
-        // 1. 입양자 계정 존재 및 상태 검증
-        const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+    async createApplication(userId: string, dto: ApplicationCreateRequestDto, userRole?: string): Promise<any> {
+        // 1. 신청자 계정 존재 및 상태 검증 (입양자 또는 브리더)
+        let applicant: any;
+        let applicantName: string;
+        let applicantEmail: string;
+        let applicantPhone: string;
+
+        if (userRole === 'breeder') {
+            applicant = await this.breederRepository.findById(userId);
+            if (!applicant) {
+                throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+            }
+            applicantName = applicant.name || applicant.nickname;
+            applicantEmail = applicant.emailAddress;
+            applicantPhone = applicant.phoneNumber || '';
+        } else {
+            applicant = await this.adopterRepository.findById(userId);
+            if (!applicant) {
+                throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            }
+            applicantName = applicant.nickname;
+            applicantEmail = applicant.emailAddress;
+            applicantPhone = applicant.phoneNumber || '';
         }
 
         // 2. 개인정보 수집 동의 확인
@@ -100,17 +119,18 @@ export class AdopterService {
         }
 
         // 3-1. 커스텀 질문 validation (브리더가 설정한 필수 질문 체크)
+        // TODO: 프론트엔드에서 커스텀 질문 기능 구현 후 주석 해제
         const customQuestions = breeder.applicationForm || [];
-        const customResponsesMap = new Map((dto.customResponses || []).map((r) => [r.questionId, r.answer]));
+        // const customResponsesMap = new Map((dto.customResponses || []).map((r) => [r.questionId, r.answer]));
 
-        for (const question of customQuestions) {
-            if (question.required) {
-                const answer = customResponsesMap.get(question.id);
-                if (!answer || (typeof answer === 'string' && answer.trim() === '')) {
-                    throw new BadRequestException(`필수 질문에 답변해주세요: ${question.label}`);
-                }
-            }
-        }
+        // for (const question of customQuestions) {
+        //     if (question.required) {
+        //         const answer = customResponsesMap.get(question.id);
+        //         if (!answer || (typeof answer === 'string' && answer.trim() === '')) {
+        //             throw new BadRequestException(`필수 질문에 답변해주세요: ${question.label}`);
+        //         }
+        //     }
+        // }
 
         // 4. 반려동물 검증 (petId가 있는 경우에만)
         let pet: any = null;
@@ -154,9 +174,9 @@ export class AdopterService {
         const newApplication = new this.adoptionApplicationModel({
             breederId: dto.breederId,
             adopterId: userId,
-            adopterName: adopter.nickname,
-            adopterEmail: adopter.emailAddress,
-            adopterPhone: adopter.phoneNumber || '',
+            adopterName: applicantName,
+            adopterEmail: applicantEmail,
+            adopterPhone: applicantPhone,
             petId: pet ? dto.petId : undefined,
             petName: pet ? pet.name : undefined,
             status: ApplicationStatus.CONSULTATION_PENDING,

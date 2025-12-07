@@ -70,7 +70,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Body() createApplicationDto: ApplicationCreateRequestDto,
     ): Promise<ApiResponseDto<ApplicationCreateResponseDto>> {
-        const result = await this.adopterService.createApplication(user.userId, createApplicationDto);
+        const result = await this.adopterService.createApplication(user.userId, createApplicationDto, user.role);
         return ApiResponseDto.success(result, '입양 신청이 성공적으로 제출되었습니다.');
     }
 
