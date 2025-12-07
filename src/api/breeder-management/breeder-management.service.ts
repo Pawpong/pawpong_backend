@@ -1,5 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 
 import { VerificationStatus, ApplicationStatus, PetStatus } from '../../common/enum/user.enum';
 
@@ -17,8 +18,8 @@ import { UploadDocumentsResponseDto, UploadedDocumentDto } from './dto/response/
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
 
+import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
 import { BreederRepository } from './repository/breeder.repository';
-import { AdopterRepository } from '../adopter/adopter.repository';
 import { ParentPetRepository } from './repository/parent-pet.repository';
 import { AdoptionApplicationRepository } from './repository/adoption-application.repository';
 import { AvailablePetManagementRepository } from './repository/available-pet-management.repository';
@@ -44,8 +45,8 @@ export class BreederManagementService {
     constructor(
         private storageService: StorageService,
 
+        @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
         private breederRepository: BreederRepository,
-        private adopterRepository: AdopterRepository,
         private parentPetRepository: ParentPetRepository,
         private availablePetRepository: AvailablePetManagementRepository,
         private adoptionApplicationRepository: AdoptionApplicationRepository,
@@ -412,7 +413,7 @@ export class BreederManagementService {
         }
 
         // 입양자 정보 조회
-        const adopter = await this.adopterRepository.findById(application.adopterId.toString());
+        const adopter = await this.adopterModel.findById(application.adopterId).lean();
 
         return {
             applicationId: (application as any)._id.toString(),
