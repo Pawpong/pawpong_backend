@@ -145,6 +145,21 @@ export class BreederProfile {
      */
     @Prop()
     experienceYears?: number;
+
+    /**
+     * 분양 가격 범위
+     */
+    @Prop({
+        type: {
+            min: { type: Number, default: 0 },
+            max: { type: Number, default: 0 },
+        },
+        default: { min: 0, max: 0 },
+    })
+    priceRange?: {
+        min: number;
+        max: number;
+    };
 }
 
 /**
