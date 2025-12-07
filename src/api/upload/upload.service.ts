@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { StorageService } from '../../common/storage/storage.service';
 
@@ -82,7 +82,10 @@ export class UploadService {
         }
 
         // 해당 petId가 본인 소유인지 확인
-        const pet = await this.availablePetModel.findOne({ _id: petId, breederId: user.userId });
+        const pet = await this.availablePetModel.findOne({
+            _id: new Types.ObjectId(petId),
+            breederId: new Types.ObjectId(user.userId),
+        });
         if (!pet) {
             throw new BadRequestException('해당 분양 개체를 찾을 수 없습니다.');
         }
@@ -112,7 +115,10 @@ export class UploadService {
         }
 
         // 해당 petId가 본인 소유인지 확인
-        const pet = await this.parentPetModel.findOne({ _id: petId, breederId: user.userId });
+        const pet = await this.parentPetModel.findOne({
+            _id: new Types.ObjectId(petId),
+            breederId: new Types.ObjectId(user.userId),
+        });
         if (!pet) {
             throw new BadRequestException('해당 부모견/묘를 찾을 수 없습니다.');
         }
@@ -120,8 +126,8 @@ export class UploadService {
         // 스토리지 업로드
         const result = await this.storageService.uploadFile(file, 'pets/parent');
 
-        // DB 업데이트: photos 배열에 1개만 저장
-        await this.parentPetModel.findByIdAndUpdate(petId, { $set: { photos: [result.fileName] } });
+        // DB 업데이트: photoFileName 필드에 저장
+        await this.parentPetModel.findByIdAndUpdate(petId, { $set: { photoFileName: result.fileName } });
 
         return new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
     }
