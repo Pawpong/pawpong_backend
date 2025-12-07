@@ -64,7 +64,7 @@ export class PlatformAdminService {
             this.adopterModel.countDocuments({ account_status: UserStatus.ACTIVE }),
             this.breederModel.countDocuments({ status: UserStatus.ACTIVE }),
             this.breederModel.countDocuments({ 'verification.status': VerificationStatus.APPROVED }),
-            this.breederModel.countDocuments({ 'verification.status': VerificationStatus.REVIEWING }),
+            this.breederModel.countDocuments({ 'verification.status': VerificationStatus.PENDING }),
         ]);
 
         // Get application stats through aggregation

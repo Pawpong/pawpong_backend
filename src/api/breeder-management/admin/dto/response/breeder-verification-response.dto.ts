@@ -55,13 +55,28 @@ export class BreederVerificationResponseDto {
         subscriptionPlan: string;
 
         /**
+         * 브리더 레벨
+         * @example "new"
+         */
+        level: string;
+
+        /**
          * 신청 일시
          * @example "2024-01-15T10:30:00.000Z"
          */
         submittedAt?: Date;
 
         /**
-         * 제출된 서류 URL 배열
+         * 제출된 서류 배열 (타입과 URL 포함)
+         * @example [{"type": "id_card", "url": "https://example.com/doc1.pdf"}]
+         */
+        documents: Array<{
+            type: string;
+            url: string;
+        }>;
+
+        /**
+         * 제출된 서류 URL 배열 (하위 호환성)
          * @example ["https://example.com/doc1.pdf", "https://example.com/doc2.pdf"]
          */
         documentUrls: string[];
