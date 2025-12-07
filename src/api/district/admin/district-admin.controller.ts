@@ -7,8 +7,8 @@ import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.de
 
 import { DistrictAdminService } from './district-admin.service';
 
-import { CreateDistrictRequestDto } from './dto/request/create-district-request.dto';
-import { UpdateDistrictRequestDto } from './dto/request/update-district-request.dto';
+import { CreateDistrictRequestDto } from '../../breeder-management/request/create-district-request.dto';
+import { UpdateDistrictRequestDto } from '../../breeder-management/request/update-district-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { DistrictResponseDto } from '../dto/response/district-response.dto';
 
