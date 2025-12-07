@@ -54,8 +54,26 @@ export class Notification {
      * - profile_review: 프로필 심사
      * - profile_re_review: 프로필 재심사
      * - matching: 매칭
+     * - breeder_approved: 브리더 입점 승인
+     * - breeder_rejected: 브리더 입점 반려
+     * - new_application: 새로운 상담 신청
+     * - document_reminder: 서류 미제출 리마인드
+     * - new_review: 새로운 후기 등록
      */
-    @Prop({ required: true, enum: ['profile_review', 'profile_re_review', 'matching'], index: true })
+    @Prop({
+        required: true,
+        enum: [
+            'profile_review',
+            'profile_re_review',
+            'matching',
+            'breeder_approved',
+            'breeder_rejected',
+            'new_application',
+            'document_reminder',
+            'new_review',
+        ],
+        index: true,
+    })
     type: string;
 
     /**
