@@ -4,19 +4,19 @@ import { ApiProperty } from '@nestjs/swagger';
 import { VerificationStatus } from '../../../../../common/enum/user.enum';
 
 /**
- * 브리더 인증 승인/거절 요청 DTO
+ * 브리더 인증 상태 변경 요청 DTO
  */
 export class BreederVerificationRequestDto {
     /**
-     * 인증 상태 (approved/rejected)
+     * 인증 상태 (reviewing/approved/rejected)
      * @example "approved"
      */
     @ApiProperty({
         description: '인증 상태',
         example: 'approved',
-        enum: [VerificationStatus.APPROVED, VerificationStatus.REJECTED],
+        enum: [VerificationStatus.REVIEWING, VerificationStatus.APPROVED, VerificationStatus.REJECTED],
     })
-    @IsEnum([VerificationStatus.APPROVED, VerificationStatus.REJECTED])
+    @IsEnum([VerificationStatus.REVIEWING, VerificationStatus.APPROVED, VerificationStatus.REJECTED])
     verificationStatus: VerificationStatus;
 
     /**
