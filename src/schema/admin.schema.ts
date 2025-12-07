@@ -60,6 +60,7 @@ export class AdminActivityLog {
         enum: [
             'approve_breeder', // 브리더 인증 승인
             'reject_breeder', // 브리더 인증 거절
+            'review_breeder', // 브리더 인증 리뷰 완료
             'suspend_user', // 사용자 계정 정지
             'activate_user', // 사용자 계정 활성화
             'resolve_report', // 신고 해결
