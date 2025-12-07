@@ -218,6 +218,72 @@ export class BreederStats {
 }
 
 /**
+ * 브리더 신고 정보 스키마
+ */
+@Schema({ _id: false })
+export class BreederReportInfo {
+    /**
+     * 신고 고유 ID
+     */
+    @Prop({ required: true })
+    reportId: string;
+
+    /**
+     * 신고자 ID
+     */
+    @Prop({ required: true })
+    reporterId: string;
+
+    /**
+     * 신고자 이름
+     */
+    @Prop({ required: true })
+    reporterName: string;
+
+    /**
+     * 신고 유형
+     * - no_contract: 계약 불이행
+     * - false_info: 허위 정보
+     * - inappropriate_content: 부적절한 콘텐츠
+     * - fraudulent_listing: 사기성 매물
+     * - other: 기타
+     */
+    @Prop({
+        required: true,
+        enum: ['no_contract', 'false_info', 'inappropriate_content', 'fraudulent_listing', 'other'],
+    })
+    type: string;
+
+    /**
+     * 신고 상세 내용
+     */
+    @Prop({ required: true })
+    description: string;
+
+    /**
+     * 신고 처리 상태
+     */
+    @Prop({
+        required: true,
+        enum: ['pending', 'reviewing', 'resolved', 'dismissed'],
+        default: 'pending',
+    })
+    status: string;
+
+    /**
+     * 신고 접수 일시
+     */
+    @Prop({ default: Date.now })
+    reportedAt: Date;
+
+    /**
+     * 관리자 처리 메모
+     */
+    @Prop()
+    adminNotes?: string;
+}
+
+/**
  * 입양 신청 폼 필드 스키마
  */
 @Schema({ _id: false })
@@ -300,6 +366,12 @@ export class Breeder extends User {
      */
     @Prop({ type: [FavoriteBreederInfo], default: [] })
     favoriteBreederList: FavoriteBreederInfo[];
+
+    /**
+     * 받은 신고 내역
+     */
+    @Prop({ type: [BreederReportInfo], default: [] })
+    reports: BreederReportInfo[];
 }
 
 /**
