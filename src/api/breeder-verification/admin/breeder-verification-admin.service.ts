@@ -13,10 +13,12 @@ import {
 
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
 import { NotificationService } from '../../../api/notification/notification.service';
+import { StorageService } from '../../../common/storage/storage.service';
 
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
 import { BreederVerificationRequestDto } from './dto/request/breeder-verification-request.dto';
 import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
+import { BreederDetailResponseDto } from './dto/response/breeder-detail-response.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { PaginationBuilder } from '../../../common/dto/pagination/pagination-builder.dto';
 
@@ -35,6 +37,7 @@ export class BreederVerificationAdminService {
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         private readonly mailTemplateService: MailTemplateService,
         private readonly notificationService: NotificationService,
+        private readonly storageService: StorageService,
     ) {}
 
     /**
@@ -111,21 +114,34 @@ export class BreederVerificationAdminService {
             this.breederModel.countDocuments(query),
         ]);
 
-        const items = breeders.map(
-            (breeder): BreederVerificationResponseDto => ({
+        const items = breeders.map((breeder): BreederVerificationResponseDto => {
+            // submittedAt이 없으면 가장 오래된 문서의 uploadedAt을 사용
+            let submittedAt = breeder.verification?.submittedAt;
+            if (!submittedAt && breeder.verification?.documents && breeder.verification.documents.length > 0) {
+                const uploadDates = breeder.verification.documents
+                    .map((doc: any) => doc.uploadedAt)
+                    .filter((date: any): date is Date => date !== undefined)
+                    .sort((a: Date, b: Date) => a.getTime() - b.getTime());
+
+                if (uploadDates.length > 0) {
+                    submittedAt = uploadDates[0]; // 가장 오래된 문서 업로드 날짜
+                }
+            }
+
+            return {
                 breederId: (breeder._id as any).toString(),
                 breederName: breeder.nickname,
                 emailAddress: breeder.emailAddress,
                 verificationInfo: {
                     verificationStatus: breeder.verification?.status || 'pending',
                     subscriptionPlan: breeder.verification?.plan || 'basic',
-                    submittedAt: breeder.verification?.submittedAt,
+                    submittedAt: submittedAt,
                     isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
                 },
                 profileInfo: breeder.profile,
                 createdAt: (breeder as any).createdAt,
-            }),
-        );
+            };
+        });
 
         return new PaginationBuilder<BreederVerificationResponseDto>()
             .setItems(items)
@@ -179,21 +195,34 @@ export class BreederVerificationAdminService {
             this.breederModel.countDocuments(query),
         ]);
 
-        const items = breeders.map(
-            (breeder): BreederVerificationResponseDto => ({
+        const items = breeders.map((breeder): BreederVerificationResponseDto => {
+            // submittedAt이 없으면 가장 오래된 문서의 uploadedAt을 사용
+            let submittedAt = breeder.verification?.submittedAt;
+            if (!submittedAt && breeder.verification?.documents && breeder.verification.documents.length > 0) {
+                const uploadDates = breeder.verification.documents
+                    .map((doc: any) => doc.uploadedAt)
+                    .filter((date: any): date is Date => date !== undefined)
+                    .sort((a: Date, b: Date) => a.getTime() - b.getTime());
+
+                if (uploadDates.length > 0) {
+                    submittedAt = uploadDates[0]; // 가장 오래된 문서 업로드 날짜
+                }
+            }
+
+            return {
                 breederId: (breeder._id as any).toString(),
                 breederName: breeder.nickname,
                 emailAddress: breeder.emailAddress,
                 verificationInfo: {
                     verificationStatus: breeder.verification?.status || 'pending',
                     subscriptionPlan: breeder.verification?.plan || 'basic',
-                    submittedAt: breeder.verification?.submittedAt,
+                    submittedAt: submittedAt,
                     isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
                 },
                 profileInfo: breeder.profile,
                 createdAt: (breeder as any).createdAt,
-            }),
-        );
+            };
+        });
 
         return new PaginationBuilder<BreederVerificationResponseDto>()
             .setItems(items)
@@ -235,10 +264,14 @@ export class BreederVerificationAdminService {
         await breeder.save();
 
         // Log admin activity
-        const action =
-            verificationData.verificationStatus === VerificationStatus.APPROVED
-                ? AdminAction.APPROVE_BREEDER
-                : AdminAction.REJECT_BREEDER;
+        let action: AdminAction;
+        if (verificationData.verificationStatus === VerificationStatus.APPROVED) {
+            action = AdminAction.APPROVE_BREEDER;
+        } else if (verificationData.verificationStatus === VerificationStatus.REJECTED) {
+            action = AdminAction.REJECT_BREEDER;
+        } else {
+            action = AdminAction.REVIEW_BREEDER; // REVIEWING 상태일 때
+        }
 
         await this.logAdminActivity(
             adminId,
@@ -253,6 +286,72 @@ export class BreederVerificationAdminService {
         await this.sendVerificationNotification(breeder, verificationData);
 
         return { message: `Breeder verification ${verificationData.verificationStatus}` };
+    }
+
+    /**
+     * 브리더 상세 정보 조회
+     *
+     * 특정 브리더의 상세 정보를 조회합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param breederId 브리더 고유 ID
+     * @returns 브리더 상세 정보
+     */
+    async getBreederDetail(adminId: string, breederId: string): Promise<BreederDetailResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canManageBreeders) {
+            throw new ForbiddenException('브리더 관리 권한이 없습니다.');
+        }
+
+        const breeder = await this.breederModel.findById(breederId).lean();
+        if (!breeder) {
+            throw new BadRequestException('브리더를 찾을 수 없습니다.');
+        }
+
+        // submittedAt이 없으면 가장 오래된 문서의 uploadedAt을 사용
+        let submittedAt = breeder.verification?.submittedAt;
+        if (!submittedAt && breeder.verification?.documents && breeder.verification.documents.length > 0) {
+            const uploadDates = breeder.verification.documents
+                .map((doc) => doc.uploadedAt)
+                .filter((date): date is Date => date !== undefined)
+                .sort((a, b) => a.getTime() - b.getTime());
+
+            if (uploadDates.length > 0) {
+                submittedAt = uploadDates[0]; // 가장 오래된 문서 업로드 날짜
+            }
+        }
+
+        return {
+            breederId: (breeder._id as any).toString(),
+            email: breeder.emailAddress,
+            nickname: breeder.nickname,
+            phone: breeder.phoneNumber,
+            businessNumber: undefined,
+            businessName: (breeder as any).name || breeder.nickname,
+            verificationInfo: {
+                verificationStatus: breeder.verification?.status || 'pending',
+                subscriptionPlan: breeder.verification?.plan || 'basic',
+                submittedAt: submittedAt,
+                processedAt: breeder.verification?.reviewedAt,
+                isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
+                documents: breeder.verification?.documents?.map((doc) => ({
+                    type: doc.type,
+                    fileName: doc.fileName,
+                    fileUrl: this.storageService.generateSignedUrl(doc.fileName, 60),
+                    uploadedAt: doc.uploadedAt,
+                })) || [],
+                rejectionReason: breeder.verification?.rejectionReason,
+            },
+            profileInfo: {
+                location: breeder.profile?.location?.city,
+                detailedLocation: breeder.profile?.location?.district,
+                specialization: breeder.profile?.specialization,
+                description: breeder.profile?.description,
+                experienceYears: breeder.profile?.experienceYears,
+            },
+            createdAt: breeder.createdAt!,
+            updatedAt: breeder.updatedAt!,
+        };
     }
 
     /**
