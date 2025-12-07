@@ -168,7 +168,7 @@ export class BreederReportAdminService {
                 adminId,
                 AdminAction.RESOLVE_REPORT,
                 AdminTargetType.BREEDER,
-                breeder._id.toString(),
+                (breeder._id as any).toString(),
                 breeder.nickname,
                 `Report resolved: ${actionData.adminNotes || 'No notes'}`,
             );
@@ -177,7 +177,7 @@ export class BreederReportAdminService {
                 adminId,
                 AdminAction.DISMISS_REPORT,
                 AdminTargetType.BREEDER,
-                breeder._id.toString(),
+                (breeder._id as any).toString(),
                 breeder.nickname,
                 `Report dismissed: ${actionData.adminNotes || 'No notes'}`,
             );
@@ -187,7 +187,7 @@ export class BreederReportAdminService {
 
         return {
             reportId: reportId,
-            breederId: breeder._id.toString(),
+            breederId: (breeder._id as any).toString(),
             action: actionData.action,
             status: newStatus,
             adminNotes: actionData.adminNotes,

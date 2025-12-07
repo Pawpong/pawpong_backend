@@ -297,6 +297,24 @@ export class AuthController {
         );
     }
 
+    @Post('check-breeder-name')
+    @HttpCode(HttpStatus.OK)
+    @ApiEndpoint({
+        summary: '브리더 상호명 중복 체크',
+        description: '입력한 브리더 상호명이 이미 사용 중인지 확인합니다.',
+        responseType: Boolean,
+        isPublic: true,
+    })
+    async checkBreederNameDuplicate(
+        @Body('breederName') breederName: string,
+    ): Promise<ApiResponseDto<{ isDuplicate: boolean }>> {
+        const isDuplicate = await this.authService.checkBreederNameDuplicate(breederName);
+        return ApiResponseDto.success(
+            { isDuplicate },
+            isDuplicate ? '이미 사용 중인 상호명입니다.' : '사용 가능한 상호명입니다.',
+        );
+    }
+
     @Post('social/check-user')
     @HttpCode(HttpStatus.OK)
     @ApiEndpoint({
