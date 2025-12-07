@@ -98,7 +98,7 @@ export class BreederAdminService {
         }
 
         const {
-            verificationStatus = VerificationStatus.REVIEWING,
+            verificationStatus = VerificationStatus.PENDING,
             cityName,
             searchKeyword,
             pageNumber = 1,
@@ -136,8 +136,15 @@ export class BreederAdminService {
                 verificationInfo: {
                     verificationStatus: breeder.verification?.status || 'pending',
                     subscriptionPlan: breeder.verification?.plan || 'basic',
+                    level: breeder.verification?.level || 'new',
                     submittedAt: breeder.verification?.submittedAt,
-                    // fileName을 동적으로 Signed URL로 변환 (1시간 유효)
+                    // 타입과 URL을 포함한 documents 배열
+                    documents:
+                        breeder.verification?.documents?.map((doc) => ({
+                            type: doc.type,
+                            url: this.storageService.generateSignedUrl(doc.fileName, 60),
+                        })) || [],
+                    // 하위 호환성을 위한 documentUrls 유지
                     documentUrls:
                         breeder.verification?.documents?.map((doc) =>
                             this.storageService.generateSignedUrl(doc.fileName, 60),
@@ -210,7 +217,9 @@ export class BreederAdminService {
                 verificationInfo: {
                     verificationStatus: breeder.verification?.status || 'pending',
                     subscriptionPlan: breeder.verification?.plan || 'basic',
+                    level: breeder.verification?.level || 'new',
                     submittedAt: breeder.verification?.submittedAt,
+                    documents: [], // 목록 조회시에는 불필요
                     documentUrls: [], // 목록 조회시에는 불필요
                     isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
                 },
