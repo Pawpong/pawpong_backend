@@ -42,11 +42,11 @@ export class ParentPet {
     birthDate: Date;
 
     /**
-     * 부모견/부모묘 사진 파일명
+     * 부모견/부모묘 사진 파일명 (선택)
      * @example "parents/uuid.jpg"
      */
-    @Prop({ required: true })
-    photoFileName: string;
+    @Prop({ required: false })
+    photoFileName?: string;
 
     /**
      * 건강 기록

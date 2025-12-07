@@ -26,7 +26,7 @@ export class BreederRepository {
      * @returns 브리더 정보 또는 null
      */
     async findById(breederId: string): Promise<BreederDocument | null> {
-        return this.breederModel.findById(breederId).select('-password').exec();
+        return this.breederModel.findById(breederId).select('-password').lean().exec() as any;
     }
 
     /**
@@ -35,7 +35,7 @@ export class BreederRepository {
      * @returns 브리더 전체 정보 또는 null
      */
     async findByIdWithAllData(breederId: string): Promise<BreederDocument | null> {
-        return this.breederModel.findById(breederId).select('-password').exec();
+        return this.breederModel.findById(breederId).select('-password').lean().exec() as any;
     }
 
     /**
