@@ -4,8 +4,8 @@ import { Model } from 'mongoose';
 
 import { District } from '../../../schema/district.schema';
 
-import { CreateDistrictRequestDto } from './dto/request/create-district-request.dto';
-import { UpdateDistrictRequestDto } from './dto/request/update-district-request.dto';
+import { CreateDistrictRequestDto } from '../../breeder-management/request/create-district-request.dto';
+import { UpdateDistrictRequestDto } from '../../breeder-management/request/update-district-request.dto';
 import { DistrictResponseDto } from '../dto/response/district-response.dto';
 
 @Injectable()

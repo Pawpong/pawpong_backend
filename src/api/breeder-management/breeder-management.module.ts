@@ -1,35 +1,40 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
+import { MongooseModule } from '@nestjs/mongoose';
 
-import { BreederAdminController } from './admin/breeder-admin.controller';
 import { BreederManagementController } from './breeder-management.controller';
 
 import { BreederManagementService } from './breeder-management.service';
-import { BreederAdminService } from './admin/breeder-admin.service';
 
 import { BreederRepository } from './repository/breeder.repository';
 import { ParentPetRepository } from './repository/parent-pet.repository';
 import { AdoptionApplicationRepository } from './repository/adoption-application.repository';
 import { AvailablePetManagementRepository } from './repository/available-pet-management.repository';
 
-import { AdopterModule } from '../adopter/adopter.module';
+import { Breeder, BreederSchema } from '../../schema/breeder.schema';
+import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
+import { ParentPet, ParentPetSchema } from '../../schema/parent-pet.schema';
+import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
+import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
+
 import { StorageModule } from '../../common/storage/storage.module';
 import { NotificationModule } from '../notification/notification.module';
 import { MailModule } from '../../common/mail/mail.module';
-import { AdminDatabaseModule } from '../../common/database/database.module';
-import { BreederDatabaseModule } from '../../common/database/database.module';
 
 @Module({
     imports: [
-        BreederDatabaseModule,
-        AdminDatabaseModule,
+        MongooseModule.forFeature([
+            { name: Breeder.name, schema: BreederSchema },
+            { name: Adopter.name, schema: AdopterSchema },
+            { name: ParentPet.name, schema: ParentPetSchema },
+            { name: AvailablePet.name, schema: AvailablePetSchema },
+            { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
+        ]),
         StorageModule,
         MailModule,
         NotificationModule,
-        forwardRef(() => AdopterModule),
     ],
-    controllers: [BreederManagementController, BreederAdminController],
+    controllers: [BreederManagementController],
     providers: [
-        BreederAdminService,
         BreederManagementService,
         BreederRepository,
         ParentPetRepository,

@@ -21,8 +21,11 @@ import { PlatformAdminModule } from './api/platform/admin/platform-admin.module'
 import { FilterOptionsModule } from './api/filter-options/filter-options.module';
 import { StandardQuestionModule } from './api/standard-question/standard-question.module';
 import { BreederManagementModule } from './api/breeder-management/breeder-management.module';
+import { BreederAdminModule } from './api/breeder/admin/breeder-admin.module'; // TODO: 기능별 분리 예정
 import { NotificationModule } from './api/notification/notification.module';
 import { AnnouncementModule } from './api/announcement/announcement.module';
+import { BreederLevelAdminModule } from './api/breeder-level/admin/breeder-level-admin.module';
+import { BreederVerificationAdminModule } from './api/breeder-verification/admin/breeder-verification-admin.module';
 
 @Module({
     imports: [
@@ -39,6 +42,9 @@ import { AnnouncementModule } from './api/announcement/announcement.module';
         BreederModule,
         AdopterModule,
         BreederManagementModule,
+        BreederAdminModule,
+        BreederVerificationAdminModule,
+        BreederLevelAdminModule,
         UserAdminModule,
         PlatformAdminModule,
         HealthModule,
