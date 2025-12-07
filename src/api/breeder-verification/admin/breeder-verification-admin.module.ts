@@ -8,6 +8,7 @@ import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 import { Admin, AdminSchema } from '../../../schema/admin.schema';
 
 import { NotificationModule } from '../../../api/notification/notification.module';
+import { StorageModule } from '../../../common/storage/storage.module';
 
 /**
  * 브리더 인증 관리자 모듈
@@ -26,6 +27,7 @@ import { NotificationModule } from '../../../api/notification/notification.modul
             { name: Admin.name, schema: AdminSchema },
         ]),
         NotificationModule, // MailTemplateService도 여기서 제공됨
+        StorageModule, // StorageService 제공
     ],
     controllers: [BreederVerificationAdminController],
     providers: [BreederVerificationAdminService],

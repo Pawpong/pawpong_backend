@@ -13,6 +13,7 @@ import { BreederVerificationRequestDto } from './dto/request/breeder-verificatio
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
+import { BreederDetailResponseDto } from './dto/response/breeder-detail-response.dto';
 
 /**
  * 브리더 인증 관리 Admin 컨트롤러
@@ -54,6 +55,21 @@ export class BreederVerificationAdminController {
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
         const result = await this.breederVerificationAdminService.getPendingBreederVerifications(user.userId, filter);
         return ApiResponseDto.success(result, '승인 대기 브리더 목록이 조회되었습니다.');
+    }
+
+    @Get('verification/:breederId')
+    @ApiEndpoint({
+        summary: '브리더 상세 정보 조회',
+        description: '특정 브리더의 상세 정보를 조회합니다 (서류, 프로필 포함).',
+        responseType: BreederDetailResponseDto,
+        isPublic: false,
+    })
+    async getBreederDetail(
+        @CurrentUser() user: any,
+        @Param('breederId') breederId: string,
+    ): Promise<ApiResponseDto<BreederDetailResponseDto>> {
+        const result = await this.breederVerificationAdminService.getBreederDetail(user.userId, breederId);
+        return ApiResponseDto.success(result, '브리더 상세 정보가 조회되었습니다.');
     }
 
     @Patch('verification/:breederId')
