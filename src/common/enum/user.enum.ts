@@ -106,6 +106,7 @@ export enum AdminLevel {
 export enum AdminAction {
     APPROVE_BREEDER = 'approve_breeder',
     REJECT_BREEDER = 'reject_breeder',
+    REVIEW_BREEDER = 'review_breeder',
     SUSPEND_USER = 'suspend_user',
     ACTIVATE_USER = 'activate_user',
     RESOLVE_REPORT = 'resolve_report',
