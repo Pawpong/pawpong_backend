@@ -80,15 +80,16 @@ export class BreederVerificationAdminService {
             throw new ForbiddenException('Access denied');
         }
 
-        const {
-            verificationStatus = VerificationStatus.PENDING,
-            cityName,
-            searchKeyword,
-            pageNumber = 1,
-            itemsPerPage = 10,
-        } = filter;
+        const { verificationStatus, cityName, searchKeyword, pageNumber = 1, itemsPerPage = 10 } = filter;
 
-        const query: any = { 'verification.status': verificationStatus };
+        const query: any = {};
+
+        // 승인 대기: pending과 reviewing 모두 포함 (아직 승인되지 않은 상태)
+        if (verificationStatus) {
+            query['verification.status'] = verificationStatus;
+        } else {
+            query['verification.status'] = { $in: [VerificationStatus.PENDING, VerificationStatus.REVIEWING] };
+        }
 
         if (cityName) {
             query['profile.location.city'] = cityName;
@@ -334,12 +335,13 @@ export class BreederVerificationAdminService {
                 submittedAt: submittedAt,
                 processedAt: breeder.verification?.reviewedAt,
                 isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
-                documents: breeder.verification?.documents?.map((doc) => ({
-                    type: doc.type,
-                    fileName: doc.fileName,
-                    fileUrl: this.storageService.generateSignedUrl(doc.fileName, 60),
-                    uploadedAt: doc.uploadedAt,
-                })) || [],
+                documents:
+                    breeder.verification?.documents?.map((doc) => ({
+                        type: doc.type,
+                        fileName: doc.fileName,
+                        fileUrl: this.storageService.generateSignedUrl(doc.fileName, 60),
+                        uploadedAt: doc.uploadedAt,
+                    })) || [],
                 rejectionReason: breeder.verification?.rejectionReason,
             },
             profileInfo: {
