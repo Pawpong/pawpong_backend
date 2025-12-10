@@ -9,7 +9,7 @@ import { Logger } from 'winston';
  */
 @Injectable()
 export class CustomLoggerService implements LoggerService {
-    constructor(@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger) {}
+    constructor(@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger) { }
 
     /**
      * 정보 레벨 로그를 출력합니다.

@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import * as URLSafeBase64 from 'urlsafe-base64';
 import { Storage } from '@google-cloud/storage';
+import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
 import * as crypto from 'crypto';
-import * as URLSafeBase64 from 'urlsafe-base64';
 
 @Injectable()
 export class StorageService {
