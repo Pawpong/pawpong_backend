@@ -1,97 +1,142 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import { Document } from 'mongoose';
 
-export type NotificationDocument = Notification & Document;
+/**
+ * 알림 타입 정의
+ * 각 타입별로 고정된 메시지가 백엔드에서 관리됩니다
+ */
+export enum NotificationType {
+    /** 브리더 승인됨 */
+    BREEDER_APPROVED = 'BREEDER_APPROVED',
+    /** 브리더 반려됨 */
+    BREEDER_UNAPPROVED = 'BREEDER_UNAPPROVED',
+    /** 브리더 온보딩 미완료 */
+    BREEDER_ONBOARDING_INCOMPLETE = 'BREEDER_ONBOARDING_INCOMPLETE',
+    /** 새 상담 신청 (브리더가 받음) */
+    NEW_CONSULT_REQUEST = 'NEW_CONSULT_REQUEST',
+    /** 새 후기 등록 (브리더가 받음) */
+    NEW_REVIEW_REGISTERED = 'NEW_REVIEW_REGISTERED',
+    /** 상담 완료 (입양자가 받음) */
+    CONSULT_COMPLETED = 'CONSULT_COMPLETED',
+    /** 새 반려동물 등록 (즐겨찾기한 입양자들이 받음) */
+    NEW_PET_REGISTERED = 'NEW_PET_REGISTERED',
+}
+
+/**
+ * 알림 타입별 메시지 템플릿
+ * 백엔드에서 관리하는 고정 메시지
+ */
+export const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; body: string }> = {
+    [NotificationType.BREEDER_APPROVED]: {
+        title: '포퐁 브리더 입점이 승인되었습니다!',
+        body: '지금 프로필을 세팅하고 아이들 정보를 등록해 보세요.',
+    },
+    [NotificationType.BREEDER_UNAPPROVED]: {
+        title: '브리더 입점 심사 결과, 보완이 필요합니다.',
+        body: '자세한 사유는 이메일을 확인해주세요.',
+    },
+    [NotificationType.BREEDER_ONBOARDING_INCOMPLETE]: {
+        title: '브리더 입점 절차가 아직 완료되지 않았어요!',
+        body: '필요한 서류들을 제출하시면 입양자에게 프로필이 공개됩니다.',
+    },
+    [NotificationType.NEW_CONSULT_REQUEST]: {
+        title: '새로운 입양 상담 신청이 도착했어요!',
+        body: '지금 확인해 보세요.',
+    },
+    [NotificationType.NEW_REVIEW_REGISTERED]: {
+        title: '새로운 후기가 등록되었어요!',
+        body: '브리더 프로필에서 후기를 확인해 보세요.',
+    },
+    [NotificationType.CONSULT_COMPLETED]: {
+        title: '{breederName}님과의 상담이 완료되었어요!',
+        body: '어떠셨는지 후기를 남겨주세요.',
+    },
+    [NotificationType.NEW_PET_REGISTERED]: {
+        title: '{breederName}님이 새로운 아이를 등록했어요!',
+        body: '지금 바로 확인해보세요.',
+    },
+};
 
 /**
  * 알림 스키마
- *
- * 사용자(입양자/브리더)에게 전송되는 알림을 관리합니다.
- * - 제목, 내용, 날짜
- * - 읽음/신규 상태 (클릭 여부)
  */
-@Schema({
-    timestamps: true,
-    collection: 'notifications',
-})
-export class Notification {
+@Schema({ collection: 'notifications', timestamps: true })
+export class Notification extends Document {
     /**
-     * 수신자 ID (입양자 또는 브리더)
+     * 알림을 받을 사용자 ID
      */
-    @Prop({ type: MongooseSchema.Types.ObjectId, required: true, index: true })
-    recipientId: MongooseSchema.Types.ObjectId;
+    @Prop({ required: true, index: true })
+    userId: string;
 
     /**
-     * 수신자 타입
-     * - adopter: 입양자
-     * - breeder: 브리더
+     * 사용자 역할 (adopter | breeder)
      */
-    @Prop({ required: true, enum: ['adopter', 'breeder'], index: true })
-    recipientType: string;
+    @Prop({ required: true, enum: ['adopter', 'breeder'] })
+    userRole: string;
 
     /**
-     * 알림 제목
+     * 알림 타입
+     */
+    @Prop({ required: true, enum: Object.values(NotificationType) })
+    type: NotificationType;
+
+    /**
+     * 알림 제목 (타입별 고정 메시지 또는 동적 생성)
      */
     @Prop({ required: true })
     title: string;
 
     /**
-     * 알림 내용
+     * 알림 내용 (타입별 고정 메시지 또는 동적 생성)
      */
     @Prop({ required: true })
-    content: string;
+    body: string;
 
     /**
-     * 읽음 여부 (클릭 여부)
-     * - false: 신규
-     * - true: 읽음
+     * 동적 데이터 (예: 브리더명, 반려동물명 등)
+     */
+    @Prop({ type: Object })
+    metadata?: {
+        breederId?: string;
+        breederName?: string;
+        petId?: string;
+        petName?: string;
+        applicationId?: string;
+        reviewId?: string;
+        [key: string]: any;
+    };
+
+    /**
+     * 읽음 여부
      */
     @Prop({ default: false, index: true })
     isRead: boolean;
 
     /**
-     * 알림 타입
-     * - profile_review: 프로필 심사
-     * - profile_re_review: 프로필 재심사
-     * - matching: 매칭
-     * - breeder_approved: 브리더 입점 승인
-     * - breeder_rejected: 브리더 입점 반려
-     * - new_application: 새로운 상담 신청
-     * - document_reminder: 서류 미제출 리마인드
-     * - new_review: 새로운 후기 등록
-     */
-    @Prop({
-        required: true,
-        enum: [
-            'profile_review',
-            'profile_re_review',
-            'matching',
-            'breeder_approved',
-            'breeder_rejected',
-            'new_application',
-            'document_reminder',
-            'new_review',
-        ],
-        index: true,
-    })
-    type: string;
-
-    /**
-     * 관련 리소스 ID (선택적 - 클릭 시 이동할 대상)
-     */
-    @Prop({ type: MongooseSchema.Types.ObjectId })
-    relatedId?: MongooseSchema.Types.ObjectId;
-
-    /**
-     * 관련 리소스 타입 (선택적)
+     * 읽은 시각
      */
     @Prop()
-    relatedType?: string;
+    readAt?: Date;
+
+    /**
+     * 클릭 시 이동할 URL (옵션)
+     */
+    @Prop()
+    targetUrl?: string;
+
+    /**
+     * 생성 일시
+     */
+    createdAt: Date;
+
+    /**
+     * 수정 일시
+     */
+    updatedAt: Date;
 }
 
 export const NotificationSchema = SchemaFactory.createForClass(Notification);
 
-// 인덱스 설정
-NotificationSchema.index({ recipientId: 1, isRead: 1, createdAt: -1 }); // 사용자별 신규/읽음 알림 조회
-NotificationSchema.index({ recipientId: 1, createdAt: -1 }); // 사용자별 최신 알림 조회
-NotificationSchema.index({ createdAt: 1 }, { expireAfterSeconds: 60 * 60 * 24 * 90 }); // 90일 후 자동 삭제 (TTL)
+// 복합 인덱스 설정
+NotificationSchema.index({ userId: 1, isRead: 1, createdAt: -1 });
+NotificationSchema.index({ userId: 1, createdAt: -1 });
