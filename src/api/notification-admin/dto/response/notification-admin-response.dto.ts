@@ -2,9 +2,9 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { NotificationType } from '../../../../schema/notification.schema';
 
 /**
- * 알림 응답 DTO
+ * Admin 알림 상세 응답 DTO
  */
-export class NotificationResponseDto {
+export class NotificationAdminResponseDto {
     /**
      * 알림 ID
      * @example "507f1f77bcf86cd799439011"
@@ -14,6 +14,27 @@ export class NotificationResponseDto {
         example: '507f1f77bcf86cd799439011',
     })
     notificationId: string;
+
+    /**
+     * 사용자 ID
+     * @example "507f1f77bcf86cd799439012"
+     */
+    @ApiProperty({
+        description: '사용자 ID',
+        example: '507f1f77bcf86cd799439012',
+    })
+    userId: string;
+
+    /**
+     * 사용자 역할
+     * @example "breeder"
+     */
+    @ApiProperty({
+        description: '사용자 역할',
+        enum: ['adopter', 'breeder'],
+        example: 'breeder',
+    })
+    userRole: string;
 
     /**
      * 알림 타입
@@ -47,7 +68,7 @@ export class NotificationResponseDto {
     body: string;
 
     /**
-     * 메타데이터 (브리더명, 반려동물명 등)
+     * 메타데이터
      */
     @ApiPropertyOptional({
         description: '메타데이터',
@@ -92,69 +113,64 @@ export class NotificationResponseDto {
         example: '2025-01-15T10:00:00.000Z',
     })
     createdAt: Date;
-}
-
-/**
- * 읽지 않은 알림 수 응답 DTO
- */
-export class UnreadCountResponseDto {
-    /**
-     * 읽지 않은 알림 수
-     * @example 5
-     */
-    @ApiProperty({
-        description: '읽지 않은 알림 수',
-        example: 5,
-    })
-    unreadCount: number;
-}
-
-/**
- * 알림 읽음 처리 응답 DTO
- */
-export class MarkAsReadResponseDto {
-    /**
-     * 처리된 알림 ID
-     * @example "507f1f77bcf86cd799439011"
-     */
-    @ApiProperty({
-        description: '처리된 알림 ID',
-        example: '507f1f77bcf86cd799439011',
-    })
-    notificationId: string;
 
     /**
-     * 읽음 여부
-     * @example true
-     */
-    @ApiProperty({
-        description: '읽음 여부',
-        example: true,
-    })
-    isRead: boolean;
-
-    /**
-     * 읽은 시각
+     * 수정 일시
      * @example "2025-01-15T10:30:00.000Z"
      */
     @ApiProperty({
-        description: '읽은 시각',
+        description: '수정 일시',
         example: '2025-01-15T10:30:00.000Z',
     })
-    readAt: Date;
+    updatedAt: Date;
 }
 
 /**
- * 모든 알림 읽음 처리 응답 DTO
+ * Admin 알림 통계 응답 DTO
  */
-export class MarkAllAsReadResponseDto {
+export class NotificationStatsResponseDto {
     /**
-     * 읽음 처리된 알림 수
-     * @example 10
+     * 전체 알림 수
+     * @example 1000
      */
     @ApiProperty({
-        description: '읽음 처리된 알림 수',
-        example: 10,
+        description: '전체 알림 수',
+        example: 1000,
     })
-    updatedCount: number;
+    totalNotifications: number;
+
+    /**
+     * 읽지 않은 알림 수
+     * @example 150
+     */
+    @ApiProperty({
+        description: '읽지 않은 알림 수',
+        example: 150,
+    })
+    unreadNotifications: number;
+
+    /**
+     * 타입별 알림 수
+     */
+    @ApiProperty({
+        description: '타입별 알림 수',
+        example: {
+            BREEDER_APPROVED: 50,
+            NEW_CONSULT_REQUEST: 100,
+            NEW_REVIEW_REGISTERED: 80,
+        },
+    })
+    notificationsByType: Record<string, number>;
+
+    /**
+     * 역할별 알림 수
+     */
+    @ApiProperty({
+        description: '역할별 알림 수',
+        example: {
+            adopter: 500,
+            breeder: 500,
+        },
+    })
+    notificationsByRole: Record<string, number>;
 }
