@@ -416,14 +416,16 @@ export class BreederService {
             .find({ breederId: new Types.ObjectId(breederId), isActive: true })
             .lean();
 
-        // 데이터 변환 (사진 URL은 fileName 그대로 반환, 필요시 Signed URL 생성은 클라이언트에서 처리)
+        // 데이터 변환 (사진 URL은 Signed URL로 변환)
         const items = parentPets.map((pet: any) => ({
             petId: pet._id.toString(),
             name: pet.name,
             breed: pet.breed,
             gender: pet.gender,
             birthDate: pet.birthDate,
-            photoUrl: pet.photoFileName || '', // 파일명 반환
+            photoUrl: pet.photoFileName
+                ? this.storageService.generateSignedUrl(pet.photoFileName, 60 * 24)
+                : '',
             healthRecords: pet.healthRecords || [],
             description: pet.description || '',
         }));
@@ -500,7 +502,9 @@ export class BreederService {
                 ageInMonths,
                 price: pet.price,
                 status: pet.status,
-                mainPhoto: pet.photos?.[0] || '',
+                mainPhoto: pet.photos?.[0]
+                    ? this.storageService.generateSignedUrl(pet.photos[0], 60 * 24)
+                    : '',
                 photoCount: pet.photos?.length || 0,
                 isVaccinated: (pet.vaccinations?.length || 0) > 0,
                 hasMicrochip: !!pet.microchipNumber,
