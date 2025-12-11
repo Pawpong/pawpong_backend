@@ -122,8 +122,8 @@ export class BreederExploreService {
         });
         const availableBreederIds = breedersWithAvailablePets.map((id) => id.toString());
 
-        // 입양 가능 여부 필터 적용 (기본값: true - 입양 가능한 개체가 있는 브리더만)
-        if (isAdoptionAvailable !== false) {
+        // 입양 가능 여부 필터 적용 (true일 때만 필터링)
+        if (isAdoptionAvailable === true) {
             filter['_id'] = { $in: breedersWithAvailablePets };
         }
 
