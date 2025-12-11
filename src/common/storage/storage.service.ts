@@ -141,15 +141,30 @@ export class StorageService {
 
     /**
      * CDN Signed URL 생성 (GCP Cloud CDN)
-     * 개발 환경: http/https로 시작하는 외부 URL은 그대로 반환
+     * 기존 signed URL이나 CDN URL인 경우 파일 경로를 추출하여 새로운 signed URL 생성
      */
     generateSignedUrl(fileName: string, expirationMinutes: number = 60): string {
-        // 외부 URL(http/https)은 그대로 반환 (개발 환경)
+        let filePath = fileName;
+
+        // CDN URL인 경우 파일 경로만 추출
         if (fileName.startsWith('http://') || fileName.startsWith('https://')) {
-            return fileName;
+            try {
+                const urlObj = new URL(fileName);
+                // CDN 도메인인 경우에만 경로 추출
+                if (urlObj.hostname === 'cdn.pawpong.kr') {
+                    // pathname은 '/pets/parent/uuid.jpeg' 형식
+                    filePath = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+                } else {
+                    // 외부 URL은 그대로 반환
+                    return fileName;
+                }
+            } catch {
+                // URL 파싱 실패 시 그대로 반환
+                return fileName;
+            }
         }
 
-        const url = `${this.cdnBaseUrl}/${fileName}`;
+        const url = `${this.cdnBaseUrl}/${filePath}`;
         const expiration = Math.round(new Date().getTime() / 1000) + expirationMinutes * 60;
         const decodedKey = URLSafeBase64.decode(this.cdnPrivateKey);
 
@@ -166,7 +181,6 @@ export class StorageService {
 
     /**
      * 파일명 배열을 Signed URL 배열로 변환
-     * 개발 환경: http/https로 시작하는 외부 URL은 그대로 반환
      */
     generateSignedUrls(fileNames: string[], expirationMinutes: number = 60): string[] {
         if (!fileNames || fileNames.length === 0) {
@@ -174,14 +188,7 @@ export class StorageService {
         }
         return fileNames
             .filter((fileName) => fileName && fileName.trim() !== '')
-            .map((fileName) => {
-                // 외부 URL(http/https)은 그대로 반환 (개발 환경)
-                if (fileName.startsWith('http://') || fileName.startsWith('https://')) {
-                    return fileName;
-                }
-                // GCS 버킷 경로는 signed URL로 변환
-                return this.generateSignedUrl(fileName, expirationMinutes);
-            });
+            .map((fileName) => this.generateSignedUrl(fileName, expirationMinutes));
     }
 
     /**
