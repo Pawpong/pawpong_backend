@@ -115,6 +115,18 @@ export class BreederExploreService {
                 sort = { createdAt: -1 };
         }
 
+        // 입양 가능한 개체가 있는 브리더 ID 목록 조회
+        const breedersWithAvailablePets = await this.availablePetModel.distinct('breederId', {
+            isActive: true,
+            status: 'available',
+        });
+        const availableBreederIds = breedersWithAvailablePets.map((id) => id.toString());
+
+        // 입양 가능 여부 필터 적용 (기본값: true - 입양 가능한 개체가 있는 브리더만)
+        if (isAdoptionAvailable !== false) {
+            filter['_id'] = { $in: breedersWithAvailablePets };
+        }
+
         // 페이지네이션 계산
         const skip = (page - 1) * take;
 
@@ -151,19 +163,8 @@ export class BreederExploreService {
             }
         }
 
-        // 브리더 ID 목록 추출
+        // 브리더 ID 목록 추출 (이미 조회한 availableBreederIds 활용)
         const breederIds = breeders.map((b) => b._id);
-
-        // 각 브리더의 분양 가능 애완동물 확인 (별도 컬렉션에서 조회)
-        const availablePetsMap = new Map<string, boolean>();
-        for (const breederId of breederIds) {
-            const hasAvailable = await this.availablePetModel.exists({
-                breederId: breederId,
-                isActive: true,
-                status: 'available',
-            });
-            availablePetsMap.set(breederId.toString(), !!hasAvailable);
-        }
 
         // 카드 데이터로 변환
         const cards: BreederCardResponseDto[] = breeders.map((breeder) => {
@@ -182,7 +183,7 @@ export class BreederExploreService {
                     ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
                     : '',
                 mainBreed: breeder.breeds?.[0] || '',
-                isAdoptionAvailable: availablePetsMap.get(breeder._id.toString()) || false,
+                isAdoptionAvailable: availableBreederIds.includes(breeder._id.toString()),
                 priceRange: {
                     min: breeder.stats?.priceRange?.min || 0,
                     max: breeder.stats?.priceRange?.max || 0,
