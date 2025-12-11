@@ -69,7 +69,7 @@ export class NotificationService {
         await notification.save();
 
         this.logger.logSuccess('createNotification', '알림 생성 완료', {
-            notificationId: notification._id.toString(),
+            notificationId: (notification._id as any).toString(),
         });
 
         return notification;
@@ -159,7 +159,7 @@ export class NotificationService {
         this.logger.logSuccess('markAsRead', '알림 읽음 처리 완료', { notificationId });
 
         return {
-            notificationId: notification._id.toString(),
+            notificationId: (notification._id as any).toString(),
             isRead: notification.isRead,
             readAt: notification.readAt,
         };
@@ -233,12 +233,12 @@ export class NotificationService {
         await notification.save();
 
         this.logger.logSuccess('createNotificationFromBuilder', '빌더를 통한 알림 생성 완료', {
-            notificationId: notification._id.toString(),
+            notificationId: (notification._id as any).toString(),
         });
 
         // Notification을 NotificationResponseDto로 변환
         return {
-            notificationId: notification._id.toString(),
+            notificationId: (notification._id as any).toString(),
             type: notification.type,
             title: notification.title,
             body: notification.body,
