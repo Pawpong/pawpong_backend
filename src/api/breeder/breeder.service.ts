@@ -201,7 +201,7 @@ export class BreederService {
             location: breeder.profile?.location
                 ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
                 : '',
-            priceRange: breeder.priceDisplay === 'range' ? breeder.priceRange : undefined,
+            priceRange: breeder.priceRange || breeder.stats?.priceRange,
             profileImage: profileImageUrl,
             favoriteCount: breeder.stats?.totalFavorites || 0,
             isFavorited: isFavorited,
