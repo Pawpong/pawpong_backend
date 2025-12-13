@@ -198,6 +198,7 @@ export class BreederService {
             breederName: breeder.name,
             breederLevel: breeder.verification?.level || 'new',
             detailBreed: breeder.detailBreed,
+            breeds: breeder.breeds || [],
             location: breeder.profile?.location
                 ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
                 : '',
