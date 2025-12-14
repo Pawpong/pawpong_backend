@@ -448,4 +448,91 @@ export class BreederVerificationAdminService {
             await builder.send();
         }
     }
+
+    /**
+     * 서류 미제출 브리더에게 독촉 메일 발송
+     *
+     * 승인 후 4주 경과했지만 서류를 제출하지 않은 브리더들을 찾아서
+     * 독촉 이메일을 발송합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @returns 발송 성공한 브리더 수
+     */
+    async sendDocumentReminders(adminId: string): Promise<{ sentCount: number; breederIds: string[] }> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canManageBreeders) {
+            throw new ForbiddenException('브리더 관리 권한이 없습니다.');
+        }
+
+        // 4주 = 28일 전
+        const fourWeeksAgo = new Date();
+        fourWeeksAgo.setDate(fourWeeksAgo.getDate() - 28);
+
+        // 승인되었지만 서류를 제출하지 않은 브리더 찾기
+        // 1. 승인된 브리더
+        // 2. 승인일이 4주 이전
+        // 3. 서류가 없거나 비어있음
+        const incompleteBreeders = await this.breederModel
+            .find({
+                'verification.status': VerificationStatus.APPROVED,
+                'verification.reviewedAt': { $lte: fourWeeksAgo },
+                $or: [
+                    { 'verification.documents': { $exists: false } },
+                    { 'verification.documents': { $size: 0 } },
+                ],
+            })
+            .select('_id nickname emailAddress verification')
+            .lean();
+
+        const breederIds: string[] = [];
+        let sentCount = 0;
+
+        // 각 브리더에게 독촉 메일 발송
+        for (const breeder of incompleteBreeders) {
+            const breederId = (breeder._id as any).toString();
+            const breederName = breeder.nickname;
+            const breederEmail = breeder.emailAddress;
+
+            if (breederEmail) {
+                try {
+                    const emailContent = this.mailTemplateService.getDocumentReminderEmail(breederName);
+
+                    const builder = this.notificationService
+                        .to(breederId, RecipientType.BREEDER)
+                        .type(NotificationType.DOCUMENT_REMINDER)
+                        .title('🐾 브리더 입점 절차가 아직 완료되지 않았어요!')
+                        .content('필요한 서류들을 제출하시면 입양자에게 프로필이 공개됩니다.')
+                        .related(breederId, 'profile');
+
+                    builder.withEmail({
+                        to: breederEmail,
+                        subject: emailContent.subject,
+                        html: emailContent.html,
+                    });
+
+                    await builder.send();
+
+                    breederIds.push(breederId);
+                    sentCount++;
+
+                    // 관리자 활동 로그 기록
+                    await this.logAdminActivity(
+                        adminId,
+                        AdminAction.REVIEW_BREEDER,
+                        AdminTargetType.BREEDER,
+                        breederId,
+                        breederName,
+                        'Document reminder email sent',
+                    );
+                } catch (error) {
+                    console.error(`Failed to send reminder to breeder ${breederId}:`, error);
+                }
+            }
+        }
+
+        return {
+            sentCount,
+            breederIds,
+        };
+    }
 }

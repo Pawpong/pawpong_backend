@@ -144,15 +144,22 @@ export enum NotificationType {
     // 브리더 입점 관련
     BREEDER_APPROVED = 'breeder_approved', // 브리더 입점 승인
     BREEDER_REJECTED = 'breeder_rejected', // 브리더 입점 반려
+    BREEDER_UNAPPROVED = 'breeder_unapproved', // 브리더 입점 반려 (스키마 호환)
+    BREEDER_ONBOARDING_INCOMPLETE = 'breeder_onboarding_incomplete', // 브리더 온보딩 미완료
 
     // 상담 신청 관련
-    NEW_APPLICATION = 'new_application', // 새로운 상담 신청
+    NEW_CONSULT_REQUEST = 'new_consult_request', // 새로운 상담 신청 (브리더가 받음)
+    CONSULT_REQUEST_CONFIRMED = 'consult_request_confirmed', // 상담 신청 확인 (신청자가 받음)
+    CONSULT_COMPLETED = 'consult_completed', // 상담 완료
 
     // 리마인드 관련
     DOCUMENT_REMINDER = 'document_reminder', // 서류 미제출 리마인드
 
     // 후기 관련
-    NEW_REVIEW = 'new_review', // 새로운 후기 등록
+    NEW_REVIEW_REGISTERED = 'new_review_registered', // 새로운 후기 등록
+
+    // 반려동물 등록
+    NEW_PET_REGISTERED = 'new_pet_registered', // 새 반려동물 등록
 }
 
 export enum RecipientType {

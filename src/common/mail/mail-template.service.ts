@@ -256,4 +256,37 @@ export class MailTemplateService {
             content: '브리더 프로필에서 후기를 확인해보세요.',
         };
     }
+
+    /**
+     * [6] 상담 신청 확인 이메일 (신청자용)
+     */
+    getApplicationConfirmationEmail(applicantName: string, breederName: string): { subject: string; html: string } {
+        const content = `
+            <h2>안녕하세요, ${applicantName}님.</h2>
+            <p>반려동물 브리더 입양 플랫폼 <strong>포퐁(Pawpong)</strong>입니다.</p>
+
+            <div class="highlight">
+                <p class="emoji">✅ <strong>${breederName}</strong> 브리더님께 상담 신청이 성공적으로 접수되었습니다!</p>
+                <p>브리더님이 신청서를 확인하고 연락드릴 예정입니다.</p>
+            </div>
+
+            <p>💡 상담 진행 과정:</p>
+            <ul>
+                <li><strong>1단계:</strong> 브리더님이 신청서를 검토합니다</li>
+                <li><strong>2단계:</strong> 브리더님이 직접 연락을 드립니다</li>
+                <li><strong>3단계:</strong> 상담을 진행하고 입양 여부를 결정합니다</li>
+            </ul>
+
+            <p style="text-align: center;">
+                <a href="${this.baseUrl}" class="button">내 상담 신청 보기</a>
+            </p>
+
+            <p>감사합니다.</p>
+        `;
+
+        return {
+            subject: '[포퐁] 상담 신청이 접수되었습니다 ✅',
+            html: this.getEmailLayout(content),
+        };
+    }
 }
