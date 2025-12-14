@@ -62,11 +62,6 @@ export class DiscordWebhookService {
                         inline: true,
                     },
                     {
-                        name: '이름',
-                        value: data.name,
-                        inline: true,
-                    },
-                    {
                         name: '닉네임',
                         value: data.nickname || '미설정',
                         inline: true,
@@ -150,7 +145,7 @@ export class DiscordWebhookService {
                     inline: true,
                 },
                 {
-                    name: '이름',
+                    name: '닉네임',
                     value: data.name,
                     inline: true,
                 },
@@ -165,19 +160,21 @@ export class DiscordWebhookService {
                     inline: true,
                 },
                 {
-                    name: '상호명',
-                    value: data.businessName || '미설정',
-                    inline: true,
-                },
-                {
                     name: '가입 유형',
                     value: data.registrationType === 'email' ? '이메일' : `소셜 (${data.provider || '알 수 없음'})`,
                     inline: true,
                 },
             ];
 
-            // 서류 URL 추가
+            // 서류 제출 상태
             if (data.documents && data.documents.length > 0) {
+                fields.push({
+                    name: '📋 서류 제출 상태',
+                    value: `${data.documents.length}개 서류 업로드 완료`,
+                    inline: false,
+                });
+
+                // 업로드된 서류 목록
                 data.documents.forEach((doc) => {
                     const docTypeName = documentTypeMap[doc.type] || doc.type;
                     const fileName = doc.originalFileName ? `\n파일명: ${doc.originalFileName}` : '';
@@ -186,6 +183,12 @@ export class DiscordWebhookService {
                         value: `[서류 보기](${doc.url})${fileName}`,
                         inline: false,
                     });
+                });
+            } else {
+                fields.push({
+                    name: '📋 서류 제출 상태',
+                    value: '⏱️ 나중에 제출 예정 (서류 미등록)',
+                    inline: false,
                 });
             }
 

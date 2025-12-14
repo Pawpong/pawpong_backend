@@ -9,7 +9,7 @@ import { StorageService } from '../../../common/storage/storage.service';
 import { Admin, AdminDocument } from '../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
-import { ProfileBanner, ProfileBannerDocument } from '../../../schema/profile-banner.schema';
+import { AuthBanner, AuthBannerDocument } from '../../../schema/auth-banner.schema';
 
 import { UserSearchRequestDto } from './dto/request/user-search-request.dto';
 import { UserManagementRequestDto } from './dto/request/user-management-request.dto';
@@ -34,7 +34,7 @@ export class UserAdminService {
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
-        @InjectModel(ProfileBanner.name) private profileBannerModel: Model<ProfileBannerDocument>,
+        @InjectModel(AuthBanner.name) private authBannerModel: Model<AuthBannerDocument>,
         private readonly storageService: StorageService,
     ) {}
 

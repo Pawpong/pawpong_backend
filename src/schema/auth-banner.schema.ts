@@ -5,14 +5,23 @@ import { Document } from 'mongoose';
  * 프로필 배너 스키마
  * 관리자 프로필 화면 좌측 배너 정보
  */
-@Schema({ collection: 'profile-banners', timestamps: true })
-export class ProfileBanner {
+@Schema({ collection: 'auth_banners', timestamps: true })
+export class AuthBanner {
     /**
      * 배너 이미지 파일명
      * @example "profile-banners/uuid.png"
      */
     @Prop({ required: true })
     imageFileName: string;
+
+    /**
+     * 배너 타입 (로그인 페이지 또는 회원가입 페이지)
+     * login: 로그인 페이지 배너
+     * signup: 회원가입 페이지 배너
+     * @example "login"
+     */
+    @Prop({ enum: ['login', 'signup'], required: true, default: 'login' })
+    bannerType: string;
 
     /**
      * 링크 타입 (선택)
@@ -59,8 +68,8 @@ export class ProfileBanner {
     description?: string;
 }
 
-export type ProfileBannerDocument = ProfileBanner & Document;
-export const ProfileBannerSchema = SchemaFactory.createForClass(ProfileBanner);
+export type AuthBannerDocument = AuthBanner & Document;
+export const AuthBannerSchema = SchemaFactory.createForClass(AuthBanner);
 
 // 인덱스 생성
-ProfileBannerSchema.index({ isActive: 1, order: 1 });
+AuthBannerSchema.index({ bannerType: 1, isActive: 1, order: 1 });
