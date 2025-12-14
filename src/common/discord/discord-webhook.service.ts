@@ -106,8 +106,6 @@ export class DiscordWebhookService {
         email: string;
         name: string;
         phone?: string;
-        businessNumber?: string;
-        businessName?: string;
         registrationType: 'email' | 'social';
         provider?: string;
         documents?: Array<{
@@ -152,11 +150,6 @@ export class DiscordWebhookService {
                 {
                     name: '전화번호',
                     value: data.phone || '미설정',
-                    inline: true,
-                },
-                {
-                    name: '사업자 등록번호',
-                    value: data.businessNumber || '미설정',
                     inline: true,
                 },
                 {
