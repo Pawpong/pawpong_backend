@@ -232,7 +232,7 @@ export class AdopterService {
             .type(NotificationType.NEW_CONSULT_REQUEST)
             .title('💬 새로운 입양 상담 신청이 도착했어요!')
             .content('지금 확인해보세요.')
-            .related(breederId, 'applications');
+            .related('/application', 'page');
 
         if (emailContent && breeder.emailAddress) {
             builder.withEmail({
