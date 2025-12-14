@@ -7,6 +7,7 @@ import { UserStatus, VerificationStatus, BreederPlan } from '../../common/enum/u
 
 import { StorageService } from '../../common/storage/storage.service';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
+import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
 
 import { AuthMapper } from './mapper/auth.mapper';
 
@@ -51,6 +52,7 @@ export class AuthService {
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
         private readonly storageService: StorageService,
+        private readonly discordWebhookService: DiscordWebhookService,
     ) {
         // 1시간마다 오래된 임시 데이터 정리 (메모리 누수 방지)
         setInterval(() => this.cleanupOldTempUploads(), 60 * 60 * 1000);
@@ -569,6 +571,21 @@ export class AuthService {
             userId: (savedAdopter._id as any).toString(),
             nickname: savedAdopter.nickname,
         });
+
+        // 디스코드 웹훅 알림 전송 (비동기, 에러 발생해도 회원가입은 성공)
+        this.discordWebhookService
+            .notifyAdopterRegistration({
+                userId: (savedAdopter._id as any).toString(),
+                email: savedAdopter.emailAddress,
+                name: dto.nickname || '알 수 없음',
+                phone: savedAdopter.phoneNumber,
+                nickname: savedAdopter.nickname,
+                registrationType: 'social',
+                provider: provider,
+            })
+            .catch((error) => {
+                this.logger.logError('registerAdopter', '디스코드 알림 전송 실패 (무시됨)', error);
+            });
 
         // 응답 데이터 구성 (Mapper 패턴 사용)
         return AuthMapper.toAdopterRegisterResponse(savedAdopter, tokens);
@@ -1401,6 +1418,22 @@ export class AuthService {
             breederId: savedBreeder._id,
             accessToken: tokens.accessToken.substring(0, 20) + '...',
         });
+
+        // 디스코드 웹훅 알림 전송 (비동기, 에러 발생해도 회원가입은 성공)
+        this.discordWebhookService
+            .notifyBreederRegistration({
+                userId: (savedBreeder._id as any).toString(),
+                email: savedBreeder.emailAddress,
+                name: savedBreeder.name,
+                phone: savedBreeder.phoneNumber,
+                businessNumber: undefined, // Breeder 스키마에 없음
+                businessName: savedBreeder.name, // 브리더명을 상호명으로 사용
+                registrationType: socialAuthInfo ? 'social' : 'email',
+                provider: socialAuthInfo?.authProvider,
+            })
+            .catch((error) => {
+                this.logger.logError('registerBreeder', '디스코드 알림 전송 실패 (무시됨)', error);
+            });
 
         // 응답 데이터 구성 (Mapper 패턴 사용)
         return AuthMapper.toBreederRegisterResponse(savedBreeder, tokens);

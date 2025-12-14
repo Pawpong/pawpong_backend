@@ -1,13 +1,32 @@
 import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
+
+import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
 
 /**
  * JWT 인증 가드
  * JWT 토큰 검증 실패 시 상세한 에러 로깅을 제공합니다.
+ * @Public() 데코레이터가 적용된 엔드포인트는 인증을 건너뜁니다.
  */
 @Injectable()
 export class JwtAuthGuard extends AuthGuard('jwt') {
+    constructor(private reflector: Reflector) {
+        super();
+    }
+
     canActivate(context: ExecutionContext) {
+        // @Public() 데코레이터가 있는지 확인
+        const isPublic = this.reflector.getAllAndOverride<boolean>(IS_PUBLIC_KEY, [
+            context.getHandler(),
+            context.getClass(),
+        ]);
+
+        if (isPublic) {
+            console.log('[JwtAuthGuard] Public 엔드포인트 - 인증 건너뜀');
+            return true;
+        }
+
         // JWT 검증 시작
         console.log('[JwtAuthGuard] canActivate - JWT 검증 시작');
         return super.canActivate(context);
