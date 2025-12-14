@@ -290,6 +290,8 @@ export class AuthService {
                 secure: isProduction,
                 // cross-site 요청을 위해 'none' 사용 (프론트: pawpong.kr, 백엔드: dev-api.pawpong.kr)
                 sameSite: isProduction ? ('none' as const) : ('lax' as const),
+                // 프로덕션 환경에서는 .pawpong.kr 도메인으로 설정하여 서브도메인 간 쿠키 공유
+                domain: isProduction ? '.pawpong.kr' : undefined,
                 path: '/',
             },
         };
