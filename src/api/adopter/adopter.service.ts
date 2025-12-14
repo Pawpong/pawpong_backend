@@ -3,7 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
 
-import { ApplicationStatus, ReportStatus, NotificationType, RecipientType } from '../../common/enum/user.enum';
+import { ApplicationStatus, ReportStatus, RecipientType } from '../../common/enum/user.enum';
+import { NotificationType } from '../../schema/notification.schema';
 
 import { StorageService } from '../../common/storage/storage.service';
 import { MailService } from '../../common/mail/mail.service';
@@ -85,27 +86,23 @@ export class AdopterService {
     async createApplication(userId: string, dto: ApplicationCreateRequestDto, userRole?: string): Promise<any> {
         // 1. 신청자 계정 존재 및 상태 검증 (입양자 또는 브리더)
         let applicant: any;
-        let applicantName: string;
-        let applicantEmail: string;
-        let applicantPhone: string;
 
         if (userRole === 'breeder') {
             applicant = await this.breederRepository.findById(userId);
             if (!applicant) {
                 throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
             }
-            applicantName = applicant.name || applicant.nickname;
-            applicantEmail = applicant.emailAddress;
-            applicantPhone = applicant.phoneNumber || '';
         } else {
             applicant = await this.adopterRepository.findById(userId);
             if (!applicant) {
                 throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
             }
-            applicantName = applicant.nickname;
-            applicantEmail = applicant.emailAddress;
-            applicantPhone = applicant.phoneNumber || '';
         }
+
+        // 1-1. 프론트엔드 폼에서 입력한 이름, 이메일, 전화번호 사용 (DB 값이 아닌 사용자가 직접 입력한 값)
+        const applicantName = dto.name;
+        const applicantEmail = dto.email;
+        const applicantPhone = dto.phone;
 
         // 2. 개인정보 수집 동의 확인
         if (!dto.privacyConsent) {
@@ -205,12 +202,21 @@ export class AdopterService {
         // 8. 브리더에게 새 상담 신청 알림 및 이메일 발송
         await this.sendNewApplicationNotification(breeder);
 
-        // 9. 응답 데이터 구성 (Mapper 패턴 사용)
+        // 9. 신청자에게 상담 신청 확인 알림 및 이메일 발송
+        await this.sendApplicationConfirmationNotification(
+            userId,
+            userRole || 'adopter',
+            applicantName,
+            applicantEmail,
+            breeder.name,
+        );
+
+        // 10. 응답 데이터 구성 (Mapper 패턴 사용)
         return AdopterMapper.toApplicationCreateResponse(savedApplication, breeder.name, pet?.name);
     }
 
     /**
-     * 새 상담 신청 알림 및 이메일 발송 (빌더 통합)
+     * 새 상담 신청 알림 및 이메일 발송 (브리더용)
      * @private
      */
     private async sendNewApplicationNotification(breeder: any): Promise<void> {
@@ -221,7 +227,7 @@ export class AdopterService {
 
         const builder = this.notificationService
             .to(breederId, RecipientType.BREEDER)
-            .type(NotificationType.NEW_APPLICATION)
+            .type(NotificationType.NEW_CONSULT_REQUEST)
             .title('💬 새로운 입양 상담 신청이 도착했어요!')
             .content('지금 확인해보세요.')
             .related(breederId, 'applications');
@@ -229,6 +235,41 @@ export class AdopterService {
         if (emailContent && breeder.emailAddress) {
             builder.withEmail({
                 to: breeder.emailAddress,
+                subject: emailContent.subject,
+                html: emailContent.html,
+            });
+        }
+
+        await builder.send();
+    }
+
+    /**
+     * 상담 신청 확인 알림 및 이메일 발송 (신청자용)
+     * @private
+     */
+    private async sendApplicationConfirmationNotification(
+        applicantId: string,
+        applicantRole: string,
+        applicantName: string,
+        applicantEmail: string,
+        breederName: string,
+    ): Promise<void> {
+        const emailContent = applicantEmail
+            ? this.mailTemplateService.getApplicationConfirmationEmail(applicantName, breederName)
+            : null;
+
+        const recipientType = applicantRole === 'breeder' ? RecipientType.BREEDER : RecipientType.ADOPTER;
+
+        const builder = this.notificationService
+            .to(applicantId, recipientType)
+            .type(NotificationType.CONSULT_REQUEST_CONFIRMED)
+            .title('✅ 상담 신청이 접수되었습니다!')
+            .content(`${breederName}님이 확인 후 연락드릴 예정입니다.`)
+            .related(applicantId, 'applications');
+
+        if (emailContent && applicantEmail) {
+            builder.withEmail({
+                to: applicantEmail,
                 subject: emailContent.subject,
                 html: emailContent.html,
             });
@@ -327,7 +368,7 @@ export class AdopterService {
     private async sendNewReviewNotification(breederId: string): Promise<void> {
         await this.notificationService
             .to(breederId, RecipientType.BREEDER)
-            .type(NotificationType.NEW_REVIEW)
+            .type(NotificationType.NEW_REVIEW_REGISTERED)
             .title('⭐ 새로운 후기가 등록되었어요!')
             .content('브리더 프로필에서 후기를 확인해보세요.')
             .related(breederId, 'profile')
