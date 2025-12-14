@@ -1420,8 +1420,6 @@ export class AuthService {
                 email: savedBreeder.emailAddress,
                 name: savedBreeder.name,
                 phone: savedBreeder.phoneNumber,
-                businessNumber: undefined, // Breeder 스키마에 없음
-                businessName: savedBreeder.name, // 브리더명을 상호명으로 사용
                 registrationType: socialAuthInfo ? 'social' : 'email',
                 provider: socialAuthInfo?.authProvider,
                 documents: documentsForWebhook.length > 0 ? documentsForWebhook : undefined,
@@ -1618,24 +1616,12 @@ export class AuthService {
             ],
         };
 
-        // New/Elite 레벨별 필수 서류 정의
-        const requiredTypes = {
-            new: ['idCard', 'animalProductionLicense'], // 필수 2개
-            elite: [
-                'idCard',
-                'animalProductionLicense',
-                'adoptionContractSample',
-                'recentAssociationDocument',
-                'breederCertification',
-            ], // 필수 5개 (ticaCfaDocument는 선택)
-        };
-
         // 레벨 검증
         if (!['new', 'elite'].includes(level)) {
             throw new BadRequestException('레벨은 "new" 또는 "elite"만 가능합니다.');
         }
 
-        // 서류 타입 검증
+        // 서류 타입 검증 (허용된 타입인지만 검증, 필수 검증 제거)
         const validTypes = allowedTypes[level];
         for (const type of types) {
             if (!validTypes.includes(type)) {
@@ -1651,12 +1637,8 @@ export class AuthService {
             throw new BadRequestException('중복된 서류 타입이 있습니다. 각 서류는 한 번만 업로드해야 합니다.');
         }
 
-        // 필수 서류 검증
-        const required = requiredTypes[level];
-        const missingRequired = required.filter((type) => !types.includes(type));
-        if (missingRequired.length > 0) {
-            throw new BadRequestException(`${level} 레벨 필수 서류가 누락되었습니다: ${missingRequired.join(', ')}`);
-        }
+        // 필수 서류 검증 제거 - 부분 업로드 허용
+        // 사용자가 원하는 만큼만 업로드할 수 있도록 변경
 
         // files와 types 배열 길이 일치 검증
         if (files.length !== types.length) {
