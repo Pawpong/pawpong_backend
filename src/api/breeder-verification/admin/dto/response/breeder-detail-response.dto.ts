@@ -131,6 +131,11 @@ export class BreederDetailResponseDto {
         subscriptionPlan: string;
 
         /**
+         * 브리더 레벨 (new: 뉴, elite: 엘리트)
+         */
+        level: string;
+
+        /**
          * 신청일
          */
         submittedAt?: Date;

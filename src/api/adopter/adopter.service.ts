@@ -203,16 +203,18 @@ export class AdopterService {
         await this.sendNewApplicationNotification(breeder);
 
         // 9. 신청자에게 상담 신청 확인 알림 및 이메일 발송
+        // breeder.name이 빈 값일 경우를 대비하여 기본값 설정
+        const breederDisplayName = breeder.name || breeder.nickname || '브리더';
         await this.sendApplicationConfirmationNotification(
             userId,
             userRole || 'adopter',
             applicantName,
             applicantEmail,
-            breeder.name,
+            breederDisplayName,
         );
 
         // 10. 응답 데이터 구성 (Mapper 패턴 사용)
-        return AdopterMapper.toApplicationCreateResponse(savedApplication, breeder.name, pet?.name);
+        return AdopterMapper.toApplicationCreateResponse(savedApplication, breederDisplayName, pet?.name);
     }
 
     /**
@@ -265,6 +267,7 @@ export class AdopterService {
             .type(NotificationType.CONSULT_REQUEST_CONFIRMED)
             .title('✅ 상담 신청이 접수되었습니다!')
             .content(`${breederName}님이 확인 후 연락드릴 예정입니다.`)
+            .metadata({ breederName })
             .related(applicantId, 'applications');
 
         if (emailContent && applicantEmail) {
