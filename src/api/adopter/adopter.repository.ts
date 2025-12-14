@@ -31,7 +31,7 @@ export class AdopterRepository {
      */
     async findById(adopterId: string): Promise<AdopterDocument | null> {
         try {
-            return await this.adopterModel.findById(adopterId).select('-password_hash').exec();
+            return await this.adopterModel.findById(adopterId).select('-passwordHash').lean().exec() as AdopterDocument | null;
         } catch (error) {
             throw new Error(`입양자 조회 실패: ${error.message}`);
         }
@@ -46,7 +46,7 @@ export class AdopterRepository {
      */
     async findByIdWithAllData(adopterId: string): Promise<AdopterDocument | null> {
         try {
-            return await this.adopterModel.findById(adopterId).select('-password_hash').exec();
+            return await this.adopterModel.findById(adopterId).select('-passwordHash').lean().exec() as AdopterDocument | null;
         } catch (error) {
             throw new Error(`입양자 전체 정보 조회 실패: ${error.message}`);
         }

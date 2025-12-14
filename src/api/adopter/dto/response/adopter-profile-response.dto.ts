@@ -68,6 +68,27 @@ export class AdopterProfileResponseDto {
     accountStatus: string;
 
     /**
+     * 소셜 로그인 제공자
+     * @example "kakao"
+     */
+    @ApiProperty({
+        description: '소셜 로그인 제공자',
+        example: 'kakao',
+        enum: ['local', 'google', 'kakao', 'naver', 'apple'],
+    })
+    authProvider: string;
+
+    /**
+     * 마케팅 정보 수신 동의 여부
+     * @example true
+     */
+    @ApiProperty({
+        description: '마케팅 정보 수신 동의 여부',
+        example: true,
+    })
+    marketingAgreed: boolean;
+
+    /**
      * 즐겨찾기 브리더 목록
      */
     @ApiProperty({

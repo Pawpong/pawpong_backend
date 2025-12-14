@@ -245,6 +245,17 @@ export class BreederProfileResponseDto {
     profileImageFileName?: string;
 
     /**
+     * 소셜 로그인 제공자
+     * @example "kakao"
+     */
+    @ApiProperty({
+        description: '소셜 로그인 제공자',
+        example: 'kakao',
+        enum: ['local', 'google', 'kakao', 'naver', 'apple'],
+    })
+    authProvider: string;
+
+    /**
      * 브리더 프로필 상세 정보
      */
     @ApiProperty({
