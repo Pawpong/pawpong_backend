@@ -527,11 +527,25 @@ export class AdopterService {
      * @returns 생성된 신고 ID 및 성공 메시지
      */
     async createReport(userId: string, createReportDto: ReportCreateRequestDto): Promise<any> {
-        const { breederId, type, description } = createReportDto;
+        const { breederId, type, reason, description } = createReportDto;
 
+        // 기타(other) 사유 선택 시 description 필수 검증
+        if (reason === 'other' && (!description || description.trim() === '')) {
+            throw new BadRequestException('기타 사유를 선택한 경우 상세 내용을 입력해주세요.');
+        }
+
+        // 신고자 정보 조회 (입양자 또는 브리더)
+        let reporterNickname = '';
         const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+        if (adopter) {
+            reporterNickname = adopter.nickname;
+        } else {
+            const reporterBreeder = await this.breederRepository.findById(userId);
+            if (reporterBreeder) {
+                reporterNickname = reporterBreeder.name;
+            } else {
+                throw new BadRequestException('사용자 정보를 찾을 수 없습니다.');
+            }
         }
 
         const breeder = await this.breederRepository.findById(breederId);
@@ -542,12 +556,13 @@ export class AdopterService {
         const reportId = randomUUID();
 
         // 신고 데이터 구성 (Mapper 패턴 사용)
+        // reason을 type으로 매핑 (reason이 실제 신고 사유)
         const report = AdopterMapper.toReport(
             reportId,
             userId,
-            adopter.nickname,
-            type,
-            description,
+            reporterNickname,
+            reason,
+            description || '',
             ReportStatus.PENDING,
         );
 
