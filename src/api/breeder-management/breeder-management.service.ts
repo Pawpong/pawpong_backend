@@ -578,10 +578,14 @@ export class BreederManagementService {
                         });
                     }
                 } else {
-                    this.logger.logWarning('updateApplicationStatus', '브리더 또는 입양자 정보를 찾을 수 없어 알림 발송 실패', {
-                        breederId: userId,
-                        adopterId,
-                    });
+                    this.logger.logWarning(
+                        'updateApplicationStatus',
+                        '브리더 또는 입양자 정보를 찾을 수 없어 알림 발송 실패',
+                        {
+                            breederId: userId,
+                            adopterId,
+                        },
+                    );
                 }
             } catch (error) {
                 // 알림 발송 실패해도 상담 완료 처리는 계속 진행
@@ -769,6 +773,7 @@ export class BreederManagementService {
             verification?.documents?.map((doc: any) => ({
                 type: doc.type,
                 url: this.storageService.generateSignedUrl(doc.fileName, 60),
+                originalFileName: doc.originalFileName,
                 uploadedAt: doc.uploadedAt,
             })) || [];
 
@@ -822,6 +827,7 @@ export class BreederManagementService {
             documents: breeder.verification.documents.map((doc: any) => ({
                 type: doc.type,
                 url: this.storageService.generateSignedUrl(doc.fileName, 60), // fileName → Signed URL 변환
+                originalFileName: doc.originalFileName,
                 uploadedAt: doc.uploadedAt,
             })),
         };
@@ -839,7 +845,7 @@ export class BreederManagementService {
 
         // parentPets의 photoFileName을 Signed URL로 변환
         const parentPetsWithSignedUrls = (parentPets || []).map((pet: any) => ({
-            ...pet.toObject ? pet.toObject() : pet,
+            ...(pet.toObject ? pet.toObject() : pet),
             petId: (pet._id || pet.petId)?.toString(),
             photoFileName: this.storageService.generateSignedUrlSafe(pet.photoFileName, 60),
         }));

@@ -458,12 +458,12 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
     @HttpCode(HttpStatus.OK)
     @ApiEndpoint({
         summary: '로그인 페이지 배너 조회 (공개)',
-        description: '로그인 초기 페이지에 표시할 활성화된 프로필 배너를 조회합니다. 인증 없이 접근 가능합니다.',
+        description: '로그인 초기 페이지에 표시할 활성화된 로그인 배너를 조회합니다. 인증 없이 접근 가능합니다.',
         responseType: Array,
         isPublic: true,
     })
     async getLoginBanners(): Promise<ApiResponseDto<any[]>> {
-        const banners = await this.authAdminService.getActiveProfileBanners();
+        const banners = await this.authAdminService.getActiveProfileBanners('login');
         return ApiResponseDto.success(banners, '로그인 페이지 배너가 조회되었습니다.');
     }
 
@@ -471,12 +471,12 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
     @HttpCode(HttpStatus.OK)
     @ApiEndpoint({
         summary: '회원가입 페이지 배너 조회 (공개)',
-        description: '회원가입 도중에 표시할 활성화된 상담 배너를 조회합니다. 인증 없이 접근 가능합니다.',
+        description: '회원가입 도중에 표시할 활성화된 회원가입 배너를 조회합니다. 인증 없이 접근 가능합니다.',
         responseType: Array,
         isPublic: true,
     })
     async getRegisterBanners(): Promise<ApiResponseDto<any[]>> {
-        const banners = await this.authAdminService.getActiveCounselBanners();
+        const banners = await this.authAdminService.getActiveProfileBanners('signup');
         return ApiResponseDto.success(banners, '회원가입 페이지 배너가 조회되었습니다.');
     }
 
@@ -508,23 +508,23 @@ documentUrls에 filename 필드 값을 넣는 경우
 - idCard: 신분증 사본
 - animalProductionLicense: 동물생산업 등록증
 
-**Elite 레벨 (필수 5개 + 선택 1개):**
+**Elite 레벨 (필수 2개 + 선택 2개):**
 - idCard: 신분증 사본 - 필수
 - animalProductionLicense: 동물생산업 등록증 - 필수
-- adoptionContractSample: 표준 입양계약서 샘플 - 필수
-- recentAssociationDocument: 최근 발급한 협회 서류 - 필수
-- breederCertification: 고양이 브리더 인증 서류 - 필수
+- adoptionContractSample: 표준 입양계약서 샘플 - 선택 (나중에 제출 가능)
+- breederCertification: 고양이 브리더 인증 서류 - 선택 (나중에 제출 가능)
 - ticaCfaDocument: TICA 또는 CFA 서류 - 선택
 
 **요청 형식:**
-- files: 파일 배열 (New: 2개, Elite: 5~6개)
+- files: 파일 배열 (New: 2개, Elite: 2~5개)
 - types: 서류 타입 JSON 배열 (예: ["idCard","animalProductionLicense"])
 - level: 브리더 레벨 ("new" 또는 "elite")
 
 **제한사항:**
 - 각 파일 최대 10MB
 - 허용 형식: pdf, jpg, jpeg, png, webp, heic, gif 등
-- 필수 서류가 모두 포함되어야 함`,
+- 필수 서류(idCard, animalProductionLicense)는 반드시 포함되어야 함
+- Elite 레벨의 나머지 서류는 회원가입 후에도 제출 가능`,
         responseType: VerificationDocumentsResponseDto,
         isPublic: true,
     })
