@@ -18,6 +18,7 @@ export interface NotificationCreateData {
     content: string;
     relatedId?: string;
     relatedType?: string;
+    metadata?: Record<string, any>;
 }
 
 export interface NotificationSendResult {
@@ -60,6 +61,7 @@ export class NotificationBuilder {
     private notificationContent: string;
     private relatedResourceId?: string;
     private relatedResourceType?: string;
+    private notificationMetadata?: Record<string, any>;
     private emailData?: EmailData;
 
     constructor(
@@ -104,6 +106,17 @@ export class NotificationBuilder {
     }
 
     /**
+     * 메타데이터 설정 (선택적)
+     * 알림 메시지에 동적으로 치환될 데이터 설정
+     * @example
+     * .metadata({ breederName: '행복한 강아지' })
+     */
+    metadata(data: Record<string, any>): this {
+        this.notificationMetadata = data;
+        return this;
+    }
+
+    /**
      * 이메일 발송 설정 (선택적)
      * 서비스 알림과 함께 이메일도 발송합니다.
      */
@@ -135,6 +148,7 @@ export class NotificationBuilder {
             content: this.notificationContent,
             relatedId: this.relatedResourceId,
             relatedType: this.relatedResourceType,
+            metadata: this.notificationMetadata,
         });
 
         // 2. 이메일 발송 (설정된 경우에만)

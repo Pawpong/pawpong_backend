@@ -525,6 +525,9 @@ export class BreederManagementService {
                 if (breeder && adopter) {
                     this.logger.log(`[updateApplicationStatus] 알림 발송 대상 입양자 ID: ${adopterId}`);
 
+                    // breederName이 빈 값일 경우를 대비하여 기본값 설정
+                    const breederDisplayName = breeder.name || breeder.nickname || '브리더';
+
                     // 1. 인앱 알림 생성
                     await this.notificationService.createNotification(
                         adopterId,
@@ -532,7 +535,7 @@ export class BreederManagementService {
                         NotificationType.CONSULT_COMPLETED,
                         {
                             breederId: userId,
-                            breederName: breeder.name,
+                            breederName: breederDisplayName,
                             applicationId: applicationId,
                         },
                         `/applications/${applicationId}`,
@@ -540,7 +543,7 @@ export class BreederManagementService {
 
                     this.logger.logSuccess('updateApplicationStatus', '상담 완료 인앱 알림 발송 완료', {
                         adopterId,
-                        breederName: breeder.name,
+                        breederName: breederDisplayName,
                     });
 
                     // 2. 이메일 발송
@@ -548,11 +551,11 @@ export class BreederManagementService {
                         const appUrl = this.configService.get('APP_URL', 'https://pawpong.com');
                         await this.mailService.sendMail({
                             to: adopter.emailAddress,
-                            subject: `${breeder.name}님과의 상담이 완료되었어요!`,
+                            subject: `${breederDisplayName}님과의 상담이 완료되었어요!`,
                             html: `
                                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
                                     <h2 style="color: #4F3B2E;">🐾 상담이 완료되었습니다!</h2>
-                                    <p>${breeder.name}님과의 상담이 완료되었어요.</p>
+                                    <p>${breederDisplayName}님과의 상담이 완료되었어요.</p>
                                     <p>어떠셨는지 후기를 남겨주세요!</p>
                                     <div style="margin: 30px 0;">
                                         <a href="${appUrl}/applications/${applicationId}"

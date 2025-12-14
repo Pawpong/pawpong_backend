@@ -137,6 +137,7 @@ export class BreederVerificationAdminService {
                 verificationInfo: {
                     verificationStatus: breeder.verification?.status || 'pending',
                     subscriptionPlan: breeder.verification?.plan || 'basic',
+                    level: breeder.verification?.level || 'new',
                     submittedAt: submittedAt,
                     isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
                 },
@@ -218,6 +219,7 @@ export class BreederVerificationAdminService {
                 verificationInfo: {
                     verificationStatus: breeder.verification?.status || 'pending',
                     subscriptionPlan: breeder.verification?.plan || 'basic',
+                    level: breeder.verification?.level || 'new',
                     submittedAt: submittedAt,
                     isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
                 },
@@ -333,6 +335,7 @@ export class BreederVerificationAdminService {
             verificationInfo: {
                 verificationStatus: breeder.verification?.status || 'pending',
                 subscriptionPlan: breeder.verification?.plan || 'basic',
+                level: breeder.verification?.level || 'new',
                 submittedAt: submittedAt,
                 processedAt: breeder.verification?.reviewedAt,
                 isSubmittedByEmail: breeder.verification?.submittedByEmail || false,

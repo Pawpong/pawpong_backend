@@ -43,6 +43,7 @@ export class BreederVerificationResponseDto {
     verificationInfo: {
         verificationStatus: string;
         subscriptionPlan: string;
+        level: string;
         submittedAt?: Date;
         isSubmittedByEmail?: boolean;
     };
