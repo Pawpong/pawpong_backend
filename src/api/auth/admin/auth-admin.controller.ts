@@ -1,4 +1,4 @@
-import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Body, HttpCode, HttpStatus, Get, Put, Delete, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { ApiEndpoint } from '../../../common/decorator/swagger.decorator';
@@ -9,6 +9,12 @@ import { AdminLoginRequestDto } from '../dto/request/admin-login-request.dto';
 import { RefreshTokenRequestDto } from '../dto/request/refresh-token-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { AdminLoginResponseDto } from '../dto/response/admin-login-response.dto';
+import { ProfileBannerResponseDto } from '../../breeder-management/admin/dto/response/profile-banner-response.dto';
+import { CounselBannerResponseDto } from '../../breeder-management/admin/dto/response/counsel-banner-response.dto';
+import { ProfileBannerCreateRequestDto } from '../../breeder-management/admin/dto/request/profile-banner-create-request.dto';
+import { ProfileBannerUpdateRequestDto } from '../../breeder-management/admin/dto/request/profile-banner-update-request.dto';
+import { CounselBannerCreateRequestDto } from '../../breeder-management/admin/dto/request/counsel-banner-create-request.dto';
+import { CounselBannerUpdateRequestDto } from '../../breeder-management/admin/dto/request/counsel-banner-update-request.dto';
 
 /**
  * 관리자 인증 컨트롤러
@@ -20,7 +26,9 @@ import { AdminLoginResponseDto } from '../dto/response/admin-login-response.dto'
 @ApiTags('인증 관리 (Admin)')
 @Controller('auth-admin')
 export class AuthAdminController {
-    constructor(private readonly authAdminService: AuthAdminService) {}
+    constructor(
+        private readonly authAdminService: AuthAdminService,
+    ) {}
 
     /**
      * 관리자 로그인
@@ -114,5 +122,111 @@ export class AuthAdminController {
     async refreshAdminToken(@Body() dto: RefreshTokenRequestDto): Promise<ApiResponseDto<{ accessToken: string }>> {
         const result = await this.authAdminService.refreshAdminToken(dto.refreshToken);
         return ApiResponseDto.success(result, '토큰이 갱신되었습니다.');
+    }
+
+    // ==================== 프로필 배너 관리 (관리자 전용) ====================
+
+    @Get('profile-banners')
+    @ApiEndpoint({
+        summary: '프로필 배너 전체 목록 조회 (관리자)',
+        description: '활성/비활성 포함 모든 프로필 배너를 조회합니다.',
+        responseType: [ProfileBannerResponseDto],
+        isPublic: false,
+    })
+    async getAllProfileBanners(): Promise<ApiResponseDto<ProfileBannerResponseDto[]>> {
+        const banners = await this.authAdminService.getAllProfileBanners();
+        return ApiResponseDto.success(banners, '프로필 배너 목록이 조회되었습니다.');
+    }
+
+    @Post('profile-banner')
+    @ApiEndpoint({
+        summary: '프로필 배너 생성',
+        description: '새로운 프로필 배너를 생성합니다.',
+        responseType: ProfileBannerResponseDto,
+        isPublic: false,
+    })
+    async createProfileBanner(
+        @Body() data: ProfileBannerCreateRequestDto,
+    ): Promise<ApiResponseDto<ProfileBannerResponseDto>> {
+        const banner = await this.authAdminService.createProfileBanner(data);
+        return ApiResponseDto.success(banner, '프로필 배너가 생성되었습니다.');
+    }
+
+    @Put('profile-banner/:bannerId')
+    @ApiEndpoint({
+        summary: '프로필 배너 수정',
+        description: '기존 프로필 배너를 수정합니다.',
+        responseType: ProfileBannerResponseDto,
+        isPublic: false,
+    })
+    async updateProfileBanner(
+        @Param('bannerId') bannerId: string,
+        @Body() data: ProfileBannerUpdateRequestDto,
+    ): Promise<ApiResponseDto<ProfileBannerResponseDto>> {
+        const banner = await this.authAdminService.updateProfileBanner(bannerId, data);
+        return ApiResponseDto.success(banner, '프로필 배너가 수정되었습니다.');
+    }
+
+    @Delete('profile-banner/:bannerId')
+    @ApiEndpoint({
+        summary: '프로필 배너 삭제',
+        description: '프로필 배너를 삭제합니다.',
+        isPublic: false,
+    })
+    async deleteProfileBanner(@Param('bannerId') bannerId: string): Promise<ApiResponseDto<null>> {
+        await this.authAdminService.deleteProfileBanner(bannerId);
+        return ApiResponseDto.success(null, '프로필 배너가 삭제되었습니다.');
+    }
+
+    // ==================== 상담 배너 관리 (관리자 전용) ====================
+
+    @Get('counsel-banners')
+    @ApiEndpoint({
+        summary: '상담 배너 전체 목록 조회 (관리자)',
+        description: '활성/비활성 포함 모든 상담 배너를 조회합니다.',
+        responseType: [CounselBannerResponseDto],
+        isPublic: false,
+    })
+    async getAllCounselBanners(): Promise<ApiResponseDto<CounselBannerResponseDto[]>> {
+        const banners = await this.authAdminService.getAllCounselBanners();
+        return ApiResponseDto.success(banners, '상담 배너 목록이 조회되었습니다.');
+    }
+
+    @Post('counsel-banner')
+    @ApiEndpoint({
+        summary: '상담 배너 생성',
+        description: '새로운 상담 배너를 생성합니다.',
+        responseType: CounselBannerResponseDto,
+        isPublic: false,
+    })
+    async createCounselBanner(@Body() data: CounselBannerCreateRequestDto): Promise<ApiResponseDto<CounselBannerResponseDto>> {
+        const banner = await this.authAdminService.createCounselBanner(data);
+        return ApiResponseDto.success(banner, '상담 배너가 생성되었습니다.');
+    }
+
+    @Put('counsel-banner/:bannerId')
+    @ApiEndpoint({
+        summary: '상담 배너 수정',
+        description: '기존 상담 배너를 수정합니다.',
+        responseType: CounselBannerResponseDto,
+        isPublic: false,
+    })
+    async updateCounselBanner(
+        @Param('bannerId') bannerId: string,
+        @Body() data: CounselBannerUpdateRequestDto,
+    ): Promise<ApiResponseDto<CounselBannerResponseDto>> {
+        const banner = await this.authAdminService.updateCounselBanner(bannerId, data);
+        return ApiResponseDto.success(banner, '상담 배너가 수정되었습니다.');
+    }
+
+    @Delete('counsel-banner/:bannerId')
+    @ApiEndpoint({
+        summary: '상담 배너 삭제',
+        description: '상담 배너를 삭제합니다.',
+        isPublic: false,
+    })
+    async deleteCounselBanner(@Param('bannerId') bannerId: string): Promise<ApiResponseDto<null>> {
+        await this.authAdminService.deleteCounselBanner(bannerId);
+        return ApiResponseDto.success(null, '상담 배너가 삭제되었습니다.');
     }
 }

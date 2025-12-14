@@ -25,7 +25,7 @@ import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard
 
 import { SmsService } from './sms.service';
 import { AuthService } from './auth.service';
-import { BreederManagementAdminService } from '../breeder-management/admin/breeder-management-admin.service';
+import { AuthAdminService } from './admin/auth-admin.service';
 
 import { RefreshTokenRequestDto } from './dto/request/refresh-token-request.dto';
 import { CheckNicknameRequestDto } from './dto/request/check-nickname-request.dto';
@@ -50,7 +50,7 @@ export class AuthController {
     constructor(
         private readonly authService: AuthService,
         private readonly smsService: SmsService,
-        private readonly breederManagementAdminService: BreederManagementAdminService,
+        private readonly authAdminService: AuthAdminService,
     ) {}
 
     @Post('refresh')
@@ -454,17 +454,30 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
         return ApiResponseDto.success(response, message);
     }
 
-    @Get('login-page-banners')
+    @Get('login-banners')
     @HttpCode(HttpStatus.OK)
     @ApiEndpoint({
         summary: '로그인 페이지 배너 조회 (공개)',
-        description: '로그인 페이지에 표시할 활성화된 프로필 배너를 조회합니다. 인증 없이 접근 가능합니다.',
+        description: '로그인 초기 페이지에 표시할 활성화된 프로필 배너를 조회합니다. 인증 없이 접근 가능합니다.',
         responseType: Array,
         isPublic: true,
     })
-    async getLoginPageBanners(): Promise<ApiResponseDto<any[]>> {
-        const banners = await this.breederManagementAdminService.getActiveProfileBanners();
-        return ApiResponseDto.success(banners, '활성화된 배너가 조회되었습니다.');
+    async getLoginBanners(): Promise<ApiResponseDto<any[]>> {
+        const banners = await this.authAdminService.getActiveProfileBanners();
+        return ApiResponseDto.success(banners, '로그인 페이지 배너가 조회되었습니다.');
+    }
+
+    @Get('register-banners')
+    @HttpCode(HttpStatus.OK)
+    @ApiEndpoint({
+        summary: '회원가입 페이지 배너 조회 (공개)',
+        description: '회원가입 도중에 표시할 활성화된 상담 배너를 조회합니다. 인증 없이 접근 가능합니다.',
+        responseType: Array,
+        isPublic: true,
+    })
+    async getRegisterBanners(): Promise<ApiResponseDto<any[]>> {
+        const banners = await this.authAdminService.getActiveCounselBanners();
+        return ApiResponseDto.success(banners, '회원가입 페이지 배너가 조회되었습니다.');
     }
 
     @Post('upload-breeder-documents')
