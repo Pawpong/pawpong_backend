@@ -196,6 +196,8 @@ export class BreederService {
         return {
             breederId: breeder._id.toString(),
             breederName: breeder.name,
+            breederEmail: breeder.emailAddress,
+            authProvider: breeder.socialAuthInfo?.authProvider || 'local',
             breederLevel: breeder.verification?.level || 'new',
             detailBreed: breeder.detailBreed,
             breeds: breeder.breeds || [],
