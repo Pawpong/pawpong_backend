@@ -415,8 +415,8 @@ export class AuthMapper {
             idCard: 'id_card',
             animalProductionLicense: 'animal_production_license',
             adoptionContractSample: 'adoption_contract_sample',
-            recentAssociationDocument: 'pedigree',
-            pedigree: 'pedigree',
+            recentAssociationDocument: 'recent_pedigree_document',
+            pedigree: 'recent_pedigree_document',
             breederCertification: 'breeder_certification',
         };
 

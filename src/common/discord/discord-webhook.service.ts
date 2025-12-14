@@ -39,7 +39,10 @@ export class DiscordWebhookService {
         provider?: string;
     }): Promise<void> {
         if (!this.webhookUrl) {
-            this.logger.logWarning('notifyAdopterRegistration', '디스코드 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.');
+            this.logger.logWarning(
+                'notifyAdopterRegistration',
+                '디스코드 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
+            );
             return;
         }
 
@@ -112,53 +115,84 @@ export class DiscordWebhookService {
         businessName?: string;
         registrationType: 'email' | 'social';
         provider?: string;
+        documents?: Array<{
+            type: string;
+            url: string;
+            originalFileName?: string;
+        }>;
     }): Promise<void> {
         if (!this.webhookUrl) {
-            this.logger.logWarning('notifyBreederRegistration', '디스코드 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.');
+            this.logger.logWarning(
+                'notifyBreederRegistration',
+                '디스코드 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
+            );
             return;
         }
 
         try {
+            const documentTypeMap: Record<string, string> = {
+                id_card: '신분증',
+                animal_production_license: '동물생산업 등록증',
+                adoption_contract_sample: '표준 입양계약서 샘플',
+                recent_pedigree_document: '최근 발급된 혈통서 사본',
+                breeder_certification: '브리더 인증 서류',
+            };
+
+            const fields: Array<{ name: string; value: string; inline: boolean }> = [
+                {
+                    name: '사용자 ID',
+                    value: data.userId,
+                    inline: true,
+                },
+                {
+                    name: '이메일',
+                    value: data.email,
+                    inline: true,
+                },
+                {
+                    name: '이름',
+                    value: data.name,
+                    inline: true,
+                },
+                {
+                    name: '전화번호',
+                    value: data.phone || '미설정',
+                    inline: true,
+                },
+                {
+                    name: '사업자 등록번호',
+                    value: data.businessNumber || '미설정',
+                    inline: true,
+                },
+                {
+                    name: '상호명',
+                    value: data.businessName || '미설정',
+                    inline: true,
+                },
+                {
+                    name: '가입 유형',
+                    value: data.registrationType === 'email' ? '이메일' : `소셜 (${data.provider || '알 수 없음'})`,
+                    inline: true,
+                },
+            ];
+
+            // 서류 URL 추가
+            if (data.documents && data.documents.length > 0) {
+                data.documents.forEach((doc) => {
+                    const docTypeName = documentTypeMap[doc.type] || doc.type;
+                    const fileName = doc.originalFileName ? `\n파일명: ${doc.originalFileName}` : '';
+                    fields.push({
+                        name: `📄 ${docTypeName}`,
+                        value: `[서류 보기](${doc.url})${fileName}`,
+                        inline: false,
+                    });
+                });
+            }
+
             const embed = {
                 title: '🏢 새로운 브리더 회원가입',
                 color: 0x2196f3, // 파란색
-                fields: [
-                    {
-                        name: '사용자 ID',
-                        value: data.userId,
-                        inline: true,
-                    },
-                    {
-                        name: '이메일',
-                        value: data.email,
-                        inline: true,
-                    },
-                    {
-                        name: '이름',
-                        value: data.name,
-                        inline: true,
-                    },
-                    {
-                        name: '전화번호',
-                        value: data.phone || '미설정',
-                        inline: true,
-                    },
-                    {
-                        name: '사업자 등록번호',
-                        value: data.businessNumber || '미설정',
-                        inline: true,
-                    },
-                    {
-                        name: '상호명',
-                        value: data.businessName || '미설정',
-                        inline: true,
-                    },
-                    {
-                        name: '가입 유형',
-                        value: data.registrationType === 'email' ? '이메일' : `소셜 (${data.provider || '알 수 없음'})`,
-                        inline: true,
-                    },
-                ],
+                fields,
                 timestamp: new Date().toISOString(),
                 footer: {
                     text: 'Pawpong Backend',
