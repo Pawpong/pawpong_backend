@@ -43,16 +43,17 @@ export class ReportCreateRequestDto {
     reason: string;
 
     /**
-     * 신고 상세 내용
+     * 신고 상세 내용 (기타 사유 선택 시 필수)
      * @example "브리더가 허위 정보를 제공했습니다. 반려동물의 건강 상태가 설명과 다릅니다."
      */
     @ApiProperty({
-        description: '신고 상세 내용',
+        description: '신고 상세 내용 (기타 사유 선택 시 필수)',
         example: '브리더가 허위 정보를 제공했습니다. 반려동물의 건강 상태가 설명과 다릅니다.',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    description: string;
+    description?: string;
 
     /**
      * 증거 자료 URL 배열 (선택사항)
