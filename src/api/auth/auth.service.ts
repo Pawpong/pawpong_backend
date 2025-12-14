@@ -32,6 +32,7 @@ interface TempUploadInfo {
     profileImage?: string; // 파일명
     documents?: Array<{
         fileName: string;
+        originalFileName?: string;
         type: string;
     }>;
     createdAt: Date;
@@ -1299,6 +1300,7 @@ export class AuthService {
         // 프론트엔드가 보낸 값과 임시 저장된 값 병합
         const finalProfileImage = dto.profileImage || tempUploadInfo?.profileImage;
         const finalDocumentUrls = dto.documentUrls || tempUploadInfo?.documents?.map((doc) => doc.fileName);
+        const finalOriginalFileNames = tempUploadInfo?.documents?.map((doc) => doc.originalFileName);
         const finalDocumentTypes =
             dto.documentTypes ||
             tempUploadInfo?.documents?.map((doc) => {
@@ -1326,11 +1328,13 @@ export class AuthService {
             finalDocumentUrls?.map((urlOrFilename, index) => {
                 // URL에서 파일명 추출 (URL이면 경고 로그와 함께 변환, 파일명이면 그대로 사용)
                 const fileName = this.extractFilenameFromUrl(urlOrFilename);
+                const originalFileName = finalOriginalFileNames?.[index];
                 const camelCaseType = finalDocumentTypes?.[index] || AuthMapper.extractDocumentType(fileName);
                 // camelCase를 snake_case로 변환 (스키마 enum 형식에 맞춤)
                 const snakeCaseType = AuthMapper.convertDocumentTypeToSnakeCase(camelCaseType);
                 return {
                     fileName: fileName, // 파일명만 저장 (조회 시 동적으로 Signed URL 생성)
+                    originalFileName: originalFileName, // 원본 파일명 저장
                     type: snakeCaseType,
                     uploadedAt: new Date(),
                 };
@@ -1420,6 +1424,16 @@ export class AuthService {
         });
 
         // 디스코드 웹훅 알림 전송 (비동기, 에러 발생해도 회원가입은 성공)
+        // 서류 URL 생성 (Signed URL)
+        const documentsForWebhook = verificationDocuments.map((doc) => {
+            const signedUrl = this.storageService.generateSignedUrl(doc.fileName);
+            return {
+                type: doc.type,
+                url: signedUrl,
+                originalFileName: doc.originalFileName,
+            };
+        });
+
         this.discordWebhookService
             .notifyBreederRegistration({
                 userId: (savedBreeder._id as any).toString(),
@@ -1430,6 +1444,7 @@ export class AuthService {
                 businessName: savedBreeder.name, // 브리더명을 상호명으로 사용
                 registrationType: socialAuthInfo ? 'social' : 'email',
                 provider: socialAuthInfo?.authProvider,
+                documents: documentsForWebhook.length > 0 ? documentsForWebhook : undefined,
             })
             .catch((error) => {
                 this.logger.logError('registerBreeder', '디스코드 알림 전송 실패 (무시됨)', error);
@@ -1544,6 +1559,7 @@ export class AuthService {
             type: string;
             url: string;
             filename: string;
+            originalFileName: string;
             size: number;
             uploadedAt: Date;
         }> = [];
@@ -1559,6 +1575,7 @@ export class AuthService {
                 type,
                 url: result.cdnUrl, // 응답용 Signed URL
                 filename: result.fileName, // DB 저장용 파일명
+                originalFileName: file.originalname, // 원본 파일명 저장
                 size: file.size,
                 uploadedAt: new Date(),
             });
@@ -1567,6 +1584,7 @@ export class AuthService {
                 level,
                 type,
                 fileName: result.fileName,
+                originalFileName: file.originalname,
             });
         }
 
@@ -1582,6 +1600,7 @@ export class AuthService {
                 ...existing,
                 documents: uploadedDocuments.map((doc) => ({
                     fileName: doc.filename,
+                    originalFileName: doc.originalFileName,
                     type: doc.type,
                 })),
                 createdAt: existing.createdAt, // 기존 생성 시간 유지
@@ -1666,9 +1685,11 @@ export class AuthService {
             );
         }
 
-        // 파일 타입 및 크기 검증 (PDF, 모든 이미지 허용, 최대 10MB)
+        // 파일 타입 및 크기 검증 (PDF, 문서, 엑셀, 모든 이미지 허용, 최대 10MB)
         const allowedMimeTypes = [
+            // PDF
             'application/pdf',
+            // 이미지
             'image/jpeg',
             'image/jpg',
             'image/png',
@@ -1678,15 +1699,45 @@ export class AuthService {
             'image/gif',
             'image/bmp',
             'image/tiff',
+            // 문서 (HWP, DOC, DOCX)
+            'application/haansofthwp', // HWP
+            'application/x-hwp', // HWP (alternative)
+            'application/vnd.hancom.hwp', // HWP (alternative)
+            'application/msword', // DOC
+            'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
+            // 엑셀 (XLS, XLSX)
+            'application/vnd.ms-excel', // XLS
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // XLSX
         ];
 
         for (const file of files) {
             if (file.size > 10 * 1024 * 1024) {
                 throw new BadRequestException(`파일 "${file.originalname}"의 크기는 10MB를 초과할 수 없습니다.`);
             }
-            if (!allowedMimeTypes.includes(file.mimetype)) {
+
+            // 파일 확장자로도 체크 (MIME 타입이 정확하지 않을 수 있음)
+            const fileExtension = file.originalname.split('.').pop()?.toLowerCase();
+            const allowedExtensions = [
+                'pdf',
+                'jpg',
+                'jpeg',
+                'png',
+                'webp',
+                'heic',
+                'heif',
+                'gif',
+                'bmp',
+                'tiff',
+                'hwp',
+                'doc',
+                'docx',
+                'xls',
+                'xlsx',
+            ];
+
+            if (!allowedMimeTypes.includes(file.mimetype) && !allowedExtensions.includes(fileExtension || '')) {
                 throw new BadRequestException(
-                    `파일 "${file.originalname}"은(는) PDF 또는 이미지 파일만 업로드 가능합니다. (pdf, jpg, jpeg, png, webp, heic, gif 등)`,
+                    `파일 "${file.originalname}"은(는) 지원되지 않는 형식입니다. (지원: pdf, jpg, jpeg, png, webp, heic, gif, hwp, doc, docx, xls, xlsx)`,
                 );
             }
         }

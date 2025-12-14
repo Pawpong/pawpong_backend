@@ -119,6 +119,7 @@ export class BreederManagementAdminController {
         return ApiResponseDto.success(banners, '상담 배너 목록이 조회되었습니다.');
     }
 
+    @Public()
     @Get('counsel-banners/active')
     @ApiEndpoint({
         summary: '활성화된 상담 배너 목록 조회 (공개)',

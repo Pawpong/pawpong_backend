@@ -39,6 +39,13 @@ export class VerificationDocument {
     @Prop({ required: true })
     fileName: string;
 
+    /**
+     * 원본 파일명 (사용자가 업로드한 파일의 원본 이름)
+     * @example "신분증.pdf"
+     */
+    @Prop({ required: false })
+    originalFileName?: string;
+
     @Prop({ default: Date.now })
     uploadedAt: Date;
 }
