@@ -222,7 +222,7 @@ export class NotificationService {
         const notification = new this.notificationModel({
             userId: data.recipientId,
             userRole,
-            type: data.type as any, // 구 버전 NotificationType 허용
+            type: data.type, // NotificationType enum은 이미 소문자 값으로 정의됨 (e.g., 'consult_request_confirmed')
             title: data.title,
             body: data.content,
             metadata: undefined,
