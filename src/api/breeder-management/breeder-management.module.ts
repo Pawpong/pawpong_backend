@@ -18,6 +18,7 @@ import { ParentPet, ParentPetSchema } from '../../schema/parent-pet.schema';
 import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
 import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
 import { ProfileBanner, ProfileBannerSchema } from '../../schema/profile-banner.schema';
+import { CounselBanner, CounselBannerSchema } from '../../schema/counsel-banner.schema';
 
 import { StorageModule } from '../../common/storage/storage.module';
 import { NotificationModule } from '../notification/notification.module';
@@ -32,6 +33,7 @@ import { MailModule } from '../../common/mail/mail.module';
             { name: AvailablePet.name, schema: AvailablePetSchema },
             { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
             { name: ProfileBanner.name, schema: ProfileBannerSchema },
+            { name: CounselBanner.name, schema: CounselBannerSchema },
         ]),
         StorageModule,
         MailModule,

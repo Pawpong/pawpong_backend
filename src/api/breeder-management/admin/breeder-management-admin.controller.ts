@@ -27,6 +27,9 @@ import { BreederManagementAdminService } from './breeder-management-admin.servic
 import { ProfileBannerCreateRequestDto } from './dto/request/profile-banner-create-request.dto';
 import { ProfileBannerUpdateRequestDto } from './dto/request/profile-banner-update-request.dto';
 import { ProfileBannerResponseDto } from './dto/response/profile-banner-response.dto';
+import { CounselBannerCreateRequestDto } from './dto/request/counsel-banner-create-request.dto';
+import { CounselBannerUpdateRequestDto } from './dto/request/counsel-banner-update-request.dto';
+import { CounselBannerResponseDto } from './dto/response/counsel-banner-response.dto';
 
 @ApiController('브리더 관리 어드민')
 @Controller('breeder-management-admin')
@@ -98,5 +101,69 @@ export class BreederManagementAdminController {
     async deleteProfileBanner(@Param('bannerId') bannerId: string): Promise<ApiResponseDto<null>> {
         await this.breederManagementService.deleteProfileBanner(bannerId);
         return ApiResponseDto.success(null, '프로필 배너가 삭제되었습니다.');
+    }
+
+    // ==================== 상담 배너 관리 ====================
+
+    @Get('counsel-banners')
+    @ApiEndpoint({
+        summary: '상담 배너 전체 목록 조회 (관리자)',
+        description: '활성/비활성 포함 모든 상담 배너를 조회합니다.',
+        responseType: [CounselBannerResponseDto],
+        isPublic: false,
+    })
+    async getAllCounselBanners(): Promise<ApiResponseDto<CounselBannerResponseDto[]>> {
+        const banners = await this.breederManagementService.getAllCounselBanners();
+        return ApiResponseDto.success(banners, '상담 배너 목록이 조회되었습니다.');
+    }
+
+    @Get('counsel-banners/active')
+    @ApiEndpoint({
+        summary: '활성화된 상담 배너 목록 조회 (공개)',
+        description: '상담 신청 페이지에 표시할 활성화된 배너만 조회합니다. 인증 없이 접근 가능합니다.',
+        responseType: [CounselBannerResponseDto],
+        isPublic: true,
+    })
+    async getActiveCounselBanners(): Promise<ApiResponseDto<CounselBannerResponseDto[]>> {
+        const banners = await this.breederManagementService.getActiveCounselBanners();
+        return ApiResponseDto.success(banners, '활성화된 상담 배너가 조회되었습니다.');
+    }
+
+    @Post('counsel-banner')
+    @ApiEndpoint({
+        summary: '상담 배너 생성',
+        description: '새로운 상담 배너를 생성합니다.',
+        responseType: CounselBannerResponseDto,
+        isPublic: false,
+    })
+    async createCounselBanner(@Body() data: CounselBannerCreateRequestDto): Promise<ApiResponseDto<CounselBannerResponseDto>> {
+        const banner = await this.breederManagementService.createCounselBanner(data);
+        return ApiResponseDto.success(banner, '상담 배너가 생성되었습니다.');
+    }
+
+    @Put('counsel-banner/:bannerId')
+    @ApiEndpoint({
+        summary: '상담 배너 수정',
+        description: '기존 상담 배너를 수정합니다.',
+        responseType: CounselBannerResponseDto,
+        isPublic: false,
+    })
+    async updateCounselBanner(
+        @Param('bannerId') bannerId: string,
+        @Body() data: CounselBannerUpdateRequestDto,
+    ): Promise<ApiResponseDto<CounselBannerResponseDto>> {
+        const banner = await this.breederManagementService.updateCounselBanner(bannerId, data);
+        return ApiResponseDto.success(banner, '상담 배너가 수정되었습니다.');
+    }
+
+    @Delete('counsel-banner/:bannerId')
+    @ApiEndpoint({
+        summary: '상담 배너 삭제',
+        description: '상담 배너를 삭제합니다.',
+        isPublic: false,
+    })
+    async deleteCounselBanner(@Param('bannerId') bannerId: string): Promise<ApiResponseDto<null>> {
+        await this.breederManagementService.deleteCounselBanner(bannerId);
+        return ApiResponseDto.success(null, '상담 배너가 삭제되었습니다.');
     }
 }
