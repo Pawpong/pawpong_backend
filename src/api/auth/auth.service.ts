@@ -288,7 +288,8 @@ export class AuthService {
             cookieOptions: {
                 httpOnly: true,
                 secure: isProduction,
-                sameSite: 'lax' as const,
+                // cross-site 요청을 위해 'none' 사용 (프론트: pawpong.kr, 백엔드: dev-api.pawpong.kr)
+                sameSite: isProduction ? ('none' as const) : ('lax' as const),
                 path: '/',
             },
         };

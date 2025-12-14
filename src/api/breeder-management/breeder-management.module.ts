@@ -48,6 +48,11 @@ import { MailModule } from '../../common/mail/mail.module';
         AdoptionApplicationRepository,
         AvailablePetManagementRepository,
     ],
-    exports: [BreederManagementService, BreederRepository, AvailablePetManagementRepository],
+    exports: [
+        BreederManagementService,
+        BreederManagementAdminService,
+        BreederRepository,
+        AvailablePetManagementRepository,
+    ],
 })
 export class BreederManagementModule {}
