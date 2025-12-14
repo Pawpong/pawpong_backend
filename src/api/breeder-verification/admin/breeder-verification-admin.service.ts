@@ -413,7 +413,7 @@ export class BreederVerificationAdminService {
                 .type(NotificationType.BREEDER_APPROVED)
                 .title('🎉 포퐁 브리더 입점이 승인되었습니다!')
                 .content('지금 프로필을 세팅하고 아이들 정보를 등록해보세요.')
-                .related(breederId, 'home');
+                .related('/profile', 'page');
 
             if (emailContent && breederEmail) {
                 builder.withEmail({
@@ -438,7 +438,7 @@ export class BreederVerificationAdminService {
                 .type(NotificationType.BREEDER_REJECTED)
                 .title('🐾 브리더 입점 심사 결과, 보완이 필요합니다.')
                 .content('자세한 사유는 이메일을 확인해주세요.')
-                .related(breederId, 'home');
+                .related('/profile', 'page');
 
             if (emailContent && breederEmail) {
                 builder.withEmail({

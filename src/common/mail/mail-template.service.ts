@@ -12,6 +12,7 @@ export class MailTemplateService {
 
     /**
      * 공통 이메일 레이아웃
+     * 포퐁 브랜드 컬러: Primary #4f3b2e (브라운), Secondary #a0c8f4 (파란색), Tertiary #f6f6ea (크림색)
      */
     private getEmailLayout(content: string): string {
         return `
@@ -44,14 +45,14 @@ export class MailTemplateService {
         .logo {
             font-size: 28px;
             font-weight: bold;
-            color: #FF6B35;
+            color: #4f3b2e;
         }
         .content {
             margin-bottom: 30px;
         }
         .button {
             display: inline-block;
-            background-color: #FF6B35;
+            background-color: #4f3b2e;
             color: #ffffff !important;
             text-decoration: none;
             padding: 14px 28px;
@@ -60,7 +61,7 @@ export class MailTemplateService {
             margin: 20px 0;
         }
         .button:hover {
-            background-color: #E55A25;
+            background-color: #3f2f25;
         }
         .footer {
             text-align: center;
@@ -71,13 +72,13 @@ export class MailTemplateService {
             border-top: 1px solid #eee;
         }
         .highlight {
-            background-color: #FFF5F0;
+            background-color: #f6f6ea;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
         }
         .reason-list {
-            background-color: #FFF5F0;
+            background-color: #f6f6ea;
             padding: 20px;
             border-radius: 8px;
             margin: 20px 0;
@@ -86,11 +87,17 @@ export class MailTemplateService {
             margin-bottom: 8px;
         }
         h2 {
-            color: #333;
+            color: #4f3b2e;
             margin-bottom: 20px;
+        }
+        h3 {
+            color: #4f3b2e;
         }
         .emoji {
             font-size: 20px;
+        }
+        strong {
+            color: #4f3b2e;
         }
     </style>
 </head>
