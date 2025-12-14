@@ -393,8 +393,14 @@ export class BreederManagementService {
     async getReceivedApplications(userId: string, page: number = 1, limit: number = 10): Promise<any> {
         const { applications, total } = await this.adoptionApplicationRepository.findByBreederId(userId, page, limit);
 
+        // MongoDB _id를 applicationId로 매핑
+        const mappedApplications = applications.map((app) => ({
+            ...app.toObject(),
+            applicationId: app._id.toString(),
+        }));
+
         return new PaginationBuilder<any>()
-            .setItems(applications)
+            .setItems(mappedApplications)
             .setPage(page)
             .setTake(limit)
             .setTotalCount(total)
