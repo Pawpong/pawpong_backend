@@ -18,6 +18,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../common/decorator/swagger.decorator';
+import { Public } from '../../../common/decorator/public.decorator';
 import { RolesGuard } from '../../../common/guard/roles.guard';
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
@@ -51,6 +52,7 @@ export class BreederManagementAdminController {
         return ApiResponseDto.success(banners, '프로필 배너 목록이 조회되었습니다.');
     }
 
+    @Public()
     @Get('profile-banners/active')
     @ApiEndpoint({
         summary: '활성화된 프로필 배너 목록 조회 (공개)',
