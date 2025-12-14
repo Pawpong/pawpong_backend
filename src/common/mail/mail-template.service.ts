@@ -120,8 +120,10 @@ export class MailTemplateService {
      * [1] 브리더 입점 승인 이메일
      */
     getBreederApprovalEmail(breederName: string): { subject: string; html: string } {
+        const displayBreederName = breederName || '브리더';
+
         const content = `
-            <h2>안녕하세요, ${breederName}님.</h2>
+            <h2>안녕하세요, ${displayBreederName}님.</h2>
             <p>반려동물 브리더 입양 플랫폼 <strong>포퐁(Pawpong)</strong>입니다.</p>
 
             <div class="highlight">
@@ -156,13 +158,15 @@ export class MailTemplateService {
      * [2] 브리더 입점 반려 이메일
      */
     getBreederRejectionEmail(breederName: string, rejectionReasons: string[]): { subject: string; html: string } {
+        const displayBreederName = breederName || '브리더';
+
         const reasonsHtml =
             rejectionReasons.length > 0
                 ? `<ul class="reason-list">${rejectionReasons.map((r) => `<li>${r}</li>`).join('')}</ul>`
                 : '<p>자세한 사유는 관리자에게 문의해주세요.</p>';
 
         const content = `
-            <h2>안녕하세요, ${breederName}님.</h2>
+            <h2>안녕하세요, ${displayBreederName}님.</h2>
             <p>반려동물 브리더 입양 플랫폼 <strong>포퐁(Pawpong)</strong>입니다.</p>
 
             <p>브리더님께서 제출해주신 입점 신청서를 검토한 결과,<br>
@@ -195,8 +199,10 @@ export class MailTemplateService {
      * [3] 새로운 상담 신청 알림 이메일
      */
     getNewApplicationEmail(breederName: string): { subject: string; html: string } {
+        const displayBreederName = breederName || '브리더';
+
         const content = `
-            <h2>안녕하세요, ${breederName}님.</h2>
+            <h2>안녕하세요, ${displayBreederName}님.</h2>
             <p>반려동물 브리더 입양 플랫폼 <strong>포퐁(Pawpong)</strong>입니다.</p>
 
             <div class="highlight">
@@ -221,8 +227,10 @@ export class MailTemplateService {
      * [4] 서류 미제출 리마인드 이메일
      */
     getDocumentReminderEmail(breederName: string): { subject: string; html: string } {
+        const displayBreederName = breederName || '브리더';
+
         const content = `
-            <h2>안녕하세요, ${breederName}님.</h2>
+            <h2>안녕하세요, ${displayBreederName}님.</h2>
             <p>반려동물 브리더 입양 플랫폼 <strong>포퐁(Pawpong)</strong>입니다.</p>
 
             <p>브리더님께서 회원가입을 완료해주셨지만, 아직 <strong>입점 심사에 필요한 서류 제출이 완료되지 않아</strong>
@@ -261,12 +269,15 @@ export class MailTemplateService {
      * [6] 상담 신청 확인 이메일 (신청자용)
      */
     getApplicationConfirmationEmail(applicantName: string, breederName: string): { subject: string; html: string } {
+        // breederName이 빈 값일 경우를 대비하여 기본값 설정
+        const displayBreederName = breederName || '브리더';
+
         const content = `
-            <h2>안녕하세요, ${applicantName}님.</h2>
+            <h2>안녕하세요, ${applicantName || '입양자'}님.</h2>
             <p>반려동물 브리더 입양 플랫폼 <strong>포퐁(Pawpong)</strong>입니다.</p>
 
             <div class="highlight">
-                <p class="emoji">✅ <strong>${breederName}</strong> 브리더님께 상담 신청이 성공적으로 접수되었습니다!</p>
+                <p class="emoji">✅ <strong>${displayBreederName}</strong> 브리더님께 상담 신청이 성공적으로 접수되었습니다!</p>
                 <p>브리더님이 신청서를 확인하고 연락드릴 예정입니다.</p>
             </div>
 
