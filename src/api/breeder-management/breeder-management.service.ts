@@ -398,7 +398,7 @@ export class BreederManagementService {
             const plainApp = app.toObject ? app.toObject() : app;
             return {
                 ...plainApp,
-                applicationId: app._id.toString(),
+                applicationId: (app._id as any).toString(),
             };
         });
 
@@ -748,6 +748,8 @@ export class BreederManagementService {
             breederName: breeder.name,
             breederEmail: breeder.emailAddress,
             breederPhone: breeder.phoneNumber,
+            authProvider: breeder.socialAuthInfo?.authProvider || 'local',
+            marketingAgreed: breeder.marketingAgreed ?? false,
             profileImageFileName: profileImageFileName,
             accountStatus: breeder.accountStatus,
             verificationInfo: verificationWithSignedUrls,

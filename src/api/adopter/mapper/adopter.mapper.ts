@@ -56,6 +56,8 @@ export class AdopterMapper {
             phoneNumber: adopter.phoneNumber || '',
             profileImageFileName: adopter.profileImageFileName,
             accountStatus: adopter.accountStatus,
+            authProvider: adopter.socialAuthInfo?.authProvider || 'local',
+            marketingAgreed: adopter.marketingAgreed ?? false,
             favoriteBreederList: (adopter.favoriteBreederList || []).map((fav: any) => ({
                 breederId: fav.favoriteBreederId,
                 breederName: fav.breederName,
