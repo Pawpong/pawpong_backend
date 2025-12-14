@@ -14,6 +14,7 @@ import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
 import { BreederDetailResponseDto } from './dto/response/breeder-detail-response.dto';
+import { BreederStatsResponseDto } from './dto/response/breeder-stats-response.dto';
 
 /**
  * 브리더 인증 관리 Admin 컨트롤러
@@ -90,5 +91,17 @@ export class BreederVerificationAdminController {
             verificationData,
         );
         return ApiResponseDto.success(result, '브리더 인증 처리가 완료되었습니다.');
+    }
+
+    @Get('stats')
+    @ApiEndpoint({
+        summary: '승인된 브리더 통계 조회',
+        description: '전체 승인된 브리더의 레벨별 통계를 조회합니다 (전체/엘리트/뉴).',
+        responseType: BreederStatsResponseDto,
+        isPublic: false,
+    })
+    async getBreederStats(@CurrentUser() user: any): Promise<ApiResponseDto<BreederStatsResponseDto>> {
+        const result = await this.breederVerificationAdminService.getBreederStats(user.userId);
+        return ApiResponseDto.success(result, '브리더 통계가 조회되었습니다.');
     }
 }

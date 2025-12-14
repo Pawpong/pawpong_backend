@@ -2,8 +2,10 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { BreederManagementController } from './breeder-management.controller';
+import { BreederManagementAdminController } from './admin/breeder-management-admin.controller';
 
 import { BreederManagementService } from './breeder-management.service';
+import { BreederManagementAdminService } from './admin/breeder-management-admin.service';
 
 import { BreederRepository } from './repository/breeder.repository';
 import { ParentPetRepository } from './repository/parent-pet.repository';
@@ -15,6 +17,7 @@ import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { ParentPet, ParentPetSchema } from '../../schema/parent-pet.schema';
 import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
 import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
+import { ProfileBanner, ProfileBannerSchema } from '../../schema/profile-banner.schema';
 
 import { StorageModule } from '../../common/storage/storage.module';
 import { NotificationModule } from '../notification/notification.module';
@@ -28,14 +31,16 @@ import { MailModule } from '../../common/mail/mail.module';
             { name: ParentPet.name, schema: ParentPetSchema },
             { name: AvailablePet.name, schema: AvailablePetSchema },
             { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
+            { name: ProfileBanner.name, schema: ProfileBannerSchema },
         ]),
         StorageModule,
         MailModule,
         NotificationModule,
     ],
-    controllers: [BreederManagementController],
+    controllers: [BreederManagementController, BreederManagementAdminController],
     providers: [
         BreederManagementService,
+        BreederManagementAdminService,
         BreederRepository,
         ParentPetRepository,
         AdoptionApplicationRepository,
