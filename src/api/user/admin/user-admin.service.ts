@@ -4,10 +4,12 @@ import { Model } from 'mongoose';
 import { randomUUID } from 'crypto';
 
 import { UserStatus, AdminAction, AdminTargetType } from '../../../common/enum/user.enum';
+import { StorageService } from '../../../common/storage/storage.service';
 
 import { Admin, AdminDocument } from '../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
+import { ProfileBanner, ProfileBannerDocument } from '../../../schema/profile-banner.schema';
 
 import { UserSearchRequestDto } from './dto/request/user-search-request.dto';
 import { UserManagementRequestDto } from './dto/request/user-management-request.dto';
@@ -25,10 +27,15 @@ import { PaginationBuilder } from '../../../common/dto/pagination/pagination-bui
  */
 @Injectable()
 export class UserAdminService {
+    // 허용되는 이미지 MIME 타입
+    private readonly allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
     constructor(
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
+        @InjectModel(ProfileBanner.name) private profileBannerModel: Model<ProfileBannerDocument>,
+        private readonly storageService: StorageService,
     ) {}
 
     /**
@@ -75,6 +82,7 @@ export class UserAdminService {
             id: (admin._id as any).toString(),
             name: admin.name,
             email: admin.email,
+            profileImage: admin.profileImage,
             status: admin.status,
             adminLevel: admin.adminLevel,
             permissions: admin.permissions,
