@@ -18,6 +18,16 @@ export class ProfileBannerUpdateRequestDto {
     @IsOptional()
     imageFileName?: string;
 
+    @ApiProperty({
+        description: '배너 타입 (login: 로그인 페이지, signup: 회원가입 페이지)',
+        example: 'login',
+        enum: ['login', 'signup'],
+        required: false,
+    })
+    @IsEnum(['login', 'signup'])
+    @IsOptional()
+    bannerType?: string;
+
     /**
      * 링크 타입
      * @example "internal"

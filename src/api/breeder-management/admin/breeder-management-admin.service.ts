@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { StorageService } from '../../../common/storage/storage.service';
-import { ProfileBanner, ProfileBannerDocument } from '../../../schema/profile-banner.schema';
+import { AuthBanner, AuthBannerDocument } from '../../../schema/auth-banner.schema';
 import { CounselBanner, CounselBannerDocument } from '../../../schema/counsel-banner.schema';
 
 import { ProfileBannerCreateRequestDto } from './dto/request/profile-banner-create-request.dto';
@@ -16,7 +16,7 @@ import { CounselBannerResponseDto } from './dto/response/counsel-banner-response
 @Injectable()
 export class BreederManagementAdminService {
     constructor(
-        @InjectModel(ProfileBanner.name) private profileBannerModel: Model<ProfileBannerDocument>,
+        @InjectModel(AuthBanner.name) private authBannerModel: Model<AuthBannerDocument>,
         @InjectModel(CounselBanner.name) private counselBannerModel: Model<CounselBannerDocument>,
         private readonly storageService: StorageService,
     ) {}
@@ -29,12 +29,13 @@ export class BreederManagementAdminService {
      * @returns 프로필 배너 목록
      */
     async getAllProfileBanners(): Promise<ProfileBannerResponseDto[]> {
-        const banners = await this.profileBannerModel.find().sort({ order: 1 }).lean().exec();
+        const banners = await this.authBannerModel.find().sort({ bannerType: 1, order: 1 }).lean().exec();
 
         return banners.map((banner) => ({
             bannerId: banner._id.toString(),
             imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
             imageFileName: banner.imageFileName,
+            bannerType: banner.bannerType,
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,
@@ -50,12 +51,13 @@ export class BreederManagementAdminService {
      * @returns 활성화된 프로필 배너 목록
      */
     async getActiveProfileBanners(): Promise<ProfileBannerResponseDto[]> {
-        const banners = await this.profileBannerModel.find({ isActive: true }).sort({ order: 1 }).lean().exec();
+        const banners = await this.authBannerModel.find({ isActive: true }).sort({ order: 1 }).lean().exec();
 
         return banners.map((banner) => ({
             bannerId: banner._id.toString(),
             imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
             imageFileName: banner.imageFileName,
+            bannerType: banner.bannerType,
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,
@@ -72,12 +74,13 @@ export class BreederManagementAdminService {
      * @returns 생성된 배너 정보
      */
     async createProfileBanner(data: ProfileBannerCreateRequestDto): Promise<ProfileBannerResponseDto> {
-        const newBanner = await this.profileBannerModel.create(data);
+        const newBanner = await this.authBannerModel.create(data);
 
         return {
             bannerId: String(newBanner._id),
             imageUrl: this.storageService.generateSignedUrl(newBanner.imageFileName, 60 * 24),
             imageFileName: newBanner.imageFileName,
+            bannerType: newBanner.bannerType,
             linkType: newBanner.linkType,
             linkUrl: newBanner.linkUrl,
             title: newBanner.title,
@@ -98,7 +101,7 @@ export class BreederManagementAdminService {
         bannerId: string,
         data: ProfileBannerUpdateRequestDto,
     ): Promise<ProfileBannerResponseDto> {
-        const banner = await this.profileBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
+        const banner = await this.authBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
 
         if (!banner) {
             throw new BadRequestException('프로필 배너를 찾을 수 없습니다.');
@@ -108,6 +111,7 @@ export class BreederManagementAdminService {
             bannerId: banner._id.toString(),
             imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
             imageFileName: banner.imageFileName,
+            bannerType: banner.bannerType,
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,
@@ -123,7 +127,7 @@ export class BreederManagementAdminService {
      * @param bannerId 배너 고유 ID
      */
     async deleteProfileBanner(bannerId: string): Promise<void> {
-        const result = await this.profileBannerModel.findByIdAndDelete(bannerId).exec();
+        const result = await this.authBannerModel.findByIdAndDelete(bannerId).exec();
 
         if (!result) {
             throw new BadRequestException('프로필 배너를 찾을 수 없습니다.');
@@ -203,7 +207,10 @@ export class BreederManagementAdminService {
      * @param data 배너 수정 데이터
      * @returns 수정된 배너 정보
      */
-    async updateCounselBanner(bannerId: string, data: CounselBannerUpdateRequestDto): Promise<CounselBannerResponseDto> {
+    async updateCounselBanner(
+        bannerId: string,
+        data: CounselBannerUpdateRequestDto,
+    ): Promise<CounselBannerResponseDto> {
         const banner = await this.counselBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
 
         if (!banner) {
