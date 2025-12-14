@@ -394,10 +394,13 @@ export class BreederManagementService {
         const { applications, total } = await this.adoptionApplicationRepository.findByBreederId(userId, page, limit);
 
         // MongoDB _id를 applicationId로 매핑
-        const mappedApplications = applications.map((app) => ({
-            ...app.toObject(),
-            applicationId: app._id.toString(),
-        }));
+        const mappedApplications = applications.map((app) => {
+            const plainApp = app.toObject ? app.toObject() : app;
+            return {
+                ...plainApp,
+                applicationId: app._id.toString(),
+            };
+        });
 
         return new PaginationBuilder<any>()
             .setItems(mappedApplications)
