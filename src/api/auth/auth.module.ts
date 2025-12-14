@@ -31,6 +31,7 @@ import { CounselBanner, CounselBannerSchema } from '../../schema/counsel-banner.
 
 import { StorageModule } from '../../common/storage/storage.module';
 import { BreederManagementModule } from '../breeder-management/breeder-management.module';
+import { DiscordWebhookModule } from '../../common/discord/discord-webhook.module';
 
 @Module({
     imports: [
@@ -43,6 +44,7 @@ import { BreederManagementModule } from '../breeder-management/breeder-managemen
         ]),
         StorageModule,
         BreederManagementModule,
+        DiscordWebhookModule,
         PassportModule,
         WinstonModule.forRoot(winstonConfig),
         JwtModule.registerAsync({
