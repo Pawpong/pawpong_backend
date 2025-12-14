@@ -265,7 +265,7 @@ export class BreederReportInfo {
      */
     @Prop({
         required: true,
-        enum: ['no_contract', 'false_info', 'inappropriate_content', 'fraudulent_listing', 'other'],
+        enum: ['no_contract', 'false_info', 'inappropriate_content', 'poor_conditions', 'fraud', 'other'],
     })
     type: string;
 
