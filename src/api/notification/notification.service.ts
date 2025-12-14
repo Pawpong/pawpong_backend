@@ -225,7 +225,7 @@ export class NotificationService {
             type: data.type, // NotificationType enum은 이미 소문자 값으로 정의됨 (e.g., 'consult_request_confirmed')
             title: data.title,
             body: data.content,
-            metadata: undefined,
+            metadata: data.metadata,
             targetUrl: data.relatedId,
             isRead: false,
         });
