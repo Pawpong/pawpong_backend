@@ -7,19 +7,23 @@ import { Document } from 'mongoose';
  */
 export enum NotificationType {
     /** 브리더 승인됨 */
-    BREEDER_APPROVED = 'BREEDER_APPROVED',
+    BREEDER_APPROVED = 'breeder_approved',
     /** 브리더 반려됨 */
-    BREEDER_UNAPPROVED = 'BREEDER_UNAPPROVED',
+    BREEDER_UNAPPROVED = 'breeder_unapproved',
     /** 브리더 온보딩 미완료 */
-    BREEDER_ONBOARDING_INCOMPLETE = 'BREEDER_ONBOARDING_INCOMPLETE',
+    BREEDER_ONBOARDING_INCOMPLETE = 'breeder_onboarding_incomplete',
     /** 새 상담 신청 (브리더가 받음) */
-    NEW_CONSULT_REQUEST = 'NEW_CONSULT_REQUEST',
+    NEW_CONSULT_REQUEST = 'new_consult_request',
+    /** 상담 신청 확인 (신청자가 받음) */
+    CONSULT_REQUEST_CONFIRMED = 'consult_request_confirmed',
     /** 새 후기 등록 (브리더가 받음) */
-    NEW_REVIEW_REGISTERED = 'NEW_REVIEW_REGISTERED',
+    NEW_REVIEW_REGISTERED = 'new_review_registered',
     /** 상담 완료 (입양자가 받음) */
-    CONSULT_COMPLETED = 'CONSULT_COMPLETED',
+    CONSULT_COMPLETED = 'consult_completed',
     /** 새 반려동물 등록 (즐겨찾기한 입양자들이 받음) */
-    NEW_PET_REGISTERED = 'NEW_PET_REGISTERED',
+    NEW_PET_REGISTERED = 'new_pet_registered',
+    /** 서류 미제출 리마인드 */
+    DOCUMENT_REMINDER = 'document_reminder',
 }
 
 /**
@@ -43,6 +47,10 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; bo
         title: '새로운 입양 상담 신청이 도착했어요!',
         body: '지금 확인해 보세요.',
     },
+    [NotificationType.CONSULT_REQUEST_CONFIRMED]: {
+        title: '상담 신청이 접수되었습니다!',
+        body: '{breederName}님이 확인 후 연락드릴 예정입니다.',
+    },
     [NotificationType.NEW_REVIEW_REGISTERED]: {
         title: '새로운 후기가 등록되었어요!',
         body: '브리더 프로필에서 후기를 확인해 보세요.',
@@ -54,6 +62,10 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; bo
     [NotificationType.NEW_PET_REGISTERED]: {
         title: '{breederName}님이 새로운 아이를 등록했어요!',
         body: '지금 바로 확인해보세요.',
+    },
+    [NotificationType.DOCUMENT_REMINDER]: {
+        title: '🐾 브리더 입점 절차가 아직 완료되지 않았어요!',
+        body: '필요한 서류들을 제출하시면 입양자에게 프로필이 공개됩니다.',
     },
 };
 

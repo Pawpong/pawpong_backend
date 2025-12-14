@@ -38,12 +38,47 @@ export class CustomQuestionAnswerDto {
  * 입양 신청 생성 요청 DTO (Figma 디자인 기반 + 커스텀 질문)
  *
  * **구조:**
+ * - 신청자 기본 정보: 이름, 휴대폰, 이메일 (프론트엔드 폼에서 입력)
  * - 표준 14개 필드: 모든 브리더 공통 (필수)
  * - 커스텀 응답: 해당 브리더가 추가한 질문들 (선택/필수 혼합)
- *
- * 입양자의 기본 정보(이름, 휴대폰, 이메일)는 JWT 토큰에서 자동으로 추출됩니다.
  */
 export class ApplicationCreateRequestDto {
+    /**
+     * 신청자 이름
+     * @example "김철수"
+     */
+    @ApiProperty({
+        description: '신청자 이름',
+        example: '김철수',
+    })
+    @IsString()
+    @IsNotEmpty()
+    name: string;
+
+    /**
+     * 신청자 휴대폰 번호
+     * @example "010-1234-5678"
+     */
+    @ApiProperty({
+        description: '신청자 휴대폰 번호',
+        example: '010-1234-5678',
+    })
+    @IsString()
+    @IsNotEmpty()
+    phone: string;
+
+    /**
+     * 신청자 이메일 주소
+     * @example "example@example.com"
+     */
+    @ApiProperty({
+        description: '신청자 이메일 주소',
+        example: 'example@example.com',
+    })
+    @IsString()
+    @IsNotEmpty()
+    email: string;
+
     /**
      * 신청할 브리더 ID
      * @example "507f1f77bcf86cd799439011"
