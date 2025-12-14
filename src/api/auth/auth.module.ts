@@ -28,6 +28,7 @@ import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 import { Admin, AdminSchema } from '../../schema/admin.schema';
 
 import { StorageModule } from '../../common/storage/storage.module';
+import { BreederManagementModule } from '../breeder-management/breeder-management.module';
 
 @Module({
     imports: [
@@ -37,6 +38,7 @@ import { StorageModule } from '../../common/storage/storage.module';
             { name: Admin.name, schema: AdminSchema },
         ]),
         StorageModule,
+        BreederManagementModule,
         PassportModule,
         WinstonModule.forRoot(winstonConfig),
         JwtModule.registerAsync({
