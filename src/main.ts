@@ -86,6 +86,9 @@ async function bootstrap(): Promise<void> {
             'https://pawpong.kr',
             'https://www.pawpong.kr',
 
+            // Vercel 프리뷰 URL (동적)
+            /^https:\/\/pawpong.*\.vercel\.app$/,
+
             // Pawpong 배포 어드민 프론트엔드
             'https://admin.pawpong.kr',
 

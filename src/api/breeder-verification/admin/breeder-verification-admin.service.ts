@@ -19,6 +19,7 @@ import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dt
 import { BreederVerificationRequestDto } from './dto/request/breeder-verification-request.dto';
 import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
 import { BreederDetailResponseDto } from './dto/response/breeder-detail-response.dto';
+import { BreederStatsResponseDto } from './dto/response/breeder-stats-response.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { PaginationBuilder } from '../../../common/dto/pagination/pagination-builder.dto';
 
@@ -353,6 +354,38 @@ export class BreederVerificationAdminService {
             },
             createdAt: breeder.createdAt!,
             updatedAt: breeder.updatedAt!,
+        };
+    }
+
+    /**
+     * 승인된 브리더 통계 조회
+     *
+     * 전체 승인된 브리더의 레벨별 통계를 조회합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @returns 브리더 통계 정보
+     */
+    async getBreederStats(adminId: string): Promise<BreederStatsResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canManageBreeders) {
+            throw new ForbiddenException('브리더 관리 권한이 없습니다.');
+        }
+
+        // 승인된 브리더만 집계
+        const query = { 'verification.status': VerificationStatus.APPROVED };
+
+        const [totalApproved, eliteCount] = await Promise.all([
+            this.breederModel.countDocuments(query),
+            this.breederModel.countDocuments({
+                ...query,
+                'verification.plan': 'premium',
+            }),
+        ]);
+
+        return {
+            totalApproved,
+            eliteCount,
+            newCount: totalApproved - eliteCount,
         };
     }
 

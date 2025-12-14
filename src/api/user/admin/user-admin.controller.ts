@@ -11,10 +11,10 @@ import { UserAdminService } from './user-admin.service';
 import { UserSearchRequestDto } from './dto/request/user-search-request.dto';
 import { UserManagementRequestDto } from './dto/request/user-management-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
+import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { AdminProfileResponseDto } from './dto/response/admin-profile-response.dto';
 import { UserManagementResponseDto } from './dto/response/user-management-response.dto';
 import { UserStatusUpdateResponseDto } from './dto/response/user-status-update-response.dto';
-import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 
 /**
  * 사용자 관리 Admin 컨트롤러
