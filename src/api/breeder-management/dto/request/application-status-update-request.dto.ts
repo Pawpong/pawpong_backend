@@ -1,5 +1,6 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { ApplicationStatus } from '../../../../common/enum/user.enum';
 
 /**
  * 입양 신청 상태 업데이트 요청 DTO
@@ -24,11 +25,11 @@ export class ApplicationStatusUpdateRequestDto {
      */
     @ApiProperty({
         description: '변경할 상태',
-        example: 'consultation_completed',
-        enum: ['consultation_pending', 'consultation_completed', 'adoption_approved', 'adoption_rejected'],
+        example: ApplicationStatus.CONSULTATION_COMPLETED,
+        enum: ApplicationStatus,
     })
-    @IsEnum(['consultation_pending', 'consultation_completed', 'adoption_approved', 'adoption_rejected'])
-    status: string;
+    @IsEnum(ApplicationStatus)
+    status: ApplicationStatus;
 
     /**
      * 상태 변경 사유 또는 메모

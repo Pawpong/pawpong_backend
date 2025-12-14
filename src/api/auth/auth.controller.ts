@@ -25,6 +25,7 @@ import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard
 
 import { SmsService } from './sms.service';
 import { AuthService } from './auth.service';
+import { BreederManagementAdminService } from '../breeder-management/admin/breeder-management-admin.service';
 
 import { RefreshTokenRequestDto } from './dto/request/refresh-token-request.dto';
 import { CheckNicknameRequestDto } from './dto/request/check-nickname-request.dto';
@@ -49,6 +50,7 @@ export class AuthController {
     constructor(
         private readonly authService: AuthService,
         private readonly smsService: SmsService,
+        private readonly breederManagementAdminService: BreederManagementAdminService,
     ) {}
 
     @Post('refresh')
@@ -80,10 +82,12 @@ export class AuthController {
         const response = await this.authService.logout(user.userId, user.role);
 
         // HTTP-only 쿠키 삭제 (maxAge: 0으로 설정하여 즉시 만료)
+        const isProduction = process.env.NODE_ENV === 'production';
         const cookieOptions = {
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax' as const,
+            secure: isProduction,
+            // cross-site 요청을 위해 'none' 사용 (프론트: pawpong.kr, 백엔드: dev-api.pawpong.kr)
+            sameSite: isProduction ? ('none' as const) : ('lax' as const),
             path: '/',
             maxAge: 0,
         };
@@ -446,6 +450,19 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
               : '프로필 이미지가 업로드되었습니다. 회원가입 시 응답의 filename 필드를 profileImage에 사용하세요.';
 
         return ApiResponseDto.success(response, message);
+    }
+
+    @Get('login-page-banners')
+    @HttpCode(HttpStatus.OK)
+    @ApiEndpoint({
+        summary: '로그인 페이지 배너 조회 (공개)',
+        description: '로그인 페이지에 표시할 활성화된 프로필 배너를 조회합니다. 인증 없이 접근 가능합니다.',
+        responseType: Array,
+        isPublic: true,
+    })
+    async getLoginPageBanners(): Promise<ApiResponseDto<any[]>> {
+        const banners = await this.breederManagementAdminService.getActiveProfileBanners();
+        return ApiResponseDto.success(banners, '활성화된 배너가 조회되었습니다.');
     }
 
     @Post('upload-breeder-documents')
