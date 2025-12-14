@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * 프로필 배너 응답 DTO
+ * 회원가입 배너 응답 DTO
  */
-export class ProfileBannerResponseDto {
+export class SignupBannerResponseDto {
     /**
      * 배너 고유 ID
      * @example "507f1f77bcf86cd799439011"
@@ -16,34 +16,23 @@ export class ProfileBannerResponseDto {
 
     /**
      * 배너 이미지 URL (CDN)
-     * @example "https://cdn.example.com/profile-banners/abc123.png"
+     * @example "https://cdn.example.com/signup-banners/abc123.png"
      */
     @ApiProperty({
         description: '배너 이미지 URL',
-        example: 'https://cdn.example.com/profile-banners/abc123.png',
+        example: 'https://cdn.example.com/signup-banners/abc123.png',
     })
     imageUrl: string;
 
     /**
      * 배너 이미지 파일명
-     * @example "profile-banners/abc123.png"
+     * @example "signup-banners/abc123.png"
      */
     @ApiProperty({
         description: '배너 이미지 파일명',
-        example: 'profile-banners/abc123.png',
+        example: 'signup-banners/abc123.png',
     })
     imageFileName: string;
-
-    /**
-     * 배너 타입
-     * @example "login"
-     */
-    @ApiProperty({
-        description: '배너 타입 (login: 로그인 페이지, signup: 회원가입 페이지)',
-        example: 'login',
-        enum: ['login', 'signup'],
-    })
-    bannerType: string;
 
     /**
      * 링크 타입
@@ -59,33 +48,33 @@ export class ProfileBannerResponseDto {
 
     /**
      * 링크 URL
-     * @example "/breeders/management"
+     * @example "/breeders/register"
      */
     @ApiProperty({
         description: '링크 URL',
-        example: '/breeders/management',
+        example: '/breeders/register',
         required: false,
     })
     linkUrl?: string;
 
     /**
      * 배너 제목 (관리용, 선택)
-     * @example "브리더 관리 바로가기"
+     * @example "브리더 회원가입 안내"
      */
     @ApiProperty({
         description: '배너 제목',
-        example: '브리더 관리 바로가기',
+        example: '브리더 회원가입 안내',
         required: false,
     })
     title?: string;
 
     /**
      * 배너 설명 (관리용, 선택)
-     * @example "브리더 승인 및 관리"
+     * @example "브리더 회원가입 페이지 배너"
      */
     @ApiProperty({
         description: '배너 설명',
-        example: '브리더 승인 및 관리',
+        example: '브리더 회원가입 페이지 배너',
         required: false,
     })
     description?: string;

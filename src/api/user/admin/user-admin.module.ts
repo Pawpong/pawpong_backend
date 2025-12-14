@@ -7,7 +7,7 @@ import { UserAdminService } from './user-admin.service';
 import { Admin, AdminSchema } from '../../../schema/admin.schema';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
-import { ProfileBanner, ProfileBannerSchema } from '../../../schema/profile-banner.schema';
+import { AuthBanner, AuthBannerSchema } from '../../../schema/auth-banner.schema';
 import { StorageModule } from '../../../common/storage/storage.module';
 
 /**
@@ -25,7 +25,7 @@ import { StorageModule } from '../../../common/storage/storage.module';
             { name: Admin.name, schema: AdminSchema },
             { name: Breeder.name, schema: BreederSchema },
             { name: Adopter.name, schema: AdopterSchema },
-            { name: ProfileBanner.name, schema: ProfileBannerSchema },
+            { name: AuthBanner.name, schema: AuthBannerSchema },
         ]),
         StorageModule,
     ],

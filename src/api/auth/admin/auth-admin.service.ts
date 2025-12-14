@@ -10,7 +10,7 @@ import { StorageService } from '../../../common/storage/storage.service';
 import { AuthAdminRepository } from '../repository/auth-admin.repository';
 
 import { AdminLoginResponseDto } from '../dto/response/admin-login-response.dto';
-import { ProfileBanner, ProfileBannerDocument } from '../../../schema/profile-banner.schema';
+import { AuthBanner, AuthBannerDocument } from '../../../schema/auth-banner.schema';
 import { CounselBanner, CounselBannerDocument } from '../../../schema/counsel-banner.schema';
 import { ProfileBannerCreateRequestDto } from '../../breeder-management/admin/dto/request/profile-banner-create-request.dto';
 import { ProfileBannerUpdateRequestDto } from '../../breeder-management/admin/dto/request/profile-banner-update-request.dto';
@@ -31,7 +31,7 @@ export class AuthAdminService {
         private readonly jwtService: JwtService,
         private readonly authAdminRepository: AuthAdminRepository,
         private readonly storageService: StorageService,
-        @InjectModel(ProfileBanner.name) private profileBannerModel: Model<ProfileBannerDocument>,
+        @InjectModel(AuthBanner.name) private authBannerModel: Model<AuthBannerDocument>,
         @InjectModel(CounselBanner.name) private counselBannerModel: Model<CounselBannerDocument>,
     ) {}
 
@@ -167,12 +167,13 @@ export class AuthAdminService {
      * @returns 프로필 배너 목록
      */
     async getAllProfileBanners(): Promise<ProfileBannerResponseDto[]> {
-        const banners = await this.profileBannerModel.find().sort({ order: 1 }).lean().exec();
+        const banners = await this.authBannerModel.find().sort({ bannerType: 1, order: 1 }).lean().exec();
 
         return banners.map((banner) => ({
             bannerId: banner._id.toString(),
             imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
             imageFileName: banner.imageFileName,
+            bannerType: banner.bannerType,
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,
@@ -183,17 +184,23 @@ export class AuthAdminService {
     }
 
     /**
-     * 활성화된 프로필 배너만 조회 (프로필 페이지 표시용)
+     * 활성화된 프로필 배너만 조회 (bannerType으로 필터링 가능)
      *
+     * @param bannerType 배너 타입 (login 또는 signup), 없으면 전체
      * @returns 활성화된 프로필 배너 목록
      */
-    async getActiveProfileBanners(): Promise<ProfileBannerResponseDto[]> {
-        const banners = await this.profileBannerModel.find({ isActive: true }).sort({ order: 1 }).lean().exec();
+    async getActiveProfileBanners(bannerType?: 'login' | 'signup'): Promise<ProfileBannerResponseDto[]> {
+        const query: any = { isActive: true };
+        if (bannerType) {
+            query.bannerType = bannerType;
+        }
+        const banners = await this.authBannerModel.find(query).sort({ order: 1 }).lean().exec();
 
         return banners.map((banner) => ({
             bannerId: banner._id.toString(),
             imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
             imageFileName: banner.imageFileName,
+            bannerType: banner.bannerType,
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,
@@ -210,12 +217,13 @@ export class AuthAdminService {
      * @returns 생성된 배너 정보
      */
     async createProfileBanner(data: ProfileBannerCreateRequestDto): Promise<ProfileBannerResponseDto> {
-        const newBanner = await this.profileBannerModel.create(data);
+        const newBanner = await this.authBannerModel.create(data);
 
         return {
             bannerId: String(newBanner._id),
             imageUrl: this.storageService.generateSignedUrl(newBanner.imageFileName, 60 * 24),
             imageFileName: newBanner.imageFileName,
+            bannerType: newBanner.bannerType,
             linkType: newBanner.linkType,
             linkUrl: newBanner.linkUrl,
             title: newBanner.title,
@@ -232,8 +240,11 @@ export class AuthAdminService {
      * @param data 배너 수정 데이터
      * @returns 수정된 배너 정보
      */
-    async updateProfileBanner(bannerId: string, data: ProfileBannerUpdateRequestDto): Promise<ProfileBannerResponseDto> {
-        const banner = await this.profileBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
+    async updateProfileBanner(
+        bannerId: string,
+        data: ProfileBannerUpdateRequestDto,
+    ): Promise<ProfileBannerResponseDto> {
+        const banner = await this.authBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
 
         if (!banner) {
             throw new BadRequestException('프로필 배너를 찾을 수 없습니다.');
@@ -243,6 +254,7 @@ export class AuthAdminService {
             bannerId: banner._id.toString(),
             imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
             imageFileName: banner.imageFileName,
+            bannerType: banner.bannerType,
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,
@@ -258,7 +270,7 @@ export class AuthAdminService {
      * @param bannerId 배너 고유 ID
      */
     async deleteProfileBanner(bannerId: string): Promise<void> {
-        const result = await this.profileBannerModel.findByIdAndDelete(bannerId).exec();
+        const result = await this.authBannerModel.findByIdAndDelete(bannerId).exec();
 
         if (!result) {
             throw new BadRequestException('프로필 배너를 찾을 수 없습니다.');
@@ -338,7 +350,10 @@ export class AuthAdminService {
      * @param data 배너 수정 데이터
      * @returns 수정된 배너 정보
      */
-    async updateCounselBanner(bannerId: string, data: CounselBannerUpdateRequestDto): Promise<CounselBannerResponseDto> {
+    async updateCounselBanner(
+        bannerId: string,
+        data: CounselBannerUpdateRequestDto,
+    ): Promise<CounselBannerResponseDto> {
         const banner = await this.counselBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
 
         if (!banner) {

@@ -26,7 +26,7 @@ import { AuthBreederRepository } from './repository/auth-breeder.repository';
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 import { Admin, AdminSchema } from '../../schema/admin.schema';
-import { ProfileBanner, ProfileBannerSchema } from '../../schema/profile-banner.schema';
+import { AuthBanner, AuthBannerSchema } from '../../schema/auth-banner.schema';
 import { CounselBanner, CounselBannerSchema } from '../../schema/counsel-banner.schema';
 
 import { StorageModule } from '../../common/storage/storage.module';
@@ -39,7 +39,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             { name: Adopter.name, schema: AdopterSchema },
             { name: Breeder.name, schema: BreederSchema },
             { name: Admin.name, schema: AdminSchema },
-            { name: ProfileBanner.name, schema: ProfileBannerSchema },
+            { name: AuthBanner.name, schema: AuthBannerSchema },
             { name: CounselBanner.name, schema: CounselBannerSchema },
         ]),
         StorageModule,

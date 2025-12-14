@@ -899,7 +899,6 @@ export class AuthService {
             idCard?: Express.Multer.File[];
             animalProductionLicense?: Express.Multer.File[];
             adoptionContractSample?: Express.Multer.File[];
-            recentAssociationDocument?: Express.Multer.File[];
             breederCertification?: Express.Multer.File[];
             ticaCfaDocument?: Express.Multer.File[];
         },
@@ -924,25 +923,14 @@ export class AuthService {
             throw new BadRequestException('동물생산업 등록증 파일이 필요합니다.');
         }
 
-        // Elite 레벨 필수 파일 검증
-        if (breederLevel === 'elite') {
-            if (!files.adoptionContractSample || files.adoptionContractSample.length === 0) {
-                throw new BadRequestException('표준 입양계약서 샘플 파일이 필요합니다.');
-            }
-            if (!files.recentAssociationDocument || files.recentAssociationDocument.length === 0) {
-                throw new BadRequestException('최근 발급한 협회 서류 파일이 필요합니다.');
-            }
-            if (!files.breederCertification || files.breederCertification.length === 0) {
-                throw new BadRequestException('고양이 브리더 인증 서류 파일이 필요합니다.');
-            }
-        }
+        // Elite 레벨은 서류를 나중에 제출할 수 있으므로 필수 검증 제거
+        // 업로드된 서류만 처리합니다.
 
         // 파일 업로드 (GCP Storage)
         const uploadedUrls: {
             idCardUrl: string;
             animalProductionLicenseUrl: string;
             adoptionContractSampleUrl?: string;
-            recentAssociationDocumentUrl?: string;
             breederCertificationUrl?: string;
             ticaCfaDocumentUrl?: string;
         } = {
@@ -962,25 +950,25 @@ export class AuthService {
             );
             uploadedUrls.animalProductionLicenseUrl = licenseResult.cdnUrl;
 
-            // Elite 레벨 서류 업로드
+            // Elite 레벨 서류 업로드 (선택적)
             if (breederLevel === 'elite') {
-                const contractResult = await this.storageService.uploadFile(
-                    files.adoptionContractSample![0],
-                    'breeder-documents',
-                );
-                uploadedUrls.adoptionContractSampleUrl = contractResult.cdnUrl;
+                // 표준 입양계약서 (선택)
+                if (files.adoptionContractSample && files.adoptionContractSample.length > 0) {
+                    const contractResult = await this.storageService.uploadFile(
+                        files.adoptionContractSample[0],
+                        'breeder-documents',
+                    );
+                    uploadedUrls.adoptionContractSampleUrl = contractResult.cdnUrl;
+                }
 
-                const associationResult = await this.storageService.uploadFile(
-                    files.recentAssociationDocument![0],
-                    'breeder-documents',
-                );
-                uploadedUrls.recentAssociationDocumentUrl = associationResult.cdnUrl;
-
-                const certificationResult = await this.storageService.uploadFile(
-                    files.breederCertification![0],
-                    'breeder-documents',
-                );
-                uploadedUrls.breederCertificationUrl = certificationResult.cdnUrl;
+                // 브리더 인증 서류 (선택)
+                if (files.breederCertification && files.breederCertification.length > 0) {
+                    const certificationResult = await this.storageService.uploadFile(
+                        files.breederCertification[0],
+                        'breeder-documents',
+                    );
+                    uploadedUrls.breederCertificationUrl = certificationResult.cdnUrl;
+                }
 
                 // TICA/CFA 서류 (선택사항)
                 if (files.ticaCfaDocument && files.ticaCfaDocument.length > 0) {
@@ -1055,35 +1043,27 @@ export class AuthService {
             uploadedAt: new Date(),
         });
 
-        // Elite 레벨 필수 서류 검증
+        // Elite 레벨 서류는 선택적으로 처리 (필수 검증 제거)
         if (breederLevel === 'elite') {
-            if (!documents.adoptionContractSampleUrl) {
-                throw new BadRequestException('표준 입양계약서 샘플이 필요합니다.');
-            }
-            if (!documents.recentAssociationDocumentUrl) {
-                throw new BadRequestException('최근 발급한 협회 서류가 필요합니다.');
-            }
-            if (!documents.breederCertificationUrl) {
-                throw new BadRequestException('고양이 브리더 인증 서류가 필요합니다.');
+            // 표준 입양계약서 (선택)
+            if (documents.adoptionContractSampleUrl) {
+                documentArray.push({
+                    type: 'adoption_contract_sample',
+                    url: documents.adoptionContractSampleUrl,
+                    uploadedAt: new Date(),
+                });
             }
 
-            documentArray.push({
-                type: 'adoption_contract_sample',
-                url: documents.adoptionContractSampleUrl,
-                uploadedAt: new Date(),
-            });
-            documentArray.push({
-                type: 'association_document',
-                url: documents.recentAssociationDocumentUrl,
-                uploadedAt: new Date(),
-            });
-            documentArray.push({
-                type: 'breeder_certification',
-                url: documents.breederCertificationUrl,
-                uploadedAt: new Date(),
-            });
+            // 브리더 인증 서류 (선택)
+            if (documents.breederCertificationUrl) {
+                documentArray.push({
+                    type: 'breeder_certification',
+                    url: documents.breederCertificationUrl,
+                    uploadedAt: new Date(),
+                });
+            }
 
-            // Elite 레벨 선택 서류
+            // TICA/CFA 서류 (선택)
             if (documents.ticaCfaDocumentUrl) {
                 documentArray.push({
                     type: 'tica_cfa_document',
