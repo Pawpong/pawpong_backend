@@ -22,7 +22,7 @@ export class SmsService {
     private readonly MAX_ATTEMPTS = 5;
     private readonly CODE_EXPIRY_MINUTES = 3;
     // 관리자 전화번호 화이트리스트 (중복 가입 허용)
-    private readonly ADMIN_PHONE_WHITELIST = ['01065456502', '01094458342', '01053208154'];
+    private readonly ADMIN_PHONE_WHITELIST = ['01065456502', '01094458342', '01053208154', '01041657943'];
 
     constructor(
         private readonly configService: ConfigService,
