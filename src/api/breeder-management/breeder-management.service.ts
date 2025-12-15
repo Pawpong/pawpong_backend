@@ -1227,4 +1227,58 @@ export class BreederManagementService {
             customQuestions: breeder.applicationForm,
         };
     }
+
+    /**
+     * 브리더 계정 탈퇴 (소프트 딜리트)
+     * 계정 상태를 'deleted'로 변경하여 로그인 불가 처리
+     *
+     * @param userId 브리더 고유 ID
+     * @returns 탈퇴 일시
+     * @throws BadRequestException 존재하지 않는 브리더 또는 이미 탈퇴된 계정
+     */
+    async deleteBreederAccount(userId: string): Promise<{ deletedAt: Date }> {
+        this.logger.logStart('deleteBreederAccount', '브리더 계정 탈퇴 처리 시작', { userId });
+
+        const breeder = await this.breederRepository.findById(userId);
+        if (!breeder) {
+            this.logger.logError('deleteBreederAccount', '브리더를 찾을 수 없음', new Error('Breeder not found'));
+            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+        }
+
+        // 이미 탈퇴된 계정인지 확인
+        if (breeder.accountStatus === 'deleted') {
+            throw new BadRequestException('이미 탈퇴된 계정입니다.');
+        }
+
+        // 진행 중인 입양 신청 확인 (선택적 - 비즈니스 요구사항에 따라 활성화)
+        const pendingApplications = await this.adoptionApplicationRepository.countByStatus(
+            userId,
+            ApplicationStatus.CONSULTATION_PENDING,
+        );
+
+        if (pendingApplications > 0) {
+            this.logger.logWarning(
+                'deleteBreederAccount',
+                `진행 중인 입양 신청 ${pendingApplications}건 존재`,
+                { userId, pendingApplications },
+            );
+            // 필요시 여기서 에러를 던질 수 있음:
+            // throw new BadRequestException(`진행 중인 입양 신청 ${pendingApplications}건을 먼저 처리해주세요.`);
+        }
+
+        // 소프트 딜리트: accountStatus를 'deleted'로 변경
+        const deletedAt = new Date();
+        await this.breederRepository.updateProfile(userId, {
+            accountStatus: 'deleted',
+            updatedAt: deletedAt,
+        });
+
+        this.logger.logSuccess('deleteBreederAccount', '브리더 계정 탈퇴 완료', {
+            userId,
+            deletedAt,
+            pendingApplications,
+        });
+
+        return { deletedAt };
+    }
 }
