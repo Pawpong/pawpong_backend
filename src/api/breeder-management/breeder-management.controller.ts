@@ -509,4 +509,26 @@ export class BreederManagementController {
         const result = await this.breederManagementService.updateApplicationForm(user.userId, updateDto);
         return ApiResponseDto.success(result, '입양 신청 폼이 업데이트되었습니다.');
     }
+
+    @Delete('account')
+    @ApiEndpoint({
+        summary: '브리더 계정 탈퇴',
+        description: `브리더 계정을 탈퇴합니다 (소프트 딜리트).
+
+**처리 내용:**
+- 계정 상태를 'deleted'로 변경
+- 로그인 불가 처리
+- 프로필 정보는 유지 (관리자 확인용)
+- 탈퇴 일시 기록
+
+**주의사항:**
+- 탈퇴 후에는 계정 복구 불가능
+- 진행 중인 입양 신청이 있는 경우 먼저 처리 필요`,
+        responseType: Object,
+        isPublic: false,
+    })
+    async deleteAccount(@CurrentUser() user: any): Promise<ApiResponseDto<{ deletedAt: Date }>> {
+        const result = await this.breederManagementService.deleteBreederAccount(user.userId);
+        return ApiResponseDto.success(result, '계정이 성공적으로 탈퇴 처리되었습니다.');
+    }
 }
