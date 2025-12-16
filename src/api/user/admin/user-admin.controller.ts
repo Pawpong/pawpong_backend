@@ -10,11 +10,14 @@ import { UserAdminService } from './user-admin.service';
 
 import { UserSearchRequestDto } from './dto/request/user-search-request.dto';
 import { UserManagementRequestDto } from './dto/request/user-management-request.dto';
+import { DeletedUserSearchRequestDto } from './dto/request/deleted-user-search-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { AdminProfileResponseDto } from './dto/response/admin-profile-response.dto';
 import { UserManagementResponseDto } from './dto/response/user-management-response.dto';
 import { UserStatusUpdateResponseDto } from './dto/response/user-status-update-response.dto';
+import { DeletedUserResponseDto } from './dto/response/deleted-user-response.dto';
+import { DeletedUserStatsResponseDto } from './dto/response/deleted-user-stats-response.dto';
 
 /**
  * 사용자 관리 Admin 컨트롤러
@@ -73,5 +76,32 @@ export class UserAdminController {
     ): Promise<ApiResponseDto<UserStatusUpdateResponseDto>> {
         const result = await this.userAdminService.updateUserStatus(user.userId, userId, role, userData);
         return ApiResponseDto.success(result, '사용자 상태가 변경되었습니다.');
+    }
+
+    @Get('deleted-users')
+    @ApiEndpoint({
+        summary: '탈퇴 사용자 목록 조회',
+        description: '입양자와 브리더 중 탈퇴한 사용자를 조회합니다.',
+        responseType: DeletedUserResponseDto,
+        isPublic: false,
+    })
+    async getDeletedUsers(
+        @CurrentUser() user: any,
+        @Query() filter: DeletedUserSearchRequestDto,
+    ): Promise<ApiResponseDto<PaginationResponseDto<DeletedUserResponseDto>>> {
+        const result = await this.userAdminService.getDeletedUsers(user.userId, filter);
+        return ApiResponseDto.success(result, '탈퇴 사용자 목록이 조회되었습니다.');
+    }
+
+    @Get('deleted-users/stats')
+    @ApiEndpoint({
+        summary: '탈퇴 사용자 통계 조회',
+        description: '탈퇴 사용자에 대한 전체 통계를 조회합니다.',
+        responseType: DeletedUserStatsResponseDto,
+        isPublic: false,
+    })
+    async getDeletedUserStats(@CurrentUser() user: any): Promise<ApiResponseDto<DeletedUserStatsResponseDto>> {
+        const result = await this.userAdminService.getDeletedUserStats(user.userId);
+        return ApiResponseDto.success(result, '탈퇴 사용자 통계가 조회되었습니다.');
     }
 }
