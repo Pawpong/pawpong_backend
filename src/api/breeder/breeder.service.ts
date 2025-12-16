@@ -151,6 +151,11 @@ export class BreederService {
             throw new BadRequestException('브리더를 찾을 수 없습니다.');
         }
 
+        // 탈퇴한 브리더는 프로필 조회 불가 (소프트 삭제)
+        if ((breeder as any).accountStatus === 'deleted') {
+            throw new BadRequestException('탈퇴한 브리더의 프로필은 조회할 수 없습니다.');
+        }
+
         // 승인되지 않은 브리더도 프로필 조회 가능 (단, 검색에는 노출되지 않음)
         // 테스트 및 본인 확인 용도로 허용
         // if (breeder.verification?.status !== VerificationStatus.APPROVED) {

@@ -1,8 +1,12 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
 import { Request } from 'express';
+import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
+import { Breeder, BreederDocument } from '../../schema/breeder.schema';
 
 /**
  * JWT 전략 클래스
@@ -11,7 +15,11 @@ import { Request } from 'express';
  */
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-    constructor(configService: ConfigService) {
+    constructor(
+        configService: ConfigService,
+        @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
+        @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
+    ) {
         const jwtSecret = configService.get<string>('JWT_SECRET') || 'fallback-secret';
         console.log('[JwtStrategy] Constructor - JWT_SECRET 길이:', jwtSecret.length);
         console.log('[JwtStrategy] Constructor - JWT_SECRET 앞 10자:', jwtSecret.substring(0, 10));
@@ -47,9 +55,27 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     /**
      * JWT 페이로드 검증
      * 토큰이 유효할 때 호출되어 사용자 정보를 반환합니다.
+     * 탈퇴된 계정인 경우 UnauthorizedException을 발생시킵니다.
      */
     async validate(payload: any) {
         console.log('[JwtStrategy] validate 호출 - payload:', JSON.stringify(payload));
+
+        // 사용자 조회 및 탈퇴 여부 확인
+        let accountStatus: string | undefined;
+        if (payload.role === 'adopter') {
+            const adopter = await this.adopterModel.findById(payload.sub).select('accountStatus').lean().exec();
+            accountStatus = adopter?.accountStatus;
+        } else if (payload.role === 'breeder') {
+            const breeder = await this.breederModel.findById(payload.sub).select('accountStatus').lean().exec();
+            accountStatus = breeder?.accountStatus;
+        }
+
+        // 탈퇴된 계정인 경우 인증 실패
+        if (accountStatus === 'deleted') {
+            console.log('[JwtStrategy] 탈퇴된 계정 접근 시도:', payload.sub);
+            throw new UnauthorizedException('이미 탈퇴된 계정입니다.');
+        }
+
         const user = {
             userId: payload.sub,
             email: payload.email,
