@@ -517,9 +517,18 @@ export class BreederManagementController {
 
 **처리 내용:**
 - 계정 상태를 'deleted'로 변경
+- 탈퇴 사유 및 상세 사유 저장
 - 로그인 불가 처리
 - 프로필 정보는 유지 (관리자 확인용)
 - 탈퇴 일시 기록
+
+**탈퇴 사유:**
+- no_inquiry: 입양 문의가 잘 오지 않았어요
+- time_consuming: 운영이 생각보다 번거롭거나 시간이 부족해요
+- verification_difficult: 브리더 심사나 검증 절차가 어려웠어요
+- policy_mismatch: 수익 구조나 서비스 정책이 잘 맞지 않아요
+- uncomfortable_ui: 사용하기 불편했어요 (UI/기능 등)
+- other: 다른 이유로 탈퇴하고 싶어요 (otherReason 필수)
 
 **주의사항:**
 - 탈퇴 후에는 계정 복구 불가능
@@ -527,8 +536,8 @@ export class BreederManagementController {
         responseType: Object,
         isPublic: false,
     })
-    async deleteAccount(@CurrentUser() user: any): Promise<ApiResponseDto<{ deletedAt: Date }>> {
-        const result = await this.breederManagementService.deleteBreederAccount(user.userId);
-        return ApiResponseDto.success(result, '계정이 성공적으로 탈퇴 처리되었습니다.');
+    async deleteAccount(@CurrentUser() user: any, @Body() deleteData?: { reason?: string; otherReason?: string }): Promise<ApiResponseDto<{ breederId: string; deletedAt: string; message: string }>> {
+        const result = await this.breederManagementService.deleteBreederAccount(user.userId, deleteData);
+        return ApiResponseDto.success(result, '브리더 회원 탈퇴가 성공적으로 처리되었습니다.');
     }
 }
