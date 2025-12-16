@@ -365,17 +365,36 @@ export class AdopterService {
     }
 
     /**
-     * 새 후기 등록 알림 발송 (서비스 알림만, 이메일 없음)
+     * 새 후기 등록 알림 및 이메일 발송 (브리더용)
      * @private
      */
     private async sendNewReviewNotification(breederId: string): Promise<void> {
-        await this.notificationService
+        // 브리더 정보 조회
+        const breeder = await this.breederRepository.findById(breederId);
+        if (!breeder) {
+            return; // 브리더를 찾을 수 없으면 알림 발송 중단
+        }
+
+        const emailContent = breeder.emailAddress
+            ? this.mailTemplateService.getNewReviewEmail(breeder.name)
+            : null;
+
+        const builder = this.notificationService
             .to(breederId, RecipientType.BREEDER)
             .type(NotificationType.NEW_REVIEW_REGISTERED)
             .title('⭐ 새로운 후기가 등록되었어요!')
             .content('브리더 프로필에서 후기를 확인해보세요.')
-            .related(breederId, 'profile')
-            .send();
+            .related(breederId, 'profile');
+
+        if (emailContent && breeder.emailAddress) {
+            builder.withEmail({
+                to: breeder.emailAddress,
+                subject: emailContent.subject,
+                html: emailContent.html,
+            });
+        }
+
+        await builder.send();
     }
 
     /**
@@ -994,24 +1013,25 @@ export class AdopterService {
 
         try {
             // 4. 계정 상태를 'deleted'로 변경
-            adopter.accountStatus = 'deleted';
+            const deletedAt = new Date();
+            await this.adopterRepository.updateProfile(userId, {
+                accountStatus: 'deleted',
+                updatedAt: deletedAt,
+            });
 
             // 5. 개인정보 마스킹 처리 (선택적)
-            // adopter.emailAddress = `deleted_${(adopter as any)._id.toString()}@deleted.com`;
-            // adopter.phoneNumber = null;
-            // adopter.nickname = '탈퇴한 사용자';
+            // await this.adopterRepository.updateProfile(userId, {
+            //     emailAddress: `deleted_${userId}@deleted.com`,
+            //     phoneNumber: null,
+            //     nickname: '탈퇴한 사용자',
+            // });
 
             // 6. 탈퇴 정보 기록 (스키마에 필드 추가 시 사용)
-            // adopter.deletedAt = new Date();
-            // adopter.deleteReason = deleteData.reason;
-            // adopter.deleteReasonDetail = deleteData.otherReason;
-
-            // 7. 변경사항 저장
-            await adopter.save();
+            // deletedAt, deleteReason, deleteReasonDetail
 
             return {
-                adopterId: (adopter as any)._id.toString(),
-                deletedAt: new Date().toISOString(),
+                adopterId: userId,
+                deletedAt: deletedAt.toISOString(),
                 message: '회원 탈퇴가 성공적으로 처리되었습니다.',
             };
         } catch (error) {

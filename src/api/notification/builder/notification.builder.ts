@@ -1,5 +1,5 @@
-import { NotificationType, RecipientType } from '../../common/enum/user.enum';
-import { NotificationResponseDto } from './dto/response/notification-response.dto';
+import { NotificationType, RecipientType } from '../../../common/enum/user.enum';
+import { NotificationResponseDto } from '../dto/response/notification-response.dto';
 
 // Alias for backward compatibility
 export type NotificationItemDto = NotificationResponseDto;
