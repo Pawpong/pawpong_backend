@@ -104,6 +104,26 @@ export class User {
     suspendedAt?: Date;
 
     /**
+     * 회원 탈퇴 일시 (accountStatus가 deleted일 때)
+     */
+    @Prop()
+    deletedAt?: Date;
+
+    /**
+     * 회원 탈퇴 사유 (accountStatus가 deleted일 때)
+     * 입양자: already_adopted, no_suitable_pet, adoption_fee_burden, uncomfortable_ui, privacy_concern, other
+     * 브리더: no_inquiry, time_consuming, verification_difficult, policy_mismatch, uncomfortable_ui, other
+     */
+    @Prop()
+    deleteReason?: string;
+
+    /**
+     * 회원 탈퇴 상세 사유 (deleteReason이 other일 때)
+     */
+    @Prop()
+    deleteReasonDetail?: string;
+
+    /**
      * 마지막 로그인 일시
      */
     @Prop({ default: Date.now })
