@@ -12,7 +12,7 @@ import {
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
-import { NotificationBuilder, NotificationCreateData, EmailData } from './notification.builder';
+import { NotificationBuilder, NotificationCreateData, EmailData } from './builder/notification.builder';
 import { RecipientType } from '../../common/enum/user.enum';
 import { MailService } from '../../common/mail/mail.service';
 
