@@ -434,6 +434,12 @@ export class AuthService {
         }
 
         if (adopter) {
+            // 탈퇴한 사용자는 로그인 불가
+            if (adopter.accountStatus === 'deleted') {
+                this.logger.log(`[handleSocialLogin] 탈퇴한 Adopter 로그인 시도: ${adopter.emailAddress}`);
+                throw new UnauthorizedException('탈퇴한 계정으로는 로그인할 수 없습니다.');
+            }
+
             // 기존 사용자 로그인
             this.logger.log(`[handleSocialLogin] 기존 Adopter 로그인 성공: ${adopter.emailAddress}`);
             return {
@@ -457,6 +463,12 @@ export class AuthService {
         );
 
         if (breeder) {
+            // 탈퇴한 사용자는 로그인 불가
+            if (breeder.accountStatus === 'deleted') {
+                this.logger.log(`[handleSocialLogin] 탈퇴한 Breeder 로그인 시도: ${breeder.emailAddress}`);
+                throw new UnauthorizedException('탈퇴한 계정으로는 로그인할 수 없습니다.');
+            }
+
             // 기존 사용자 로그인
             this.logger.log(`[handleSocialLogin] 기존 Breeder 로그인 성공: ${breeder.emailAddress}`);
             return {
@@ -828,64 +840,81 @@ export class AuthService {
         redirectUrl: string;
         cookies?: { name: string; value: string; options: any }[];
     }> {
-        const result = await this.handleSocialLogin(userProfile);
         const frontendUrl = this.getFrontendUrl(referer, origin);
 
-        if (result.needsAdditionalInfo) {
-            // 신규 사용자 - /signup으로 리다이렉트
-            const params: Record<string, string> = {
-                tempId: result.tempUserId || '',
-                provider: userProfile.provider || '',
-                email: userProfile.email || '',
-                name: userProfile.name || '',
-                profileImage: userProfile.profileImage || '',
-            };
+        try {
+            const result = await this.handleSocialLogin(userProfile);
 
-            if (userProfile.needsEmail) {
-                params.needsEmail = 'true';
+            if (result.needsAdditionalInfo) {
+                // 신규 사용자 - /signup으로 리다이렉트
+                const params: Record<string, string> = {
+                    tempId: result.tempUserId || '',
+                    provider: userProfile.provider || '',
+                    email: userProfile.email || '',
+                    name: userProfile.name || '',
+                    profileImage: userProfile.profileImage || '',
+                };
+
+                if (userProfile.needsEmail) {
+                    params.needsEmail = 'true';
+                }
+
+                const queryParams = new URLSearchParams(params);
+
+                return {
+                    redirectUrl: `${frontendUrl}/signup?${queryParams.toString()}`,
+                };
+            } else {
+                // 기존 사용자 - 로그인 처리 (토큰 발급)
+                const tokens = await this.generateSocialLoginTokens(result.user);
+                const { isProduction, cookieOptions } = this.getCookieOptions();
+
+                const cookies = [
+                    {
+                        name: 'accessToken',
+                        value: tokens.accessToken,
+                        options: {
+                            ...cookieOptions,
+                            maxAge: 24 * 60 * 60 * 1000, // 1일
+                        },
+                    },
+                    {
+                        name: 'refreshToken',
+                        value: tokens.refreshToken,
+                        options: {
+                            ...cookieOptions,
+                            maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
+                        },
+                    },
+                    {
+                        name: 'userRole',
+                        value: result.user.role,
+                        options: {
+                            ...cookieOptions,
+                            httpOnly: false, // 프론트엔드에서 읽을 수 있어야 함
+                            maxAge: 24 * 60 * 60 * 1000, // 1일
+                        },
+                    },
+                ];
+
+                return {
+                    redirectUrl: `${frontendUrl}/explore`,
+                    cookies,
+                };
             }
+        } catch (error) {
+            // 탈퇴한 계정 에러인 경우 에러 페이지로 리다이렉트
+            const errorMessage = error instanceof Error ? error.message : '로그인 처리 중 오류가 발생했습니다.';
+            this.logger.logError('processSocialLoginCallback', '소셜 로그인 콜백 처리 실패', error);
 
-            const queryParams = new URLSearchParams(params);
-
-            return {
-                redirectUrl: `${frontendUrl}/signup?${queryParams.toString()}`,
-            };
-        } else {
-            // 기존 사용자 - 로그인 처리 (토큰 발급)
-            const tokens = await this.generateSocialLoginTokens(result.user);
-            const { isProduction, cookieOptions } = this.getCookieOptions();
-
-            const cookies = [
-                {
-                    name: 'accessToken',
-                    value: tokens.accessToken,
-                    options: {
-                        ...cookieOptions,
-                        maxAge: 24 * 60 * 60 * 1000, // 1일
-                    },
-                },
-                {
-                    name: 'refreshToken',
-                    value: tokens.refreshToken,
-                    options: {
-                        ...cookieOptions,
-                        maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
-                    },
-                },
-                {
-                    name: 'userRole',
-                    value: result.user.role,
-                    options: {
-                        ...cookieOptions,
-                        httpOnly: false, // 프론트엔드에서 읽을 수 있어야 함
-                        maxAge: 24 * 60 * 60 * 1000, // 1일
-                    },
-                },
-            ];
+            // 에러 메시지를 쿼리 파라미터로 전달
+            const errorParams = new URLSearchParams({
+                error: errorMessage,
+                type: errorMessage.includes('탈퇴') ? 'deleted_account' : 'login_error',
+            });
 
             return {
-                redirectUrl: `${frontendUrl}/explore`,
-                cookies,
+                redirectUrl: `${frontendUrl}/login?${errorParams.toString()}`,
             };
         }
     }
