@@ -493,14 +493,16 @@ export class AuthService {
     async registerAdopter(dto: RegisterAdopterRequestDto): Promise<RegisterAdopterResponseDto> {
         this.logger.logStart('registerAdopter', '입양자 회원가입 처리 시작', dto, 'AuthService');
 
-        // tempId 파싱: "temp_kakao_4479198661_1759826027884" 형식
+        // tempId 파싱: "temp_kakao_4479198661_1759826027884" 또는 "temp_naver_providerId_timestamp" 형식
+        // providerId에 언더스코어가 포함될 수 있으므로 (네이버 등) 마지막 파트를 timestamp로 처리
         const tempIdParts = dto.tempId.split('_');
-        if (tempIdParts.length !== 4 || tempIdParts[0] !== 'temp') {
+        if (tempIdParts.length < 4 || tempIdParts[0] !== 'temp') {
             throw new BadRequestException('유효하지 않은 임시 ID 형식입니다.');
         }
 
         const provider = tempIdParts[1]; // kakao, google, naver
-        const providerId = tempIdParts[2]; // 소셜 제공자의 사용자 ID
+        // providerId는 2번째부터 마지막 전까지의 모든 파트를 합침 (언더스코어 포함될 수 있음)
+        const providerId = tempIdParts.slice(2, -1).join('_'); // 소셜 제공자의 사용자 ID
 
         this.logger.logSuccess(
             'registerAdopter',
@@ -1239,11 +1241,12 @@ export class AuthService {
         let socialAuthInfo: any = undefined;
 
         if (dto.tempId && dto.provider) {
-            // tempId 파싱: "temp_kakao_4479198661_1759826027884" 형식
+            // tempId 파싱: "temp_kakao_4479198661_1759826027884" 또는 "temp_naver_providerId_timestamp" 형식
+            // providerId에 언더스코어가 포함될 수 있으므로 (네이버 등) 마지막 파트를 timestamp로 처리
             const tempIdParts = dto.tempId.split('_');
-            if (tempIdParts.length === 4 && tempIdParts[0] === 'temp') {
+            if (tempIdParts.length >= 4 && tempIdParts[0] === 'temp') {
                 const provider = tempIdParts[1];
-                const providerId = tempIdParts[2];
+                const providerId = tempIdParts.slice(2, -1).join('_');
 
                 socialAuthInfo = {
                     authProvider: provider,
