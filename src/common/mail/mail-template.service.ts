@@ -262,13 +262,33 @@ export class MailTemplateService {
     }
 
     /**
-     * [5] 신규 후기 등록 알림 (이메일 없음 - 서비스 알림만)
-     * 이 템플릿은 참조용으로만 존재
+     * [5] 신규 후기 등록 알림 이메일 (브리더용)
      */
-    getNewReviewNotificationContent(): { title: string; content: string } {
+    getNewReviewEmail(breederName: string): { subject: string; html: string } {
+        const displayBreederName = breederName || '브리더';
+
+        const content = `
+            <h2>안녕하세요, ${displayBreederName}님.</h2>
+            <p>반려동물 브리더 입양 플랫폼 <strong>포퐁(Pawpong)</strong>입니다.</p>
+
+            <div class="highlight">
+                <p class="emoji">⭐ 새로운 후기가 등록되었어요!</p>
+                <p>입양자분이 브리더님에게 소중한 후기를 남겨주셨습니다.</p>
+            </div>
+
+            <p>💡 후기는 브리더님의 신뢰도를 높이고, 더 많은 입양 희망자에게 긍정적인 인상을 줄 수 있어요.<br>
+            포퐁에서 확인해보세요!</p>
+
+            <p style="text-align: center;">
+                <a href="${this.baseUrl}" class="button">내 프로필에서 후기 보기</a>
+            </p>
+
+            <p>감사합니다.</p>
+        `;
+
         return {
-            title: '⭐ 새로운 후기가 등록되었어요!',
-            content: '브리더 프로필에서 후기를 확인해보세요.',
+            subject: '[포퐁] 새로운 후기가 등록되었어요 ⭐',
+            html: this.getEmailLayout(content),
         };
     }
 
