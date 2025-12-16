@@ -1014,22 +1014,15 @@ export class AdopterService {
         }
 
         try {
-            // 4. 계정 상태를 'deleted'로 변경
+            // 4. 계정 상태를 'deleted'로 변경하고 탈퇴 정보 저장
             const deletedAt = new Date();
             await this.adopterRepository.updateProfile(userId, {
                 accountStatus: 'deleted',
+                deletedAt: deletedAt,
+                deleteReason: deleteData.reason,
+                deleteReasonDetail: deleteData.otherReason || null,
                 updatedAt: deletedAt,
             });
-
-            // 5. 개인정보 마스킹 처리 (선택적)
-            // await this.adopterRepository.updateProfile(userId, {
-            //     emailAddress: `deleted_${userId}@deleted.com`,
-            //     phoneNumber: null,
-            //     nickname: '탈퇴한 사용자',
-            // });
-
-            // 6. 탈퇴 정보 기록 (스키마에 필드 추가 시 사용)
-            // deletedAt, deleteReason, deleteReasonDetail
 
             return {
                 adopterId: userId,
