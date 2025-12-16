@@ -366,11 +366,12 @@ export class AuthMapper {
             return undefined;
         }
 
-        // tempId 파싱: "temp_kakao_4479198661_1759826027884" 형식
+        // tempId 파싱: "temp_kakao_4479198661_1759826027884" 또는 "temp_naver_providerId_timestamp" 형식
+        // providerId에 언더스코어가 포함될 수 있으므로 (네이버 등) 마지막 파트를 timestamp로 처리
         const tempIdParts = tempId.split('_');
-        if (tempIdParts.length === 4 && tempIdParts[0] === 'temp') {
+        if (tempIdParts.length >= 4 && tempIdParts[0] === 'temp') {
             const parsedProvider = tempIdParts[1];
-            const providerId = tempIdParts[2];
+            const providerId = tempIdParts.slice(2, -1).join('_');
 
             return {
                 authProvider: parsedProvider,
