@@ -912,7 +912,7 @@ export class AdopterService {
                 return {
                     applicationId: app._id.toString(),
                     breederId: app.breederId.toString(),
-                    breederName: breeder?.name || '알 수 없음',
+                    breederName: breeder?.nickname || breeder?.name || '알 수 없음',
                     petId: app.petId?.toString(),
                     petName: app.petName,
                     status: app.status,
@@ -920,7 +920,9 @@ export class AdopterService {
                     processedAt: app.processedAt?.toISOString(),
                     // 프론트엔드 요구사항 필드 추가
                     breederLevel: (breeder?.verification?.level || 'new') as 'elite' | 'new',
-                    profileImage: breeder?.profileImageFileName,
+                    profileImage: breeder?.profileImageFileName
+                        ? this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60)
+                        : null,
                     animalType: animalType as 'cat' | 'dog',
                     applicationDate: formatDate(app.appliedAt),
                 };
