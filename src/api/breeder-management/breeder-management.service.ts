@@ -1230,13 +1230,14 @@ export class BreederManagementService {
 
     /**
      * 브리더 계정 탈퇴 (소프트 딜리트)
-     * 계정 상태를 'deleted'로 변경하여 로그인 불가 처리
+     * 계정 상태를 'deleted'로 변경하여 로그인 불가 처리하고 탈퇴 사유 저장
      *
      * @param userId 브리더 고유 ID
-     * @returns 탈퇴 일시
+     * @param deleteData 탈퇴 사유 정보
+     * @returns 탈퇴 정보
      * @throws BadRequestException 존재하지 않는 브리더 또는 이미 탈퇴된 계정
      */
-    async deleteBreederAccount(userId: string): Promise<{ deletedAt: Date }> {
+    async deleteBreederAccount(userId: string, deleteData?: { reason?: string; otherReason?: string }): Promise<{ breederId: string; deletedAt: string; message: string }> {
         this.logger.logStart('deleteBreederAccount', '브리더 계정 탈퇴 처리 시작', { userId });
 
         const breeder = await this.breederRepository.findById(userId);
@@ -1248,6 +1249,11 @@ export class BreederManagementService {
         // 이미 탈퇴된 계정인지 확인
         if (breeder.accountStatus === 'deleted') {
             throw new BadRequestException('이미 탈퇴된 계정입니다.');
+        }
+
+        // 기타 사유인 경우 otherReason 필수 검증
+        if (deleteData?.reason === 'other' && !deleteData?.otherReason) {
+            throw new BadRequestException('기타 사유를 입력해주세요.');
         }
 
         // 진행 중인 입양 신청 확인 (선택적 - 비즈니스 요구사항에 따라 활성화)
@@ -1266,19 +1272,27 @@ export class BreederManagementService {
             // throw new BadRequestException(`진행 중인 입양 신청 ${pendingApplications}건을 먼저 처리해주세요.`);
         }
 
-        // 소프트 딜리트: accountStatus를 'deleted'로 변경
+        // 소프트 딜리트: accountStatus를 'deleted'로 변경하고 탈퇴 정보 저장
         const deletedAt = new Date();
         await this.breederRepository.updateProfile(userId, {
             accountStatus: 'deleted',
+            deletedAt: deletedAt,
+            deleteReason: deleteData?.reason || null,
+            deleteReasonDetail: deleteData?.otherReason || null,
             updatedAt: deletedAt,
         });
 
         this.logger.logSuccess('deleteBreederAccount', '브리더 계정 탈퇴 완료', {
             userId,
             deletedAt,
+            reason: deleteData?.reason,
             pendingApplications,
         });
 
-        return { deletedAt };
+        return {
+            breederId: userId,
+            deletedAt: deletedAt.toISOString(),
+            message: '브리더 회원 탈퇴가 성공적으로 처리되었습니다.',
+        };
     }
 }
