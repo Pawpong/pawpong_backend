@@ -1,11 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { EmailTestController } from './test/email-test.controller';
 import { NotificationController } from './notification.controller';
 
 import { NotificationService } from './notification.service';
 
 import { Notification, NotificationSchema } from '../../schema/notification.schema';
+
 import { MailModule } from '../../common/mail/mail.module';
 
 /**
@@ -16,7 +18,7 @@ import { MailModule } from '../../common/mail/mail.module';
  */
 @Module({
     imports: [MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }]), MailModule],
-    controllers: [NotificationController],
+    controllers: [NotificationController, EmailTestController],
     providers: [NotificationService],
     exports: [NotificationService, MailModule], // MailModule re-export
 })
