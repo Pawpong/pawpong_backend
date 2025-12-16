@@ -112,6 +112,8 @@ export enum AdminAction {
     RESOLVE_REPORT = 'resolve_report',
     DISMISS_REPORT = 'dismiss_report',
     DELETE_REVIEW = 'delete_review',
+    VIEW_USER_LIST = 'view_user_list',
+    VIEW_STATISTICS = 'view_statistics',
 }
 
 export enum AdminTargetType {
@@ -119,6 +121,7 @@ export enum AdminTargetType {
     ADOPTER = 'adopter',
     REPORT = 'report',
     REVIEW = 'review',
+    SYSTEM = 'system',
 }
 
 export enum FormFieldType {
