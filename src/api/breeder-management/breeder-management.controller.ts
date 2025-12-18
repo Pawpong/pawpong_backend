@@ -536,7 +536,10 @@ export class BreederManagementController {
         responseType: Object,
         isPublic: false,
     })
-    async deleteAccount(@CurrentUser() user: any, @Body() deleteData?: { reason?: string; otherReason?: string }): Promise<ApiResponseDto<{ breederId: string; deletedAt: string; message: string }>> {
+    async deleteAccount(
+        @CurrentUser() user: any,
+        @Body() deleteData?: { reason?: string; otherReason?: string },
+    ): Promise<ApiResponseDto<{ breederId: string; deletedAt: string; message: string }>> {
         const result = await this.breederManagementService.deleteBreederAccount(user.userId, deleteData);
         return ApiResponseDto.success(result, '브리더 회원 탈퇴가 성공적으로 처리되었습니다.');
     }
