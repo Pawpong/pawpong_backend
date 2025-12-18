@@ -28,10 +28,12 @@ export class ParentPetRepository {
      * @returns ParentPet 또는 null
      */
     async findByIdAndBreeder(id: string, breederId: string): Promise<ParentPetDocument | null> {
-        return this.parentPetModel.findOne({
-            _id: new Types.ObjectId(id),
-            breederId: new Types.ObjectId(breederId)
-        }).exec() as any;
+        return this.parentPetModel
+            .findOne({
+                _id: new Types.ObjectId(id),
+                breederId: new Types.ObjectId(breederId),
+            })
+            .exec() as any;
     }
 
     /**
@@ -85,7 +87,7 @@ export class ParentPetRepository {
     async countByBreeder(breederId: string): Promise<number> {
         return this.parentPetModel.countDocuments({
             breederId: new Types.ObjectId(breederId),
-            isActive: true
+            isActive: true,
         });
     }
 }

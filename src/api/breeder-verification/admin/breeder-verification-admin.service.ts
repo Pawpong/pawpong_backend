@@ -479,10 +479,7 @@ export class BreederVerificationAdminService {
             .find({
                 'verification.status': VerificationStatus.APPROVED,
                 'verification.reviewedAt': { $lte: fourWeeksAgo },
-                $or: [
-                    { 'verification.documents': { $exists: false } },
-                    { 'verification.documents': { $size: 0 } },
-                ],
+                $or: [{ 'verification.documents': { $exists: false } }, { 'verification.documents': { $size: 0 } }],
             })
             .select('_id nickname emailAddress verification')
             .lean();

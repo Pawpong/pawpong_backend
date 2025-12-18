@@ -64,4 +64,4 @@ import { NoticeModule } from './api/notice/notice.module';
     controllers: [],
     providers: [],
 })
-export class AppModule { }
+export class AppModule {}

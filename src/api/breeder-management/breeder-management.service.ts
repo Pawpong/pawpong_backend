@@ -1237,7 +1237,10 @@ export class BreederManagementService {
      * @returns 탈퇴 정보
      * @throws BadRequestException 존재하지 않는 브리더 또는 이미 탈퇴된 계정
      */
-    async deleteBreederAccount(userId: string, deleteData?: { reason?: string; otherReason?: string }): Promise<{ breederId: string; deletedAt: string; message: string }> {
+    async deleteBreederAccount(
+        userId: string,
+        deleteData?: { reason?: string; otherReason?: string },
+    ): Promise<{ breederId: string; deletedAt: string; message: string }> {
         this.logger.logStart('deleteBreederAccount', '브리더 계정 탈퇴 처리 시작', { userId });
 
         const breeder = await this.breederRepository.findById(userId);
@@ -1263,11 +1266,10 @@ export class BreederManagementService {
         );
 
         if (pendingApplications > 0) {
-            this.logger.logWarning(
-                'deleteBreederAccount',
-                `진행 중인 입양 신청 ${pendingApplications}건 존재`,
-                { userId, pendingApplications },
-            );
+            this.logger.logWarning('deleteBreederAccount', `진행 중인 입양 신청 ${pendingApplications}건 존재`, {
+                userId,
+                pendingApplications,
+            });
             // 필요시 여기서 에러를 던질 수 있음:
             // throw new BadRequestException(`진행 중인 입양 신청 ${pendingApplications}건을 먼저 처리해주세요.`);
         }

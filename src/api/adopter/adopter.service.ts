@@ -375,9 +375,7 @@ export class AdopterService {
             return; // 브리더를 찾을 수 없으면 알림 발송 중단
         }
 
-        const emailContent = breeder.emailAddress
-            ? this.mailTemplateService.getNewReviewEmail(breeder.name)
-            : null;
+        const emailContent = breeder.emailAddress ? this.mailTemplateService.getNewReviewEmail(breeder.name) : null;
 
         const builder = this.notificationService
             .to(breederId, RecipientType.BREEDER)
