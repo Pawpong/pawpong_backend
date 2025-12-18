@@ -27,6 +27,7 @@ import { AnnouncementModule } from './api/announcement/announcement.module';
 import { BreederLevelAdminModule } from './api/breeder-level/admin/breeder-level-admin.module';
 import { BreederVerificationAdminModule } from './api/breeder-verification/admin/breeder-verification-admin.module';
 import { BreederReportAdminModule } from './api/breeder-report/admin/breeder-report-admin.module';
+import { NoticeModule } from './api/notice/notice.module';
 
 @Module({
     imports: [
@@ -58,6 +59,7 @@ import { BreederReportAdminModule } from './api/breeder-report/admin/breeder-rep
         NotificationModule,
         NotificationAdminModule,
         AnnouncementModule,
+        NoticeModule,
     ],
     controllers: [],
     providers: [],
