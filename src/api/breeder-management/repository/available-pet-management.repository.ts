@@ -30,10 +30,12 @@ export class AvailablePetManagementRepository {
      * @returns AvailablePet 또는 null
      */
     async findByIdAndBreeder(id: string, breederId: string): Promise<AvailablePetDocument | null> {
-        return this.availablePetModel.findOne({
-            _id: new Types.ObjectId(id),
-            breederId: new Types.ObjectId(breederId)
-        }).exec() as any;
+        return this.availablePetModel
+            .findOne({
+                _id: new Types.ObjectId(id),
+                breederId: new Types.ObjectId(breederId),
+            })
+            .exec() as any;
     }
 
     /**
@@ -83,7 +85,7 @@ export class AvailablePetManagementRepository {
         return this.availablePetModel.countDocuments({
             breederId: new Types.ObjectId(breederId),
             status,
-            isActive
+            isActive,
         });
     }
 
@@ -95,7 +97,7 @@ export class AvailablePetManagementRepository {
     async countInactive(breederId: string): Promise<number> {
         return this.availablePetModel.countDocuments({
             breederId: new Types.ObjectId(breederId),
-            isActive: false
+            isActive: false,
         });
     }
 

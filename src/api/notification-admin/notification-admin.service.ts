@@ -68,13 +68,7 @@ export class NotificationAdminService {
 
             // 병렬로 데이터 조회 및 총 개수 조회
             const [notifications, totalItems] = await Promise.all([
-                this.notificationModel
-                    .find(query)
-                    .sort({ createdAt: -1 })
-                    .skip(skip)
-                    .limit(limit)
-                    .lean()
-                    .exec(),
+                this.notificationModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit).lean().exec(),
                 this.notificationModel.countDocuments(query).exec(),
             ]);
 
