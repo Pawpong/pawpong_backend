@@ -223,9 +223,7 @@ export class BreederService {
                 birthDate: pet.birthDate,
                 price: pet.price,
                 status: pet.status,
-                photo: pet.photos?.[0]
-                    ? this.storageService.generateSignedUrl(pet.photos[0], 60 * 24)
-                    : '',
+                photo: pet.photos?.[0] ? this.storageService.generateSignedUrl(pet.photos[0], 60 * 24) : '',
             })),
             parentPets: (breeder.parentPets?.filter((pet: any) => pet.isActive) || []).map((pet: any) => ({
                 petId: pet.petId,
@@ -233,9 +231,7 @@ export class BreederService {
                 breed: pet.breed,
                 gender: pet.gender,
                 birthDate: this.calculateBirthDateFromAge(pet.age),
-                photo: pet.photoFileName
-                    ? this.storageService.generateSignedUrl(pet.photoFileName, 60 * 24)
-                    : '',
+                photo: pet.photoFileName ? this.storageService.generateSignedUrl(pet.photoFileName, 60 * 24) : '',
             })),
             reviews: (breeder.reviews?.filter((review: any) => review.isVisible) || [])
                 .slice(-5)
@@ -431,9 +427,7 @@ export class BreederService {
             breed: pet.breed,
             gender: pet.gender,
             birthDate: pet.birthDate,
-            photoUrl: pet.photoFileName
-                ? this.storageService.generateSignedUrl(pet.photoFileName, 60 * 24)
-                : '',
+            photoUrl: pet.photoFileName ? this.storageService.generateSignedUrl(pet.photoFileName, 60 * 24) : '',
             healthRecords: pet.healthRecords || [],
             description: pet.description || '',
         }));
@@ -510,9 +504,7 @@ export class BreederService {
                 ageInMonths,
                 price: pet.price,
                 status: pet.status,
-                mainPhoto: pet.photos?.[0]
-                    ? this.storageService.generateSignedUrl(pet.photos[0], 60 * 24)
-                    : '',
+                mainPhoto: pet.photos?.[0] ? this.storageService.generateSignedUrl(pet.photos[0], 60 * 24) : '',
                 photoCount: pet.photos?.length || 0,
                 isVaccinated: (pet.vaccinations?.length || 0) > 0,
                 hasMicrochip: !!pet.microchipNumber,

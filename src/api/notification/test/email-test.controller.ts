@@ -162,7 +162,9 @@ export class EmailTestController {
         description: '브리더에게 새 후기가 등록되었을 때 발송되는 이메일을 테스트합니다.',
         isPublic: true,
     })
-    async testNewReviewEmail(@Body() body: { email: string; breederName: string }): Promise<ApiResponseDto<{ preview: string }>> {
+    async testNewReviewEmail(
+        @Body() body: { email: string; breederName: string },
+    ): Promise<ApiResponseDto<{ preview: string }>> {
         const { subject, html } = this.mailTemplateService.getNewReviewEmail(body.breederName);
 
         await this.mailService.sendMail({

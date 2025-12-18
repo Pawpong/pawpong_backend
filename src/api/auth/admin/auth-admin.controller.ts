@@ -26,9 +26,7 @@ import { CounselBannerUpdateRequestDto } from '../../breeder-management/admin/dt
 @ApiTags('인증 관리 (Admin)')
 @Controller('auth-admin')
 export class AuthAdminController {
-    constructor(
-        private readonly authAdminService: AuthAdminService,
-    ) {}
+    constructor(private readonly authAdminService: AuthAdminService) {}
 
     /**
      * 관리자 로그인
@@ -199,7 +197,9 @@ export class AuthAdminController {
         responseType: CounselBannerResponseDto,
         isPublic: false,
     })
-    async createCounselBanner(@Body() data: CounselBannerCreateRequestDto): Promise<ApiResponseDto<CounselBannerResponseDto>> {
+    async createCounselBanner(
+        @Body() data: CounselBannerCreateRequestDto,
+    ): Promise<ApiResponseDto<CounselBannerResponseDto>> {
         const banner = await this.authAdminService.createCounselBanner(data);
         return ApiResponseDto.success(banner, '상담 배너가 생성되었습니다.');
     }

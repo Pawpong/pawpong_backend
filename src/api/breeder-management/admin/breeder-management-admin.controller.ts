@@ -139,7 +139,9 @@ export class BreederManagementAdminController {
         responseType: CounselBannerResponseDto,
         isPublic: false,
     })
-    async createCounselBanner(@Body() data: CounselBannerCreateRequestDto): Promise<ApiResponseDto<CounselBannerResponseDto>> {
+    async createCounselBanner(
+        @Body() data: CounselBannerCreateRequestDto,
+    ): Promise<ApiResponseDto<CounselBannerResponseDto>> {
         const banner = await this.breederManagementService.createCounselBanner(data);
         return ApiResponseDto.success(banner, '상담 배너가 생성되었습니다.');
     }

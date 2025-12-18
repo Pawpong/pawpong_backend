@@ -79,10 +79,7 @@ export class BreederReportAdminService {
         }
 
         // Aggregation pipeline으로 임베딩된 신고 데이터 조회
-        const pipeline: any[] = [
-            { $match: matchQuery },
-            { $unwind: '$reports' },
-        ];
+        const pipeline: any[] = [{ $match: matchQuery }, { $unwind: '$reports' }];
 
         if (status) {
             pipeline.push({ $match: { 'reports.status': status } });

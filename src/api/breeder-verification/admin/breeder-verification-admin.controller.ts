@@ -108,15 +108,13 @@ export class BreederVerificationAdminController {
     @Post('document-reminders/send')
     @ApiEndpoint({
         summary: '서류 미제출 브리더에게 독촉 메일 발송',
-        description: '승인 후 4주 경과했지만 서류를 제출하지 않은 브리더들에게 독촉 이메일을 발송합니다. Cloud Run으로 스케줄링하여 사용할 수 있습니다.',
+        description:
+            '승인 후 4주 경과했지만 서류를 제출하지 않은 브리더들에게 독촉 이메일을 발송합니다. Cloud Run으로 스케줄링하여 사용할 수 있습니다.',
         responseType: Object,
         isPublic: false,
     })
     async sendDocumentReminders(@CurrentUser() user: any): Promise<ApiResponseDto<any>> {
         const result = await this.breederVerificationAdminService.sendDocumentReminders(user.userId);
-        return ApiResponseDto.success(
-            result,
-            `${result.sentCount}명의 브리더에게 서류 독촉 이메일이 발송되었습니다.`,
-        );
+        return ApiResponseDto.success(result, `${result.sentCount}명의 브리더에게 서류 독촉 이메일이 발송되었습니다.`);
     }
 }
