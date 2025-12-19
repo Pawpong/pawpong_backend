@@ -23,6 +23,7 @@ import { CounselBanner, CounselBannerSchema } from '../../schema/counsel-banner.
 import { StorageModule } from '../../common/storage/storage.module';
 import { NotificationModule } from '../notification/notification.module';
 import { MailModule } from '../../common/mail/mail.module';
+import { DiscordWebhookModule } from '../../common/discord/discord-webhook.module';
 
 @Module({
     imports: [
@@ -38,6 +39,7 @@ import { MailModule } from '../../common/mail/mail.module';
         StorageModule,
         MailModule,
         NotificationModule,
+        DiscordWebhookModule,
     ],
     controllers: [BreederManagementController, BreederManagementAdminController],
     providers: [

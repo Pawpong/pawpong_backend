@@ -10,6 +10,7 @@ import { NotificationService } from '../notification/notification.service';
 import { NotificationType } from '../../schema/notification.schema';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { MailService } from '../../common/mail/mail.service';
+import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
 
 import { ParentPetAddDto } from './dto/request/parent-pet-add-request.dto';
 import { ParentPetUpdateDto } from './dto/request/parent-pet-update-request.dto';
@@ -59,6 +60,7 @@ export class BreederManagementService {
         private mailService: MailService,
         private configService: ConfigService,
         private logger: CustomLoggerService,
+        private discordWebhookService: DiscordWebhookService,
     ) {}
 
     /**
@@ -735,15 +737,42 @@ export class BreederManagementService {
             uploadedAt: new Date(),
         }));
 
+        const submittedAt = new Date();
+        const isResubmission = breeder.verification?.status === VerificationStatus.REJECTED;
+
         const verification = {
             status: VerificationStatus.REVIEWING,
             level: dto.level,
-            submittedAt: new Date(),
+            submittedAt,
             documents,
             submittedByEmail: dto.submittedByEmail || false,
         };
 
         await this.breederRepository.updateVerification(userId, verification);
+
+        // 디스코드 알림 전송 (브리더 입점 서류 제출)
+        try {
+            await this.discordWebhookService.notifyBreederVerificationSubmission({
+                breederId: userId,
+                breederName: breeder.name || '이름 미설정',
+                email: breeder.emailAddress,
+                phone: breeder.phoneNumber,
+                level: dto.level,
+                isResubmission,
+                documents: dto.documents.map((doc) => ({
+                    type: doc.type,
+                    url: this.storageService.generateSignedUrl(doc.fileName, 60 * 24 * 7), // 7일 유효
+                    originalFileName: doc.fileName.split('/').pop(), // 파일명에서 원본 파일명 추출
+                })),
+                submittedAt,
+            });
+        } catch (error) {
+            this.logger.logWarning(
+                'submitVerificationDocuments',
+                '디스코드 알림 전송 실패 (서류 제출은 성공)',
+                error,
+            );
+        }
 
         return { message: '입점 서류 제출이 완료되었습니다. 관리자 검토 후 결과를 알려드립니다.' };
     }
