@@ -565,10 +565,15 @@ export class AdopterService {
                         profileImageUrl = this.storageService.generateSignedUrl(breeder.profileImageFileName);
                     }
 
-                    return AdopterMapper.toFavoriteDetail(fav, breeder, profileImageUrl);
+                    // 대표 사진들 Signed URL 생성
+                    const representativePhotos = breeder?.profile?.representativePhotos
+                        ? this.storageService.generateSignedUrls(breeder.profile.representativePhotos)
+                        : [];
+
+                    return AdopterMapper.toFavoriteDetail(fav, breeder, profileImageUrl, representativePhotos);
                 } catch (error) {
                     // 에러 발생 시 기본 정보 반환
-                    return AdopterMapper.toFavoriteDetail(fav, null, '');
+                    return AdopterMapper.toFavoriteDetail(fav, null, '', []);
                 }
             }),
         );
