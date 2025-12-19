@@ -558,10 +558,17 @@ export class AdopterService {
             favorites.map(async (fav: any) => {
                 try {
                     const breeder = await this.breederRepository.findById(fav.favoriteBreederId);
-                    return AdopterMapper.toFavoriteDetail(fav, breeder);
+
+                    // 브리더 프로필 이미지 Signed URL 생성
+                    let profileImageUrl = '';
+                    if (breeder?.profileImageFileName) {
+                        profileImageUrl = this.storageService.generateSignedUrl(breeder.profileImageFileName);
+                    }
+
+                    return AdopterMapper.toFavoriteDetail(fav, breeder, profileImageUrl);
                 } catch (error) {
                     // 에러 발생 시 기본 정보 반환
-                    return AdopterMapper.toFavoriteDetail(fav, null);
+                    return AdopterMapper.toFavoriteDetail(fav, null, '');
                 }
             }),
         );

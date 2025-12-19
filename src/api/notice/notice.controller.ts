@@ -5,8 +5,8 @@ import { NoticeService } from './notice.service';
 
 import { PaginationRequestDto } from '../../common/dto/pagination/pagination-request.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
-import { NoticeResponseDto } from './dto/response/notice-response.dto';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
+import { NoticeResponseDto } from './dto/response/notice-response.dto';
 
 /**
  * 공지사항 컨트롤러 (공개 API)

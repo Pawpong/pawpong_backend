@@ -209,6 +209,125 @@ export class DiscordWebhookService {
     }
 
     /**
+     * 브리더 입점 서류 제출/수정 알림
+     *
+     * @param data 브리더 서류 제출 정보
+     */
+    async notifyBreederVerificationSubmission(data: {
+        breederId: string;
+        breederName: string;
+        email: string;
+        phone?: string;
+        level: 'new' | 'elite';
+        isResubmission: boolean;
+        documents: Array<{
+            type: string;
+            url: string;
+            originalFileName?: string;
+        }>;
+        submittedAt: Date;
+    }): Promise<void> {
+        if (!this.webhookUrl) {
+            this.logger.logWarning(
+                'notifyBreederVerificationSubmission',
+                '디스코드 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
+            );
+            return;
+        }
+
+        try {
+            const documentTypeMap: Record<string, string> = {
+                idCard: '신분증 사본',
+                businessLicense: '동물생산업 등록증',
+                contractSample: '표준 입양계약서 샘플',
+                breederDogCertificate: '강아지 브리더 인증 서류',
+                breederCatCertificate: '고양이 브리더 인증 서류',
+                breederCertificate: '브리더 인증 서류',
+            };
+
+            const levelName = data.level === 'new' ? 'New 레벨' : 'Elite 레벨';
+            const submissionType = data.isResubmission ? '재제출' : '신규 제출';
+
+            const fields: Array<{ name: string; value: string; inline: boolean }> = [
+                {
+                    name: '브리더 ID',
+                    value: data.breederId,
+                    inline: true,
+                },
+                {
+                    name: '브리더명',
+                    value: data.breederName,
+                    inline: true,
+                },
+                {
+                    name: '이메일',
+                    value: data.email,
+                    inline: true,
+                },
+                {
+                    name: '전화번호',
+                    value: data.phone || '미설정',
+                    inline: true,
+                },
+                {
+                    name: '입점 레벨',
+                    value: levelName,
+                    inline: true,
+                },
+                {
+                    name: '제출 유형',
+                    value: submissionType,
+                    inline: true,
+                },
+                {
+                    name: '📋 제출된 서류',
+                    value: `총 ${data.documents.length}개 서류`,
+                    inline: false,
+                },
+            ];
+
+            // 업로드된 서류 목록
+            data.documents.forEach((doc) => {
+                const docTypeName = documentTypeMap[doc.type] || doc.type;
+                const fileName = doc.originalFileName ? `\n파일명: ${doc.originalFileName}` : '';
+                fields.push({
+                    name: `📄 ${docTypeName}`,
+                    value: `[서류 보기](${doc.url})${fileName}`,
+                    inline: false,
+                });
+            });
+
+            const embed = {
+                title: data.isResubmission
+                    ? '🔄 브리더 입점 서류 재제출'
+                    : '📝 브리더 입점 서류 제출 (신규)',
+                color: data.isResubmission ? 0xff9800 : 0x9c27b0, // 주황색 (재제출) / 보라색 (신규)
+                fields,
+                timestamp: data.submittedAt.toISOString(),
+                footer: {
+                    text: 'Pawpong Backend - 관리자 검토가 필요합니다',
+                },
+            };
+
+            await axios.post(this.webhookUrl, {
+                content: '<@&1410549218225029150>', // 역할 멘션
+                embeds: [embed],
+            });
+
+            this.logger.logSuccess(
+                'notifyBreederVerificationSubmission',
+                '브리더 입점 서류 제출 알림 전송 완료',
+                {
+                    breederId: data.breederId,
+                    isResubmission: data.isResubmission,
+                },
+            );
+        } catch (error) {
+            this.logger.logError('notifyBreederVerificationSubmission', '디스코드 웹훅 전송 실패', error);
+        }
+    }
+
+    /**
      * 일반 알림 전송
      *
      * @param title 알림 제목

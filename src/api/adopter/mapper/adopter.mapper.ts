@@ -89,16 +89,17 @@ export class AdopterMapper {
      *
      * @param favorite 즐겨찾기 데이터
      * @param breeder 브리더 Document (nullable)
+     * @param profileImageUrl 프로필 이미지 Signed URL
      * @returns 즐겨찾기 브리더 상세 정보
      */
-    static toFavoriteDetail(favorite: any, breeder: any | null): any {
+    static toFavoriteDetail(favorite: any, breeder: any | null, profileImageUrl: string): any {
         if (!breeder) {
             return {
                 breederId: favorite.favoriteBreederId,
                 breederName: favorite.breederName,
-                profileImageFileName: favorite.breederProfileImageUrl || '',
+                profileImage: favorite.breederProfileImageUrl || '',
                 location: favorite.breederLocation || '',
-                specialization: '',
+                specialization: [],
                 averageRating: 0,
                 totalReviews: 0,
                 availablePets: 0,
@@ -110,9 +111,9 @@ export class AdopterMapper {
         return {
             breederId: breeder._id.toString(),
             breederName: breeder.name,
-            profileImageFileName: breeder.profileImageFileName || '',
+            profileImage: profileImageUrl || '',
             location: `${breeder.profile?.location?.city || ''} ${breeder.profile?.location?.district || ''}`.trim(),
-            specialization: breeder.profile?.specialization || '',
+            specialization: breeder.breeds || [],
             averageRating: breeder.stats?.averageRating || 0,
             totalReviews: breeder.stats?.totalReviews || 0,
             availablePets:
