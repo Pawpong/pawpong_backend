@@ -49,9 +49,8 @@ LAST_IMAGE=$(docker images pawpong-backend --format "{{.Tag}}" | head -n 1)
 echo "$LAST_IMAGE" > /root/pawpong_backend/.last_deploy
 echo -e "${YELLOW}📦 Previous image tag saved: ${LAST_IMAGE}${NC}"
 
-echo -e "${BLUE}🔨 Building Docker image...${NC}"
-docker build -t pawpong-backend:${IMAGE_TAG} .
-docker tag pawpong-backend:${IMAGE_TAG} pawpong-backend:latest
+echo -e "${BLUE}✅ Using Docker image from Artifact Registry: pawpong-backend:latest${NC}"
+# Artifact Registry에서 이미 pull된 이미지를 사용 (중복 빌드 제거)
 
 # 현재 활성 컨테이너 확인 (헬스체크 기반)
 echo -e "${BLUE}🔍 Checking current active container...${NC}"
