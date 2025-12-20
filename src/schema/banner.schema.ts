@@ -8,11 +8,26 @@ import { Document } from 'mongoose';
 @Schema({ collection: 'banners', timestamps: true })
 export class Banner {
     /**
-     * 배너 이미지 파일명
-     * @example "banners/uuid.png"
+     * 데스크톱/패드용 배너 이미지 파일명 (PC/Pad 버전)
+     * @example "banners/uuid-desktop.png"
      */
     @Prop({ required: true })
-    imageFileName: string;
+    desktopImageFileName: string;
+
+    /**
+     * 모바일용 배너 이미지 파일명 (모바일 버전)
+     * @example "banners/uuid-mobile.png"
+     */
+    @Prop({ required: true })
+    mobileImageFileName: string;
+
+    /**
+     * 레거시: 기존 배너 이미지 파일명 (하위 호환성)
+     * @deprecated desktopImageFileName과 mobileImageFileName 사용 권장
+     * @example "banners/uuid.png"
+     */
+    @Prop({ required: false })
+    imageFileName?: string;
 
     /**
      * 링크 타입
