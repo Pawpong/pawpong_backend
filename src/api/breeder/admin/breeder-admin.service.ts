@@ -12,6 +12,7 @@ import {
 } from '../../../common/enum/user.enum';
 
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
+import { MailService } from '../../../common/mail/mail.service';
 import { NotificationService } from '../../../api/notification/notification.service';
 
 import { ApplicationMonitoringRequestDto } from './dto/request/application-monitoring-request.dto';
@@ -41,6 +42,7 @@ export class BreederAdminService {
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         private readonly mailTemplateService: MailTemplateService,
+        private readonly mailService: MailService,
         private readonly notificationService: NotificationService,
     ) {}
 
@@ -185,13 +187,91 @@ export class BreederAdminService {
             `Suspended: ${suspendData.reason}`,
         );
 
-        // TODO: 브리더에게 제재 알림 발송 (알림 시스템 구현 후 추가)
-        const notificationSent = true;
+        // 브리더에게 이메일 발송 (정지된 계정은 로그인 불가하므로 이메일만 발송)
+        let notificationSent = false;
+        try {
+            if (breeder.emailAddress) {
+                const emailContent = this.mailTemplateService.getBreederSuspensionEmail(
+                    breeder.nickname,
+                    suspendData.reason,
+                );
+
+                notificationSent = await this.mailService.sendMail({
+                    to: breeder.emailAddress,
+                    subject: emailContent.subject,
+                    html: emailContent.html,
+                });
+            }
+        } catch (error) {
+            console.error('브리더 정지 이메일 발송 실패:', error);
+        }
 
         return {
             breederId,
             reason: suspendData.reason,
             suspendedAt: new Date(),
+            notificationSent,
+        };
+    }
+
+    /**
+     * 브리더 계정 정지 해제
+     *
+     * 정지된 브리더 계정을 활성화하고 알림을 발송합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param breederId 브리더 고유 ID
+     * @returns 정지 해제 처리 결과
+     */
+    async unsuspendBreeder(adminId: string, breederId: string): Promise<BreederSuspendResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canManageBreeders) {
+            throw new ForbiddenException('브리더 관리 권한이 없습니다.');
+        }
+
+        const breeder = await this.breederModel.findById(breederId);
+        if (!breeder) {
+            throw new BadRequestException('브리더를 찾을 수 없습니다.');
+        }
+
+        if (breeder.accountStatus !== 'suspended') {
+            throw new BadRequestException('정지 상태가 아닌 계정입니다.');
+        }
+
+        breeder.accountStatus = 'active';
+        breeder.suspensionReason = undefined;
+        breeder.suspendedAt = undefined;
+        await breeder.save();
+
+        await this.logAdminActivity(
+            adminId,
+            AdminAction.ACTIVATE_USER,
+            AdminTargetType.BREEDER,
+            breederId,
+            breeder.nickname,
+            'Account unsuspended',
+        );
+
+        // 브리더에게 정지 해제 이메일 발송
+        let notificationSent = false;
+        try {
+            if (breeder.emailAddress) {
+                const emailContent = this.mailTemplateService.getBreederUnsuspensionEmail(breeder.nickname);
+
+                notificationSent = await this.mailService.sendMail({
+                    to: breeder.emailAddress,
+                    subject: emailContent.subject,
+                    html: emailContent.html,
+                });
+            }
+        } catch (error) {
+            console.error('브리더 정지 해제 이메일 발송 실패:', error);
+        }
+
+        return {
+            breederId,
+            reason: undefined,
+            suspendedAt: undefined,
             notificationSent,
         };
     }

@@ -35,6 +35,18 @@ export class BreederVerificationResponseDto {
     emailAddress: string;
 
     /**
+     * 계정 상태
+     * @example "active"
+     */
+    @ApiProperty({
+        description: '계정 상태',
+        example: 'active',
+        enum: ['active', 'suspended', 'deleted'],
+        required: false,
+    })
+    accountStatus?: string;
+
+    /**
      * 인증 정보
      */
     @ApiProperty({
