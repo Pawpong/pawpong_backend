@@ -49,33 +49,35 @@ jobs:
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
-            - name: Set up gcloud CLI
-              uses: google-github-actions/setup-gcloud@v2
-
-            - name: Setup SSH Keys for GCP
+            - name: Setup SSH for Production Server
               run: |
-                  echo "Generating SSH keys..."
-                  ssh-keygen -t rsa -b 4096 -C "github-actions-${{ github.run_id }}" -f ~/.ssh/gcp_key -N ""
-                  echo "Preparing SSH key for metadata..."
-                  echo "ubuntu:$(cat ~/.ssh/gcp_key.pub)" > /tmp/gcp_ssh_key.pub
-                  echo "Adding SSH key to instance metadata..."
-                  gcloud compute instances add-metadata ${{ env.INSTANCE_NAME }} \
-                    --metadata-from-file ssh-keys=/tmp/gcp_ssh_key.pub \
-                    --zone=${{ env.INSTANCE_ZONE }} \
-                    --project=${{ env.GCP_PROJECT_ID }}
-                  echo "Setting SSH key permissions..."
                   mkdir -p ~/.ssh
-                  chmod 700 ~/.ssh
-                  chmod 600 ~/.ssh/gcp_key
-                  echo "Host *" > ~/.ssh/config
-                  echo "  StrictHostKeyChecking no" >> ~/.ssh/config
-                  echo "  UserKnownHostsFile /dev/null" >> ~/.ssh/config
-                  chmod 600 ~/.ssh/config
+                  echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/prod_key
+                  chmod 600 ~/.ssh/prod_key
+                  ssh-keyscan -H ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
 
-            - name: Deploy to GCP Instance via IAP Tunnel
+            - name: Deploy to Production Server
               run: |
-                  echo "Triggering deployment script on GCP instance (main) via IAP Tunnel..."
-                  ssh -v -o ProxyCommand="gcloud compute start-iap-tunnel ${{ env.INSTANCE_NAME }} %p --listen-on-stdin --project=${{ env.GCP_PROJECT_ID }} --zone=${{ env.INSTANCE_ZONE }} --verbosity=warning" \
-                    -i ~/.ssh/gcp_key \
-                    ubuntu@${{ env.INSTANCE_NAME }} \
-                    "sudo /home/ubuntu/pawpong_backend/gcp_deploy.sh ${{ github.sha }}"
+                  echo "🚀 Starting deployment to production server..."
+                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no root@${{ secrets.PROD_SERVER_HOST }} << 'ENDSSH'
+                  set -e
+
+                  echo "📦 Authenticating with Artifact Registry..."
+                  gcloud auth activate-service-account --key-file=/root/gcp-service-account.json
+                  gcloud auth configure-docker ${{ env.GAR_LOCATION }} --quiet
+
+                  cd /root/pawpong_backend || { echo "❌ Directory not found"; exit 1; }
+
+                  echo "📥 Pulling latest code..."
+                  git pull origin main
+
+                  echo "🐳 Pulling Docker image from Artifact Registry..."
+                  IMAGE_TAG="${{ env.GAR_LOCATION }}/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}/pawpong-backend:${{ github.sha }}"
+                  docker pull "$IMAGE_TAG"
+                  docker tag "$IMAGE_TAG" pawpong-backend:latest
+
+                  echo "🔄 Running Blue-Green deployment..."
+                  bash gcp_deploy.sh ${{ github.sha }}
+
+                  echo "✅ Deployment completed successfully!"
+                  ENDSSH
