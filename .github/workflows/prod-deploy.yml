@@ -81,3 +81,56 @@ jobs:
 
                   echo "✅ Deployment completed successfully!"
                   ENDSSH
+
+            - name: Send Discord Notification (Success)
+              if: success()
+              run: |
+                  COMMIT_MSG=$(git log -1 --pretty=%B)
+                  COMMIT_AUTHOR=$(git log -1 --pretty=%an)
+                  COMMIT_SHA=$(git rev-parse --short HEAD)
+
+                  curl -H "Content-Type: application/json" \
+                       -X POST \
+                       -d "{
+                         \"embeds\": [{
+                           \"title\": \"✅ 프로덕션 배포 성공\",
+                           \"description\": \"Main 브랜치가 프로덕션 서버에 성공적으로 배포되었습니다.\",
+                           \"color\": 3066993,
+                           \"fields\": [
+                             {\"name\": \"서버\", \"value\": \"115.68.176.129\", \"inline\": true},
+                             {\"name\": \"배포 방식\", \"value\": \"Docker Blue-Green\", \"inline\": true},
+                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
+                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
+                             {\"name\": \"커밋 메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false}
+                           ],
+                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                         }]
+                       }" \
+                       DISCORD_WEBHOOK_URL_REMOVED
+
+            - name: Send Discord Notification (Failure)
+              if: failure()
+              run: |
+                  COMMIT_MSG=$(git log -1 --pretty=%B)
+                  COMMIT_AUTHOR=$(git log -1 --pretty=%an)
+                  COMMIT_SHA=$(git rev-parse --short HEAD)
+
+                  curl -H "Content-Type: application/json" \
+                       -X POST \
+                       -d "{
+                         \"embeds\": [{
+                           \"title\": \"❌ 프로덕션 배포 실패\",
+                           \"description\": \"Main 브랜치 배포 중 오류가 발생했습니다.\",
+                           \"color\": 15158332,
+                           \"fields\": [
+                             {\"name\": \"서버\", \"value\": \"115.68.176.129\", \"inline\": true},
+                             {\"name\": \"배포 방식\", \"value\": \"Docker Blue-Green\", \"inline\": true},
+                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
+                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
+                             {\"name\": \"커밋 메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false},
+                             {\"name\": \"로그 확인\", \"value\": \"[GitHub Actions 로그 보기](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
+                           ],
+                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                         }]
+                       }" \
+                       DISCORD_WEBHOOK_URL_REMOVED
