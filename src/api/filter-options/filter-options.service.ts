@@ -67,12 +67,12 @@ export class FilterOptionsService {
             },
             {
                 value: 'price_asc',
-                label: '가격 낮은순',
+                label: '오름차순',
                 description: '분양가가 낮은 브리더순',
             },
             {
                 value: 'price_desc',
-                label: '가격 높은순',
+                label: '내림차순',
                 description: '분양가가 높은 브리더순',
             },
         ];
