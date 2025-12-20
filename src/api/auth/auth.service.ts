@@ -270,20 +270,30 @@ export class AuthService {
 
         // 추가로 referer 체크 (일반 API 호출 시 더 정확한 판단)
         const refererStr = referer || origin || '';
-        const isLocalReferer = refererStr.includes('localhost') || refererStr.includes('127.0.0.1');
+
+        // localhost에서 요청한 경우 - 전달받은 origin을 그대로 사용 (포트 포함)
+        // 예: http://localhost:3000/login → http://localhost:3000
+        if (refererStr.includes('localhost') || refererStr.includes('127.0.0.1')) {
+            try {
+                const url = new URL(refererStr);
+                return `${url.protocol}//${url.host}`; // http://localhost:3000
+            } catch {
+                return 'http://localhost:3000';
+            }
+        }
 
         // local.pawpong.kr에서 요청한 경우 (로컬 개발 + 프로덕션 쿠키 테스트용)
-        const isLocalPawpong = refererStr.includes('local.pawpong.kr');
-        if (isLocalPawpong) {
+        if (refererStr.includes('local.pawpong.kr')) {
             return 'http://local.pawpong.kr:3000';
         }
 
-        // development 환경이거나 localhost에서 요청한 경우 로컬 URL 반환
-        if (isLocalEnv || isLocalReferer) {
+        // development 환경에서는 로컬 URL 반환
+        if (isLocalEnv) {
             return this.configService.get<string>('FRONTEND_URL_LOCAL') || 'http://localhost:3000';
-        } else {
-            return this.configService.get<string>('FRONTEND_URL_PROD') || 'https://pawpong-frontend.vercel.app';
         }
+
+        // 프로덕션 환경
+        return this.configService.get<string>('FRONTEND_URL_PROD') || 'https://pawpong.kr';
     }
 
     /**
@@ -846,7 +856,11 @@ export class AuthService {
         redirectUrl: string;
         cookies?: { name: string; value: string; options: any }[];
     }> {
+        // 디버그 로그: 전달받은 origin 정보
+        this.logger.log(`[processSocialLoginCallback] referer: ${referer}, origin: ${origin}`);
+
         const frontendUrl = this.getFrontendUrl(referer, origin);
+        this.logger.log(`[processSocialLoginCallback] 결정된 frontendUrl: ${frontendUrl}`);
 
         try {
             const result = await this.handleSocialLogin(userProfile);
@@ -881,11 +895,17 @@ export class AuthService {
                     (frontendUrl.includes('localhost') || frontendUrl.includes('127.0.0.1')) &&
                     !frontendUrl.includes('local.pawpong.kr');
 
+                // 디버그 로그
+                this.logger.log(
+                    `[processSocialLoginCallback] isProduction: ${isProduction}, isLocalFrontend: ${isLocalFrontend}, frontendUrl: ${frontendUrl}`,
+                );
+
                 // 로컬 프론트엔드인 경우 토큰을 URL 파라미터로 전달 (쿠키 도메인 불일치 문제 해결)
                 // - 백엔드가 프로덕션이어도 프론트엔드가 localhost면 .pawpong.kr 쿠키 사용 불가
                 // - 프론트엔드에서 직접 쿠키를 설정해야 함
                 // - 단, local.pawpong.kr은 .pawpong.kr 쿠키 공유 가능하므로 프로덕션 방식 사용
                 if (!isProduction || isLocalFrontend) {
+                    this.logger.log(`[processSocialLoginCallback] URL 파라미터 방식으로 토큰 전달`);
                     return {
                         redirectUrl: `${frontendUrl}/login/success?accessToken=${encodeURIComponent(tokens.accessToken)}&refreshToken=${encodeURIComponent(tokens.refreshToken)}`,
                     };
