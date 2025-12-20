@@ -120,4 +120,21 @@ export class UserAdminController {
         const result = await this.userAdminService.restoreDeletedUser(user.userId, userId, role);
         return ApiResponseDto.success(result, '탈퇴 사용자가 복구되었습니다.');
     }
+
+    @Patch('users/:userId/hard-delete')
+    @Roles('super_admin')
+    @ApiEndpoint({
+        summary: '사용자 영구 삭제 (하드 딜리트)',
+        description: 'DB에서 사용자 데이터를 완전히 삭제합니다. deleted 상태의 사용자만 삭제 가능하며, super_admin 권한이 필요합니다.',
+        responseType: UserStatusUpdateResponseDto,
+        isPublic: false,
+    })
+    async hardDeleteUser(
+        @CurrentUser() user: any,
+        @Param('userId') userId: string,
+        @Query('role') role: 'adopter' | 'breeder',
+    ): Promise<ApiResponseDto<any>> {
+        const result = await this.userAdminService.hardDeleteUser(user.userId, userId, role);
+        return ApiResponseDto.success(result, '사용자가 영구적으로 삭제되었습니다.');
+    }
 }

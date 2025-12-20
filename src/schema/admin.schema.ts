@@ -63,6 +63,7 @@ export class AdminActivityLog {
             'review_breeder', // 브리더 인증 리뷰 완료
             'suspend_user', // 사용자 계정 정지
             'activate_user', // 사용자 계정 활성화
+            'delete_user', // 사용자 영구 삭제
             'resolve_report', // 신고 해결
             'dismiss_report', // 신고 기각
             'delete_review', // 후기 삭제
