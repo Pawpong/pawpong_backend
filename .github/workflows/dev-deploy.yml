@@ -95,7 +95,7 @@ jobs:
                        -X POST \
                        -d "{
                          \"embeds\": [{
-                           \"title\": \"✅ 개발 서버 배포 성공\",
+                           \"title\": \"개발 서버 배포 성공\",
                            \"description\": \"Dev 브랜치가 개발 서버에 성공적으로 배포되었습니다.\",
                            \"color\": 5763719,
                            \"fields\": [
@@ -108,7 +108,7 @@ jobs:
                            \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
                          }]
                        }" \
-                       https://discord.com/api/webhooks/1451994089112469738/Bdi87aTQL7NDhanFc4WWg3GFH322TcBI_iL0GlfC1n4F2rs37_nj9NiigPp_y5OPLjET
+                       ${{ secrets.DISCORD_WEBHOOK_URL }}
 
             - name: Send Discord Notification (Failure)
               if: failure()
@@ -121,7 +121,7 @@ jobs:
                        -X POST \
                        -d "{
                          \"embeds\": [{
-                           \"title\": \"❌ 개발 서버 배포 실패\",
+                           \"title\": \"개발 서버 배포 실패\",
                            \"description\": \"Dev 브랜치 배포 중 오류가 발생했습니다.\",
                            \"color\": 15158332,
                            \"fields\": [
@@ -135,7 +135,7 @@ jobs:
                            \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
                          }]
                        }" \
-                       https://discord.com/api/webhooks/1451994089112469738/Bdi87aTQL7NDhanFc4WWg3GFH322TcBI_iL0GlfC1n4F2rs37_nj9NiigPp_y5OPLjET
+                       ${{ secrets.DISCORD_WEBHOOK_URL }}
 
             - name: Check deployment status
               if: failure()
