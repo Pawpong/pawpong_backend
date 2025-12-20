@@ -138,17 +138,24 @@ export class AuthController {
         description: '구글 OAuth 로그인을 시작합니다.',
         isPublic: true,
     })
-    async googleLogin() {
+    async googleLogin(@Req() req, @Res() res: Response) {
+        // OAuth 시작 전에 원래 origin을 쿠키에 저장 (콜백에서 사용)
+        const originUrl = req.headers.referer || req.headers.origin || '';
+        res.cookie('oauth_origin', originUrl, { httpOnly: true, maxAge: 5 * 60 * 1000 }); // 5분
         // Guard가 Google OAuth로 리다이렉트
     }
 
     @Get('google/callback')
     @UseGuards(AuthGuard('google'))
     async googleCallback(@Req() req, @Res() res: Response) {
+        // 쿠키에서 원래 origin 가져오기
+        const savedOrigin = req.cookies?.oauth_origin || '';
+        res.clearCookie('oauth_origin');
+
         const { redirectUrl, cookies } = await this.authService.processSocialLoginCallback(
             req.user,
-            req.headers.referer,
-            req.headers.origin,
+            savedOrigin,
+            savedOrigin,
         );
 
         if (cookies) {
@@ -167,17 +174,24 @@ export class AuthController {
         description: '네이버 OAuth 로그인을 시작합니다.',
         isPublic: true,
     })
-    async naverLogin() {
+    async naverLogin(@Req() req, @Res() res: Response) {
+        // OAuth 시작 전에 원래 origin을 쿠키에 저장 (콜백에서 사용)
+        const originUrl = req.headers.referer || req.headers.origin || '';
+        res.cookie('oauth_origin', originUrl, { httpOnly: true, maxAge: 5 * 60 * 1000 }); // 5분
         // Guard가 Naver OAuth로 리다이렉트
     }
 
     @Get('naver/callback')
     @UseGuards(AuthGuard('naver'))
     async naverCallback(@Req() req, @Res() res: Response) {
+        // 쿠키에서 원래 origin 가져오기
+        const savedOrigin = req.cookies?.oauth_origin || '';
+        res.clearCookie('oauth_origin');
+
         const { redirectUrl, cookies } = await this.authService.processSocialLoginCallback(
             req.user,
-            req.headers.referer,
-            req.headers.origin,
+            savedOrigin,
+            savedOrigin,
         );
 
         if (cookies) {
@@ -196,17 +210,24 @@ export class AuthController {
         description: '카카오 OAuth 로그인을 시작합니다.',
         isPublic: true,
     })
-    async kakaoLogin() {
+    async kakaoLogin(@Req() req, @Res() res: Response) {
+        // OAuth 시작 전에 원래 origin을 쿠키에 저장 (콜백에서 사용)
+        const originUrl = req.headers.referer || req.headers.origin || '';
+        res.cookie('oauth_origin', originUrl, { httpOnly: true, maxAge: 5 * 60 * 1000 }); // 5분
         // Guard가 Kakao OAuth로 리다이렉트
     }
 
     @Get('kakao/callback')
     @UseGuards(AuthGuard('kakao'))
     async kakaoCallback(@Req() req, @Res() res: Response) {
+        // 쿠키에서 원래 origin 가져오기
+        const savedOrigin = req.cookies?.oauth_origin || '';
+        res.clearCookie('oauth_origin');
+
         const { redirectUrl, cookies } = await this.authService.processSocialLoginCallback(
             req.user,
-            req.headers.referer,
-            req.headers.origin,
+            savedOrigin,
+            savedOrigin,
         );
 
         if (cookies) {
