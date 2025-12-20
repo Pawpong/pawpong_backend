@@ -175,19 +175,28 @@ export class BreederExploreService {
             );
             const profileImage = this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60);
 
+            // 가격 정보 계산
+            const statsMin = breeder.stats?.priceRange?.min || 0;
+            const statsMax = breeder.stats?.priceRange?.max || 0;
+            const profileMin = breeder.profile?.priceRange?.min || 0;
+            const profileMax = breeder.profile?.priceRange?.max || 0;
+            const finalMin = statsMin || profileMin;
+            const finalMax = statsMax || profileMax;
+
             return {
                 breederId: breeder._id.toString(),
                 breederName: breeder.name,
                 breederLevel: breeder.verification?.level || 'new',
+                petType: breeder.petType || 'dog',
                 location: breeder.profile?.location
                     ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
                     : '',
                 mainBreed: breeder.breeds?.[0] || '',
                 isAdoptionAvailable: availableBreederIds.includes(breeder._id.toString()),
                 priceRange: {
-                    min: breeder.stats?.priceRange?.min || 0,
-                    max: breeder.stats?.priceRange?.max || 0,
-                    display: 'range',
+                    min: finalMin,
+                    max: finalMax,
+                    display: finalMin > 0 || finalMax > 0 ? 'range' : 'consultation',
                 },
                 favoriteCount: breeder.stats?.totalFavorites || 0,
                 isFavorited: (() => {
@@ -248,6 +257,7 @@ export class BreederExploreService {
                     breederId: breeder._id.toString(),
                     breederName: breeder.name,
                     breederLevel: breeder.verification?.level || 'new',
+                    petType: breeder.petType || 'dog',
                     location: breeder.profile?.location
                         ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
                         : '',
