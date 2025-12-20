@@ -149,7 +149,7 @@ async function bootstrap(): Promise<void> {
         operationIdFactory: (_controllerKey: string, methodKey: string) => methodKey,
     });
 
-    SwaggerModule.setup('docs', app, document, {
+    SwaggerModule.setup('api/docs', app, document, {
         swaggerOptions: {
             persistAuthorization: true, // 인증 정보 유지
             tryItOutEnabled: true, // API 테스트 기능 활성화
@@ -194,9 +194,7 @@ async function bootstrap(): Promise<void> {
     logger.log(`[bootstrap] Pawpong Backend Server running on: http://localhost:${port}`);
     logger.log(`[bootstrap] API Documentation available at: http://localhost:${port}/api/docs`);
     logger.log(`[bootstrap] Health check endpoint: http://localhost:${port}/api/health`);
-    logger.log(`[bootstrap] Health check endpoint: http://localhost:${port}/api/health`);
     logger.log(`[bootstrap] Static files served from: http://localhost:${port}/uploads/`);
-    logger.log(`[bootstrap] Environment: ${process.env.NODE_ENV || 'development'}`);
     logger.log(`[bootstrap] Environment: ${process.env.NODE_ENV || 'development'}`);
 
     // PM2 프로세스 매니저에게 준비 완료 알림
