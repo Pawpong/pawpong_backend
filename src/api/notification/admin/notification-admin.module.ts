@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Notification, NotificationSchema } from '../../schema/notification.schema';
+
 import { NotificationAdminController } from './notification-admin.controller';
+
+import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
 import { NotificationAdminService } from './notification-admin.service';
-import { CustomLoggerService } from '../../common/logger/custom-logger.service';
+
+import { Notification, NotificationSchema } from '../../../schema/notification.schema';
 
 /**
  * 관리자 알림 관리 모듈

@@ -64,7 +64,7 @@ export class UserSearchRequestDto {
     @Type(() => Number)
     @IsNumber()
     @Min(1)
-    pageNumber?: number = 1;
+    page?: number = 1;
 
     /**
      * 페이지당 항목 수
@@ -82,5 +82,5 @@ export class UserSearchRequestDto {
     @IsNumber()
     @Min(1)
     @Max(50)
-    itemsPerPage?: number = 10;
+    limit?: number = 10;
 }

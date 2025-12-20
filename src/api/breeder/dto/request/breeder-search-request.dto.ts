@@ -144,7 +144,7 @@ export class BreederSearchRequestDto {
     @IsNumber()
     @Min(1)
     @Max(50)
-    take?: number = 10;
+    limit?: number = 10;
 
     /**
      * 정렬 기준

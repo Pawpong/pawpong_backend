@@ -149,7 +149,7 @@ export class BreederVerificationAdminService {
         return new PaginationBuilder<BreederVerificationResponseDto>()
             .setItems(items)
             .setPage(pageNumber)
-            .setTake(itemsPerPage)
+            .setLimit(itemsPerPage)
             .setTotalCount(total)
             .build();
     }
@@ -231,7 +231,7 @@ export class BreederVerificationAdminService {
         return new PaginationBuilder<BreederVerificationResponseDto>()
             .setItems(items)
             .setPage(pageNumber)
-            .setTake(itemsPerPage)
+            .setLimit(itemsPerPage)
             .setTotalCount(total)
             .build();
     }
