@@ -20,11 +20,17 @@ export class RolesGuard implements CanActivate {
         const { user } = context.switchToHttp().getRequest();
         console.log('[RolesGuard] user:', JSON.stringify(user));
         console.log('[RolesGuard] user.role:', user?.role);
+        console.log('[RolesGuard] user.adminLevel:', user?.adminLevel);
 
         // 브리더도 adopter 권한의 API 사용 가능 (찜하기 등)
         const effectiveRoles = [user?.role];
         if (user?.role === 'breeder') {
             effectiveRoles.push('adopter');
+        }
+
+        // admin인 경우 adminLevel도 체크
+        if (user?.role === 'admin' && user?.adminLevel) {
+            effectiveRoles.push(user.adminLevel);
         }
 
         const hasRole = requiredRoles.some((role) => effectiveRoles.includes(role));

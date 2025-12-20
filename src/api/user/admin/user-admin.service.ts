@@ -191,15 +191,24 @@ export class UserAdminService {
             throw new BadRequestException(`${role === 'adopter' ? '입양자를' : '브리더를'} 찾을 수 없습니다.`);
         }
 
-        if (role === 'adopter') {
-            user.account_status = userData.accountStatus;
+        // 계정 상태 업데이트
+        user.accountStatus = userData.accountStatus;
+
+        // deleted 상태로 변경 시 deletedAt 설정
+        if (userData.accountStatus === 'deleted') {
+            user.deletedAt = new Date();
         } else {
-            user.status = userData.accountStatus;
+            user.deletedAt = undefined;
         }
+
         await user.save();
 
         const action =
-            userData.accountStatus === UserStatus.SUSPENDED ? AdminAction.SUSPEND_USER : AdminAction.ACTIVATE_USER;
+            userData.accountStatus === UserStatus.SUSPENDED
+                ? AdminAction.SUSPEND_USER
+                : userData.accountStatus === UserStatus.DELETED
+                  ? AdminAction.DELETE_USER
+                  : AdminAction.ACTIVATE_USER;
 
         await this.logAdminActivity(
             adminId,
@@ -522,6 +531,66 @@ export class UserAdminService {
             newStatus: 'active',
             updatedAt: updatedAt.toISOString(),
             message: `${role === 'adopter' ? '입양자' : '브리더'} 계정이 복구되었습니다.`,
+        };
+    }
+
+    /**
+     * 사용자 영구 삭제 (하드 딜리트)
+     *
+     * DB에서 사용자 데이터를 완전히 삭제합니다.
+     * deleted 상태의 사용자만 삭제 가능하며, super_admin 권한이 필요합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param userId 삭제할 사용자 ID
+     * @param role 사용자 역할 (adopter 또는 breeder)
+     * @returns 삭제 결과
+     */
+    async hardDeleteUser(adminId: string, userId: string, role: 'adopter' | 'breeder'): Promise<any> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || admin.adminLevel !== 'super_admin') {
+            throw new ForbiddenException('super_admin 권한이 필요합니다.');
+        }
+
+        const user =
+            role === 'adopter' ? await this.adopterModel.findById(userId) : await this.breederModel.findById(userId);
+
+        if (!user) {
+            throw new BadRequestException(`${role === 'adopter' ? '입양자를' : '브리더를'} 찾을 수 없습니다.`);
+        }
+
+        if (user.accountStatus !== 'deleted') {
+            throw new BadRequestException('deleted 상태의 사용자만 영구 삭제할 수 있습니다.');
+        }
+
+        // 브리더는 name 필드, 입양자는 nickname 필드 사용
+        const userName =
+            role === 'breeder' ? ((user as any).name || user.nickname || '알 수 없음') : (user.nickname || '알 수 없음');
+        const userEmail = user.emailAddress || '';
+
+        // 관리자 활동 로그 먼저 기록 (삭제 전에)
+        await this.logAdminActivity(
+            adminId,
+            AdminAction.DELETE_USER,
+            role === 'adopter' ? AdminTargetType.ADOPTER : AdminTargetType.BREEDER,
+            userId,
+            userName,
+            `영구 삭제 (이메일: ${userEmail})`,
+        );
+
+        // DB에서 완전히 삭제
+        if (role === 'adopter') {
+            await this.adopterModel.findByIdAndDelete(userId);
+        } else {
+            await this.breederModel.findByIdAndDelete(userId);
+        }
+
+        return {
+            userId,
+            role,
+            userName,
+            userEmail,
+            deletedAt: new Date().toISOString(),
+            message: `${role === 'adopter' ? '입양자' : '브리더'} 데이터가 영구적으로 삭제되었습니다.`,
         };
     }
 
