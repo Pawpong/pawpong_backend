@@ -134,6 +134,7 @@ export class BreederVerificationAdminService {
                 breederId: (breeder._id as any).toString(),
                 breederName: breeder.nickname,
                 emailAddress: breeder.emailAddress,
+                accountStatus: (breeder as any).accountStatus || 'active',
                 verificationInfo: {
                     verificationStatus: breeder.verification?.status || 'pending',
                     subscriptionPlan: breeder.verification?.plan || 'basic',
@@ -216,6 +217,7 @@ export class BreederVerificationAdminService {
                 breederId: (breeder._id as any).toString(),
                 breederName: breeder.nickname,
                 emailAddress: breeder.emailAddress,
+                accountStatus: (breeder as any).accountStatus || 'active',
                 verificationInfo: {
                     verificationStatus: breeder.verification?.status || 'pending',
                     subscriptionPlan: breeder.verification?.plan || 'basic',

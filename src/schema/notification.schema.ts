@@ -12,6 +12,8 @@ export enum NotificationType {
     BREEDER_UNAPPROVED = 'breeder_unapproved',
     /** 브리더 온보딩 미완료 */
     BREEDER_ONBOARDING_INCOMPLETE = 'breeder_onboarding_incomplete',
+    /** 브리더 계정 정지 */
+    BREEDER_SUSPENDED = 'breeder_suspended',
     /** 새 상담 신청 (브리더가 받음) */
     NEW_CONSULT_REQUEST = 'new_consult_request',
     /** 상담 신청 확인 (신청자가 받음) */
@@ -42,6 +44,10 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; bo
     [NotificationType.BREEDER_ONBOARDING_INCOMPLETE]: {
         title: '브리더 입점 절차가 아직 완료되지 않았어요!',
         body: '필요한 서류들을 제출하시면 입양자에게 프로필이 공개됩니다.',
+    },
+    [NotificationType.BREEDER_SUSPENDED]: {
+        title: '브리더 계정이 정지되었습니다',
+        body: '자세한 사유는 이메일을 확인해주세요.',
     },
     [NotificationType.NEW_CONSULT_REQUEST]: {
         title: '새로운 입양 상담 신청이 도착했어요!',

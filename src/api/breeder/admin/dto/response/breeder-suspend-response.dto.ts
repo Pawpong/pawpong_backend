@@ -17,24 +17,26 @@ export class BreederSuspendResponseDto {
     breederId: string;
 
     /**
-     * 제재 사유
+     * 제재 사유 (정지 해제 시에는 undefined)
      * @example "반복적인 규정 위반으로 인한 영구정지"
      */
     @ApiProperty({
-        description: '제재 사유',
+        description: '제재 사유 (정지 시), 정지 해제 시에는 null',
         example: '반복적인 규정 위반으로 인한 영구정지',
+        required: false,
     })
-    reason: string;
+    reason?: string;
 
     /**
-     * 제재 일시
+     * 제재 일시 (정지 해제 시에는 undefined)
      * @example "2025-01-15T10:30:00.000Z"
      */
     @ApiProperty({
-        description: '제재 일시 (ISO 8601 형식)',
+        description: '제재 일시 (ISO 8601 형식), 정지 해제 시에는 null',
         example: '2025-01-15T10:30:00.000Z',
+        required: false,
     })
-    suspendedAt: Date;
+    suspendedAt?: Date;
 
     /**
      * 알림 발송 여부
