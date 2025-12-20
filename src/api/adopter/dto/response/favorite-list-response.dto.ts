@@ -20,10 +20,28 @@ export class FavoriteBreederDataDto {
     breederName: string;
 
     /**
-     * 프로필 이미지 URL
+     * 프로필 이미지 URL (Signed URL)
      */
     @ApiProperty({ description: '프로필 이미지 URL', required: false })
-    profileImageFileName?: string;
+    profileImage?: string;
+
+    /**
+     * 대표 사진 배열 (Signed URLs)
+     */
+    @ApiProperty({ description: '대표 사진 배열', required: false, type: [String] })
+    representativePhotos?: string[];
+
+    /**
+     * 브리더 레벨
+     */
+    @ApiProperty({ description: '브리더 레벨 (new, elite)', required: false })
+    breederLevel?: string;
+
+    /**
+     * 반려동물 타입 (강아지/고양이)
+     */
+    @ApiProperty({ description: '반려동물 타입', required: false })
+    petType?: string;
 
     /**
      * 위치 정보
@@ -48,6 +66,19 @@ export class FavoriteBreederDataDto {
      */
     @ApiProperty({ description: '총 후기 수' })
     totalReviews: number;
+
+    /**
+     * 가격 범위 정보
+     */
+    @ApiProperty({
+        description: '가격 범위 정보 (range: 가격표시, consultation: 상담후결정)',
+        required: false,
+    })
+    priceRange?: {
+        min: number;
+        max: number;
+        display: string; // "range" | "consultation"
+    };
 
     /**
      * 분양 가능한 반려동물 수
