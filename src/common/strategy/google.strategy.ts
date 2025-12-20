@@ -11,11 +11,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
             clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET') || '',
             callbackURL: configService.get<string>('GOOGLE_CALLBACK_URL') || '',
             scope: ['email', 'profile'],
+            passReqToCallback: true, // req 객체를 validate에 전달
         });
     }
 
-    async validate(accessToken: string, refreshToken: string, profile: any, done: VerifyCallback): Promise<any> {
+    async validate(req: any, accessToken: string, refreshToken: string, profile: any, done: VerifyCallback): Promise<any> {
         const { id, name, emails, photos } = profile;
+
+        // state 파라미터에서 origin 정보 추출 (OAuth 시작 시 전달됨)
+        const originFromState = req.query?.state || '';
 
         const user = {
             provider: 'google',
@@ -23,6 +27,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
             email: emails[0].value,
             name: name.givenName || name.familyName || emails[0].value.split('@')[0],
             profileImage: photos[0]?.value,
+            originUrl: originFromState, // 원래 origin 정보 전달
         };
 
         done(null, user);
