@@ -38,17 +38,29 @@ export class HomeAdminService {
 
         const banners = await this.bannerModel.find().sort({ order: 1 }).lean().exec();
 
-        return banners.map((banner) => ({
-            bannerId: banner._id.toString(),
-            imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
-            imageFileName: banner.imageFileName,
-            linkType: banner.linkType,
-            linkUrl: banner.linkUrl,
-            title: banner.title,
-            description: banner.description,
-            order: banner.order,
-            isActive: banner.isActive !== false, // 기본값 true
-        }));
+        return banners.map((banner) => {
+            // 레거시 데이터 처리: imageFileName이 있지만 새 필드가 없는 경우 폴백
+            const desktopFileName = banner.desktopImageFileName || banner.imageFileName;
+            const mobileFileName = banner.mobileImageFileName || banner.imageFileName;
+
+            return {
+                bannerId: banner._id.toString(),
+                desktopImageUrl: desktopFileName
+                    ? this.storageService.generateSignedUrl(desktopFileName, 60 * 24)
+                    : '',
+                mobileImageUrl: mobileFileName
+                    ? this.storageService.generateSignedUrl(mobileFileName, 60 * 24)
+                    : '',
+                desktopImageFileName: desktopFileName || '',
+                mobileImageFileName: mobileFileName || '',
+                linkType: banner.linkType,
+                linkUrl: banner.linkUrl,
+                title: banner.title,
+                description: banner.description,
+                order: banner.order,
+                isActive: banner.isActive !== false, // 기본값 true
+            };
+        });
     }
 
     /**
@@ -63,8 +75,10 @@ export class HomeAdminService {
 
         return {
             bannerId: String(newBanner._id),
-            imageUrl: this.storageService.generateSignedUrl(newBanner.imageFileName, 60 * 24),
-            imageFileName: newBanner.imageFileName,
+            desktopImageUrl: this.storageService.generateSignedUrl(newBanner.desktopImageFileName, 60 * 24),
+            mobileImageUrl: this.storageService.generateSignedUrl(newBanner.mobileImageFileName, 60 * 24),
+            desktopImageFileName: newBanner.desktopImageFileName,
+            mobileImageFileName: newBanner.mobileImageFileName,
             linkType: newBanner.linkType,
             linkUrl: newBanner.linkUrl,
             title: newBanner.title,
@@ -88,10 +102,18 @@ export class HomeAdminService {
 
         this.logger.log('[updateBanner] 배너 수정 완료', { bannerId });
 
+        // 레거시 데이터 처리
+        const desktopFileName = banner.desktopImageFileName || banner.imageFileName;
+        const mobileFileName = banner.mobileImageFileName || banner.imageFileName;
+
         return {
             bannerId: banner._id.toString(),
-            imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
-            imageFileName: banner.imageFileName,
+            desktopImageUrl: desktopFileName
+                ? this.storageService.generateSignedUrl(desktopFileName, 60 * 24)
+                : '',
+            mobileImageUrl: mobileFileName ? this.storageService.generateSignedUrl(mobileFileName, 60 * 24) : '',
+            desktopImageFileName: desktopFileName || '',
+            mobileImageFileName: mobileFileName || '',
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,

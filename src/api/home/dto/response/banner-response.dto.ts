@@ -15,24 +15,44 @@ export class BannerResponseDto {
     bannerId: string;
 
     /**
-     * 배너 이미지 URL (Signed URL)
-     * @example "https://storage.googleapis.com/..."
+     * 데스크톱/패드용 배너 이미지 URL (Signed URL)
+     * @example "https://storage.googleapis.com/bucket/banners/uuid-desktop.png"
      */
     @ApiProperty({
-        description: '배너 이미지 URL',
-        example: 'https://storage.googleapis.com/bucket/banners/uuid.png',
+        description: '데스크톱/패드용 배너 이미지 URL',
+        example: 'https://storage.googleapis.com/bucket/banners/uuid-desktop.png',
     })
-    imageUrl: string;
+    desktopImageUrl: string;
 
     /**
-     * 배너 이미지 파일명 (경로 포함)
-     * @example "banners/3384fec2-7e9a-4467-aba5-6b61b1c52cb2.jpg"
+     * 모바일용 배너 이미지 URL (Signed URL)
+     * @example "https://storage.googleapis.com/bucket/banners/uuid-mobile.png"
      */
     @ApiProperty({
-        description: '배너 이미지 파일명',
-        example: 'banners/3384fec2-7e9a-4467-aba5-6b61b1c52cb2.jpg',
+        description: '모바일용 배너 이미지 URL',
+        example: 'https://storage.googleapis.com/bucket/banners/uuid-mobile.png',
     })
-    imageFileName: string;
+    mobileImageUrl: string;
+
+    /**
+     * 데스크톱/패드용 배너 이미지 파일명 (경로 포함)
+     * @example "banners/3384fec2-7e9a-4467-aba5-6b61b1c52cb2-desktop.jpg"
+     */
+    @ApiProperty({
+        description: '데스크톱/패드용 배너 이미지 파일명',
+        example: 'banners/3384fec2-7e9a-4467-aba5-6b61b1c52cb2-desktop.jpg',
+    })
+    desktopImageFileName: string;
+
+    /**
+     * 모바일용 배너 이미지 파일명 (경로 포함)
+     * @example "banners/3384fec2-7e9a-4467-aba5-6b61b1c52cb2-mobile.jpg"
+     */
+    @ApiProperty({
+        description: '모바일용 배너 이미지 파일명',
+        example: 'banners/3384fec2-7e9a-4467-aba5-6b61b1c52cb2-mobile.jpg',
+    })
+    mobileImageFileName: string;
 
     /**
      * 링크 타입

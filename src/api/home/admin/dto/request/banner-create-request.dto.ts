@@ -7,15 +7,26 @@ import { Type } from 'class-transformer';
  */
 export class BannerCreateRequestDto {
     /**
-     * 배너 이미지 파일명
-     * @example "banners/uuid.png"
+     * 데스크톱/패드용 배너 이미지 파일명 (PC/Pad 버전)
+     * @example "banners/uuid-desktop.png"
      */
     @ApiProperty({
-        description: '배너 이미지 파일명 (업로드된 파일 경로)',
-        example: 'banners/uuid.png',
+        description: '데스크톱/패드용 배너 이미지 파일명 (업로드된 파일 경로)',
+        example: 'banners/uuid-desktop.png',
     })
     @IsString()
-    imageFileName: string;
+    desktopImageFileName: string;
+
+    /**
+     * 모바일용 배너 이미지 파일명 (모바일 버전)
+     * @example "banners/uuid-mobile.png"
+     */
+    @ApiProperty({
+        description: '모바일용 배너 이미지 파일명 (업로드된 파일 경로)',
+        example: 'banners/uuid-mobile.png',
+    })
+    @IsString()
+    mobileImageFileName: string;
 
     /**
      * 링크 타입
