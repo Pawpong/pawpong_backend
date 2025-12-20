@@ -456,6 +456,12 @@ export class AuthService {
                 throw new UnauthorizedException('탈퇴한 계정으로는 로그인할 수 없습니다.');
             }
 
+            // 정지된 사용자는 로그인 불가
+            if (adopter.accountStatus === 'suspended') {
+                this.logger.log(`[handleSocialLogin] 정지된 Adopter 로그인 시도: ${adopter.emailAddress}`);
+                throw new UnauthorizedException('정지된 계정입니다. 자세한 내용은 이메일을 확인해주세요.');
+            }
+
             // 기존 사용자 로그인
             this.logger.log(`[handleSocialLogin] 기존 Adopter 로그인 성공: ${adopter.emailAddress}`);
             return {
@@ -483,6 +489,12 @@ export class AuthService {
             if (breeder.accountStatus === 'deleted') {
                 this.logger.log(`[handleSocialLogin] 탈퇴한 Breeder 로그인 시도: ${breeder.emailAddress}`);
                 throw new UnauthorizedException('탈퇴한 계정으로는 로그인할 수 없습니다.');
+            }
+
+            // 정지된 사용자는 로그인 불가
+            if (breeder.accountStatus === 'suspended') {
+                this.logger.log(`[handleSocialLogin] 정지된 Breeder 로그인 시도: ${breeder.emailAddress}`);
+                throw new UnauthorizedException('정지된 계정입니다. 자세한 내용은 이메일을 확인해주세요.');
             }
 
             // 기존 사용자 로그인
@@ -953,7 +965,11 @@ export class AuthService {
             // 에러 메시지를 쿼리 파라미터로 전달
             const errorParams = new URLSearchParams({
                 error: errorMessage,
-                type: errorMessage.includes('탈퇴') ? 'deleted_account' : 'login_error',
+                type: errorMessage.includes('탈퇴')
+                    ? 'deleted_account'
+                    : errorMessage.includes('정지')
+                      ? 'suspended_account'
+                      : 'login_error',
             });
 
             return {

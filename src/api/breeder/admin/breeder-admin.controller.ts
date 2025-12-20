@@ -69,6 +69,21 @@ export class BreederAdminController {
         return ApiResponseDto.success(result, '브리더 계정이 영구정지 처리되었습니다.');
     }
 
+    @Post('unsuspend/:breederId')
+    @ApiEndpoint({
+        summary: '브리더 정지 해제',
+        description: '정지된 브리더 계정을 활성화하고 알림을 발송합니다.',
+        responseType: BreederSuspendResponseDto,
+        isPublic: false,
+    })
+    async unsuspendBreeder(
+        @CurrentUser() user: any,
+        @Param('breederId') breederId: string,
+    ): Promise<ApiResponseDto<BreederSuspendResponseDto>> {
+        const result = await this.breederAdminService.unsuspendBreeder(user.userId, breederId);
+        return ApiResponseDto.success(result, '브리더 계정 정지가 해제되었습니다.');
+    }
+
     @Post('remind')
     @ApiEndpoint({
         summary: '리마인드 알림 발송',

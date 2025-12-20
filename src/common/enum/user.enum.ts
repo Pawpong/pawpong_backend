@@ -149,6 +149,7 @@ export enum NotificationType {
     BREEDER_REJECTED = 'breeder_rejected', // 브리더 입점 반려
     BREEDER_UNAPPROVED = 'breeder_unapproved', // 브리더 입점 반려 (스키마 호환)
     BREEDER_ONBOARDING_INCOMPLETE = 'breeder_onboarding_incomplete', // 브리더 온보딩 미완료
+    BREEDER_SUSPENDED = 'breeder_suspended', // 브리더 계정 정지
 
     // 상담 신청 관련
     NEW_CONSULT_REQUEST = 'new_consult_request', // 새로운 상담 신청 (브리더가 받음)

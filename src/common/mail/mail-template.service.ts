@@ -327,4 +327,84 @@ export class MailTemplateService {
             html: this.getEmailLayout(content),
         };
     }
+
+    /**
+     * [7] 브리더 계정 정지 이메일
+     */
+    getBreederSuspensionEmail(breederName: string, reason: string): { subject: string; html: string } {
+        const displayBreederName = breederName || '브리더';
+
+        const content = `
+            <h2>안녕하세요, ${displayBreederName}님.</h2>
+            <p>반려동물 브리더 입양 플랫폼 <strong>포퐁(Pawpong)</strong>입니다.</p>
+
+            <div class="highlight" style="background-color: #fee; border-left: 4px solid #c33;">
+                <p class="emoji">⚠️ 브리더님의 계정이 정지되었습니다.</p>
+                <p>현재 포퐁 서비스를 이용하실 수 없습니다.</p>
+            </div>
+
+            <h3>정지 사유</h3>
+            <div class="reason-list">
+                <p>${reason}</p>
+            </div>
+
+            <p>포퐁은 모든 사용자의 안전과 신뢰를 위해 서비스 이용약관 및 운영 정책을 엄격히 준수하고 있습니다.</p>
+
+            <p>계정 정지와 관련하여 문의사항이 있으시면 아래 연락처로 문의해주시기 바랍니다.</p>
+
+            <div class="highlight">
+                <p><strong>문의 방법</strong></p>
+                <p>
+                    💌 이메일: ${this.contactEmail}<br>
+                    💬 카카오톡 채널: 포퐁
+                </p>
+            </div>
+
+            <p>감사합니다.</p>
+        `;
+
+        return {
+            subject: '[포퐁] 브리더 계정 정지 안내',
+            html: this.getEmailLayout(content),
+        };
+    }
+
+    /**
+     * [8] 브리더 계정 정지 해제 이메일
+     */
+    getBreederUnsuspensionEmail(breederName: string): { subject: string; html: string } {
+        const displayBreederName = breederName || '브리더';
+
+        const content = `
+            <h2>안녕하세요, ${displayBreederName}님.</h2>
+            <p>반려동물 브리더 입양 플랫폼 <strong>포퐁(Pawpong)</strong>입니다.</p>
+
+            <div class="highlight" style="background-color: #efe; border-left: 4px solid #4c4;">
+                <p class="emoji">✅ 브리더님의 계정 정지가 해제되었습니다!</p>
+                <p>이제 다시 포퐁 서비스를 이용하실 수 있습니다.</p>
+            </div>
+
+            <h3>✅ 다시 이용 가능한 서비스</h3>
+            <ul>
+                <li><strong>프로필 관리:</strong> 브리더 소개 및 정보 수정</li>
+                <li><strong>아이 등록:</strong> 분양 중인 아이들 등록 및 관리</li>
+                <li><strong>상담 신청 받기:</strong> 입양 희망자의 상담 신청 확인</li>
+                <li><strong>리뷰 관리:</strong> 입양자가 남긴 후기 확인</li>
+            </ul>
+
+            <p>💡 포퐁은 윤리적 브리딩과 투명한 정보 공개를 가장 중요하게 생각합니다.<br>
+            앞으로도 서비스 이용약관과 운영 정책을 준수하여 활동해주시기 바랍니다.</p>
+
+            <p style="text-align: center;">
+                <a href="${this.baseUrl}" class="button">포퐁 바로가기</a>
+            </p>
+
+            <p>감사합니다.</p>
+        `;
+
+        return {
+            subject: '[포퐁] 브리더 계정이 복구되었습니다 ✅',
+            html: this.getEmailLayout(content),
+        };
+    }
 }
