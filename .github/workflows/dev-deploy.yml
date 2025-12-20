@@ -2,7 +2,7 @@ name: Deploy to Development Server
 
 on:
     push:
-        branches: [develop]
+        branches: [dev, develop]
 
 jobs:
     deploy:
@@ -43,12 +43,12 @@ jobs:
             - name: Test SSH Connection
               run: |
                   echo "=== Testing SSH Connection ==="
-                  ssh -v -i ~/.ssh/deploy_key pawpong@${{ secrets.DEV_SERVER_HOST }} 'echo "SSH connection successful!"' 2>&1 | tee ssh_test.log
+                  ssh -v -i ~/.ssh/deploy_key root@${{ secrets.DEV_SERVER_HOST }} 'echo "SSH connection successful!"' 2>&1 | tee ssh_test.log
 
             - name: Deploy to Development Server
               run: |
                   echo "=== Starting Deployment ==="
-                  ssh -v -i ~/.ssh/deploy_key pawpong@${{ secrets.DEV_SERVER_HOST }} << 'EOF'
+                  ssh -v -i ~/.ssh/deploy_key root@${{ secrets.DEV_SERVER_HOST }} << 'EOF'
                     echo "Connected to server as: $(whoami)"
                     echo "Current directory: $(pwd)"
                     echo "Home directory: $HOME"
@@ -61,21 +61,81 @@ jobs:
                     echo "npm version: $(npm --version)"
                     echo "yarn version: $(yarn --version)"
 
-                    cd ~/pawpong_backend/ &&
+                    cd /root/pawpong_backend/ || { echo "❌ Directory not found"; exit 1; }
                     echo "Changed to project directory: $(pwd)"
-                    git pull &&
+
+                    git pull origin dev
                     echo "Git pull completed"
 
-                    pm2 delete all || echo "No PM2 processes to delete"
-                    echo "PM2 processes deleted"
+                    yarn install
+                    echo "Dependencies installed"
 
-                    yarn build &&
+                    yarn build
                     echo "Build completed"
 
-                    pm2 start ecosystem.config.js --name pawpong-dev --env development &&
+                    pm2 delete pawpong-dev || echo "No PM2 process to delete"
+                    echo "PM2 process deleted"
+
+                    pm2 start ecosystem.config.js --name pawpong-dev --env development
                     echo "PM2 start completed with development environment"
+
+                    pm2 save
+                    echo "PM2 configuration saved"
                   EOF
                   2>&1 | tee deployment.log
+
+            - name: Send Discord Notification (Success)
+              if: success()
+              run: |
+                  COMMIT_MSG=$(git log -1 --pretty=%B)
+                  COMMIT_AUTHOR=$(git log -1 --pretty=%an)
+                  COMMIT_SHA=$(git rev-parse --short HEAD)
+
+                  curl -H "Content-Type: application/json" \
+                       -X POST \
+                       -d "{
+                         \"embeds\": [{
+                           \"title\": \"✅ 개발 서버 배포 성공\",
+                           \"description\": \"Dev 브랜치가 개발 서버에 성공적으로 배포되었습니다.\",
+                           \"color\": 5763719,
+                           \"fields\": [
+                             {\"name\": \"서버\", \"value\": \"115.68.179.77\", \"inline\": true},
+                             {\"name\": \"배포 방식\", \"value\": \"PM2\", \"inline\": true},
+                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
+                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
+                             {\"name\": \"커밋 메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false}
+                           ],
+                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                         }]
+                       }" \
+                       https://discord.com/api/webhooks/1451994089112469738/Bdi87aTQL7NDhanFc4WWg3GFH322TcBI_iL0GlfC1n4F2rs37_nj9NiigPp_y5OPLjET
+
+            - name: Send Discord Notification (Failure)
+              if: failure()
+              run: |
+                  COMMIT_MSG=$(git log -1 --pretty=%B)
+                  COMMIT_AUTHOR=$(git log -1 --pretty=%an)
+                  COMMIT_SHA=$(git rev-parse --short HEAD)
+
+                  curl -H "Content-Type: application/json" \
+                       -X POST \
+                       -d "{
+                         \"embeds\": [{
+                           \"title\": \"❌ 개발 서버 배포 실패\",
+                           \"description\": \"Dev 브랜치 배포 중 오류가 발생했습니다.\",
+                           \"color\": 15158332,
+                           \"fields\": [
+                             {\"name\": \"서버\", \"value\": \"115.68.179.77\", \"inline\": true},
+                             {\"name\": \"배포 방식\", \"value\": \"PM2\", \"inline\": true},
+                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
+                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
+                             {\"name\": \"커밋 메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false},
+                             {\"name\": \"로그 확인\", \"value\": \"[GitHub Actions 로그 보기](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
+                           ],
+                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                         }]
+                       }" \
+                       https://discord.com/api/webhooks/1451994089112469738/Bdi87aTQL7NDhanFc4WWg3GFH322TcBI_iL0GlfC1n4F2rs37_nj9NiigPp_y5OPLjET
 
             - name: Check deployment status
               if: failure()
