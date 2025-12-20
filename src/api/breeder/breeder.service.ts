@@ -209,7 +209,18 @@ export class BreederService {
             location: breeder.profile?.location
                 ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
                 : '',
-            priceRange: breeder.priceRange || breeder.stats?.priceRange,
+            priceRange: (() => {
+                const statsPrice = breeder.stats?.priceRange || { min: 0, max: 0 };
+                const profilePrice = breeder.profile?.priceRange || { min: 0, max: 0 };
+                const finalMin = statsPrice.min || profilePrice.min || 0;
+                const finalMax = statsPrice.max || profilePrice.max || 0;
+
+                return {
+                    min: finalMin,
+                    max: finalMax,
+                    display: finalMin > 0 || finalMax > 0 ? 'range' : 'consultation',
+                };
+            })(),
             profileImage: profileImageUrl,
             favoriteCount: breeder.stats?.totalFavorites || 0,
             isFavorited: isFavorited,

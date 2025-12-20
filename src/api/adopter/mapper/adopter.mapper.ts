@@ -109,21 +109,44 @@ export class AdopterMapper {
                 specialization: [],
                 averageRating: 0,
                 totalReviews: 0,
+                priceRange: {
+                    min: 0,
+                    max: 0,
+                    display: 'consultation',
+                },
                 availablePets: 0,
                 addedAt: favorite.addedAt,
                 isActive: false,
             };
         }
 
+        // 가격 정보 처리
+        const statsPrice = breeder.stats?.priceRange || { min: 0, max: 0 };
+        const profilePrice = breeder.profile?.priceRange || { min: 0, max: 0 };
+
+        // stats와 profile 중 값이 있는 것을 우선 사용
+        const finalMin = statsPrice.min || profilePrice.min || 0;
+        const finalMax = statsPrice.max || profilePrice.max || 0;
+
+        // 가격이 하나라도 설정되어 있으면 'range', 둘 다 0이면 'consultation'
+        const priceDisplay = finalMin > 0 || finalMax > 0 ? 'range' : 'consultation';
+
         return {
             breederId: breeder._id.toString(),
             breederName: breeder.name,
             profileImage: profileImageUrl || '',
             representativePhotos: representativePhotos || [],
+            breederLevel: breeder.verification?.level || 'new',
+            petType: breeder.petType || 'dog',
             location: `${breeder.profile?.location?.city || ''} ${breeder.profile?.location?.district || ''}`.trim(),
             specialization: breeder.breeds || [],
             averageRating: breeder.stats?.averageRating || 0,
             totalReviews: breeder.stats?.totalReviews || 0,
+            priceRange: {
+                min: finalMin,
+                max: finalMax,
+                display: priceDisplay,
+            },
             availablePets:
                 breeder.availablePets?.filter((pet: any) => pet.status === 'available' && pet.isActive).length || 0,
             addedAt: favorite.addedAt,

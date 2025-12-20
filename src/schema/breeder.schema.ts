@@ -162,6 +162,7 @@ export class BreederProfile {
             max: { type: Number, default: 0 },
         },
         default: { min: 0, max: 0 },
+        _id: false,
     })
     priceRange?: {
         min: number;
@@ -226,6 +227,7 @@ export class BreederStats {
             max: { type: Number, default: 0 },
         },
         default: { min: 0, max: 0 },
+        _id: false,
     })
     priceRange: {
         min: number;
