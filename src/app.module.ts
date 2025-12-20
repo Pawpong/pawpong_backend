@@ -22,7 +22,7 @@ import { StandardQuestionModule } from './api/standard-question/standard-questio
 import { BreederManagementModule } from './api/breeder-management/breeder-management.module';
 import { BreederAdminModule } from './api/breeder/admin/breeder-admin.module'; // TODO: 기능별 분리 예정
 import { NotificationModule } from './api/notification/notification.module';
-import { NotificationAdminModule } from './api/notification-admin/notification-admin.module';
+import { NotificationAdminModule } from './api/notification/admin/notification-admin.module';
 import { AnnouncementModule } from './api/announcement/announcement.module';
 import { BreederLevelAdminModule } from './api/breeder-level/admin/breeder-level-admin.module';
 import { BreederVerificationAdminModule } from './api/breeder-verification/admin/breeder-verification-admin.module';

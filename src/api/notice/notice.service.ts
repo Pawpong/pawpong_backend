@@ -73,8 +73,8 @@ export class NoticeService {
             status,
         });
 
-        const { page = 1, take = 10 } = paginationData;
-        const skip = (page - 1) * take;
+        const { page = 1, limit = 10 } = paginationData;
+        const skip = (page - 1) * limit;
 
         // 필터 조건
         const filter: any = {};
@@ -93,7 +93,7 @@ export class NoticeService {
                 .find(filter)
                 .sort({ isPinned: -1, createdAt: -1 })
                 .skip(skip)
-                .limit(take)
+                .limit(limit)
                 .lean()
                 .exec();
 
@@ -107,7 +107,7 @@ export class NoticeService {
             return new PaginationBuilder<NoticeResponseDto>()
                 .setItems(items)
                 .setPage(page)
-                .setTake(take)
+                .setLimit(limit)
                 .setTotalCount(totalItems)
                 .build();
         } catch (error) {

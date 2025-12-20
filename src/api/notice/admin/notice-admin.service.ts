@@ -73,8 +73,8 @@ export class NoticeAdminService {
             status,
         });
 
-        const { page = 1, take = 10 } = paginationData;
-        const skip = (page - 1) * take;
+        const { page = 1, limit = 10 } = paginationData;
+        const skip = (page - 1) * limit;
 
         // 필터 조건 (관리자는 status 파라미터로 모든 상태 조회 가능)
         const filter: any = {};
@@ -91,7 +91,7 @@ export class NoticeAdminService {
                 .find(filter)
                 .sort({ isPinned: -1, createdAt: -1 })
                 .skip(skip)
-                .limit(take)
+                .limit(limit)
                 .lean()
                 .exec();
 
@@ -105,7 +105,7 @@ export class NoticeAdminService {
             return new PaginationBuilder<NoticeResponseDto>()
                 .setItems(items)
                 .setPage(page)
-                .setTake(take)
+                .setLimit(limit)
                 .setTotalCount(totalItems)
                 .build();
         } catch (error) {

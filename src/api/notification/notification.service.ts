@@ -115,7 +115,7 @@ export class NotificationService {
         const result = new PaginationBuilder<NotificationResponseDto>()
             .setItems(items)
             .setPage(page)
-            .setTake(limit)
+            .setLimit(limit)
             .setTotalCount(totalItems)
             .build();
 

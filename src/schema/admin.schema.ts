@@ -66,6 +66,8 @@ export class AdminActivityLog {
             'resolve_report', // 신고 해결
             'dismiss_report', // 신고 기각
             'delete_review', // 후기 삭제
+            'view_user_list', // 사용자 목록 조회
+            'view_statistics', // 통계 조회
         ],
     })
     action: string;
@@ -73,7 +75,7 @@ export class AdminActivityLog {
     /**
      * 작업 대상 유형
      */
-    @Prop({ required: true, enum: ['breeder', 'adopter', 'report', 'review'] })
+    @Prop({ required: true, enum: ['breeder', 'adopter', 'report', 'review', 'system'] })
     targetType: string;
 
     /**

@@ -36,15 +36,15 @@ export class AnnouncementAdminService {
         try {
             this.logger.logStart('getAllAnnouncements', '관리자 공지사항 목록 조회 시작', {
                 page: paginationDto.page,
-                take: paginationDto.take,
+                take: paginationDto.limit,
             });
 
-            const { page = 1, take = 10 } = paginationDto;
-            const skip = (page - 1) * take;
+            const { page = 1, limit = 10 } = paginationDto;
+            const skip = (page - 1) * limit;
 
             // 모든 공지사항 조회 (비활성화된 것도 포함)
             const [announcements, totalCount] = await Promise.all([
-                this.announcementModel.find().sort({ order: 1, createdAt: -1 }).skip(skip).limit(take).lean().exec(),
+                this.announcementModel.find().sort({ order: 1, createdAt: -1 }).skip(skip).limit(limit).lean().exec(),
                 this.announcementModel.countDocuments().exec(),
             ]);
 
@@ -56,7 +56,7 @@ export class AnnouncementAdminService {
                 .setItems(items)
                 .setTotalCount(totalCount)
                 .setPage(page)
-                .setTake(take)
+                .setLimit(limit)
                 .build();
 
             this.logger.logSuccess('getAllAnnouncements', '관리자 공지사항 목록 조회 완료', {
