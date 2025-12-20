@@ -72,7 +72,7 @@ export class BreederController {
     }
 
     @Get(':id')
-    // @UseGuards(JwtAuthGuard) // 임시로 주석 처리
+    @UseGuards(OptionalJwtAuthGuard) // 선택적 인증 - 로그인 선택사항
     @ApiEndpoint({
         ...BreederSwaggerDocs.getBreederProfile,
         responseType: BreederProfileResponseDto,
@@ -87,6 +87,7 @@ export class BreederController {
     }
 
     @Get(':id/reviews')
+    @UseGuards(OptionalJwtAuthGuard) // 선택적 인증 - 로그인 선택사항
     @ApiPaginatedEndpoint({
         ...BreederSwaggerDocs.getBreederReviews,
         responseType: BreederReviewsResponseDto,
@@ -103,6 +104,7 @@ export class BreederController {
     }
 
     @Get(':id/pets')
+    @UseGuards(OptionalJwtAuthGuard) // 선택적 인증 - 로그인 선택사항
     @ApiPaginatedEndpoint({
         ...BreederSwaggerDocs.getBreederPets,
         responseType: PetsListResponseDto,
@@ -134,6 +136,7 @@ export class BreederController {
     }
 
     @Get(':id/parent-pets')
+    @UseGuards(OptionalJwtAuthGuard) // 선택적 인증 - 로그인 선택사항
     @ApiEndpoint({
         ...BreederSwaggerDocs.getParentPets,
         responseType: [ParentPetListResponseDto],
