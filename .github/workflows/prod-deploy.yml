@@ -1,0 +1,136 @@
+name: Deploy to GCP (Main)
+
+on:
+    push:
+        branches: [main]
+
+env:
+    GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+    GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
+    SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
+    INSTANCE_ZONE: ${{ secrets.INSTANCE_ZONE }}
+    INSTANCE_NAME: ${{ secrets.INSTANCE_NAME }}
+    GCP_SA_EMAIL: ${{ secrets.GCP_SA_EMAIL }}
+
+jobs:
+    build-and-deploy:
+        name: Build and Deploy to GCP (Main)
+        runs-on: ubuntu-latest
+
+        permissions:
+            contents: 'read'
+            id-token: 'write'
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Authenticate to Google Cloud
+              id: auth
+              uses: google-github-actions/auth@v2
+              with:
+                  workload_identity_provider: 'projects/${{ secrets.GCP_PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions-pool/providers/github-actions-provider'
+                  service_account: '${{ env.GCP_SA_EMAIL }}'
+
+            - name: Set up Docker Buildx
+              id: buildx
+              uses: docker/setup-buildx-action@v3
+
+            - name: Configure Docker for GAR
+              run: gcloud auth configure-docker ${{ env.GAR_LOCATION }} --quiet
+
+            - name: Build and push Docker image
+              id: docker_build
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  push: true
+                  tags: ${{ env.GAR_LOCATION }}/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}/pawpong-backend:${{ github.sha }}
+                  cache-from: type=gha
+                  cache-to: type=gha,mode=max
+
+            - name: Setup SSH for Production Server
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/prod_key
+                  chmod 600 ~/.ssh/prod_key
+                  ssh-keyscan -H ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
+
+            - name: Deploy to Production Server
+              run: |
+                  echo "🚀 Starting deployment to production server..."
+                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no root@${{ secrets.PROD_SERVER_HOST }} << 'ENDSSH'
+                  set -e
+
+                  echo "📦 Authenticating with Artifact Registry..."
+                  gcloud auth activate-service-account --key-file=/root/gcp-service-account.json
+                  gcloud auth configure-docker ${{ env.GAR_LOCATION }} --quiet
+
+                  cd /root/pawpong_backend || { echo "❌ Directory not found"; exit 1; }
+
+                  echo "📥 Pulling latest code..."
+                  git pull origin main
+
+                  echo "🐳 Pulling Docker image from Artifact Registry..."
+                  IMAGE_TAG="${{ env.GAR_LOCATION }}/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}/pawpong-backend:${{ github.sha }}"
+                  docker pull "$IMAGE_TAG"
+                  docker tag "$IMAGE_TAG" pawpong-backend:latest
+
+                  echo "🔄 Running Blue-Green deployment..."
+                  bash gcp_deploy.sh ${{ github.sha }}
+
+                  echo "✅ Deployment completed successfully!"
+                  ENDSSH
+
+            - name: Send Discord Notification (Success)
+              if: success()
+              run: |
+                  COMMIT_MSG=$(git log -1 --pretty=%B)
+                  COMMIT_AUTHOR=$(git log -1 --pretty=%an)
+                  COMMIT_SHA=$(git rev-parse --short HEAD)
+
+                  curl -H "Content-Type: application/json" \
+                       -X POST \
+                       -d "{
+                         \"embeds\": [{
+                           \"title\": \"✅ 프로덕션 배포 성공\",
+                           \"description\": \"Main 브랜치가 프로덕션 서버에 성공적으로 배포되었습니다.\",
+                           \"color\": 3066993,
+                           \"fields\": [
+                             {\"name\": \"서버\", \"value\": \"115.68.176.129\", \"inline\": true},
+                             {\"name\": \"배포 방식\", \"value\": \"Docker Blue-Green\", \"inline\": true},
+                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
+                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
+                             {\"name\": \"커밋 메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false}
+                           ],
+                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                         }]
+                       }" \
+                       https://discord.com/api/webhooks/1451994089112469738/Bdi87aTQL7NDhanFc4WWg3GFH322TcBI_iL0GlfC1n4F2rs37_nj9NiigPp_y5OPLjET
+
+            - name: Send Discord Notification (Failure)
+              if: failure()
+              run: |
+                  COMMIT_MSG=$(git log -1 --pretty=%B)
+                  COMMIT_AUTHOR=$(git log -1 --pretty=%an)
+                  COMMIT_SHA=$(git rev-parse --short HEAD)
+
+                  curl -H "Content-Type: application/json" \
+                       -X POST \
+                       -d "{
+                         \"embeds\": [{
+                           \"title\": \"❌ 프로덕션 배포 실패\",
+                           \"description\": \"Main 브랜치 배포 중 오류가 발생했습니다.\",
+                           \"color\": 15158332,
+                           \"fields\": [
+                             {\"name\": \"서버\", \"value\": \"115.68.176.129\", \"inline\": true},
+                             {\"name\": \"배포 방식\", \"value\": \"Docker Blue-Green\", \"inline\": true},
+                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
+                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
+                             {\"name\": \"커밋 메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false},
+                             {\"name\": \"로그 확인\", \"value\": \"[GitHub Actions 로그 보기](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
+                           ],
+                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                         }]
+                       }" \
+                       https://discord.com/api/webhooks/1451994089112469738/Bdi87aTQL7NDhanFc4WWg3GFH322TcBI_iL0GlfC1n4F2rs37_nj9NiigPp_y5OPLjET
