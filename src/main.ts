@@ -149,7 +149,7 @@ async function bootstrap(): Promise<void> {
         operationIdFactory: (_controllerKey: string, methodKey: string) => methodKey,
     });
 
-    SwaggerModule.setup('api/docs', app, document, {
+    SwaggerModule.setup('docs', app, document, {
         swaggerOptions: {
             persistAuthorization: true, // 인증 정보 유지
             tryItOutEnabled: true, // API 테스트 기능 활성화
