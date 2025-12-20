@@ -39,17 +39,29 @@ export class HomeService {
 
         this.logger.log(`[getActiveBanners] ${banners.length}개의 배너 조회 완료`);
 
-        return banners.map((banner) => ({
-            bannerId: banner._id.toString(),
-            imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24), // 24시간 유효
-            imageFileName: banner.imageFileName,
-            linkType: banner.linkType,
-            linkUrl: banner.linkUrl,
-            title: banner.title,
-            description: banner.description,
-            order: banner.order,
-            isActive: banner.isActive !== false, // 기본값 true
-        }));
+        return banners.map((banner) => {
+            // 레거시 데이터 처리: imageFileName이 있지만 새 필드가 없는 경우 폴백
+            const desktopFileName = banner.desktopImageFileName || banner.imageFileName;
+            const mobileFileName = banner.mobileImageFileName || banner.imageFileName;
+
+            return {
+                bannerId: banner._id.toString(),
+                desktopImageUrl: desktopFileName
+                    ? this.storageService.generateSignedUrl(desktopFileName, 60 * 24)
+                    : '', // 24시간 유효
+                mobileImageUrl: mobileFileName
+                    ? this.storageService.generateSignedUrl(mobileFileName, 60 * 24)
+                    : '', // 24시간 유효
+                desktopImageFileName: desktopFileName || '',
+                mobileImageFileName: mobileFileName || '',
+                linkType: banner.linkType,
+                linkUrl: banner.linkUrl,
+                title: banner.title,
+                description: banner.description,
+                order: banner.order,
+                isActive: banner.isActive !== false, // 기본값 true
+            };
+        });
     }
 
     /**
