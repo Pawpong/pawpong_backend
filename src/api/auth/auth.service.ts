@@ -272,6 +272,12 @@ export class AuthService {
         const refererStr = referer || origin || '';
         const isLocalReferer = refererStr.includes('localhost') || refererStr.includes('127.0.0.1');
 
+        // local.pawpong.kr에서 요청한 경우 (로컬 개발 + 프로덕션 쿠키 테스트용)
+        const isLocalPawpong = refererStr.includes('local.pawpong.kr');
+        if (isLocalPawpong) {
+            return 'http://local.pawpong.kr:3000';
+        }
+
         // development 환경이거나 localhost에서 요청한 경우 로컬 URL 반환
         if (isLocalEnv || isLocalReferer) {
             return this.configService.get<string>('FRONTEND_URL_LOCAL') || 'http://localhost:3000';
@@ -869,6 +875,23 @@ export class AuthService {
                 const tokens = await this.generateSocialLoginTokens(result.user);
                 const { isProduction, cookieOptions } = this.getCookieOptions();
 
+                // 프론트엔드가 localhost인지 확인 (로컬 개발 환경 감지)
+                // local.pawpong.kr은 .pawpong.kr 쿠키를 사용할 수 있으므로 제외
+                const isLocalFrontend =
+                    (frontendUrl.includes('localhost') || frontendUrl.includes('127.0.0.1')) &&
+                    !frontendUrl.includes('local.pawpong.kr');
+
+                // 로컬 프론트엔드인 경우 토큰을 URL 파라미터로 전달 (쿠키 도메인 불일치 문제 해결)
+                // - 백엔드가 프로덕션이어도 프론트엔드가 localhost면 .pawpong.kr 쿠키 사용 불가
+                // - 프론트엔드에서 직접 쿠키를 설정해야 함
+                // - 단, local.pawpong.kr은 .pawpong.kr 쿠키 공유 가능하므로 프로덕션 방식 사용
+                if (!isProduction || isLocalFrontend) {
+                    return {
+                        redirectUrl: `${frontendUrl}/login/success?accessToken=${encodeURIComponent(tokens.accessToken)}&refreshToken=${encodeURIComponent(tokens.refreshToken)}`,
+                    };
+                }
+
+                // 프로덕션 프론트엔드에서는 쿠키로 설정 (.pawpong.kr 도메인으로 공유됨)
                 const cookies = [
                     {
                         name: 'accessToken',
