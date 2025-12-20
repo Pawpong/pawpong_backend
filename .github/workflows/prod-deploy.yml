@@ -54,17 +54,22 @@ jobs:
                   mkdir -p ~/.ssh
                   echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/prod_key
                   chmod 600 ~/.ssh/prod_key
-                  ssh-keyscan -H ${{ secrets.PROD_SERVER_HOST }} >> ~/.ssh/known_hosts
+                  ssh-keyscan -H "${{ secrets.PROD_SERVER_HOST }}" >> ~/.ssh/known_hosts || echo "SSH keyscan failed, will use StrictHostKeyChecking=no"
 
             - name: Deploy to Production Server
+              env:
+                  GAR_LOCATION: ${{ env.GAR_LOCATION }}
+                  GCP_PROJECT_ID: ${{ env.GCP_PROJECT_ID }}
+                  SERVICE_NAME: ${{ env.SERVICE_NAME }}
+                  COMMIT_SHA: ${{ github.sha }}
               run: |
                   echo "🚀 Starting deployment to production server..."
-                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no root@${{ secrets.PROD_SERVER_HOST }} << 'ENDSSH'
+                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no root@${{ secrets.PROD_SERVER_HOST }} << ENDSSH
                   set -e
 
                   echo "📦 Authenticating with Artifact Registry..."
                   gcloud auth activate-service-account --key-file=/root/gcp-service-account.json
-                  gcloud auth configure-docker ${{ env.GAR_LOCATION }} --quiet
+                  gcloud auth configure-docker ${GAR_LOCATION} --quiet
 
                   cd /root/pawpong_backend || { echo "❌ Directory not found"; exit 1; }
 
@@ -72,12 +77,13 @@ jobs:
                   git pull origin main
 
                   echo "🐳 Pulling Docker image from Artifact Registry..."
-                  IMAGE_TAG="${{ env.GAR_LOCATION }}/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}/pawpong-backend:${{ github.sha }}"
-                  docker pull "$IMAGE_TAG"
-                  docker tag "$IMAGE_TAG" pawpong-backend:latest
+                  IMAGE_TAG="${GAR_LOCATION}/${GCP_PROJECT_ID}/${SERVICE_NAME}/pawpong-backend:${COMMIT_SHA}"
+                  docker pull "\$IMAGE_TAG"
+                  docker tag "\$IMAGE_TAG" pawpong-backend:latest
+                  docker tag "\$IMAGE_TAG" pawpong-backend:${COMMIT_SHA}
 
                   echo "🔄 Running Blue-Green deployment..."
-                  bash gcp_deploy.sh ${{ github.sha }}
+                  bash gcp_deploy.sh ${COMMIT_SHA}
 
                   echo "✅ Deployment completed successfully!"
                   ENDSSH
