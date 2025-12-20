@@ -180,6 +180,9 @@ export class BreederManagementService {
         if (updateData.profileImage) {
             profileUpdateData['profileImageFileName'] = updateData.profileImage;
         }
+        if (updateData.marketingAgreed !== undefined) {
+            profileUpdateData['marketingAgreed'] = updateData.marketingAgreed;
+        }
 
         await this.breederRepository.updateProfile(userId, profileUpdateData);
 
