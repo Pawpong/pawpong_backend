@@ -109,6 +109,7 @@ export enum AdminAction {
     REVIEW_BREEDER = 'review_breeder',
     SUSPEND_USER = 'suspend_user',
     ACTIVATE_USER = 'activate_user',
+    DELETE_USER = 'delete_user',
     RESOLVE_REPORT = 'resolve_report',
     DISMISS_REPORT = 'dismiss_report',
     DELETE_REVIEW = 'delete_review',

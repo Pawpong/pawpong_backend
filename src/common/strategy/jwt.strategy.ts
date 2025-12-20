@@ -80,6 +80,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             userId: payload.sub,
             email: payload.email,
             role: payload.role,
+            adminLevel: payload.adminLevel, // admin인 경우 adminLevel 포함
         };
         console.log('[JwtStrategy] validate 반환 - user:', JSON.stringify(user));
         return user;
