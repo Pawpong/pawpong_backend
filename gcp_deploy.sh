@@ -2,82 +2,137 @@
 
 set -e
 
-IMAGE_TAG=$1
-if [ -z "$IMAGE_TAG" ]; then
-    echo "❌ Error: IMAGE_TAG is required"
-    echo "Usage: $0 <image-tag>"
-    exit 1
+# ========================================
+# Pawpong Backend Blue-Green Deployment
+# ========================================
+
+# 색상 정의
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+NC='\033[0m' # No Color
+
+# 환경 변수 로드
+if [ -f .env.production ]; then
+    export $(cat .env.production | grep -v '^#' | xargs)
 fi
 
-GCP_PROJECT_ID="pawpong"
-GAR_LOCATION="asia-docker.pkg.dev"
-SERVICE_NAME="pawpong-docker"
-IMAGE_URL="${GAR_LOCATION}/${GCP_PROJECT_ID}/${SERVICE_NAME}/pawpong-backend:${IMAGE_TAG}"
+# Discord 알림 함수
+send_discord_notification() {
+    local message=$1
+    local color=$2
+    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    
+    if [ -n "$DISCORD_WEBHOOK_URL" ]; then
+        curl -X POST "$DISCORD_WEBHOOK_URL" \
+            -H "Content-Type: application/json" \
+            -d "{\"embeds\": [{\"title\": \"🚀 Pawpong Backend Deployment\", \"description\": \"$message\", \"color\": $color, \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\"}]}" \
+            2>/dev/null || echo "Discord 알림 전송 실패"
+    fi
+}
 
-echo "🚀 Starting deployment with image: ${IMAGE_URL}"
+# 이미지 태그 (GitHub SHA 또는 timestamp)
+IMAGE_TAG=${1:-$(date +%Y%m%d_%H%M%S)}
 
-cd /home/ubuntu/pawpong_backend
+echo -e "${BLUE}========================================${NC}"
+echo -e "${BLUE}🚀 Starting Deployment: ${IMAGE_TAG}${NC}"
+echo -e "${BLUE}========================================${NC}"
 
-echo "📥 Pulling new Docker image from Artifact Registry..."
-docker pull "${IMAGE_URL}"
+# 배포 시작 알림
+send_discord_notification "⏳ 배포 시작\nTag: \`$IMAGE_TAG\`" 16776960
 
-echo "🏷️ Tagging image as 'latest'..."
-docker tag "${IMAGE_URL}" pawpong-backend:latest
+cd /root/pawpong_backend
 
-CURRENT_CONTAINER=$(curl -s http://localhost:8080/api/health && echo "blue" || echo "green")
+# 이전 이미지 태그 저장 (롤백용)
+LAST_IMAGE=$(docker images pawpong-backend --format "{{.Tag}}" | head -n 1)
+echo "$LAST_IMAGE" > /root/pawpong_backend/.last_deploy
+echo -e "${YELLOW}📦 Previous image tag saved: ${LAST_IMAGE}${NC}"
 
-if [ "$CURRENT_CONTAINER" == "blue" ]; then
-    echo "🔵 Current: blue → Deploying to green..."
+echo -e "${BLUE}🔨 Building Docker image...${NC}"
+docker build -t pawpong-backend:${IMAGE_TAG} .
+docker tag pawpong-backend:${IMAGE_TAG} pawpong-backend:latest
 
-    docker compose up -d --no-deps --build green
-
-    echo "🏥 Health checking green deployment..."
-    sleep 10
-
-    for i in {1..30}; do
-        if curl -s http://localhost:8081/api/health; then
-            echo "✅ Green deployment healthy!"
-            echo "🛑 Stopping blue container..."
-            docker compose stop blue
-            echo "🎉 Deployment completed! Green is now active."
-            exit 0
-        fi
-        echo "⏳ Waiting for green to be ready... ($i/30)"
-        sleep 2
-    done
-
-    echo "❌ Green deployment failed health check!"
-    echo "🔄 Rolling back to blue..."
-    docker compose stop green
-    docker compose start blue
-    exit 1
-
+# 현재 활성 컨테이너 확인 (헬스체크 기반)
+echo -e "${BLUE}🔍 Checking current active container...${NC}"
+if curl -sf http://localhost:8080/api/health > /dev/null 2>&1; then
+    CURRENT_CONTAINER="blue"
+    NEW_CONTAINER="green"
+    CURRENT_PORT=8080
+    NEW_PORT=8081
+    echo -e "${GREEN}✅ Current: Blue (port 8080)${NC}"
 else
-    echo "🟢 Current: green → Deploying to blue..."
+    CURRENT_CONTAINER="green"
+    NEW_CONTAINER="blue"
+    CURRENT_PORT=8081
+    NEW_PORT=8080
+    echo -e "${GREEN}✅ Current: Green (port 8081)${NC}"
+fi
 
-    docker compose up -d --no-deps --build blue
+echo -e "${BLUE}🚀 Deploying to ${NEW_CONTAINER} container...${NC}"
 
-    echo "🏥 Health checking blue deployment..."
-    sleep 10
+# 새 컨테이너 배포
+docker compose up -d --no-deps --build ${NEW_CONTAINER}
 
-    for i in {1..30}; do
-        if curl -s http://localhost:8080/api/health; then
-            echo "✅ Blue deployment healthy!"
-            echo "🛑 Stopping green container..."
-            docker compose stop green
-            echo "🎉 Deployment completed! Blue is now active."
-            exit 0
-        fi
-        echo "⏳ Waiting for blue to be ready... ($i/30)"
-        sleep 2
-    done
+echo -e "${YELLOW}⏳ Waiting for ${NEW_CONTAINER} to start (40 seconds)...${NC}"
+sleep 40
 
-    echo "❌ Blue deployment failed health check!"
-    echo "🔄 Rolling back to green..."
-    docker compose stop blue
-    docker compose start green
+# 헬스체크
+echo -e "${BLUE}🏥 Health checking ${NEW_CONTAINER} deployment...${NC}"
+HEALTHY=false
+
+for i in {1..30}; do
+    if curl -sf http://localhost:${NEW_PORT}/api/health > /dev/null 2>&1; then
+        echo -e "${GREEN}✅ ${NEW_CONTAINER} deployment healthy!${NC}"
+        HEALTHY=true
+        break
+    fi
+    echo -e "${YELLOW}⏳ Waiting for ${NEW_CONTAINER} to be ready... ($i/30)${NC}"
+    sleep 2
+done
+
+if [ "$HEALTHY" = true ]; then
+    echo -e "${BLUE}🔄 Switching traffic to ${NEW_CONTAINER}...${NC}"
+    
+    # Nginx 설정 업데이트 (upstream을 새 포트로 변경)
+    if [ -f /etc/nginx/sites-available/pawpong ]; then
+        echo -e "${BLUE}📝 Updating Nginx configuration...${NC}"
+        # Nginx에서 upstream 포트를 새 포트로 변경
+        sed -i "s/localhost:[0-9]\{4\}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
+        nginx -t && systemctl reload nginx
+        echo -e "${GREEN}✅ Nginx reloaded with new upstream${NC}"
+    fi
+    
+    sleep 5
+    
+    echo -e "${BLUE}🛑 Stopping old ${CURRENT_CONTAINER} container...${NC}"
+    docker compose stop ${CURRENT_CONTAINER}
+    
+    echo -e "${GREEN}========================================${NC}"
+    echo -e "${GREEN}🎉 Deployment completed successfully!${NC}"
+    echo -e "${GREEN}Active Container: ${NEW_CONTAINER} (port ${NEW_PORT})${NC}"
+    echo -e "${GREEN}========================================${NC}"
+    
+    # 성공 알림
+    send_discord_notification "✅ 배포 성공!\nTag: \`$IMAGE_TAG\`\nActive: \`${NEW_CONTAINER}\` (port ${NEW_PORT})" 3066993
+    
+    exit 0
+else
+    echo -e "${RED}========================================${NC}"
+    echo -e "${RED}❌ ${NEW_CONTAINER} deployment failed health check!${NC}"
+    echo -e "${RED}🔄 Rolling back to ${CURRENT_CONTAINER}...${NC}"
+    echo -e "${RED}========================================${NC}"
+    
+    docker compose stop ${NEW_CONTAINER}
+    docker compose start ${CURRENT_CONTAINER}
+    
+    # 실패 알림
+    send_discord_notification "❌ 배포 실패!\nTag: \`$IMAGE_TAG\`\n롤백 완료: \`${CURRENT_CONTAINER}\`" 15158332
+    
     exit 1
 fi
 
-echo "🔍 Ensuring Grafana stack is running..."
+# Grafana/Loki/Promtail 확인
+echo -e "${BLUE}🔍 Ensuring monitoring stack is running...${NC}"
 docker compose up -d grafana loki promtail
+
