@@ -5,16 +5,37 @@ services:
         ports:
             - '8080:8080'
         env_file:
-            - .env
+            - .env.production
         environment:
             - NODE_ENV=production
             - PORT=8080
             - CONTAINER_NAME=blue
         volumes:
             - ./logs:/app/logs
+            - ./gcp-service-account.json:/app/gcp-service-account.json:ro
         restart: unless-stopped
         networks:
             - pawpong_network
+        healthcheck:
+            test:
+                [
+                    'CMD',
+                    'wget',
+                    '--no-verbose',
+                    '--tries=1',
+                    '--spider',
+                    'http://localhost:8080/api/health',
+                    '||',
+                    'exit',
+                    '1',
+                ]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+        depends_on:
+            loki:
+                condition: service_started
         deploy:
             resources:
                 limits:
@@ -22,13 +43,13 @@ services:
                 reservations:
                     memory: 1G
         labels:
-            - "deployment=blue"
+            - 'deployment=blue'
         logging:
-            driver: "json-file"
+            driver: 'json-file'
             options:
-                max-size: "10m"
-                max-file: "3"
-                labels: "deployment,container_name"
+                max-size: '10m'
+                max-file: '3'
+                labels: 'deployment,container_name'
 
     green:
         build: .
@@ -36,16 +57,26 @@ services:
         ports:
             - '8081:8080'
         env_file:
-            - .env
+            - .env.production
         environment:
             - NODE_ENV=production
             - PORT=8080
             - CONTAINER_NAME=green
         volumes:
             - ./logs:/app/logs
+            - ./gcp-service-account.json:/app/gcp-service-account.json:ro
         restart: unless-stopped
         networks:
             - pawpong_network
+        healthcheck:
+            test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/api/health", "||", "exit", "1"]
+            interval: 30s
+            timeout: 10s
+            retries: 3
+            start_period: 40s
+        depends_on:
+            loki:
+                condition: service_started
         deploy:
             resources:
                 limits:
@@ -66,7 +97,7 @@ services:
         image: grafana/grafana:latest
         container_name: grafana
         ports:
-            - "3000:3000"
+            - '3000:3000'
         environment:
             - GF_SECURITY_ADMIN_USER=admin
             - GF_SECURITY_ADMIN_PASSWORD=pawpong2025
@@ -91,7 +122,7 @@ services:
         image: grafana/loki:latest
         container_name: loki
         ports:
-            - "3100:3100"
+            - '3100:3100'
         command: -config.file=/etc/loki/local-config.yaml
         volumes:
             - loki_data:/loki
