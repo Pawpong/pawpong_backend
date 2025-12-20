@@ -112,7 +112,7 @@ export class BreederReportAdminService {
         return new PaginationBuilder<ReportListResponseDto>()
             .setItems(items)
             .setPage(pageNumber)
-            .setTake(itemsPerPage)
+            .setLimit(itemsPerPage)
             .setTotalCount(totalCount)
             .build();
     }

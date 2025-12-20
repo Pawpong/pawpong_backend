@@ -421,7 +421,7 @@ export class BreederManagementService {
         return new PaginationBuilder<any>()
             .setItems(mappedApplications)
             .setPage(page)
-            .setTake(limit)
+            .setLimit(limit)
             .setTotalCount(total)
             .build();
     }
@@ -979,7 +979,7 @@ export class BreederManagementService {
         const paginationResponse = new PaginationBuilder<any>()
             .setItems(items)
             .setPage(page)
-            .setTake(limit)
+            .setLimit(limit)
             .setTotalCount(total)
             .build();
 
@@ -1048,7 +1048,7 @@ export class BreederManagementService {
         const paginationResponse = new PaginationBuilder<any>()
             .setItems(reviews)
             .setPage(page)
-            .setTake(limit)
+            .setLimit(limit)
             .setTotalCount(total)
             .build();
 

@@ -104,4 +104,20 @@ export class UserAdminController {
         const result = await this.userAdminService.getDeletedUserStats(user.userId);
         return ApiResponseDto.success(result, '탈퇴 사용자 통계가 조회되었습니다.');
     }
+
+    @Patch('deleted-users/:userId/restore')
+    @ApiEndpoint({
+        summary: '탈퇴 사용자 복구',
+        description: '탈퇴한 사용자를 active 상태로 복구합니다.',
+        responseType: UserStatusUpdateResponseDto,
+        isPublic: false,
+    })
+    async restoreDeletedUser(
+        @CurrentUser() user: any,
+        @Param('userId') userId: string,
+        @Query('role') role: 'adopter' | 'breeder',
+    ): Promise<ApiResponseDto<UserStatusUpdateResponseDto>> {
+        const result = await this.userAdminService.restoreDeletedUser(user.userId, userId, role);
+        return ApiResponseDto.success(result, '탈퇴 사용자가 복구되었습니다.');
+    }
 }
