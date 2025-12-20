@@ -23,11 +23,11 @@ export class DeletedUserSearchRequestDto {
     page?: number = 1;
 
     /**
-     * 페이지 크기
+     * 페이지당 항목 수
      * @example 20
      */
     @ApiProperty({
-        description: '페이지 크기',
+        description: '페이지당 항목 수',
         example: 20,
         required: false,
         minimum: 1,
@@ -36,7 +36,7 @@ export class DeletedUserSearchRequestDto {
     @IsInt()
     @Min(1)
     @IsOptional()
-    pageSize?: number = 20;
+    limit?: number = 20;
 
     /**
      * 사용자 역할 필터

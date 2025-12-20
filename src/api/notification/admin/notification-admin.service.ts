@@ -1,15 +1,18 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Notification, NotificationType } from '../../schema/notification.schema';
+
+import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
+
+import { Notification } from '../../../schema/notification.schema';
+
+import { PaginationBuilder } from '../../../common/dto/pagination/pagination-builder.dto';
 import { NotificationAdminListRequestDto } from './dto/request/notification-admin-list-request.dto';
 import {
     NotificationAdminResponseDto,
     NotificationStatsResponseDto,
 } from './dto/response/notification-admin-response.dto';
-import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
-import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
-import { CustomLoggerService } from '../../common/logger/custom-logger.service';
+import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 
 /**
  * 관리자 알림 관리 서비스
@@ -92,7 +95,7 @@ export class NotificationAdminService {
             const result = new PaginationBuilder<NotificationAdminResponseDto>()
                 .setItems(items)
                 .setPage(page)
-                .setTake(limit)
+                .setLimit(limit)
                 .setTotalCount(totalItems)
                 .build();
 

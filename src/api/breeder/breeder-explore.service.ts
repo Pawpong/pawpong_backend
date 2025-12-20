@@ -46,7 +46,7 @@ export class BreederExploreService {
             breederLevel,
             sortBy,
             page = 1,
-            take = 20,
+            limit = 20,
         } = searchDto;
 
         // 기본 필터 조건
@@ -128,11 +128,11 @@ export class BreederExploreService {
         }
 
         // 페이지네이션 계산
-        const skip = (page - 1) * take;
+        const skip = (page - 1) * limit;
 
         // 데이터 조회
         const [breeders, totalCount] = await Promise.all([
-            this.breederModel.find(filter).sort(sort).skip(skip).limit(take).lean().exec(),
+            this.breederModel.find(filter).sort(sort).skip(skip).limit(limit).lean().exec(),
             this.breederModel.countDocuments(filter),
         ]);
         let totalItems = totalCount;
@@ -210,7 +210,7 @@ export class BreederExploreService {
             .setItems(cards)
             .setTotalCount(totalItems)
             .setPage(page)
-            .setTake(take)
+            .setLimit(limit)
             .build();
     }
 

@@ -27,21 +27,21 @@ export class PaginationRequestDto {
     @IsNumber()
     @Min(1)
     @Transform(({ value }) => Math.min(parseInt(value), 100)) // 최대 100개로 제한
-    take: number = 10;
+    limit: number = 10;
 
     /**
      * MongoDB skip 값을 계산합니다.
      * @returns 건너뛸 문서 수
      */
     getSkip(): number {
-        return (this.page - 1) * this.take;
+        return (this.page - 1) * this.limit;
     }
 
     /**
-     * take 값을 반환합니다.
+     * limit 값을 반환합니다.
      * @returns 가져올 문서 수
      */
-    getTake(): number {
-        return this.take;
+    getLimit(): number {
+        return this.limit;
     }
 }

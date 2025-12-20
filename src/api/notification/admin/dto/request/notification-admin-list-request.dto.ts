@@ -1,7 +1,8 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString, IsBoolean, IsEnum, IsNumber, Min } from 'class-validator';
 import { Type } from 'class-transformer';
-import { NotificationType } from '../../../../schema/notification.schema';
+
+import { NotificationType } from '../../../../../schema/notification.schema';
 
 /**
  * Admin 알림 목록 조회 요청 DTO

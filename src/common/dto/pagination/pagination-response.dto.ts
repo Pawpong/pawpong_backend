@@ -24,12 +24,12 @@ export class PaginationResponseDto<T> {
         this.items = paginationBuilder._items;
         this.pagination = {
             currentPage: paginationBuilder._page,
-            pageSize: paginationBuilder._take,
+            pageSize: paginationBuilder._limit,
             totalItems: paginationBuilder._totalCount,
-            totalPages: this.getTotalPages(paginationBuilder._totalCount, paginationBuilder._take),
+            totalPages: this.getTotalPages(paginationBuilder._totalCount, paginationBuilder._limit),
             hasNextPage: this.getHasNextPage(
                 paginationBuilder._page,
-                this.getTotalPages(paginationBuilder._totalCount, paginationBuilder._take),
+                this.getTotalPages(paginationBuilder._totalCount, paginationBuilder._limit),
             ),
             hasPrevPage: paginationBuilder._page > 1,
         };

@@ -37,7 +37,7 @@ export class BreederService {
             minPrice,
             maxPrice,
             page = 1,
-            take: limit = 10,
+            limit = 10,
             sortCriteria = 'rating',
         } = searchDto;
 
@@ -131,7 +131,7 @@ export class BreederService {
         return new PaginationBuilder<any>()
             .setItems(transformedBreeders as any[])
             .setPage(page)
-            .setTake(limit)
+            .setLimit(limit)
             .setTotalCount(total)
             .build();
     }
@@ -323,7 +323,7 @@ export class BreederService {
         return new PaginationBuilder<any>()
             .setItems(formattedReviews)
             .setPage(page)
-            .setTake(limit)
+            .setLimit(limit)
             .setTotalCount(total)
             .build();
     }
@@ -517,7 +517,7 @@ export class BreederService {
         const paginationResponse = new PaginationBuilder<any>()
             .setItems(items)
             .setPage(page)
-            .setTake(limit)
+            .setLimit(limit)
             .setTotalCount(total)
             .build();
 

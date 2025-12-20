@@ -173,5 +173,5 @@ export class SearchBreederRequestDto {
     @IsNumber()
     @Min(1)
     @Max(100)
-    take?: number = 20;
+    limit?: number = 20;
 }

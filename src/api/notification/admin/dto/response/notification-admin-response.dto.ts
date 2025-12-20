@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { NotificationType } from '../../../../schema/notification.schema';
+
+import { NotificationType } from '../../../../../schema/notification.schema';
 
 /**
  * Admin 알림 상세 응답 DTO

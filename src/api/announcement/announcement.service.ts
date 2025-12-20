@@ -34,11 +34,11 @@ export class AnnouncementService {
         try {
             this.logger.logStart('getActiveAnnouncements', '활성화된 공지사항 목록 조회 시작', {
                 page: paginationDto.page,
-                take: paginationDto.take,
+                take: paginationDto.limit,
             });
 
-            const { page = 1, take = 10 } = paginationDto;
-            const skip = (page - 1) * take;
+            const { page = 1, limit = 10 } = paginationDto;
+            const skip = (page - 1) * limit;
 
             // 활성화된 공지사항만 조회, 정렬 순서대로
             const [announcements, totalCount] = await Promise.all([
@@ -46,7 +46,7 @@ export class AnnouncementService {
                     .find({ isActive: true })
                     .sort({ order: 1, createdAt: -1 }) // 정렬 순서 우선, 그 다음 최신순
                     .skip(skip)
-                    .limit(take)
+                    .limit(limit)
                     .lean()
                     .exec(),
                 this.announcementModel.countDocuments({ isActive: true }).exec(),
@@ -60,7 +60,7 @@ export class AnnouncementService {
                 .setItems(items)
                 .setTotalCount(totalCount)
                 .setPage(page)
-                .setTake(take)
+                .setLimit(limit)
                 .build();
 
             this.logger.logSuccess('getActiveAnnouncements', '공지사항 목록 조회 완료', {

@@ -7,7 +7,7 @@ import { PaginationResponseDto } from './pagination-response.dto';
 export class PaginationBuilder<T> {
     _items: T[];
     _page: number;
-    _take: number;
+    _limit: number;
     _totalCount: number;
 
     /**
@@ -30,10 +30,10 @@ export class PaginationBuilder<T> {
 
     /**
      * 페이지 크기를 설정합니다.
-     * @param take 한 페이지에 표시할 데이터 수
+     * @param limit 한 페이지에 표시할 데이터 수
      */
-    setTake(take: number): this {
-        this._take = take;
+    setLimit(limit: number): this {
+        this._limit = limit;
         return this;
     }
 

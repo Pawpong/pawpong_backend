@@ -581,7 +581,7 @@ export class AdopterService {
         return new PaginationBuilder<any>()
             .setItems(favoriteListWithDetails)
             .setPage(page)
-            .setTake(limit)
+            .setLimit(limit)
             .setTotalCount(total)
             .build();
     }
@@ -756,7 +756,7 @@ export class AdopterService {
         return new PaginationBuilder<any>()
             .setItems(formattedReviews)
             .setPage(page)
-            .setTake(limit)
+            .setLimit(limit)
             .setTotalCount(total)
             .build();
     }
@@ -945,7 +945,7 @@ export class AdopterService {
         return new PaginationBuilder<any>()
             .setItems(items)
             .setPage(page)
-            .setTake(limit)
+            .setLimit(limit)
             .setTotalCount(totalItems)
             .build();
     }
