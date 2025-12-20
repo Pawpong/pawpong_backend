@@ -42,11 +42,11 @@ echo -e "${BLUE}========================================${NC}"
 # 배포 시작 알림
 send_discord_notification "⏳ 배포 시작\nTag: \`$IMAGE_TAG\`" 16776960
 
-cd /root/Pawpong_Backend
+cd /root/pawpong_backend
 
 # 이전 이미지 태그 저장 (롤백용)
 LAST_IMAGE=$(docker images pawpong-backend --format "{{.Tag}}" | head -n 1)
-echo "$LAST_IMAGE" > /root/Pawpong_Backend/.last_deploy
+echo "$LAST_IMAGE" > /root/pawpong_backend/.last_deploy
 echo -e "${YELLOW}📦 Previous image tag saved: ${LAST_IMAGE}${NC}"
 
 echo -e "${BLUE}🔨 Building Docker image...${NC}"
