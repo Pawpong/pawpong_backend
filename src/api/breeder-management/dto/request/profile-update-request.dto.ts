@@ -5,6 +5,7 @@ import {
     IsString,
     IsNotEmpty,
     IsOptional,
+    IsBoolean,
     Min,
     MaxLength,
     ValidateNested,
@@ -209,4 +210,17 @@ export class ProfileUpdateRequestDto {
     @IsString()
     @IsOptional()
     profileImage?: string;
+
+    /**
+     * 마케팅 정보 수신 동의
+     * @example true
+     */
+    @ApiProperty({
+        description: '마케팅 정보 수신 동의',
+        example: true,
+        required: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    marketingAgreed?: boolean;
 }
