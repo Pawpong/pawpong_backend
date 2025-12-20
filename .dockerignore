@@ -1,0 +1,46 @@
+# .dockerignore
+
+# Git 관련 파일 무시
+.git
+.gitignore
+
+# Node.js 의존성 디렉토리 무시 (RUN yarn install 등으로 이미지 내부에 설치)
+node_modules
+
+# 각종 로그 파일 무시
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+logs/
+
+# 빌드 결과물 디렉토리 무시 (Dockerfile에서 빌드 후 복사하는 경우 제외)
+dist/
+
+# Docker 관련 파일 자체는 이미지에 포함될 필요 없음
+Dockerfile
+.dockerignore
+docker-compose.yml
+
+# 환경 변수 파일 무시 (가장 중요!)
+.env
+.env.*
+
+# 보통 이미지에 포함할 필요 없는 프로젝트 메타 파일
+README.md
+LICENSE
+CLAUDE.md
+
+# 테스트 관련 파일
+test/
+jest-e2e.json
+coverage/
+
+# PM2 설정
+ecosystem.config.js
+
+# 스크립트
+scripts/
+
+# GitHub Actions
+.github/
