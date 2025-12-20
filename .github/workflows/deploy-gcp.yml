@@ -5,12 +5,12 @@ on:
         branches: [main]
 
 env:
-    GCP_PROJECT_ID: pawpong
-    GAR_LOCATION: asia-docker.pkg.dev
-    SERVICE_NAME: pawpong-docker
-    INSTANCE_ZONE: asia-northeast3-c
-    INSTANCE_NAME: pawpong-backend-prod
-    GCP_SA_EMAIL: github-actions-deployer@pawpong.iam.gserviceaccount.com
+    GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+    GAR_LOCATION: ${{ secrets.GAR_LOCATION }}
+    SERVICE_NAME: ${{ secrets.SERVICE_NAME }}
+    INSTANCE_ZONE: ${{ secrets.INSTANCE_ZONE }}
+    INSTANCE_NAME: ${{ secrets.INSTANCE_NAME }}
+    GCP_SA_EMAIL: ${{ secrets.GCP_SA_EMAIL }}
 
 jobs:
     build-and-deploy:
