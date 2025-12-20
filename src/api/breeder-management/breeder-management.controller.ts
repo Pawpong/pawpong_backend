@@ -328,7 +328,7 @@ export class BreederManagementController {
         const result = await this.breederManagementService.getReceivedApplications(
             user.userId,
             queryParams.page || 1,
-            queryParams.take || 10,
+            queryParams.limit || 10,
         );
         return ApiResponseDto.success(result, '입양 신청 목록이 조회되었습니다.');
     }

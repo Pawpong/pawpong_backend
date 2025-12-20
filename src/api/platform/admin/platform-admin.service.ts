@@ -61,8 +61,8 @@ export class PlatformAdminService {
 
         // For now, return aggregated stats. In production, you'd use SystemStats collection
         const [adoptersTotal, breedersTotal, breedersApproved, breedersPending] = await Promise.all([
-            this.adopterModel.countDocuments({ account_status: UserStatus.ACTIVE }),
-            this.breederModel.countDocuments({ status: UserStatus.ACTIVE }),
+            this.adopterModel.countDocuments({ accountStatus: UserStatus.ACTIVE }),
+            this.breederModel.countDocuments({ accountStatus: UserStatus.ACTIVE }),
             this.breederModel.countDocuments({ 'verification.status': VerificationStatus.APPROVED }),
             this.breederModel.countDocuments({ 'verification.status': VerificationStatus.PENDING }),
         ]);
