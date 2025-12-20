@@ -1,34 +1,70 @@
 # GitHub Secrets 설정 가이드
 
-## 필수 Secret 설정
+## 필수 GitHub Secrets 설정
 
-GitHub Repository에서 다음 Secrets를 설정해야 합니다.
-
-### 1. GCP_PROJECT_NUMBER
+GitHub Repository에서 다음 Secrets를 모두 설정해야 합니다.
 
 **위치**: GitHub Repository > Settings > Secrets and variables > Actions > New repository secret
 
-**Secret 이름**: `GCP_PROJECT_NUMBER`
+### 1. GCP_PROJECT_NUMBER
 
 **값 얻는 방법**:
 ```bash
-# 터미널에서 실행
 gcloud projects describe pawpong --format="value(projectNumber)"
+# 출력: 371938485294
 ```
 
-또는 GCP Console에서:
-1. https://console.cloud.google.com 접속
-2. 프로젝트 선택 (pawpong)
-3. 대시보드에서 "프로젝트 정보" 카드 확인
-4. "프로젝트 번호" 복사 (예: 123456789012)
+**설정**:
+- Name: `GCP_PROJECT_NUMBER`
+- Secret: `371938485294`
 
-**설정 방법**:
-1. GitHub Repository 페이지로 이동
-2. Settings > Secrets and variables > Actions 클릭
-3. "New repository secret" 클릭
-4. Name: `GCP_PROJECT_NUMBER`
-5. Secret: `[위에서 얻은 프로젝트 번호]` 입력
-6. "Add secret" 클릭
+### 2. GCP_PROJECT_ID
+
+**설정**:
+- Name: `GCP_PROJECT_ID`
+- Secret: `pawpong`
+
+### 3. GAR_LOCATION
+
+**설정**:
+- Name: `GAR_LOCATION`
+- Secret: `asia-docker.pkg.dev`
+
+### 4. SERVICE_NAME
+
+**설정**:
+- Name: `SERVICE_NAME`
+- Secret: `pawpong-docker`
+
+### 5. INSTANCE_ZONE
+
+**설정**:
+- Name: `INSTANCE_ZONE`
+- Secret: `asia-northeast3-c`
+
+### 6. INSTANCE_NAME
+
+**설정**:
+- Name: `INSTANCE_NAME`
+- Secret: `pawpong-backend-prod`
+
+### 7. GCP_SA_EMAIL
+
+**설정**:
+- Name: `GCP_SA_EMAIL`
+- Secret: `github-actions-deployer@pawpong.iam.gserviceaccount.com`
+
+### 8. DEV_SERVER_SSH_KEY (develop 브랜치 배포용, 선택)
+
+**설정**:
+- Name: `DEV_SERVER_SSH_KEY`
+- Secret: `[개발 서버 SSH 개인키 내용]`
+
+### 9. DEV_SERVER_HOST (develop 브랜치 배포용, 선택)
+
+**설정**:
+- Name: `DEV_SERVER_HOST`
+- Secret: `[개발 서버 IP 주소]`
 
 ---
 
