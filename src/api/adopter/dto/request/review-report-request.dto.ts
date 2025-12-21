@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 
 /**
  * 후기 신고 요청 DTO
@@ -22,10 +22,12 @@ export class ReviewReportRequestDto {
     reason: string;
 
     @ApiProperty({
-        description: '신고 상세 설명',
+        description: '신고 상세 설명 (선택사항)',
         example: '욕설 및 비방이 포함되어 있습니다.',
+        required: false,
     })
+    @IsOptional()
     @IsString()
     @IsNotEmpty()
-    description: string;
+    description?: string;
 }
