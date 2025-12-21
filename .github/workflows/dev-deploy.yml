@@ -13,32 +13,25 @@ jobs:
 
             - name: Configure SSH Connection
               run: |
+                  # Secrets 확인
+                  if [ -z "${{ secrets.DEV_SERVER_HOST }}" ]; then
+                    echo "Error: DEV_SERVER_HOST secret is not set"
+                    exit 1
+                  fi
+                  # Dev와 Prod가 같은 SSH 키를 사용하므로 PROD_SSH_KEY 사용
+                  if [ -z "${{ secrets.PROD_SSH_KEY }}" ]; then
+                    echo "Error: PROD_SSH_KEY secret is not set"
+                    exit 1
+                  fi
+
                   mkdir -p ~/.ssh/
-                  echo "${{ secrets.DEV_SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+                  echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/deploy_key
                   chmod 600 ~/.ssh/deploy_key
                   ssh-keyscan -H ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts
-                  echo "=== SSH Key Debug Info ==="
-                  echo "SSH key file permissions:"
-                  ls -la ~/.ssh/deploy_key
-                  echo "SSH key file size:"
-                  wc -c ~/.ssh/deploy_key
-                  echo "SSH key first few lines:"
-                  head -3 ~/.ssh/deploy_key
-                  echo "SSH key last few lines:"
-                  tail -3 ~/.ssh/deploy_key
-                  echo "SSH key format check:"
-                  ssh-keygen -l -f ~/.ssh/deploy_key || echo "Invalid SSH key format"
+
+                  echo "=== SSH Configuration Complete ==="
                   echo "Target host: ${{ secrets.DEV_SERVER_HOST }}"
-                  echo "SSH known_hosts:"
-                  cat ~/.ssh/known_hosts
-
-                  echo "=== Trying to fix SSH key format ==="
-                  cat ~/.ssh/deploy_key | tr -d '\r' > ~/.ssh/deploy_key_fixed
-                  mv ~/.ssh/deploy_key_fixed ~/.ssh/deploy_key
-                  chmod 600 ~/.ssh/deploy_key
-
-                  echo "After fixing - SSH key format check:"
-                  ssh-keygen -l -f ~/.ssh/deploy_key || echo "Still invalid SSH key format"
+                  echo "SSH key configured successfully"
 
             - name: Test SSH Connection
               run: |
@@ -73,11 +66,11 @@ jobs:
                     yarn build
                     echo "Build completed"
 
-                    pm2 delete pawpong-dev || echo "No PM2 process to delete"
+                    pm2 delete pawpong-api || echo "No PM2 process to delete"
                     echo "PM2 process deleted"
 
-                    pm2 start ecosystem.config.js --name pawpong-dev --env development
-                    echo "PM2 start completed with development environment"
+                    pm2 restart ecosystem.config.js --env production || pm2 start ecosystem.config.js --env production
+                    echo "PM2 restart/start completed"
 
                     pm2 save
                     echo "PM2 configuration saved"
