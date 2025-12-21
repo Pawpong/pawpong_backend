@@ -384,7 +384,8 @@ export class AdopterService {
             .type(NotificationType.NEW_REVIEW_REGISTERED)
             .title('⭐ 새로운 후기가 등록되었어요!')
             .content('브리더 프로필에서 후기를 확인해보세요.')
-            .related(breederId, 'profile');
+            .related(`/explore/breeder/${breederId}#reviews`, 'profile')
+            .metadata({ breederId });
 
         if (emailContent && breeder.emailAddress) {
             builder.withEmail({
