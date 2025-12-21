@@ -187,30 +187,27 @@ export class BreederAdminService {
             `Suspended: ${suspendData.reason}`,
         );
 
-        // 브리더에게 이메일 발송 (정지된 계정은 로그인 불가하므로 이메일만 발송)
-        let notificationSent = false;
-        try {
-            if (breeder.emailAddress) {
-                const emailContent = this.mailTemplateService.getBreederSuspensionEmail(
-                    breeder.nickname,
-                    suspendData.reason,
-                );
+        // 브리더에게 이메일 발송 (비동기, 결과를 기다리지 않음)
+        if (breeder.emailAddress) {
+            const emailContent = this.mailTemplateService.getBreederSuspensionEmail(
+                breeder.nickname,
+                suspendData.reason,
+            );
 
-                notificationSent = await this.mailService.sendMail({
+            this.mailService
+                .sendMail({
                     to: breeder.emailAddress,
                     subject: emailContent.subject,
                     html: emailContent.html,
-                });
-            }
-        } catch (error) {
-            console.error('브리더 정지 이메일 발송 실패:', error);
+                })
+                .catch((error) => console.error('브리더 정지 이메일 발송 실패:', error));
         }
 
         return {
             breederId,
             reason: suspendData.reason,
             suspendedAt: new Date(),
-            notificationSent,
+            notificationSent: true, // 발송 시작됨
         };
     }
 
@@ -252,27 +249,24 @@ export class BreederAdminService {
             'Account unsuspended',
         );
 
-        // 브리더에게 정지 해제 이메일 발송
-        let notificationSent = false;
-        try {
-            if (breeder.emailAddress) {
-                const emailContent = this.mailTemplateService.getBreederUnsuspensionEmail(breeder.nickname);
+        // 브리더에게 정지 해제 이메일 발송 (비동기, 결과를 기다리지 않음)
+        if (breeder.emailAddress) {
+            const emailContent = this.mailTemplateService.getBreederUnsuspensionEmail(breeder.nickname);
 
-                notificationSent = await this.mailService.sendMail({
+            this.mailService
+                .sendMail({
                     to: breeder.emailAddress,
                     subject: emailContent.subject,
                     html: emailContent.html,
-                });
-            }
-        } catch (error) {
-            console.error('브리더 정지 해제 이메일 발송 실패:', error);
+                })
+                .catch((error) => console.error('브리더 정지 해제 이메일 발송 실패:', error));
         }
 
         return {
             breederId,
             reason: undefined,
             suspendedAt: undefined,
-            notificationSent,
+            notificationSent: true, // 발송 시작됨
         };
     }
 
