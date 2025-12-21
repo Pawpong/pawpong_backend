@@ -9,6 +9,7 @@ import { MailService } from '../../common/mail/mail.service';
 import { StorageService } from '../../common/storage/storage.service';
 import { MailTemplateService } from '../../common/mail/mail-template.service';
 import { NotificationService } from '../notification/notification.service';
+import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
 
 import { NotificationType } from '../../schema/notification.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
@@ -53,6 +54,7 @@ export class AdopterService {
         private mailService: MailService,
         private mailTemplateService: MailTemplateService,
         private notificationService: NotificationService,
+        private discordWebhookService: DiscordWebhookService,
 
         private adopterRepository: AdopterRepository,
         private breederRepository: BreederRepository,
@@ -1032,6 +1034,18 @@ export class AdopterService {
                 deleteReason: deleteData.reason,
                 deleteReasonDetail: deleteData.otherReason || null,
                 updatedAt: deletedAt,
+            });
+
+            // 5. Discord 탈퇴 알림 전송
+            await this.discordWebhookService.notifyUserWithdrawal({
+                userId: userId,
+                userType: 'adopter',
+                email: adopter.emailAddress,
+                name: adopter.nickname || '알 수 없음',
+                nickname: adopter.nickname,
+                reason: deleteData.reason,
+                reasonDetail: deleteData.otherReason || undefined,
+                deletedAt: deletedAt,
             });
 
             return {
