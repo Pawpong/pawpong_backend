@@ -6,6 +6,7 @@ import { randomUUID } from 'crypto';
 import { AdminAction, AdminTargetType } from '../../../common/enum/user.enum';
 
 import { Admin, AdminDocument } from '../../../schema/admin.schema';
+import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 import { BreederReview, BreederReviewDocument } from '../../../schema/breeder-review.schema';
 
