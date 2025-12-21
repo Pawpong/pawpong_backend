@@ -1495,16 +1495,7 @@ export class AuthService {
         });
 
         // 디스코드 웹훅 알림 전송 (비동기, 에러 발생해도 회원가입은 성공)
-        // 서류 URL 생성 (Signed URL)
-        const documentsForWebhook = verificationDocuments.map((doc) => {
-            const signedUrl = this.storageService.generateSignedUrl(doc.fileName);
-            return {
-                type: doc.type,
-                url: signedUrl,
-                originalFileName: doc.originalFileName,
-            };
-        });
-
+        // 1. 회원가입 알림 (서류 정보 제외)
         this.discordWebhookService
             .notifyBreederRegistration({
                 userId: (savedBreeder._id as any).toString(),
@@ -1513,11 +1504,34 @@ export class AuthService {
                 phone: savedBreeder.phoneNumber,
                 registrationType: socialAuthInfo ? 'social' : 'email',
                 provider: socialAuthInfo?.authProvider,
-                documents: documentsForWebhook.length > 0 ? documentsForWebhook : undefined,
             })
             .catch((error) => {
-                this.logger.logError('registerBreeder', '디스코드 알림 전송 실패 (무시됨)', error);
+                this.logger.logError('registerBreeder', '디스코드 회원가입 알림 전송 실패 (무시됨)', error);
             });
+
+        // 2. 서류 제출 알림 (서류가 있는 경우에만)
+        if (verificationDocuments.length > 0) {
+            const documentsForWebhook = verificationDocuments.map((doc) => {
+                const signedUrl = this.storageService.generateSignedUrl(doc.fileName);
+                return {
+                    type: doc.type,
+                    url: signedUrl,
+                    originalFileName: doc.originalFileName,
+                };
+            });
+
+            this.discordWebhookService
+                .notifyRegistrationDocuments({
+                    userId: (savedBreeder._id as any).toString(),
+                    email: savedBreeder.emailAddress,
+                    name: savedBreeder.name,
+                    userType: 'breeder',
+                    documents: documentsForWebhook,
+                })
+                .catch((error) => {
+                    this.logger.logError('registerBreeder', '디스코드 서류 제출 알림 전송 실패 (무시됨)', error);
+                });
+        }
 
         // 응답 데이터 구성 (Mapper 패턴 사용)
         return AuthMapper.toBreederRegisterResponse(savedBreeder, tokens);
