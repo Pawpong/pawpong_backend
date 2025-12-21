@@ -47,6 +47,9 @@ gcp-service-account.json
 .temp
 .tmp
 
+# Deployment tracking files
+.last_deploy
+
 # Runtime data
 pids
 *.pid
