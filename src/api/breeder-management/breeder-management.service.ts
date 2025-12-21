@@ -1523,6 +1523,18 @@ export class BreederManagementService {
             updatedAt: deletedAt,
         });
 
+        // Discord 탈퇴 알림 전송
+        await this.discordWebhookService.notifyUserWithdrawal({
+            userId: userId,
+            userType: 'breeder',
+            email: breeder.emailAddress,
+            name: breeder.name || breeder.nickname || '알 수 없음',
+            nickname: breeder.nickname,
+            reason: deleteData?.reason || 'unknown',
+            reasonDetail: deleteData?.otherReason || undefined,
+            deletedAt: deletedAt,
+        });
+
         this.logger.logSuccess('deleteBreederAccount', '브리더 계정 탈퇴 완료', {
             userId,
             deletedAt,

@@ -386,6 +386,107 @@ export class DiscordWebhookService {
     }
 
     /**
+     * 회원 탈퇴 알림
+     *
+     * @param data 탈퇴 사용자 정보
+     */
+    async notifyUserWithdrawal(data: {
+        userId: string;
+        userType: 'adopter' | 'breeder';
+        email: string;
+        name: string;
+        nickname?: string;
+        reason: string;
+        reasonDetail?: string;
+        deletedAt: Date;
+    }): Promise<void> {
+        const withdrawalWebhookUrl = this.configService.get<string>('DISCORD_WITHDRAWAL_WEBHOOK_URL') || '';
+
+        if (!withdrawalWebhookUrl) {
+            this.logger.logWarning(
+                'notifyUserWithdrawal',
+                '탈퇴 알림 웹훅 URL이 설정되지 않아 알림을 보낼 수 없습니다.',
+            );
+            return;
+        }
+
+        try {
+            const reasonMap: Record<string, string> = {
+                not_using: '서비스를 사용하지 않음',
+                found_alternative: '다른 서비스를 이용하게 됨',
+                privacy_concern: '개인정보 보호 우려',
+                dissatisfied: '서비스 불만족',
+                other: '기타',
+            };
+
+            const userTypeName = data.userType === 'adopter' ? '입양자' : '브리더';
+            const reasonText = reasonMap[data.reason] || data.reason;
+
+            const fields: Array<{ name: string; value: string; inline: boolean }> = [
+                {
+                    name: '사용자 타입',
+                    value: userTypeName,
+                    inline: true,
+                },
+                {
+                    name: '사용자 ID',
+                    value: data.userId,
+                    inline: true,
+                },
+                {
+                    name: '이메일',
+                    value: data.email,
+                    inline: true,
+                },
+                {
+                    name: '이름',
+                    value: data.name,
+                    inline: true,
+                },
+                {
+                    name: '닉네임',
+                    value: data.nickname || '미설정',
+                    inline: true,
+                },
+                {
+                    name: '탈퇴 사유',
+                    value: reasonText,
+                    inline: false,
+                },
+            ];
+
+            if (data.reasonDetail) {
+                fields.push({
+                    name: '상세 사유',
+                    value: data.reasonDetail,
+                    inline: false,
+                });
+            }
+
+            const embed = {
+                title: '👋 회원 탈퇴 알림',
+                color: 0xf44336, // 빨간색
+                fields,
+                timestamp: data.deletedAt.toISOString(),
+                footer: {
+                    text: 'Pawpong Backend',
+                },
+            };
+
+            await axios.post(withdrawalWebhookUrl, {
+                embeds: [embed],
+            });
+
+            this.logger.logSuccess('notifyUserWithdrawal', '회원 탈퇴 알림 전송 완료', {
+                userId: data.userId,
+                userType: data.userType,
+            });
+        } catch (error) {
+            this.logger.logError('notifyUserWithdrawal', '디스코드 웹훅 전송 실패', error);
+        }
+    }
+
+    /**
      * 일반 알림 전송
      *
      * @param title 알림 제목
