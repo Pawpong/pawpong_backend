@@ -66,7 +66,7 @@ export class NotificationBuilder {
 
     constructor(
         private readonly createFn: (data: NotificationCreateData) => Promise<NotificationItemDto>,
-        private readonly sendEmailFn: (data: EmailData) => Promise<boolean>,
+        private readonly sendEmailFn: (data: EmailData) => boolean,
         private readonly recipientId: string,
         private readonly recipientType: RecipientType,
     ) {}
@@ -127,6 +127,7 @@ export class NotificationBuilder {
 
     /**
      * 알림 전송 (서비스 알림 + 이메일)
+     * 이메일은 비동기로 발송되며 결과를 기다리지 않음
      */
     async send(): Promise<NotificationSendResult> {
         if (!this.notificationType) {
@@ -151,15 +152,14 @@ export class NotificationBuilder {
             metadata: this.notificationMetadata,
         });
 
-        // 2. 이메일 발송 (설정된 경우에만)
-        let emailSent = false;
+        // 2. 이메일 발송 (비동기, 결과를 기다리지 않음 - 내부에서 fire-and-forget 처리)
         if (this.emailData) {
-            emailSent = await this.sendEmailFn(this.emailData);
+            this.sendEmailFn(this.emailData);
         }
 
         return {
             notification,
-            emailSent,
+            emailSent: !!this.emailData, // 발송 시작 여부 반환
         };
     }
 }
