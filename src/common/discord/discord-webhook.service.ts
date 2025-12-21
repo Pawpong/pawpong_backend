@@ -11,16 +11,21 @@ import { CustomLoggerService } from '../logger/custom-logger.service';
  */
 @Injectable()
 export class DiscordWebhookService {
-    private readonly webhookUrl: string;
+    private readonly signWebhookUrl: string;
+    private readonly documentWebhookUrl: string;
 
     constructor(
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
     ) {
-        this.webhookUrl = this.configService.get<string>('DISCORD_WEBHOOK_URL') || '';
+        this.signWebhookUrl = this.configService.get<string>('DISCORD_SIGN_WEBHOOK_URL') || '';
+        this.documentWebhookUrl = this.configService.get<string>('DISCORD_DOCUMENT_WEBHOOK_URL') || '';
 
-        if (!this.webhookUrl) {
-            this.logger.logWarning('DiscordWebhookService', '디스코드 웹훅 URL이 설정되지 않았습니다.');
+        if (!this.signWebhookUrl) {
+            this.logger.logWarning('DiscordWebhookService', '디스코드 가입 웹훅 URL이 설정되지 않았습니다.');
+        }
+        if (!this.documentWebhookUrl) {
+            this.logger.logWarning('DiscordWebhookService', '디스코드 서류 웹훅 URL이 설정되지 않았습니다.');
         }
     }
 
@@ -38,10 +43,10 @@ export class DiscordWebhookService {
         registrationType: 'email' | 'social';
         provider?: string;
     }): Promise<void> {
-        if (!this.webhookUrl) {
+        if (!this.signWebhookUrl) {
             this.logger.logWarning(
                 'notifyAdopterRegistration',
-                '디스코드 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
+                '디스코드 가입 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
             );
             return;
         }
@@ -83,7 +88,7 @@ export class DiscordWebhookService {
                 },
             };
 
-            await axios.post(this.webhookUrl, {
+            await axios.post(this.signWebhookUrl, {
                 embeds: [embed],
             });
 
@@ -97,7 +102,7 @@ export class DiscordWebhookService {
     }
 
     /**
-     * 브리더 회원가입 알림
+     * 브리더 회원가입 알림 (서류 정보 제외)
      *
      * @param data 브리더 회원가입 정보
      */
@@ -108,29 +113,16 @@ export class DiscordWebhookService {
         phone?: string;
         registrationType: 'email' | 'social';
         provider?: string;
-        documents?: Array<{
-            type: string;
-            url: string;
-            originalFileName?: string;
-        }>;
     }): Promise<void> {
-        if (!this.webhookUrl) {
+        if (!this.signWebhookUrl) {
             this.logger.logWarning(
                 'notifyBreederRegistration',
-                '디스코드 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
+                '디스코드 가입 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
             );
             return;
         }
 
         try {
-            const documentTypeMap: Record<string, string> = {
-                id_card: '신분증',
-                animal_production_license: '동물생산업 등록증',
-                adoption_contract_sample: '표준 입양계약서 샘플',
-                recent_pedigree_document: '최근 발급된 혈통서 사본',
-                breeder_certification: '브리더 인증 서류',
-            };
-
             const fields: Array<{ name: string; value: string; inline: boolean }> = [
                 {
                     name: '사용자 ID',
@@ -159,32 +151,6 @@ export class DiscordWebhookService {
                 },
             ];
 
-            // 서류 제출 상태
-            if (data.documents && data.documents.length > 0) {
-                fields.push({
-                    name: '📋 서류 제출 상태',
-                    value: `${data.documents.length}개 서류 업로드 완료`,
-                    inline: false,
-                });
-
-                // 업로드된 서류 목록
-                data.documents.forEach((doc) => {
-                    const docTypeName = documentTypeMap[doc.type] || doc.type;
-                    const fileName = doc.originalFileName ? `\n파일명: ${doc.originalFileName}` : '';
-                    fields.push({
-                        name: `📄 ${docTypeName}`,
-                        value: `[서류 보기](${doc.url})${fileName}`,
-                        inline: false,
-                    });
-                });
-            } else {
-                fields.push({
-                    name: '📋 서류 제출 상태',
-                    value: '⏱️ 나중에 제출 예정 (서류 미등록)',
-                    inline: false,
-                });
-            }
-
             const embed = {
                 title: '🏢 새로운 브리더 회원가입',
                 color: 0x2196f3, // 파란색
@@ -195,7 +161,7 @@ export class DiscordWebhookService {
                 },
             };
 
-            await axios.post(this.webhookUrl, {
+            await axios.post(this.signWebhookUrl, {
                 embeds: [embed],
             });
 
@@ -205,6 +171,111 @@ export class DiscordWebhookService {
             });
         } catch (error) {
             this.logger.logError('notifyBreederRegistration', '디스코드 웹훅 전송 실패', error);
+        }
+    }
+
+    /**
+     * 회원가입 시 서류 제출 알림
+     *
+     * @param data 서류 제출 정보
+     */
+    async notifyRegistrationDocuments(data: {
+        userId: string;
+        email: string;
+        name: string;
+        userType: 'adopter' | 'breeder';
+        isResubmission?: boolean;
+        documents: Array<{
+            type: string;
+            url: string;
+            originalFileName?: string;
+        }>;
+    }): Promise<void> {
+        if (!this.documentWebhookUrl) {
+            this.logger.logWarning(
+                'notifyRegistrationDocuments',
+                '디스코드 서류 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
+            );
+            return;
+        }
+
+        try {
+            const documentTypeMap: Record<string, string> = {
+                id_card: '신분증',
+                animal_production_license: '동물생산업 등록증',
+                adoption_contract_sample: '표준 입양계약서 샘플',
+                recent_pedigree_document: '최근 발급된 혈통서 사본',
+                breeder_certification: '브리더 인증 서류',
+            };
+
+            const userTypeText = data.userType === 'adopter' ? '입양자' : '브리더';
+            const submissionType = data.isResubmission ? '재제출' : '신규 제출';
+
+            const fields: Array<{ name: string; value: string; inline: boolean }> = [
+                {
+                    name: '사용자 ID',
+                    value: data.userId,
+                    inline: true,
+                },
+                {
+                    name: '이메일',
+                    value: data.email,
+                    inline: true,
+                },
+                {
+                    name: '닉네임',
+                    value: data.name,
+                    inline: true,
+                },
+                {
+                    name: '회원 유형',
+                    value: userTypeText,
+                    inline: true,
+                },
+                {
+                    name: '제출 유형',
+                    value: submissionType,
+                    inline: true,
+                },
+                {
+                    name: '📋 제출된 서류',
+                    value: `총 ${data.documents.length}개 서류`,
+                    inline: false,
+                },
+            ];
+
+            // 업로드된 서류 목록
+            data.documents.forEach((doc) => {
+                const docTypeName = documentTypeMap[doc.type] || doc.type;
+                const fileName = doc.originalFileName ? `\n파일명: ${doc.originalFileName}` : '';
+                fields.push({
+                    name: `📄 ${docTypeName}`,
+                    value: `[서류 보기](${doc.url})${fileName}`,
+                    inline: false,
+                });
+            });
+
+            const embed = {
+                title: data.isResubmission ? '🔄 회원가입 서류 재제출' : '📝 회원가입 서류 제출 (신규)',
+                color: data.isResubmission ? 0xff9800 : 0x9c27b0, // 주황색 (재제출) / 보라색 (신규)
+                fields,
+                timestamp: new Date().toISOString(),
+                footer: {
+                    text: 'Pawpong Backend',
+                },
+            };
+
+            await axios.post(this.documentWebhookUrl, {
+                embeds: [embed],
+            });
+
+            this.logger.logSuccess('notifyRegistrationDocuments', '회원가입 서류 제출 알림 전송 완료', {
+                userId: data.userId,
+                email: data.email,
+                isResubmission: data.isResubmission || false,
+            });
+        } catch (error) {
+            this.logger.logError('notifyRegistrationDocuments', '디스코드 웹훅 전송 실패', error);
         }
     }
 
@@ -227,25 +298,16 @@ export class DiscordWebhookService {
         }>;
         submittedAt: Date;
     }): Promise<void> {
-        if (!this.webhookUrl) {
+        if (!this.documentWebhookUrl) {
             this.logger.logWarning(
                 'notifyBreederVerificationSubmission',
-                '디스코드 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
+                '디스코드 서류 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
             );
             return;
         }
 
         try {
-            const documentTypeMap: Record<string, string> = {
-                idCard: '신분증 사본',
-                businessLicense: '동물생산업 등록증',
-                contractSample: '표준 입양계약서 샘플',
-                breederDogCertificate: '강아지 브리더 인증 서류',
-                breederCatCertificate: '고양이 브리더 인증 서류',
-                breederCertificate: '브리더 인증 서류',
-            };
-
-            const levelName = data.level === 'new' ? 'New 레벨' : 'Elite 레벨';
+            const levelName = data.level === 'new' ? 'New' : 'Elite';
             const submissionType = data.isResubmission ? '재제출' : '신규 제출';
 
             const fields: Array<{ name: string; value: string; inline: boolean }> = [
@@ -288,19 +350,16 @@ export class DiscordWebhookService {
 
             // 업로드된 서류 목록
             data.documents.forEach((doc) => {
-                const docTypeName = documentTypeMap[doc.type] || doc.type;
-                const fileName = doc.originalFileName ? `\n파일명: ${doc.originalFileName}` : '';
+                const fileName = doc.originalFileName || doc.type;
                 fields.push({
-                    name: `📄 ${docTypeName}`,
-                    value: `[서류 보기](${doc.url})${fileName}`,
+                    name: `📄 ${fileName}`,
+                    value: `[서류 보기](${doc.url})`,
                     inline: false,
                 });
             });
 
             const embed = {
-                title: data.isResubmission
-                    ? '🔄 브리더 입점 서류 재제출'
-                    : '📝 브리더 입점 서류 제출 (신규)',
+                title: '📝 브리더 입점 서류 제출',
                 color: data.isResubmission ? 0xff9800 : 0x9c27b0, // 주황색 (재제출) / 보라색 (신규)
                 fields,
                 timestamp: data.submittedAt.toISOString(),
@@ -309,8 +368,7 @@ export class DiscordWebhookService {
                 },
             };
 
-            await axios.post(this.webhookUrl, {
-                content: '<@&1410549218225029150>', // 역할 멘션
+            await axios.post(this.documentWebhookUrl, {
                 embeds: [embed],
             });
 
@@ -328,6 +386,107 @@ export class DiscordWebhookService {
     }
 
     /**
+     * 회원 탈퇴 알림
+     *
+     * @param data 탈퇴 사용자 정보
+     */
+    async notifyUserWithdrawal(data: {
+        userId: string;
+        userType: 'adopter' | 'breeder';
+        email: string;
+        name: string;
+        nickname?: string;
+        reason: string;
+        reasonDetail?: string;
+        deletedAt: Date;
+    }): Promise<void> {
+        const withdrawalWebhookUrl = this.configService.get<string>('DISCORD_WITHDRAWAL_WEBHOOK_URL') || '';
+
+        if (!withdrawalWebhookUrl) {
+            this.logger.logWarning(
+                'notifyUserWithdrawal',
+                '탈퇴 알림 웹훅 URL이 설정되지 않아 알림을 보낼 수 없습니다.',
+            );
+            return;
+        }
+
+        try {
+            const reasonMap: Record<string, string> = {
+                not_using: '서비스를 사용하지 않음',
+                found_alternative: '다른 서비스를 이용하게 됨',
+                privacy_concern: '개인정보 보호 우려',
+                dissatisfied: '서비스 불만족',
+                other: '기타',
+            };
+
+            const userTypeName = data.userType === 'adopter' ? '입양자' : '브리더';
+            const reasonText = reasonMap[data.reason] || data.reason;
+
+            const fields: Array<{ name: string; value: string; inline: boolean }> = [
+                {
+                    name: '사용자 타입',
+                    value: userTypeName,
+                    inline: true,
+                },
+                {
+                    name: '사용자 ID',
+                    value: data.userId,
+                    inline: true,
+                },
+                {
+                    name: '이메일',
+                    value: data.email,
+                    inline: true,
+                },
+                {
+                    name: '이름',
+                    value: data.name,
+                    inline: true,
+                },
+                {
+                    name: '닉네임',
+                    value: data.nickname || '미설정',
+                    inline: true,
+                },
+                {
+                    name: '탈퇴 사유',
+                    value: reasonText,
+                    inline: false,
+                },
+            ];
+
+            if (data.reasonDetail) {
+                fields.push({
+                    name: '상세 사유',
+                    value: data.reasonDetail,
+                    inline: false,
+                });
+            }
+
+            const embed = {
+                title: '👋 회원 탈퇴 알림',
+                color: 0xf44336, // 빨간색
+                fields,
+                timestamp: data.deletedAt.toISOString(),
+                footer: {
+                    text: 'Pawpong Backend',
+                },
+            };
+
+            await axios.post(withdrawalWebhookUrl, {
+                embeds: [embed],
+            });
+
+            this.logger.logSuccess('notifyUserWithdrawal', '회원 탈퇴 알림 전송 완료', {
+                userId: data.userId,
+                userType: data.userType,
+            });
+        } catch (error) {
+            this.logger.logError('notifyUserWithdrawal', '디스코드 웹훅 전송 실패', error);
+        }
+    }
+
+    /**
      * 일반 알림 전송
      *
      * @param title 알림 제목
@@ -335,8 +494,8 @@ export class DiscordWebhookService {
      * @param color 임베드 색상 (기본: 회색)
      */
     async sendNotification(title: string, message: string, color: number = 0x9e9e9e): Promise<void> {
-        if (!this.webhookUrl) {
-            this.logger.logWarning('sendNotification', '디스코드 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.');
+        if (!this.signWebhookUrl) {
+            this.logger.logWarning('sendNotification', '디스코드 가입 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.');
             return;
         }
 
@@ -351,7 +510,7 @@ export class DiscordWebhookService {
                 },
             };
 
-            await axios.post(this.webhookUrl, {
+            await axios.post(this.signWebhookUrl, {
                 embeds: [embed],
             });
 

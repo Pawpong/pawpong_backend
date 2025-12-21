@@ -48,16 +48,20 @@ export class VerificationStatusResponseDto {
             type: 'object',
             properties: {
                 type: { type: 'string', example: 'business_license' },
+                fileName: { type: 'string', example: 'verification/breeder123/idCard_uuid.pdf' },
                 url: { type: 'string', example: 'https://storage.googleapis.com/...' },
                 uploadedAt: { type: 'string', example: '2024-01-15T10:30:00.000Z' },
+                originalFileName: { type: 'string', example: '신분증.pdf' },
             },
         },
         required: false,
     })
     documents?: Array<{
         type: string;
+        fileName: string;
         url: string;
         uploadedAt: Date;
+        originalFileName?: string;
     }>;
 
     @ApiProperty({
