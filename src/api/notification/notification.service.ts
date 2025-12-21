@@ -253,34 +253,34 @@ export class NotificationService {
     /**
      * 이메일 발송 (내부용)
      * @param emailData 이메일 데이터
-     * @returns 발송 성공 여부
+     * @returns 발송 시작 여부 (비동기 발송, 결과를 기다리지 않음)
      */
-    private async sendEmail(emailData: EmailData): Promise<boolean> {
-        try {
-            this.logger.logStart('sendEmail', '이메일 발송 시작', {
-                to: emailData.to,
-                subject: emailData.subject,
-            });
+    private sendEmail(emailData: EmailData): boolean {
+        this.logger.logStart('sendEmail', '이메일 발송 시작 (비동기)', {
+            to: emailData.to,
+            subject: emailData.subject,
+        });
 
-            // MailService를 사용하여 실제 이메일 발송
-            const result = await this.mailService.sendMail({
+        // MailService를 사용하여 비동기 이메일 발송 (결과를 기다리지 않음)
+        this.mailService
+            .sendMail({
                 to: emailData.to,
                 subject: emailData.subject,
                 html: emailData.html,
+            })
+            .then((result) => {
+                if (result) {
+                    this.logger.logSuccess('sendEmail', '이메일 발송 완료', { to: emailData.to });
+                } else {
+                    this.logger.logWarning('sendEmail', '이메일 발송 실패 (MailService 반환값 false)', {
+                        to: emailData.to,
+                    });
+                }
+            })
+            .catch((error) => {
+                this.logger.logError('sendEmail', '이메일 발송 중 에러 발생', error);
             });
 
-            if (result) {
-                this.logger.logSuccess('sendEmail', '이메일 발송 완료', { to: emailData.to });
-            } else {
-                this.logger.logWarning('sendEmail', '이메일 발송 실패 (MailService 반환값 false)', {
-                    to: emailData.to,
-                });
-            }
-
-            return result;
-        } catch (error) {
-            this.logger.logError('sendEmail', '이메일 발송 중 에러 발생', error);
-            return false;
-        }
+        return true; // 발송 시작됨
     }
 }
