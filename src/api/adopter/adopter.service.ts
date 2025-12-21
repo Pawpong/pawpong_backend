@@ -384,7 +384,8 @@ export class AdopterService {
             .type(NotificationType.NEW_REVIEW_REGISTERED)
             .title('⭐ 새로운 후기가 등록되었어요!')
             .content('브리더 프로필에서 후기를 확인해보세요.')
-            .related(breederId, 'profile');
+            .related(`/explore/breeder/${breederId}#reviews`, 'profile')
+            .metadata({ breederId });
 
         if (emailContent && breeder.emailAddress) {
             builder.withEmail({
@@ -812,11 +813,13 @@ export class AdopterService {
      * @returns 성공 메시지
      * @throws BadRequestException 존재하지 않는 후기
      */
-    async reportReview(userId: string, reviewId: string, reason: string, description: string): Promise<any> {
-        // 입양자 존재 확인
+    async reportReview(userId: string, reviewId: string, reason: string, description?: string): Promise<any> {
+        // 신고자 존재 확인 (입양자 또는 브리더)
         const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+        const breeder = await this.breederRepository.findById(userId);
+
+        if (!adopter && !breeder) {
+            throw new BadRequestException('사용자 정보를 찾을 수 없습니다.');
         }
 
         // 후기 존재 확인
@@ -829,7 +832,7 @@ export class AdopterService {
         review.isReported = true;
         review.reportedBy = userId as any;
         review.reportReason = reason;
-        review.reportDescription = description;
+        review.reportDescription = description || '';
         review.reportedAt = new Date();
 
         await review.save();

@@ -561,10 +561,10 @@ export class BreederManagementService {
                         breederName: breederDisplayName,
                     });
 
-                    // 2. 이메일 발송
-                    try {
-                        const appUrl = this.configService.get('APP_URL', 'https://pawpong.com');
-                        await this.mailService.sendMail({
+                    // 2. 이메일 발송 (비동기, 결과를 기다리지 않음)
+                    const appUrl = this.configService.get('APP_URL', 'https://pawpong.com');
+                    this.mailService
+                        .sendMail({
                             to: adopter.emailAddress,
                             subject: `${breederDisplayName}님과의 상담이 완료되었어요!`,
                             html: `
@@ -583,18 +583,19 @@ export class BreederManagementService {
                                     </p>
                                 </div>
                             `,
+                        })
+                        .then(() => {
+                            this.logger.logSuccess('updateApplicationStatus', '상담 완료 이메일 발송 완료', {
+                                adopterEmail: adopter.emailAddress,
+                                breederName: breeder.name,
+                            });
+                        })
+                        .catch((emailError) => {
+                            // 이메일 발송 실패는 로그만 남기고 계속 진행
+                            this.logger.logWarning('updateApplicationStatus', '상담 완료 이메일 발송 실패', {
+                                error: emailError,
+                            });
                         });
-
-                        this.logger.logSuccess('updateApplicationStatus', '상담 완료 이메일 발송 완료', {
-                            adopterEmail: adopter.emailAddress,
-                            breederName: breeder.name,
-                        });
-                    } catch (emailError) {
-                        // 이메일 발송 실패는 로그만 남기고 계속 진행
-                        this.logger.logWarning('updateApplicationStatus', '상담 완료 이메일 발송 실패', {
-                            error: emailError,
-                        });
-                    }
                 } else {
                     this.logger.logWarning(
                         'updateApplicationStatus',
