@@ -13,32 +13,24 @@ jobs:
 
             - name: Configure SSH Connection
               run: |
+                  # Secrets 확인
+                  if [ -z "${{ secrets.DEV_SERVER_HOST }}" ]; then
+                    echo "Error: DEV_SERVER_HOST secret is not set"
+                    exit 1
+                  fi
+                  if [ -z "${{ secrets.DEV_SERVER_SSH_KEY }}" ]; then
+                    echo "Error: DEV_SERVER_SSH_KEY secret is not set"
+                    exit 1
+                  fi
+
                   mkdir -p ~/.ssh/
                   echo "${{ secrets.DEV_SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
                   chmod 600 ~/.ssh/deploy_key
                   ssh-keyscan -H ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts
-                  echo "=== SSH Key Debug Info ==="
-                  echo "SSH key file permissions:"
-                  ls -la ~/.ssh/deploy_key
-                  echo "SSH key file size:"
-                  wc -c ~/.ssh/deploy_key
-                  echo "SSH key first few lines:"
-                  head -3 ~/.ssh/deploy_key
-                  echo "SSH key last few lines:"
-                  tail -3 ~/.ssh/deploy_key
-                  echo "SSH key format check:"
-                  ssh-keygen -l -f ~/.ssh/deploy_key || echo "Invalid SSH key format"
+
+                  echo "=== SSH Configuration Complete ==="
                   echo "Target host: ${{ secrets.DEV_SERVER_HOST }}"
-                  echo "SSH known_hosts:"
-                  cat ~/.ssh/known_hosts
-
-                  echo "=== Trying to fix SSH key format ==="
-                  cat ~/.ssh/deploy_key | tr -d '\r' > ~/.ssh/deploy_key_fixed
-                  mv ~/.ssh/deploy_key_fixed ~/.ssh/deploy_key
-                  chmod 600 ~/.ssh/deploy_key
-
-                  echo "After fixing - SSH key format check:"
-                  ssh-keygen -l -f ~/.ssh/deploy_key || echo "Still invalid SSH key format"
+                  echo "SSH key configured successfully"
 
             - name: Test SSH Connection
               run: |
