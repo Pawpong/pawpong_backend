@@ -18,18 +18,9 @@ if [ -f .env.production ]; then
     export $(cat .env.production | grep -v '^#' | xargs)
 fi
 
-# Discord 알림 함수
+# Discord 알림 함수 (비활성화)
 send_discord_notification() {
-    local message=$1
-    local color=$2
-    local timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    
-    if [ -n "$DISCORD_WEBHOOK_URL" ]; then
-        curl -X POST "$DISCORD_WEBHOOK_URL" \
-            -H "Content-Type: application/json" \
-            -d "{\"embeds\": [{\"title\": \"🚀 Pawpong Backend Deployment\", \"description\": \"$message\", \"color\": $color, \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%S.000Z)\"}]}" \
-            2>/dev/null || echo "Discord 알림 전송 실패"
-    fi
+    echo "Discord notification disabled (handled by GitHub Actions)"
 }
 
 # 이미지 태그 (GitHub SHA 또는 timestamp)
