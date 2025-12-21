@@ -101,7 +101,7 @@ jobs:
                            \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
                          }]
                        }" \
-                       ${{ secrets.DISCORD_WEBHOOK_URL }}
+                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
 
             - name: Send Discord Notification (Failure)
               if: failure()
@@ -128,7 +128,7 @@ jobs:
                            \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
                          }]
                        }" \
-                       ${{ secrets.DISCORD_WEBHOOK_URL }}
+                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
 
             - name: Check deployment status
               if: failure()
