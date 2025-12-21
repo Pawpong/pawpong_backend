@@ -18,13 +18,14 @@ jobs:
                     echo "Error: DEV_SERVER_HOST secret is not set"
                     exit 1
                   fi
-                  if [ -z "${{ secrets.DEV_SERVER_SSH_KEY }}" ]; then
-                    echo "Error: DEV_SERVER_SSH_KEY secret is not set"
+                  # Dev와 Prod가 같은 SSH 키를 사용하므로 PROD_SSH_KEY 사용
+                  if [ -z "${{ secrets.PROD_SSH_KEY }}" ]; then
+                    echo "Error: PROD_SSH_KEY secret is not set"
                     exit 1
                   fi
 
                   mkdir -p ~/.ssh/
-                  echo "${{ secrets.DEV_SERVER_SSH_KEY }}" > ~/.ssh/deploy_key
+                  echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/deploy_key
                   chmod 600 ~/.ssh/deploy_key
                   ssh-keyscan -H ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts
 
