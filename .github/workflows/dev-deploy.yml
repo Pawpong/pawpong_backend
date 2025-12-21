@@ -66,11 +66,11 @@ jobs:
                     yarn build
                     echo "Build completed"
 
-                    pm2 delete pawpong-dev || echo "No PM2 process to delete"
+                    pm2 delete pawpong-api || echo "No PM2 process to delete"
                     echo "PM2 process deleted"
 
-                    pm2 start ecosystem.config.js --name pawpong-dev --env development
-                    echo "PM2 start completed with development environment"
+                    pm2 restart ecosystem.config.js --env production || pm2 start ecosystem.config.js --env production
+                    echo "PM2 restart/start completed"
 
                     pm2 save
                     echo "PM2 configuration saved"
