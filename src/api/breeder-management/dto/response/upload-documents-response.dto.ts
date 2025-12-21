@@ -27,6 +27,13 @@ export class UploadedDocumentDto {
         example: 102400,
     })
     size: number;
+
+    @ApiProperty({
+        description: '원본 파일명',
+        example: '신분증.pdf',
+        required: false,
+    })
+    originalFileName?: string;
 }
 
 /**
