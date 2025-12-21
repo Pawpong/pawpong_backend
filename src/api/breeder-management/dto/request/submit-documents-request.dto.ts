@@ -21,6 +21,15 @@ export class DocumentInfoDto {
     @IsString()
     @IsNotEmpty()
     fileName: string;
+
+    @ApiProperty({
+        description: '원본 파일명',
+        example: '신분증.pdf',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    originalFileName?: string;
 }
 
 /**
