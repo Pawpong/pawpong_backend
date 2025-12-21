@@ -1591,16 +1591,13 @@ export class AuthService {
     }
 
     private validateProfileImageFile(file: Express.Multer.File): void {
-        // 파일 크기 검증 (5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            throw new BadRequestException('파일 크기는 5MB를 초과할 수 없습니다.');
+        // 파일 크기 검증 (50MB)
+        if (file.size > 50 * 1024 * 1024) {
+            throw new BadRequestException('파일 크기는 50MB를 초과할 수 없습니다.');
         }
 
-        // 파일 타입 검증
-        const allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
-        if (!allowedMimeTypes.includes(file.mimetype)) {
-            throw new BadRequestException('이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp)');
-        }
+        // 파일 타입 검증 제거 - 모든 파일 타입 허용
+        // 브리더 프로필 이미지는 다양한 형식(.png, .jpg, .ico, .webp 등)을 지원
     }
 
     /**
