@@ -72,6 +72,14 @@ export class Banner {
      */
     @Prop()
     description?: string;
+
+    /**
+     * 표시 대상 (비어있으면 전체)
+     * guest: 비회원, adopter: 입양자(일반 회원), breeder: 브리더
+     * @example ["guest", "adopter"]
+     */
+    @Prop({ type: [String], enum: ['guest', 'adopter', 'breeder'], default: [] })
+    targetAudience?: string[];
 }
 
 export type BannerDocument = Banner & Document;
