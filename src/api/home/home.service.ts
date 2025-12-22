@@ -60,6 +60,7 @@ export class HomeService {
                 description: banner.description,
                 order: banner.order,
                 isActive: banner.isActive !== false, // 기본값 true
+                targetAudience: banner.targetAudience || [], // 표시 대상
             };
         });
     }
