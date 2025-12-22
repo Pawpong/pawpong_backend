@@ -116,4 +116,18 @@ export class BannerResponseDto {
         example: true,
     })
     isActive: boolean;
+
+    /**
+     * 표시 대상 (비어있으면 전체)
+     * @example ["guest", "adopter"]
+     */
+    @ApiProperty({
+        description: '표시 대상 (guest: 비회원, adopter: 입양자, breeder: 브리더). 비어있으면 전체 사용자에게 표시',
+        example: ['guest', 'adopter'],
+        type: [String],
+        enum: ['guest', 'adopter', 'breeder'],
+        isArray: true,
+        required: false,
+    })
+    targetAudience?: string[];
 }
