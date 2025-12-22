@@ -38,6 +38,26 @@ export class ReviewReportItemDto {
     breederName: string;
 
     /**
+     * 후기 작성자 (입양자) 고유 ID
+     * @example "507f1f77bcf86cd799439014"
+     */
+    @ApiProperty({
+        description: '후기 작성자 (입양자) 고유 ID',
+        example: '507f1f77bcf86cd799439014',
+    })
+    authorId: string;
+
+    /**
+     * 후기 작성자 (입양자) 닉네임
+     * @example "입양자456"
+     */
+    @ApiProperty({
+        description: '후기 작성자 (입양자) 닉네임',
+        example: '입양자456',
+    })
+    authorName: string;
+
+    /**
      * 신고자 고유 ID
      * @example "507f1f77bcf86cd799439013"
      */
