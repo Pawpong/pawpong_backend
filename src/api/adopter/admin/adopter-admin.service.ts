@@ -21,6 +21,7 @@ import { BreederReview, BreederReviewDocument } from '../../../schema/breeder-re
 export class AdopterAdminService {
     constructor(
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
+        @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(BreederReview.name) private breederReviewModel: Model<BreederReviewDocument>,
     ) {}
@@ -83,24 +84,49 @@ export class AdopterAdminService {
                 .skip(skip)
                 .limit(limit)
                 .populate('breederId', 'name')
-                .populate('reportedBy', 'nickname')
+                .populate('adopterId', 'nickname')
                 .lean(),
             this.breederReviewModel.countDocuments({ isReported: true }),
         ]);
 
-        const formattedReviews = reviews.map((review: any) => ({
-            reviewId: review._id.toString(),
-            breederId: review.breederId?._id?.toString(),
-            breederName: review.breederId?.name || 'Unknown',
-            reportedBy: review.reportedBy?._id?.toString(),
-            reporterName: review.reportedBy?.nickname || 'Unknown',
-            reportReason: review.reportReason,
-            reportDescription: review.reportDescription,
-            reportedAt: review.reportedAt,
-            content: review.content,
-            writtenAt: review.writtenAt,
-            isVisible: review.isVisible,
-        }));
+        // 신고자 정보를 Adopter와 Breeder 모두에서 조회
+        const formattedReviews = await Promise.all(
+            reviews.map(async (review: any) => {
+                let reporterName = 'Unknown';
+
+                if (review.reportedBy) {
+                    const reporterId = review.reportedBy.toString();
+
+                    // Adopter에서 먼저 조회
+                    const adopter = await this.adopterModel.findById(reporterId).select('nickname').lean();
+                    if (adopter) {
+                        reporterName = adopter.nickname;
+                    } else {
+                        // Adopter에 없으면 Breeder에서 조회
+                        const breeder = await this.breederModel.findById(reporterId).select('name').lean();
+                        if (breeder) {
+                            reporterName = breeder.name;
+                        }
+                    }
+                }
+
+                return {
+                    reviewId: review._id.toString(),
+                    breederId: review.breederId?._id?.toString(),
+                    breederName: review.breederId?.name || 'Unknown',
+                    authorId: review.adopterId?._id?.toString(),
+                    authorName: review.adopterId?.nickname || 'Unknown',
+                    reportedBy: review.reportedBy?.toString(),
+                    reporterName,
+                    reportReason: review.reportReason,
+                    reportDescription: review.reportDescription,
+                    reportedAt: review.reportedAt,
+                    content: review.content,
+                    writtenAt: review.writtenAt,
+                    isVisible: review.isVisible,
+                };
+            }),
+        );
 
         return {
             items: formattedReviews,
