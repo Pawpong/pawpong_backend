@@ -14,20 +14,29 @@ export type BreederDocument = Breeder & Document;
 export class VerificationDocument {
     /**
      * 서류 타입
-     * - id_card: 신분증 사본 (필수 - 모든 레벨)
-     * - animal_production_license: 동물생산업 등록증 (필수 - 모든 레벨)
-     * - adoption_contract_sample: 표준 입양계약서 샘플 (엘리트 필수)
-     * - recent_pedigree_document: 최근 발급된 혈통서 사본 (엘리트 필수)
-     * - breeder_certification: 고양이 브리더 인증 서류 (엘리트 필수)
+     * - id_card / idCard: 신분증 사본 (필수 - 모든 레벨)
+     * - animal_production_license / businessLicense: 동물생산업 등록증 (필수 - 모든 레벨)
+     * - adoption_contract_sample / contractSample: 표준 입양계약서 샘플 (엘리트 필수)
+     * - recent_pedigree_document / pedigreeDocument: 최근 발급된 혈통서 사본 (엘리트 필수)
+     * - breeder_certification / breederCertificate / breederDogCertificate / breederCatCertificate: 브리더 인증 서류 (엘리트 필수)
      */
     @Prop({
         required: true,
         enum: [
+            // snake_case 형식 (새로운 표준)
             'id_card',
             'animal_production_license',
             'adoption_contract_sample',
             'recent_pedigree_document',
             'breeder_certification',
+            // camelCase 형식 (기존 데이터 호환성)
+            'idCard',
+            'businessLicense',
+            'contractSample',
+            'pedigreeDocument',
+            'breederCertificate',
+            'breederDogCertificate',
+            'breederCatCertificate',
         ],
     })
     type: string;
