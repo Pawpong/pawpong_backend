@@ -59,6 +59,7 @@ export class HomeAdminService {
                 description: banner.description,
                 order: banner.order,
                 isActive: banner.isActive !== false, // 기본값 true
+                targetAudience: banner.targetAudience || [],
             };
         });
     }
@@ -85,6 +86,7 @@ export class HomeAdminService {
             description: newBanner.description,
             order: newBanner.order,
             isActive: newBanner.isActive !== false, // 기본값 true
+            targetAudience: newBanner.targetAudience || [],
         };
     }
 
@@ -120,6 +122,7 @@ export class HomeAdminService {
             description: banner.description,
             order: banner.order,
             isActive: banner.isActive !== false, // 기본값 true
+            targetAudience: banner.targetAudience || [],
         };
     }
 
