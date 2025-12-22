@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsString, IsEnum, IsNumber, IsOptional, IsBoolean, Min } from 'class-validator';
+import { IsString, IsEnum, IsNumber, IsOptional, IsBoolean, Min, IsArray, ArrayUnique } from 'class-validator';
 import { Type } from 'class-transformer';
 
 /**
@@ -104,4 +104,21 @@ export class BannerCreateRequestDto {
     @IsOptional()
     @IsString()
     description?: string;
+
+    /**
+     * 표시 대상 (비어있으면 전체)
+     * @example ["guest", "adopter"]
+     */
+    @ApiPropertyOptional({
+        description: '표시 대상 (guest: 비회원, adopter: 입양자, breeder: 브리더). 비어있으면 전체 사용자에게 표시',
+        example: ['guest', 'adopter'],
+        type: [String],
+        enum: ['guest', 'adopter', 'breeder'],
+        isArray: true,
+    })
+    @IsOptional()
+    @IsArray()
+    @IsEnum(['guest', 'adopter', 'breeder'], { each: true })
+    @ArrayUnique()
+    targetAudience?: string[];
 }
