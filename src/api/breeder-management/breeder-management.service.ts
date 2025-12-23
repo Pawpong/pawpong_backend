@@ -187,7 +187,8 @@ export class BreederManagementService {
                 max: updateData.priceRangeInfo.maximumPrice,
             };
         }
-        if (updateData.profileImage) {
+        if (updateData.profileImage !== undefined) {
+            // null이면 삭제, 문자열이면 업데이트
             profileUpdateData['profileImageFileName'] = updateData.profileImage;
         }
         if (updateData.marketingAgreed !== undefined) {
