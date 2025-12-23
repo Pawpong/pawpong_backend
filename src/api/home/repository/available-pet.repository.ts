@@ -13,7 +13,7 @@ export class AvailablePetRepository {
     constructor(@InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>) {}
 
     /**
-     * 입양 가능한 반려동물 목록 조회 (최신순)
+     * 입양 가능한 반려동물 목록 조회 (오래된 순)
      * @param limit 조회할 개수
      * @returns AvailablePet 배열
      */
@@ -24,7 +24,7 @@ export class AvailablePetRepository {
                 isActive: true,
             })
             .populate('breederId', 'name') // 브리더 이름만 조회
-            .sort({ createdAt: -1 }) // 최신순 정렬
+            .sort({ createdAt: 1 }) // 오래된 순 정렬
             .limit(limit)
             .exec() as any;
     }
@@ -49,6 +49,6 @@ export class AvailablePetRepository {
         if (status) {
             query.status = status;
         }
-        return this.availablePetModel.find(query).sort({ createdAt: -1 }).exec() as any;
+        return this.availablePetModel.find(query).sort({ createdAt: 1 }).exec() as any;
     }
 }
