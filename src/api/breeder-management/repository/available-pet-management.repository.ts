@@ -67,7 +67,7 @@ export class AvailablePetManagementRepository {
         const skip = (page - 1) * limit;
 
         const [pets, total] = await Promise.all([
-            this.availablePetModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean() as any,
+            this.availablePetModel.find(filter).sort({ createdAt: 1 }).skip(skip).limit(limit).lean() as any,
             this.availablePetModel.countDocuments(filter),
         ]);
 
