@@ -156,8 +156,9 @@ export class BreederManagementService {
         }
 
         // 각 필드별 업데이트 데이터 구성 (MongoDB 중첩 객체 업데이트)
-        if (updateData.profileDescription) {
-            profileUpdateData['profile.description'] = updateData.profileDescription;
+        if (updateData.profileDescription !== undefined) {
+            // 빈 문자열이나 공백도 허용 (소개글 삭제 가능)
+            profileUpdateData['profile.description'] = updateData.profileDescription.trim();
         }
         if (updateData.locationInfo) {
             profileUpdateData['profile.location'] = {
