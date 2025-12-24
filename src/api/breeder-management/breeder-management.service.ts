@@ -156,8 +156,9 @@ export class BreederManagementService {
         }
 
         // 각 필드별 업데이트 데이터 구성 (MongoDB 중첩 객체 업데이트)
-        if (updateData.profileDescription) {
-            profileUpdateData['profile.description'] = updateData.profileDescription;
+        if (updateData.profileDescription !== undefined) {
+            // 빈 문자열이나 공백도 허용 (소개글 삭제 가능)
+            profileUpdateData['profile.description'] = updateData.profileDescription.trim();
         }
         if (updateData.locationInfo) {
             profileUpdateData['profile.location'] = {
@@ -187,7 +188,8 @@ export class BreederManagementService {
                 max: updateData.priceRangeInfo.maximumPrice,
             };
         }
-        if (updateData.profileImage) {
+        if (updateData.profileImage !== undefined) {
+            // null이면 삭제, 문자열이면 업데이트
             profileUpdateData['profileImageFileName'] = updateData.profileImage;
         }
         if (updateData.marketingAgreed !== undefined) {
@@ -1109,6 +1111,7 @@ export class BreederManagementService {
             marketingAgreed: breeder.marketingAgreed ?? false,
             profileImageFileName: profileImageFileName,
             accountStatus: breeder.accountStatus,
+            petType: breeder.petType,
             verificationInfo: verificationWithSignedUrls,
             profileInfo: profileWithSignedUrls,
             breeds: breeder.breeds || [],
@@ -1523,6 +1526,10 @@ export class BreederManagementService {
             deleteReasonDetail: deleteData?.otherReason || null,
             updatedAt: deletedAt,
         });
+
+        // 브리더의 모든 분양 개체 비활성화 (홈에서 노출되지 않도록)
+        const deactivatedPetsCount = await this.availablePetRepository.deactivateAllByBreeder(userId);
+        this.logger.log(`[deleteBreederAccount] 분양 개체 ${deactivatedPetsCount}개 비활성화 완료`);
 
         // Discord 탈퇴 알림 전송
         await this.discordWebhookService.notifyUserWithdrawal({

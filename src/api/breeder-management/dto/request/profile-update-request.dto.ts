@@ -102,12 +102,12 @@ export class ProfileUpdateRequestDto {
     @ApiProperty({
         description: '브리더 소개 설명',
         example: '20년 경력의 전문 브리더입니다. 건강하고 성격 좋은 반려동물을 분양합니다.',
-        maxLength: 1000,
+        maxLength: 1500,
         required: false,
     })
     @IsString()
     @IsOptional()
-    @MaxLength(1000)
+    @MaxLength(1500)
     profileDescription?: string;
 
     /**
