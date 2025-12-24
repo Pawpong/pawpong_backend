@@ -28,6 +28,7 @@ import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 import { Admin, AdminSchema } from '../../schema/admin.schema';
 import { AuthBanner, AuthBannerSchema } from '../../schema/auth-banner.schema';
 import { CounselBanner, CounselBannerSchema } from '../../schema/counsel-banner.schema';
+import { PhoneWhitelist, PhoneWhitelistSchema } from '../../schema/phone-whitelist.schema';
 
 import { StorageModule } from '../../common/storage/storage.module';
 import { BreederManagementModule } from '../breeder-management/breeder-management.module';
@@ -41,6 +42,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             { name: Admin.name, schema: AdminSchema },
             { name: AuthBanner.name, schema: AuthBannerSchema },
             { name: CounselBanner.name, schema: CounselBannerSchema },
+            { name: PhoneWhitelist.name, schema: PhoneWhitelistSchema },
         ]),
         StorageModule,
         BreederManagementModule,
