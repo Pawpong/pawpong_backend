@@ -1111,6 +1111,7 @@ export class BreederManagementService {
             marketingAgreed: breeder.marketingAgreed ?? false,
             profileImageFileName: profileImageFileName,
             accountStatus: breeder.accountStatus,
+            petType: breeder.petType,
             verificationInfo: verificationWithSignedUrls,
             profileInfo: profileWithSignedUrls,
             breeds: breeder.breeds || [],
