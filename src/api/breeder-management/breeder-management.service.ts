@@ -1526,6 +1526,10 @@ export class BreederManagementService {
             updatedAt: deletedAt,
         });
 
+        // 브리더의 모든 분양 개체 비활성화 (홈에서 노출되지 않도록)
+        const deactivatedPetsCount = await this.availablePetRepository.deactivateAllByBreeder(userId);
+        this.logger.log(`[deleteBreederAccount] 분양 개체 ${deactivatedPetsCount}개 비활성화 완료`);
+
         // Discord 탈퇴 알림 전송
         await this.discordWebhookService.notifyUserWithdrawal({
             userId: userId,

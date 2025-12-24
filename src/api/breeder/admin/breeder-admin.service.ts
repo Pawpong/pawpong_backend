@@ -20,6 +20,7 @@ import { BreederSuspendRequestDto } from './dto/request/breeder-suspend-request.
 import { BreederRemindRequestDto } from './dto/request/breeder-remind-request.dto';
 import { BreederSuspendResponseDto } from './dto/response/breeder-suspend-response.dto';
 import { BreederRemindResponseDto } from './dto/response/breeder-remind-response.dto';
+import { SetTestAccountResponseDto } from './dto/response/set-test-account-response.dto';
 
 import { Admin, AdminDocument } from '../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
@@ -348,6 +349,56 @@ export class BreederAdminService {
             successIds,
             failIds,
             sentAt: new Date(),
+        };
+    }
+
+    /**
+     * 테스트 계정 설정/해제
+     *
+     * 브리더를 테스트 계정으로 설정하거나 해제합니다.
+     * 테스트 계정은 탐색 페이지와 홈 화면에 노출되지 않습니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param breederId 브리더 고유 ID
+     * @param isTestAccount 테스트 계정 여부
+     * @returns 설정 결과
+     */
+    async setTestAccount(
+        adminId: string,
+        breederId: string,
+        isTestAccount: boolean,
+    ): Promise<SetTestAccountResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canManageBreeders) {
+            throw new ForbiddenException('브리더 관리 권한이 없습니다.');
+        }
+
+        const breeder = await this.breederModel.findById(breederId);
+        if (!breeder) {
+            throw new BadRequestException('브리더를 찾을 수 없습니다.');
+        }
+
+        breeder.isTestAccount = isTestAccount;
+        await breeder.save();
+
+        const actionDescription = isTestAccount
+            ? 'Set as test account (hidden from explore)'
+            : 'Removed from test account (visible in explore)';
+
+        await this.logAdminActivity(
+            adminId,
+            'SET_TEST_ACCOUNT' as AdminAction,
+            AdminTargetType.BREEDER,
+            breederId,
+            breeder.name,
+            actionDescription,
+        );
+
+        return {
+            breederId,
+            breederName: breeder.name,
+            isTestAccount,
+            updatedAt: new Date(),
         };
     }
 }

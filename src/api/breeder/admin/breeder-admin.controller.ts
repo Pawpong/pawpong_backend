@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Param, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
 
 import { Roles } from '../../../common/decorator/roles.decorator';
 import { CurrentUser } from '../../../common/decorator/user.decorator';
@@ -11,10 +11,12 @@ import { BreederAdminService } from './breeder-admin.service';
 import { ApplicationMonitoringRequestDto } from './dto/request/application-monitoring-request.dto';
 import { BreederSuspendRequestDto } from './dto/request/breeder-suspend-request.dto';
 import { BreederRemindRequestDto } from './dto/request/breeder-remind-request.dto';
+import { SetTestAccountRequestDto } from './dto/request/set-test-account-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { ApplicationMonitoringResponseDto } from './dto/response/application-monitoring-response.dto';
 import { BreederSuspendResponseDto } from './dto/response/breeder-suspend-response.dto';
 import { BreederRemindResponseDto } from './dto/response/breeder-remind-response.dto';
+import { SetTestAccountResponseDto } from './dto/response/set-test-account-response.dto';
 
 /**
  * 브리더 관리 Admin 컨트롤러
@@ -97,5 +99,23 @@ export class BreederAdminController {
     ): Promise<ApiResponseDto<BreederRemindResponseDto>> {
         const result = await this.breederAdminService.sendRemindNotifications(user.userId, remindData);
         return ApiResponseDto.success(result, `${result.successCount}명에게 리마인드 알림이 발송되었습니다.`);
+    }
+
+    @Patch('test-account/:breederId')
+    @ApiEndpoint({
+        summary: '테스트 계정 설정',
+        description:
+            '브리더를 테스트 계정으로 설정하거나 해제합니다. 테스트 계정은 탐색 페이지와 홈 화면에 노출되지 않습니다.',
+        responseType: SetTestAccountResponseDto,
+        isPublic: false,
+    })
+    async setTestAccount(
+        @CurrentUser() user: any,
+        @Param('breederId') breederId: string,
+        @Body() dto: SetTestAccountRequestDto,
+    ): Promise<ApiResponseDto<SetTestAccountResponseDto>> {
+        const result = await this.breederAdminService.setTestAccount(user.userId, breederId, dto.isTestAccount);
+        const message = dto.isTestAccount ? '테스트 계정으로 설정되었습니다.' : '테스트 계정이 해제되었습니다.';
+        return ApiResponseDto.success(result, message);
     }
 }
