@@ -6,6 +6,7 @@ import CoolsmsMessageService from 'coolsms-node-sdk';
 
 import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
+import { PhoneWhitelist, PhoneWhitelistDocument } from '../../schema/phone-whitelist.schema';
 
 interface VerificationCode {
     phone: string;
@@ -21,13 +22,12 @@ export class SmsService {
     private verificationCodes: Map<string, VerificationCode> = new Map();
     private readonly MAX_ATTEMPTS = 5;
     private readonly CODE_EXPIRY_MINUTES = 3;
-    // 관리자 전화번호 화이트리스트 (중복 가입 허용)
-    private readonly ADMIN_PHONE_WHITELIST = ['01065456502', '01094458342', '01041657943', '01040587805', '01053208154'];
 
     constructor(
         private readonly configService: ConfigService,
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
+        @InjectModel(PhoneWhitelist.name) private phoneWhitelistModel: Model<PhoneWhitelistDocument>,
     ) {
         const apiKey = this.configService.get<string>('COOLSMS_API_KEY');
         const apiSecret = this.configService.get<string>('COOLSMS_API_SECRET');
@@ -37,11 +37,22 @@ export class SmsService {
         }
     }
 
+    /**
+     * 전화번호가 화이트리스트에 있는지 확인 (DB 조회)
+     */
+    private async isPhoneWhitelisted(phoneNumber: string): Promise<boolean> {
+        const whitelist = await this.phoneWhitelistModel
+            .findOne({ phoneNumber, isActive: true })
+            .lean()
+            .exec();
+        return !!whitelist;
+    }
+
     async sendVerificationCode(phone: string): Promise<{ success: boolean; message: string }> {
         const normalizedPhone = this.normalizePhoneNumber(phone);
 
-        // 관리자 전화번호 화이트리스트 체크 (중복 허용)
-        const isWhitelisted = this.ADMIN_PHONE_WHITELIST.includes(normalizedPhone);
+        // 전화번호 화이트리스트 체크 (DB 조회, 중복 허용)
+        const isWhitelisted = await this.isPhoneWhitelisted(normalizedPhone);
 
         // 전화번호 중복 체크 (화이트리스트에 없는 경우만)
         if (!isWhitelisted) {
