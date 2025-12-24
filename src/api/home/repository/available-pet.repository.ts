@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { AvailablePet, AvailablePetDocument } from '../../../schema/available-pet.schema';
+import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 
 /**
  * AvailablePet Repository
@@ -10,21 +11,34 @@ import { AvailablePet, AvailablePetDocument } from '../../../schema/available-pe
  */
 @Injectable()
 export class AvailablePetRepository {
-    constructor(@InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>) {}
+    constructor(
+        @InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>,
+        @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
+    ) {}
 
     /**
      * 입양 가능한 반려동물 목록 조회 (오래된 순)
+     * 탈퇴/정지된 브리더의 개체는 제외
      * @param limit 조회할 개수
      * @returns AvailablePet 배열
      */
     async findAvailablePets(limit: number = 10): Promise<AvailablePetDocument[]> {
+        // 활성 상태인 브리더 ID 목록 조회
+        const activeBreeders = await this.breederModel
+            .find({ accountStatus: 'active' })
+            .select('_id')
+            .lean()
+            .exec();
+        const activeBreederIds = activeBreeders.map((b) => b._id);
+
         return this.availablePetModel
             .find({
                 status: 'available',
                 isActive: true,
+                breederId: { $in: activeBreederIds }, // 활성 브리더의 개체만 조회
             })
-            .populate('breederId', 'name') // 브리더 이름만 조회
-            .sort({ createdAt: 1 }) // 오래된 순 정렬
+            .populate('breederId', 'name')
+            .sort({ createdAt: 1 })
             .limit(limit)
             .exec() as any;
     }
