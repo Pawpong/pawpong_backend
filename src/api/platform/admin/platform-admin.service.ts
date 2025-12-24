@@ -426,7 +426,7 @@ export class PlatformAdminService {
         const saved = await whitelist.save();
 
         return {
-            id: saved._id.toString(),
+            id: (saved._id as any).toString(),
             phoneNumber: saved.phoneNumber,
             description: saved.description,
             isActive: saved.isActive,
@@ -458,7 +458,7 @@ export class PlatformAdminService {
         const saved = await whitelist.save();
 
         return {
-            id: saved._id.toString(),
+            id: (saved._id as any).toString(),
             phoneNumber: saved.phoneNumber,
             description: saved.description,
             isActive: saved.isActive,
