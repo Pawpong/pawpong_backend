@@ -54,6 +54,7 @@ export class BreederExploreService {
             'verification.status': 'approved', // 승인된 브리더만
             accountStatus: 'active', // 활성 상태만
             petType: petType, // 반려동물 타입
+            isTestAccount: { $ne: true }, // 테스트 계정 제외
         };
 
         // 품종 필터
@@ -231,6 +232,7 @@ export class BreederExploreService {
             .find({
                 'verification.status': 'approved',
                 accountStatus: 'active',
+                isTestAccount: { $ne: true }, // 테스트 계정 제외
             })
             .sort({ 'stats.totalFavorites': -1, 'stats.averageRating': -1 })
             .limit(limit)

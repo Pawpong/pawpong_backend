@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -9,10 +9,13 @@ import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
 import { SystemStats, SystemStatsDocument } from '../../../schema/system-stats.schema';
 import { AdoptionApplication, AdoptionApplicationDocument } from '../../../schema/adoption-application.schema';
+import { PhoneWhitelist, PhoneWhitelistDocument } from '../../../schema/phone-whitelist.schema';
 
 import { StatsFilterRequestDto } from './dto/request/stats-filter-request.dto';
 import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
 import { MvpStatsResponseDto } from './dto/response/mvp-stats-response.dto';
+import { AddPhoneWhitelistRequestDto, UpdatePhoneWhitelistRequestDto } from './dto/request/phone-whitelist-request.dto';
+import { PhoneWhitelistResponseDto, PhoneWhitelistListResponseDto } from './dto/response/phone-whitelist-response.dto';
 
 /**
  * 플랫폼 Admin 서비스
@@ -34,6 +37,7 @@ export class PlatformAdminService {
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
         @InjectModel(SystemStats.name) private systemStatsModel: Model<SystemStatsDocument>,
         @InjectModel(AdoptionApplication.name) private adoptionApplicationModel: Model<AdoptionApplicationDocument>,
+        @InjectModel(PhoneWhitelist.name) private phoneWhitelistModel: Model<PhoneWhitelistDocument>,
     ) {}
 
     /**
@@ -375,5 +379,104 @@ export class PlatformAdminService {
                 resubmissionApprovalRate: Math.round(resubmissionApprovalRate),
             },
         };
+    }
+
+    // ================== 전화번호 화이트리스트 관리 ==================
+
+    /**
+     * 전화번호 화이트리스트 목록 조회
+     */
+    async getPhoneWhitelist(): Promise<PhoneWhitelistListResponseDto> {
+        const items = await this.phoneWhitelistModel.find().sort({ createdAt: -1 }).lean().exec();
+
+        return {
+            items: items.map((item) => ({
+                id: item._id.toString(),
+                phoneNumber: item.phoneNumber,
+                description: item.description,
+                isActive: item.isActive,
+                createdBy: item.createdBy,
+                createdAt: item.createdAt,
+                updatedAt: item.updatedAt,
+            })),
+            total: items.length,
+        };
+    }
+
+    /**
+     * 전화번호 화이트리스트 추가
+     */
+    async addPhoneWhitelist(
+        adminId: string,
+        dto: AddPhoneWhitelistRequestDto,
+    ): Promise<PhoneWhitelistResponseDto> {
+        // 중복 확인
+        const existing = await this.phoneWhitelistModel.findOne({ phoneNumber: dto.phoneNumber }).exec();
+        if (existing) {
+            throw new BadRequestException('이미 화이트리스트에 등록된 전화번호입니다.');
+        }
+
+        const whitelist = new this.phoneWhitelistModel({
+            phoneNumber: dto.phoneNumber,
+            description: dto.description,
+            isActive: true,
+            createdBy: adminId,
+        });
+
+        const saved = await whitelist.save();
+
+        return {
+            id: (saved._id as any).toString(),
+            phoneNumber: saved.phoneNumber,
+            description: saved.description,
+            isActive: saved.isActive,
+            createdBy: saved.createdBy,
+            createdAt: saved.createdAt,
+            updatedAt: saved.updatedAt,
+        };
+    }
+
+    /**
+     * 전화번호 화이트리스트 수정
+     */
+    async updatePhoneWhitelist(
+        id: string,
+        dto: UpdatePhoneWhitelistRequestDto,
+    ): Promise<PhoneWhitelistResponseDto> {
+        const whitelist = await this.phoneWhitelistModel.findById(id).exec();
+        if (!whitelist) {
+            throw new BadRequestException('화이트리스트를 찾을 수 없습니다.');
+        }
+
+        if (dto.description !== undefined) {
+            whitelist.description = dto.description;
+        }
+        if (dto.isActive !== undefined) {
+            whitelist.isActive = dto.isActive;
+        }
+
+        const saved = await whitelist.save();
+
+        return {
+            id: (saved._id as any).toString(),
+            phoneNumber: saved.phoneNumber,
+            description: saved.description,
+            isActive: saved.isActive,
+            createdBy: saved.createdBy,
+            createdAt: saved.createdAt,
+            updatedAt: saved.updatedAt,
+        };
+    }
+
+    /**
+     * 전화번호 화이트리스트 삭제
+     */
+    async deletePhoneWhitelist(id: string): Promise<{ message: string }> {
+        const result = await this.phoneWhitelistModel.findByIdAndDelete(id).exec();
+        if (!result) {
+            throw new BadRequestException('화이트리스트를 찾을 수 없습니다.');
+        }
+
+        return { message: '화이트리스트가 삭제되었습니다.' };
     }
 }
