@@ -142,8 +142,12 @@ export class BreederController {
         responseType: [ParentPetListResponseDto],
         isPublic: true,
     })
-    async getParentPets(@Param('id') breederId: string): Promise<ApiResponseDto<ParentPetListResponseDto[]>> {
-        const result = await this.breederService.getParentPets(breederId);
+    async getParentPets(
+        @Param('id') breederId: string,
+        @Query('page') page?: number,
+        @Query('limit') limit?: number,
+    ): Promise<ApiResponseDto<ParentPetListResponseDto[]>> {
+        const result = await this.breederService.getParentPets(breederId, page, limit);
         return ApiResponseDto.success(result, '부모견/부모묘 목록이 조회되었습니다.');
     }
 
