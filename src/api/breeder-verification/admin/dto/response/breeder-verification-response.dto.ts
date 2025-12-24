@@ -47,6 +47,18 @@ export class BreederVerificationResponseDto {
     accountStatus?: string;
 
     /**
+     * 테스트 계정 여부
+     * 테스트 계정은 탐색 페이지와 홈 화면에 노출되지 않습니다.
+     * @example false
+     */
+    @ApiProperty({
+        description: '테스트 계정 여부',
+        example: false,
+        required: false,
+    })
+    isTestAccount?: boolean;
+
+    /**
      * 인증 정보
      */
     @ApiProperty({
