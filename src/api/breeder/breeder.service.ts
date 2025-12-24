@@ -412,10 +412,12 @@ export class BreederService {
      * ParentPet은 별도 컬렉션으로 관리되며, 사진은 Signed URL로 변환합니다.
      *
      * @param breederId 브리더 ID
+     * @param page 페이지 번호 (기본값: 1)
+     * @param limit 페이지당 개수 (기본값: 전체)
      * @returns 부모견/부모묘 목록
      * @throws BadRequestException 존재하지 않는 브리더
      */
-    async getParentPets(breederId: string): Promise<any> {
+    async getParentPets(breederId: string, page?: number, limit?: number): Promise<any> {
         // ObjectId 형식 검증
         if (!Types.ObjectId.isValid(breederId)) {
             throw new BadRequestException('올바르지 않은 브리더 ID 형식입니다.');
@@ -427,10 +429,23 @@ export class BreederService {
             throw new BadRequestException('브리더를 찾을 수 없습니다.');
         }
 
+        // 페이지네이션 설정
+        const currentPage = page && page > 0 ? page : 1;
+        const itemsPerPage = limit && limit > 0 ? limit : 0; // 0이면 전체 조회
+        const skip = itemsPerPage > 0 ? (currentPage - 1) * itemsPerPage : 0;
+
         // ParentPet 컬렉션에서 활성화된 부모견/부모묘 조회
-        const parentPets = await this.parentPetModel
-            .find({ breederId: new Types.ObjectId(breederId), isActive: true })
-            .lean();
+        let query = this.parentPetModel.find({ breederId: new Types.ObjectId(breederId), isActive: true });
+
+        // 페이지네이션 적용
+        if (itemsPerPage > 0) {
+            query = query.skip(skip).limit(itemsPerPage);
+        }
+
+        const [parentPets, totalCount] = await Promise.all([
+            query.lean(),
+            this.parentPetModel.countDocuments({ breederId: new Types.ObjectId(breederId), isActive: true }),
+        ]);
 
         // 데이터 변환 (사진 URL은 Signed URL로 변환)
         const items = parentPets.map((pet: any) => ({
@@ -444,7 +459,23 @@ export class BreederService {
             description: pet.description || '',
         }));
 
-        return { items };
+        // 페이지네이션 정보
+        const totalPages = itemsPerPage > 0 ? Math.ceil(totalCount / itemsPerPage) : 1;
+        const hasNextPage = itemsPerPage > 0 && currentPage < totalPages;
+        const hasPrevPage = currentPage > 1;
+
+        return {
+            items,
+            pagination: itemsPerPage > 0
+                ? {
+                      currentPage,
+                      totalPages,
+                      totalCount,
+                      hasNextPage,
+                      hasPrevPage,
+                  }
+                : undefined,
+        };
     }
 
     /**
