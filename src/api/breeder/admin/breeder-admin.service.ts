@@ -387,7 +387,7 @@ export class BreederAdminService {
 
         await this.logAdminActivity(
             adminId,
-            'SET_TEST_ACCOUNT' as AdminAction,
+            'set_test_account' as AdminAction,
             AdminTargetType.BREEDER,
             breederId,
             breeder.name,

@@ -69,6 +69,7 @@ export class AdminActivityLog {
             'delete_review', // 후기 삭제
             'view_user_list', // 사용자 목록 조회
             'view_statistics', // 통계 조회
+            'set_test_account', // 테스트 계정 설정/해제
         ],
     })
     action: string;
