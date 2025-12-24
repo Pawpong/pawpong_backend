@@ -133,9 +133,9 @@ export class HomeService {
         const validLimit = Math.min(limit, 50);
         this.logger.log(`[getAvailablePets] 분양 가능한 반려동물 ${validLimit}개 조회 시작`);
 
-        // 활성 상태의 브리더 ID 목록 조회 (탈퇴/정지 브리더 제외)
+        // 활성 상태의 브리더 ID 목록 조회 (탈퇴/정지/테스트 브리더 제외)
         const activeBreeders = await this.breederModel
-            .find({ accountStatus: 'active' })
+            .find({ accountStatus: 'active', isTestAccount: { $ne: true } })
             .select('_id')
             .lean()
             .exec();
