@@ -234,6 +234,7 @@ export class BreederService {
                 birthDate: pet.birthDate,
                 price: pet.price,
                 status: pet.status,
+                description: pet.description || '',
                 photo: pet.photos?.[0] ? this.storageService.generateSignedUrl(pet.photos[0], 60 * 24) : '',
             })),
             parentPets: (breeder.parentPets?.filter((pet: any) => pet.isActive) || []).map((pet: any) => ({
@@ -515,6 +516,7 @@ export class BreederService {
                 ageInMonths,
                 price: pet.price,
                 status: pet.status,
+                description: pet.description || '',
                 mainPhoto: pet.photos?.[0] ? this.storageService.generateSignedUrl(pet.photos[0], 60 * 24) : '',
                 photoCount: pet.photos?.length || 0,
                 isVaccinated: (pet.vaccinations?.length || 0) > 0,
