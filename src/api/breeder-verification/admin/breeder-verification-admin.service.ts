@@ -267,7 +267,7 @@ export class BreederVerificationAdminService {
             breeder.verification.rejectionReason = verificationData.rejectionReason;
         }
 
-        await breeder.save();
+        await breeder.save({ validateBeforeSave: false });
 
         // Log admin activity
         let action: AdminAction;
