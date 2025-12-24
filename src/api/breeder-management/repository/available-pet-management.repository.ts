@@ -67,7 +67,7 @@ export class AvailablePetManagementRepository {
         const skip = (page - 1) * limit;
 
         const [pets, total] = await Promise.all([
-            this.availablePetModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean() as any,
+            this.availablePetModel.find(filter).sort({ createdAt: 1 }).skip(skip).limit(limit).lean() as any,
             this.availablePetModel.countDocuments(filter),
         ]);
 
@@ -138,5 +138,18 @@ export class AvailablePetManagementRepository {
      */
     async delete(id: string): Promise<AvailablePetDocument | null> {
         return this.availablePetModel.findByIdAndDelete(id).exec() as any;
+    }
+
+    /**
+     * 브리더의 모든 AvailablePet 비활성화 (탈퇴 시 사용)
+     * @param breederId 브리더 ID
+     * @returns 비활성화된 개체 수
+     */
+    async deactivateAllByBreeder(breederId: string): Promise<number> {
+        const result = await this.availablePetModel.updateMany(
+            { breederId: new Types.ObjectId(breederId), isActive: true },
+            { $set: { isActive: false, updatedAt: new Date() } },
+        );
+        return result.modifiedCount;
     }
 }

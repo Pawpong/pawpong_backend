@@ -47,7 +47,7 @@ export class ParentPetRepository {
         if (isActive !== undefined) {
             query.isActive = isActive;
         }
-        return this.parentPetModel.find(query).sort({ createdAt: -1 }).exec() as any;
+        return this.parentPetModel.find(query).sort({ createdAt: 1 }).exec() as any;
     }
 
     /**

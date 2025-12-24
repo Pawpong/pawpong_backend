@@ -405,6 +405,13 @@ export class Breeder extends User {
      */
     @Prop({ type: [BreederReportInfo], default: [] })
     reports: BreederReportInfo[];
+
+    /**
+     * 테스트/관리자 계정 여부
+     * true인 경우 탐색 페이지와 홈 화면에서 노출되지 않음
+     */
+    @Prop({ default: false })
+    isTestAccount: boolean;
 }
 
 /**

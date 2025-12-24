@@ -24,6 +24,7 @@ export class HomeService {
         @InjectModel(Faq.name) private faqModel: Model<FaqDocument>,
         @InjectModel(Banner.name) private bannerModel: Model<BannerDocument>,
         @InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>,
+        @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
 
         private readonly storageService: StorageService,
     ) {}
@@ -124,6 +125,7 @@ export class HomeService {
     /**
      * 분양 가능한 반려동물 목록 조회
      * AvailablePet 컬렉션에서 직접 조회
+     * 탈퇴/정지된 브리더의 개체는 제외
      * @param limit 조회 개수 (기본: 10, 최대: 50)
      */
     async getAvailablePets(limit: number = 10): Promise<any[]> {
@@ -131,11 +133,22 @@ export class HomeService {
         const validLimit = Math.min(limit, 50);
         this.logger.log(`[getAvailablePets] 분양 가능한 반려동물 ${validLimit}개 조회 시작`);
 
-        // AvailablePet 컬렉션에서 분양 가능한 개체 조회
+        // 활성 상태의 브리더 ID 목록 조회 (탈퇴/정지/테스트 브리더 제외)
+        const activeBreeders = await this.breederModel
+            .find({ accountStatus: 'active', isTestAccount: { $ne: true } })
+            .select('_id')
+            .lean()
+            .exec();
+        const activeBreederIds = activeBreeders.map((b) => b._id);
+
+        this.logger.log(`[getAvailablePets] 활성 브리더 ${activeBreederIds.length}명 확인`);
+
+        // AvailablePet 컬렉션에서 분양 가능한 개체 조회 (활성 브리더만)
         const pets = await this.availablePetModel
             .find({
                 status: 'available',
                 isActive: true,
+                breederId: { $in: activeBreederIds },
             })
             .populate('breederId', 'name profile')
             .limit(validLimit)
