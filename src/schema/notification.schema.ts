@@ -55,11 +55,15 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; bo
         body: '어떠셨는지 후기를 남겨주세요.',
     },
     [NotificationType.DOCUMENT_REMINDER]: {
-        title: '🐾 브리더 입점 절차가 아직 완료되지 않았어요!',
+        title: '📄 브리더 입점 절차가 아직 완료되지 않았어요!',
         body: '필요한 서류들을 제출하시면 입양자에게 프로필이 공개됩니다.',
     },
+    [NotificationType.PROFILE_COMPLETION_REMINDER]: {
+        title: '📝 브리더 프로필이 아직 완성되지 않았어요!',
+        body: '프로필 작성을 마무리하면 입양자에게 노출되고 상담을 받을 수 있어요.',
+    },
     [NotificationType.NEW_REVIEW_REGISTERED]: {
-        title: '새로운 후기가 등록되었어요!',
+        title: '⭐ 새로운 후기가 등록되었어요!',
         body: '브리더 프로필에서 후기를 확인해 보세요.',
     },
     [NotificationType.NEW_PET_REGISTERED]: {
