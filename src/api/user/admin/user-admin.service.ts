@@ -87,7 +87,8 @@ export class UserAdminService {
         let users: any[] = [];
         let total = 0;
 
-        if (!userRole || userRole === 'adopter') {
+        // 특정 역할만 조회하는 경우
+        if (userRole === 'adopter') {
             const adopterQuery: any = {};
             if (accountStatus) adopterQuery.accountStatus = accountStatus;
             if (searchKeyword) {
@@ -102,17 +103,15 @@ export class UserAdminService {
                     .find(adopterQuery)
                     .select('nickname emailAddress accountStatus lastLoginAt createdAt')
                     .sort({ createdAt: -1 })
-                    .skip(userRole === 'adopter' ? skip : 0)
-                    .limit(userRole === 'adopter' ? limit : limit / 2)
+                    .skip(skip)
+                    .limit(limit)
                     .lean(),
                 this.adopterModel.countDocuments(adopterQuery),
             ]);
 
             users.push(...adopterResults.map((user) => ({ ...user, role: 'adopter' })));
-            total += adopterTotal;
-        }
-
-        if (!userRole || userRole === 'breeder') {
+            total = adopterTotal;
+        } else if (userRole === 'breeder') {
             const breederQuery: any = {};
             if (accountStatus) breederQuery.accountStatus = accountStatus;
             if (searchKeyword) {
@@ -127,14 +126,68 @@ export class UserAdminService {
                     .find(breederQuery)
                     .select('name emailAddress accountStatus lastLoginAt createdAt stats')
                     .sort({ createdAt: -1 })
-                    .skip(userRole === 'breeder' ? skip : 0)
-                    .limit(userRole === 'breeder' ? limit : limit / 2)
+                    .skip(skip)
+                    .limit(limit)
                     .lean(),
                 this.breederModel.countDocuments(breederQuery),
             ]);
 
             users.push(...breederResults.map((user) => ({ ...user, role: 'breeder' })));
-            total += breederTotal;
+            total = breederTotal;
+        } else {
+            // 전체 사용자 조회 (입양자 + 브리더)
+            const adopterQuery: any = {};
+            const breederQuery: any = {};
+
+            if (accountStatus) {
+                adopterQuery.accountStatus = accountStatus;
+                breederQuery.accountStatus = accountStatus;
+            }
+            if (searchKeyword) {
+                adopterQuery.$or = [
+                    { nickname: new RegExp(searchKeyword, 'i') },
+                    { emailAddress: new RegExp(searchKeyword, 'i') },
+                ];
+                breederQuery.$or = [
+                    { name: new RegExp(searchKeyword, 'i') },
+                    { emailAddress: new RegExp(searchKeyword, 'i') },
+                ];
+            }
+
+            // 전체 개수 조회
+            const [adopterTotal, breederTotal] = await Promise.all([
+                this.adopterModel.countDocuments(adopterQuery),
+                this.breederModel.countDocuments(breederQuery),
+            ]);
+
+            total = adopterTotal + breederTotal;
+
+            // 모든 사용자를 가져와서 병합 후 정렬 (페이지네이션은 메모리에서 처리)
+            const [adopterResults, breederResults] = await Promise.all([
+                this.adopterModel
+                    .find(adopterQuery)
+                    .select('nickname emailAddress accountStatus lastLoginAt createdAt')
+                    .sort({ createdAt: -1 })
+                    .lean(),
+                this.breederModel
+                    .find(breederQuery)
+                    .select('name emailAddress accountStatus lastLoginAt createdAt stats')
+                    .sort({ createdAt: -1 })
+                    .lean(),
+            ]);
+
+            // 입양자와 브리더 병합 및 createdAt 기준 정렬
+            const allUsers = [
+                ...adopterResults.map((user) => ({ ...user, role: 'adopter' })),
+                ...breederResults.map((user) => ({ ...user, role: 'breeder' })),
+            ].sort((a, b) => {
+                const dateA = new Date(a.createdAt || 0).getTime();
+                const dateB = new Date(b.createdAt || 0).getTime();
+                return dateB - dateA; // 최신순
+            });
+
+            // 페이지네이션 적용
+            users = allUsers.slice(skip, skip + limit);
         }
 
         const items = users.map(
