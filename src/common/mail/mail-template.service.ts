@@ -262,6 +262,43 @@ export class MailTemplateService {
     }
 
     /**
+     * [6] 프로필 완성 독려 이메일
+     */
+    getProfileCompletionReminderEmail(breederName: string): { subject: string; html: string } {
+        const displayBreederName = breederName || '브리더';
+
+        const content = `
+            <h2>안녕하세요, ${displayBreederName}님! 포퐁(Pawpong)입니다.</h2>
+
+            <p>입점 승인이 완료된 이후, 아직 <strong>브리더 프로필 정보가 모두 등록되지 않아</strong> 입양자에게 노출되지 않고 있어요.</p>
+
+            <p>포퐁에서는 브리더님의 소개, 환경, 분양 중인 아이 정보가 등록되어야 입양자와의 상담이 시작될 수 있어요.</p>
+
+            <div class="highlight">
+                <h3>✅ 지금 하면 좋아요</h3>
+                <ul>
+                    <li><strong>브리더 소개글 작성:</strong> 어떤 기준으로 브리딩을 하고 계신지 알려주세요. 브리더님의 개성과 전문성을 잘 드러나게 작성해주시면 좋아요!</li>
+                    <li><strong>환경 사진 등록:</strong> 아이들이 지내는 공간은 입양자분들이 가장 궁금해하는 정보예요.</li>
+                    <li><strong>분양 중인 아이 등록:</strong> 사진과 설명이 자세할수록 상담 신청 확률이 높아져요.</li>
+                </ul>
+            </div>
+
+            <p>조금만 더 작성해주시면, 브리더님의 아이들을 더 많은 입양자에게 소개해드릴 수 있어요 🐶🐱</p>
+
+            <p style="text-align: center;">
+                <a href="${this.baseUrl}" class="button">포퐁 바로가기</a>
+            </p>
+
+            <p>감사합니다.</p>
+        `;
+
+        return {
+            subject: '[포퐁] 브리더 프로필을 완성해주세요 🐾',
+            html: this.getEmailLayout(content),
+        };
+    }
+
+    /**
      * [5] 신규 후기 등록 알림 이메일 (브리더용)
      */
     getNewReviewEmail(breederName: string): { subject: string; html: string } {

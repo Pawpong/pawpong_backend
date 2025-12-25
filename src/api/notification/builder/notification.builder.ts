@@ -19,6 +19,7 @@ export interface NotificationCreateData {
     relatedId?: string;
     relatedType?: string;
     metadata?: Record<string, any>;
+    targetUrl?: string;
 }
 
 export interface NotificationSendResult {
@@ -62,6 +63,7 @@ export class NotificationBuilder {
     private relatedResourceId?: string;
     private relatedResourceType?: string;
     private notificationMetadata?: Record<string, any>;
+    private notificationTargetUrl?: string;
     private emailData?: EmailData;
 
     constructor(
@@ -117,6 +119,16 @@ export class NotificationBuilder {
     }
 
     /**
+     * 클릭 시 이동할 URL 설정 (선택적)
+     * @example
+     * .targetUrl('/breeder/verification')
+     */
+    targetUrl(url: string): this {
+        this.notificationTargetUrl = url;
+        return this;
+    }
+
+    /**
      * 이메일 발송 설정 (선택적)
      * 서비스 알림과 함께 이메일도 발송합니다.
      */
@@ -150,6 +162,7 @@ export class NotificationBuilder {
             relatedId: this.relatedResourceId,
             relatedType: this.relatedResourceType,
             metadata: this.notificationMetadata,
+            targetUrl: this.notificationTargetUrl,
         });
 
         // 2. 이메일 발송 (비동기, 결과를 기다리지 않음 - 내부에서 fire-and-forget 처리)

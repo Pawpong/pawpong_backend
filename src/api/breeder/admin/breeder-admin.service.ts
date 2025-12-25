@@ -274,7 +274,9 @@ export class BreederAdminService {
     /**
      * 리마인드 알림 발송
      *
-     * 서류 미제출 브리더들에게 리마인드 알림을 발송합니다.
+     * 브리더들에게 리마인드 알림을 발송합니다.
+     * - DOCUMENT_REMINDER: 서류 미제출 브리더 대상 (입점 심사 독촉)
+     * - PROFILE_COMPLETION_REMINDER: 프로필 미완성 브리더 대상 (프로필 완성 독려)
      *
      * @param adminId 관리자 고유 ID
      * @param remindData 리마인드 데이터
@@ -300,40 +302,123 @@ export class BreederAdminService {
                     continue;
                 }
 
-                // 서류 미제출 상태 확인
-                if (breeder.verification?.status === VerificationStatus.PENDING) {
-                    // 서비스 알림 + 이메일 발송 (빌더 통합)
-                    const emailContent = breeder.emailAddress
-                        ? this.mailTemplateService.getDocumentReminderEmail(breeder.nickname)
-                        : null;
+                // remindType에 따라 다른 알림 발송
+                if (remindData.remindType === 'document_reminder') {
+                    // [4] 입점 심사 독촉 알림
+                    // 서류 미제출 상태(PENDING) 확인
+                    if (breeder.verification?.status === VerificationStatus.PENDING) {
+                        // 이메일 템플릿 생성
+                        const emailContent = this.mailTemplateService.getDocumentReminderEmail(breeder.nickname || '브리더');
 
-                    const builder = this.notificationService
-                        .to(breederId, RecipientType.BREEDER)
-                        .type(NotificationType.DOCUMENT_REMINDER)
-                        .title('📄 브리더 입점 절차가 아직 완료되지 않았어요!')
-                        .content('필요한 서류들을 제출하시면 입양자에게 프로필이 공개됩니다.')
-                        .related(breederId, 'verification');
-
-                    if (emailContent && breeder.emailAddress) {
-                        builder.withEmail({
-                            to: breeder.emailAddress,
-                            subject: emailContent.subject,
-                            html: emailContent.html,
+                        console.log('📧 [입점 심사 독촉] 이메일 발송 준비:', {
+                            breederId,
+                            breederName: breeder.nickname,
+                            emailAddress: breeder.emailAddress,
+                            hasEmailContent: !!emailContent,
+                            subject: emailContent?.subject,
                         });
+
+                        // 서비스 알림 빌더 (입점 서류 수정 화면으로 이동하도록 설정)
+                        const builder = this.notificationService
+                            .to(breederId, RecipientType.BREEDER)
+                            .type(NotificationType.DOCUMENT_REMINDER)
+                            .title('📄 브리더 입점 절차가 아직 완료되지 않았어요!')
+                            .content('필요한 서류들을 제출하시면 입양자에게 프로필이 공개됩니다.')
+                            .targetUrl('/profile/documents'); // 입점 서류 수정 화면으로 이동
+
+                        // 이메일 주소가 있으면 이메일 발송 추가
+                        if (breeder.emailAddress) {
+                            console.log('✅ [입점 심사 독촉] 이메일 발송 추가됨:', breeder.emailAddress);
+                            builder.withEmail({
+                                to: breeder.emailAddress,
+                                subject: emailContent.subject,
+                                html: emailContent.html,
+                            });
+                        } else {
+                            console.log('⚠️ [입점 심사 독촉] 이메일 주소 없음');
+                        }
+
+                        await builder.send();
+
+                        await this.logAdminActivity(
+                            adminId,
+                            'SEND_REMINDER' as AdminAction,
+                            AdminTargetType.BREEDER,
+                            breederId,
+                            breeder.nickname,
+                            'Sent document submission reminder',
+                        );
+
+                        successIds.push(breederId);
+                    } else {
+                        failIds.push(breederId);
                     }
-
-                    await builder.send();
-
-                    await this.logAdminActivity(
-                        adminId,
-                        'SEND_REMINDER' as AdminAction,
-                        AdminTargetType.BREEDER,
+                } else if (remindData.remindType === 'profile_completion_reminder') {
+                    // [6] 프로필 완성 독려 알림
+                    // 입점 승인(APPROVED)되었지만 프로필이 미완성인 브리더 대상
+                    console.log('📝 [프로필 완성 독려] 브리더 상태 확인:', {
                         breederId,
-                        breeder.nickname,
-                        'Sent document submission reminder',
-                    );
+                        breederName: breeder.nickname,
+                        verificationStatus: breeder.verification?.status,
+                        isApproved: breeder.verification?.status === VerificationStatus.APPROVED,
+                    });
 
-                    successIds.push(breederId);
+                    if (breeder.verification?.status === VerificationStatus.APPROVED) {
+                        // 이메일 템플릿 생성
+                        const emailContent = this.mailTemplateService.getProfileCompletionReminderEmail(
+                            breeder.nickname || '브리더',
+                        );
+
+                        console.log('📧 [프로필 완성 독려] 이메일 발송 준비:', {
+                            breederId,
+                            breederName: breeder.nickname,
+                            emailAddress: breeder.emailAddress,
+                            hasEmailContent: !!emailContent,
+                            subject: emailContent?.subject,
+                        });
+
+                        // 서비스 알림 빌더 (브리더 프로필 화면으로 이동하도록 설정)
+                        const builder = this.notificationService
+                            .to(breederId, RecipientType.BREEDER)
+                            .type(NotificationType.PROFILE_COMPLETION_REMINDER)
+                            .title('📝 브리더 프로필이 아직 완성되지 않았어요!')
+                            .content('프로필 작성을 마무리하면 입양자에게 노출되고 상담을 받을 수 있어요.')
+                            .targetUrl('/profile'); // 브리더 프로필 화면으로 이동
+
+                        // 이메일 주소가 있으면 이메일 발송 추가
+                        if (breeder.emailAddress) {
+                            console.log('✅ [프로필 완성 독려] 이메일 발송 추가됨:', breeder.emailAddress);
+                            builder.withEmail({
+                                to: breeder.emailAddress,
+                                subject: emailContent.subject,
+                                html: emailContent.html,
+                            });
+                        } else {
+                            console.log('⚠️ [프로필 완성 독려] 이메일 주소 없음');
+                        }
+
+                        console.log('🔔 [프로필 완성 독려] 서비스 알림 발송 시작');
+                        await builder.send();
+                        console.log('✅ [프로필 완성 독려] 서비스 알림 발송 완료');
+
+                        await this.logAdminActivity(
+                            adminId,
+                            'SEND_REMINDER' as AdminAction,
+                            AdminTargetType.BREEDER,
+                            breederId,
+                            breeder.nickname,
+                            'Sent profile completion reminder',
+                        );
+
+                        successIds.push(breederId);
+                    } else {
+                        console.log('❌ [프로필 완성 독려] 브리더가 APPROVED 상태가 아님:', {
+                            breederId,
+                            breederName: breeder.nickname,
+                            currentStatus: breeder.verification?.status,
+                        });
+                        failIds.push(breederId);
+                    }
                 } else {
                     failIds.push(breederId);
                 }
