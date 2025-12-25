@@ -261,12 +261,14 @@ export class AuthService {
 
     /**
      * 환경에 따른 프론트엔드 URL 반환
-     * - APP_ENV가 local이면 로컬 프론트엔드 URL 반환
-     * - APP_ENV가 dev이면 개발 프론트엔드 URL 반환
-     * - APP_ENV가 prod이면 프로덕션 프론트엔드 URL 반환
+     * - NODE_ENV가 development이면 로컬 프론트엔드 URL 반환
+     * - NODE_ENV가 production이면 프로덕션 프론트엔드 URL 반환
      */
     getFrontendUrl(referer?: string, origin?: string): string {
-        const appEnv = this.configService.get<string>('APP_ENV') || 'local';
+        const nodeEnv = this.configService.get<string>('NODE_ENV') || 'development';
+        const isLocalEnv = nodeEnv === 'development';
+
+        // 추가로 referer 체크 (일반 API 호출 시 더 정확한 판단)
         const refererStr = referer || origin || '';
 
         // localhost에서 요청한 경우 - 전달받은 origin을 그대로 사용 (포트 포함)
@@ -285,15 +287,13 @@ export class AuthService {
             return 'http://local.pawpong.kr:3000';
         }
 
-        // 환경별 URL 반환
-        if (appEnv === 'local') {
+        // development 환경에서는 로컬 URL 반환
+        if (isLocalEnv) {
             return this.configService.get<string>('FRONTEND_URL_LOCAL') || 'http://localhost:3000';
-        } else if (appEnv === 'dev') {
-            return this.configService.get<string>('FRONTEND_URL_DEV') || 'https://pawpongdev.vercel.app';
-        } else {
-            // prod
-            return this.configService.get<string>('FRONTEND_URL_PROD') || 'https://pawpong.kr';
         }
+
+        // 프로덕션 환경
+        return this.configService.get<string>('FRONTEND_URL_PROD') || 'https://pawpong.kr';
     }
 
     /**
