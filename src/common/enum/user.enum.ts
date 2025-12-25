@@ -158,7 +158,8 @@ export enum NotificationType {
     CONSULT_COMPLETED = 'consult_completed', // 상담 완료
 
     // 리마인드 관련
-    DOCUMENT_REMINDER = 'document_reminder', // 서류 미제출 리마인드
+    DOCUMENT_REMINDER = 'document_reminder', // 서류 미제출 리마인드 (입점 심사 독촉)
+    PROFILE_COMPLETION_REMINDER = 'profile_completion_reminder', // 프로필 완성 독려
 
     // 후기 관련
     NEW_REVIEW_REGISTERED = 'new_review_registered', // 새로운 후기 등록
