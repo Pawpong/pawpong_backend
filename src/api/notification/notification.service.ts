@@ -226,7 +226,7 @@ export class NotificationService {
             title: data.title,
             body: data.content,
             metadata: data.metadata,
-            targetUrl: data.relatedId,
+            targetUrl: data.targetUrl, // targetUrl 필드 사용
             isRead: false,
         });
 
