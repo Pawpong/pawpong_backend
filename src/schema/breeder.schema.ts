@@ -164,13 +164,16 @@ export class BreederProfile {
 
     /**
      * 분양 가격 범위
+     * - min: -1, max: -1 -> 가격 미설정 (기본값)
+     * - min: 0, max: 0 -> 상담 후 공개
+     * - 그 외 -> 실제 가격 범위
      */
     @Prop({
         type: {
-            min: { type: Number, default: 0 },
-            max: { type: Number, default: 0 },
+            min: { type: Number, default: -1 },
+            max: { type: Number, default: -1 },
         },
-        default: { min: 0, max: 0 },
+        default: { min: -1, max: -1 },
         _id: false,
     })
     priceRange?: {
@@ -229,13 +232,16 @@ export class BreederStats {
 
     /**
      * 분양 가격 범위 (availablePets 기반 자동 계산)
+     * - min: -1, max: -1 -> 가격 미설정 (기본값)
+     * - min: 0, max: 0 -> 상담 후 공개
+     * - 그 외 -> 실제 가격 범위
      */
     @Prop({
         type: {
-            min: { type: Number, default: 0 },
-            max: { type: Number, default: 0 },
+            min: { type: Number, default: -1 },
+            max: { type: Number, default: -1 },
         },
-        default: { min: 0, max: 0 },
+        default: { min: -1, max: -1 },
         _id: false,
     })
     priceRange: {
