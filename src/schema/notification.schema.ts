@@ -27,11 +27,11 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; bo
         body: '지금 프로필을 세팅하고 아이들 정보를 등록해 보세요.',
     },
     [NotificationType.BREEDER_REJECTED]: {
-        title: '브리더 입점 심사 결과, 보완이 필요합니다.',
+        title: '🐾 브리더 입점 심사 결과, 보완이 필요합니다.',
         body: '자세한 사유는 이메일을 확인해주세요.',
     },
     [NotificationType.BREEDER_UNAPPROVED]: {
-        title: '브리더 입점 심사 결과, 보완이 필요합니다.',
+        title: '🐾 브리더 입점 심사 결과, 보완이 필요합니다.',
         body: '자세한 사유는 이메일을 확인해주세요.',
     },
     [NotificationType.BREEDER_ONBOARDING_INCOMPLETE]: {
