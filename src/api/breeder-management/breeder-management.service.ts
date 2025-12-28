@@ -419,12 +419,21 @@ export class BreederManagementService {
     async getReceivedApplications(userId: string, page: number = 1, limit: number = 10): Promise<any> {
         const { applications, total } = await this.adoptionApplicationRepository.findByBreederId(userId, page, limit);
 
-        // MongoDB _id를 applicationId로 매핑 + preferredPetInfo 추출
+        // MongoDB _id를 applicationId로 매핑 + preferredPetInfo 추출 + 입양자 닉네임 추출
         const mappedApplications = applications.map((app) => {
             const plainApp = app.toObject ? app.toObject() : app;
+            // populate된 adopterId에서 nickname 추출
+            // adopterId가 객체인 경우(populate됨) nickname 사용, 아니면 adopterName 사용
+            const adopterInfo = plainApp.adopterId;
+            const adopterNickname =
+                typeof adopterInfo === 'object' && adopterInfo !== null
+                    ? (adopterInfo as any).nickname || plainApp.adopterName || '알 수 없음'
+                    : plainApp.adopterName || '알 수 없음';
+
             return {
                 ...plainApp,
                 applicationId: (app._id as any).toString(),
+                adopterNickname, // 입양자 닉네임 추가
                 // 입양 원하는 아이 정보를 최상위 필드로 추출 (프론트엔드 편의성)
                 preferredPetInfo: plainApp.standardResponses?.preferredPetDescription || null,
             };
