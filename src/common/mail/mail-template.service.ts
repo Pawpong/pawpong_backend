@@ -7,8 +7,9 @@ import { Injectable } from '@nestjs/common';
  */
 @Injectable()
 export class MailTemplateService {
-    private readonly baseUrl = 'https://pawpong.kr';
+    private readonly baseUrl = 'https://pawpong.kr/';
     private readonly contactEmail = 'pawriendsofficial@gmail.com';
+    private readonly kakaoChannelUrl = 'https://pf.kakao.com/_Wqxekn';
 
     /**
      * 공통 이메일 레이아웃
@@ -110,10 +111,10 @@ export class MailTemplateService {
             ${content}
         </div>
         <div class="footer">
-            <p>— 포퐁 팀 드림 🐶🐱</p>
+            <p>— 포퐁 드림 🐶🐱</p>
             <p>
                 💌 문의<br>
-                카카오톡 채널: 포퐁<br>
+                카카오톡 채널: <a href="${this.kakaoChannelUrl}" style="color: #4f3b2e;">https://pf.kakao.com/_Wqxekn</a><br>
                 이메일: ${this.contactEmail}
             </p>
         </div>
@@ -142,11 +143,11 @@ export class MailTemplateService {
             <ul>
                 <li><strong>프로필 세팅:</strong> 브리더 소개글, 대표 사진, 입양 비용 범위 등을 등록해주세요. 자세히 적어주시면 더 좋아요!</li>
                 <li><strong>분양중인 아이 등록:</strong> 분양중인 아이 정보를 등록해주세요. 사진과 함께 아이의 설명을 자세히 적어주시면 분양 확률이 올라갑니다.</li>
-                <li><strong>엄마·아빠 등록:</strong> 브리딩에 참여중인 아이들 정보를 등록해주세요. 입양자분들은 엄마와 아빠 동물들을 궁금해해요.</li>
+                <li><strong>엄마·아빠 등록:</strong> 브리딩에 참여중인 부모 동물들 정보를 등록해주세요. 입양자분들은 엄마와 아빠 동물들을 궁금해해요.</li>
             </ul>
 
             <p>💡 윤리적 브리딩과 투명한 정보 공개는 포퐁이 가장 중요하게 생각하는 가치입니다.<br>
-            브리더님의 신뢰 있는 활동이 더 많은 입양자에게 따뜻하게 닿을 거예요.</p>
+            브리더님의 믿을 수 있는 활동이 더 많은 입양자에게 따뜻하게 닿을 거예요.</p>
 
             <p style="text-align: center;">
                 <a href="${this.baseUrl}" class="button">포퐁 바로가기</a>
@@ -179,7 +180,7 @@ export class MailTemplateService {
             <p>브리더님께서 제출해주신 입점 신청서를 검토한 결과,<br>
             <strong>현재 기준으로는 입점 승인이 어려운 점</strong> 안내드립니다.</p>
 
-            <p>포퐁은 모든 입양 과정에서 동물의 건강, 브리딩 환경, 서류의 투명성을 매우 엄격히 검토하고 있습니다.<br>
+            <p>포퐁은 모든 입양 과정에서 동물의 복지, 브리딩 환경, 서류의 투명성을 매우 엄격히 검토하고 있습니다.<br>
             다음 사항을 보완하신 후 재신청해주시면 감사하겠습니다.</p>
 
             ${reasonsHtml}
@@ -245,7 +246,7 @@ export class MailTemplateService {
 
             <div class="highlight">
                 <p>서류 제출만 완료해주시면 브리더님의 아이들을 더 많은 입양자에게 안전하게 소개해드릴 수 있어요.</p>
-                <p>윤리적인 브리딩을 실천하시는 브리더님께 포퐁이 꼭 도움이 되고 싶습니다. 🐶🐱</p>
+                <p>브리더님께 포퐁이 꼭 도움이 되고 싶습니다. 🐶🐱</p>
             </div>
 
             <p style="text-align: center;">
@@ -393,7 +394,7 @@ export class MailTemplateService {
                 <p><strong>문의 방법</strong></p>
                 <p>
                     💌 이메일: ${this.contactEmail}<br>
-                    💬 카카오톡 채널: 포퐁
+                    💬 카카오톡 채널: <a href="${this.kakaoChannelUrl}" style="color: #4f3b2e;">https://pf.kakao.com/_Wqxekn</a>
                 </p>
             </div>
 
