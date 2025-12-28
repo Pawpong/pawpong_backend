@@ -59,7 +59,8 @@ export class StorageService {
                 resumable: false,
                 metadata: {
                     contentType: file.mimetype,
-                    cacheControl: 'public, max-age=3600',
+                    // 이미지는 UUID로 관리되어 변경되지 않으므로 1년 캐싱 (비용 절감)
+                    cacheControl: 'public, max-age=31536000, immutable',
                 },
             });
 
