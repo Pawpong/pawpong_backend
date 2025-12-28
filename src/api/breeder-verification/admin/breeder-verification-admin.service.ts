@@ -355,6 +355,7 @@ export class BreederVerificationAdminService {
                 location: breeder.profile?.location?.city,
                 detailedLocation: breeder.profile?.location?.district,
                 specialization: breeder.profile?.specialization,
+                breeds: (breeder as any).breeds || [],
                 description: breeder.profile?.description,
                 experienceYears: breeder.profile?.experienceYears,
             },
