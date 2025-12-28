@@ -185,6 +185,11 @@ export class BreederDetailResponseDto {
         specialization?: string[];
 
         /**
+         * 브리딩 품종 목록
+         */
+        breeds?: string[];
+
+        /**
          * 소개
          */
         description?: string;

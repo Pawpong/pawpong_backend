@@ -88,6 +88,59 @@ export class ApplicationFormDataDto {
             '5년 전 고양이 한 마리를 키웠습니다. 러시안블루 품종이었으며, 매우 온순한 성격이었습니다. 수명을 다해 무지개다리를 건넜습니다.',
     })
     previousPetExperience: string;
+
+    /**
+     * 기본 케어 가능 여부
+     * @example true
+     */
+    @ApiProperty({
+        description: '정기 예방접종·건강검진·훈련 등 기본 케어를 책임지고 할 수 있는지 여부',
+        example: true,
+    })
+    canProvideBasicCare: boolean;
+
+    /**
+     * 의료비 감당 가능 여부
+     * @example true
+     */
+    @ApiProperty({
+        description: '예상치 못한 질병이나 사고 등으로 치료비가 발생할 경우 감당 가능 여부',
+        example: true,
+    })
+    canAffordMedicalExpenses: boolean;
+
+    /**
+     * 입양 원하는 아이 정보 (선택한 아이들)
+     * @example "코코 (푸들, 수컷)/모모 (말티즈, 암컷)"
+     */
+    @ApiProperty({
+        description: '입양 원하는 아이 정보 (복수 선택 시 "/" 구분자로 연결)',
+        example: '코코 (푸들, 수컷)/모모 (말티즈, 암컷)',
+        required: false,
+    })
+    preferredPetDescription?: string;
+
+    /**
+     * 원하는 입양 시기
+     * @example "2024년 2월 중순"
+     */
+    @ApiProperty({
+        description: '원하는 입양 시기',
+        example: '2024년 2월 중순',
+        required: false,
+    })
+    desiredAdoptionTiming?: string;
+
+    /**
+     * 추가 메시지
+     * @example "저는 고양이를 정말 사랑합니다..."
+     */
+    @ApiProperty({
+        description: '추가 메시지',
+        example: '저는 고양이를 정말 사랑합니다...',
+        required: false,
+    })
+    additionalNotes?: string;
 }
 
 /**
@@ -125,6 +178,16 @@ export class ReceivedApplicationResponseDto {
         example: '김입양',
     })
     adopterName: string;
+
+    /**
+     * 입양자 닉네임
+     * @example "고양이집사"
+     */
+    @ApiProperty({
+        description: '입양자 닉네임',
+        example: '고양이집사',
+    })
+    adopterNickname: string;
 
     /**
      * 입양자 이메일
