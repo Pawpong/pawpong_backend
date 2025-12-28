@@ -52,6 +52,7 @@ export class AdoptionApplicationRepository {
         const [applications, total] = await Promise.all([
             this.adoptionApplicationModel
                 .find({ breederId })
+                .populate('adopterId', 'nickname') // 입양자 닉네임 populate
                 .sort({ appliedAt: -1 })
                 .skip(skip)
                 .limit(limit)
