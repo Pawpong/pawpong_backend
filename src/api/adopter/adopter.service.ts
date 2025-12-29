@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
@@ -10,6 +10,7 @@ import { StorageService } from '../../common/storage/storage.service';
 import { MailTemplateService } from '../../common/mail/mail-template.service';
 import { NotificationService } from '../notification/notification.service';
 import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
+import { AlimtalkService } from '../../common/alimtalk/alimtalk.service';
 
 import { NotificationType } from '../../schema/notification.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
@@ -49,12 +50,15 @@ import { AdopterProfileResponseDto } from './dto/response/adopter-profile-respon
  */
 @Injectable()
 export class AdopterService {
+    private readonly logger = new Logger(AdopterService.name);
+
     constructor(
         private storageService: StorageService,
         private mailService: MailService,
         private mailTemplateService: MailTemplateService,
         private notificationService: NotificationService,
         private discordWebhookService: DiscordWebhookService,
+        private alimtalkService: AlimtalkService,
 
         private adopterRepository: AdopterRepository,
         private breederRepository: BreederRepository,
@@ -202,7 +206,7 @@ export class AdopterService {
         const savedApplication = await newApplication.save();
 
         // 8. 브리더에게 새 상담 신청 알림 및 이메일 발송
-        await this.sendNewApplicationNotification(breeder);
+        await this.sendNewApplicationNotification(breeder, applicantName, pet?.name);
 
         // 9. 신청자에게 상담 신청 확인 알림 및 이메일 발송
         // breeder.name이 빈 값일 경우를 대비하여 기본값 설정
@@ -223,7 +227,7 @@ export class AdopterService {
      * 새 상담 신청 알림 및 이메일 발송 (브리더용)
      * @private
      */
-    private async sendNewApplicationNotification(breeder: any): Promise<void> {
+    private async sendNewApplicationNotification(breeder: any, adopterName?: string, petName?: string): Promise<void> {
         const breederId = breeder._id.toString();
         const emailContent = breeder.emailAddress
             ? this.mailTemplateService.getNewApplicationEmail(breeder.name)
@@ -245,6 +249,29 @@ export class AdopterService {
         }
 
         await builder.send();
+
+        // 카카오 알림톡 발송 (브리더에게)
+        // CONSULTATION_REQUEST 템플릿은 현재 re_review 상태 - 검수 완료 후 자동 활성화
+        if (breeder.phoneNumber) {
+            try {
+                const alimtalkResult = await this.alimtalkService.sendConsultationRequest(
+                    breeder.phoneNumber,
+                    adopterName || '입양자',
+                    petName || '반려동물',
+                );
+                if (alimtalkResult.success) {
+                    this.logger.log(
+                        `[sendNewApplicationNotification] 상담 신청 알림톡 발송 성공: ${breeder.phoneNumber}`,
+                    );
+                } else {
+                    this.logger.warn(
+                        `[sendNewApplicationNotification] 상담 신청 알림톡 발송 실패: ${alimtalkResult.error}`,
+                    );
+                }
+            } catch (error) {
+                this.logger.error(`[sendNewApplicationNotification] 알림톡 발송 오류: ${error.message}`);
+            }
+        }
     }
 
     /**
@@ -396,6 +423,20 @@ export class AdopterService {
         }
 
         await builder.send();
+
+        // 카카오 알림톡 발송
+        if (breeder.phoneNumber) {
+            try {
+                const alimtalkResult = await this.alimtalkService.sendNewReview(breeder.phoneNumber);
+                if (alimtalkResult.success) {
+                    this.logger.log(`[sendNewReviewNotification] 신규 후기 알림톡 발송 성공: ${breeder.phoneNumber}`);
+                } else {
+                    this.logger.warn(`[sendNewReviewNotification] 신규 후기 알림톡 발송 실패: ${alimtalkResult.error}`);
+                }
+            } catch (error) {
+                this.logger.error(`[sendNewReviewNotification] 알림톡 발송 오류: ${error.message}`);
+            }
+        }
     }
 
     /**

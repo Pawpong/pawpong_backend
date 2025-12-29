@@ -10,6 +10,7 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
 import { StorageModule } from '../../../common/storage/storage.module';
 import { MailModule } from '../../../common/mail/mail.module';
 import { NotificationModule } from '../../../api/notification/notification.module';
+import { AlimtalkModule } from '../../../common/alimtalk/alimtalk.module';
 
 /**
  * 브리더 관리자 모듈
@@ -32,6 +33,7 @@ import { NotificationModule } from '../../../api/notification/notification.modul
         StorageModule,
         MailModule,
         NotificationModule,
+        AlimtalkModule,
     ],
     controllers: [BreederAdminController],
     providers: [BreederAdminService],
