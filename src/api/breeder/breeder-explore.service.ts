@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { StorageService } from '../../common/storage/storage.service';
+import { PriceDisplayType } from '../../common/enum/user.enum';
 
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
 import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
@@ -177,12 +178,20 @@ export class BreederExploreService {
             const profileImage = this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60);
 
             // 가격 정보 계산
-            const statsMin = breeder.stats?.priceRange?.min || 0;
-            const statsMax = breeder.stats?.priceRange?.max || 0;
-            const profileMin = breeder.profile?.priceRange?.min || 0;
-            const profileMax = breeder.profile?.priceRange?.max || 0;
-            const finalMin = statsMin || profileMin;
-            const finalMax = statsMax || profileMax;
+            const profilePrice = breeder.profile?.priceRange || { min: 0, max: 0, display: 'not_set' };
+
+            // display 값 결정: 명시적으로 설정된 값이 있으면 사용, 없으면 값에 따라 자동 결정
+            let display: string;
+            if (profilePrice.display) {
+                display = profilePrice.display;
+            } else {
+                // display가 없는 경우 (마이그레이션 전 데이터) 값에 따라 자동 결정
+                if (profilePrice.min > 0 || profilePrice.max > 0) {
+                    display = 'range';
+                } else {
+                    display = 'not_set';
+                }
+            }
 
             return {
                 breederId: breeder._id.toString(),
@@ -195,9 +204,9 @@ export class BreederExploreService {
                 mainBreed: breeder.breeds?.[0] || '',
                 isAdoptionAvailable: availableBreederIds.includes(breeder._id.toString()),
                 priceRange: {
-                    min: finalMin,
-                    max: finalMax,
-                    display: finalMin > 0 || finalMax > 0 ? 'range' : 'consultation',
+                    min: profilePrice.min,
+                    max: profilePrice.max,
+                    display: display as PriceDisplayType,
                 },
                 favoriteCount: breeder.stats?.totalFavorites || 0,
                 isFavorited: (() => {

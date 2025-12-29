@@ -164,21 +164,24 @@ export class BreederProfile {
 
     /**
      * 분양 가격 범위
-     * - min: -1, max: -1 -> 가격 미설정 (기본값)
-     * - min: 0, max: 0 -> 상담 후 공개
-     * - 그 외 -> 실제 가격 범위
+     * PriceDisplayType enum 참고:
+     * - NOT_SET: min: 0, max: 0, display: 'not_set' (기본값, 아직 설정 안함)
+     * - CONSULTATION: min: 0, max: 0, display: 'consultation' (상담 후 공개)
+     * - RANGE: min > 0, max > 0, display: 'range' (실제 가격 범위)
      */
     @Prop({
         type: {
-            min: { type: Number, default: -1 },
-            max: { type: Number, default: -1 },
+            min: { type: Number, default: 0 },
+            max: { type: Number, default: 0 },
+            display: { type: String, enum: ['not_set', 'consultation', 'range'], default: 'not_set' },
         },
-        default: { min: -1, max: -1 },
+        default: { min: 0, max: 0, display: 'not_set' },
         _id: false,
     })
     priceRange?: {
         min: number;
         max: number;
+        display: string;
     };
 }
 
@@ -229,25 +232,6 @@ export class BreederStats {
      */
     @Prop({ default: 0 })
     profileViews: number;
-
-    /**
-     * 분양 가격 범위 (availablePets 기반 자동 계산)
-     * - min: -1, max: -1 -> 가격 미설정 (기본값)
-     * - min: 0, max: 0 -> 상담 후 공개
-     * - 그 외 -> 실제 가격 범위
-     */
-    @Prop({
-        type: {
-            min: { type: Number, default: -1 },
-            max: { type: Number, default: -1 },
-        },
-        default: { min: -1, max: -1 },
-        _id: false,
-    })
-    priceRange: {
-        min: number;
-        max: number;
-    };
 
     /**
      * 통계 마지막 업데이트 일시

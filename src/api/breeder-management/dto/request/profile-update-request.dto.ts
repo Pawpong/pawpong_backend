@@ -13,7 +13,7 @@ import {
 import { Type } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { PetType } from '../../../../common/enum/user.enum';
+import { PetType, PriceDisplayType } from '../../../../common/enum/user.enum';
 
 /**
  * 브리더 위치 정보 업데이트 DTO
@@ -88,6 +88,23 @@ export class PriceRangeUpdateDto {
     @IsNumber()
     @Min(0)
     maximumPrice: number;
+
+    /**
+     * 가격 표시 타입
+     * - not_set: 가격 미설정 (min: 0, max: 0)
+     * - consultation: 상담 후 공개 (min: 0, max: 0)
+     * - range: 가격 범위 표시 (min > 0, max > 0)
+     * @example "consultation"
+     */
+    @ApiProperty({
+        description: '가격 표시 타입',
+        example: 'consultation',
+        enum: PriceDisplayType,
+        required: false,
+    })
+    @IsEnum(PriceDisplayType)
+    @IsOptional()
+    display?: PriceDisplayType;
 }
 
 /**
