@@ -185,9 +185,23 @@ export class BreederManagementService {
             profileUpdateData['profile.experienceYears'] = updateData.experienceYears;
         }
         if (updateData.priceRangeInfo) {
+            const min = updateData.priceRangeInfo.minimumPrice;
+            const max = updateData.priceRangeInfo.maximumPrice;
+
+            // display는 프론트엔드에서 전달받거나, 값에 따라 자동 계산
+            let display: string;
+            if (min === 0 && max === 0) {
+                // 0, 0인 경우는 프론트엔드에서 display를 명시해야 함
+                // not_set(미설정) vs consultation(상담 후 공개) 구분
+                display = updateData.priceRangeInfo.display || 'not_set';
+            } else {
+                display = 'range';
+            }
+
             profileUpdateData['profile.priceRange'] = {
-                min: updateData.priceRangeInfo.minimumPrice,
-                max: updateData.priceRangeInfo.maximumPrice,
+                min,
+                max,
+                display,
             };
         }
         if (updateData.profileImage !== undefined) {
@@ -1116,6 +1130,21 @@ export class BreederManagementService {
                       breeder.profile.representativePhotos || [],
                       60,
                   ),
+                  priceRange: (() => {
+                      const priceRange = breeder.profile.priceRange;
+                      if (!priceRange) return { min: 0, max: 0, display: 'not_set' };
+
+                      // display 필드가 없는 경우 (마이그레이션 전 데이터) 자동 결정
+                      if (!priceRange.display) {
+                          return {
+                              min: priceRange.min || 0,
+                              max: priceRange.max || 0,
+                              display: (priceRange.min > 0 || priceRange.max > 0) ? 'range' : 'not_set',
+                          };
+                      }
+
+                      return priceRange;
+                  })(),
               }
             : breeder.profile;
 
