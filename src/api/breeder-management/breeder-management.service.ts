@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
@@ -11,6 +11,7 @@ import { NotificationType } from '../../schema/notification.schema';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { MailService } from '../../common/mail/mail.service';
 import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
+import { AlimtalkService } from '../../common/alimtalk/alimtalk.service';
 
 import { ParentPetAddDto } from './dto/request/parent-pet-add-request.dto';
 import { ParentPetUpdateDto } from './dto/request/parent-pet-update-request.dto';
@@ -71,6 +72,7 @@ export class BreederManagementService {
         private configService: ConfigService,
         private logger: CustomLoggerService,
         private discordWebhookService: DiscordWebhookService,
+        private alimtalkService: AlimtalkService,
     ) {}
 
     /**
@@ -607,6 +609,31 @@ export class BreederManagementService {
                                 error: emailError,
                             });
                         });
+
+                    // 3. 카카오 알림톡 발송 (입양자에게)
+                    if (adopter.phoneNumber) {
+                        try {
+                            const alimtalkResult = await this.alimtalkService.sendConsultationComplete(
+                                adopter.phoneNumber,
+                                breederDisplayName,
+                            );
+                            if (alimtalkResult.success) {
+                                this.logger.logSuccess('updateApplicationStatus', '상담 완료 알림톡 발송 성공', {
+                                    adopterPhone: adopter.phoneNumber,
+                                    breederName: breederDisplayName,
+                                });
+                            } else {
+                                this.logger.logWarning('updateApplicationStatus', '상담 완료 알림톡 발송 실패', {
+                                    error: alimtalkResult.error,
+                                });
+                            }
+                        } catch (alimtalkError) {
+                            // 알림톡 발송 실패해도 상담 완료 처리는 계속 진행
+                            this.logger.logWarning('updateApplicationStatus', '상담 완료 알림톡 발송 오류', {
+                                error: alimtalkError,
+                            });
+                        }
+                    }
                 } else {
                     this.logger.logWarning(
                         'updateApplicationStatus',
