@@ -2,7 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { VerificationStatus, PetStatus } from '../../common/enum/user.enum';
+import { VerificationStatus, PetStatus, PriceDisplayType } from '../../common/enum/user.enum';
 import { StorageService } from '../../common/storage/storage.service';
 
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
@@ -210,15 +210,25 @@ export class BreederService {
                 ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
                 : '',
             priceRange: (() => {
-                const statsPrice = breeder.stats?.priceRange || { min: 0, max: 0 };
-                const profilePrice = breeder.profile?.priceRange || { min: 0, max: 0 };
-                const finalMin = statsPrice.min || profilePrice.min || 0;
-                const finalMax = statsPrice.max || profilePrice.max || 0;
+                const profilePrice = breeder.profile?.priceRange || { min: 0, max: 0, display: 'not_set' };
+
+                // display 값 결정: 명시적으로 설정된 값이 있으면 사용, 없으면 값에 따라 자동 결정
+                let finalDisplay: string;
+                if (profilePrice.display) {
+                    finalDisplay = profilePrice.display;
+                } else {
+                    // display가 없는 경우 (마이그레이션 전 데이터) 값에 따라 자동 결정
+                    if (profilePrice.min > 0 || profilePrice.max > 0) {
+                        finalDisplay = 'range';
+                    } else {
+                        finalDisplay = 'not_set';
+                    }
+                }
 
                 return {
-                    min: finalMin,
-                    max: finalMax,
-                    display: finalMin > 0 || finalMax > 0 ? 'range' : 'consultation',
+                    min: profilePrice.min,
+                    max: profilePrice.max,
+                    display: finalDisplay as PriceDisplayType,
                 };
             })(),
             profileImage: profileImageUrl,
