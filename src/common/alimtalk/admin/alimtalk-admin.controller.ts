@@ -142,7 +142,9 @@ export class AlimtalkAdminController {
     @ApiResponse({ status: 400, description: '잘못된 요청 또는 중복된 템플릿 코드' })
     @ApiResponse({ status: 401, description: '인증 실패' })
     @ApiResponse({ status: 403, description: '권한 없음 (관리자 전용)' })
-    async createTemplate(@Body() createData: TemplateCreateRequestDto): Promise<ApiResponseDto<TemplateDetailResponseDto>> {
+    async createTemplate(
+        @Body() createData: TemplateCreateRequestDto,
+    ): Promise<ApiResponseDto<TemplateDetailResponseDto>> {
         const data = await this.alimtalkAdminService.createTemplate(createData);
         return {
             success: true,
