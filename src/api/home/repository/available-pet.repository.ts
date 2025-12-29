@@ -24,11 +24,7 @@ export class AvailablePetRepository {
      */
     async findAvailablePets(limit: number = 10): Promise<AvailablePetDocument[]> {
         // 활성 상태인 브리더 ID 목록 조회
-        const activeBreeders = await this.breederModel
-            .find({ accountStatus: 'active' })
-            .select('_id')
-            .lean()
-            .exec();
+        const activeBreeders = await this.breederModel.find({ accountStatus: 'active' }).select('_id').lean().exec();
         const activeBreederIds = activeBreeders.map((b) => b._id);
 
         return this.availablePetModel

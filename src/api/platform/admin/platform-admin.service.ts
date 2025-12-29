@@ -406,10 +406,7 @@ export class PlatformAdminService {
     /**
      * 전화번호 화이트리스트 추가
      */
-    async addPhoneWhitelist(
-        adminId: string,
-        dto: AddPhoneWhitelistRequestDto,
-    ): Promise<PhoneWhitelistResponseDto> {
+    async addPhoneWhitelist(adminId: string, dto: AddPhoneWhitelistRequestDto): Promise<PhoneWhitelistResponseDto> {
         // 중복 확인
         const existing = await this.phoneWhitelistModel.findOne({ phoneNumber: dto.phoneNumber }).exec();
         if (existing) {
@@ -439,10 +436,7 @@ export class PlatformAdminService {
     /**
      * 전화번호 화이트리스트 수정
      */
-    async updatePhoneWhitelist(
-        id: string,
-        dto: UpdatePhoneWhitelistRequestDto,
-    ): Promise<PhoneWhitelistResponseDto> {
+    async updatePhoneWhitelist(id: string, dto: UpdatePhoneWhitelistRequestDto): Promise<PhoneWhitelistResponseDto> {
         const whitelist = await this.phoneWhitelistModel.findById(id).exec();
         if (!whitelist) {
             throw new BadRequestException('화이트리스트를 찾을 수 없습니다.');
