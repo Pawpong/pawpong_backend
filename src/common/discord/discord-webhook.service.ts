@@ -372,14 +372,10 @@ export class DiscordWebhookService {
                 embeds: [embed],
             });
 
-            this.logger.logSuccess(
-                'notifyBreederVerificationSubmission',
-                '브리더 입점 서류 제출 알림 전송 완료',
-                {
-                    breederId: data.breederId,
-                    isResubmission: data.isResubmission,
-                },
-            );
+            this.logger.logSuccess('notifyBreederVerificationSubmission', '브리더 입점 서류 제출 알림 전송 완료', {
+                breederId: data.breederId,
+                isResubmission: data.isResubmission,
+            });
         } catch (error) {
             this.logger.logError('notifyBreederVerificationSubmission', '디스코드 웹훅 전송 실패', error);
         }

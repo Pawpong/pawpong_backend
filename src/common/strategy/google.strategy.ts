@@ -15,7 +15,13 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         });
     }
 
-    async validate(req: any, accessToken: string, refreshToken: string, profile: any, done: VerifyCallback): Promise<any> {
+    async validate(
+        req: any,
+        accessToken: string,
+        refreshToken: string,
+        profile: any,
+        done: VerifyCallback,
+    ): Promise<any> {
         const { id, name, emails, photos } = profile;
 
         // state 파라미터에서 origin 정보 추출 (OAuth 시작 시 전달됨)

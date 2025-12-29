@@ -308,7 +308,9 @@ export class BreederAdminService {
                     // 서류 미제출 상태(PENDING) 확인
                     if (breeder.verification?.status === VerificationStatus.PENDING) {
                         // 이메일 템플릿 생성
-                        const emailContent = this.mailTemplateService.getDocumentReminderEmail(breeder.nickname || '브리더');
+                        const emailContent = this.mailTemplateService.getDocumentReminderEmail(
+                            breeder.nickname || '브리더',
+                        );
 
                         console.log('📧 [입점 심사 독촉] 이메일 발송 준비:', {
                             breederId,

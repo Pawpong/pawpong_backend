@@ -227,11 +227,7 @@ export class AdopterService {
      * 새 상담 신청 알림 및 이메일 발송 (브리더용)
      * @private
      */
-    private async sendNewApplicationNotification(
-        breeder: any,
-        adopterName?: string,
-        petName?: string,
-    ): Promise<void> {
+    private async sendNewApplicationNotification(breeder: any, adopterName?: string, petName?: string): Promise<void> {
         const breederId = breeder._id.toString();
         const emailContent = breeder.emailAddress
             ? this.mailTemplateService.getNewApplicationEmail(breeder.name)
@@ -264,7 +260,9 @@ export class AdopterService {
                     petName || '반려동물',
                 );
                 if (alimtalkResult.success) {
-                    this.logger.log(`[sendNewApplicationNotification] 상담 신청 알림톡 발송 성공: ${breeder.phoneNumber}`);
+                    this.logger.log(
+                        `[sendNewApplicationNotification] 상담 신청 알림톡 발송 성공: ${breeder.phoneNumber}`,
+                    );
                 } else {
                     this.logger.warn(
                         `[sendNewApplicationNotification] 상담 신청 알림톡 발송 실패: ${alimtalkResult.error}`,
