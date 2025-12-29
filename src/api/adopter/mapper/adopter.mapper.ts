@@ -1,5 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 
+import { PriceDisplayType } from '../../../common/enum/user.enum';
 import { ApplicationCreateResponseDto } from '../dto/response/application-create-response.dto';
 import { AdopterProfileResponseDto } from '../dto/response/adopter-profile-response.dto';
 
@@ -112,7 +113,7 @@ export class AdopterMapper {
                 priceRange: {
                     min: 0,
                     max: 0,
-                    display: 'consultation',
+                    display: PriceDisplayType.CONSULTATION,
                 },
                 availablePets: 0,
                 addedAt: favorite.addedAt,
@@ -121,15 +122,20 @@ export class AdopterMapper {
         }
 
         // 가격 정보 처리
-        const statsPrice = breeder.stats?.priceRange || { min: 0, max: 0 };
-        const profilePrice = breeder.profile?.priceRange || { min: 0, max: 0 };
+        const profilePrice = breeder.profile?.priceRange || { min: 0, max: 0, display: 'not_set' };
 
-        // stats와 profile 중 값이 있는 것을 우선 사용
-        const finalMin = statsPrice.min || profilePrice.min || 0;
-        const finalMax = statsPrice.max || profilePrice.max || 0;
-
-        // 가격이 하나라도 설정되어 있으면 'range', 둘 다 0이면 'consultation'
-        const priceDisplay = finalMin > 0 || finalMax > 0 ? 'range' : 'consultation';
+        // display 값 결정: 명시적으로 설정된 값이 있으면 사용, 없으면 값에 따라 자동 결정
+        let priceDisplay: string;
+        if (profilePrice.display) {
+            priceDisplay = profilePrice.display;
+        } else {
+            // display가 없는 경우 (마이그레이션 전 데이터) 값에 따라 자동 결정
+            if (profilePrice.min > 0 || profilePrice.max > 0) {
+                priceDisplay = 'range';
+            } else {
+                priceDisplay = 'not_set';
+            }
+        }
 
         return {
             breederId: breeder._id.toString(),
@@ -143,9 +149,9 @@ export class AdopterMapper {
             averageRating: breeder.stats?.averageRating || 0,
             totalReviews: breeder.stats?.totalReviews || 0,
             priceRange: {
-                min: finalMin,
-                max: finalMax,
-                display: priceDisplay,
+                min: profilePrice.min,
+                max: profilePrice.max,
+                display: priceDisplay as PriceDisplayType,
             },
             availablePets:
                 breeder.availablePets?.filter((pet: any) => pet.status === 'available' && pet.isActive).length || 0,

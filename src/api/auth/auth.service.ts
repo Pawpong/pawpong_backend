@@ -780,10 +780,6 @@ export class AuthService {
                     averageRating: 0,
                     totalReviews: 0,
                     profileViews: 0,
-                    priceRange: {
-                        min: 0,
-                        max: 0,
-                    },
                     lastUpdated: new Date(),
                 },
             });
@@ -1468,10 +1464,6 @@ export class AuthService {
                 averageRating: 0,
                 totalReviews: 0,
                 profileViews: 0,
-                priceRange: {
-                    min: 0,
-                    max: 0,
-                },
                 lastUpdated: new Date(),
             },
         });
