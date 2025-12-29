@@ -250,9 +250,9 @@ export class AdopterService {
 
         await builder.send();
 
-        // 카카오 알림톡 발송 (브리더에게)
+        // 카카오 알림톡 발송 (브리더에게) - pro 플랜만 발송
         // CONSULTATION_REQUEST 템플릿은 현재 re_review 상태 - 검수 완료 후 자동 활성화
-        if (breeder.phoneNumber) {
+        if (breeder.phoneNumber && breeder.verification?.plan === 'pro') {
             try {
                 const alimtalkResult = await this.alimtalkService.sendConsultationRequest(
                     breeder.phoneNumber,
@@ -271,6 +271,8 @@ export class AdopterService {
             } catch (error) {
                 this.logger.error(`[sendNewApplicationNotification] 알림톡 발송 오류: ${error.message}`);
             }
+        } else if (breeder.phoneNumber && breeder.verification?.plan !== 'pro') {
+            this.logger.log(`[sendNewApplicationNotification] 알림톡 발송 스킵 (basic 플랜): ${breeder.phoneNumber}`);
         }
     }
 
@@ -424,8 +426,8 @@ export class AdopterService {
 
         await builder.send();
 
-        // 카카오 알림톡 발송
-        if (breeder.phoneNumber) {
+        // 카카오 알림톡 발송 - pro 플랜만 발송
+        if (breeder.phoneNumber && breeder.verification?.plan === 'pro') {
             try {
                 const alimtalkResult = await this.alimtalkService.sendNewReview(breeder.phoneNumber);
                 if (alimtalkResult.success) {
@@ -436,6 +438,8 @@ export class AdopterService {
             } catch (error) {
                 this.logger.error(`[sendNewReviewNotification] 알림톡 발송 오류: ${error.message}`);
             }
+        } else if (breeder.phoneNumber && breeder.verification?.plan !== 'pro') {
+            this.logger.log(`[sendNewReviewNotification] 알림톡 발송 스킵 (basic 플랜): ${breeder.phoneNumber}`);
         }
     }
 

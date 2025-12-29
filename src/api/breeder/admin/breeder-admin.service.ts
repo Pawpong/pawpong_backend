@@ -405,10 +405,10 @@ export class BreederAdminService {
                         await builder.send();
                         console.log('✅ [프로필 완성 독려] 서비스 알림 발송 완료');
 
-                        // 카카오 알림톡 발송 (전화번호가 있는 경우)
+                        // 카카오 알림톡 발송 (전화번호가 있고 pro 플랜인 경우)
                         const breederPhone = breeder.phoneNumber;
                         const breederName = breeder.nickname || '브리더';
-                        if (breederPhone) {
+                        if (breederPhone && breeder.verification?.plan === 'pro') {
                             const alimtalkResult = await this.alimtalkService.sendDocumentReminder(
                                 breederPhone,
                                 breederName,
@@ -418,6 +418,8 @@ export class BreederAdminService {
                             } else {
                                 console.log(`⚠️ [프로필 완성 독려] 알림톡 발송 실패: ${alimtalkResult.error}`);
                             }
+                        } else if (breederPhone && breeder.verification?.plan !== 'pro') {
+                            console.log(`⚠️ [프로필 완성 독려] 알림톡 발송 스킵 (basic 플랜): ${breederPhone}`);
                         } else {
                             console.log('⚠️ [프로필 완성 독려] 전화번호 없음 - 알림톡 발송 생략');
                         }
