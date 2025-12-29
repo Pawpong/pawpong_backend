@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
@@ -14,6 +14,7 @@ import {
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
 import { NotificationService } from '../../../api/notification/notification.service';
 import { StorageService } from '../../../common/storage/storage.service';
+import { AlimtalkService } from '../../../common/alimtalk/alimtalk.service';
 
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
 import { BreederVerificationRequestDto } from './dto/request/breeder-verification-request.dto';
@@ -33,12 +34,15 @@ import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
  */
 @Injectable()
 export class BreederVerificationAdminService {
+    private readonly logger = new Logger(BreederVerificationAdminService.name);
+
     constructor(
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         private readonly mailTemplateService: MailTemplateService,
         private readonly notificationService: NotificationService,
         private readonly storageService: StorageService,
+        private readonly alimtalkService: AlimtalkService,
     ) {}
 
     /**
@@ -407,6 +411,7 @@ export class BreederVerificationAdminService {
         const breederId = (breeder._id as any).toString();
         const breederName = breeder.nickname;
         const breederEmail = breeder.emailAddress;
+        const breederPhone = breeder.phoneNumber;
 
         if (verificationData.verificationStatus === VerificationStatus.APPROVED) {
             // 승인 알림 + 이메일 발송
@@ -428,6 +433,22 @@ export class BreederVerificationAdminService {
             }
 
             await builder.send();
+
+            // 카카오 알림톡 발송
+            if (breederPhone) {
+                try {
+                    const alimtalkResult = await this.alimtalkService.sendBreederApproved(breederPhone);
+                    if (alimtalkResult.success) {
+                        this.logger.log(`[sendVerificationNotification] 브리더 승인 알림톡 발송 성공: ${breederPhone}`);
+                    } else {
+                        this.logger.warn(
+                            `[sendVerificationNotification] 브리더 승인 알림톡 발송 실패: ${alimtalkResult.error}`,
+                        );
+                    }
+                } catch (error) {
+                    this.logger.error(`[sendVerificationNotification] 알림톡 발송 오류: ${error.message}`);
+                }
+            }
         } else if (verificationData.verificationStatus === VerificationStatus.REJECTED) {
             // 반려 알림 + 이메일 발송
             const rejectionReasons = verificationData.rejectionReason
@@ -453,6 +474,22 @@ export class BreederVerificationAdminService {
             }
 
             await builder.send();
+
+            // 카카오 알림톡 발송
+            if (breederPhone) {
+                try {
+                    const alimtalkResult = await this.alimtalkService.sendBreederRejected(breederPhone);
+                    if (alimtalkResult.success) {
+                        this.logger.log(`[sendVerificationNotification] 브리더 반려 알림톡 발송 성공: ${breederPhone}`);
+                    } else {
+                        this.logger.warn(
+                            `[sendVerificationNotification] 브리더 반려 알림톡 발송 실패: ${alimtalkResult.error}`,
+                        );
+                    }
+                } catch (error) {
+                    this.logger.error(`[sendVerificationNotification] 알림톡 발송 오류: ${error.message}`);
+                }
+            }
         }
     }
 
@@ -485,20 +522,22 @@ export class BreederVerificationAdminService {
                 'verification.reviewedAt': { $lte: fourWeeksAgo },
                 $or: [{ 'verification.documents': { $exists: false } }, { 'verification.documents': { $size: 0 } }],
             })
-            .select('_id nickname emailAddress verification')
+            .select('_id nickname emailAddress phoneNumber verification')
             .lean();
 
         const breederIds: string[] = [];
         let sentCount = 0;
 
-        // 각 브리더에게 독촉 메일 발송
+        // 각 브리더에게 독촉 메일 + 알림톡 발송
         for (const breeder of incompleteBreeders) {
             const breederId = (breeder._id as any).toString();
             const breederName = breeder.nickname;
             const breederEmail = breeder.emailAddress;
+            const breederPhone = breeder.phoneNumber;
 
-            if (breederEmail) {
-                try {
+            try {
+                // 이메일 발송
+                if (breederEmail) {
                     const emailContent = this.mailTemplateService.getDocumentReminderEmail(breederName);
 
                     const builder = this.notificationService
@@ -515,22 +554,32 @@ export class BreederVerificationAdminService {
                     });
 
                     await builder.send();
-
-                    breederIds.push(breederId);
-                    sentCount++;
-
-                    // 관리자 활동 로그 기록
-                    await this.logAdminActivity(
-                        adminId,
-                        AdminAction.REVIEW_BREEDER,
-                        AdminTargetType.BREEDER,
-                        breederId,
-                        breederName,
-                        'Document reminder email sent',
-                    );
-                } catch (error) {
-                    console.error(`Failed to send reminder to breeder ${breederId}:`, error);
                 }
+
+                // 카카오 알림톡 발송
+                if (breederPhone) {
+                    const alimtalkResult = await this.alimtalkService.sendDocumentReminder(breederPhone, breederName);
+                    if (alimtalkResult.success) {
+                        this.logger.log(`[sendDocumentReminders] 서류 독촉 알림톡 발송 성공: ${breederPhone}`);
+                    } else {
+                        this.logger.warn(`[sendDocumentReminders] 서류 독촉 알림톡 발송 실패: ${alimtalkResult.error}`);
+                    }
+                }
+
+                breederIds.push(breederId);
+                sentCount++;
+
+                // 관리자 활동 로그 기록
+                await this.logAdminActivity(
+                    adminId,
+                    AdminAction.REVIEW_BREEDER,
+                    AdminTargetType.BREEDER,
+                    breederId,
+                    breederName,
+                    'Document reminder sent (email + alimtalk)',
+                );
+            } catch (error) {
+                this.logger.error(`Failed to send reminder to breeder ${breederId}: ${error.message}`);
             }
         }
 
