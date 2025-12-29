@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PriceDisplayType } from '../../../../common/enum/user.enum';
 
 /**
  * 브리더 카드뷰 응답 DTO
@@ -79,19 +80,20 @@ export class BreederCardResponseDto {
 
     /**
      * 가격 범위 정보
-     * - range: 최소/최대 가격 표시
-     * - consultation: 상담 후 결정
+     * - NOT_SET: 가격 미설정 (min: -1, max: -1)
+     * - CONSULTATION: 상담 후 공개 (min: 0, max: 0)
+     * - RANGE: 가격 범위 표시 (min > 0, max > 0)
      * @example { "min": 1000000, "max": 2000000, "display": "range" }
      */
     @ApiProperty({
-        description: '가격 범위 정보 (range: 가격표시, consultation: 상담후결정)',
-        example: { min: 0, max: 0, display: 'consultation' },
+        description: '가격 범위 정보',
+        example: { min: 0, max: 0, display: PriceDisplayType.CONSULTATION },
         required: false,
     })
     priceRange?: {
         min: number;
         max: number;
-        display: string; // "range" | "consultation"
+        display: PriceDisplayType;
     };
 
     /**

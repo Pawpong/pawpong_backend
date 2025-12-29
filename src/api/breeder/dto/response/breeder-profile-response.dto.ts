@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { PriceDisplayType } from '../../../../common/enum/user.enum';
 
 /**
  * 브리더 프로필 위치 정보 DTO
@@ -48,7 +49,7 @@ export class BreederPriceRangeDto {
         description: '최소 가격 (원)',
         example: 500000,
     })
-    minPrice: number;
+    min: number;
 
     /**
      * 최대 가격 (원)
@@ -58,7 +59,21 @@ export class BreederPriceRangeDto {
         description: '최대 가격 (원)',
         example: 2000000,
     })
-    maxPrice: number;
+    max: number;
+
+    /**
+     * 가격 표시 타입
+     * - not_set: 가격 미설정 (min: 0, max: 0)
+     * - consultation: 상담 후 공개 (min: 0, max: 0)
+     * - range: 가격 범위 표시 (min > 0, max > 0)
+     * @example "consultation"
+     */
+    @ApiProperty({
+        description: '가격 표시 타입',
+        example: 'consultation',
+        enum: PriceDisplayType,
+    })
+    display: PriceDisplayType;
 }
 
 /**
