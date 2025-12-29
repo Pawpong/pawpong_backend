@@ -617,7 +617,7 @@ export class UserAdminService {
 
         // 브리더는 name 필드, 입양자는 nickname 필드 사용
         const userName =
-            role === 'breeder' ? ((user as any).name || user.nickname || '알 수 없음') : (user.nickname || '알 수 없음');
+            role === 'breeder' ? (user as any).name || user.nickname || '알 수 없음' : user.nickname || '알 수 없음';
         const userEmail = user.emailAddress || '';
 
         // 관리자 활동 로그 먼저 기록 (삭제 전에)

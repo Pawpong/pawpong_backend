@@ -14,6 +14,7 @@ import {
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
 import { MailService } from '../../../common/mail/mail.service';
 import { NotificationService } from '../../../api/notification/notification.service';
+import { AlimtalkService } from '../../../common/alimtalk/alimtalk.service';
 
 import { ApplicationMonitoringRequestDto } from './dto/request/application-monitoring-request.dto';
 import { BreederSuspendRequestDto } from './dto/request/breeder-suspend-request.dto';
@@ -45,6 +46,7 @@ export class BreederAdminService {
         private readonly mailTemplateService: MailTemplateService,
         private readonly mailService: MailService,
         private readonly notificationService: NotificationService,
+        private readonly alimtalkService: AlimtalkService,
     ) {}
 
     /**
@@ -308,7 +310,9 @@ export class BreederAdminService {
                     // 서류 미제출 상태(PENDING) 확인
                     if (breeder.verification?.status === VerificationStatus.PENDING) {
                         // 이메일 템플릿 생성
-                        const emailContent = this.mailTemplateService.getDocumentReminderEmail(breeder.nickname || '브리더');
+                        const emailContent = this.mailTemplateService.getDocumentReminderEmail(
+                            breeder.nickname || '브리더',
+                        );
 
                         console.log('📧 [입점 심사 독촉] 이메일 발송 준비:', {
                             breederId,
@@ -400,6 +404,23 @@ export class BreederAdminService {
                         console.log('🔔 [프로필 완성 독려] 서비스 알림 발송 시작');
                         await builder.send();
                         console.log('✅ [프로필 완성 독려] 서비스 알림 발송 완료');
+
+                        // 카카오 알림톡 발송 (전화번호가 있는 경우)
+                        const breederPhone = breeder.phoneNumber;
+                        const breederName = breeder.nickname || '브리더';
+                        if (breederPhone) {
+                            const alimtalkResult = await this.alimtalkService.sendDocumentReminder(
+                                breederPhone,
+                                breederName,
+                            );
+                            if (alimtalkResult.success) {
+                                console.log(`✅ [프로필 완성 독려] 알림톡 발송 성공: ${breederPhone}`);
+                            } else {
+                                console.log(`⚠️ [프로필 완성 독려] 알림톡 발송 실패: ${alimtalkResult.error}`);
+                            }
+                        } else {
+                            console.log('⚠️ [프로필 완성 독려] 전화번호 없음 - 알림톡 발송 생략');
+                        }
 
                         await this.logAdminActivity(
                             adminId,
