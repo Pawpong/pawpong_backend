@@ -1139,7 +1139,7 @@ export class BreederManagementService {
                           return {
                               min: priceRange.min || 0,
                               max: priceRange.max || 0,
-                              display: (priceRange.min > 0 || priceRange.max > 0) ? 'range' : 'not_set',
+                              display: priceRange.min > 0 || priceRange.max > 0 ? 'range' : 'not_set',
                           };
                       }
 
