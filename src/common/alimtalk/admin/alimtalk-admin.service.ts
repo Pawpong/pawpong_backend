@@ -6,6 +6,7 @@ import { AlimtalkTemplate, AlimtalkTemplateDocument } from '../../../schema/alim
 import { AlimtalkService } from '../alimtalk.service';
 
 import { TemplateUpdateRequestDto } from './dto/request/template-update-request.dto';
+import { TemplateCreateRequestDto } from './dto/request/template-create-request.dto';
 import { TemplateListResponseDto, TemplateListItemDto } from './dto/response/template-list-response.dto';
 import { TemplateDetailResponseDto } from './dto/response/template-detail-response.dto';
 
@@ -144,6 +145,92 @@ export class AlimtalkAdminService {
                 throw error;
             }
             throw new BadRequestException('템플릿 업데이트에 실패했습니다.');
+        }
+    }
+
+    /**
+     * 알림톡 템플릿 생성
+     */
+    async createTemplate(createData: TemplateCreateRequestDto): Promise<TemplateDetailResponseDto> {
+        try {
+            // 중복 템플릿 코드 확인
+            const existingTemplate = await this.alimtalkTemplateModel
+                .findOne({ templateCode: createData.templateCode })
+                .exec();
+
+            if (existingTemplate) {
+                throw new BadRequestException(`이미 존재하는 템플릿 코드입니다: ${createData.templateCode}`);
+            }
+
+            // 템플릿 생성
+            const newTemplate = await this.alimtalkTemplateModel.create({
+                ...createData,
+                fallbackToSms: createData.fallbackToSms ?? true,
+                isActive: createData.isActive ?? true,
+                reviewStatus: createData.reviewStatus ?? 'approved',
+                buttons: createData.buttons ?? [],
+            });
+
+            this.logger.log(`[createTemplate] 템플릿 생성 성공: ${createData.templateCode}`);
+
+            // 템플릿 캐시 갱신
+            await this.alimtalkService.refreshTemplateCache();
+
+            const template: any = newTemplate.toObject();
+
+            return {
+                templateCode: template.templateCode,
+                templateId: template.templateId,
+                name: template.name,
+                description: template.description,
+                requiredVariables: template.requiredVariables,
+                fallbackToSms: template.fallbackToSms,
+                isActive: template.isActive,
+                reviewStatus: template.reviewStatus,
+                memo: template.memo,
+                buttons: template.buttons,
+                createdAt: template.createdAt ? new Date(template.createdAt).toISOString() : new Date().toISOString(),
+                updatedAt: template.updatedAt ? new Date(template.updatedAt).toISOString() : new Date().toISOString(),
+            };
+        } catch (error) {
+            this.logger.error(`[createTemplate] 템플릿 생성 실패: ${error.message}`);
+            if (error instanceof BadRequestException) {
+                throw error;
+            }
+            throw new BadRequestException('템플릿 생성에 실패했습니다.');
+        }
+    }
+
+    /**
+     * 알림톡 템플릿 삭제 (물리적 삭제)
+     */
+    async deleteTemplate(templateCode: string): Promise<{ success: boolean; message: string }> {
+        try {
+            // 템플릿 존재 여부 확인
+            const template = await this.alimtalkTemplateModel.findOne({ templateCode }).exec();
+
+            if (!template) {
+                throw new BadRequestException(`템플릿을 찾을 수 없습니다: ${templateCode}`);
+            }
+
+            // 템플릿 삭제
+            await this.alimtalkTemplateModel.deleteOne({ templateCode }).exec();
+
+            this.logger.log(`[deleteTemplate] 템플릿 삭제 성공: ${templateCode}`);
+
+            // 템플릿 캐시 갱신
+            await this.alimtalkService.refreshTemplateCache();
+
+            return {
+                success: true,
+                message: `템플릿이 삭제되었습니다: ${templateCode}`,
+            };
+        } catch (error) {
+            this.logger.error(`[deleteTemplate] 템플릿 삭제 실패: ${error.message}`);
+            if (error instanceof BadRequestException) {
+                throw error;
+            }
+            throw new BadRequestException('템플릿 삭제에 실패했습니다.');
         }
     }
 

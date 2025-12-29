@@ -1,4 +1,4 @@
-import { Controller, Get, Put, Post, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Put, Post, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
@@ -7,6 +7,7 @@ import { Roles } from '../../../common/decorator/roles.decorator';
 
 import { AlimtalkAdminService } from './alimtalk-admin.service';
 import { TemplateUpdateRequestDto } from './dto/request/template-update-request.dto';
+import { TemplateCreateRequestDto } from './dto/request/template-create-request.dto';
 import { TemplateListResponseDto } from './dto/response/template-list-response.dto';
 import { TemplateDetailResponseDto } from './dto/response/template-detail-response.dto';
 
@@ -118,6 +119,67 @@ export class AlimtalkAdminController {
             code: 200,
             data,
             message: '알림톡 템플릿 수정 성공',
+            timestamp: new Date().toISOString(),
+        };
+    }
+
+    /**
+     * 알림톡 템플릿 생성
+     *
+     * @param createData 생성할 템플릿 데이터
+     * @returns 생성된 템플릿 정보
+     */
+    @Post('templates')
+    @ApiOperation({
+        summary: '알림톡 템플릿 생성',
+        description: 'CoolSMS에서 검수 받은 새 템플릿을 등록합니다. 생성 후 자동으로 캐시가 갱신됩니다.',
+    })
+    @ApiResponse({
+        status: 200,
+        description: '템플릿 생성 성공',
+        type: TemplateDetailResponseDto,
+    })
+    @ApiResponse({ status: 400, description: '잘못된 요청 또는 중복된 템플릿 코드' })
+    @ApiResponse({ status: 401, description: '인증 실패' })
+    @ApiResponse({ status: 403, description: '권한 없음 (관리자 전용)' })
+    async createTemplate(@Body() createData: TemplateCreateRequestDto): Promise<ApiResponseDto<TemplateDetailResponseDto>> {
+        const data = await this.alimtalkAdminService.createTemplate(createData);
+        return {
+            success: true,
+            code: 200,
+            data,
+            message: '알림톡 템플릿 생성 성공',
+            timestamp: new Date().toISOString(),
+        };
+    }
+
+    /**
+     * 알림톡 템플릿 삭제
+     *
+     * @param templateCode 삭제할 템플릿 코드
+     * @returns 삭제 결과
+     */
+    @Delete('templates/:templateCode')
+    @ApiOperation({
+        summary: '알림톡 템플릿 삭제',
+        description: '특정 템플릿을 완전히 삭제합니다. 삭제 후 자동으로 캐시가 갱신됩니다.',
+    })
+    @ApiResponse({
+        status: 200,
+        description: '템플릿 삭제 성공',
+    })
+    @ApiResponse({ status: 400, description: '잘못된 요청 또는 템플릿을 찾을 수 없음' })
+    @ApiResponse({ status: 401, description: '인증 실패' })
+    @ApiResponse({ status: 403, description: '권한 없음 (관리자 전용)' })
+    async deleteTemplate(
+        @Param('templateCode') templateCode: string,
+    ): Promise<ApiResponseDto<{ success: boolean; message: string }>> {
+        const data = await this.alimtalkAdminService.deleteTemplate(templateCode);
+        return {
+            success: true,
+            code: 200,
+            data,
+            message: '알림톡 템플릿 삭제 성공',
             timestamp: new Date().toISOString(),
         };
     }
