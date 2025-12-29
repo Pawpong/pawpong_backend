@@ -33,10 +33,7 @@ export class SmsService {
      * 전화번호가 화이트리스트에 있는지 확인 (DB 조회)
      */
     private async isPhoneWhitelisted(phoneNumber: string): Promise<boolean> {
-        const whitelist = await this.phoneWhitelistModel
-            .findOne({ phoneNumber, isActive: true })
-            .lean()
-            .exec();
+        const whitelist = await this.phoneWhitelistModel.findOne({ phoneNumber, isActive: true }).lean().exec();
         return !!whitelist;
     }
 

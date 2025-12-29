@@ -5,6 +5,7 @@ import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './common/config/winston.config';
 import { LoggerModule } from './common/logger/logger.module';
 import { AlimtalkModule } from './common/alimtalk/alimtalk.module';
+import { AlimtalkAdminModule } from './common/alimtalk/admin/alimtalk-admin.module';
 
 import { AuthModule } from './api/auth/auth.module';
 import { HomeModule } from './api/home/home.module';
@@ -40,6 +41,7 @@ import { NoticeModule } from './api/notice/notice.module';
         LoggerModule,
         DatabaseModule,
         AlimtalkModule,
+        AlimtalkAdminModule,
         StandardQuestionModule,
         AuthModule,
         HomeModule,

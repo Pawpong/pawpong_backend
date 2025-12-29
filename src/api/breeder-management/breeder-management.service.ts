@@ -770,7 +770,9 @@ export class BreederManagementService {
 
         // userId를 키로 tempUploads에 저장
         this.tempUploads.set(userId, tempDocuments);
-        this.logger.log(`[uploadVerificationDocuments] Saved to tempUploads - userId: ${userId}, documents: ${tempDocuments.length}`);
+        this.logger.log(
+            `[uploadVerificationDocuments] Saved to tempUploads - userId: ${userId}, documents: ${tempDocuments.length}`,
+        );
 
         return new UploadDocumentsResponseDto(uploadedDocuments.length, level, uploadedDocuments);
     }
@@ -838,10 +840,7 @@ export class BreederManagementService {
                 );
             });
         } else {
-            this.logger.logWarning(
-                'submitVerificationDocuments',
-                `No tempUploads found for userId: ${userId}`,
-            );
+            this.logger.logWarning('submitVerificationDocuments', `No tempUploads found for userId: ${userId}`);
         }
 
         // DTO에서 받은 서류를 "새로 업로드한 서류"와 "기존 서류" 구분
@@ -985,11 +984,7 @@ export class BreederManagementService {
                 })),
             });
         } catch (error) {
-            this.logger.logWarning(
-                'submitVerificationDocuments',
-                '디스코드 알림 전송 실패 (서류 제출은 성공)',
-                error,
-            );
+            this.logger.logWarning('submitVerificationDocuments', '디스코드 알림 전송 실패 (서류 제출은 성공)', error);
         }
 
         // 임시 업로드 정보 정리

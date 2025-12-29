@@ -47,12 +47,8 @@ export class HomeService {
 
             return {
                 bannerId: banner._id.toString(),
-                desktopImageUrl: desktopFileName
-                    ? this.storageService.generateSignedUrl(desktopFileName, 60 * 24)
-                    : '', // 24시간 유효
-                mobileImageUrl: mobileFileName
-                    ? this.storageService.generateSignedUrl(mobileFileName, 60 * 24)
-                    : '', // 24시간 유효
+                desktopImageUrl: desktopFileName ? this.storageService.generateSignedUrl(desktopFileName, 60 * 24) : '', // 24시간 유효
+                mobileImageUrl: mobileFileName ? this.storageService.generateSignedUrl(mobileFileName, 60 * 24) : '', // 24시간 유효
                 desktopImageFileName: desktopFileName || '',
                 mobileImageFileName: mobileFileName || '',
                 linkType: banner.linkType,
