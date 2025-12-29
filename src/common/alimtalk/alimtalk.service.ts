@@ -161,18 +161,28 @@ export class AlimtalkService implements OnModuleInit {
         try {
             const normalizedPhone = this.normalizePhoneNumber(to);
 
+            // 디버깅: 전송할 변수 로그
+            this.logger.log(
+                `[send] 전송 변수 확인 - templateId: ${templateId}, variables: ${JSON.stringify(variables)}`,
+            );
+
             // 알림톡 발송 요청
+            // 중요: 강조 타입 템플릿은 템플릿 자체에 이미 강조 구조가 설정되어 있어서
+            // API 호출 시에는 variables만 전달하면 됩니다.
+            const kakaoOptions: any = {
+                pfId: this.pfId,
+                templateId: templateId,
+                variables: variables,
+                adFlag: false, // 광고성 메시지 여부 (알림톡은 false)
+                disableSms: !fallbackToSms, // true면 SMS 대체 발송 안함
+            };
+
             const response = await this.messageService.sendOne({
                 to: normalizedPhone,
                 from: this.senderPhone,
+                type: 'ATA', // 알림톡 타입 명시
                 autoTypeDetect: false, // 알림톡 타입 자동 감지 비활성화
-                kakaoOptions: {
-                    pfId: this.pfId,
-                    templateId: templateId,
-                    variables: variables,
-                    adFlag: false, // 광고성 메시지 여부 (알림톡은 false)
-                    disableSms: !fallbackToSms, // true면 SMS 대체 발송 안함
-                },
+                kakaoOptions: kakaoOptions,
             });
 
             this.logger.log(`[send] 알림톡 발송 성공: ${normalizedPhone}, templateId: ${templateId}`);
@@ -230,10 +240,11 @@ export class AlimtalkService implements OnModuleInit {
 
     /**
      * 회원가입 인증번호 알림톡 발송
+     * 중요: CoolSMS/Solapi API는 변수 키를 "#{변수명}" 형식으로 전달해야 합니다.
      */
     async sendVerificationCode(phone: string, code: string): Promise<AlimtalkResult> {
         return this.sendByTemplate(phone, AlimtalkTemplateCodeEnum.VERIFICATION_CODE, {
-            인증번호: code,
+            '#{인증번호}': code,
         });
     }
 
@@ -255,21 +266,23 @@ export class AlimtalkService implements OnModuleInit {
 
     /**
      * 상담 신청 알림톡 발송 (브리더에게)
+     * 중요: CoolSMS/Solapi API는 변수 키를 "#{변수명}" 형식으로 전달해야 합니다.
      */
     async sendConsultationRequest(breederPhone: string, adopterName: string, petName: string): Promise<AlimtalkResult> {
         return this.sendByTemplate(breederPhone, AlimtalkTemplateCodeEnum.CONSULTATION_REQUEST, {
-            adopterName: adopterName,
-            petName: petName,
+            '#{adopterName}': adopterName,
+            '#{petName}': petName,
         });
     }
 
     /**
      * 상담 완료 알림톡 발송 (입양자에게)
      * 템플릿: #{브리더명}님과의 입양 상담은 어떠셨나요?
+     * 중요: CoolSMS/Solapi API는 변수 키를 "#{변수명}" 형식으로 전달해야 합니다.
      */
     async sendConsultationComplete(adopterPhone: string, breederName: string): Promise<AlimtalkResult> {
         return this.sendByTemplate(adopterPhone, AlimtalkTemplateCodeEnum.CONSULTATION_COMPLETE, {
-            브리더명: breederName,
+            '#{브리더명}': breederName,
         });
     }
 
@@ -282,10 +295,11 @@ export class AlimtalkService implements OnModuleInit {
 
     /**
      * 서류 미제출 브리더 계정 활성화 알림톡 발송
+     * 중요: CoolSMS/Solapi API는 변수 키를 "#{변수명}" 형식으로 전달해야 합니다.
      */
     async sendDocumentReminder(breederPhone: string, breederName: string): Promise<AlimtalkResult> {
         return this.sendByTemplate(breederPhone, AlimtalkTemplateCodeEnum.DOCUMENT_REMINDER, {
-            브리더명: breederName,
+            '#{브리더명}': breederName,
         });
     }
 
