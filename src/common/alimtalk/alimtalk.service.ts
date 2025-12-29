@@ -23,6 +23,7 @@ interface CachedTemplate {
     fallbackToSms: boolean;
     isActive: boolean;
     reviewStatus: string;
+    buttons?: AlimtalkButton[];
 }
 
 /**
@@ -32,6 +33,18 @@ export interface AlimtalkResult {
     success: boolean;
     messageId?: string;
     error?: string;
+}
+
+/**
+ * 알림톡 버튼 인터페이스
+ */
+export interface AlimtalkButton {
+    buttonType: string; // WL(웹링크), AL(앱링크), BK(봇키워드), MD(메시지전달), BC(상담톡전환), BT(봇전환), AC(채널추가)
+    buttonName: string;
+    linkMo?: string;
+    linkPc?: string;
+    linkAnd?: string;
+    linkIos?: string;
 }
 
 /**
@@ -46,6 +59,8 @@ export interface AlimtalkOptions {
     variables?: Record<string, string>;
     /** 알림톡 실패 시 SMS로 대체 발송 여부 */
     fallbackToSms?: boolean;
+    /** 알림톡 버튼 (템플릿에 버튼이 있으면 필수) */
+    buttons?: AlimtalkButton[];
 }
 
 @Injectable()
@@ -101,6 +116,7 @@ export class AlimtalkService implements OnModuleInit {
                     fallbackToSms: template.fallbackToSms,
                     isActive: template.isActive,
                     reviewStatus: template.reviewStatus,
+                    buttons: template.buttons,
                 });
             }
 
@@ -132,6 +148,7 @@ export class AlimtalkService implements OnModuleInit {
                 fallbackToSms: template.fallbackToSms,
                 isActive: template.isActive,
                 reviewStatus: template.reviewStatus,
+                buttons: template.buttons,
             };
             this.templateCache.set(templateCode, cached);
             return cached;
@@ -219,11 +236,11 @@ export class AlimtalkService implements OnModuleInit {
         }
 
         if (template.reviewStatus !== 'approved') {
-            this.logger.warn(`[sendByTemplate] 검수되지 않은 템플릿: ${templateCode} (${template.reviewStatus})`);
-            // 검수 중인 템플릿은 SMS로 대체
-            if (template.fallbackToSms) {
-                this.logger.log(`[sendByTemplate] SMS로 대체 발송 시도: ${templateCode}`);
-            }
+            this.logger.warn(
+                `[sendByTemplate] 검수되지 않은 템플릿 발송 스킵: ${templateCode} (${template.reviewStatus})`,
+            );
+            // 검수 중인 템플릿은 알림톡 발송하지 않음 (이메일만 발송됨)
+            return { success: false, error: `템플릿이 검수 중입니다: ${template.reviewStatus}` };
         }
 
         return this.send({
