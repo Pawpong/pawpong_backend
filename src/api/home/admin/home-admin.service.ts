@@ -45,12 +45,8 @@ export class HomeAdminService {
 
             return {
                 bannerId: banner._id.toString(),
-                desktopImageUrl: desktopFileName
-                    ? this.storageService.generateSignedUrl(desktopFileName, 60 * 24)
-                    : '',
-                mobileImageUrl: mobileFileName
-                    ? this.storageService.generateSignedUrl(mobileFileName, 60 * 24)
-                    : '',
+                desktopImageUrl: desktopFileName ? this.storageService.generateSignedUrl(desktopFileName, 60 * 24) : '',
+                mobileImageUrl: mobileFileName ? this.storageService.generateSignedUrl(mobileFileName, 60 * 24) : '',
                 desktopImageFileName: desktopFileName || '',
                 mobileImageFileName: mobileFileName || '',
                 linkType: banner.linkType,
@@ -110,9 +106,7 @@ export class HomeAdminService {
 
         return {
             bannerId: banner._id.toString(),
-            desktopImageUrl: desktopFileName
-                ? this.storageService.generateSignedUrl(desktopFileName, 60 * 24)
-                : '',
+            desktopImageUrl: desktopFileName ? this.storageService.generateSignedUrl(desktopFileName, 60 * 24) : '',
             mobileImageUrl: mobileFileName ? this.storageService.generateSignedUrl(mobileFileName, 60 * 24) : '',
             desktopImageFileName: desktopFileName || '',
             mobileImageFileName: mobileFileName || '',
