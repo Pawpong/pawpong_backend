@@ -172,3 +172,12 @@ export enum RecipientType {
     ADOPTER = 'adopter',
     BREEDER = 'breeder',
 }
+
+/**
+ * 가격 표시 타입 열거형
+ */
+export enum PriceDisplayType {
+    NOT_SET = 'not_set', // 가격 미설정 (min: 0, max: 0, display: 'not_set')
+    CONSULTATION = 'consultation', // 상담 후 공개 (min: 0, max: 0, display: 'consultation')
+    RANGE = 'range', // 가격 범위 표시 (min > 0, max > 0, display: 'range')
+}
