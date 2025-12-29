@@ -1,12 +1,11 @@
-import { Injectable, BadRequestException, InternalServerErrorException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, BadRequestException, InternalServerErrorException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import CoolsmsMessageService from 'coolsms-node-sdk';
 
 import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
 import { PhoneWhitelist, PhoneWhitelistDocument } from '../../schema/phone-whitelist.schema';
+import { AlimtalkService } from '../../common/alimtalk/alimtalk.service';
 
 interface VerificationCode {
     phone: string;
@@ -18,33 +17,23 @@ interface VerificationCode {
 
 @Injectable()
 export class SmsService {
-    private readonly messageService: CoolsmsMessageService;
+    private readonly logger = new Logger(SmsService.name);
     private verificationCodes: Map<string, VerificationCode> = new Map();
     private readonly MAX_ATTEMPTS = 5;
     private readonly CODE_EXPIRY_MINUTES = 3;
 
     constructor(
-        private readonly configService: ConfigService,
+        private readonly alimtalkService: AlimtalkService,
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(PhoneWhitelist.name) private phoneWhitelistModel: Model<PhoneWhitelistDocument>,
-    ) {
-        const apiKey = this.configService.get<string>('COOLSMS_API_KEY');
-        const apiSecret = this.configService.get<string>('COOLSMS_API_SECRET');
-
-        if (apiKey && apiSecret) {
-            this.messageService = new CoolsmsMessageService(apiKey, apiSecret);
-        }
-    }
+    ) {}
 
     /**
      * 전화번호가 화이트리스트에 있는지 확인 (DB 조회)
      */
     private async isPhoneWhitelisted(phoneNumber: string): Promise<boolean> {
-        const whitelist = await this.phoneWhitelistModel
-            .findOne({ phoneNumber, isActive: true })
-            .lean()
-            .exec();
+        const whitelist = await this.phoneWhitelistModel.findOne({ phoneNumber, isActive: true }).lean().exec();
         return !!whitelist;
     }
 
@@ -79,25 +68,19 @@ export class SmsService {
         const expiresAt = new Date(Date.now() + this.CODE_EXPIRY_MINUTES * 60 * 1000);
 
         try {
-            if (!this.messageService) {
-                throw new InternalServerErrorException('SMS 서비스가 설정되지 않았습니다.');
+            // 1. 카카오 알림톡으로 인증번호 발송 시도
+            const alimtalkResult = await this.alimtalkService.sendVerificationCode(normalizedPhone, verificationCode);
+
+            if (alimtalkResult.success) {
+                this.logger.log(`[sendVerificationCode] 알림톡 인증번호 발송 성공: ${normalizedPhone}`);
+            } else {
+                // 알림톡 실패 시 로그 기록 (SMS fallback은 알림톡 서비스에서 자동 처리)
+                this.logger.warn(
+                    `[sendVerificationCode] 알림톡 발송 실패, SMS fallback 시도됨: ${alimtalkResult.error}`,
+                );
             }
 
-            const senderPhone = this.configService.get<string>('COOLSMS_SENDER_PHONE');
-
-            if (!senderPhone) {
-                throw new InternalServerErrorException('발신번호가 설정되지 않았습니다.');
-            }
-
-            const messageContent = `[Pawpong]\n인증번호는 ${verificationCode}입니다.\n${this.CODE_EXPIRY_MINUTES}분 내에 입력해주세요.`;
-
-            await this.messageService.sendOne({
-                to: normalizedPhone,
-                from: senderPhone,
-                text: messageContent,
-                autoTypeDetect: true,
-            });
-
+            // 인증코드 저장 (알림톡/SMS 발송 성공 여부와 관계없이)
             this.verificationCodes.set(normalizedPhone, {
                 phone: normalizedPhone,
                 code: verificationCode,
@@ -111,7 +94,7 @@ export class SmsService {
                 message: '인증번호가 발송되었습니다.',
             };
         } catch (error) {
-            console.error('SMS 발송 실패:', error);
+            this.logger.error(`[sendVerificationCode] 인증번호 발송 실패: ${error.message}`);
             throw new InternalServerErrorException('인증번호 발송에 실패했습니다. 잠시 후 다시 시도해주세요.');
         }
     }

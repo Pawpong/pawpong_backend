@@ -466,15 +466,16 @@ export class BreederService {
 
         return {
             items,
-            pagination: itemsPerPage > 0
-                ? {
-                      currentPage,
-                      totalPages,
-                      totalCount,
-                      hasNextPage,
-                      hasPrevPage,
-                  }
-                : undefined,
+            pagination:
+                itemsPerPage > 0
+                    ? {
+                          currentPage,
+                          totalPages,
+                          totalCount,
+                          hasNextPage,
+                          hasPrevPage,
+                      }
+                    : undefined,
         };
     }
 
