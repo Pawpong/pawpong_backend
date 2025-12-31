@@ -1,15 +1,14 @@
-import { Module } from '@nestjs/common';
+import { Module, Logger, OnModuleInit } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigService } from '@nestjs/config';
+import { InjectConnection } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 @Module({
     imports: [
         MongooseModule.forRootAsync({
             useFactory: async (configService: ConfigService) => {
                 const uri = configService.get<string>('MONGODB_URI');
-                console.log('[DatabaseModule] MongoDB URI:', uri ? uri.replace(/:[^:]*@/, ':****@') : 'NOT SET');
-                console.log('[DatabaseModule] Connecting to MongoDB...');
-
                 return {
                     uri: uri,
                     retryAttempts: 2,
@@ -24,4 +23,13 @@ import { ConfigService } from '@nestjs/config';
     ],
     exports: [MongooseModule],
 })
-export class DatabaseModule {}
+export class DatabaseModule implements OnModuleInit {
+    private readonly logger = new Logger('Database');
+
+    constructor(@InjectConnection() private readonly connection: Connection) {}
+
+    onModuleInit() {
+        const dbName = this.connection.db?.databaseName || 'pawpong';
+        this.logger.log(`MongoDB 연결 성공 (DB: ${dbName})`);
+    }
+}

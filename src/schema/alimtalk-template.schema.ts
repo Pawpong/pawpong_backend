@@ -43,7 +43,7 @@ export class AlimtalkTemplate {
         description: '템플릿 코드 (고유 식별자)',
         example: 'VERIFICATION_CODE',
     })
-    @Prop({ required: true, unique: true, index: true })
+    @Prop({ required: true, unique: true })
     templateCode: string;
 
     @ApiProperty({
@@ -126,6 +126,5 @@ export class AlimtalkTemplate {
 
 export const AlimtalkTemplateSchema = SchemaFactory.createForClass(AlimtalkTemplate);
 
-// 인덱스 설정
-AlimtalkTemplateSchema.index({ templateCode: 1 }, { unique: true });
+// 인덱스 설정 (templateCode는 unique: true로 이미 인덱스됨)
 AlimtalkTemplateSchema.index({ isActive: 1 });
