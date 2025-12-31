@@ -4,6 +4,7 @@ import { WinstonModule } from 'nest-winston';
 
 import { winstonConfig } from './common/config/winston.config';
 import { LoggerModule } from './common/logger/logger.module';
+// import { KafkaModule } from './common/kafka/kafka.module'; // 채팅 기능 구현 시 활성화
 import { AlimtalkModule } from './common/alimtalk/alimtalk.module';
 import { AlimtalkAdminModule } from './common/alimtalk/admin/alimtalk-admin.module';
 
@@ -39,6 +40,7 @@ import { NoticeModule } from './api/notice/notice.module';
         }),
         WinstonModule.forRoot(winstonConfig),
         LoggerModule,
+        // KafkaModule, // 채팅 기능 구현 시 활성화
         DatabaseModule,
         AlimtalkModule,
         AlimtalkAdminModule,

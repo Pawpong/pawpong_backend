@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Delete, Query, Param, Body, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Query, Param, Body, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
 import { RolesGuard } from '../../../common/guard/roles.guard';
@@ -109,7 +109,7 @@ export class NoticeAdminController {
     /**
      * 공지사항 수정 (관리자 전용)
      */
-    @Put(':noticeId')
+    @Patch(':noticeId')
     @ApiOperation({
         summary: '공지사항 수정',
         description: '기존 공지사항을 수정합니다. (관리자 전용)',
