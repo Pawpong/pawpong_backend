@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
 import { HomeService } from './home.service';
@@ -6,6 +6,8 @@ import { HomeService } from './home.service';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { FaqResponseDto } from './dto/response/faq-response.dto';
 import { BannerResponseDto } from './dto/response/banner-response.dto';
+import { CurrentUser } from '../../common/decorator/user.decorator';
+import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard';
 
 /**
  * 홈페이지 공개 API 컨트롤러
@@ -66,9 +68,10 @@ export class HomeController {
      * GET /api/home/available-pets?limit=10
      */
     @Get('available-pets')
+    @UseGuards(OptionalJwtAuthGuard)
     @ApiOperation({
         summary: '분양 중인 아이들 조회',
-        description: '홈페이지에 표시할 분양 가능한 반려동물 목록을 반환합니다.',
+        description: '홈페이지에 표시할 분양 가능한 반려동물 목록을 반환합니다. 비로그인 시 가격 정보는 제공되지 않습니다.',
     })
     @ApiQuery({
         name: 'limit',
@@ -80,8 +83,9 @@ export class HomeController {
         status: 200,
         description: '분양 가능한 반려동물 목록 조회 성공',
     })
-    async getAvailablePets(@Query('limit') limit: number = 10): Promise<ApiResponseDto<any[]>> {
-        const pets = await this.homeService.getAvailablePets(limit);
+    async getAvailablePets(@Query('limit') limit: number = 10, @CurrentUser() user?: any): Promise<ApiResponseDto<any[]>> {
+        const isAuthenticated = !!user?.userId;
+        const pets = await this.homeService.getAvailablePets(limit, isAuthenticated);
         return ApiResponseDto.success(pets, '분양중인 아이들이 조회되었습니다.');
     }
 }
