@@ -35,6 +35,17 @@ export class BreederVerificationResponseDto {
     emailAddress: string;
 
     /**
+     * 브리더 전화번호
+     * @example "010-1234-5678"
+     */
+    @ApiProperty({
+        description: '브리더 전화번호',
+        example: '010-1234-5678',
+        required: false,
+    })
+    phoneNumber?: string;
+
+    /**
      * 계정 상태
      * @example "active"
      */
