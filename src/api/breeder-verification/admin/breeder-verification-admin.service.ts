@@ -112,7 +112,7 @@ export class BreederVerificationAdminService {
         const [breeders, total] = await Promise.all([
             this.breederModel
                 .find(query)
-                .select('nickname emailAddress verification profile createdAt')
+                .select('nickname emailAddress phoneNumber verification profile createdAt')
                 .sort({ 'verification.submittedAt': -1 })
                 .skip(skip)
                 .limit(itemsPerPage)
@@ -138,6 +138,7 @@ export class BreederVerificationAdminService {
                 breederId: (breeder._id as any).toString(),
                 breederName: breeder.nickname,
                 emailAddress: breeder.emailAddress,
+                phoneNumber: breeder.phoneNumber,
                 accountStatus: (breeder as any).accountStatus || 'active',
                 verificationInfo: {
                     verificationStatus: breeder.verification?.status || 'pending',
@@ -195,7 +196,7 @@ export class BreederVerificationAdminService {
         const [breeders, total] = await Promise.all([
             this.breederModel
                 .find(query)
-                .select('nickname emailAddress verification profile createdAt accountStatus isTestAccount')
+                .select('nickname emailAddress phoneNumber verification profile createdAt accountStatus isTestAccount')
                 .sort({ createdAt: -1 })
                 .skip(skip)
                 .limit(itemsPerPage)
@@ -221,6 +222,7 @@ export class BreederVerificationAdminService {
                 breederId: (breeder._id as any).toString(),
                 breederName: breeder.nickname,
                 emailAddress: breeder.emailAddress,
+                phoneNumber: breeder.phoneNumber,
                 accountStatus: (breeder as any).accountStatus || 'active',
                 isTestAccount: (breeder as any).isTestAccount || false,
                 verificationInfo: {
