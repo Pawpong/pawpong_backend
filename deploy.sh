@@ -40,6 +40,12 @@ LAST_IMAGE=$(docker images pawpong-backend --format "{{.Tag}}" | head -n 1)
 echo "$LAST_IMAGE" > /root/pawpong_backend/.last_deploy
 echo -e "${YELLOW}Previous image tag saved: ${LAST_IMAGE}${NC}"
 
+# 배포 히스토리 저장 (최근 10개 유지)
+echo "$IMAGE_TAG" >> /root/pawpong_backend/.deploy_history
+tail -10 /root/pawpong_backend/.deploy_history > /root/pawpong_backend/.deploy_history.tmp
+mv /root/pawpong_backend/.deploy_history.tmp /root/pawpong_backend/.deploy_history
+echo -e "${YELLOW}Deployment history updated${NC}"
+
 echo -e "${BLUE}Using Docker image from Artifact Registry: pawpong-backend:latest${NC}"
 # Artifact Registry에서 이미 pull된 이미지를 사용 (중복 빌드 제거)
 
@@ -122,7 +128,8 @@ else
     exit 1
 fi
 
-# Grafana/Loki/Promtail 확인
+# Grafana/Loki/Promtail 확인 (Kafka는 채팅 기능 구현 시 활성화)
 echo -e "${BLUE}Ensuring monitoring stack is running...${NC}"
 docker compose up -d grafana loki promtail
+# docker compose up -d zookeeper kafka kafka-ui  # 채팅 기능 구현 시 활성화
 

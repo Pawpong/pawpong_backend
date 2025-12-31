@@ -1,0 +1,113 @@
+name: Manual Rollback
+
+on:
+    workflow_dispatch:
+        inputs:
+            version:
+                description: 'Rollback version number (1 = most recent previous, 2 = two versions ago, etc.)'
+                required: false
+                default: '1'
+                type: string
+            confirm:
+                description: 'Type "ROLLBACK" to confirm'
+                required: true
+                type: string
+
+jobs:
+    rollback:
+        name: Rollback to Previous Version
+        runs-on: ubuntu-latest
+        if: ${{ github.event.inputs.confirm == 'ROLLBACK' }}
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup SSH for Production Server
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/prod_key
+                  chmod 600 ~/.ssh/prod_key
+                  ssh-keyscan -H "${{ secrets.PROD_SERVER_HOST }}" >> ~/.ssh/known_hosts || true
+
+            - name: Check deployment history
+              id: check_history
+              run: |
+                  echo "Checking deployment history..."
+                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no root@${{ secrets.PROD_SERVER_HOST }} << 'ENDSSH'
+                  cd /root/pawpong_backend
+                  if [ -f .deploy_history ]; then
+                      echo "=== Available versions ==="
+                      cat -n .deploy_history
+                  else
+                      echo "No deployment history found"
+                      exit 1
+                  fi
+                  ENDSSH
+
+            - name: Execute Rollback
+              env:
+                  VERSION: ${{ github.event.inputs.version }}
+              run: |
+                  echo "Starting rollback to version $VERSION..."
+                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no root@${{ secrets.PROD_SERVER_HOST }} << ENDSSH > rollback.log 2>&1
+                  cd /root/pawpong_backend
+                  bash rollback.sh ${VERSION}
+                  ENDSSH
+                  cat rollback.log
+                  echo "ROLLBACK_LOG<<EOF" >> $GITHUB_ENV
+                  cat rollback.log >> $GITHUB_ENV
+                  echo "EOF" >> $GITHUB_ENV
+
+            - name: Send Discord Notification (Success)
+              if: success()
+              run: |
+                  ROLLBACK_VERSION=$(echo "$ROLLBACK_LOG" | grep -oP 'Rolled back to: \K.*' || echo "unknown")
+                  ACTIVE_CONTAINER=$(echo "$ROLLBACK_LOG" | grep -oP 'Active Container: \K(blue|green)' || echo "unknown")
+                  ACTIVE_PORT=$(echo "$ROLLBACK_LOG" | grep -oP 'Active Container: (?:blue|green) \(port \K[0-9]+' || echo "unknown")
+
+                  curl -H "Content-Type: application/json" \
+                       -X POST \
+                       -d "{
+                         \"embeds\": [{
+                           \"title\": \"롤백 성공\",
+                           \"description\": \"프로덕션 서버가 이전 버전으로 롤백되었습니다.\",
+                           \"color\": 16776960,
+                           \"fields\": [
+                             {\"name\": \"롤백 버전\", \"value\": \"${ROLLBACK_VERSION}\", \"inline\": true},
+                             {\"name\": \"활성 컨테이너\", \"value\": \"${ACTIVE_CONTAINER} (포트 ${ACTIVE_PORT})\", \"inline\": true},
+                             {\"name\": \"실행자\", \"value\": \"${{ github.actor }}\", \"inline\": true}
+                           ],
+                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                         }]
+                       }" \
+                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+
+            - name: Send Discord Notification (Failure)
+              if: failure()
+              run: |
+                  curl -H "Content-Type: application/json" \
+                       -X POST \
+                       -d "{
+                         \"embeds\": [{
+                           \"title\": \"롤백 실패\",
+                           \"description\": \"롤백 중 오류가 발생했습니다.\",
+                           \"color\": 15158332,
+                           \"fields\": [
+                             {\"name\": \"실행자\", \"value\": \"${{ github.actor }}\", \"inline\": true},
+                             {\"name\": \"로그 확인\", \"value\": \"[GitHub Actions 로그](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
+                           ],
+                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                         }]
+                       }" \
+                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+
+    cancelled:
+        name: Rollback Cancelled
+        runs-on: ubuntu-latest
+        if: ${{ github.event.inputs.confirm != 'ROLLBACK' }}
+        steps:
+            - name: Cancelled
+              run: |
+                  echo "Rollback cancelled. You must type 'ROLLBACK' to confirm."
+                  exit 1
