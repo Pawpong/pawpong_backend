@@ -22,52 +22,31 @@ export class LoggingInterceptor implements NestInterceptor {
 
         const { method, url, ip, headers, cookies, body } = request;
 
-        // 요청 정보 로깅
-        this.logger.log(`\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-        this.logger.log(`→ Request: ${method} ${url}`);
-        this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━`);
-        this.logger.log(`  IP: ${ip}`);
+        // 요청 헤더 로깅
+        this.logger.log(``, 'HTTP');
+        this.logger.log(`▶ ${method} ${url}`, 'HTTP');
+        this.logger.log(`  ├─ IP: ${ip}`, 'HTTP');
 
-        // Bearer 토큰 로깅
-        if (headers.authorization) {
-            if (headers.authorization.startsWith('Bearer ')) {
-                const token = headers.authorization.substring(7);
-                this.logger.log(`  Bearer Token: ${token.substring(0, 20)}...`);
-            } else {
-                this.logger.log(`  Authorization: ${headers.authorization.substring(0, 30)}...`);
-            }
+        // Bearer 토큰
+        if (headers.authorization?.startsWith('Bearer ')) {
+            const token = headers.authorization.substring(7);
+            this.logger.log(`  ├─ Token: ${token}`, 'HTTP');
         }
 
-        // 쿠키 로깅
-        if (cookies) {
-            const cookieKeys = Object.keys(cookies);
-            if (cookieKeys.length > 0) {
-                this.logger.log(`  Cookies: ${cookieKeys.join(', ')}`);
-                if (cookies.accessToken) {
-                    this.logger.log(`  AccessToken (Cookie): ${cookies.accessToken.substring(0, 20)}...`);
-                }
-                if (cookies.refreshToken) {
-                    this.logger.log(`  RefreshToken (Cookie): ${cookies.refreshToken.substring(0, 20)}...`);
-                }
-                if (cookies.userRole) {
-                    this.logger.log(`  UserRole (Cookie): ${cookies.userRole}`);
-                }
-            } else {
-                this.logger.log(`  Cookies: (none)`);
-            }
+        // 쿠키 역할
+        if (cookies?.userRole) {
+            this.logger.log(`  ├─ Role: ${cookies.userRole}`, 'HTTP');
         }
 
-        // Body 로깅 (multipart 제외)
-        if (body && Object.keys(body).length > 0) {
-            this.logger.log(`  Body: ${JSON.stringify(body)}`);
+        // Body 로깅 (POST, PUT, PATCH만)
+        if (['POST', 'PUT', 'PATCH'].includes(method) && body && Object.keys(body).length > 0) {
+            const safeBody = { ...body };
+            if (safeBody.password) safeBody.password = '***';
+            if (safeBody.refreshToken) safeBody.refreshToken = safeBody.refreshToken.substring(0, 20) + '...';
+            this.logger.log(`  └─ Body: ${JSON.stringify(safeBody)}`, 'HTTP');
+        } else {
+            this.logger.log(`  └─ Body: (none)`, 'HTTP');
         }
-
-        // Content-Type 로깅
-        if (headers['content-type']) {
-            this.logger.log(`  Content-Type: ${headers['content-type']}`);
-        }
-
-        this.logger.log(`━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`);
 
         // 응답은 로깅하지 않음 (사용자 요청)
         return next.handle();
