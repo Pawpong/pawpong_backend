@@ -123,11 +123,12 @@ export class HomeService {
      * AvailablePet 컬렉션에서 직접 조회
      * 탈퇴/정지된 브리더의 개체는 제외
      * @param limit 조회 개수 (기본: 10, 최대: 50)
+     * @param isAuthenticated 로그인 여부 (비로그인 시 가격 정보 미제공)
      */
-    async getAvailablePets(limit: number = 10): Promise<any[]> {
+    async getAvailablePets(limit: number = 10, isAuthenticated: boolean = false): Promise<any[]> {
         // 최대 조회 개수 제한 (최대 50개)
         const validLimit = Math.min(limit, 50);
-        this.logger.log(`[getAvailablePets] 분양 가능한 반려동물 ${validLimit}개 조회 시작`);
+        this.logger.log(`[getAvailablePets] 분양 가능한 반려동물 ${validLimit}개 조회 시작 (로그인 여부: ${isAuthenticated})`);
 
         // 활성 상태의 브리더 ID 목록 조회 (탈퇴/정지/테스트 브리더 제외)
         const activeBreeders = await this.breederModel
@@ -163,7 +164,7 @@ export class HomeService {
                 breed: pet.breed,
                 breederId: breeder._id ? breeder._id.toString() : '',
                 breederName: breeder.name || '브리더 정보 없음',
-                price: pet.price || 0,
+                price: isAuthenticated ? pet.price || 0 : null, // 비로그인 시 null
                 mainPhoto:
                     pet.photos && pet.photos.length > 0
                         ? this.storageService.generateSignedUrl(pet.photos[0], 60)
