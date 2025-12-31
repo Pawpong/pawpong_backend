@@ -52,8 +52,5 @@ export class PhoneWhitelist {
 
 export const PhoneWhitelistSchema = SchemaFactory.createForClass(PhoneWhitelist);
 
-// 전화번호 유니크 인덱스
-PhoneWhitelistSchema.index({ phoneNumber: 1 }, { unique: true });
-
-// 활성 상태별 조회 인덱스
+// 활성 상태별 조회 인덱스 (phoneNumber는 unique: true로 이미 인덱스됨)
 PhoneWhitelistSchema.index({ isActive: 1 });
