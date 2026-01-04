@@ -1,5 +1,19 @@
+# =============================================================================
+# Pawpong Backend - Docker Compose
+# =============================================================================
+# 사용법:
+#   전체 실행: docker-compose up -d
+#   앱만 실행: docker-compose up -d blue green
+#   모니터링만: docker-compose up -d loki grafana promtail
+#   Kafka 포함: docker-compose --profile kafka up -d
+# =============================================================================
+
 services:
+    # =========================================================================
+    # 앱 서비스 (Blue-Green 배포)
+    # =========================================================================
     blue:
+        image: pawpong-backend:latest
         build: .
         container_name: pawpong_blue
         ports:
@@ -17,14 +31,11 @@ services:
         networks:
             - pawpong_network
         healthcheck:
-            test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/api/health || exit 1"]
+            test: [ 'CMD-SHELL', 'wget --no-verbose --tries=1 --spider http://localhost:8080/api/health || exit 1' ]
             interval: 30s
             timeout: 10s
             retries: 3
             start_period: 40s
-        depends_on:
-            loki:
-                condition: service_started
         deploy:
             resources:
                 limits:
@@ -38,9 +49,9 @@ services:
             options:
                 max-size: '10m'
                 max-file: '3'
-                labels: 'deployment,container_name'
 
     green:
+        image: pawpong-backend:latest
         build: .
         container_name: pawpong_green
         ports:
@@ -58,14 +69,11 @@ services:
         networks:
             - pawpong_network
         healthcheck:
-            test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://localhost:8080/api/health || exit 1"]
+            test: [ 'CMD-SHELL', 'wget --no-verbose --tries=1 --spider http://localhost:8080/api/health || exit 1' ]
             interval: 30s
             timeout: 10s
             retries: 3
             start_period: 40s
-        depends_on:
-            loki:
-                condition: service_started
         deploy:
             resources:
                 limits:
@@ -73,17 +81,43 @@ services:
                 reservations:
                     memory: 1G
         labels:
-            - "deployment=green"
+            - 'deployment=green'
         logging:
-            driver: "json-file"
+            driver: 'json-file'
             options:
-                max-size: "10m"
-                max-file: "3"
-                labels: "deployment,container_name"
+                max-size: '10m'
+                max-file: '3'
 
-    # Grafana - 시각화 대시보드
+    # =========================================================================
+    # 모니터링 스택 (Loki + Grafana + Promtail)
+    # =========================================================================
+    loki:
+        image: grafana/loki:2.9.0
+        container_name: loki
+        ports:
+            - '3100:3100'
+        command: -config.file=/etc/loki/local-config.yaml
+        volumes:
+            - loki_data:/loki
+            - ./loki/loki-config.yaml:/etc/loki/local-config.yaml:ro
+        restart: unless-stopped
+        networks:
+            - pawpong_network
+        healthcheck:
+            test: [ 'CMD-SHELL', 'wget --no-verbose --tries=1 --spider http://localhost:3100/ready || exit 1' ]
+            interval: 10s
+            timeout: 5s
+            retries: 5
+            start_period: 20s
+        deploy:
+            resources:
+                limits:
+                    memory: 512M
+                reservations:
+                    memory: 256M
+
     grafana:
-        image: grafana/grafana:latest
+        image: grafana/grafana:10.2.0
         container_name: grafana
         ports:
             - '3000:3000'
@@ -91,14 +125,15 @@ services:
             - GF_SECURITY_ADMIN_USER=admin
             - GF_SECURITY_ADMIN_PASSWORD=pawpong2025
             - GF_USERS_ALLOW_SIGN_UP=false
-            - GF_SERVER_ROOT_URL=http://localhost:3000
-            - GF_INSTALL_PLUGINS=
         volumes:
             - grafana_data:/var/lib/grafana
-            - ./grafana/provisioning:/etc/grafana/provisioning
+            - ./grafana/provisioning:/etc/grafana/provisioning:ro
         restart: unless-stopped
         networks:
             - pawpong_network
+        depends_on:
+            loki:
+                condition: service_healthy
         deploy:
             resources:
                 limits:
@@ -106,39 +141,20 @@ services:
                 reservations:
                     memory: 256M
 
-    # Loki - 로그 수집 및 저장
-    loki:
-        image: grafana/loki:latest
-        container_name: loki
-        ports:
-            - '3100:3100'
-        command: -config.file=/etc/loki/local-config.yaml
-        volumes:
-            - loki_data:/loki
-            - ./loki/loki-config.yaml:/etc/loki/local-config.yaml
-        restart: unless-stopped
-        networks:
-            - pawpong_network
-        deploy:
-            resources:
-                limits:
-                    memory: 512M
-                reservations:
-                    memory: 256M
-
-    # Promtail - 로그 에이전트 (Docker 로그 수집)
     promtail:
-        image: grafana/promtail:latest
+        image: grafana/promtail:2.9.0
         container_name: promtail
         volumes:
-            - ./promtail/promtail-config.yaml:/etc/promtail/config.yml
+            - ./promtail/promtail-config.yaml:/etc/promtail/config.yml:ro
             - /var/lib/docker/containers:/var/lib/docker/containers:ro
-            - /var/run/docker.sock:/var/run/docker.sock
-            - ./logs:/app/logs:ro
+            - /var/run/docker.sock:/var/run/docker.sock:ro
         command: -config.file=/etc/promtail/config.yml
         restart: unless-stopped
         networks:
             - pawpong_network
+        depends_on:
+            loki:
+                condition: service_healthy
         deploy:
             resources:
                 limits:
@@ -146,10 +162,15 @@ services:
                 reservations:
                     memory: 128M
 
-    # Zookeeper - Kafka 의존성
+    # =========================================================================
+    # Kafka 스택 (채팅 기능용 - 필요시 활성화)
+    # 사용: docker-compose --profile kafka up -d
+    # =========================================================================
     zookeeper:
         image: confluentinc/cp-zookeeper:7.5.0
         container_name: zookeeper
+        profiles:
+            - kafka
         environment:
             ZOOKEEPER_CLIENT_PORT: 2181
             ZOOKEEPER_TICK_TIME: 2000
@@ -166,10 +187,11 @@ services:
                 reservations:
                     memory: 256M
 
-    # Kafka - 메시지 브로커 (채팅 + 유저 플로우 로그)
     kafka:
         image: confluentinc/cp-kafka:7.5.0
         container_name: kafka
+        profiles:
+            - kafka
         depends_on:
             - zookeeper
         ports:
@@ -198,16 +220,17 @@ services:
                 reservations:
                     memory: 512M
         healthcheck:
-            test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1"]
+            test: [ 'CMD-SHELL', 'kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1' ]
             interval: 30s
             timeout: 10s
             retries: 5
             start_period: 60s
 
-    # Kafka UI - 카프카 모니터링 (개발/디버깅용, 프로덕션에서는 제거 가능)
     kafka-ui:
         image: provectuslabs/kafka-ui:latest
         container_name: kafka-ui
+        profiles:
+            - kafka
         depends_on:
             - kafka
         ports:
