@@ -121,9 +121,11 @@ services:
         container_name: grafana
         ports:
             - '3000:3000'
+        env_file:
+            - .env.production
         environment:
-            - GF_SECURITY_ADMIN_USER=admin
-            - GF_SECURITY_ADMIN_PASSWORD=pawpong2025
+            - GF_SECURITY_ADMIN_USER=${GRAFANA_ADMIN_USER:-admin}
+            - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD:-admin}
             - GF_USERS_ALLOW_SIGN_UP=false
         volumes:
             - grafana_data:/var/lib/grafana
@@ -142,7 +144,7 @@ services:
                     memory: 256M
 
     promtail:
-        image: grafana/promtail:2.9.0
+        image: grafana/promtail:3.0.0
         container_name: promtail
         volumes:
             - ./promtail/promtail-config.yaml:/etc/promtail/config.yml:ro
