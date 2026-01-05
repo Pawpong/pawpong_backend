@@ -914,8 +914,19 @@ export class AuthService {
                 // - 단, local.pawpong.kr은 .pawpong.kr 쿠키 공유 가능하므로 프로덕션 방식 사용
                 if (!isProduction || isLocalFrontend) {
                     this.logger.log(`[processSocialLoginCallback] URL 파라미터 방식으로 토큰 전달`);
+
+                    // originUrl에서 리다이렉트 경로 추출 (형식: "frontendUrl|/redirect/path")
+                    let redirectPath = '/explore'; // 기본 경로
+                    if (userProfile.originUrl && userProfile.originUrl.includes('|')) {
+                        const parts = userProfile.originUrl.split('|');
+                        if (parts.length > 1 && parts[1]) {
+                            redirectPath = parts[1];
+                            this.logger.log(`[processSocialLoginCallback] 추출된 redirectPath (localhost): ${redirectPath}`);
+                        }
+                    }
+
                     return {
-                        redirectUrl: `${frontendUrl}/login/success?accessToken=${encodeURIComponent(tokens.accessToken)}&refreshToken=${encodeURIComponent(tokens.refreshToken)}`,
+                        redirectUrl: `${frontendUrl}/login/success?accessToken=${encodeURIComponent(tokens.accessToken)}&refreshToken=${encodeURIComponent(tokens.refreshToken)}&returnUrl=${encodeURIComponent(redirectPath)}`,
                     };
                 }
 
@@ -948,8 +959,18 @@ export class AuthService {
                     },
                 ];
 
+                // originUrl에서 리다이렉트 경로 추출 (형식: "frontendUrl|/redirect/path")
+                let redirectPath = '/explore'; // 기본 경로
+                if (userProfile.originUrl && userProfile.originUrl.includes('|')) {
+                    const parts = userProfile.originUrl.split('|');
+                    if (parts.length > 1 && parts[1]) {
+                        redirectPath = parts[1];
+                        this.logger.log(`[processSocialLoginCallback] 추출된 redirectPath: ${redirectPath}`);
+                    }
+                }
+
                 return {
-                    redirectUrl: `${frontendUrl}/explore`,
+                    redirectUrl: `${frontendUrl}${redirectPath}`,
                     cookies,
                 };
             }

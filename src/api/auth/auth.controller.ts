@@ -140,10 +140,13 @@ export class AuthController {
     async googleLogin(@Req() req, @Res() res: Response) {
         // 원래 origin을 state 파라미터로 전달 (OAuth 콜백에서 사용)
         const originUrl = req.headers.referer || req.headers.origin || '';
-        const encodedOrigin = encodeURIComponent(originUrl);
+        // returnUrl 쿼리 파라미터가 있으면 origin과 함께 전달 (형식: "originUrl|/returnPath")
+        const returnUrl = req.query.returnUrl as string;
+        const stateValue = returnUrl ? `${originUrl}|${returnUrl}` : originUrl;
+        const encodedState = encodeURIComponent(stateValue);
 
         // Google OAuth URL로 리다이렉트 (state 파라미터 포함)
-        const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.GOOGLE_CALLBACK_URL || '')}&response_type=code&scope=email%20profile&state=${encodedOrigin}`;
+        const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.GOOGLE_CALLBACK_URL || '')}&response_type=code&scope=email%20profile&state=${encodedState}`;
         return res.redirect(googleAuthUrl);
     }
 
@@ -177,10 +180,13 @@ export class AuthController {
     async naverLogin(@Req() req, @Res() res: Response) {
         // 원래 origin을 state 파라미터로 전달 (OAuth 콜백에서 사용)
         const originUrl = req.headers.referer || req.headers.origin || '';
-        const encodedOrigin = encodeURIComponent(originUrl);
+        // returnUrl 쿼리 파라미터가 있으면 origin과 함께 전달 (형식: "originUrl|/returnPath")
+        const returnUrl = req.query.returnUrl as string;
+        const stateValue = returnUrl ? `${originUrl}|${returnUrl}` : originUrl;
+        const encodedState = encodeURIComponent(stateValue);
 
         // Naver OAuth URL로 리다이렉트 (state 파라미터 포함)
-        const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?client_id=${process.env.NAVER_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.NAVER_CALLBACK_URL || '')}&response_type=code&state=${encodedOrigin}`;
+        const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?client_id=${process.env.NAVER_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.NAVER_CALLBACK_URL || '')}&response_type=code&state=${encodedState}`;
         return res.redirect(naverAuthUrl);
     }
 
@@ -214,10 +220,13 @@ export class AuthController {
     async kakaoLogin(@Req() req, @Res() res: Response) {
         // 원래 origin을 state 파라미터로 전달 (OAuth 콜백에서 사용)
         const originUrl = req.headers.referer || req.headers.origin || '';
-        const encodedOrigin = encodeURIComponent(originUrl);
+        // returnUrl 쿼리 파라미터가 있으면 origin과 함께 전달 (형식: "originUrl|/returnPath")
+        const returnUrl = req.query.returnUrl as string;
+        const stateValue = returnUrl ? `${originUrl}|${returnUrl}` : originUrl;
+        const encodedState = encodeURIComponent(stateValue);
 
         // Kakao OAuth URL로 리다이렉트 (state 파라미터 포함)
-        const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.KAKAO_CALLBACK_URL || '')}&response_type=code&state=${encodedOrigin}`;
+        const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.KAKAO_CALLBACK_URL || '')}&response_type=code&state=${encodedState}`;
         return res.redirect(kakaoAuthUrl);
     }
 
