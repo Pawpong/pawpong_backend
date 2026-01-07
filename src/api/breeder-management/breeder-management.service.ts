@@ -805,18 +805,29 @@ export class BreederManagementService {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
         }
 
-        if (breeder.verification?.status === VerificationStatus.APPROVED) {
-            throw new BadRequestException('이미 인증이 완료된 브리더입니다.');
+        // 레벨 변경 신청인지 확인 (APPROVED 상태에서 다른 레벨로 신청)
+        const isLevelChange =
+            breeder.verification?.status === VerificationStatus.APPROVED &&
+            breeder.verification?.level !== dto.level;
+
+        // 이미 승인된 브리더가 같은 레벨로 재신청하는 것은 막음
+        if (breeder.verification?.status === VerificationStatus.APPROVED && !isLevelChange) {
+            throw new BadRequestException('이미 인증이 완료된 브리더입니다. 레벨 변경만 가능합니다.');
         }
+
+        this.logger.log(
+            `[submitVerificationDocuments] Level change detection - isLevelChange: ${isLevelChange}, currentLevel: ${breeder.verification?.level}, requestedLevel: ${dto.level}`,
+        );
 
         // 필수 서류 검증 (재제출인 경우 기존 서류 + 새 서류 합쳐서 검증)
         const requiredTypes =
             dto.level === 'new' ? ['idCard', 'businessLicense'] : ['idCard', 'businessLicense', 'contractSample'];
 
-        // 재제출인 경우 기존 서류 타입도 포함
+        // 재제출 또는 레벨 변경인 경우 기존 서류 타입도 포함
         const isResubmissionCheck =
             breeder.verification?.status === VerificationStatus.REVIEWING ||
-            breeder.verification?.status === VerificationStatus.REJECTED;
+            breeder.verification?.status === VerificationStatus.REJECTED ||
+            isLevelChange;
 
         const submittedTypes = dto.documents.map((d) => d.type);
         const existingTypes = isResubmissionCheck ? breeder.verification?.documents?.map((d) => d.type) || [] : [];
@@ -897,16 +908,17 @@ export class BreederManagementService {
         });
 
         const submittedAt = new Date();
-        // 이미 서류를 제출한 적이 있으면 재제출 (REVIEWING, REJECTED 상태)
+        // 이미 서류를 제출한 적이 있으면 재제출 (REVIEWING, REJECTED 상태) 또는 레벨 변경
         const isResubmission =
             breeder.verification?.status === VerificationStatus.REVIEWING ||
-            breeder.verification?.status === VerificationStatus.REJECTED;
+            breeder.verification?.status === VerificationStatus.REJECTED ||
+            isLevelChange;
 
         this.logger.log(
-            `[submitVerificationDocuments] Resubmission check - current status: ${breeder.verification?.status}, isResubmission: ${isResubmission}`,
+            `[submitVerificationDocuments] Resubmission check - current status: ${breeder.verification?.status}, isResubmission: ${isResubmission}, isLevelChange: ${isLevelChange}`,
         );
 
-        // 기존 서류와 새로 제출된 서류 병합 (재제출인 경우)
+        // 기존 서류와 새로 제출된 서류 병합 (재제출 또는 레벨 변경인 경우)
         let finalDocuments = actualNewDocuments;
         if (isResubmission && breeder.verification?.documents) {
             // 기존 서류 중에서:
@@ -940,13 +952,24 @@ export class BreederManagementService {
             );
         }
 
-        const verification = {
+        const verification: any = {
             status: VerificationStatus.REVIEWING,
             level: dto.level,
             submittedAt,
             documents: finalDocuments,
             submittedByEmail: dto.submittedByEmail || false,
         };
+
+        // 레벨 변경 신청인 경우 추가 정보 저장
+        if (isLevelChange) {
+            verification.isLevelChangeRequested = true;
+            verification.levelChangeRequest = {
+                previousLevel: breeder.verification?.level,
+                requestedLevel: dto.level,
+                requestedAt: submittedAt,
+                documents: finalDocuments,
+            };
+        }
 
         await this.breederRepository.updateVerification(userId, verification);
 
@@ -985,6 +1008,8 @@ export class BreederManagementService {
                 phone: breeder.phoneNumber,
                 level: dto.level,
                 isResubmission,
+                isLevelChange,
+                previousLevel: isLevelChange ? (breeder.verification?.level as 'new' | 'elite') : undefined,
                 documents: documentsWithOriginalName,
                 submittedAt,
             });
@@ -1046,8 +1071,10 @@ export class BreederManagementService {
         const documents =
             verification?.documents
                 ?.map((doc: any) => {
-                    // fileName이 올바른 GCS 경로인지 검증 (verification/userId/uuid.ext 형식)
-                    const isValidFileName = doc.fileName && doc.fileName.startsWith('verification/');
+                    // fileName이 올바른 GCS 경로인지 검증
+                    // verification/ 또는 documents/verification/ 형식 모두 허용
+                    const isValidFileName = doc.fileName &&
+                        (doc.fileName.startsWith('verification/') || doc.fileName.startsWith('documents/verification/'));
 
                     if (!isValidFileName) {
                         this.logger.logWarning(

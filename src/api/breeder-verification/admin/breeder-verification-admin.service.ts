@@ -74,6 +74,87 @@ export class BreederVerificationAdminService {
     }
 
     /**
+     * 레벨 변경 신청 목록 조회
+     */
+    async getLevelChangeRequests(
+        adminId: string,
+        filter: BreederSearchRequestDto,
+    ): Promise<PaginationResponseDto<BreederVerificationResponseDto>> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canManageBreeders) {
+            throw new ForbiddenException('Access denied');
+        }
+
+        const { cityName, searchKeyword, pageNumber = 1, itemsPerPage = 10 } = filter;
+
+        const query: any = {
+            // 레벨 변경 신청 중인 브리더만 조회
+            'verification.isLevelChangeRequested': true,
+            'verification.status': VerificationStatus.REVIEWING,
+        };
+
+        if (cityName) {
+            query['profile.location.city'] = cityName;
+        }
+
+        if (searchKeyword) {
+            query.$or = [
+                { nickname: { $regex: searchKeyword, $options: 'i' } },
+                { emailAddress: { $regex: searchKeyword, $options: 'i' } },
+                { phoneNumber: { $regex: searchKeyword, $options: 'i' } },
+            ];
+        }
+
+        const skip = (pageNumber - 1) * itemsPerPage;
+
+        const [breeders, total] = await Promise.all([
+            this.breederModel
+                .find(query)
+                .select(
+                    '_id nickname emailAddress phoneNumber accountStatus isTestAccount verification profile createdAt',
+                )
+                .sort({ 'verification.submittedAt': -1 })
+                .skip(skip)
+                .limit(itemsPerPage)
+                .lean(),
+            this.breederModel.countDocuments(query),
+        ]);
+
+        const items = breeders.map((breeder): BreederVerificationResponseDto => {
+            const levelChangeRequest = (breeder.verification as any)?.levelChangeRequest;
+            const submittedAt = levelChangeRequest?.requestedAt || breeder.verification?.submittedAt;
+
+            return {
+                breederId: (breeder._id as any).toString(),
+                breederName: breeder.nickname,
+                emailAddress: breeder.emailAddress,
+                phoneNumber: breeder.phoneNumber,
+                accountStatus: (breeder as any).accountStatus || 'active',
+                isTestAccount: (breeder as any).isTestAccount || false,
+                verificationInfo: {
+                    verificationStatus: 'reviewing', // 레벨 변경은 항상 reviewing 상태
+                    subscriptionPlan: breeder.verification?.plan || 'basic',
+                    level: levelChangeRequest?.requestedLevel || breeder.verification?.level || 'new',
+                    submittedAt: submittedAt,
+                    isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
+                    // 추가 정보: 이전 레벨
+                    previousLevel: levelChangeRequest?.previousLevel,
+                    isLevelChange: true,
+                },
+                profileInfo: breeder.profile,
+                createdAt: (breeder as any).createdAt,
+            };
+        });
+
+        return new PaginationBuilder<BreederVerificationResponseDto>()
+            .setItems(items)
+            .setPage(pageNumber)
+            .setLimit(itemsPerPage)
+            .setTotalCount(total)
+            .build();
+    }
+
+    /**
      * 승인 대기 중인 브리더 목록 조회
      */
     async getPendingBreederVerifications(
@@ -88,6 +169,9 @@ export class BreederVerificationAdminService {
         const { verificationStatus, cityName, searchKeyword, pageNumber = 1, itemsPerPage = 10 } = filter;
 
         const query: any = {};
+
+        // 레벨 변경 신청은 제외
+        query['verification.isLevelChangeRequested'] = { $ne: true };
 
         // 승인 대기: pending과 reviewing 모두 포함 (아직 승인되지 않은 상태)
         if (verificationStatus) {
@@ -267,11 +351,51 @@ export class BreederVerificationAdminService {
             throw new BadRequestException('No verification request found');
         }
 
+        // 레벨 변경 승인인지 확인
+        const isLevelChangeApproval =
+            breeder.verification.isLevelChangeRequested &&
+            breeder.verification.levelChangeRequest &&
+            verificationData.verificationStatus === VerificationStatus.APPROVED;
+
         breeder.verification.status = verificationData.verificationStatus;
         breeder.verification.reviewedAt = new Date();
 
         if (verificationData.rejectionReason) {
             breeder.verification.rejectionReason = verificationData.rejectionReason;
+        }
+
+        // 레벨 변경 승인 시 이력 저장
+        if (isLevelChangeApproval && breeder.verification.levelChangeRequest) {
+            const levelChangeHistory = {
+                previousLevel: breeder.verification.levelChangeRequest.previousLevel,
+                newLevel: breeder.verification.levelChangeRequest.requestedLevel,
+                requestedAt: breeder.verification.levelChangeRequest.requestedAt,
+                approvedAt: new Date(),
+                approvedBy: adminId,
+            };
+
+            if (!breeder.verification.levelChangeHistory) {
+                breeder.verification.levelChangeHistory = [];
+            }
+            breeder.verification.levelChangeHistory.push(levelChangeHistory);
+
+            // 레벨 변경 신청 정보 초기화
+            breeder.verification.isLevelChangeRequested = false;
+            breeder.verification.levelChangeRequest = undefined;
+
+            this.logger.log(
+                `[updateBreederVerification] Level change approved - ${levelChangeHistory.previousLevel} → ${levelChangeHistory.newLevel}`,
+            );
+        }
+
+        // 레벨 변경 거절 시 신청 정보만 초기화
+        if (
+            breeder.verification.isLevelChangeRequested &&
+            verificationData.verificationStatus === VerificationStatus.REJECTED
+        ) {
+            breeder.verification.isLevelChangeRequested = false;
+            breeder.verification.levelChangeRequest = undefined;
+            // 레벨은 이전 승인된 레벨로 되돌림 (별도 처리 필요 시)
         }
 
         await breeder.save({ validateBeforeSave: false });
