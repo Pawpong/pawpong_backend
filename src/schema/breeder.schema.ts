@@ -60,6 +60,42 @@ export class VerificationDocument {
 }
 
 /**
+ * 레벨 변경 이력 스키마
+ */
+@Schema({ _id: false })
+export class LevelChangeHistory {
+    /**
+     * 이전 레벨
+     */
+    @Prop({ required: true, enum: ['new', 'elite'] })
+    previousLevel: string;
+
+    /**
+     * 새로운 레벨
+     */
+    @Prop({ required: true, enum: ['new', 'elite'] })
+    newLevel: string;
+
+    /**
+     * 변경 요청 일시
+     */
+    @Prop({ required: true, default: Date.now })
+    requestedAt: Date;
+
+    /**
+     * 변경 승인 일시
+     */
+    @Prop()
+    approvedAt?: Date;
+
+    /**
+     * 변경 승인한 관리자 ID (자동 승인인 경우 'system')
+     */
+    @Prop()
+    approvedBy?: string;
+}
+
+/**
  * 브리더 인증 정보 스키마
  */
 @Schema({ _id: false })
@@ -111,6 +147,29 @@ export class BreederVerification {
 
     @Prop()
     submittedByEmail?: boolean;
+
+    /**
+     * 레벨 변경 신청 중 여부
+     */
+    @Prop({ default: false })
+    isLevelChangeRequested?: boolean;
+
+    /**
+     * 레벨 변경 신청 정보 (신청 중일 때만 존재)
+     */
+    @Prop({ type: Object, required: false })
+    levelChangeRequest?: {
+        previousLevel: string;
+        requestedLevel: string;
+        requestedAt: Date;
+        documents: VerificationDocument[];
+    };
+
+    /**
+     * 레벨 변경 이력
+     */
+    @Prop({ type: [LevelChangeHistory], default: [] })
+    levelChangeHistory?: LevelChangeHistory[];
 }
 
 /**

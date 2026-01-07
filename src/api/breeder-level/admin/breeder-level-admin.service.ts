@@ -51,15 +51,15 @@ export class BreederLevelAdminService {
         breeder.verification.level = levelData.newLevel;
         await breeder.save();
 
-        // 알림 발송 (빌더 패턴 사용)
-        await this.notificationService
-            .to(breederId, RecipientType.BREEDER)
-            .type(NotificationType.PROFILE_REVIEW)
-            .title('브리더 레벨 변경')
-            .content(
-                `브리더 레벨이 ${previousLevel === BreederLevel.NEW ? '뉴' : '엘리트'}에서 ${levelData.newLevel === BreederLevel.NEW ? '뉴' : '엘리트'}로 변경되었습니다.`,
-            )
-            .send();
+        // 알림 발송 (빌더 패턴 사용) - 임시 비활성화
+        // await this.notificationService
+        //     .to(breederId, RecipientType.BREEDER)
+        //     .type(NotificationType.PROFILE_REVIEW)
+        //     .title('브리더 레벨 변경')
+        //     .content(
+        //         `브리더 레벨이 ${previousLevel === BreederLevel.NEW ? '뉴' : '엘리트'}에서 ${levelData.newLevel === BreederLevel.NEW ? '뉴' : '엘리트'}로 변경되었습니다.`,
+        //     )
+        //     .send();
 
         return {
             breederId,

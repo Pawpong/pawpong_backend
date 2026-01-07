@@ -58,6 +58,21 @@ export class BreederVerificationAdminController {
         return ApiResponseDto.success(result, '승인 대기 브리더 목록이 조회되었습니다.');
     }
 
+    @Get('verification/level-change-requests')
+    @ApiEndpoint({
+        summary: '레벨 변경 신청 목록 조회',
+        description: '승인된 브리더가 제출한 레벨 변경 신청 목록을 조회합니다 (New ↔ Elite).',
+        responseType: BreederVerificationResponseDto,
+        isPublic: false,
+    })
+    async getLevelChangeRequests(
+        @CurrentUser() user: any,
+        @Query() filter: BreederSearchRequestDto,
+    ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
+        const result = await this.breederVerificationAdminService.getLevelChangeRequests(user.userId, filter);
+        return ApiResponseDto.success(result, '레벨 변경 신청 목록이 조회되었습니다.');
+    }
+
     @Get('verification/:breederId')
     @ApiEndpoint({
         summary: '브리더 상세 정보 조회',
