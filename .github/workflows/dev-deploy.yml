@@ -57,8 +57,9 @@ jobs:
                     cd /root/pawpong_backend/ || { echo "❌ Directory not found"; exit 1; }
                     echo "Changed to project directory: $(pwd)"
 
+                    git checkout dev
                     git pull origin dev
-                    echo "Git pull completed"
+                    echo "Git checkout and pull completed"
 
                     yarn install
                     echo "Dependencies installed"

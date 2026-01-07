@@ -169,6 +169,7 @@ export class HomeService {
                     pet.photos && pet.photos.length > 0
                         ? this.storageService.generateSignedUrl(pet.photos[0], 60)
                         : 'https://via.placeholder.com/300',
+                birthDate: pet.birthDate || null, // 생년월일 추가
                 ageInMonths: this.calculateAgeInMonths(pet.birthDate),
                 location: {
                     city: breeder.profile?.location?.city || '',

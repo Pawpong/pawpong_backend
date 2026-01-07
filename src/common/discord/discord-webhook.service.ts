@@ -291,6 +291,8 @@ export class DiscordWebhookService {
         phone?: string;
         level: 'new' | 'elite';
         isResubmission: boolean;
+        isLevelChange?: boolean;
+        previousLevel?: 'new' | 'elite';
         documents: Array<{
             type: string;
             url: string;
@@ -308,7 +310,13 @@ export class DiscordWebhookService {
 
         try {
             const levelName = data.level === 'new' ? 'New' : 'Elite';
-            const submissionType = data.isResubmission ? '재제출' : '신규 제출';
+            let submissionType = data.isResubmission ? '재제출' : '신규 제출';
+
+            // 레벨 변경인 경우 특별 표시
+            if (data.isLevelChange && data.previousLevel) {
+                const previousLevelName = data.previousLevel === 'new' ? 'New' : 'Elite';
+                submissionType = `레벨 변경 (${previousLevelName} → ${levelName})`;
+            }
 
             const fields: Array<{ name: string; value: string; inline: boolean }> = [
                 {
@@ -358,9 +366,17 @@ export class DiscordWebhookService {
                 });
             });
 
+            // 레벨 변경은 파란색, 재제출은 주황색, 신규는 보라색
+            let embedColor = 0x9c27b0; // 보라색 (신규)
+            if (data.isLevelChange) {
+                embedColor = 0x2196f3; // 파란색 (레벨 변경)
+            } else if (data.isResubmission) {
+                embedColor = 0xff9800; // 주황색 (재제출)
+            }
+
             const embed = {
-                title: '📝 브리더 입점 서류 제출',
-                color: data.isResubmission ? 0xff9800 : 0x9c27b0, // 주황색 (재제출) / 보라색 (신규)
+                title: data.isLevelChange ? '🔄 브리더 레벨 변경 신청' : '📝 브리더 입점 서류 제출',
+                color: embedColor,
                 fields,
                 timestamp: data.submittedAt.toISOString(),
                 footer: {
