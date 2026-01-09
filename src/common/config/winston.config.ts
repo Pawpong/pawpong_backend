@@ -66,7 +66,7 @@ const consoleFormat = winston.format.combine(
 );
 
 /**
- * 파일용 포맷 (Loki 연동)
+ * 파일용 포맷 (로컬 로그 파일)
  */
 const fileFormat = winston.format.combine(
     winston.format.timestamp({ format: 'YYYY-MM-DD HH:mm:ss' }),
@@ -85,16 +85,48 @@ const fileFormat = winston.format.combine(
 );
 
 /**
+ * Docker stdout용 JSON 포맷 (Loki/Promtail 연동)
+ * Promtail이 JSON 파싱하여 level, context 등을 라벨로 추출
+ */
+const dockerJsonFormat = winston.format.combine(
+    winston.format.timestamp({ format: 'YYYY-MM-DDTHH:mm:ss.SSSZ' }),
+    winston.format.errors({ stack: true }),
+    winston.format((info) => {
+        const context = info.context as string;
+        // 필터링할 컨텍스트는 무시
+        if (context && filteredContexts.includes(context)) {
+            return false;
+        }
+        return info;
+    })(),
+    winston.format.printf((info) => {
+        const { timestamp, level, message, context, stack, ...rest } = info;
+        const logObject: Record<string, any> = {
+            timestamp,
+            level,
+            message,
+        };
+        if (context) logObject.context = context;
+        if (stack) logObject.stack = stack;
+        // 추가 메타데이터가 있으면 포함
+        if (Object.keys(rest).length > 0) {
+            logObject.metadata = rest;
+        }
+        return JSON.stringify(logObject);
+    }),
+);
+
+/**
  * Winston 모듈 옵션 설정
  */
 export const winstonConfig: WinstonModuleOptions = {
     level: logLevel,
     format: winston.format.combine(winston.format.timestamp(), winston.format.errors({ stack: true }), winston.format.json()),
     transports: [
-        // 콘솔 출력
+        // 콘솔 출력 (프로덕션: JSON, 개발: 컬러풀)
         new winston.transports.Console({
             level: logLevel,
-            format: isProduction ? fileFormat : consoleFormat,
+            format: isProduction ? dockerJsonFormat : consoleFormat,
         }),
 
         // 에러 로그 파일
