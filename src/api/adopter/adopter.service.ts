@@ -317,8 +317,8 @@ export class AdopterService {
      *
      * 변경사항:
      * - 상담 완료된 입양 신청에 대해서만 작성 가능
-     * - 입양 신청당 1개의 후기만 작성 가능 (중복 방지)
      * - 본인 신청에 대해서만 후기 작성 가능
+     * - 동일 신청에 대해 여러 후기 작성 가능 (제한 없음)
      *
      * @param userId 입양자 고유 ID (JWT에서 추출)
      * @param createReviewDto 후기 작성 데이터
@@ -358,16 +358,7 @@ export class AdopterService {
             throw new BadRequestException('해당 브리더를 찾을 수 없습니다.');
         }
 
-        // 6. 중복 후기 작성 방지 (해당 신청에 이미 작성한 후기가 있는지 확인)
-        const existingReview = await this.breederReviewModel.findOne({
-            applicationId: applicationId,
-        });
-
-        if (existingReview) {
-            throw new ConflictException('이미 해당 신청에 대한 후기를 작성하셨습니다.');
-        }
-
-        // 7. BreederReview 컬렉션에 후기 저장
+        // 6. BreederReview 컬렉션에 후기 저장
         const newReview = new this.breederReviewModel({
             applicationId: applicationId,
             breederId: application.breederId,
@@ -380,10 +371,10 @@ export class AdopterService {
 
         const savedReview = await newReview.save();
 
-        // 8. 브리더 통계 업데이트
+        // 7. 브리더 통계 업데이트
         await this.breederRepository.incrementReviewCount(application.breederId.toString());
 
-        // 9. 브리더에게 새 후기 알림 발송 (이메일 없음, 서비스 알림만)
+        // 8. 브리더에게 새 후기 알림 발송 (이메일 없음, 서비스 알림만)
         await this.sendNewReviewNotification(application.breederId.toString());
 
         return {
