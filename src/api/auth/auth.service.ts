@@ -913,16 +913,19 @@ export class AuthService {
                     (frontendUrl.includes('localhost') || frontendUrl.includes('127.0.0.1')) &&
                     !frontendUrl.includes('local.pawpong.kr');
 
+                // Vercel 개발 배포인지 확인
+                const isVercelDev = frontendUrl.includes('vercel.app');
+
                 // 디버그 로그
                 this.logger.log(
-                    `[processSocialLoginCallback] isProduction: ${isProduction}, isLocalFrontend: ${isLocalFrontend}, frontendUrl: ${frontendUrl}`,
+                    `[processSocialLoginCallback] isProduction: ${isProduction}, isLocalFrontend: ${isLocalFrontend}, isVercelDev: ${isVercelDev}, frontendUrl: ${frontendUrl}`,
                 );
 
-                // 로컬 프론트엔드인 경우 토큰을 URL 파라미터로 전달 (쿠키 도메인 불일치 문제 해결)
-                // - 백엔드가 프로덕션이어도 프론트엔드가 localhost면 .pawpong.kr 쿠키 사용 불가
+                // 로컬 프론트엔드 또는 Vercel 배포인 경우 토큰을 URL 파라미터로 전달 (쿠키 도메인 불일치 문제 해결)
+                // - 백엔드가 프로덕션이어도 프론트엔드가 localhost나 vercel.app이면 .pawpong.kr 쿠키 사용 불가
                 // - 프론트엔드에서 직접 쿠키를 설정해야 함
                 // - 단, local.pawpong.kr은 .pawpong.kr 쿠키 공유 가능하므로 프로덕션 방식 사용
-                if (!isProduction || isLocalFrontend) {
+                if (!isProduction || isLocalFrontend || isVercelDev) {
                     this.logger.log(`[processSocialLoginCallback] URL 파라미터 방식으로 토큰 전달`);
 
                     // originUrl에서 리다이렉트 경로 추출 (형식: "frontendUrl|/redirect/path")
