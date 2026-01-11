@@ -12,6 +12,7 @@ import {
     UseInterceptors,
     UploadedFiles,
     UploadedFile,
+    Logger,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
@@ -47,6 +48,8 @@ import { VerificationDocumentsResponseDto } from './dto/response/verification-do
 @ApiController('인증')
 @Controller('auth')
 export class AuthController {
+    private readonly logger = new Logger(AuthController.name);
+
     constructor(
         private readonly authService: AuthService,
         private readonly smsService: SmsService,
