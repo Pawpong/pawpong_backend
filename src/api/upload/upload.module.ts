@@ -24,11 +24,11 @@ import { StorageModule } from '../../common/storage/storage.module';
     ],
     controllers: [
         UploadController,
-        // UploadAdminController
+        UploadAdminController, // 컨트롤러 제외하고 서비스만 테스트
     ],
     providers: [
         UploadService,
-        // UploadAdminService
+        UploadAdminService, // 서비스만 추가
     ],
 })
 export class UploadModule {}
