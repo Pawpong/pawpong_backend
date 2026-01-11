@@ -1,15 +1,17 @@
-import { Controller, Get, Delete, Body, Query, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Delete, Post, Body, Query, Param, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 
-import { UploadAdminService } from './upload-admin.service';
-import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
-import { RolesGuard } from '../../../common/guard/roles.guard';
 import { Roles } from '../../../common/decorator/roles.decorator';
-import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
+import { RolesGuard } from '../../../common/guard/roles.guard';
+import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 
-import { StorageListResponseDto } from './dto/response/storage-list-response.dto';
+import { UploadAdminService } from './upload-admin.service';
+
+import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { DeleteFilesRequestDto } from './dto/request/delete-files-request.dto';
 import { DeleteFilesResponseDto } from './dto/response/delete-files-response.dto';
+import { StorageListResponseDto } from './dto/response/storage-list-response.dto';
+import { FileReferenceResponseDto } from './dto/response/file-reference-response.dto';
 
 /**
  * Admin용 스토리지 관리 컨트롤러
@@ -88,5 +90,29 @@ export class UploadAdminController {
     async deleteFolder(@Query('folder') folder: string): Promise<ApiResponseDto<DeleteFilesResponseDto>> {
         const result = await this.uploadAdminService.deleteFolder(folder);
         return ApiResponseDto.success(result, `${folder} 폴더가 삭제되었습니다.`);
+    }
+
+    @Post('files/check-references')
+    @ApiOperation({
+        summary: '파일 DB 참조 확인',
+        description: '스토리지 파일들이 DB에서 참조 중인지 확인합니다.',
+    })
+    @ApiResponse({ status: 200, description: '성공', type: FileReferenceResponseDto })
+    @ApiResponse({ status: 400, description: '잘못된 요청' })
+    async checkFileReferences(@Body() data: { fileKeys: string[] }): Promise<ApiResponseDto<FileReferenceResponseDto>> {
+        const result = await this.uploadAdminService.checkFileReferences(data.fileKeys);
+        return ApiResponseDto.success(result, 'DB 참조 확인 완료');
+    }
+
+    @Get('files/referenced')
+    @ApiOperation({
+        summary: 'DB에서 참조 중인 모든 파일 조회',
+        description: 'MongoDB에서 실제로 사용 중인 파일 목록을 조회합니다.',
+    })
+    @ApiResponse({ status: 200, description: '성공' })
+    @ApiResponse({ status: 400, description: '잘못된 요청' })
+    async getAllReferencedFiles(): Promise<ApiResponseDto<string[]>> {
+        const result = await this.uploadAdminService.getAllReferencedFiles();
+        return ApiResponseDto.success(result, 'DB 참조 파일 목록 조회 완료');
     }
 }
