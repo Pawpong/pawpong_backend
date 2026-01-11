@@ -24,9 +24,7 @@ export class StorageService {
             this.bucketName = this.configService.get<string>('SMILESERV_S3_BUCKET') || '';
             this.cdnBaseUrl = this.configService.get<string>('SMILESERV_CDN_BASE_URL') || '';
 
-            this.logger.log(
-                `[StorageService] SmileServ Config - Endpoint: ${endpoint}, Bucket: ${this.bucketName}`,
-            );
+            this.logger.log(`[StorageService] SmileServ Config - Endpoint: ${endpoint}, Bucket: ${this.bucketName}`);
 
             // AWS SDK S3 클라이언트 설정 (스마일서브 호환)
             this.s3 = new AWS.S3({

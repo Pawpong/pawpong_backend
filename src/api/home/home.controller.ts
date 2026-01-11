@@ -71,7 +71,8 @@ export class HomeController {
     @UseGuards(OptionalJwtAuthGuard)
     @ApiOperation({
         summary: '분양 중인 아이들 조회',
-        description: '홈페이지에 표시할 분양 가능한 반려동물 목록을 반환합니다. 비로그인 시 가격 정보는 제공되지 않습니다.',
+        description:
+            '홈페이지에 표시할 분양 가능한 반려동물 목록을 반환합니다. 비로그인 시 가격 정보는 제공되지 않습니다.',
     })
     @ApiQuery({
         name: 'limit',
@@ -83,7 +84,10 @@ export class HomeController {
         status: 200,
         description: '분양 가능한 반려동물 목록 조회 성공',
     })
-    async getAvailablePets(@Query('limit') limit: number = 10, @CurrentUser() user?: any): Promise<ApiResponseDto<any[]>> {
+    async getAvailablePets(
+        @Query('limit') limit: number = 10,
+        @CurrentUser() user?: any,
+    ): Promise<ApiResponseDto<any[]>> {
         const isAuthenticated = !!user?.userId;
         const pets = await this.homeService.getAvailablePets(limit, isAuthenticated);
         return ApiResponseDto.success(pets, '분양중인 아이들이 조회되었습니다.');
