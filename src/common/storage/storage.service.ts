@@ -197,4 +197,24 @@ export class StorageService {
         }
         return this.generateSignedUrl(fileName, expirationMinutes);
     }
+
+    /**
+     * 버킷 내 파일 목록 조회 (Admin용)
+     */
+    async listObjects(prefix?: string, maxKeys: number = 1000): Promise<AWS.S3.ListObjectsV2Output> {
+        const params: AWS.S3.ListObjectsV2Request = {
+            Bucket: this.bucketName,
+            Prefix: prefix || '',
+            MaxKeys: maxKeys,
+        };
+
+        return await this.s3.listObjectsV2(params).promise();
+    }
+
+    /**
+     * 버킷 이름 반환
+     */
+    getBucketName(): string {
+        return this.bucketName;
+    }
 }
