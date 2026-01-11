@@ -1,7 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
-import * as AWS from 'aws-sdk';
+import {
+    S3Client,
+    PutObjectCommand,
+    DeleteObjectCommand,
+    HeadObjectCommand,
+    ListObjectsV2Command,
+} from '@aws-sdk/client-s3';
 
 /**
  * 스마일서브 오브젝트 스토리지 서비스
@@ -9,7 +15,7 @@ import * as AWS from 'aws-sdk';
  */
 @Injectable()
 export class StorageService {
-    private s3: AWS.S3;
+    private s3: S3Client;
     private bucketName: string;
     private cdnBaseUrl: string;
     private readonly logger = new Logger(StorageService.name);
@@ -24,17 +30,21 @@ export class StorageService {
             this.bucketName = this.configService.get<string>('SMILESERV_S3_BUCKET') || '';
             this.cdnBaseUrl = this.configService.get<string>('SMILESERV_CDN_BASE_URL') || '';
 
+            if (!endpoint || !accessKeyId || !secretAccessKey) {
+                throw new Error('SmileServ S3 configuration is incomplete');
+            }
+
             this.logger.log(`[StorageService] SmileServ Config - Endpoint: ${endpoint}, Bucket: ${this.bucketName}`);
 
-            // AWS SDK S3 클라이언트 설정 (스마일서브 호환)
-            this.s3 = new AWS.S3({
+            // AWS SDK v3 S3 클라이언트 설정 (스마일서브 호환)
+            this.s3 = new S3Client({
                 endpoint: endpoint,
-                accessKeyId: accessKeyId,
-                secretAccessKey: secretAccessKey,
+                credentials: {
+                    accessKeyId: accessKeyId,
+                    secretAccessKey: secretAccessKey,
+                },
                 region: 'default', // 스마일서브는 단일 리전
-                s3ForcePathStyle: true, // Path style URL 사용 필수
-                signatureVersion: 'v4',
-                sslEnabled: true,
+                forcePathStyle: true, // Path style URL 사용 필수
             });
 
             this.logger.log('[StorageService] SmileServ Object Storage initialized successfully');
@@ -54,16 +64,16 @@ export class StorageService {
         const fileName = this.generateFileName(file.originalname, folder);
 
         try {
-            const params: AWS.S3.PutObjectRequest = {
+            const command = new PutObjectCommand({
                 Bucket: this.bucketName,
                 Key: fileName,
                 Body: file.buffer,
                 ContentType: file.mimetype,
                 ACL: 'public-read', // 공개 읽기 권한
                 CacheControl: 'public, max-age=31536000, immutable', // 1년 캐싱
-            };
+            });
 
-            await this.s3.upload(params).promise();
+            await this.s3.send(command);
 
             const cdnUrl = this.getCdnUrl(fileName);
             const storageUrl = cdnUrl; // 스마일서브는 CDN URL과 Storage URL이 동일
@@ -92,12 +102,12 @@ export class StorageService {
      */
     async deleteFile(fileName: string): Promise<void> {
         try {
-            const params: AWS.S3.DeleteObjectRequest = {
+            const command = new DeleteObjectCommand({
                 Bucket: this.bucketName,
                 Key: fileName,
-            };
+            });
 
-            await this.s3.deleteObject(params).promise();
+            await this.s3.send(command);
             this.logger.log(`File deleted: ${fileName}`);
         } catch (error) {
             this.logger.error(`Delete failed: ${error.message}`);
@@ -110,15 +120,15 @@ export class StorageService {
      */
     async fileExists(fileName: string): Promise<boolean> {
         try {
-            const params: AWS.S3.HeadObjectRequest = {
+            const command = new HeadObjectCommand({
                 Bucket: this.bucketName,
                 Key: fileName,
-            };
+            });
 
-            await this.s3.headObject(params).promise();
+            await this.s3.send(command);
             return true;
         } catch (error) {
-            if (error.code === 'NotFound' || error.statusCode === 404) {
+            if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
                 return false;
             }
             this.logger.error(`Check file existence failed: ${error.message}`);
@@ -201,14 +211,14 @@ export class StorageService {
     /**
      * 버킷 내 파일 목록 조회 (Admin용)
      */
-    async listObjects(prefix?: string, maxKeys: number = 1000): Promise<AWS.S3.ListObjectsV2Output> {
-        const params: AWS.S3.ListObjectsV2Request = {
+    async listObjects(prefix?: string, maxKeys: number = 1000) {
+        const command = new ListObjectsV2Command({
             Bucket: this.bucketName,
             Prefix: prefix || '',
             MaxKeys: maxKeys,
-        };
+        });
 
-        return await this.s3.listObjectsV2(params).promise();
+        return await this.s3.send(command);
     }
 
     /**
