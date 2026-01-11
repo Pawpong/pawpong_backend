@@ -10,6 +10,10 @@ import { UploadAdminService } from './admin/upload-admin.service';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 import { ParentPet, ParentPetSchema } from '../../schema/parent-pet.schema';
 import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
+import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
+import { Banner, BannerSchema } from '../../schema/banner.schema';
+import { AuthBanner, AuthBannerSchema } from '../../schema/auth-banner.schema';
+import { CounselBanner, CounselBannerSchema } from '../../schema/counsel-banner.schema';
 
 import { StorageModule } from '../../common/storage/storage.module';
 
@@ -19,6 +23,10 @@ import { StorageModule } from '../../common/storage/storage.module';
             { name: Breeder.name, schema: BreederSchema },
             { name: ParentPet.name, schema: ParentPetSchema },
             { name: AvailablePet.name, schema: AvailablePetSchema },
+            { name: Adopter.name, schema: AdopterSchema },
+            { name: Banner.name, schema: BannerSchema },
+            { name: AuthBanner.name, schema: AuthBannerSchema },
+            { name: CounselBanner.name, schema: CounselBannerSchema },
         ]),
         StorageModule,
     ],

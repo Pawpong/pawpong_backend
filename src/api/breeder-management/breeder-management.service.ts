@@ -995,7 +995,8 @@ export class BreederManagementService {
         // Elite 레벨인 경우 최종 서류 목록에서 브리더 인증 서류 검증
         if (dto.level === 'elite') {
             const hasBreederCertificateInFinal =
-                finalDocumentTypes.includes('breederCatCertificate') || finalDocumentTypes.includes('breederDogCertificate');
+                finalDocumentTypes.includes('breederCatCertificate') ||
+                finalDocumentTypes.includes('breederDogCertificate');
             if (!hasBreederCertificateInFinal) {
                 throw new BadRequestException('Elite 레벨은 브리더 인증 서류가 필수입니다.');
             }
