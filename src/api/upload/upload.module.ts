@@ -3,6 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { UploadController } from './upload.controller';
 import { UploadService } from './upload.service';
+import { UploadAdminController } from './admin/upload-admin.controller';
+import { UploadAdminService } from './admin/upload-admin.service';
 
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 
@@ -21,7 +23,7 @@ import { StorageModule } from '../../common/storage/storage.module';
         ]),
         StorageModule,
     ],
-    controllers: [UploadController],
-    providers: [UploadService, CustomLoggerService],
+    controllers: [UploadController, UploadAdminController],
+    providers: [UploadService, UploadAdminService, CustomLoggerService],
 })
 export class UploadModule {}
