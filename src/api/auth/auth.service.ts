@@ -271,6 +271,16 @@ export class AuthService {
         // 추가로 referer 체크 (일반 API 호출 시 더 정확한 판단)
         const refererStr = referer || origin || '';
 
+        // Vercel 개발 배포에서 요청한 경우 (pawpongdev.vercel.app)
+        if (refererStr.includes('pawpongdev.vercel.app')) {
+            return 'https://pawpongdev.vercel.app';
+        }
+
+        // 프로덕션 도메인에서 요청한 경우 (pawpong.kr)
+        if (refererStr.includes('pawpong.kr') && !refererStr.includes('local.pawpong.kr')) {
+            return 'https://pawpong.kr';
+        }
+
         // localhost에서 요청한 경우 - 전달받은 origin을 그대로 사용 (포트 포함)
         // 예: http://localhost:3000/login → http://localhost:3000
         if (refererStr.includes('localhost') || refererStr.includes('127.0.0.1')) {
@@ -287,7 +297,7 @@ export class AuthService {
             return 'http://local.pawpong.kr:3000';
         }
 
-        // development 환경에서는 로컬 URL 반환
+        // referer가 없는 경우, development 환경에서는 개발 URL 반환
         if (isLocalEnv) {
             return this.configService.get<string>('FRONTEND_URL_LOCAL') || 'http://localhost:3000';
         }
