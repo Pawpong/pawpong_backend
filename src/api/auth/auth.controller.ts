@@ -139,7 +139,15 @@ export class AuthController {
     })
     async googleLogin(@Req() req, @Res() res: Response) {
         // 원래 origin을 state 파라미터로 전달 (OAuth 콜백에서 사용)
-        const originUrl = req.headers.referer || req.headers.origin || '';
+        const referer = req.headers.referer || '';
+        const origin = req.headers.origin || '';
+        const originUrl = referer || origin || '';
+
+        // 디버그 로그
+        this.logger.log(`[googleLogin] referer: ${referer}`);
+        this.logger.log(`[googleLogin] origin: ${origin}`);
+        this.logger.log(`[googleLogin] originUrl: ${originUrl}`);
+
         // returnUrl 쿼리 파라미터가 있으면 origin과 함께 전달 (형식: "originUrl|/returnPath")
         const returnUrl = req.query.returnUrl as string;
         const stateValue = returnUrl ? `${originUrl}|${returnUrl}` : originUrl;
@@ -179,7 +187,15 @@ export class AuthController {
     })
     async naverLogin(@Req() req, @Res() res: Response) {
         // 원래 origin을 state 파라미터로 전달 (OAuth 콜백에서 사용)
-        const originUrl = req.headers.referer || req.headers.origin || '';
+        const referer = req.headers.referer || '';
+        const origin = req.headers.origin || '';
+        const originUrl = referer || origin || '';
+
+        // 디버그 로그
+        this.logger.log(`[naverLogin] referer: ${referer}`);
+        this.logger.log(`[naverLogin] origin: ${origin}`);
+        this.logger.log(`[naverLogin] originUrl: ${originUrl}`);
+
         // returnUrl 쿼리 파라미터가 있으면 origin과 함께 전달 (형식: "originUrl|/returnPath")
         const returnUrl = req.query.returnUrl as string;
         const stateValue = returnUrl ? `${originUrl}|${returnUrl}` : originUrl;
@@ -219,7 +235,15 @@ export class AuthController {
     })
     async kakaoLogin(@Req() req, @Res() res: Response) {
         // 원래 origin을 state 파라미터로 전달 (OAuth 콜백에서 사용)
-        const originUrl = req.headers.referer || req.headers.origin || '';
+        const referer = req.headers.referer || '';
+        const origin = req.headers.origin || '';
+        const originUrl = referer || origin || '';
+
+        // 디버그 로그
+        this.logger.log(`[kakaoLogin] referer: ${referer}`);
+        this.logger.log(`[kakaoLogin] origin: ${origin}`);
+        this.logger.log(`[kakaoLogin] originUrl: ${originUrl}`);
+
         // returnUrl 쿼리 파라미터가 있으면 origin과 함께 전달 (형식: "originUrl|/returnPath")
         const returnUrl = req.query.returnUrl as string;
         const stateValue = returnUrl ? `${originUrl}|${returnUrl}` : originUrl;
