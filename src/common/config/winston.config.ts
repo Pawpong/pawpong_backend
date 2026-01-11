@@ -121,7 +121,11 @@ const dockerJsonFormat = winston.format.combine(
  */
 export const winstonConfig: WinstonModuleOptions = {
     level: logLevel,
-    format: winston.format.combine(winston.format.timestamp(), winston.format.errors({ stack: true }), winston.format.json()),
+    format: winston.format.combine(
+        winston.format.timestamp(),
+        winston.format.errors({ stack: true }),
+        winston.format.json(),
+    ),
     transports: [
         // 콘솔 출력 (프로덕션: JSON, 개발: 컬러풀)
         new winston.transports.Console({

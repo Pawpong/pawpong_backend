@@ -934,7 +934,9 @@ export class AuthService {
                         const parts = userProfile.originUrl.split('|');
                         if (parts.length > 1 && parts[1]) {
                             redirectPath = parts[1];
-                            this.logger.log(`[processSocialLoginCallback] 추출된 redirectPath (localhost): ${redirectPath}`);
+                            this.logger.log(
+                                `[processSocialLoginCallback] 추출된 redirectPath (localhost): ${redirectPath}`,
+                            );
                         }
                     }
 

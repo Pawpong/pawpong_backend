@@ -807,8 +807,7 @@ export class BreederManagementService {
 
         // 레벨 변경 신청인지 확인 (APPROVED 상태에서 다른 레벨로 신청)
         const isLevelChange =
-            breeder.verification?.status === VerificationStatus.APPROVED &&
-            breeder.verification?.level !== dto.level;
+            breeder.verification?.status === VerificationStatus.APPROVED && breeder.verification?.level !== dto.level;
 
         // 이미 승인된 브리더가 같은 레벨로 재신청하는 것은 막음
         if (breeder.verification?.status === VerificationStatus.APPROVED && !isLevelChange) {
@@ -1073,8 +1072,10 @@ export class BreederManagementService {
                 ?.map((doc: any) => {
                     // fileName이 올바른 GCS 경로인지 검증
                     // verification/ 또는 documents/verification/ 형식 모두 허용
-                    const isValidFileName = doc.fileName &&
-                        (doc.fileName.startsWith('verification/') || doc.fileName.startsWith('documents/verification/'));
+                    const isValidFileName =
+                        doc.fileName &&
+                        (doc.fileName.startsWith('verification/') ||
+                            doc.fileName.startsWith('documents/verification/'));
 
                     if (!isValidFileName) {
                         this.logger.logWarning(
