@@ -1,6 +1,4 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as AWS from 'aws-sdk';
 
 import { StorageService } from '../../../common/storage/storage.service';
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
@@ -9,30 +7,14 @@ import { StorageListResponseDto } from './dto/response/storage-list-response.dto
 
 /**
  * Admin용 스토리지 관리 서비스
+ * StorageService를 활용하여 AWS S3 중복 초기화 방지
  */
 @Injectable()
 export class UploadAdminService {
-    private s3: AWS.S3;
-    private bucketName: string;
-    private cdnBaseUrl: string;
-
     constructor(
         private readonly storageService: StorageService,
         private readonly logger: CustomLoggerService,
-        private readonly configService: ConfigService,
-    ) {
-        this.s3 = new AWS.S3({
-            endpoint: this.configService.get<string>('SMILESERV_S3_ENDPOINT'),
-            accessKeyId: this.configService.get<string>('SMILESERV_S3_ACCESS_KEY'),
-            secretAccessKey: this.configService.get<string>('SMILESERV_S3_SECRET_KEY'),
-            region: 'default',
-            s3ForcePathStyle: true,
-            signatureVersion: 'v4',
-            sslEnabled: true,
-        });
-        this.bucketName = this.configService.get<string>('SMILESERV_S3_BUCKET') || '';
-        this.cdnBaseUrl = this.configService.get<string>('SMILESERV_CDN_BASE_URL') || '';
-    }
+    ) {}
 
     /**
      * 버킷 내 전체 파일 목록 조회
@@ -41,20 +23,14 @@ export class UploadAdminService {
         this.logger.logStart('listAllFiles', '스토리지 파일 목록 조회 시작', { prefix });
 
         try {
-            const params: AWS.S3.ListObjectsV2Request = {
-                Bucket: this.bucketName,
-                Prefix: prefix || '',
-                MaxKeys: 1000,
-            };
-
-            const result = await this.s3.listObjectsV2(params).promise();
+            const result = await this.storageService.listObjects(prefix, 1000);
 
             const files: StorageFileResponseDto[] =
                 result.Contents?.map((item) => ({
                     key: item.Key || '',
                     size: item.Size || 0,
                     lastModified: item.LastModified || new Date(),
-                    url: `${this.cdnBaseUrl}/${item.Key}`,
+                    url: this.storageService.getCdnUrl(item.Key || ''),
                     folder: this.extractFolder(item.Key || ''),
                 })) || [];
 
@@ -169,7 +145,9 @@ export class UploadAdminService {
     /**
      * 폴더별 통계 계산
      */
-    private calculateFolderStats(files: StorageFileResponseDto[]): Record<string, { count: number; totalSize: number }> {
+    private calculateFolderStats(
+        files: StorageFileResponseDto[],
+    ): Record<string, { count: number; totalSize: number }> {
         const stats: Record<string, { count: number; totalSize: number }> = {};
 
         for (const file of files) {
