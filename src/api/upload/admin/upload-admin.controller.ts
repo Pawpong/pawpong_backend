@@ -52,14 +52,15 @@ export class UploadAdminController {
         return ApiResponseDto.success(result, `${folder} 폴더 파일 목록 조회 완료`);
     }
 
-    @Delete('file/:fileName(*)')
+    @Delete('file')
     @ApiOperation({
         summary: '단일 파일 삭제',
-        description: '스토리지에서 단일 파일을 삭제합니다.',
+        description: '스토리지에서 단일 파일을 삭제합니다. fileName을 쿼리 파라미터로 전달합니다.',
     })
+    @ApiQuery({ name: 'fileName', required: true, description: '삭제할 파일 경로 (예: profiles/xxx.jpg)' })
     @ApiResponse({ status: 200, description: '삭제 성공' })
     @ApiResponse({ status: 400, description: '잘못된 요청' })
-    async deleteFile(@Param('fileName') fileName: string): Promise<ApiResponseDto<void>> {
+    async deleteFile(@Query('fileName') fileName: string): Promise<ApiResponseDto<void>> {
         await this.uploadAdminService.deleteFile(fileName);
         return ApiResponseDto.success(undefined, '파일이 삭제되었습니다.');
     }
@@ -76,14 +77,15 @@ export class UploadAdminController {
         return ApiResponseDto.success(result, '파일 삭제가 완료되었습니다.');
     }
 
-    @Delete('folder/:folder(*)')
+    @Delete('folder')
     @ApiOperation({
         summary: '폴더 전체 삭제',
-        description: '특정 폴더 내 모든 파일을 삭제합니다.',
+        description: '특정 폴더 내 모든 파일을 삭제합니다. folder를 쿼리 파라미터로 전달합니다.',
     })
+    @ApiQuery({ name: 'folder', required: true, description: '삭제할 폴더 경로 (예: profiles)' })
     @ApiResponse({ status: 200, description: '삭제 성공', type: DeleteFilesResponseDto })
     @ApiResponse({ status: 400, description: '잘못된 요청' })
-    async deleteFolder(@Param('folder') folder: string): Promise<ApiResponseDto<DeleteFilesResponseDto>> {
+    async deleteFolder(@Query('folder') folder: string): Promise<ApiResponseDto<DeleteFilesResponseDto>> {
         const result = await this.uploadAdminService.deleteFolder(folder);
         return ApiResponseDto.success(result, `${folder} 폴더가 삭제되었습니다.`);
     }
