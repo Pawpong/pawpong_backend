@@ -271,6 +271,16 @@ export class AuthService {
         // 추가로 referer 체크 (일반 API 호출 시 더 정확한 판단)
         const refererStr = referer || origin || '';
 
+        // 개발 환경 도메인에서 요청한 경우 (dev.pawpong.kr)
+        if (refererStr.includes('dev.pawpong.kr')) {
+            return 'https://dev.pawpong.kr';
+        }
+
+        // 프로덕션 도메인에서 요청한 경우 (pawpong.kr)
+        if (refererStr.includes('pawpong.kr') && !refererStr.includes('local.pawpong.kr')) {
+            return 'https://pawpong.kr';
+        }
+
         // localhost에서 요청한 경우 - 전달받은 origin을 그대로 사용 (포트 포함)
         // 예: http://localhost:3000/login → http://localhost:3000
         if (refererStr.includes('localhost') || refererStr.includes('127.0.0.1')) {
@@ -287,7 +297,7 @@ export class AuthService {
             return 'http://local.pawpong.kr:3000';
         }
 
-        // development 환경에서는 로컬 URL 반환
+        // referer가 없는 경우, development 환경에서는 개발 URL 반환
         if (isLocalEnv) {
             return this.configService.get<string>('FRONTEND_URL_LOCAL') || 'http://localhost:3000';
         }
@@ -903,16 +913,19 @@ export class AuthService {
                     (frontendUrl.includes('localhost') || frontendUrl.includes('127.0.0.1')) &&
                     !frontendUrl.includes('local.pawpong.kr');
 
+                // Vercel 개발 배포인지 확인
+                const isVercelDev = frontendUrl.includes('vercel.app');
+
                 // 디버그 로그
                 this.logger.log(
-                    `[processSocialLoginCallback] isProduction: ${isProduction}, isLocalFrontend: ${isLocalFrontend}, frontendUrl: ${frontendUrl}`,
+                    `[processSocialLoginCallback] isProduction: ${isProduction}, isLocalFrontend: ${isLocalFrontend}, isVercelDev: ${isVercelDev}, frontendUrl: ${frontendUrl}`,
                 );
 
-                // 로컬 프론트엔드인 경우 토큰을 URL 파라미터로 전달 (쿠키 도메인 불일치 문제 해결)
-                // - 백엔드가 프로덕션이어도 프론트엔드가 localhost면 .pawpong.kr 쿠키 사용 불가
+                // 로컬 프론트엔드 또는 Vercel 배포인 경우 토큰을 URL 파라미터로 전달 (쿠키 도메인 불일치 문제 해결)
+                // - 백엔드가 프로덕션이어도 프론트엔드가 localhost나 vercel.app이면 .pawpong.kr 쿠키 사용 불가
                 // - 프론트엔드에서 직접 쿠키를 설정해야 함
                 // - 단, local.pawpong.kr은 .pawpong.kr 쿠키 공유 가능하므로 프로덕션 방식 사용
-                if (!isProduction || isLocalFrontend) {
+                if (!isProduction || isLocalFrontend || isVercelDev) {
                     this.logger.log(`[processSocialLoginCallback] URL 파라미터 방식으로 토큰 전달`);
 
                     // originUrl에서 리다이렉트 경로 추출 (형식: "frontendUrl|/redirect/path")
@@ -921,7 +934,9 @@ export class AuthService {
                         const parts = userProfile.originUrl.split('|');
                         if (parts.length > 1 && parts[1]) {
                             redirectPath = parts[1];
-                            this.logger.log(`[processSocialLoginCallback] 추출된 redirectPath (localhost): ${redirectPath}`);
+                            this.logger.log(
+                                `[processSocialLoginCallback] 추출된 redirectPath (localhost): ${redirectPath}`,
+                            );
                         }
                     }
 
@@ -1661,6 +1676,38 @@ export class AuthService {
             const file = files[i];
             const type = types[i];
 
+            // 원본 파일명 처리 (한글 파일명 인코딩 수정)
+            let originalFileName = file.originalname;
+
+            // 한글 파일명이 깨진 경우 UTF-8로 재인코딩
+            try {
+                // 파일명이 ISO-8859-1로 인코딩되어 있는지 확인
+                if (originalFileName && /[^\x00-\x7F]/.test(originalFileName)) {
+                    // 이미 올바른 UTF-8 문자가 포함된 경우 그대로 사용
+                    this.logger.log(`[uploadBreederDocuments] UTF-8 filename detected: ${originalFileName}`);
+                } else if (originalFileName) {
+                    // ASCII 범위 밖의 문자가 없으면 ISO-8859-1로 인코딩되어 있을 가능성
+                    try {
+                        const decoded = Buffer.from(originalFileName, 'latin1').toString('utf8');
+                        if (decoded !== originalFileName) {
+                            this.logger.log(
+                                `[uploadBreederDocuments] Filename re-encoded from latin1 to utf8: ${originalFileName} -> ${decoded}`,
+                            );
+                            originalFileName = decoded;
+                        }
+                    } catch (error) {
+                        // 재인코딩 실패 시 원본 사용
+                        this.logger.logWarning(
+                            'uploadBreederDocuments',
+                            'Failed to re-encode filename, using original',
+                            error,
+                        );
+                    }
+                }
+            } catch (error) {
+                this.logger.logWarning('uploadBreederDocuments', 'Filename encoding check failed', error);
+            }
+
             // 파일 업로드 (임시 폴더에 저장, 회원가입 완료 시 브리더 ID 폴더로 이동 가능)
             const result = await this.storageService.uploadFile(file, `documents/verification/temp/${level}`);
 
@@ -1668,7 +1715,7 @@ export class AuthService {
                 type,
                 url: result.cdnUrl, // 응답용 Signed URL
                 filename: result.fileName, // DB 저장용 파일명
-                originalFileName: file.originalname, // 원본 파일명 저장
+                originalFileName, // 원본 파일명 저장
                 size: file.size,
                 uploadedAt: new Date(),
             });
@@ -1677,7 +1724,7 @@ export class AuthService {
                 level,
                 type,
                 fileName: result.fileName,
-                originalFileName: file.originalname,
+                originalFileName,
             });
         }
 

@@ -13,7 +13,7 @@ module.exports = {
         {
             // 기본 설정
             name: 'pawpong-api',
-            script: './dist/src/main.js',
+            script: './dist/main.js',
 
             // Fork 모드 (단일 프로세스)
             instances: 1,
