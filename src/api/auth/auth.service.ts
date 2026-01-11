@@ -271,9 +271,9 @@ export class AuthService {
         // 추가로 referer 체크 (일반 API 호출 시 더 정확한 판단)
         const refererStr = referer || origin || '';
 
-        // Vercel 개발 배포에서 요청한 경우 (pawpongdev.vercel.app)
-        if (refererStr.includes('pawpongdev.vercel.app')) {
-            return 'https://pawpongdev.vercel.app';
+        // 개발 환경 도메인에서 요청한 경우 (dev.pawpong.kr)
+        if (refererStr.includes('dev.pawpong.kr')) {
+            return 'https://dev.pawpong.kr';
         }
 
         // 프로덕션 도메인에서 요청한 경우 (pawpong.kr)
