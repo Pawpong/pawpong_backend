@@ -85,7 +85,7 @@ async function bootstrap(): Promise<void> {
             'http://localhost:5173',
 
             // Pawpong 배포 프론트엔드
-            'https://pawpongdev.vercel.app',
+            'https://dev.pawpong.kr',
             'https://pawpong.kr',
             'https://www.pawpong.kr',
 
