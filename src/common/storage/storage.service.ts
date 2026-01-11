@@ -1,43 +1,47 @@
 import { Injectable, Logger } from '@nestjs/common';
-import * as URLSafeBase64 from 'urlsafe-base64';
-import { Storage } from '@google-cloud/storage';
 import { ConfigService } from '@nestjs/config';
 import { v4 as uuidv4 } from 'uuid';
-import * as crypto from 'crypto';
+import * as AWS from 'aws-sdk';
 
+/**
+ * 스마일서브 오브젝트 스토리지 서비스
+ * OpenStack Swift 기반 (AWS S3 호환 API 사용)
+ */
 @Injectable()
 export class StorageService {
-    private storage: Storage;
+    private s3: AWS.S3;
     private bucketName: string;
     private cdnBaseUrl: string;
-    private cdnKeyName: string;
-    private cdnPrivateKey: string;
     private readonly logger = new Logger(StorageService.name);
 
     constructor(private configService: ConfigService) {
         try {
-            this.logger.log('[StorageService] Initializing GCP Storage...');
+            this.logger.log('[StorageService] Initializing SmileServ Object Storage...');
 
-            const projectId = this.configService.get<string>('GCP_PROJECT_ID');
-            const keyFilePath = this.configService.get<string>('GCP_KEYFILE_PATH');
-
-            this.bucketName = this.configService.get<string>('GCP_BUCKET_NAME') || '';
-            this.cdnBaseUrl = this.configService.get<string>('CDN_BASE_URL') || '';
-            this.cdnKeyName = this.configService.get<string>('CDN_KEY_NAME') || '';
-            this.cdnPrivateKey = this.configService.get<string>('CDN_PRIVATE_KEY') || '';
+            const endpoint = this.configService.get<string>('SMILESERV_S3_ENDPOINT');
+            const accessKeyId = this.configService.get<string>('SMILESERV_S3_ACCESS_KEY');
+            const secretAccessKey = this.configService.get<string>('SMILESERV_S3_SECRET_KEY');
+            this.bucketName = this.configService.get<string>('SMILESERV_S3_BUCKET') || '';
+            this.cdnBaseUrl = this.configService.get<string>('SMILESERV_CDN_BASE_URL') || '';
 
             this.logger.log(
-                `[StorageService] GCP Config - Project: ${projectId}, Key: ${keyFilePath}, Bucket: ${this.bucketName}`,
+                `[StorageService] SmileServ Config - Endpoint: ${endpoint}, Bucket: ${this.bucketName}`,
             );
 
-            this.storage = new Storage({
-                projectId,
-                keyFilename: keyFilePath,
+            // AWS SDK S3 클라이언트 설정 (스마일서브 호환)
+            this.s3 = new AWS.S3({
+                endpoint: endpoint,
+                accessKeyId: accessKeyId,
+                secretAccessKey: secretAccessKey,
+                region: 'default', // 스마일서브는 단일 리전
+                s3ForcePathStyle: true, // Path style URL 사용 필수
+                signatureVersion: 'v4',
+                sslEnabled: true,
             });
 
-            this.logger.log('[StorageService] GCP Storage initialized successfully');
+            this.logger.log('[StorageService] SmileServ Object Storage initialized successfully');
         } catch (error) {
-            this.logger.error('[StorageService] Failed to initialize GCP Storage:', error);
+            this.logger.error('[StorageService] Failed to initialize SmileServ Storage:', error);
             throw error;
         }
     }
@@ -52,35 +56,22 @@ export class StorageService {
         const fileName = this.generateFileName(file.originalname, folder);
 
         try {
-            const bucket = this.storage.bucket(this.bucketName);
-            const blob = bucket.file(fileName);
+            const params: AWS.S3.PutObjectRequest = {
+                Bucket: this.bucketName,
+                Key: fileName,
+                Body: file.buffer,
+                ContentType: file.mimetype,
+                ACL: 'public-read', // 공개 읽기 권한
+                CacheControl: 'public, max-age=31536000, immutable', // 1년 캐싱
+            };
 
-            const blobStream = blob.createWriteStream({
-                resumable: false,
-                metadata: {
-                    contentType: file.mimetype,
-                    // 이미지는 UUID로 관리되어 변경되지 않으므로 1년 캐싱 (비용 절감)
-                    cacheControl: 'public, max-age=31536000, immutable',
-                },
-            });
+            await this.s3.upload(params).promise();
 
-            return new Promise((resolve, reject) => {
-                blobStream.on('error', (err) => {
-                    this.logger.error(`Upload error: ${err.message}`);
-                    reject(err);
-                });
+            const cdnUrl = this.getCdnUrl(fileName);
+            const storageUrl = cdnUrl; // 스마일서브는 CDN URL과 Storage URL이 동일
 
-                blobStream.on('finish', () => {
-                    // Generate CDN Signed URL (1 hour expiration)
-                    const cdnUrl = this.generateSignedUrl(fileName, 60);
-                    const storageUrl = `https://storage.googleapis.com/${this.bucketName}/${fileName}`;
-
-                    this.logger.log(`File uploaded: ${fileName}`);
-                    resolve({ fileName, cdnUrl, storageUrl });
-                });
-
-                blobStream.end(file.buffer);
-            });
+            this.logger.log(`File uploaded: ${fileName}`);
+            return { fileName, cdnUrl, storageUrl };
         } catch (error) {
             this.logger.error(`Upload failed: ${error.message}`);
             throw error;
@@ -103,7 +94,12 @@ export class StorageService {
      */
     async deleteFile(fileName: string): Promise<void> {
         try {
-            await this.storage.bucket(this.bucketName).file(fileName).delete();
+            const params: AWS.S3.DeleteObjectRequest = {
+                Bucket: this.bucketName,
+                Key: fileName,
+            };
+
+            await this.s3.deleteObject(params).promise();
             this.logger.log(`File deleted: ${fileName}`);
         } catch (error) {
             this.logger.error(`Delete failed: ${error.message}`);
@@ -116,9 +112,17 @@ export class StorageService {
      */
     async fileExists(fileName: string): Promise<boolean> {
         try {
-            const [exists] = await this.storage.bucket(this.bucketName).file(fileName).exists();
-            return exists;
+            const params: AWS.S3.HeadObjectRequest = {
+                Bucket: this.bucketName,
+                Key: fileName,
+            };
+
+            await this.s3.headObject(params).promise();
+            return true;
         } catch (error) {
+            if (error.code === 'NotFound' || error.statusCode === 404) {
+                return false;
+            }
             this.logger.error(`Check file existence failed: ${error.message}`);
             return false;
         }
@@ -134,27 +138,31 @@ export class StorageService {
     }
 
     /**
-     * CDN URL 생성
+     * CDN URL 생성 (스마일서브는 공개 URL 직접 반환)
      */
     getCdnUrl(fileName: string): string {
         return `${this.cdnBaseUrl}/${fileName}`;
     }
 
     /**
-     * CDN Signed URL 생성 (GCP Cloud CDN)
-     * 기존 signed URL이나 CDN URL인 경우 파일 경로를 추출하여 새로운 signed URL 생성
+     * Signed URL 생성 (스마일서브는 공개 파일이므로 일반 URL 반환)
+     * 기존 GCP CDN Signed URL 호환을 위해 메서드 유지
      */
     generateSignedUrl(fileName: string, expirationMinutes: number = 60): string {
         let filePath = fileName;
 
-        // CDN URL인 경우 파일 경로만 추출
+        // URL인 경우 파일 경로만 추출
         if (fileName.startsWith('http://') || fileName.startsWith('https://')) {
             try {
                 const urlObj = new URL(fileName);
-                // CDN 도메인인 경우에만 경로 추출
-                if (urlObj.hostname === 'cdn.pawpong.kr') {
-                    // pathname은 '/pets/parent/uuid.jpeg' 형식
-                    filePath = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+                // 스마일서브 도메인인 경우 경로 추출
+                if (urlObj.hostname.includes('object.iwinv.kr')) {
+                    // pathname에서 버킷 이름 제거: /pawpong_bucket/path/file.jpg -> path/file.jpg
+                    const pathParts = urlObj.pathname.split('/').filter((p) => p);
+                    if (pathParts[0] === this.bucketName) {
+                        pathParts.shift(); // 버킷 이름 제거
+                    }
+                    filePath = pathParts.join('/');
                 } else {
                     // 외부 URL은 그대로 반환
                     return fileName;
@@ -165,23 +173,13 @@ export class StorageService {
             }
         }
 
-        const url = `${this.cdnBaseUrl}/${filePath}`;
-        const expiration = Math.round(new Date().getTime() / 1000) + expirationMinutes * 60;
-        const decodedKey = URLSafeBase64.decode(this.cdnPrivateKey);
-
-        let urlToSign =
-            url + (url.indexOf('?') > -1 ? '&' : '?') + 'Expires=' + expiration + '&KeyName=' + this.cdnKeyName;
-
-        const hmac = crypto.createHmac('sha1', decodedKey);
-        const signature = hmac.update(urlToSign).digest();
-        const encodedSignature = URLSafeBase64.encode(signature);
-
-        urlToSign += '&Signature=' + encodedSignature;
-        return urlToSign;
+        // 스마일서브는 공개 버킷이므로 만료 시간 없이 URL 반환
+        // 민감한 파일의 경우 향후 Pre-signed URL 구현 가능
+        return this.getCdnUrl(filePath);
     }
 
     /**
-     * 파일명 배열을 Signed URL 배열로 변환
+     * 파일명 배열을 URL 배열로 변환
      */
     generateSignedUrls(fileNames: string[], expirationMinutes: number = 60): string[] {
         if (!fileNames || fileNames.length === 0) {
@@ -193,7 +191,7 @@ export class StorageService {
     }
 
     /**
-     * 단일 파일명을 Signed URL로 변환 (null-safe)
+     * 단일 파일명을 URL로 변환 (null-safe)
      */
     generateSignedUrlSafe(fileName: string | null | undefined, expirationMinutes: number = 60): string | undefined {
         if (!fileName || fileName.trim() === '') {
