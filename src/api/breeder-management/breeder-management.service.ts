@@ -746,11 +746,41 @@ export class BreederManagementService {
             const type = types[i];
 
             // 원본 파일명을 먼저 저장 (UUID 변경 전)
-            const originalFileName = file.originalname;
+            // multer가 자동으로 디코딩한 파일명을 사용
+            let originalFileName = file.originalname;
+
+            // 한글 파일명이 깨진 경우 UTF-8로 재인코딩
+            try {
+                // 파일명이 ISO-8859-1로 인코딩되어 있는지 확인
+                if (originalFileName && /[^\x00-\x7F]/.test(originalFileName)) {
+                    // 이미 올바른 UTF-8 문자가 포함된 경우 그대로 사용
+                    this.logger.log(`[uploadVerificationDocuments] UTF-8 filename detected: ${originalFileName}`);
+                } else if (originalFileName) {
+                    // ASCII 범위 밖의 문자가 없으면 ISO-8859-1로 인코딩되어 있을 가능성
+                    try {
+                        const decoded = Buffer.from(originalFileName, 'latin1').toString('utf8');
+                        if (decoded !== originalFileName) {
+                            this.logger.log(
+                                `[uploadVerificationDocuments] Filename re-encoded from latin1 to utf8: ${originalFileName} -> ${decoded}`,
+                            );
+                            originalFileName = decoded;
+                        }
+                    } catch (error) {
+                        // 재인코딩 실패 시 원본 사용
+                        this.logger.logWarning(
+                            'uploadVerificationDocuments',
+                            'Failed to re-encode filename, using original',
+                            error,
+                        );
+                    }
+                }
+            } catch (error) {
+                this.logger.logWarning('uploadVerificationDocuments', 'Filename encoding check failed', error);
+            }
 
             // 디버깅 로그: 업로드 시점의 파일명 확인
             this.logger.log(
-                `[uploadVerificationDocuments] File upload - type: ${type}, originalname: ${file.originalname}, mimetype: ${file.mimetype}, size: ${file.size}`,
+                `[uploadVerificationDocuments] File upload - type: ${type}, originalname: ${originalFileName}, mimetype: ${file.mimetype}, size: ${file.size}`,
             );
 
             // 폴더 경로: verification/{breederId}
@@ -805,32 +835,32 @@ export class BreederManagementService {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
         }
 
-        // 레벨 변경 신청인지 확인 (APPROVED 상태에서 다른 레벨로 신청)
-        const isLevelChange =
-            breeder.verification?.status === VerificationStatus.APPROVED && breeder.verification?.level !== dto.level;
-
-        // 이미 승인된 브리더가 같은 레벨로 재신청하는 것은 막음
-        if (breeder.verification?.status === VerificationStatus.APPROVED && !isLevelChange) {
-            throw new BadRequestException('이미 인증이 완료된 브리더입니다. 레벨 변경만 가능합니다.');
+        // APPROVED 상태에서는 서류 제출 불가
+        if (breeder.verification?.status === VerificationStatus.APPROVED) {
+            throw new BadRequestException('이미 인증이 완료된 브리더입니다.');
         }
-
-        this.logger.log(
-            `[submitVerificationDocuments] Level change detection - isLevelChange: ${isLevelChange}, currentLevel: ${breeder.verification?.level}, requestedLevel: ${dto.level}`,
-        );
 
         // 필수 서류 검증 (재제출인 경우 기존 서류 + 새 서류 합쳐서 검증)
         const requiredTypes =
             dto.level === 'new' ? ['idCard', 'businessLicense'] : ['idCard', 'businessLicense', 'contractSample'];
 
-        // 재제출 또는 레벨 변경인 경우 기존 서류 타입도 포함
+        // 재제출인 경우 기존 서류 타입도 포함
         const isResubmissionCheck =
             breeder.verification?.status === VerificationStatus.REVIEWING ||
-            breeder.verification?.status === VerificationStatus.REJECTED ||
-            isLevelChange;
+            breeder.verification?.status === VerificationStatus.REJECTED;
 
         const submittedTypes = dto.documents.map((d) => d.type);
         const existingTypes = isResubmissionCheck ? breeder.verification?.documents?.map((d) => d.type) || [] : [];
         const allTypes = [...new Set([...submittedTypes, ...existingTypes])]; // 중복 제거
+
+        // Elite 레벨인 경우 브리더 인증 서류 검증 (breederCatCertificate 또는 breederDogCertificate 중 하나 필수)
+        if (dto.level === 'elite') {
+            const hasBreederCertificate =
+                allTypes.includes('breederCatCertificate') || allTypes.includes('breederDogCertificate');
+            if (!hasBreederCertificate) {
+                throw new BadRequestException('Elite 레벨은 브리더 인증 서류가 필수입니다.');
+            }
+        }
 
         const missingTypes = requiredTypes.filter((t) => !allTypes.includes(t));
 
@@ -907,17 +937,16 @@ export class BreederManagementService {
         });
 
         const submittedAt = new Date();
-        // 이미 서류를 제출한 적이 있으면 재제출 (REVIEWING, REJECTED 상태) 또는 레벨 변경
+        // 이미 서류를 제출한 적이 있으면 재제출 (REVIEWING, REJECTED 상태)
         const isResubmission =
             breeder.verification?.status === VerificationStatus.REVIEWING ||
-            breeder.verification?.status === VerificationStatus.REJECTED ||
-            isLevelChange;
+            breeder.verification?.status === VerificationStatus.REJECTED;
 
         this.logger.log(
-            `[submitVerificationDocuments] Resubmission check - current status: ${breeder.verification?.status}, isResubmission: ${isResubmission}, isLevelChange: ${isLevelChange}`,
+            `[submitVerificationDocuments] Resubmission check - current status: ${breeder.verification?.status}, isResubmission: ${isResubmission}`,
         );
 
-        // 기존 서류와 새로 제출된 서류 병합 (재제출 또는 레벨 변경인 경우)
+        // 기존 서류와 새로 제출된 서류 병합 (재제출인 경우)
         let finalDocuments = actualNewDocuments;
         if (isResubmission && breeder.verification?.documents) {
             // 기존 서류 중에서:
@@ -951,6 +980,27 @@ export class BreederManagementService {
             );
         }
 
+        // 최종 서류 목록으로 필수 서류 재검증
+        const finalDocumentTypes = finalDocuments.map((d) => d.type);
+        const finalMissingTypes = requiredTypes.filter((t) => !finalDocumentTypes.includes(t));
+
+        this.logger.log(
+            `[submitVerificationDocuments] Final validation - finalDocumentTypes: ${finalDocumentTypes.join(', ')}, finalMissingTypes: ${finalMissingTypes.join(', ')}`,
+        );
+
+        if (finalMissingTypes.length > 0) {
+            throw new BadRequestException(`필수 서류가 누락되었습니다: ${finalMissingTypes.join(', ')}`);
+        }
+
+        // Elite 레벨인 경우 최종 서류 목록에서 브리더 인증 서류 검증
+        if (dto.level === 'elite') {
+            const hasBreederCertificateInFinal =
+                finalDocumentTypes.includes('breederCatCertificate') || finalDocumentTypes.includes('breederDogCertificate');
+            if (!hasBreederCertificateInFinal) {
+                throw new BadRequestException('Elite 레벨은 브리더 인증 서류가 필수입니다.');
+            }
+        }
+
         const verification: any = {
             status: VerificationStatus.REVIEWING,
             level: dto.level,
@@ -958,17 +1008,6 @@ export class BreederManagementService {
             documents: finalDocuments,
             submittedByEmail: dto.submittedByEmail || false,
         };
-
-        // 레벨 변경 신청인 경우 추가 정보 저장
-        if (isLevelChange) {
-            verification.isLevelChangeRequested = true;
-            verification.levelChangeRequest = {
-                previousLevel: breeder.verification?.level,
-                requestedLevel: dto.level,
-                requestedAt: submittedAt,
-                documents: finalDocuments,
-            };
-        }
 
         await this.breederRepository.updateVerification(userId, verification);
 
@@ -1007,8 +1046,6 @@ export class BreederManagementService {
                 phone: breeder.phoneNumber,
                 level: dto.level,
                 isResubmission,
-                isLevelChange,
-                previousLevel: isLevelChange ? (breeder.verification?.level as 'new' | 'elite') : undefined,
                 documents: documentsWithOriginalName,
                 submittedAt,
             });

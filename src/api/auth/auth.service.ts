@@ -1676,6 +1676,38 @@ export class AuthService {
             const file = files[i];
             const type = types[i];
 
+            // 원본 파일명 처리 (한글 파일명 인코딩 수정)
+            let originalFileName = file.originalname;
+
+            // 한글 파일명이 깨진 경우 UTF-8로 재인코딩
+            try {
+                // 파일명이 ISO-8859-1로 인코딩되어 있는지 확인
+                if (originalFileName && /[^\x00-\x7F]/.test(originalFileName)) {
+                    // 이미 올바른 UTF-8 문자가 포함된 경우 그대로 사용
+                    this.logger.log(`[uploadBreederDocuments] UTF-8 filename detected: ${originalFileName}`);
+                } else if (originalFileName) {
+                    // ASCII 범위 밖의 문자가 없으면 ISO-8859-1로 인코딩되어 있을 가능성
+                    try {
+                        const decoded = Buffer.from(originalFileName, 'latin1').toString('utf8');
+                        if (decoded !== originalFileName) {
+                            this.logger.log(
+                                `[uploadBreederDocuments] Filename re-encoded from latin1 to utf8: ${originalFileName} -> ${decoded}`,
+                            );
+                            originalFileName = decoded;
+                        }
+                    } catch (error) {
+                        // 재인코딩 실패 시 원본 사용
+                        this.logger.logWarning(
+                            'uploadBreederDocuments',
+                            'Failed to re-encode filename, using original',
+                            error,
+                        );
+                    }
+                }
+            } catch (error) {
+                this.logger.logWarning('uploadBreederDocuments', 'Filename encoding check failed', error);
+            }
+
             // 파일 업로드 (임시 폴더에 저장, 회원가입 완료 시 브리더 ID 폴더로 이동 가능)
             const result = await this.storageService.uploadFile(file, `documents/verification/temp/${level}`);
 
@@ -1683,7 +1715,7 @@ export class AuthService {
                 type,
                 url: result.cdnUrl, // 응답용 Signed URL
                 filename: result.fileName, // DB 저장용 파일명
-                originalFileName: file.originalname, // 원본 파일명 저장
+                originalFileName, // 원본 파일명 저장
                 size: file.size,
                 uploadedAt: new Date(),
             });
@@ -1692,7 +1724,7 @@ export class AuthService {
                 level,
                 type,
                 fileName: result.fileName,
-                originalFileName: file.originalname,
+                originalFileName,
             });
         }
 
