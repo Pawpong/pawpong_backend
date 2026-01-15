@@ -4,6 +4,7 @@ import { WinstonModule } from 'nest-winston';
 
 import { winstonConfig } from './common/config/winston.config';
 import { LoggerModule } from './common/logger/logger.module';
+import { RedisModule } from './common/redis/redis.module';
 // import { KafkaModule } from './common/kafka/kafka.module'; // 채팅 기능 구현 시 활성화
 import { AlimtalkModule } from './common/alimtalk/alimtalk.module';
 import { AlimtalkAdminModule } from './common/alimtalk/admin/alimtalk-admin.module';
@@ -31,6 +32,7 @@ import { BreederLevelAdminModule } from './api/breeder-level/admin/breeder-level
 import { BreederVerificationAdminModule } from './api/breeder-verification/admin/breeder-verification-admin.module';
 import { BreederReportAdminModule } from './api/breeder-report/admin/breeder-report-admin.module';
 import { NoticeModule } from './api/notice/notice.module';
+import { FeedModule } from './api/feed/feed.module';
 
 @Module({
     imports: [
@@ -40,6 +42,7 @@ import { NoticeModule } from './api/notice/notice.module';
         }),
         WinstonModule.forRoot(winstonConfig),
         LoggerModule,
+        RedisModule,
         // KafkaModule, // 채팅 기능 구현 시 활성화
         DatabaseModule,
         AlimtalkModule,
@@ -66,6 +69,7 @@ import { NoticeModule } from './api/notice/notice.module';
         NotificationAdminModule,
         AnnouncementModule,
         NoticeModule,
+        FeedModule,
     ],
     controllers: [],
     providers: [],

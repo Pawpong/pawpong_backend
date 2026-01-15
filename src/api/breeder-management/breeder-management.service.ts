@@ -159,8 +159,13 @@ export class BreederManagementService {
 
         // 각 필드별 업데이트 데이터 구성 (MongoDB 중첩 객체 업데이트)
         if (updateData.profileDescription !== undefined) {
-            // 빈 문자열이나 공백도 허용 (소개글 삭제 가능)
-            profileUpdateData['profile.description'] = updateData.profileDescription.trim();
+            // 줄바꿈 문자(\n, \r\n)는 완전히 유지
+            // 각 줄의 앞뒤 공백/탭만 제거 (줄바꿈 자체는 절대 제거하지 않음)
+            const description = updateData.profileDescription
+                .split('\n') // 줄바꿈으로 분리
+                .map((line) => line.replace(/^[ \t]+|[ \t]+$/g, '')) // 각 줄의 앞뒤 공백/탭만 제거
+                .join('\n'); // 줄바꿈으로 다시 결합
+            profileUpdateData['profile.description'] = description;
         }
         if (updateData.locationInfo) {
             profileUpdateData['profile.location'] = {
