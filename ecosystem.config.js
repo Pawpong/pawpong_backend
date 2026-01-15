@@ -36,6 +36,11 @@ module.exports = {
                 JWT_EXPIRATION: '1h',
                 JWT_REFRESH_EXPIRATION: '7d',
 
+                // Redis 설정
+                REDIS_HOST: process.env.REDIS_HOST || 'localhost',
+                REDIS_PORT: process.env.REDIS_PORT || 6379,
+                REDIS_PASSWORD: process.env.REDIS_PASSWORD || '',
+
                 // 로그 레벨
                 LOG_LEVEL: 'info',
             },
