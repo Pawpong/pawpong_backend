@@ -7,10 +7,10 @@ import { ApplicationStatus, ReportStatus, RecipientType } from '../../common/enu
 
 import { MailService } from '../../common/mail/mail.service';
 import { StorageService } from '../../common/storage/storage.service';
+import { AlimtalkService } from '../../common/alimtalk/alimtalk.service';
 import { MailTemplateService } from '../../common/mail/mail-template.service';
 import { NotificationService } from '../notification/notification.service';
 import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
-import { AlimtalkService } from '../../common/alimtalk/alimtalk.service';
 
 import { NotificationType } from '../../schema/notification.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
@@ -358,7 +358,7 @@ export class AdopterService {
             throw new BadRequestException('해당 브리더를 찾을 수 없습니다.');
         }
 
-        // 6. BreederReview 컬렉션에 후기 저장
+        // 7. BreederReview 컬렉션에 후기 저장
         const newReview = new this.breederReviewModel({
             applicationId: applicationId,
             breederId: application.breederId,
@@ -371,10 +371,10 @@ export class AdopterService {
 
         const savedReview = await newReview.save();
 
-        // 7. 브리더 통계 업데이트
+        // 8. 브리더 통계 업데이트
         await this.breederRepository.incrementReviewCount(application.breederId.toString());
 
-        // 8. 브리더에게 새 후기 알림 발송 (이메일 없음, 서비스 알림만)
+        // 9. 브리더에게 새 후기 알림 발송 (이메일 없음, 서비스 알림만)
         await this.sendNewReviewNotification(application.breederId.toString());
 
         return {

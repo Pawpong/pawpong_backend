@@ -7,7 +7,11 @@ import {
     DeleteObjectCommand,
     HeadObjectCommand,
     ListObjectsV2Command,
+    GetObjectCommand,
 } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+import * as fs from 'fs';
+import { Readable } from 'stream';
 
 /**
  * 스마일서브 오브젝트 스토리지 서비스
@@ -226,5 +230,113 @@ export class StorageService {
      */
     getBucketName(): string {
         return this.bucketName;
+    }
+
+    /**
+     * Presigned Upload URL 생성
+     * 클라이언트가 직접 S3로 업로드할 수 있는 URL 제공
+     * @param fileKey S3 파일 키 (예: videos/raw/{uuid}.mp4)
+     * @param expirationSeconds URL 유효 시간 (초)
+     * @returns Presigned URL
+     */
+    async generatePresignedUploadUrl(fileKey: string, expirationSeconds: number = 600): Promise<string> {
+        const command = new PutObjectCommand({
+            Bucket: this.bucketName,
+            Key: fileKey,
+            ACL: 'public-read',
+        });
+
+        const url = await getSignedUrl(this.s3, command, {
+            expiresIn: expirationSeconds,
+        });
+
+        this.logger.log(`[generatePresignedUploadUrl] Generated upload URL for: ${fileKey}`);
+        return url;
+    }
+
+    /**
+     * 파일 다운로드 (로컬 경로로 저장)
+     * @param fileKey S3 파일 키
+     * @param localPath 로컬 저장 경로
+     */
+    async downloadFile(fileKey: string, localPath: string): Promise<void> {
+        try {
+            const command = new GetObjectCommand({
+                Bucket: this.bucketName,
+                Key: fileKey,
+            });
+
+            const response = await this.s3.send(command);
+
+            // ReadableStream을 파일로 저장
+            const stream = response.Body as Readable;
+            const writeStream = fs.createWriteStream(localPath);
+
+            await new Promise<void>((resolve, reject) => {
+                stream.pipe(writeStream);
+                stream.on('error', reject);
+                writeStream.on('finish', () => resolve());
+                writeStream.on('error', reject);
+            });
+
+            this.logger.log(`[downloadFile] Downloaded: ${fileKey} -> ${localPath}`);
+        } catch (error) {
+            this.logger.error(`[downloadFile] Failed to download ${fileKey}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * 로컬 파일을 S3에 업로드 (Worker에서 사용)
+     * @param localPath 로컬 파일 경로
+     * @param fileKey S3 파일 키
+     * @param contentType MIME 타입
+     */
+    async uploadLocalFile(
+        localPath: string,
+        fileKey: string,
+        contentType: string = 'application/octet-stream',
+    ): Promise<void> {
+        try {
+            const fileContent = fs.readFileSync(localPath);
+
+            const command = new PutObjectCommand({
+                Bucket: this.bucketName,
+                Key: fileKey,
+                Body: fileContent,
+                ContentType: contentType,
+                ACL: 'public-read',
+                CacheControl: 'public, max-age=31536000, immutable',
+            });
+
+            await this.s3.send(command);
+
+            this.logger.log(`[uploadLocalFile] Uploaded: ${localPath} -> ${fileKey}`);
+        } catch (error) {
+            this.logger.error(`[uploadLocalFile] Failed to upload ${localPath}:`, error);
+            throw error;
+        }
+    }
+
+    /**
+     * S3 파일 스트림 가져오기 (HLS 프록시용)
+     * @param fileKey S3 파일 키
+     * @returns Readable 스트림
+     */
+    async getFileStream(fileKey: string): Promise<Readable> {
+        try {
+            const command = new GetObjectCommand({
+                Bucket: this.bucketName,
+                Key: fileKey,
+            });
+
+            const response = await this.s3.send(command);
+
+            this.logger.log(`[getFileStream] Streaming: ${fileKey}`);
+            return response.Body as Readable;
+        } catch (error) {
+            this.logger.error(`[getFileStream] Failed to get stream for ${fileKey}:`, error);
+            throw error;
+        }
     }
 }
