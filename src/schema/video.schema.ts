@@ -136,6 +136,9 @@ export class Video extends Document {
 
 export const VideoSchema = SchemaFactory.createForClass(Video);
 
+// VideoDocument 타입 export
+export type VideoDocument = Video & Document;
+
 // 복합 인덱스
 VideoSchema.index({ uploadedBy: 1, createdAt: -1 }); // 사용자별 동영상 목록
 VideoSchema.index({ status: 1, isPublic: 1, createdAt: -1 }); // 피드 조회

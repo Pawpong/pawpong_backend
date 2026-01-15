@@ -270,7 +270,7 @@ export class FeedVideoService {
         );
 
         const result = {
-            videos: videosWithUrls,
+            items: videosWithUrls,
             pagination: {
                 currentPage: page,
                 pageSize: limit,
@@ -359,7 +359,7 @@ export class FeedVideoService {
         );
 
         return {
-            videos: videosWithUrls,
+            items: videosWithUrls,
             pagination: {
                 currentPage: page,
                 pageSize: limit,
