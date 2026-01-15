@@ -118,7 +118,7 @@ export class FeedVideoItemDto {
  */
 export class FeedResponseDto {
     @ApiProperty({ description: '동영상 목록', type: [FeedVideoItemDto] })
-    videos: FeedVideoItemDto[];
+    items: FeedVideoItemDto[];
 
     @ApiProperty({ description: '페이지네이션 정보' })
     pagination: {
