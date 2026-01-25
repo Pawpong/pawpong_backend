@@ -251,6 +251,7 @@ export class BreederManagementService {
             birthDate: new Date(parentPetDto.birthDate),
             photoFileName: parentPetDto.photoFileName,
             description: parentPetDto.description || '',
+            photos: parentPetDto.photos || [],
             isActive: true,
         });
 
@@ -279,6 +280,7 @@ export class BreederManagementService {
         if (updateData.birthDate) updateFields.birthDate = new Date(updateData.birthDate);
         if (updateData.photoFileName) updateFields.photoFileName = updateData.photoFileName;
         if (updateData.description !== undefined) updateFields.description = updateData.description;
+        if (updateData.photos !== undefined) updateFields.photos = updateData.photos;
 
         await this.parentPetRepository.update(petId, updateFields);
 
@@ -333,7 +335,7 @@ export class BreederManagementService {
             birthDate: new Date(availablePetDto.birthDate),
             price: availablePetDto.price,
             status: 'available',
-            photos: [],
+            photos: availablePetDto.photos || [],
             description: availablePetDto.description || '',
             parentInfo: availablePetDto.parentInfo
                 ? {
@@ -371,6 +373,7 @@ export class BreederManagementService {
         if (updateData.birthDate) updateFields.birthDate = new Date(updateData.birthDate);
         if (updateData.price) updateFields.price = updateData.price;
         if (updateData.description !== undefined) updateFields.description = updateData.description;
+        if (updateData.photos !== undefined) updateFields.photos = updateData.photos;
         if (updateData.parentInfo) {
             updateFields.parentInfo = {
                 mother: updateData.parentInfo.mother,
@@ -1219,11 +1222,12 @@ export class BreederManagementService {
               }
             : breeder.profile;
 
-        // parentPets의 photoFileName을 Signed URL로 변환
+        // parentPets의 photoFileName과 photos를 Signed URL로 변환
         const parentPetsWithSignedUrls = (parentPets || []).map((pet: any) => ({
             ...(pet.toObject ? pet.toObject() : pet),
             petId: (pet._id || pet.petId)?.toString(),
             photoFileName: this.storageService.generateSignedUrlSafe(pet.photoFileName, 60),
+            photos: this.storageService.generateSignedUrls(pet.photos || [], 60),
         }));
 
         // availablePets의 photos를 Signed URL로 변환
