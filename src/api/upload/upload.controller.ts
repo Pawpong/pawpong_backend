@@ -48,38 +48,38 @@ export class UploadController {
     @UseGuards(JwtAuthGuard)
     @ApiConsumes('multipart/form-data')
     @ApiEndpoint({
-        summary: '분양 개체 사진 업로드',
-        description: '분양 개체의 사진 1장을 업로드하고 자동으로 DB에 저장합니다.',
+        summary: '분양 개체 사진 업로드 (다중)',
+        description: '분양 개체의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장)',
         responseType: UploadResponseDto,
         isPublic: false,
     })
-    @UseInterceptors(FileInterceptor('file'))
+    @UseInterceptors(FilesInterceptor('files', 4))
     async uploadAvailablePetPhotos(
         @Param('petId') petId: string,
-        @UploadedFile() file: Express.Multer.File,
+        @UploadedFiles() files: Express.Multer.File[],
         @CurrentUser() user: any,
-    ): Promise<ApiResponseDto<UploadResponseDto>> {
-        const response = await this.uploadService.uploadAvailablePetPhotos(petId, file, user);
-        return ApiResponseDto.success(response, '분양 개체 사진이 업로드되고 저장되었습니다.');
+    ): Promise<ApiResponseDto<UploadResponseDto[]>> {
+        const responses = await this.uploadService.uploadAvailablePetPhotosMultiple(petId, files, user);
+        return ApiResponseDto.success(responses, '분양 개체 사진이 업로드되고 저장되었습니다.');
     }
 
     @Post('parent-pet-photos/:petId')
     @UseGuards(JwtAuthGuard)
     @ApiConsumes('multipart/form-data')
     @ApiEndpoint({
-        summary: '부모견/묘 사진 업로드',
-        description: '부모견/묘의 사진 1장을 업로드하고 자동으로 DB에 저장합니다.',
+        summary: '부모견/묘 사진 업로드 (다중)',
+        description: '부모견/묘의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장)',
         responseType: UploadResponseDto,
         isPublic: false,
     })
-    @UseInterceptors(FileInterceptor('file'))
+    @UseInterceptors(FilesInterceptor('files', 4))
     async uploadParentPetPhotos(
         @Param('petId') petId: string,
-        @UploadedFile() file: Express.Multer.File,
+        @UploadedFiles() files: Express.Multer.File[],
         @CurrentUser() user: any,
-    ): Promise<ApiResponseDto<UploadResponseDto>> {
-        const response = await this.uploadService.uploadParentPetPhotos(petId, file, user);
-        return ApiResponseDto.success(response, '부모견/묘 사진이 업로드되고 저장되었습니다.');
+    ): Promise<ApiResponseDto<UploadResponseDto[]>> {
+        const responses = await this.uploadService.uploadParentPetPhotosMultiple(petId, files, user);
+        return ApiResponseDto.success(responses, '부모견/묘 사진이 업로드되고 저장되었습니다.');
     }
 
     @Post('single')
