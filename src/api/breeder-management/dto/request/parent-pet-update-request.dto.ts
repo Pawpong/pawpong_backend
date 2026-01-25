@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEnum, IsDateString } from 'class-validator';
+import { IsString, IsOptional, IsEnum, IsDateString, IsArray, ArrayMaxSize } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
@@ -80,4 +80,20 @@ export class ParentPetUpdateDto {
     @IsOptional()
     @IsString()
     description?: string;
+
+    /**
+     * 추가 사진 파일명 배열 (선택, 최대 4개)
+     * @example ["parent-pets/pet001/photo1.jpg", "parent-pets/pet001/photo2.jpg"]
+     */
+    @ApiPropertyOptional({
+        description: '추가 사진 파일명 배열 (최대 4개)',
+        example: ['parent-pets/pet001/photo1.jpg', 'parent-pets/pet001/photo2.jpg'],
+        type: [String],
+        maxItems: 4,
+    })
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    @ArrayMaxSize(4)
+    photos?: string[];
 }
