@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, Min } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber, IsEnum, Min, IsArray, ArrayMaxSize } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -94,4 +94,20 @@ export class AvailablePetAddDto {
         mother?: string;
         father?: string;
     };
+
+    /**
+     * 사진 파일명 배열 (선택, 최대 4개)
+     * @example ["available-pets/pet001/photo1.jpg", "available-pets/pet001/photo2.jpg"]
+     */
+    @ApiPropertyOptional({
+        description: '사진 파일명 배열 (최대 4개)',
+        example: ['available-pets/pet001/photo1.jpg', 'available-pets/pet001/photo2.jpg'],
+        type: [String],
+        maxItems: 4,
+    })
+    @IsOptional()
+    @IsArray()
+    @IsString({ each: true })
+    @ArrayMaxSize(4)
+    photos?: string[];
 }
