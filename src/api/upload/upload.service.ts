@@ -12,8 +12,26 @@ import { UploadResponseDto } from './dto/response/upload-response.dto';
 
 @Injectable()
 export class UploadService {
-    // 허용되는 이미지 MIME 타입
-    private readonly allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    // 허용되는 이미지 MIME 타입 (HEIF/HEIC 포함)
+    private readonly allowedImageMimeTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/heif',
+        'image/heic',
+    ];
+
+    // 허용되는 영상 MIME 타입
+    private readonly allowedVideoMimeTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
+
+    // 허용되는 미디어 MIME 타입 (이미지 + 영상)
+    private readonly allowedMediaMimeTypes = [...this.allowedImageMimeTypes, ...this.allowedVideoMimeTypes];
+
+    // 파일 크기 제한
+    private readonly IMAGE_MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    private readonly VIDEO_MAX_SIZE = 20 * 1024 * 1024; // 20MB
 
     constructor(
         private readonly storageService: StorageService,
@@ -45,12 +63,7 @@ export class UploadService {
 
         // 각 파일 크기 및 타입 검증
         for (const file of files) {
-            if (file.size > 5 * 1024 * 1024) {
-                throw new BadRequestException('파일 크기는 5MB를 초과할 수 없습니다.');
-            }
-            if (!this.allowedMimeTypes.includes(file.mimetype)) {
-                throw new BadRequestException('이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp)');
-            }
+            this.validateMediaFile(file);
         }
 
         // 스토리지 업로드
@@ -101,12 +114,7 @@ export class UploadService {
 
         // 각 파일 크기 및 타입 검증
         for (const file of files) {
-            if (file.size > 5 * 1024 * 1024) {
-                throw new BadRequestException('파일 크기는 5MB를 초과할 수 없습니다.');
-            }
-            if (!this.allowedMimeTypes.includes(file.mimetype)) {
-                throw new BadRequestException('이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp)');
-            }
+            this.validateMediaFile(file);
         }
 
         // 스토리지 업로드
@@ -156,12 +164,7 @@ export class UploadService {
 
         // 각 파일 크기 및 타입 검증
         for (const file of files) {
-            if (file.size > 5 * 1024 * 1024) {
-                throw new BadRequestException('파일 크기는 5MB를 초과할 수 없습니다.');
-            }
-            if (!this.allowedMimeTypes.includes(file.mimetype)) {
-                throw new BadRequestException('이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp)');
-            }
+            this.validateMediaFile(file);
         }
 
         // 스토리지 업로드
@@ -217,5 +220,28 @@ export class UploadService {
         }
 
         await this.storageService.deleteFile(fileName);
+    }
+
+    /**
+     * 미디어 파일 검증 (이미지/영상)
+     * 이미지: 최대 5MB, 영상: 최대 20MB
+     */
+    private validateMediaFile(file: Express.Multer.File): void {
+        const isVideo = this.allowedVideoMimeTypes.includes(file.mimetype);
+        const isImage = this.allowedImageMimeTypes.includes(file.mimetype);
+
+        if (!isVideo && !isImage) {
+            throw new BadRequestException(
+                '이미지 또는 영상 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp, heif, heic, mp4, mov, avi, webm)',
+            );
+        }
+
+        if (isVideo && file.size > this.VIDEO_MAX_SIZE) {
+            throw new BadRequestException('영상 파일 크기는 20MB를 초과할 수 없습니다.');
+        }
+
+        if (isImage && file.size > this.IMAGE_MAX_SIZE) {
+            throw new BadRequestException('이미지 파일 크기는 5MB를 초과할 수 없습니다.');
+        }
     }
 }
