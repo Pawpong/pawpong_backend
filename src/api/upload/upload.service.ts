@@ -67,13 +67,22 @@ export class UploadService {
     }
 
     /**
-     * 분양 개체 사진 업로드
-     * 분양 개체의 사진 1장을 업로드하고 자동으로 DB에 저장합니다.
+     * 분양 개체 사진 다중 업로드
+     * 분양 개체의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장)
      */
-    async uploadAvailablePetPhotos(petId: string, file: Express.Multer.File, user: any): Promise<UploadResponseDto> {
+    async uploadAvailablePetPhotosMultiple(
+        petId: string,
+        files: Express.Multer.File[],
+        user: any,
+    ): Promise<UploadResponseDto[]> {
         // 파일 존재 여부 검증
-        if (!file) {
+        if (!files || files.length === 0) {
             throw new BadRequestException('파일이 업로드되지 않았습니다.');
+        }
+
+        // 파일 개수 검증 (최대 4장)
+        if (files.length > 4) {
+            throw new BadRequestException('사진은 최대 4장까지 업로드 가능합니다.');
         }
 
         // 권한 검증
@@ -90,23 +99,45 @@ export class UploadService {
             throw new BadRequestException('해당 분양 개체를 찾을 수 없습니다.');
         }
 
+        // 각 파일 크기 및 타입 검증
+        for (const file of files) {
+            if (file.size > 5 * 1024 * 1024) {
+                throw new BadRequestException('파일 크기는 5MB를 초과할 수 없습니다.');
+            }
+            if (!this.allowedMimeTypes.includes(file.mimetype)) {
+                throw new BadRequestException('이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp)');
+            }
+        }
+
         // 스토리지 업로드
-        const result = await this.storageService.uploadFile(file, 'pets/available');
+        const results = await this.storageService.uploadMultipleFiles(files, 'pets/available');
+        const fileNames = results.map((r) => r.fileName);
 
-        // DB 업데이트: photos 배열에 1개만 저장
-        await this.availablePetModel.findByIdAndUpdate(petId, { $set: { photos: [result.fileName] } });
+        // DB 업데이트: photos 배열에 추가 (기존 사진 유지하고 추가)
+        await this.availablePetModel.findByIdAndUpdate(petId, {
+            $push: { photos: { $each: fileNames } },
+        });
 
-        return new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
+        return results.map((result, index) => new UploadResponseDto(result.cdnUrl, result.fileName, files[index].size));
     }
 
     /**
-     * 부모견/묘 사진 업로드
-     * 부모견/묘의 사진 1장을 업로드하고 자동으로 DB에 저장합니다.
+     * 부모견/묘 사진 다중 업로드
+     * 부모견/묘의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장)
      */
-    async uploadParentPetPhotos(petId: string, file: Express.Multer.File, user: any): Promise<UploadResponseDto> {
+    async uploadParentPetPhotosMultiple(
+        petId: string,
+        files: Express.Multer.File[],
+        user: any,
+    ): Promise<UploadResponseDto[]> {
         // 파일 존재 여부 검증
-        if (!file) {
+        if (!files || files.length === 0) {
             throw new BadRequestException('파일이 업로드되지 않았습니다.');
+        }
+
+        // 파일 개수 검증 (최대 4장)
+        if (files.length > 4) {
+            throw new BadRequestException('사진은 최대 4장까지 업로드 가능합니다.');
         }
 
         // 권한 검증
@@ -123,13 +154,26 @@ export class UploadService {
             throw new BadRequestException('해당 부모견/묘를 찾을 수 없습니다.');
         }
 
+        // 각 파일 크기 및 타입 검증
+        for (const file of files) {
+            if (file.size > 5 * 1024 * 1024) {
+                throw new BadRequestException('파일 크기는 5MB를 초과할 수 없습니다.');
+            }
+            if (!this.allowedMimeTypes.includes(file.mimetype)) {
+                throw new BadRequestException('이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp)');
+            }
+        }
+
         // 스토리지 업로드
-        const result = await this.storageService.uploadFile(file, 'pets/parent');
+        const results = await this.storageService.uploadMultipleFiles(files, 'pets/parent');
+        const fileNames = results.map((r) => r.fileName);
 
-        // DB 업데이트: photoFileName 필드에 저장
-        await this.parentPetModel.findByIdAndUpdate(petId, { $set: { photoFileName: result.fileName } });
+        // DB 업데이트: photos 배열에 추가 (기존 사진 유지하고 추가)
+        await this.parentPetModel.findByIdAndUpdate(petId, {
+            $push: { photos: { $each: fileNames } },
+        });
 
-        return new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
+        return results.map((result, index) => new UploadResponseDto(result.cdnUrl, result.fileName, files[index].size));
     }
 
     /**

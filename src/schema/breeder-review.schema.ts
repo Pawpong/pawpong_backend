@@ -95,7 +95,7 @@ export class BreederReview {
 export const BreederReviewSchema = SchemaFactory.createForClass(BreederReview);
 
 // 인덱스 설정
-BreederReviewSchema.index({ applicationId: 1 }, { unique: true }); // 신청당 1개 후기 보장
+BreederReviewSchema.index({ applicationId: 1 }); // 신청별 후기 조회 (유니크 제거 - 여러 후기 허용)
 BreederReviewSchema.index({ breederId: 1, isVisible: 1, writtenAt: -1 }); // 브리더별 최신 후기 조회
 BreederReviewSchema.index({ adopterId: 1, writtenAt: -1 }); // 입양자별 작성 후기 조회
 BreederReviewSchema.index({ breederId: 1, type: 1 }); // 브리더별 후기 타입 필터링
