@@ -8,11 +8,18 @@ import Redis from 'ioredis';
 /**
  * 직접 ioredis를 사용하는 Redis 서비스
  * cache-manager보다 확실하게 Redis에 저장됨
+ *
+ * 로컬 개발 환경에서 Redis 없이도 동작 (인메모리 폴백)
  */
 @Injectable()
 export class RedisService implements OnModuleDestroy {
-    private client: Redis;
+    private client: Redis | null = null;
     private readonly logger = new Logger(RedisService.name);
+    private isConnected = false;
+    private connectionAttempted = false;
+
+    // 인메모리 캐시 (Redis 연결 실패 시 폴백)
+    private memoryCache = new Map<string, { value: string; expireAt?: number }>();
 
     constructor() {
         const host = process.env.REDIS_HOST || 'localhost';
@@ -24,40 +31,111 @@ export class RedisService implements OnModuleDestroy {
             port,
             password: password || undefined,
             db: 0,
+            maxRetriesPerRequest: 1,
+            retryStrategy: (times) => {
+                // 로컬 개발 환경에서 Redis 없으면 재시도하지 않음
+                if (times >= 1 && !this.connectionAttempted) {
+                    this.connectionAttempted = true;
+                    this.logger.warn(`[RedisService] Redis 연결 실패 - 인메모리 캐시로 폴백합니다 (개발 환경)`);
+                    return null; // 재시도 중단
+                }
+                return null;
+            },
+            lazyConnect: false,
         });
 
         this.client.on('connect', () => {
+            this.isConnected = true;
             this.logger.log(`[RedisService] 연결 성공 - ${host}:${port}`);
         });
 
-        this.client.on('error', (err) => {
-            this.logger.error(`[RedisService] 연결 에러:`, err.message);
+        this.client.on('error', () => {
+            // 에러 로그는 retryStrategy에서 한 번만 출력
+            this.isConnected = false;
+        });
+
+        this.client.on('close', () => {
+            this.isConnected = false;
         });
     }
 
     async get(key: string): Promise<string | null> {
-        return this.client.get(key);
+        if (this.isConnected && this.client) {
+            try {
+                return await this.client.get(key);
+            } catch {
+                // Redis 에러 시 인메모리 폴백
+            }
+        }
+        // 인메모리 캐시에서 조회
+        const cached = this.memoryCache.get(key);
+        if (cached) {
+            if (cached.expireAt && Date.now() > cached.expireAt) {
+                this.memoryCache.delete(key);
+                return null;
+            }
+            return cached.value;
+        }
+        return null;
     }
 
     async set(key: string, value: string, ttlSeconds?: number): Promise<void> {
-        if (ttlSeconds) {
-            await this.client.setex(key, ttlSeconds, value);
-        } else {
-            await this.client.set(key, value);
+        if (this.isConnected && this.client) {
+            try {
+                if (ttlSeconds) {
+                    await this.client.setex(key, ttlSeconds, value);
+                } else {
+                    await this.client.set(key, value);
+                }
+                return;
+            } catch {
+                // Redis 에러 시 인메모리 폴백
+            }
         }
+        // 인메모리 캐시에 저장
+        this.memoryCache.set(key, {
+            value,
+            expireAt: ttlSeconds ? Date.now() + ttlSeconds * 1000 : undefined,
+        });
     }
 
     async del(key: string): Promise<void> {
-        await this.client.del(key);
+        if (this.isConnected && this.client) {
+            try {
+                await this.client.del(key);
+                return;
+            } catch {
+                // Redis 에러 시 인메모리 폴백
+            }
+        }
+        this.memoryCache.delete(key);
     }
 
     async exists(key: string): Promise<boolean> {
-        const result = await this.client.exists(key);
-        return result === 1;
+        if (this.isConnected && this.client) {
+            try {
+                const result = await this.client.exists(key);
+                return result === 1;
+            } catch {
+                // Redis 에러 시 인메모리 폴백
+            }
+        }
+        const cached = this.memoryCache.get(key);
+        if (cached) {
+            if (cached.expireAt && Date.now() > cached.expireAt) {
+                this.memoryCache.delete(key);
+                return false;
+            }
+            return true;
+        }
+        return false;
     }
 
     onModuleDestroy() {
-        this.client.disconnect();
+        if (this.client) {
+            this.client.disconnect();
+        }
+        this.memoryCache.clear();
     }
 }
 
