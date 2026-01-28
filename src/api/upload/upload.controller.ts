@@ -49,7 +49,8 @@ export class UploadController {
     @ApiConsumes('multipart/form-data')
     @ApiEndpoint({
         summary: '분양 개체 사진 업로드 (다중)',
-        description: '분양 개체의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장)',
+        description:
+            '분양 개체의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장, 기존 사진 URL과 함께 전송 시 전체 교체)',
         responseType: UploadResponseDto,
         isPublic: false,
     })
@@ -57,9 +58,21 @@ export class UploadController {
     async uploadAvailablePetPhotos(
         @Param('petId') petId: string,
         @UploadedFiles() files: Express.Multer.File[],
+        @Body('existingPhotos') existingPhotos: string | string[],
         @CurrentUser() user: any,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
-        const responses = await this.uploadService.uploadAvailablePetPhotosMultiple(petId, files, user);
+        // existingPhotos가 문자열이면 배열로 변환 (multipart에서 단일 값은 문자열로 올 수 있음)
+        const existingPhotoArray = existingPhotos
+            ? Array.isArray(existingPhotos)
+                ? existingPhotos
+                : [existingPhotos]
+            : [];
+        const responses = await this.uploadService.uploadAvailablePetPhotosMultiple(
+            petId,
+            files || [],
+            existingPhotoArray,
+            user,
+        );
         return ApiResponseDto.success(responses, '분양 개체 사진이 업로드되고 저장되었습니다.');
     }
 
@@ -68,7 +81,8 @@ export class UploadController {
     @ApiConsumes('multipart/form-data')
     @ApiEndpoint({
         summary: '부모견/묘 사진 업로드 (다중)',
-        description: '부모견/묘의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장)',
+        description:
+            '부모견/묘의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장, 기존 사진 URL과 함께 전송 시 전체 교체)',
         responseType: UploadResponseDto,
         isPublic: false,
     })
@@ -76,9 +90,21 @@ export class UploadController {
     async uploadParentPetPhotos(
         @Param('petId') petId: string,
         @UploadedFiles() files: Express.Multer.File[],
+        @Body('existingPhotos') existingPhotos: string | string[],
         @CurrentUser() user: any,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
-        const responses = await this.uploadService.uploadParentPetPhotosMultiple(petId, files, user);
+        // existingPhotos가 문자열이면 배열로 변환 (multipart에서 단일 값은 문자열로 올 수 있음)
+        const existingPhotoArray = existingPhotos
+            ? Array.isArray(existingPhotos)
+                ? existingPhotos
+                : [existingPhotos]
+            : [];
+        const responses = await this.uploadService.uploadParentPetPhotosMultiple(
+            petId,
+            files || [],
+            existingPhotoArray,
+            user,
+        );
         return ApiResponseDto.success(responses, '부모견/묘 사진이 업로드되고 저장되었습니다.');
     }
 
