@@ -9,9 +9,9 @@ import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.de
 
 import { NotificationAdminService } from './notification-admin.service';
 
-import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { NotificationAdminListRequestDto } from './dto/request/notification-admin-list-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
+import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import {
     NotificationAdminResponseDto,
     NotificationStatsResponseDto,
