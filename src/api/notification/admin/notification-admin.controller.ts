@@ -3,9 +3,9 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 
 import { Roles } from '../../../common/decorator/roles.decorator';
 import { CurrentUser } from '../../../common/decorator/user.decorator';
+import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
 import { RolesGuard } from '../../../common/guard/roles.guard';
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
-import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
 
 import { NotificationAdminService } from './notification-admin.service';
 
