@@ -143,6 +143,39 @@ export class MyReviewItemDto {
         example: 0,
     })
     reportCount?: number;
+
+    /**
+     * 브리더 답글 내용
+     * @example "소중한 후기 감사합니다!"
+     */
+    @ApiProperty({
+        description: '브리더 답글 내용',
+        example: '소중한 후기 감사합니다!',
+        required: false,
+    })
+    replyContent?: string;
+
+    /**
+     * 브리더 답글 작성 일시
+     * @example "2024-01-16T10:30:00.000Z"
+     */
+    @ApiProperty({
+        description: '브리더 답글 작성 일시',
+        example: '2024-01-16T10:30:00.000Z',
+        required: false,
+    })
+    replyWrittenAt?: Date;
+
+    /**
+     * 브리더 답글 수정 일시
+     * @example "2024-01-16T11:00:00.000Z"
+     */
+    @ApiProperty({
+        description: '브리더 답글 수정 일시',
+        example: '2024-01-16T11:00:00.000Z',
+        required: false,
+    })
+    replyUpdatedAt?: Date;
 }
 
 /**

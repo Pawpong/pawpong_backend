@@ -560,8 +560,8 @@ export class BreederVerificationAdminService {
 
             await builder.send();
 
-            // 카카오 알림톡 발송 - pro 플랜만 발송
-            if (breederPhone && breeder.verification?.plan === 'pro') {
+            // 카카오 알림톡 발송
+            if (breederPhone) {
                 try {
                     const alimtalkResult = await this.alimtalkService.sendBreederApproved(breederPhone);
                     if (alimtalkResult.success) {
@@ -574,8 +574,6 @@ export class BreederVerificationAdminService {
                 } catch (error) {
                     this.logger.error(`[sendVerificationNotification] 알림톡 발송 오류: ${error.message}`);
                 }
-            } else if (breederPhone && breeder.verification?.plan !== 'pro') {
-                this.logger.log(`[sendVerificationNotification] 알림톡 발송 스킵 (basic 플랜): ${breederPhone}`);
             }
         } else if (verificationData.verificationStatus === VerificationStatus.REJECTED) {
             // 반려 알림 + 이메일 발송
@@ -603,8 +601,8 @@ export class BreederVerificationAdminService {
 
             await builder.send();
 
-            // 카카오 알림톡 발송 - pro 플랜만 발송
-            if (breederPhone && breeder.verification?.plan === 'pro') {
+            // 카카오 알림톡 발송
+            if (breederPhone) {
                 try {
                     const alimtalkResult = await this.alimtalkService.sendBreederRejected(breederPhone);
                     if (alimtalkResult.success) {
@@ -617,8 +615,6 @@ export class BreederVerificationAdminService {
                 } catch (error) {
                     this.logger.error(`[sendVerificationNotification] 알림톡 발송 오류: ${error.message}`);
                 }
-            } else if (breederPhone && breeder.verification?.plan !== 'pro') {
-                this.logger.log(`[sendVerificationNotification] 알림톡 발송 스킵 (basic 플랜): ${breederPhone}`);
             }
         }
     }
@@ -686,16 +682,14 @@ export class BreederVerificationAdminService {
                     await builder.send();
                 }
 
-                // 카카오 알림톡 발송 - pro 플랜만 발송
-                if (breederPhone && (breeder as any).verification?.plan === 'pro') {
+                // 카카오 알림톡 발송
+                if (breederPhone) {
                     const alimtalkResult = await this.alimtalkService.sendDocumentReminder(breederPhone, breederName);
                     if (alimtalkResult.success) {
                         this.logger.log(`[sendDocumentReminders] 서류 독촉 알림톡 발송 성공: ${breederPhone}`);
                     } else {
                         this.logger.warn(`[sendDocumentReminders] 서류 독촉 알림톡 발송 실패: ${alimtalkResult.error}`);
                     }
-                } else if (breederPhone && (breeder as any).verification?.plan !== 'pro') {
-                    this.logger.log(`[sendDocumentReminders] 알림톡 발송 스킵 (basic 플랜): ${breederPhone}`);
                 }
 
                 breederIds.push(breederId);

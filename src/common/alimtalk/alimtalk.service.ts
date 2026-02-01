@@ -283,13 +283,10 @@ export class AlimtalkService implements OnModuleInit {
 
     /**
      * 상담 신청 알림톡 발송 (브리더에게)
-     * 중요: CoolSMS/Solapi API는 변수 키를 "#{변수명}" 형식으로 전달해야 합니다.
+     * 템플릿에 변수가 없으므로 고정 메시지로 발송
      */
-    async sendConsultationRequest(breederPhone: string, adopterName: string, petName: string): Promise<AlimtalkResult> {
-        return this.sendByTemplate(breederPhone, AlimtalkTemplateCodeEnum.CONSULTATION_REQUEST, {
-            '#{adopterName}': adopterName,
-            '#{petName}': petName,
-        });
+    async sendConsultationRequest(breederPhone: string): Promise<AlimtalkResult> {
+        return this.sendByTemplate(breederPhone, AlimtalkTemplateCodeEnum.CONSULTATION_REQUEST, {});
     }
 
     /**

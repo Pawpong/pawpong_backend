@@ -19,6 +19,7 @@ import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.sch
 import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
 import { AuthBanner, AuthBannerSchema } from '../../schema/auth-banner.schema';
 import { CounselBanner, CounselBannerSchema } from '../../schema/counsel-banner.schema';
+import { BreederReview, BreederReviewSchema } from '../../schema/breeder-review.schema';
 
 import { StorageModule } from '../../common/storage/storage.module';
 import { NotificationModule } from '../notification/notification.module';
@@ -35,6 +36,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
             { name: AuthBanner.name, schema: AuthBannerSchema },
             { name: CounselBanner.name, schema: CounselBannerSchema },
+            { name: BreederReview.name, schema: BreederReviewSchema },
         ]),
         StorageModule,
         MailModule,
