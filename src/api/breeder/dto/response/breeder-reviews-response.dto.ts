@@ -77,6 +77,42 @@ export class BreederReviewItemDto {
         enum: ['consultation', 'adoption'],
     })
     type: string;
+
+    /**
+     * 브리더 답글 내용
+     * @example "소중한 후기 감사합니다!"
+     */
+    @ApiProperty({
+        description: '브리더 답글 내용',
+        example: '소중한 후기 감사합니다!',
+        required: false,
+        nullable: true,
+    })
+    replyContent?: string | null;
+
+    /**
+     * 브리더 답글 작성 일시
+     * @example "2024-01-16T10:30:00.000Z"
+     */
+    @ApiProperty({
+        description: '브리더 답글 작성 일시',
+        example: '2024-01-16T10:30:00.000Z',
+        required: false,
+        nullable: true,
+    })
+    replyWrittenAt?: Date | null;
+
+    /**
+     * 브리더 답글 수정 일시
+     * @example "2024-01-16T11:00:00.000Z"
+     */
+    @ApiProperty({
+        description: '브리더 답글 수정 일시',
+        example: '2024-01-16T11:00:00.000Z',
+        required: false,
+        nullable: true,
+    })
+    replyUpdatedAt?: Date | null;
 }
 
 /**

@@ -54,6 +54,8 @@ import { ApplicationStatusUpdateResponseDto } from './dto/response/application-s
 import { MyPetsListResponseDto, MyPetItemDto } from './dto/response/my-pets-list-response.dto';
 import { MyReviewsListResponseDto, MyReviewItemDto } from './dto/response/my-reviews-list-response.dto';
 import { UploadDocumentsResponseDto } from './dto/response/upload-documents-response.dto';
+import { ReviewReplyRequestDto } from './dto/request/review-reply-request.dto';
+import { ReviewReplyResponseDto, ReviewReplyDeleteResponseDto } from './dto/response/review-reply-response.dto';
 
 @ApiController('브리더 관리')
 @Controller('breeder-management')
@@ -542,5 +544,66 @@ export class BreederManagementController {
     ): Promise<ApiResponseDto<{ breederId: string; deletedAt: string; message: string }>> {
         const result = await this.breederManagementService.deleteBreederAccount(user.userId, deleteData);
         return ApiResponseDto.success(result, '브리더 회원 탈퇴가 성공적으로 처리되었습니다.');
+    }
+
+    // ==================== 후기 답글 API ====================
+
+    @Post('reviews/:reviewId/reply')
+    @ApiEndpoint({
+        summary: '후기 답글 등록',
+        description: `브리더가 자신에게 달린 후기에 답글을 작성합니다.
+
+**제한사항:**
+- 자신에게 달린 후기에만 답글 작성 가능
+- 후기당 1개의 답글만 작성 가능
+- 답글 내용은 최대 800자`,
+        responseType: ReviewReplyResponseDto,
+        isPublic: false,
+    })
+    async addReviewReply(
+        @CurrentUser() user: any,
+        @Param('reviewId') reviewId: string,
+        @Body() dto: ReviewReplyRequestDto,
+    ): Promise<ApiResponseDto<ReviewReplyResponseDto>> {
+        const result = await this.breederManagementService.addReviewReply(user.userId, reviewId, dto.content);
+        return ApiResponseDto.success(result, '답글이 등록되었습니다.');
+    }
+
+    @Patch('reviews/:reviewId/reply')
+    @ApiEndpoint({
+        summary: '후기 답글 수정',
+        description: `브리더가 자신이 작성한 답글을 수정합니다.
+
+**제한사항:**
+- 자신이 작성한 답글만 수정 가능
+- 답글 내용은 최대 800자`,
+        responseType: ReviewReplyResponseDto,
+        isPublic: false,
+    })
+    async updateReviewReply(
+        @CurrentUser() user: any,
+        @Param('reviewId') reviewId: string,
+        @Body() dto: ReviewReplyRequestDto,
+    ): Promise<ApiResponseDto<ReviewReplyResponseDto>> {
+        const result = await this.breederManagementService.updateReviewReply(user.userId, reviewId, dto.content);
+        return ApiResponseDto.success(result, '답글이 수정되었습니다.');
+    }
+
+    @Delete('reviews/:reviewId/reply')
+    @ApiEndpoint({
+        summary: '후기 답글 삭제',
+        description: `브리더가 자신이 작성한 답글을 삭제합니다.
+
+**제한사항:**
+- 자신이 작성한 답글만 삭제 가능`,
+        responseType: ReviewReplyDeleteResponseDto,
+        isPublic: false,
+    })
+    async deleteReviewReply(
+        @CurrentUser() user: any,
+        @Param('reviewId') reviewId: string,
+    ): Promise<ApiResponseDto<ReviewReplyDeleteResponseDto>> {
+        const result = await this.breederManagementService.deleteReviewReply(user.userId, reviewId);
+        return ApiResponseDto.success(result, '답글이 삭제되었습니다.');
     }
 }

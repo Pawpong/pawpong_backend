@@ -240,4 +240,17 @@ export class ProfileUpdateRequestDto {
     @IsBoolean()
     @IsOptional()
     marketingAgreed?: boolean;
+
+    /**
+     * 상담 신청 알림톡 수신 동의
+     * @example true
+     */
+    @ApiProperty({
+        description: '상담 신청 알림톡 수신 동의',
+        example: true,
+        required: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    consultationAgreed?: boolean;
 }
