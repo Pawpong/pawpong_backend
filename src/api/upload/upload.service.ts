@@ -12,8 +12,26 @@ import { UploadResponseDto } from './dto/response/upload-response.dto';
 
 @Injectable()
 export class UploadService {
-    // 허용되는 이미지 MIME 타입
-    private readonly allowedMimeTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    // 허용되는 이미지 MIME 타입 (HEIF/HEIC 포함)
+    private readonly allowedImageMimeTypes = [
+        'image/jpeg',
+        'image/jpg',
+        'image/png',
+        'image/gif',
+        'image/webp',
+        'image/heif',
+        'image/heic',
+    ];
+
+    // 허용되는 영상 MIME 타입
+    private readonly allowedVideoMimeTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
+
+    // 허용되는 미디어 MIME 타입 (이미지 + 영상)
+    private readonly allowedMediaMimeTypes = [...this.allowedImageMimeTypes, ...this.allowedVideoMimeTypes];
+
+    // 파일 크기 제한
+    private readonly IMAGE_MAX_SIZE = 5 * 1024 * 1024; // 5MB
+    private readonly VIDEO_MAX_SIZE = 20 * 1024 * 1024; // 20MB
 
     constructor(
         private readonly storageService: StorageService,
@@ -45,12 +63,7 @@ export class UploadService {
 
         // 각 파일 크기 및 타입 검증
         for (const file of files) {
-            if (file.size > 5 * 1024 * 1024) {
-                throw new BadRequestException('파일 크기는 5MB를 초과할 수 없습니다.');
-            }
-            if (!this.allowedMimeTypes.includes(file.mimetype)) {
-                throw new BadRequestException('이미지 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp)');
-            }
+            this.validateMediaFile(file);
         }
 
         // 스토리지 업로드
@@ -67,15 +80,16 @@ export class UploadService {
     }
 
     /**
-     * 분양 개체 사진 업로드
-     * 분양 개체의 사진 1장을 업로드하고 자동으로 DB에 저장합니다.
+     * 분양 개체 사진 다중 업로드
+     * 분양 개체의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장)
+     * 기존 사진 URL과 새 파일을 함께 받아서 전체 교체합니다.
      */
-    async uploadAvailablePetPhotos(petId: string, file: Express.Multer.File, user: any): Promise<UploadResponseDto> {
-        // 파일 존재 여부 검증
-        if (!file) {
-            throw new BadRequestException('파일이 업로드되지 않았습니다.');
-        }
-
+    async uploadAvailablePetPhotosMultiple(
+        petId: string,
+        files: Express.Multer.File[],
+        existingPhotos: string[],
+        user: any,
+    ): Promise<UploadResponseDto[]> {
         // 권한 검증
         if (user.role !== 'breeder') {
             throw new ForbiddenException('브리더만 분양 개체 사진을 업로드할 수 있습니다.');
@@ -90,25 +104,50 @@ export class UploadService {
             throw new BadRequestException('해당 분양 개체를 찾을 수 없습니다.');
         }
 
-        // 스토리지 업로드
-        const result = await this.storageService.uploadFile(file, 'pets/available');
+        // 기존 사진 URL에서 파일명 추출 (Signed URL에서 파일 경로만 추출)
+        const existingFileNames = existingPhotos.map((url) => this.extractFileNameFromUrl(url)).filter(Boolean);
 
-        // DB 업데이트: photos 배열에 1개만 저장
-        await this.availablePetModel.findByIdAndUpdate(petId, { $set: { photos: [result.fileName] } });
+        // 전체 개수 검증 (기존 + 새 파일 = 최대 4장)
+        const totalCount = existingFileNames.length + (files?.length || 0);
+        if (totalCount > 4) {
+            throw new BadRequestException(`사진은 최대 4장까지 업로드 가능합니다. (현재: ${totalCount}장)`);
+        }
 
-        return new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
+        // 새 파일 업로드
+        let newFileNames: string[] = [];
+        let results: { cdnUrl: string; fileName: string }[] = [];
+        if (files && files.length > 0) {
+            // 각 파일 크기 및 타입 검증
+            for (const file of files) {
+                this.validateMediaFile(file);
+            }
+            results = await this.storageService.uploadMultipleFiles(files, 'pets/available');
+            newFileNames = results.map((r) => r.fileName);
+        }
+
+        // 기존 파일명 + 새 파일명 합치기
+        const allFileNames = [...existingFileNames, ...newFileNames];
+
+        // DB 업데이트: photos 배열 전체 교체 ($set)
+        await this.availablePetModel.findByIdAndUpdate(petId, {
+            $set: { photos: allFileNames },
+        });
+
+        // 새로 업로드한 파일 정보만 반환
+        return results.map((result, index) => new UploadResponseDto(result.cdnUrl, result.fileName, files[index].size));
     }
 
     /**
-     * 부모견/묘 사진 업로드
-     * 부모견/묘의 사진 1장을 업로드하고 자동으로 DB에 저장합니다.
+     * 부모견/묘 사진 다중 업로드
+     * 부모견/묘의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장)
+     * 기존 사진 URL과 새 파일을 함께 받아서 전체 교체합니다.
      */
-    async uploadParentPetPhotos(petId: string, file: Express.Multer.File, user: any): Promise<UploadResponseDto> {
-        // 파일 존재 여부 검증
-        if (!file) {
-            throw new BadRequestException('파일이 업로드되지 않았습니다.');
-        }
-
+    async uploadParentPetPhotosMultiple(
+        petId: string,
+        files: Express.Multer.File[],
+        existingPhotos: string[],
+        user: any,
+    ): Promise<UploadResponseDto[]> {
         // 권한 검증
         if (user.role !== 'breeder') {
             throw new ForbiddenException('브리더만 부모견/묘 사진을 업로드할 수 있습니다.');
@@ -123,13 +162,37 @@ export class UploadService {
             throw new BadRequestException('해당 부모견/묘를 찾을 수 없습니다.');
         }
 
-        // 스토리지 업로드
-        const result = await this.storageService.uploadFile(file, 'pets/parent');
+        // 기존 사진 URL에서 파일명 추출 (Signed URL에서 파일 경로만 추출)
+        const existingFileNames = existingPhotos.map((url) => this.extractFileNameFromUrl(url)).filter(Boolean);
 
-        // DB 업데이트: photoFileName 필드에 저장
-        await this.parentPetModel.findByIdAndUpdate(petId, { $set: { photoFileName: result.fileName } });
+        // 전체 개수 검증 (기존 + 새 파일 = 최대 4장)
+        const totalCount = existingFileNames.length + (files?.length || 0);
+        if (totalCount > 4) {
+            throw new BadRequestException(`사진은 최대 4장까지 업로드 가능합니다. (현재: ${totalCount}장)`);
+        }
 
-        return new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
+        // 새 파일 업로드
+        let newFileNames: string[] = [];
+        let results: { cdnUrl: string; fileName: string }[] = [];
+        if (files && files.length > 0) {
+            // 각 파일 크기 및 타입 검증
+            for (const file of files) {
+                this.validateMediaFile(file);
+            }
+            results = await this.storageService.uploadMultipleFiles(files, 'pets/parent');
+            newFileNames = results.map((r) => r.fileName);
+        }
+
+        // 기존 파일명 + 새 파일명 합치기
+        const allFileNames = [...existingFileNames, ...newFileNames];
+
+        // DB 업데이트: photos 배열 전체 교체 ($set)
+        await this.parentPetModel.findByIdAndUpdate(petId, {
+            $set: { photos: allFileNames },
+        });
+
+        // 새로 업로드한 파일 정보만 반환
+        return results.map((result, index) => new UploadResponseDto(result.cdnUrl, result.fileName, files[index].size));
     }
 
     /**
@@ -173,5 +236,53 @@ export class UploadService {
         }
 
         await this.storageService.deleteFile(fileName);
+    }
+
+    /**
+     * 미디어 파일 검증 (이미지/영상)
+     * 이미지: 최대 5MB, 영상: 최대 20MB
+     */
+    private validateMediaFile(file: Express.Multer.File): void {
+        const isVideo = this.allowedVideoMimeTypes.includes(file.mimetype);
+        const isImage = this.allowedImageMimeTypes.includes(file.mimetype);
+
+        if (!isVideo && !isImage) {
+            throw new BadRequestException(
+                '이미지 또는 영상 파일만 업로드 가능합니다. (jpg, jpeg, png, gif, webp, heif, heic, mp4, mov, avi, webm)',
+            );
+        }
+
+        if (isVideo && file.size > this.VIDEO_MAX_SIZE) {
+            throw new BadRequestException('영상 파일 크기는 20MB를 초과할 수 없습니다.');
+        }
+
+        if (isImage && file.size > this.IMAGE_MAX_SIZE) {
+            throw new BadRequestException('이미지 파일 크기는 5MB를 초과할 수 없습니다.');
+        }
+    }
+
+    /**
+     * Signed URL에서 파일 경로(파일명) 추출
+     * URL 형식: https://cdn.pawpong.kr/pets/available/uuid.jpeg?Expires=...
+     * 결과: pets/available/uuid.jpeg
+     */
+    private extractFileNameFromUrl(url: string): string {
+        if (!url) return '';
+
+        try {
+            // 이미 파일 경로 형식이면 그대로 반환 (예: pets/available/uuid.jpeg)
+            if (!url.startsWith('http')) {
+                return url;
+            }
+
+            const urlObj = new URL(url);
+            // pathname은 /pets/available/uuid.jpeg 형식
+            // 맨 앞의 / 제거하여 pets/available/uuid.jpeg 형태로 만듦
+            const filePath = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+            return filePath || '';
+        } catch {
+            // URL 파싱 실패 시 원본 반환 (이미 파일명인 경우)
+            return url;
+        }
     }
 }

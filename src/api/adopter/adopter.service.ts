@@ -206,7 +206,7 @@ export class AdopterService {
         const savedApplication = await newApplication.save();
 
         // 8. 브리더에게 새 상담 신청 알림 및 이메일 발송
-        await this.sendNewApplicationNotification(breeder, applicantName, pet?.name);
+        await this.sendNewApplicationNotification(breeder);
 
         // 9. 신청자에게 상담 신청 확인 알림 및 이메일 발송
         // breeder.name이 빈 값일 경우를 대비하여 기본값 설정
@@ -227,7 +227,7 @@ export class AdopterService {
      * 새 상담 신청 알림 및 이메일 발송 (브리더용)
      * @private
      */
-    private async sendNewApplicationNotification(breeder: any, adopterName?: string, petName?: string): Promise<void> {
+    private async sendNewApplicationNotification(breeder: any): Promise<void> {
         const breederId = breeder._id.toString();
         const emailContent = breeder.emailAddress
             ? this.mailTemplateService.getNewApplicationEmail(breeder.name)
@@ -250,15 +250,10 @@ export class AdopterService {
 
         await builder.send();
 
-        // 카카오 알림톡 발송 (브리더에게) - pro 플랜만 발송
-        // CONSULTATION_REQUEST 템플릿은 현재 re_review 상태 - 검수 완료 후 자동 활성화
-        if (breeder.phoneNumber && breeder.verification?.plan === 'pro') {
+        // 카카오 알림톡 발송 (브리더에게)
+        if (breeder.phoneNumber) {
             try {
-                const alimtalkResult = await this.alimtalkService.sendConsultationRequest(
-                    breeder.phoneNumber,
-                    adopterName || '입양자',
-                    petName || '반려동물',
-                );
+                const alimtalkResult = await this.alimtalkService.sendConsultationRequest(breeder.phoneNumber);
                 if (alimtalkResult.success) {
                     this.logger.log(
                         `[sendNewApplicationNotification] 상담 신청 알림톡 발송 성공: ${breeder.phoneNumber}`,
@@ -271,8 +266,6 @@ export class AdopterService {
             } catch (error) {
                 this.logger.error(`[sendNewApplicationNotification] 알림톡 발송 오류: ${error.message}`);
             }
-        } else if (breeder.phoneNumber && breeder.verification?.plan !== 'pro') {
-            this.logger.log(`[sendNewApplicationNotification] 알림톡 발송 스킵 (basic 플랜): ${breeder.phoneNumber}`);
         }
     }
 
@@ -417,8 +410,8 @@ export class AdopterService {
 
         await builder.send();
 
-        // 카카오 알림톡 발송 - pro 플랜만 발송
-        if (breeder.phoneNumber && breeder.verification?.plan === 'pro') {
+        // 카카오 알림톡 발송
+        if (breeder.phoneNumber) {
             try {
                 const alimtalkResult = await this.alimtalkService.sendNewReview(breeder.phoneNumber);
                 if (alimtalkResult.success) {
@@ -429,8 +422,6 @@ export class AdopterService {
             } catch (error) {
                 this.logger.error(`[sendNewReviewNotification] 알림톡 발송 오류: ${error.message}`);
             }
-        } else if (breeder.phoneNumber && breeder.verification?.plan !== 'pro') {
-            this.logger.log(`[sendNewReviewNotification] 알림톡 발송 스킵 (basic 플랜): ${breeder.phoneNumber}`);
         }
     }
 

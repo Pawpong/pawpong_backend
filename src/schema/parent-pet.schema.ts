@@ -63,6 +63,13 @@ export class ParentPet {
     description?: string;
 
     /**
+     * 추가 사진 파일명 배열 (최대 4개)
+     * @example ["parent-pets/pet001/photo1.jpg", "parent-pets/pet001/photo2.jpg"]
+     */
+    @Prop({ type: [String], default: [] })
+    photos: string[];
+
+    /**
      * 활성화 여부 (소프트 삭제)
      * @example true
      */
