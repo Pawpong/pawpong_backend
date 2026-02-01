@@ -461,6 +461,13 @@ export class Breeder extends User {
      */
     @Prop({ default: false })
     isTestAccount: boolean;
+
+    /**
+     * 상담 신청 알림톡 수신 동의
+     * true인 경우 입양자가 상담 신청 시 알림톡을 수신함
+     */
+    @Prop({ default: true })
+    consultationAgreed: boolean;
 }
 
 /**

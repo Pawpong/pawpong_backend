@@ -26,6 +26,7 @@ import { PaginationResponseDto } from '../../common/dto/pagination/pagination-re
 import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
 
 import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
+import { BreederReview, BreederReviewDocument } from '../../schema/breeder-review.schema';
 import { BreederRepository } from './repository/breeder.repository';
 import { ParentPetRepository } from './repository/parent-pet.repository';
 import { AdoptionApplicationRepository } from './repository/adoption-application.repository';
@@ -63,6 +64,7 @@ export class BreederManagementService {
         private storageService: StorageService,
 
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
+        @InjectModel(BreederReview.name) private breederReviewModel: Model<BreederReviewDocument>,
         private breederRepository: BreederRepository,
         private parentPetRepository: ParentPetRepository,
         private availablePetRepository: AvailablePetManagementRepository,
@@ -215,6 +217,9 @@ export class BreederManagementService {
         }
         if (updateData.marketingAgreed !== undefined) {
             profileUpdateData['marketingAgreed'] = updateData.marketingAgreed;
+        }
+        if (updateData.consultationAgreed !== undefined) {
+            profileUpdateData['consultationAgreed'] = updateData.consultationAgreed;
         }
 
         await this.breederRepository.updateProfile(userId, profileUpdateData);
@@ -1254,6 +1259,7 @@ export class BreederManagementService {
             availablePetInfo: availablePetsWithSignedUrls,
             applicationForm: breeder.applicationForm,
             statsInfo: breeder.stats,
+            consultationAgreed: breeder.consultationAgreed ?? true,
         };
     }
 
@@ -1354,42 +1360,58 @@ export class BreederManagementService {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
         }
 
-        // 브리더 스키마의 reviews 필드에서 조회
-        let allReviews = (breeder as any).reviews || [];
+        // BreederReview 컬렉션에서 직접 조회 (reply 정보 포함)
+        const breederId = new Types.ObjectId(userId);
+
+        // 기본 필터: 해당 브리더의 후기
+        const filter: any = { breederId };
 
         // 공개 여부 필터링
         if (visibility === 'visible') {
-            allReviews = allReviews.filter((review: any) => review.isVisible);
+            filter.isVisible = true;
         } else if (visibility === 'hidden') {
-            allReviews = allReviews.filter((review: any) => !review.isVisible);
+            filter.isVisible = false;
         }
 
-        const total = allReviews.length;
-        const visibleCount = (breeder as any).reviews?.filter((r: any) => r.isVisible).length || 0;
-        const hiddenCount = total - visibleCount;
+        // 전체 통계 조회
+        const [totalCount, visibleCount] = await Promise.all([
+            this.breederReviewModel.countDocuments({ breederId }),
+            this.breederReviewModel.countDocuments({ breederId, isVisible: true }),
+        ]);
+        const hiddenCount = totalCount - visibleCount;
 
-        // 최신순 정렬 및 페이지네이션
+        // 페이지네이션 조회
         const skip = (page - 1) * limit;
-        const reviews = allReviews
-            .sort((a: any, b: any) => new Date(b.writtenAt).getTime() - new Date(a.writtenAt).getTime())
-            .slice(skip, skip + limit)
-            .map((review: any) => ({
-                reviewId: review.reviewId,
-                adopterId: review.adopterId || '',
-                adopterName: review.adopterName,
-                petName: review.petName || '',
-                rating: review.rating || 0,
-                petHealthRating: review.petHealthRating,
-                communicationRating: review.communicationRating,
-                content: review.content,
-                photos: review.photos || [],
-                writtenAt: review.writtenAt,
-                type: review.type || 'adoption',
-                isVisible: review.isVisible,
-                reportCount: review.reportCount || 0,
-            }));
+        const reviewDocs = await this.breederReviewModel
+            .find(filter)
+            .sort({ writtenAt: -1 })
+            .skip(skip)
+            .limit(limit)
+            .populate('adopterId', 'name nickname')
+            .lean();
 
-        const totalPages = Math.ceil(total / limit);
+        // 데이터 변환
+        const reviews = reviewDocs.map((review: any) => ({
+            reviewId: review._id.toString(),
+            adopterId: review.adopterId?._id?.toString() || '',
+            adopterName: review.adopterId?.name || review.adopterId?.nickname || '익명',
+            petName: '', // 필요시 추가 조회
+            rating: 0, // 현재 스키마에 rating 없음
+            petHealthRating: undefined,
+            communicationRating: undefined,
+            content: review.content,
+            photos: [],
+            writtenAt: review.writtenAt,
+            type: review.type || 'consultation',
+            isVisible: review.isVisible,
+            reportCount: review.isReported ? 1 : 0,
+            // 답글 정보 추가
+            replyContent: review.replyContent,
+            replyWrittenAt: review.replyWrittenAt,
+            replyUpdatedAt: review.replyUpdatedAt,
+        }));
+
+        const total = visibility === 'all' ? totalCount : await this.breederReviewModel.countDocuments(filter);
 
         const paginationResponse = new PaginationBuilder<any>()
             .setItems(reviews)
@@ -1401,7 +1423,7 @@ export class BreederManagementService {
         return {
             ...paginationResponse,
             averageRating: breeder.stats?.averageRating || 0,
-            totalReviews: total,
+            totalReviews: totalCount,
             visibleReviews: visibleCount,
             hiddenReviews: hiddenCount,
         };
@@ -1689,6 +1711,131 @@ export class BreederManagementService {
             breederId: userId,
             deletedAt: deletedAt.toISOString(),
             message: '브리더 회원 탈퇴가 성공적으로 처리되었습니다.',
+        };
+    }
+
+    /**
+     * 후기 답글 등록
+     * 브리더가 자신에게 달린 후기에 답글을 작성합니다.
+     */
+    async addReviewReply(breederId: string, reviewId: string, content: string): Promise<any> {
+        // 후기 조회 및 권한 확인
+        const review = await this.breederReviewModel.findOne({
+            _id: new Types.ObjectId(reviewId),
+            breederId: new Types.ObjectId(breederId),
+        });
+
+        if (!review) {
+            throw new BadRequestException('해당 후기를 찾을 수 없거나 권한이 없습니다.');
+        }
+
+        // 이미 답글이 있는지 확인
+        if (review.replyContent) {
+            throw new BadRequestException('이미 답글이 작성되어 있습니다. 수정 기능을 이용해주세요.');
+        }
+
+        const now = new Date();
+
+        // 답글 저장
+        await this.breederReviewModel.findByIdAndUpdate(reviewId, {
+            $set: {
+                replyContent: content,
+                replyWrittenAt: now,
+            },
+        });
+
+        this.logger.logSuccess('addReviewReply', '후기 답글 등록 완료', {
+            breederId,
+            reviewId,
+        });
+
+        return {
+            reviewId,
+            replyContent: content,
+            replyWrittenAt: now.toISOString(),
+        };
+    }
+
+    /**
+     * 후기 답글 수정
+     * 브리더가 자신이 작성한 답글을 수정합니다.
+     */
+    async updateReviewReply(breederId: string, reviewId: string, content: string): Promise<any> {
+        // 후기 조회 및 권한 확인
+        const review = await this.breederReviewModel.findOne({
+            _id: new Types.ObjectId(reviewId),
+            breederId: new Types.ObjectId(breederId),
+        });
+
+        if (!review) {
+            throw new BadRequestException('해당 후기를 찾을 수 없거나 권한이 없습니다.');
+        }
+
+        // 기존 답글이 있는지 확인
+        if (!review.replyContent) {
+            throw new BadRequestException('수정할 답글이 없습니다. 먼저 답글을 작성해주세요.');
+        }
+
+        const now = new Date();
+
+        // 답글 수정
+        await this.breederReviewModel.findByIdAndUpdate(reviewId, {
+            $set: {
+                replyContent: content,
+                replyUpdatedAt: now,
+            },
+        });
+
+        this.logger.logSuccess('updateReviewReply', '후기 답글 수정 완료', {
+            breederId,
+            reviewId,
+        });
+
+        return {
+            reviewId,
+            replyContent: content,
+            replyWrittenAt: review.replyWrittenAt?.toISOString(),
+            replyUpdatedAt: now.toISOString(),
+        };
+    }
+
+    /**
+     * 후기 답글 삭제
+     * 브리더가 자신이 작성한 답글을 삭제합니다.
+     */
+    async deleteReviewReply(breederId: string, reviewId: string): Promise<any> {
+        // 후기 조회 및 권한 확인
+        const review = await this.breederReviewModel.findOne({
+            _id: new Types.ObjectId(reviewId),
+            breederId: new Types.ObjectId(breederId),
+        });
+
+        if (!review) {
+            throw new BadRequestException('해당 후기를 찾을 수 없거나 권한이 없습니다.');
+        }
+
+        // 기존 답글이 있는지 확인
+        if (!review.replyContent) {
+            throw new BadRequestException('삭제할 답글이 없습니다.');
+        }
+
+        // 답글 삭제 (필드 제거)
+        await this.breederReviewModel.findByIdAndUpdate(reviewId, {
+            $unset: {
+                replyContent: '',
+                replyWrittenAt: '',
+                replyUpdatedAt: '',
+            },
+        });
+
+        this.logger.logSuccess('deleteReviewReply', '후기 답글 삭제 완료', {
+            breederId,
+            reviewId,
+        });
+
+        return {
+            reviewId,
+            message: '답글이 삭제되었습니다.',
         };
     }
 }
