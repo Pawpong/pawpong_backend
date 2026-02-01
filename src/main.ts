@@ -94,6 +94,7 @@ async function bootstrap(): Promise<void> {
 
             // Pawpong 배포 어드민 프론트엔드
             'https://admin.pawpong.kr',
+            'https://dev.admin.pawpong.kr',
 
             // Pawpong 개발 API
             'http://localhost:8080',
