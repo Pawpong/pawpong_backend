@@ -326,4 +326,15 @@ export class BreederProfileResponseDto {
         type: BreederVerificationDto,
     })
     verificationInfo: BreederVerificationDto;
+
+    /**
+     * 상담 신청 알림톡 수신 동의
+     * @example true
+     */
+    @ApiProperty({
+        description: '상담 신청 알림톡 수신 동의',
+        example: true,
+        required: false,
+    })
+    consultationAgreed?: boolean;
 }
