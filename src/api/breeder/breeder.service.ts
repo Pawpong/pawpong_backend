@@ -329,7 +329,7 @@ export class BreederService {
             this.breederReviewModel.countDocuments({ breederId: breederOid, isVisible: true }).exec(), // ObjectId로 쿼리
         ]);
 
-        // 3. 응답 데이터 포맷팅
+        // 3. 응답 데이터 포맷팅 (답글 정보 포함)
         const formattedReviews = reviews.map((review: any) => ({
             reviewId: review._id.toString(),
             applicationId: review.applicationId?._id?.toString() || review.applicationId?.toString(),
@@ -338,6 +338,10 @@ export class BreederService {
             content: review.content,
             writtenAt: review.writtenAt,
             type: review.type,
+            // 브리더 답글 정보 추가
+            replyContent: review.replyContent || null,
+            replyWrittenAt: review.replyWrittenAt || null,
+            replyUpdatedAt: review.replyUpdatedAt || null,
         }));
 
         const totalPages = Math.ceil(total / limit);
@@ -458,16 +462,24 @@ export class BreederService {
         ]);
 
         // 데이터 변환 (사진 URL은 Signed URL로 변환)
-        const items = parentPets.map((pet: any) => ({
-            petId: pet._id.toString(),
-            name: pet.name,
-            breed: pet.breed,
-            gender: pet.gender,
-            birthDate: pet.birthDate,
-            photoUrl: pet.photoFileName ? this.storageService.generateSignedUrl(pet.photoFileName, 60 * 24) : '',
-            healthRecords: pet.healthRecords || [],
-            description: pet.description || '',
-        }));
+        const items = parentPets.map((pet: any) => {
+            // photos 배열 전체를 Signed URL로 변환
+            const photos = (pet.photos || []).map((photo: string) =>
+                this.storageService.generateSignedUrl(photo, 60 * 24),
+            );
+
+            return {
+                petId: pet._id.toString(),
+                name: pet.name,
+                breed: pet.breed,
+                gender: pet.gender,
+                birthDate: pet.birthDate,
+                photoUrl: pet.photoFileName ? this.storageService.generateSignedUrl(pet.photoFileName, 60 * 24) : '',
+                photos, // photos 배열 전체 반환
+                healthRecords: pet.healthRecords || [],
+                description: pet.description || '',
+            };
+        });
 
         // 페이지네이션 정보
         const totalPages = itemsPerPage > 0 ? Math.ceil(totalCount / itemsPerPage) : 1;
@@ -549,6 +561,11 @@ export class BreederService {
             const now = new Date();
             const ageInMonths = Math.floor((now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
 
+            // photos 배열 전체를 Signed URL로 변환
+            const photos = (pet.photos || []).map((photo: string) =>
+                this.storageService.generateSignedUrl(photo, 60 * 24),
+            );
+
             return {
                 petId: pet._id.toString(),
                 name: pet.name,
@@ -559,8 +576,9 @@ export class BreederService {
                 price: pet.price,
                 status: pet.status,
                 description: pet.description || '',
-                mainPhoto: pet.photos?.[0] ? this.storageService.generateSignedUrl(pet.photos[0], 60 * 24) : '',
-                photoCount: pet.photos?.length || 0,
+                mainPhoto: photos[0] || '',
+                photos, // photos 배열 전체 반환
+                photoCount: photos.length,
                 isVaccinated: (pet.vaccinations?.length || 0) > 0,
                 hasMicrochip: !!pet.microchipNumber,
                 availableFrom: pet.availableFrom,
