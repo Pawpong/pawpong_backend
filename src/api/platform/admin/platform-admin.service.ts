@@ -256,6 +256,8 @@ export class PlatformAdminService {
             ]);
 
         // 2. 상담/입양 신청 통계 (AdoptionApplication 컬렉션 사용)
+        // - 상담 신청 현황: 모든 신청 건수 (포퐁에서는 모든 신청이 상담 신청으로 시작)
+        // - 입양 신청 현황: 입양 승인된 건수 (status가 'adoption_approved')
         const [
             consultations7Days,
             consultations14Days,
@@ -264,29 +266,28 @@ export class PlatformAdminService {
             adoptions14Days,
             adoptions28Days,
         ] = await Promise.all([
+            // 상담 신청 = 전체 신청 건수 (appliedAt 기준)
             this.adoptionApplicationModel.countDocuments({
-                applicationType: 'consultation',
-                createdAt: { $gte: sevenDaysAgo },
+                appliedAt: { $gte: sevenDaysAgo },
             }),
             this.adoptionApplicationModel.countDocuments({
-                applicationType: 'consultation',
-                createdAt: { $gte: fourteenDaysAgo },
+                appliedAt: { $gte: fourteenDaysAgo },
             }),
             this.adoptionApplicationModel.countDocuments({
-                applicationType: 'consultation',
-                createdAt: { $gte: twentyEightDaysAgo },
+                appliedAt: { $gte: twentyEightDaysAgo },
+            }),
+            // 입양 완료 = 입양 승인된 건수 (processedAt 기준)
+            this.adoptionApplicationModel.countDocuments({
+                status: ApplicationStatus.ADOPTION_APPROVED,
+                processedAt: { $gte: sevenDaysAgo },
             }),
             this.adoptionApplicationModel.countDocuments({
-                applicationType: 'adoption',
-                createdAt: { $gte: sevenDaysAgo },
+                status: ApplicationStatus.ADOPTION_APPROVED,
+                processedAt: { $gte: fourteenDaysAgo },
             }),
             this.adoptionApplicationModel.countDocuments({
-                applicationType: 'adoption',
-                createdAt: { $gte: fourteenDaysAgo },
-            }),
-            this.adoptionApplicationModel.countDocuments({
-                applicationType: 'adoption',
-                createdAt: { $gte: twentyEightDaysAgo },
+                status: ApplicationStatus.ADOPTION_APPROVED,
+                processedAt: { $gte: twentyEightDaysAgo },
             }),
         ]);
 
