@@ -90,6 +90,24 @@ export class BreederReview {
      */
     @Prop()
     reportedAt?: Date;
+
+    /**
+     * 브리더 답글 내용
+     */
+    @Prop()
+    replyContent?: string;
+
+    /**
+     * 브리더 답글 작성 일시
+     */
+    @Prop()
+    replyWrittenAt?: Date;
+
+    /**
+     * 브리더 답글 수정 일시
+     */
+    @Prop()
+    replyUpdatedAt?: Date;
 }
 
 export const BreederReviewSchema = SchemaFactory.createForClass(BreederReview);

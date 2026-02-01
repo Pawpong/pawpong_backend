@@ -329,7 +329,7 @@ export class BreederService {
             this.breederReviewModel.countDocuments({ breederId: breederOid, isVisible: true }).exec(), // ObjectId로 쿼리
         ]);
 
-        // 3. 응답 데이터 포맷팅
+        // 3. 응답 데이터 포맷팅 (답글 정보 포함)
         const formattedReviews = reviews.map((review: any) => ({
             reviewId: review._id.toString(),
             applicationId: review.applicationId?._id?.toString() || review.applicationId?.toString(),
@@ -338,6 +338,10 @@ export class BreederService {
             content: review.content,
             writtenAt: review.writtenAt,
             type: review.type,
+            // 브리더 답글 정보 추가
+            replyContent: review.replyContent || null,
+            replyWrittenAt: review.replyWrittenAt || null,
+            replyUpdatedAt: review.replyUpdatedAt || null,
         }));
 
         const totalPages = Math.ceil(total / limit);
