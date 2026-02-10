@@ -512,6 +512,51 @@ export class BreederManagementController {
         return ApiResponseDto.success(result, '입양 신청 폼이 업데이트되었습니다.');
     }
 
+    @Patch('application-form/simple')
+    @ApiEndpoint({
+        summary: '입양 신청 폼 수정 (간소화 버전)',
+        description: `브리더가 커스텀 질문을 간단하게 추가/수정합니다.
+
+**특징:**
+- 질문 텍스트만 입력하면 됩니다
+- 자동으로 기본값 설정:
+  - type: 'textarea' (장문형 고정)
+  - required: false (선택 항목)
+  - id: 자동 생성 (custom_timestamp_index)
+  - order: 배열 순서대로 자동 설정
+
+**사용 케이스:**
+- 프론트엔드에서 질문 텍스트만 입력받는 경우
+- 빠른 질문 추가가 필요한 경우
+
+**제한사항:**
+- 모든 질문이 textarea 타입으로만 생성됨
+- 라디오, 체크박스, 선택형 등 다른 타입 사용 불가
+- 필수 항목 설정 불가 (모두 선택 항목)
+
+**예시:**
+\`\`\`json
+{
+  "questions": [
+    { "question": "방문 가능한 시간대를 알려주세요" },
+    { "question": "선호하는 반려동물의 성격을 알려주세요" }
+  ]
+}
+\`\`\``,
+        responseType: ApplicationFormUpdateResponseDto,
+        isPublic: false,
+    })
+    async updateApplicationFormSimple(
+        @CurrentUser() user: any,
+        @Body() updateDto: any,
+    ): Promise<ApiResponseDto<any>> {
+        const result = await this.breederManagementService.updateApplicationFormSimple(
+            user.userId,
+            updateDto.questions,
+        );
+        return ApiResponseDto.success(result, '입양 신청 폼이 업데이트되었습니다.');
+    }
+
     @Delete('account')
     @ApiEndpoint({
         summary: '브리더 계정 탈퇴',
