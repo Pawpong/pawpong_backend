@@ -14,7 +14,7 @@ import { AddPhoneWhitelistRequestDto, UpdatePhoneWhitelistRequestDto } from './d
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { MvpStatsResponseDto } from './dto/response/mvp-stats-response.dto';
 import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
-import { ApplicationListResponseDto } from './dto/response/application-list-response.dto';
+import { AdminApplicationListResponseDto } from './dto/response/application-list-response.dto';
 import { PhoneWhitelistResponseDto, PhoneWhitelistListResponseDto } from './dto/response/phone-whitelist-response.dto';
 
 /**
@@ -63,13 +63,13 @@ export class PlatformAdminController {
     @ApiEndpoint({
         summary: '입양 신청 리스트 조회',
         description: '전체 입양 신청 내역을 조회합니다. 페이지네이션, 필터링, 통계 정보를 함께 제공합니다.',
-        responseType: ApplicationListResponseDto,
+        responseType: AdminApplicationListResponseDto,
         isPublic: false,
     })
     async getApplicationList(
         @CurrentUser() user: any,
         @Query() filters: ApplicationListRequestDto,
-    ): Promise<ApiResponseDto<ApplicationListResponseDto>> {
+    ): Promise<ApiResponseDto<AdminApplicationListResponseDto>> {
         const result = await this.platformAdminService.getApplicationList(user.userId, filters);
         return ApiResponseDto.success(result, '입양 신청 리스트가 조회되었습니다.');
     }

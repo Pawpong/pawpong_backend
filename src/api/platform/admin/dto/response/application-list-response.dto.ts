@@ -4,7 +4,7 @@ import { ApplicationStatus } from '../../../../../common/enum/user.enum';
 /**
  * 입양 신청 리스트 아이템 DTO
  */
-export class ApplicationListItemDto {
+export class AdminApplicationListItemDto {
     /**
      * 신청 고유 ID
      * @example "507f1f77bcf86cd799439011"
@@ -112,15 +112,15 @@ export class ApplicationListItemDto {
 /**
  * 입양 신청 리스트 응답 DTO
  */
-export class ApplicationListResponseDto {
+export class AdminApplicationListResponseDto {
     /**
      * 입양 신청 리스트
      */
     @ApiProperty({
         description: '입양 신청 리스트',
-        type: [ApplicationListItemDto],
+        type: [AdminApplicationListItemDto],
     })
-    applications: ApplicationListItemDto[];
+    applications: AdminApplicationListItemDto[];
 
     /**
      * 전체 아이템 수
