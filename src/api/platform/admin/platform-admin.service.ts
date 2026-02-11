@@ -12,8 +12,10 @@ import { AdoptionApplication, AdoptionApplicationDocument } from '../../../schem
 import { PhoneWhitelist, PhoneWhitelistDocument } from '../../../schema/phone-whitelist.schema';
 
 import { StatsFilterRequestDto } from './dto/request/stats-filter-request.dto';
+import { ApplicationListRequestDto } from './dto/request/application-list-request.dto';
 import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
 import { MvpStatsResponseDto } from './dto/response/mvp-stats-response.dto';
+import { ApplicationListResponseDto, ApplicationListItemDto } from './dto/response/application-list-response.dto';
 import { AddPhoneWhitelistRequestDto, UpdatePhoneWhitelistRequestDto } from './dto/request/phone-whitelist-request.dto';
 import { PhoneWhitelistResponseDto, PhoneWhitelistListResponseDto } from './dto/response/phone-whitelist-response.dto';
 
@@ -379,6 +381,130 @@ export class PlatformAdminService {
                 resubmissionApprovals: resubmittedAndApproved,
                 resubmissionApprovalRate: Math.round(resubmissionApprovalRate),
             },
+        };
+    }
+
+    /**
+     * 입양 신청 리스트 조회 (플랫폼 어드민용)
+     *
+     * 전체 입양 신청 내역을 조회합니다.
+     * 페이지네이션, 필터링, 통계 정보를 함께 제공합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param filters 필터 및 페이지네이션 옵션
+     * @returns 입양 신청 리스트 및 통계
+     */
+    async getApplicationList(adminId: string, filters: ApplicationListRequestDto): Promise<ApplicationListResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canViewStatistics) {
+            throw new ForbiddenException('통계 조회 권한이 없습니다.');
+        }
+
+        const { page = 1, limit = 10, status, breederName, startDate, endDate } = filters;
+
+        // 쿼리 조건 생성
+        const query: any = {};
+        if (status) {
+            query.status = status;
+        }
+
+        // 브리더 이름으로 검색
+        if (breederName) {
+            const breeders = await this.breederModel
+                .find({ name: { $regex: breederName, $options: 'i' } })
+                .select('_id')
+                .lean();
+
+            if (breeders.length === 0) {
+                // 검색 결과가 없으면 빈 결과 반환
+                return {
+                    applications: [],
+                    totalCount: 0,
+                    pendingCount: 0,
+                    completedCount: 0,
+                    approvedCount: 0,
+                    rejectedCount: 0,
+                    currentPage: page,
+                    pageSize: limit,
+                    totalPages: 0,
+                };
+            }
+
+            query.breederId = { $in: breeders.map((b) => b._id) };
+        }
+
+        if (startDate || endDate) {
+            query.appliedAt = {};
+            if (startDate) {
+                query.appliedAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                const endDateTime = new Date(endDate);
+                endDateTime.setHours(23, 59, 59, 999);
+                query.appliedAt.$lte = endDateTime;
+            }
+        }
+
+        // 전체 건수 조회
+        const totalCount = await this.adoptionApplicationModel.countDocuments(query);
+
+        // 상태별 통계 (필터 적용된 범위 내에서)
+        const [pendingCount, completedCount, approvedCount, rejectedCount] = await Promise.all([
+            this.adoptionApplicationModel.countDocuments({
+                ...query,
+                status: ApplicationStatus.CONSULTATION_PENDING,
+            }),
+            this.adoptionApplicationModel.countDocuments({
+                ...query,
+                status: ApplicationStatus.CONSULTATION_COMPLETED,
+            }),
+            this.adoptionApplicationModel.countDocuments({
+                ...query,
+                status: ApplicationStatus.ADOPTION_APPROVED,
+            }),
+            this.adoptionApplicationModel.countDocuments({
+                ...query,
+                status: ApplicationStatus.ADOPTION_REJECTED,
+            }),
+        ]);
+
+        // 페이지네이션된 데이터 조회
+        const applications = await this.adoptionApplicationModel
+            .find(query)
+            .sort({ appliedAt: -1 }) // 최신순
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .populate('breederId', 'name') // 브리더 이름 조인
+            .lean()
+            .exec();
+
+        // 응답 DTO 매핑
+        const applicationItems: ApplicationListItemDto[] = applications.map((app) => {
+            const breeder = app.breederId as any;
+            return {
+                applicationId: app._id.toString(),
+                adopterName: app.adopterName,
+                adopterEmail: app.adopterEmail,
+                adopterPhone: app.adopterPhone,
+                breederId: breeder._id ? breeder._id.toString() : breeder.toString(),
+                breederName: breeder.name || '알 수 없음',
+                petName: app.petName,
+                status: app.status as ApplicationStatus,
+                appliedAt: app.appliedAt,
+                processedAt: app.processedAt,
+            };
+        });
+
+        return {
+            applications: applicationItems,
+            totalCount,
+            pendingCount,
+            completedCount,
+            approvedCount,
+            rejectedCount,
+            currentPage: page,
+            pageSize: limit,
+            totalPages: Math.ceil(totalCount / limit),
         };
     }
 
