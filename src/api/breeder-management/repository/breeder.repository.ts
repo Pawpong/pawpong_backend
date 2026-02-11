@@ -30,6 +30,15 @@ export class BreederRepository {
     }
 
     /**
+     * 브리더 ID로 조회 (저장 가능한 문서 반환)
+     * @param breederId 조회할 브리더 고유 ID
+     * @returns 브리더 문서 (save() 메서드 사용 가능) 또는 null
+     */
+    async findByIdForUpdate(breederId: string): Promise<BreederDocument | null> {
+        return this.breederModel.findById(breederId).select('-password').exec();
+    }
+
+    /**
      * 브리더 ID로 전체 데이터 조회 (관리용)
      * @param breederId 조회할 브리더 고유 ID
      * @returns 브리더 전체 정보 또는 null
