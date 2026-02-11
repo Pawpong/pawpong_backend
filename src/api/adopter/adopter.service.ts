@@ -165,6 +165,14 @@ export class AdopterService {
             if (!question) {
                 throw new BadRequestException(`존재하지 않는 질문 ID입니다: ${response.questionId}`);
             }
+
+            // answer 필드가 실제로 전달되었는지 확인
+            if (response.answer === undefined || response.answer === null) {
+                throw new BadRequestException(
+                    `질문 "${question.label}"에 대한 답변이 필요합니다. (questionId: ${response.questionId})`,
+                );
+            }
+
             return {
                 questionId: response.questionId,
                 questionLabel: question.label,
@@ -967,6 +975,7 @@ export class AdopterService {
                         : null,
                     animalType: animalType as 'cat' | 'dog',
                     applicationDate: formatDate(app.appliedAt),
+                    customResponses: app.customResponses || [],
                 };
             }),
         );

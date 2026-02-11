@@ -1,4 +1,13 @@
-import { IsString, IsNotEmpty, IsBoolean, MaxLength, IsArray, ValidateNested, IsOptional } from 'class-validator';
+import {
+    IsString,
+    IsNotEmpty,
+    IsBoolean,
+    MaxLength,
+    IsArray,
+    ValidateNested,
+    IsOptional,
+    IsDefined,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -31,6 +40,7 @@ export class CustomQuestionAnswerDto {
         description: '질문에 대한 응답 (타입에 따라 string 또는 string[])',
         example: '오후 (13:00-17:00)',
     })
+    @IsDefined({ message: '답변을 입력해주세요.' })
     answer: any;
 }
 
