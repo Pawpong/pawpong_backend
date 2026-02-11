@@ -1590,7 +1590,7 @@ export class BreederManagementService {
      * @returns 성공 메시지
      */
     async updateApplicationForm(breederId: string, updateDto: any): Promise<any> {
-        const breeder = await this.breederRepository.findById(breederId);
+        const breeder = await this.breederRepository.findByIdForUpdate(breederId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
         }
@@ -1653,7 +1653,7 @@ export class BreederManagementService {
         breederId: string,
         questions: Array<{ question: string }>,
     ): Promise<any> {
-        const breeder = await this.breederRepository.findById(breederId);
+        const breeder = await this.breederRepository.findByIdForUpdate(breederId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
         }
