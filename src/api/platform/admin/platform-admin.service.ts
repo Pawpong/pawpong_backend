@@ -15,7 +15,7 @@ import { StatsFilterRequestDto } from './dto/request/stats-filter-request.dto';
 import { ApplicationListRequestDto } from './dto/request/application-list-request.dto';
 import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
 import { MvpStatsResponseDto } from './dto/response/mvp-stats-response.dto';
-import { ApplicationListResponseDto, ApplicationListItemDto } from './dto/response/application-list-response.dto';
+import { AdminApplicationListResponseDto, AdminApplicationListItemDto } from './dto/response/application-list-response.dto';
 import { AddPhoneWhitelistRequestDto, UpdatePhoneWhitelistRequestDto } from './dto/request/phone-whitelist-request.dto';
 import { PhoneWhitelistResponseDto, PhoneWhitelistListResponseDto } from './dto/response/phone-whitelist-response.dto';
 
@@ -394,7 +394,7 @@ export class PlatformAdminService {
      * @param filters 필터 및 페이지네이션 옵션
      * @returns 입양 신청 리스트 및 통계
      */
-    async getApplicationList(adminId: string, filters: ApplicationListRequestDto): Promise<ApplicationListResponseDto> {
+    async getApplicationList(adminId: string, filters: ApplicationListRequestDto): Promise<AdminApplicationListResponseDto> {
         const admin = await this.adminModel.findById(adminId);
         if (!admin || !admin.permissions.canViewStatistics) {
             throw new ForbiddenException('통계 조회 권한이 없습니다.');
@@ -479,7 +479,7 @@ export class PlatformAdminService {
             .exec();
 
         // 응답 DTO 매핑
-        const applicationItems: ApplicationListItemDto[] = applications.map((app) => {
+        const applicationItems: AdminApplicationListItemDto[] = applications.map((app) => {
             const breeder = app.breederId as any;
             return {
                 applicationId: app._id.toString(),
