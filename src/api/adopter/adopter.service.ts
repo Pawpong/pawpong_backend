@@ -975,6 +975,7 @@ export class AdopterService {
                         : null,
                     animalType: animalType as 'cat' | 'dog',
                     applicationDate: formatDate(app.appliedAt),
+                    customResponses: app.customResponses || [],
                 };
             }),
         );
