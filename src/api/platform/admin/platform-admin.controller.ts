@@ -9,10 +9,12 @@ import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { PlatformAdminService } from './platform-admin.service';
 
 import { StatsFilterRequestDto } from './dto/request/stats-filter-request.dto';
+import { ApplicationListRequestDto } from './dto/request/application-list-request.dto';
 import { AddPhoneWhitelistRequestDto, UpdatePhoneWhitelistRequestDto } from './dto/request/phone-whitelist-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { MvpStatsResponseDto } from './dto/response/mvp-stats-response.dto';
 import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
+import { AdminApplicationListResponseDto } from './dto/response/application-list-response.dto';
 import { PhoneWhitelistResponseDto, PhoneWhitelistListResponseDto } from './dto/response/phone-whitelist-response.dto';
 
 /**
@@ -55,6 +57,21 @@ export class PlatformAdminController {
     async getMvpStats(@CurrentUser() user: any): Promise<ApiResponseDto<MvpStatsResponseDto>> {
         const result = await this.platformAdminService.getMvpStats(user.userId);
         return ApiResponseDto.success(result, 'MVP 통계가 조회되었습니다.');
+    }
+
+    @Get('applications')
+    @ApiEndpoint({
+        summary: '입양 신청 리스트 조회',
+        description: '전체 입양 신청 내역을 조회합니다. 페이지네이션, 필터링, 통계 정보를 함께 제공합니다.',
+        responseType: AdminApplicationListResponseDto,
+        isPublic: false,
+    })
+    async getApplicationList(
+        @CurrentUser() user: any,
+        @Query() filters: ApplicationListRequestDto,
+    ): Promise<ApiResponseDto<AdminApplicationListResponseDto>> {
+        const result = await this.platformAdminService.getApplicationList(user.userId, filters);
+        return ApiResponseDto.success(result, '입양 신청 리스트가 조회되었습니다.');
     }
 
     // ================== 전화번호 화이트리스트 관리 ==================

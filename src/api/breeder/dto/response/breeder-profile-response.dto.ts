@@ -271,6 +271,17 @@ export class BreederProfileResponseDto {
     authProvider: string;
 
     /**
+     * 반려동물 타입
+     * @example "dog"
+     */
+    @ApiProperty({
+        description: '반려동물 타입',
+        example: 'dog',
+        enum: ['dog', 'cat'],
+    })
+    petType: string;
+
+    /**
      * 브리더 프로필 상세 정보
      */
     @ApiProperty({

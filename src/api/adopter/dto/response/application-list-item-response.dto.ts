@@ -134,4 +134,36 @@ export class ApplicationListItemResponseDto {
         example: '2024. 01. 15.',
     })
     applicationDate: string;
+
+    /**
+     * 커스텀 질문 응답 데이터 (브리더가 추가한 질문들)
+     * @example [
+     *   {
+     *     "questionId": "custom_1770782752825_0",
+     *     "questionLabel": "방문 가능한 시간대를 선택해주세요",
+     *     "questionType": "select",
+     *     "answer": "오후 (13:00-17:00)"
+     *   }
+     * ]
+     */
+    @ApiProperty({
+        description: '커스텀 질문 응답 데이터',
+        type: 'array',
+        items: {
+            type: 'object',
+            properties: {
+                questionId: { type: 'string', example: 'custom_1770782752825_0' },
+                questionLabel: { type: 'string', example: '방문 가능한 시간대를 선택해주세요' },
+                questionType: { type: 'string', example: 'select' },
+                answer: { type: 'any', example: '오후 (13:00-17:00)' },
+            },
+        },
+        required: false,
+    })
+    customResponses?: Array<{
+        questionId: string;
+        questionLabel: string;
+        questionType: string;
+        answer: any;
+    }>;
 }

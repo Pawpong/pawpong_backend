@@ -1590,7 +1590,7 @@ export class BreederManagementService {
      * @returns 성공 메시지
      */
     async updateApplicationForm(breederId: string, updateDto: any): Promise<any> {
-        const breeder = await this.breederRepository.findById(breederId);
+        const breeder = await this.breederRepository.findByIdForUpdate(breederId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
         }
@@ -1625,6 +1625,73 @@ export class BreederManagementService {
         return {
             message: '입양 신청 폼이 성공적으로 업데이트되었습니다.',
             customQuestions: breeder.applicationForm,
+        };
+    }
+
+    /**
+     * 입양 신청 폼 업데이트 (간소화 버전)
+     * 질문 텍스트만 받아서 자동으로 기본값 설정
+     *
+     * 자동 설정값:
+     * - id: `custom_${timestamp}_${index}`
+     * - type: 'textarea' (고정)
+     * - required: false (선택)
+     * - order: 배열 순서 (1부터 시작)
+     *
+     * 검증 규칙:
+     * - 빈 질문 자동 제거 (공백만 있는 질문)
+     * - 최대 5개 제한
+     * - 질문당 최소 2자, 최대 200자
+     * - 중복 질문 체크 (대소문자 구분 없음)
+     *
+     * @param breederId 브리더 고유 ID
+     * @param questions 질문 텍스트 배열
+     * @returns 업데이트 결과 (message, customQuestions, totalQuestions)
+     * @throws BadRequestException 브리더를 찾을 수 없거나 유효성 검증 실패
+     */
+    async updateApplicationFormSimple(
+        breederId: string,
+        questions: Array<{ question: string }>,
+    ): Promise<any> {
+        const breeder = await this.breederRepository.findByIdForUpdate(breederId);
+        if (!breeder) {
+            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+        }
+
+        // 1. 빈 질문 제거 (공백만 있는 질문)
+        const validQuestions = questions.filter((q) => q.question && q.question.trim().length > 0);
+
+        // 2. 최대 5개 제한 (DTO에서도 체크하지만 이중 검증)
+        if (validQuestions.length > 5) {
+            throw new BadRequestException('커스텀 질문은 최대 5개까지만 추가할 수 있습니다.');
+        }
+
+        // 3. 중복 질문 체크
+        const questionTexts = validQuestions.map((q) => q.question.trim().toLowerCase());
+        const uniqueQuestions = new Set(questionTexts);
+        if (questionTexts.length !== uniqueQuestions.size) {
+            throw new BadRequestException('중복된 질문이 있습니다. 각 질문은 고유해야 합니다.');
+        }
+
+        const timestamp = Date.now();
+
+        // 질문 텍스트를 전체 커스텀 질문 객체로 변환
+        breeder.applicationForm = validQuestions.map((q, index) => ({
+            id: `custom_${timestamp}_${index}`,
+            type: 'textarea',
+            label: q.question.trim(), // 앞뒤 공백 제거
+            required: false,
+            options: undefined,
+            placeholder: undefined,
+            order: index + 1,
+        }));
+
+        await breeder.save();
+
+        return {
+            message: '입양 신청 폼이 성공적으로 업데이트되었습니다.',
+            customQuestions: breeder.applicationForm,
+            totalQuestions: breeder.applicationForm.length,
         };
     }
 
