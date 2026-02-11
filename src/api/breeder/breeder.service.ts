@@ -111,7 +111,7 @@ export class BreederService {
 
         // 브리더 데이터 변환
         const transformedBreeders = breeders.map((breeder: any) => ({
-            breederId: (breeder._id as any).toString(),
+            breederId: breeder._id.toString(),
             breederName: breeder.name,
             location: breeder.profile?.location?.city || 'Unknown',
             specialization: breeder.profile?.specialization || '',
@@ -204,6 +204,7 @@ export class BreederService {
             breederEmail: breeder.emailAddress,
             authProvider: breeder.socialAuthInfo?.authProvider || 'local',
             breederLevel: breeder.verification?.level || 'new',
+            petType: breeder.petType || 'dog',
             detailBreed: breeder.detailBreed,
             breeds: breeder.breeds || [],
             location: breeder.profile?.location
