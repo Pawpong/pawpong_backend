@@ -1,18 +1,19 @@
 import { Controller, Get, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
 
-import { Roles } from '../../../common/decorator/roles.decorator';
-import { CurrentUser } from '../../../common/decorator/user.decorator';
-import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
-import { RolesGuard } from '../../../common/guard/roles.guard';
-import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
+import { Roles } from '../../../../common/decorator/roles.decorator';
+import { CurrentUser } from '../../../../common/decorator/user.decorator';
+import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
+import { RolesGuard } from '../../../../common/guard/roles.guard';
+import { JwtAuthGuard } from '../../../../common/guard/jwt-auth.guard';
 
 import { BreederReportAdminService } from './breeder-report-admin.service';
+
 import { ReportListRequestDto } from './dto/request/report-list-request.dto';
 import { ReportActionRequestDto } from './dto/request/report-action-request.dto';
+import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
+import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { ReportListResponseDto } from './dto/response/report-list-response.dto';
 import { ReportActionResponseDto } from './dto/response/report-action-response.dto';
-import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
-import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 
 /**
  * 브리더 신고 관리 Admin 컨트롤러
