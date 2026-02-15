@@ -1,6 +1,6 @@
 import { Injectable, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { VerificationStatus, UserStatus, ApplicationStatus } from '../../../common/enum/user.enum';
 
@@ -15,7 +15,11 @@ import { StatsFilterRequestDto } from './dto/request/stats-filter-request.dto';
 import { ApplicationListRequestDto } from './dto/request/application-list-request.dto';
 import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
 import { MvpStatsResponseDto } from './dto/response/mvp-stats-response.dto';
-import { AdminApplicationListResponseDto, AdminApplicationListItemDto } from './dto/response/application-list-response.dto';
+import {
+    AdminApplicationListResponseDto,
+    AdminApplicationListItemDto,
+} from './dto/response/application-list-response.dto';
+import { AdminApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
 import { AddPhoneWhitelistRequestDto, UpdatePhoneWhitelistRequestDto } from './dto/request/phone-whitelist-request.dto';
 import { PhoneWhitelistResponseDto, PhoneWhitelistListResponseDto } from './dto/response/phone-whitelist-response.dto';
 
@@ -394,7 +398,10 @@ export class PlatformAdminService {
      * @param filters 필터 및 페이지네이션 옵션
      * @returns 입양 신청 리스트 및 통계
      */
-    async getApplicationList(adminId: string, filters: ApplicationListRequestDto): Promise<AdminApplicationListResponseDto> {
+    async getApplicationList(
+        adminId: string,
+        filters: ApplicationListRequestDto,
+    ): Promise<AdminApplicationListResponseDto> {
         const admin = await this.adminModel.findById(adminId);
         if (!admin || !admin.permissions.canViewStatistics) {
             throw new ForbiddenException('통계 조회 권한이 없습니다.');
@@ -478,7 +485,7 @@ export class PlatformAdminService {
             .lean()
             .exec();
 
-        // 응답 DTO 매핑
+        // 응답 DTO 매핑 (삭제된 브리더 참조 시 null 방어)
         const applicationItems: AdminApplicationListItemDto[] = applications.map((app) => {
             const breeder = app.breederId as any;
             return {
@@ -486,8 +493,8 @@ export class PlatformAdminService {
                 adopterName: app.adopterName,
                 adopterEmail: app.adopterEmail,
                 adopterPhone: app.adopterPhone,
-                breederId: breeder._id ? breeder._id.toString() : breeder.toString(),
-                breederName: breeder.name || '알 수 없음',
+                breederId: breeder?._id ? breeder._id.toString() : breeder ? breeder.toString() : '',
+                breederName: breeder?.name || '알 수 없음',
                 petName: app.petName,
                 status: app.status as ApplicationStatus,
                 appliedAt: app.appliedAt,
@@ -505,6 +512,57 @@ export class PlatformAdminService {
             currentPage: page,
             pageSize: limit,
             totalPages: Math.ceil(totalCount / limit),
+        };
+    }
+
+    /**
+     * 입양 신청 상세 조회 (플랫폼 어드민용)
+     *
+     * 특정 입양 신청의 상세 정보를 조회합니다.
+     * 표준 신청 응답, 커스텀 질문 응답, 브리더 메모 등 전체 정보를 제공합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param applicationId 입양 신청 고유 ID
+     * @returns 입양 신청 상세 정보
+     */
+    async getApplicationDetail(adminId: string, applicationId: string): Promise<AdminApplicationDetailResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canViewStatistics) {
+            throw new ForbiddenException('통계 조회 권한이 없습니다.');
+        }
+
+        // ObjectId 형식 검증
+        if (!Types.ObjectId.isValid(applicationId)) {
+            throw new BadRequestException('올바르지 않은 신청 ID 형식입니다.');
+        }
+
+        const application = await this.adoptionApplicationModel
+            .findById(applicationId)
+            .populate('breederId', 'name')
+            .lean()
+            .exec();
+
+        if (!application) {
+            throw new BadRequestException('해당 입양 신청을 찾을 수 없습니다.');
+        }
+
+        // 삭제된 브리더 참조 시 null 방어
+        const breeder = application.breederId as any;
+
+        return {
+            applicationId: application._id.toString(),
+            adopterName: application.adopterName,
+            adopterEmail: application.adopterEmail,
+            adopterPhone: application.adopterPhone,
+            breederId: breeder?._id ? breeder._id.toString() : breeder ? breeder.toString() : '',
+            breederName: breeder?.name || '알 수 없음',
+            petName: application.petName,
+            status: application.status as ApplicationStatus,
+            standardResponses: application.standardResponses,
+            customResponses: application.customResponses || [],
+            appliedAt: application.appliedAt,
+            processedAt: application.processedAt,
+            breederNotes: application.breederNotes,
         };
     }
 

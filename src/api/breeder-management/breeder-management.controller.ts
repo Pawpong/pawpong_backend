@@ -546,10 +546,7 @@ export class BreederManagementController {
         responseType: ApplicationFormUpdateResponseDto,
         isPublic: false,
     })
-    async updateApplicationFormSimple(
-        @CurrentUser() user: any,
-        @Body() updateDto: any,
-    ): Promise<ApiResponseDto<any>> {
+    async updateApplicationFormSimple(@CurrentUser() user: any, @Body() updateDto: any): Promise<ApiResponseDto<any>> {
         const result = await this.breederManagementService.updateApplicationFormSimple(
             user.userId,
             updateDto.questions,
