@@ -184,10 +184,27 @@ export class BreederService {
             await this.breederModel.findByIdAndUpdate(breederId, { $inc: { 'stats.profileViews': 1 } });
         }
 
-        return this.transformToResponseDto(breeder, isFavorited);
+        // AvailablePet 컬렉션에서 부모 정보와 함께 조회
+        const availablePets = await this.availablePetModel
+            .find({ breederId: new Types.ObjectId(breederId), isActive: true })
+            .populate('parentInfo.mother')
+            .populate('parentInfo.father')
+            .lean();
+
+        // ParentPet 컬렉션에서 조회
+        const parentPets = await this.parentPetModel
+            .find({ breederId: new Types.ObjectId(breederId), isActive: true })
+            .lean();
+
+        return this.transformToResponseDto(breeder, isFavorited, availablePets, parentPets);
     }
 
-    private transformToResponseDto(breeder: any, isFavorited: boolean = false): any {
+    private transformToResponseDto(
+        breeder: any,
+        isFavorited: boolean = false,
+        availablePets: any[] = [],
+        parentPets: any[] = [],
+    ): any {
         // 프로필 이미지 signed URL 생성 (User 스키마의 profileImageFileName 사용)
         const profileImageUrl = breeder.profileImageFileName
             ? this.storageService.generateSignedUrl(breeder.profileImageFileName, 60 * 24)
@@ -237,25 +254,80 @@ export class BreederService {
             isFavorited: isFavorited,
             description: breeder.profile?.description || '',
             representativePhotos: representativePhotoUrls,
-            availablePets: (breeder.availablePets?.filter((pet: any) => pet.isActive) || []).map((pet: any) => ({
-                petId: pet.petId,
-                name: pet.name,
-                breed: pet.breed,
-                gender: pet.gender,
-                birthDate: pet.birthDate,
-                price: pet.price,
-                status: pet.status,
-                description: pet.description || '',
-                photo: pet.photos?.[0] ? this.storageService.generateSignedUrl(pet.photos[0], 60 * 24) : '',
-            })),
-            parentPets: (breeder.parentPets?.filter((pet: any) => pet.isActive) || []).map((pet: any) => ({
-                petId: pet.petId,
-                name: pet.name,
-                breed: pet.breed,
-                gender: pet.gender,
-                birthDate: this.calculateBirthDateFromAge(pet.age),
-                photo: pet.photoFileName ? this.storageService.generateSignedUrl(pet.photoFileName, 60 * 24) : '',
-            })),
+            availablePets: availablePets.map((pet: any) => {
+                const petPhotos = (pet.photos || []).map((photo: string) =>
+                    this.storageService.generateSignedUrl(photo, 60 * 24),
+                );
+
+                // 부모 정보 변환
+                const parents: any[] = [];
+                if (pet.parentInfo?.mother) {
+                    const mother = pet.parentInfo.mother;
+                    const motherPhotos = (mother.photos || []).map((photo: string) =>
+                        this.storageService.generateSignedUrl(photo, 60 * 24),
+                    );
+                    // avatarUrl: photos 배열 우선, 없으면 photoFileName 사용
+                    const motherAvatarUrl =
+                        motherPhotos[0] ||
+                        (mother.photoFileName ? this.storageService.generateSignedUrl(mother.photoFileName, 60 * 24) : '');
+                    parents.push({
+                        id: mother._id.toString(),
+                        avatarUrl: motherAvatarUrl,
+                        name: mother.name,
+                        sex: mother.gender,
+                        birth: this.formatBirthDateToKorean(mother.birthDate),
+                        breed: mother.breed,
+                        photos: motherPhotos,
+                    });
+                }
+                if (pet.parentInfo?.father) {
+                    const father = pet.parentInfo.father;
+                    const fatherPhotos = (father.photos || []).map((photo: string) =>
+                        this.storageService.generateSignedUrl(photo, 60 * 24),
+                    );
+                    // avatarUrl: photos 배열 우선, 없으면 photoFileName 사용
+                    const fatherAvatarUrl =
+                        fatherPhotos[0] ||
+                        (father.photoFileName ? this.storageService.generateSignedUrl(father.photoFileName, 60 * 24) : '');
+                    parents.push({
+                        id: father._id.toString(),
+                        avatarUrl: fatherAvatarUrl,
+                        name: father.name,
+                        sex: father.gender,
+                        birth: this.formatBirthDateToKorean(father.birthDate),
+                        breed: father.breed,
+                        photos: fatherPhotos,
+                    });
+                }
+
+                return {
+                    petId: pet._id.toString(),
+                    name: pet.name,
+                    breed: pet.breed,
+                    gender: pet.gender,
+                    birthDate: pet.birthDate,
+                    price: pet.price,
+                    status: pet.status,
+                    description: pet.description || '',
+                    photo: petPhotos[0] || '',
+                    photos: petPhotos,
+                    parents, // 부모 정보 추가
+                };
+            }),
+            parentPets: parentPets.map((pet: any) => {
+                const petPhotos = (pet.photos || []).map((photo: string) =>
+                    this.storageService.generateSignedUrl(photo, 60 * 24),
+                );
+                return {
+                    petId: pet._id.toString(),
+                    name: pet.name,
+                    breed: pet.breed,
+                    gender: pet.gender,
+                    birthDate: pet.birthDate,
+                    photo: petPhotos[0] || '',
+                    photos: petPhotos,
+                };
+            }),
             reviews: (breeder.reviews?.filter((review: any) => review.isVisible) || [])
                 .slice(-5)
                 .map((review: any) => ({
@@ -278,6 +350,18 @@ export class BreederService {
     private calculateBirthDateFromAge(age: number): Date {
         const now = new Date();
         return new Date(now.getFullYear() - age, now.getMonth(), now.getDate());
+    }
+
+    private formatBirthDateToKorean(date: Date | string | undefined): string {
+        if (!date) return '';
+        const d = new Date(date);
+        if (isNaN(d.getTime())) return '';
+
+        const year = d.getFullYear();
+        const month = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+
+        return `${year}년 ${month}월 ${day}일 생`;
     }
 
     /**
@@ -554,7 +638,13 @@ export class BreederService {
 
         // 페이지네이션 조회
         const skip = (page - 1) * limit;
-        const pets = await this.availablePetModel.find(filter).skip(skip).limit(limit).lean();
+        const pets = await this.availablePetModel
+            .find(filter)
+            .populate('parentInfo.mother')
+            .populate('parentInfo.father')
+            .skip(skip)
+            .limit(limit)
+            .lean();
 
         // 데이터 변환
         const items = pets.map((pet: any) => {
@@ -566,6 +656,47 @@ export class BreederService {
             const photos = (pet.photos || []).map((photo: string) =>
                 this.storageService.generateSignedUrl(photo, 60 * 24),
             );
+
+            // 부모 정보 변환 (populate된 데이터)
+            const parents: any[] = [];
+            if (pet.parentInfo?.mother) {
+                const mother = pet.parentInfo.mother;
+                const motherPhotos = (mother.photos || []).map((photo: string) =>
+                    this.storageService.generateSignedUrl(photo, 60 * 24),
+                );
+                // avatarUrl: photos 배열 우선, 없으면 photoFileName 사용
+                const motherAvatarUrl =
+                    motherPhotos[0] ||
+                    (mother.photoFileName ? this.storageService.generateSignedUrl(mother.photoFileName, 60 * 24) : '');
+                parents.push({
+                    id: mother._id.toString(),
+                    avatarUrl: motherAvatarUrl,
+                    name: mother.name,
+                    sex: mother.gender,
+                    birth: this.formatBirthDateToKorean(mother.birthDate),
+                    breed: mother.breed,
+                    photos: motherPhotos,
+                });
+            }
+            if (pet.parentInfo?.father) {
+                const father = pet.parentInfo.father;
+                const fatherPhotos = (father.photos || []).map((photo: string) =>
+                    this.storageService.generateSignedUrl(photo, 60 * 24),
+                );
+                // avatarUrl: photos 배열 우선, 없으면 photoFileName 사용
+                const fatherAvatarUrl =
+                    fatherPhotos[0] ||
+                    (father.photoFileName ? this.storageService.generateSignedUrl(father.photoFileName, 60 * 24) : '');
+                parents.push({
+                    id: father._id.toString(),
+                    avatarUrl: fatherAvatarUrl,
+                    name: father.name,
+                    sex: father.gender,
+                    birth: this.formatBirthDateToKorean(father.birthDate),
+                    breed: father.breed,
+                    photos: fatherPhotos,
+                });
+            }
 
             return {
                 petId: pet._id.toString(),
@@ -583,6 +714,7 @@ export class BreederService {
                 isVaccinated: (pet.vaccinations?.length || 0) > 0,
                 hasMicrochip: !!pet.microchipNumber,
                 availableFrom: pet.availableFrom,
+                parents, // 부모 정보 추가
             };
         });
 
