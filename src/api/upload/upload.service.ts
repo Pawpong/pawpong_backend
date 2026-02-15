@@ -118,8 +118,16 @@ export class UploadService {
         let results: { cdnUrl: string; fileName: string }[] = [];
         if (files && files.length > 0) {
             // 각 파일 크기 및 타입 검증
-            for (const file of files) {
-                this.validateMediaFile(file);
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                // 대표 사진(첫 번째 사진)은 이미지만 허용, 추가 사진은 동영상도 허용
+                if (existingFileNames.length === 0 && i === 0) {
+                    // 첫 번째 업로드 = 대표 사진 → 이미지만
+                    this.validateImageFile(file);
+                } else {
+                    // 추가 사진 → 이미지/동영상 모두 허용
+                    this.validateMediaFile(file);
+                }
             }
             results = await this.storageService.uploadMultipleFiles(files, 'pets/available');
             newFileNames = results.map((r) => r.fileName);
@@ -176,8 +184,16 @@ export class UploadService {
         let results: { cdnUrl: string; fileName: string }[] = [];
         if (files && files.length > 0) {
             // 각 파일 크기 및 타입 검증
-            for (const file of files) {
-                this.validateMediaFile(file);
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                // 대표 사진(첫 번째 사진)은 이미지만 허용, 추가 사진은 동영상도 허용
+                if (existingFileNames.length === 0 && i === 0) {
+                    // 첫 번째 업로드 = 대표 사진 → 이미지만
+                    this.validateImageFile(file);
+                } else {
+                    // 추가 사진 → 이미지/동영상 모두 허용
+                    this.validateMediaFile(file);
+                }
             }
             results = await this.storageService.uploadMultipleFiles(files, 'pets/parent');
             newFileNames = results.map((r) => r.fileName);
@@ -257,6 +273,24 @@ export class UploadService {
         }
 
         if (isImage && file.size > this.IMAGE_MAX_SIZE) {
+            throw new BadRequestException('이미지 파일 크기는 5MB를 초과할 수 없습니다.');
+        }
+    }
+
+    /**
+     * 이미지 파일만 검증 (동영상 차단)
+     * 이미지: 최대 5MB
+     */
+    private validateImageFile(file: Express.Multer.File): void {
+        const isImage = this.allowedImageMimeTypes.includes(file.mimetype);
+
+        if (!isImage) {
+            throw new BadRequestException(
+                '이미지 파일만 업로드 가능합니다. 동영상은 업로드할 수 없습니다. (jpg, jpeg, png, gif, webp, heif, heic)',
+            );
+        }
+
+        if (file.size > this.IMAGE_MAX_SIZE) {
             throw new BadRequestException('이미지 파일 크기는 5MB를 초과할 수 없습니다.');
         }
     }
