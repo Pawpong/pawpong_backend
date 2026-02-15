@@ -2,7 +2,7 @@ import { IsOptional, IsString, IsEnum, IsInt, Min } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
-import { VerificationStatus } from '../../../../../common/enum/user.enum';
+import { VerificationStatus } from '../../../../../../common/enum/user.enum';
 
 /**
  * 브리더 검색 요청 DTO

@@ -1,7 +1,7 @@
 import { IsEnum, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { VerificationStatus } from '../../../../../common/enum/user.enum';
+import { VerificationStatus } from '../../../../../../common/enum/user.enum';
 
 /**
  * 브리더 인증 상태 변경 요청 DTO

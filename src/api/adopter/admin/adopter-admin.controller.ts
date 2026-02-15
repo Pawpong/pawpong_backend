@@ -8,10 +8,13 @@ import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 
 import { AdopterAdminService } from './adopter-admin.service';
 
+import { ApplicationListRequestDto } from './dto/request/application-list-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { ReviewReportItemDto } from './dto/response/review-report-list.dto';
 import { ReviewDeleteResponseDto } from './dto/response/review-delete-response.dto';
+import { AdminApplicationListResponseDto } from './dto/response/application-list-response.dto';
+import { AdminApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
 
 /**
  * 입양자 관리 Admin 컨트롤러
@@ -22,6 +25,7 @@ import { ReviewDeleteResponseDto } from './dto/response/review-delete-response.d
  * 주요 기능:
  * - 후기 신고 관리
  * - 부적절한 후기 삭제
+ * - 입양 신청 모니터링
  */
 @ApiController('입양자 관리 (Admin)')
 @Controller('adopter-admin')
@@ -60,5 +64,38 @@ export class AdopterAdminController {
     ): Promise<ApiResponseDto<ReviewDeleteResponseDto>> {
         const result = await this.adopterAdminService.deleteReview(user.userId, breederId, reviewId);
         return ApiResponseDto.success(result, '부적절한 후기가 삭제되었습니다.');
+    }
+
+    // ================== 입양 신청 모니터링 ==================
+
+    @Get('applications')
+    @ApiEndpoint({
+        summary: '입양 신청 리스트 조회',
+        description: '전체 입양 신청 내역을 조회합니다. 페이지네이션, 필터링, 통계 정보를 함께 제공합니다.',
+        responseType: AdminApplicationListResponseDto,
+        isPublic: false,
+    })
+    async getApplicationList(
+        @CurrentUser() user: any,
+        @Query() filters: ApplicationListRequestDto,
+    ): Promise<ApiResponseDto<AdminApplicationListResponseDto>> {
+        const result = await this.adopterAdminService.getApplicationList(user.userId, filters);
+        return ApiResponseDto.success(result, '입양 신청 리스트가 조회되었습니다.');
+    }
+
+    @Get('applications/:applicationId')
+    @ApiEndpoint({
+        summary: '입양 신청 상세 조회',
+        description:
+            '특정 입양 신청의 상세 정보를 조회합니다. 표준 신청 응답, 커스텀 질문 응답 등 전체 정보를 제공합니다.',
+        responseType: AdminApplicationDetailResponseDto,
+        isPublic: false,
+    })
+    async getApplicationDetail(
+        @CurrentUser() user: any,
+        @Param('applicationId') applicationId: string,
+    ): Promise<ApiResponseDto<AdminApplicationDetailResponseDto>> {
+        const result = await this.adopterAdminService.getApplicationDetail(user.userId, applicationId);
+        return ApiResponseDto.success(result, '입양 신청 상세 정보가 조회되었습니다.');
     }
 }

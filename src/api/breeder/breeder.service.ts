@@ -269,7 +269,9 @@ export class BreederService {
                     // avatarUrl: photos 배열 우선, 없으면 photoFileName 사용
                     const motherAvatarUrl =
                         motherPhotos[0] ||
-                        (mother.photoFileName ? this.storageService.generateSignedUrl(mother.photoFileName, 60 * 24) : '');
+                        (mother.photoFileName
+                            ? this.storageService.generateSignedUrl(mother.photoFileName, 60 * 24)
+                            : '');
                     parents.push({
                         id: mother._id.toString(),
                         avatarUrl: motherAvatarUrl,
@@ -288,7 +290,9 @@ export class BreederService {
                     // avatarUrl: photos 배열 우선, 없으면 photoFileName 사용
                     const fatherAvatarUrl =
                         fatherPhotos[0] ||
-                        (father.photoFileName ? this.storageService.generateSignedUrl(father.photoFileName, 60 * 24) : '');
+                        (father.photoFileName
+                            ? this.storageService.generateSignedUrl(father.photoFileName, 60 * 24)
+                            : '');
                     parents.push({
                         id: father._id.toString(),
                         avatarUrl: fatherAvatarUrl,

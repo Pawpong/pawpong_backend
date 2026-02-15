@@ -26,7 +26,7 @@ import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard
 
 import { SmsService } from './sms.service';
 import { AuthService } from './auth.service';
-import { AuthAdminService } from './admin/auth-admin.service';
+import { BreederManagementAdminService } from '../breeder-management/admin/breeder-management-admin.service';
 
 import { RefreshTokenRequestDto } from './dto/request/refresh-token-request.dto';
 import { CheckNicknameRequestDto } from './dto/request/check-nickname-request.dto';
@@ -53,7 +53,7 @@ export class AuthController {
     constructor(
         private readonly authService: AuthService,
         private readonly smsService: SmsService,
-        private readonly authAdminService: AuthAdminService,
+        private readonly breederManagementAdminService: BreederManagementAdminService,
     ) {}
 
     @Post('refresh')
@@ -523,7 +523,7 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
         isPublic: true,
     })
     async getLoginBanners(): Promise<ApiResponseDto<any[]>> {
-        const banners = await this.authAdminService.getActiveProfileBanners('login');
+        const banners = await this.breederManagementAdminService.getActiveProfileBanners('login');
         return ApiResponseDto.success(banners, '로그인 페이지 배너가 조회되었습니다.');
     }
 
@@ -536,7 +536,7 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
         isPublic: true,
     })
     async getRegisterBanners(): Promise<ApiResponseDto<any[]>> {
-        const banners = await this.authAdminService.getActiveProfileBanners('signup');
+        const banners = await this.breederManagementAdminService.getActiveProfileBanners('signup');
         return ApiResponseDto.success(banners, '회원가입 페이지 배너가 조회되었습니다.');
     }
 

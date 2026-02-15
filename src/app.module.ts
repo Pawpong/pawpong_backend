@@ -24,13 +24,10 @@ import { PlatformAdminModule } from './api/platform/admin/platform-admin.module'
 import { FilterOptionsModule } from './api/filter-options/filter-options.module';
 import { StandardQuestionModule } from './api/standard-question/standard-question.module';
 import { BreederManagementModule } from './api/breeder-management/breeder-management.module';
-import { BreederAdminModule } from './api/breeder/admin/breeder-admin.module'; // TODO: 기능별 분리 예정
+import { BreederAdminModule } from './api/breeder/admin/breeder-admin.module'; // 통합 모듈 (verification, report 포함)
 import { NotificationModule } from './api/notification/notification.module';
 import { NotificationAdminModule } from './api/notification/admin/notification-admin.module';
 import { AnnouncementModule } from './api/announcement/announcement.module';
-import { BreederLevelAdminModule } from './api/breeder-level/admin/breeder-level-admin.module';
-import { BreederVerificationAdminModule } from './api/breeder-verification/admin/breeder-verification-admin.module';
-import { BreederReportAdminModule } from './api/breeder-report/admin/breeder-report-admin.module';
 import { NoticeModule } from './api/notice/notice.module';
 import { FeedModule } from './api/feed/feed.module';
 
@@ -54,10 +51,7 @@ import { FeedModule } from './api/feed/feed.module';
         BreederModule,
         AdopterModule,
         BreederManagementModule,
-        BreederAdminModule,
-        BreederVerificationAdminModule,
-        BreederLevelAdminModule,
-        BreederReportAdminModule,
+        BreederAdminModule, // 통합 모듈 (verification + report sub-modules 포함)
         UserAdminModule,
         PlatformAdminModule,
         HealthModule,
