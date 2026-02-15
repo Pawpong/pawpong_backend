@@ -1,7 +1,7 @@
 import { IsEnum } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { BreederLevel } from '../../../../../common/enum/user.enum';
+import { BreederLevel } from '../../../../../../common/enum/user.enum';
 
 /**
  * 브리더 레벨 변경 요청 DTO

@@ -16,7 +16,6 @@ import { MailService } from '../../../common/mail/mail.service';
 import { NotificationService } from '../../../api/notification/notification.service';
 import { AlimtalkService } from '../../../common/alimtalk/alimtalk.service';
 
-import { ApplicationMonitoringRequestDto } from './dto/request/application-monitoring-request.dto';
 import { BreederSuspendRequestDto } from './dto/request/breeder-suspend-request.dto';
 import { BreederRemindRequestDto } from './dto/request/breeder-remind-request.dto';
 import { BreederSuspendResponseDto } from './dto/response/breeder-suspend-response.dto';
@@ -30,13 +29,13 @@ import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
  * 브리더 관리 Admin 서비스
  *
  * 브리더 도메인에 대한 관리자 기능을 제공합니다:
- * - 입양 신청 모니터링
- * - 브리더 제재 처리 (향후 breeder-suspend/admin으로 분리 예정)
- * - 리마인드 알림 발송 (향후 breeder-remind/admin으로 분리 예정)
+ * - 브리더 제재 처리 (정지/해제)
+ * - 리마인드 알림 발송
+ * - 테스트 계정 설정
  *
  * 분리된 기능:
  * - 브리더 인증 관리 → BreederVerificationAdminService
- * - 브리더 레벨 변경 → BreederLevelAdminService
+ * - 브리더 레벨 변경 → BreederVerificationAdminService
  */
 @Injectable()
 export class BreederAdminService {
@@ -75,76 +74,6 @@ export class BreederAdminService {
             admin.activityLogs.push(logEntry);
             await admin.save();
         }
-    }
-
-    /**
-     * 입양 신청 모니터링
-     *
-     * 브리더에게 접수된 입양 신청 현황을 모니터링합니다.
-     *
-     * @param adminId 관리자 고유 ID
-     * @param filter 필터 (breederId, 날짜 범위, pagination)
-     * @returns 입양 신청 목록
-     */
-    async getApplications(adminId: string, filter: ApplicationMonitoringRequestDto): Promise<any> {
-        const admin = await this.adminModel.findById(adminId);
-        if (!admin) {
-            throw new ForbiddenException('Access denied');
-        }
-
-        const { targetBreederId, startDate, endDate, pageNumber = 1, itemsPerPage = 10 } = filter;
-        const skip = (pageNumber - 1) * itemsPerPage;
-
-        const query: any = {};
-        if (targetBreederId) {
-            query._id = targetBreederId;
-        }
-
-        const dateFilter: any = {};
-        if (startDate) dateFilter.$gte = new Date(startDate);
-        if (endDate) dateFilter.$lte = new Date(endDate);
-
-        let pipeline: any[] = [{ $match: query }, { $unwind: '$receivedApplications' }];
-
-        if (startDate || endDate) {
-            pipeline.push({
-                $match: { 'receivedApplications.appliedAt': dateFilter },
-            });
-        }
-
-        pipeline.push(
-            { $sort: { 'receivedApplications.appliedAt': -1 } },
-            { $skip: skip },
-            { $limit: itemsPerPage },
-            {
-                $project: {
-                    breederName: '$name',
-                    breederId: '$_id',
-                    application: '$receivedApplications',
-                },
-            },
-        );
-
-        const [applications, totalCount] = await Promise.all([
-            this.breederModel.aggregate(pipeline),
-            this.breederModel.aggregate([
-                { $match: query },
-                { $unwind: '$receivedApplications' },
-                ...(startDate || endDate ? [{ $match: { 'receivedApplications.appliedAt': dateFilter } }] : []),
-                { $count: 'total' },
-            ]),
-        ]);
-
-        const total = totalCount[0]?.total || 0;
-
-        return {
-            applications,
-            total,
-            page: pageNumber,
-            totalPages: Math.ceil(total / itemsPerPage),
-            hasNext: pageNumber < Math.ceil(total / itemsPerPage),
-            hasPrev: pageNumber > 1,
-        };
     }
 
     /**
