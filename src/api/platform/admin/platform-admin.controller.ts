@@ -15,6 +15,7 @@ import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { MvpStatsResponseDto } from './dto/response/mvp-stats-response.dto';
 import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
 import { AdminApplicationListResponseDto } from './dto/response/application-list-response.dto';
+import { AdminApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
 import { PhoneWhitelistResponseDto, PhoneWhitelistListResponseDto } from './dto/response/phone-whitelist-response.dto';
 
 /**
@@ -72,6 +73,22 @@ export class PlatformAdminController {
     ): Promise<ApiResponseDto<AdminApplicationListResponseDto>> {
         const result = await this.platformAdminService.getApplicationList(user.userId, filters);
         return ApiResponseDto.success(result, '입양 신청 리스트가 조회되었습니다.');
+    }
+
+    @Get('applications/:applicationId')
+    @ApiEndpoint({
+        summary: '입양 신청 상세 조회',
+        description:
+            '특정 입양 신청의 상세 정보를 조회합니다. 표준 신청 응답, 커스텀 질문 응답 등 전체 정보를 제공합니다.',
+        responseType: AdminApplicationDetailResponseDto,
+        isPublic: false,
+    })
+    async getApplicationDetail(
+        @CurrentUser() user: any,
+        @Param('applicationId') applicationId: string,
+    ): Promise<ApiResponseDto<AdminApplicationDetailResponseDto>> {
+        const result = await this.platformAdminService.getApplicationDetail(user.userId, applicationId);
+        return ApiResponseDto.success(result, '입양 신청 상세 정보가 조회되었습니다.');
     }
 
     // ================== 전화번호 화이트리스트 관리 ==================

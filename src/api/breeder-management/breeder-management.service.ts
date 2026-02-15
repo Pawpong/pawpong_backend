@@ -1649,10 +1649,7 @@ export class BreederManagementService {
      * @returns 업데이트 결과 (message, customQuestions, totalQuestions)
      * @throws BadRequestException 브리더를 찾을 수 없거나 유효성 검증 실패
      */
-    async updateApplicationFormSimple(
-        breederId: string,
-        questions: Array<{ question: string }>,
-    ): Promise<any> {
+    async updateApplicationFormSimple(breederId: string, questions: Array<{ question: string }>): Promise<any> {
         const breeder = await this.breederRepository.findByIdForUpdate(breederId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
