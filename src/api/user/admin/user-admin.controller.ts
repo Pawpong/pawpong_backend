@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Patch, Delete, Body, Param, Query, UseGuards } from '@nestjs/common';
 
 import { Roles } from '../../../common/decorator/roles.decorator';
 import { CurrentUser } from '../../../common/decorator/user.decorator';
@@ -11,6 +11,7 @@ import { UserAdminService } from './user-admin.service';
 import { UserSearchRequestDto } from './dto/request/user-search-request.dto';
 import { UserManagementRequestDto } from './dto/request/user-management-request.dto';
 import { DeletedUserSearchRequestDto } from './dto/request/deleted-user-search-request.dto';
+import { AddPhoneWhitelistRequestDto, UpdatePhoneWhitelistRequestDto } from './dto/request/phone-whitelist-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { AdminProfileResponseDto } from './dto/response/admin-profile-response.dto';
@@ -18,6 +19,7 @@ import { UserManagementResponseDto } from './dto/response/user-management-respon
 import { UserStatusUpdateResponseDto } from './dto/response/user-status-update-response.dto';
 import { DeletedUserResponseDto } from './dto/response/deleted-user-response.dto';
 import { DeletedUserStatsResponseDto } from './dto/response/deleted-user-stats-response.dto';
+import { PhoneWhitelistResponseDto, PhoneWhitelistListResponseDto } from './dto/response/phone-whitelist-response.dto';
 
 /**
  * 사용자 관리 Admin 컨트롤러
@@ -26,6 +28,7 @@ import { DeletedUserStatsResponseDto } from './dto/response/deleted-user-stats-r
  * - 관리자 프로필 관리
  * - 통합 사용자 관리 (입양자 + 브리더)
  * - 사용자 상태 변경
+ * - 전화번호 화이트리스트 관리
  */
 @ApiController('사용자 관리 관리자')
 @Controller('user-admin')
@@ -137,5 +140,60 @@ export class UserAdminController {
     ): Promise<ApiResponseDto<any>> {
         const result = await this.userAdminService.hardDeleteUser(user.userId, userId, role);
         return ApiResponseDto.success(result, '사용자가 영구적으로 삭제되었습니다.');
+    }
+
+    // ================== 전화번호 화이트리스트 관리 ==================
+
+    @Get('phone-whitelist')
+    @ApiEndpoint({
+        summary: '전화번호 화이트리스트 목록 조회',
+        description: '중복 가입이 허용되는 전화번호 목록을 조회합니다.',
+        responseType: PhoneWhitelistListResponseDto,
+        isPublic: false,
+    })
+    async getPhoneWhitelist(): Promise<ApiResponseDto<PhoneWhitelistListResponseDto>> {
+        const result = await this.userAdminService.getPhoneWhitelist();
+        return ApiResponseDto.success(result, '화이트리스트가 조회되었습니다.');
+    }
+
+    @Post('phone-whitelist')
+    @ApiEndpoint({
+        summary: '전화번호 화이트리스트 추가',
+        description: '중복 가입을 허용할 전화번호를 화이트리스트에 추가합니다.',
+        responseType: PhoneWhitelistResponseDto,
+        isPublic: false,
+    })
+    async addPhoneWhitelist(
+        @CurrentUser() user: any,
+        @Body() dto: AddPhoneWhitelistRequestDto,
+    ): Promise<ApiResponseDto<PhoneWhitelistResponseDto>> {
+        const result = await this.userAdminService.addPhoneWhitelist(user.userId, dto);
+        return ApiResponseDto.success(result, '화이트리스트에 추가되었습니다.');
+    }
+
+    @Patch('phone-whitelist/:id')
+    @ApiEndpoint({
+        summary: '전화번호 화이트리스트 수정',
+        description: '화이트리스트 항목의 설명이나 활성 상태를 수정합니다.',
+        responseType: PhoneWhitelistResponseDto,
+        isPublic: false,
+    })
+    async updatePhoneWhitelist(
+        @Param('id') id: string,
+        @Body() dto: UpdatePhoneWhitelistRequestDto,
+    ): Promise<ApiResponseDto<PhoneWhitelistResponseDto>> {
+        const result = await this.userAdminService.updatePhoneWhitelist(id, dto);
+        return ApiResponseDto.success(result, '화이트리스트가 수정되었습니다.');
+    }
+
+    @Delete('phone-whitelist/:id')
+    @ApiEndpoint({
+        summary: '전화번호 화이트리스트 삭제',
+        description: '화이트리스트에서 전화번호를 삭제합니다.',
+        isPublic: false,
+    })
+    async deletePhoneWhitelist(@Param('id') id: string): Promise<ApiResponseDto<{ message: string }>> {
+        const result = await this.userAdminService.deletePhoneWhitelist(id);
+        return ApiResponseDto.success(result, result.message);
     }
 }

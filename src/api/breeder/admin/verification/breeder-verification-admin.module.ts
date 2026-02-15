@@ -2,13 +2,14 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { BreederVerificationAdminController } from './breeder-verification-admin.controller';
+
 import { BreederVerificationAdminService } from './breeder-verification-admin.service';
 
-import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
-import { Admin, AdminSchema } from '../../../schema/admin.schema';
+import { Admin, AdminSchema } from '../../../../schema/admin.schema';
+import { Breeder, BreederSchema } from '../../../../schema/breeder.schema';
 
-import { NotificationModule } from '../../../api/notification/notification.module';
-import { StorageModule } from '../../../common/storage/storage.module';
+import { StorageModule } from '../../../../common/storage/storage.module';
+import { NotificationModule } from '../../../notification/notification.module';
 
 /**
  * 브리더 인증 관리자 모듈

@@ -4,9 +4,9 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BreederReportAdminController } from './breeder-report-admin.controller';
 import { BreederReportAdminService } from './breeder-report-admin.service';
 
-import { BreederReport, BreederReportSchema } from '../../../schema/breeder-report.schema';
-import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
-import { Admin, AdminSchema } from '../../../schema/admin.schema';
+import { BreederReport, BreederReportSchema } from '../../../../schema/breeder-report.schema';
+import { Breeder, BreederSchema } from '../../../../schema/breeder.schema';
+import { Admin, AdminSchema } from '../../../../schema/admin.schema';
 
 /**
  * 브리더 신고 관리 Admin 모듈
