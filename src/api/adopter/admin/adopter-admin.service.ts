@@ -1,14 +1,22 @@
 import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { randomUUID } from 'crypto';
 
-import { AdminAction, AdminTargetType } from '../../../common/enum/user.enum';
+import { AdminAction, AdminTargetType, ApplicationStatus } from '../../../common/enum/user.enum';
 
 import { Admin, AdminDocument } from '../../../schema/admin.schema';
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 import { BreederReview, BreederReviewDocument } from '../../../schema/breeder-review.schema';
+import { AdoptionApplication, AdoptionApplicationDocument } from '../../../schema/adoption-application.schema';
+
+import { ApplicationListRequestDto } from './dto/request/application-list-request.dto';
+import {
+    AdminApplicationListResponseDto,
+    AdminApplicationListItemDto,
+} from './dto/response/application-list-response.dto';
+import { AdminApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
 
 /**
  * 입양자 관리 Admin 서비스
@@ -16,6 +24,7 @@ import { BreederReview, BreederReviewDocument } from '../../../schema/breeder-re
  * 입양자 도메인에 대한 관리자 기능을 제공합니다:
  * - 후기 신고 관리
  * - 부적절한 후기 삭제
+ * - 입양 신청 모니터링
  */
 @Injectable()
 export class AdopterAdminService {
@@ -24,6 +33,7 @@ export class AdopterAdminService {
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(BreederReview.name) private breederReviewModel: Model<BreederReviewDocument>,
+        @InjectModel(AdoptionApplication.name) private adoptionApplicationModel: Model<AdoptionApplicationDocument>,
     ) {}
 
     /**
@@ -186,5 +196,183 @@ export class AdopterAdminService {
         );
 
         return { message: 'Review deleted successfully' };
+    }
+
+    /**
+     * 입양 신청 리스트 조회 (플랫폼 어드민용)
+     *
+     * 전체 입양 신청 내역을 조회합니다.
+     * 상태별 필터링, 브리더 이름 검색, 날짜 범위 필터링을 지원합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param filters 필터 조건 (page, limit, status, breederName, startDate, endDate)
+     * @returns 입양 신청 목록 및 상태별 통계
+     */
+    async getApplicationList(
+        adminId: string,
+        filters: ApplicationListRequestDto,
+    ): Promise<AdminApplicationListResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canViewStatistics) {
+            throw new ForbiddenException('통계 조회 권한이 없습니다.');
+        }
+
+        const { page = 1, limit = 10, status, breederName, startDate, endDate } = filters;
+
+        // 쿼리 조건 생성
+        const query: any = {};
+        if (status) {
+            query.status = status;
+        }
+
+        // 브리더 이름으로 검색
+        if (breederName) {
+            const breeders = await this.breederModel
+                .find({ name: { $regex: breederName, $options: 'i' } })
+                .select('_id')
+                .lean();
+
+            if (breeders.length === 0) {
+                // 검색 결과가 없으면 빈 결과 반환
+                return {
+                    applications: [],
+                    totalCount: 0,
+                    pendingCount: 0,
+                    completedCount: 0,
+                    approvedCount: 0,
+                    rejectedCount: 0,
+                    currentPage: page,
+                    pageSize: limit,
+                    totalPages: 0,
+                };
+            }
+
+            query.breederId = { $in: breeders.map((b) => b._id) };
+        }
+
+        if (startDate || endDate) {
+            query.appliedAt = {};
+            if (startDate) {
+                query.appliedAt.$gte = new Date(startDate);
+            }
+            if (endDate) {
+                const endDateTime = new Date(endDate);
+                endDateTime.setHours(23, 59, 59, 999);
+                query.appliedAt.$lte = endDateTime;
+            }
+        }
+
+        // 전체 건수 조회
+        const totalCount = await this.adoptionApplicationModel.countDocuments(query);
+
+        // 상태별 통계 (필터 적용된 범위 내에서)
+        const [pendingCount, completedCount, approvedCount, rejectedCount] = await Promise.all([
+            this.adoptionApplicationModel.countDocuments({
+                ...query,
+                status: ApplicationStatus.CONSULTATION_PENDING,
+            }),
+            this.adoptionApplicationModel.countDocuments({
+                ...query,
+                status: ApplicationStatus.CONSULTATION_COMPLETED,
+            }),
+            this.adoptionApplicationModel.countDocuments({
+                ...query,
+                status: ApplicationStatus.ADOPTION_APPROVED,
+            }),
+            this.adoptionApplicationModel.countDocuments({
+                ...query,
+                status: ApplicationStatus.ADOPTION_REJECTED,
+            }),
+        ]);
+
+        // 페이지네이션된 데이터 조회
+        const applications = await this.adoptionApplicationModel
+            .find(query)
+            .sort({ appliedAt: -1 }) // 최신순
+            .skip((page - 1) * limit)
+            .limit(limit)
+            .populate('breederId', 'name') // 브리더 이름 조인
+            .lean()
+            .exec();
+
+        // 응답 DTO 매핑 (삭제된 브리더 참조 시 null 방어)
+        const applicationItems: AdminApplicationListItemDto[] = applications.map((app) => {
+            const breeder = app.breederId as any;
+            return {
+                applicationId: app._id.toString(),
+                adopterName: app.adopterName,
+                adopterEmail: app.adopterEmail,
+                adopterPhone: app.adopterPhone,
+                breederId: breeder?._id ? breeder._id.toString() : breeder ? breeder.toString() : '',
+                breederName: breeder?.name || '알 수 없음',
+                petName: app.petName,
+                status: app.status as ApplicationStatus,
+                appliedAt: app.appliedAt,
+                processedAt: app.processedAt,
+            };
+        });
+
+        return {
+            applications: applicationItems,
+            totalCount,
+            pendingCount,
+            completedCount,
+            approvedCount,
+            rejectedCount,
+            currentPage: page,
+            pageSize: limit,
+            totalPages: Math.ceil(totalCount / limit),
+        };
+    }
+
+    /**
+     * 입양 신청 상세 조회 (플랫폼 어드민용)
+     *
+     * 특정 입양 신청의 상세 정보를 조회합니다.
+     * 표준 신청 응답, 커스텀 질문 응답, 브리더 메모 등 전체 정보를 제공합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param applicationId 입양 신청 고유 ID
+     * @returns 입양 신청 상세 정보
+     */
+    async getApplicationDetail(adminId: string, applicationId: string): Promise<AdminApplicationDetailResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canViewStatistics) {
+            throw new ForbiddenException('통계 조회 권한이 없습니다.');
+        }
+
+        // ObjectId 형식 검증
+        if (!Types.ObjectId.isValid(applicationId)) {
+            throw new BadRequestException('올바르지 않은 신청 ID 형식입니다.');
+        }
+
+        const application = await this.adoptionApplicationModel
+            .findById(applicationId)
+            .populate('breederId', 'name')
+            .lean()
+            .exec();
+
+        if (!application) {
+            throw new BadRequestException('해당 입양 신청을 찾을 수 없습니다.');
+        }
+
+        // 삭제된 브리더 참조 시 null 방어
+        const breeder = application.breederId as any;
+
+        return {
+            applicationId: application._id.toString(),
+            adopterName: application.adopterName,
+            adopterEmail: application.adopterEmail,
+            adopterPhone: application.adopterPhone,
+            breederId: breeder?._id ? breeder._id.toString() : breeder ? breeder.toString() : '',
+            breederName: breeder?.name || '알 수 없음',
+            petName: application.petName,
+            status: application.status as ApplicationStatus,
+            standardResponses: application.standardResponses,
+            customResponses: application.customResponses || [],
+            appliedAt: application.appliedAt,
+            processedAt: application.processedAt,
+            breederNotes: application.breederNotes,
+        };
     }
 }

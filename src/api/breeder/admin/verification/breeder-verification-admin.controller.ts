@@ -1,20 +1,22 @@
 import { Controller, Get, Post, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
 
-import { Roles } from '../../../common/decorator/roles.decorator';
-import { CurrentUser } from '../../../common/decorator/user.decorator';
-import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
-import { RolesGuard } from '../../../common/guard/roles.guard';
-import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
+import { Roles } from '../../../../common/decorator/roles.decorator';
+import { CurrentUser } from '../../../../common/decorator/user.decorator';
+import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
+import { RolesGuard } from '../../../../common/guard/roles.guard';
+import { JwtAuthGuard } from '../../../../common/guard/jwt-auth.guard';
 
 import { BreederVerificationAdminService } from './breeder-verification-admin.service';
 
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
+import { BreederLevelChangeRequestDto } from './dto/request/breeder-level-change-request.dto';
 import { BreederVerificationRequestDto } from './dto/request/breeder-verification-request.dto';
-import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
-import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
-import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
-import { BreederDetailResponseDto } from './dto/response/breeder-detail-response.dto';
+import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
+import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { BreederStatsResponseDto } from './dto/response/breeder-stats-response.dto';
+import { BreederDetailResponseDto } from './dto/response/breeder-detail-response.dto';
+import { BreederLevelChangeResponseDto } from './dto/response/breeder-level-change-response.dto';
+import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
 
 /**
  * 브리더 인증 관리 Admin 컨트롤러
@@ -131,5 +133,21 @@ export class BreederVerificationAdminController {
     async sendDocumentReminders(@CurrentUser() user: any): Promise<ApiResponseDto<any>> {
         const result = await this.breederVerificationAdminService.sendDocumentReminders(user.userId);
         return ApiResponseDto.success(result, `${result.sentCount}명의 브리더에게 서류 독촉 이메일이 발송되었습니다.`);
+    }
+
+    @Patch('level/:breederId')
+    @ApiEndpoint({
+        summary: '브리더 레벨 변경',
+        description: '승인된 브리더의 레벨을 뉴 ↔ 엘리트로 변경합니다.',
+        responseType: BreederLevelChangeResponseDto,
+        isPublic: false,
+    })
+    async changeBreederLevel(
+        @CurrentUser() user: any,
+        @Param('breederId') breederId: string,
+        @Body() levelData: BreederLevelChangeRequestDto,
+    ): Promise<ApiResponseDto<BreederLevelChangeResponseDto>> {
+        const result = await this.breederVerificationAdminService.changeBreederLevel(user.userId, breederId, levelData);
+        return ApiResponseDto.success(result, '브리더 레벨이 변경되었습니다.');
     }
 }

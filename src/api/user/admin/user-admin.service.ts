@@ -8,14 +8,17 @@ import { UserStatus, AdminAction, AdminTargetType } from '../../../common/enum/u
 import { Admin, AdminDocument } from '../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
+import { PhoneWhitelist, PhoneWhitelistDocument } from '../../../schema/phone-whitelist.schema';
 
 import { UserSearchRequestDto } from './dto/request/user-search-request.dto';
 import { UserManagementRequestDto } from './dto/request/user-management-request.dto';
 import { DeletedUserSearchRequestDto } from './dto/request/deleted-user-search-request.dto';
+import { AddPhoneWhitelistRequestDto, UpdatePhoneWhitelistRequestDto } from './dto/request/phone-whitelist-request.dto';
 import { UserManagementResponseDto } from './dto/response/user-management-response.dto';
 import { UserStatusUpdateResponseDto } from './dto/response/user-status-update-response.dto';
 import { DeletedUserResponseDto } from './dto/response/deleted-user-response.dto';
 import { DeletedUserStatsResponseDto } from './dto/response/deleted-user-stats-response.dto';
+import { PhoneWhitelistResponseDto, PhoneWhitelistListResponseDto } from './dto/response/phone-whitelist-response.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { PaginationBuilder } from '../../../common/dto/pagination/pagination-builder.dto';
 
@@ -26,6 +29,7 @@ import { PaginationBuilder } from '../../../common/dto/pagination/pagination-bui
  * - 관리자 프로필 관리
  * - 통합 사용자 관리 (입양자 + 브리더)
  * - 사용자 상태 변경
+ * - 전화번호 화이트리스트 관리
  */
 @Injectable()
 export class UserAdminService {
@@ -36,6 +40,7 @@ export class UserAdminService {
         @InjectModel(Admin.name) private adminModel: Model<AdminDocument>,
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
         @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
+        @InjectModel(PhoneWhitelist.name) private phoneWhitelistModel: Model<PhoneWhitelistDocument>,
     ) {}
 
     /**
@@ -673,5 +678,119 @@ export class UserAdminService {
             admin.activityLogs.push(logEntry);
             await admin.save();
         }
+    }
+
+    // ================== 전화번호 화이트리스트 관리 ==================
+
+    /**
+     * 전화번호 화이트리스트 목록 조회
+     *
+     * 중복 가입이 허용되는 전화번호 목록을 조회합니다.
+     *
+     * @returns 화이트리스트 목록
+     */
+    async getPhoneWhitelist(): Promise<PhoneWhitelistListResponseDto> {
+        const items = await this.phoneWhitelistModel.find().sort({ createdAt: -1 }).lean().exec();
+
+        return {
+            items: items.map((item) => ({
+                id: item._id.toString(),
+                phoneNumber: item.phoneNumber,
+                description: item.description,
+                isActive: item.isActive,
+                createdBy: item.createdBy,
+                createdAt: item.createdAt,
+                updatedAt: item.updatedAt,
+            })),
+            total: items.length,
+        };
+    }
+
+    /**
+     * 전화번호 화이트리스트 추가
+     *
+     * 중복 가입을 허용할 전화번호를 화이트리스트에 추가합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param dto 추가할 전화번호 정보
+     * @returns 추가된 화이트리스트 정보
+     */
+    async addPhoneWhitelist(adminId: string, dto: AddPhoneWhitelistRequestDto): Promise<PhoneWhitelistResponseDto> {
+        // 중복 확인
+        const existing = await this.phoneWhitelistModel.findOne({ phoneNumber: dto.phoneNumber }).exec();
+        if (existing) {
+            throw new BadRequestException('이미 화이트리스트에 등록된 전화번호입니다.');
+        }
+
+        const whitelist = new this.phoneWhitelistModel({
+            phoneNumber: dto.phoneNumber,
+            description: dto.description,
+            isActive: true,
+            createdBy: adminId,
+        });
+
+        const saved = await whitelist.save();
+
+        return {
+            id: (saved._id as any).toString(),
+            phoneNumber: saved.phoneNumber,
+            description: saved.description,
+            isActive: saved.isActive,
+            createdBy: saved.createdBy,
+            createdAt: saved.createdAt,
+            updatedAt: saved.updatedAt,
+        };
+    }
+
+    /**
+     * 전화번호 화이트리스트 수정
+     *
+     * 화이트리스트 항목의 설명이나 활성 상태를 수정합니다.
+     *
+     * @param id 화이트리스트 항목 ID
+     * @param dto 수정할 정보
+     * @returns 수정된 화이트리스트 정보
+     */
+    async updatePhoneWhitelist(id: string, dto: UpdatePhoneWhitelistRequestDto): Promise<PhoneWhitelistResponseDto> {
+        const whitelist = await this.phoneWhitelistModel.findById(id).exec();
+        if (!whitelist) {
+            throw new BadRequestException('화이트리스트를 찾을 수 없습니다.');
+        }
+
+        if (dto.description !== undefined) {
+            whitelist.description = dto.description;
+        }
+        if (dto.isActive !== undefined) {
+            whitelist.isActive = dto.isActive;
+        }
+
+        const saved = await whitelist.save();
+
+        return {
+            id: (saved._id as any).toString(),
+            phoneNumber: saved.phoneNumber,
+            description: saved.description,
+            isActive: saved.isActive,
+            createdBy: saved.createdBy,
+            createdAt: saved.createdAt,
+            updatedAt: saved.updatedAt,
+        };
+    }
+
+    /**
+     * 전화번호 화이트리스트 삭제
+     *
+     * 화이트리스트에서 전화번호를 삭제합니다.
+     *
+     * @param id 화이트리스트 항목 ID
+     * @returns 삭제 결과 메시지
+     */
+    async deletePhoneWhitelist(id: string): Promise<{ message: string }> {
+        const result = await this.phoneWhitelistModel.findByIdAndDelete(id).exec();
+        if (!result) {
+            throw new BadRequestException('화이트리스트를 찾을 수 없습니다.');
+        }
+
+        return { message: '화이트리스트가 삭제되었습니다.' };
     }
 }

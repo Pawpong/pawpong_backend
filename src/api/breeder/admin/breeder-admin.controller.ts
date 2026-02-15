@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Patch, Param, Query, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Patch, Param, Body, UseGuards } from '@nestjs/common';
 
 import { Roles } from '../../../common/decorator/roles.decorator';
 import { CurrentUser } from '../../../common/decorator/user.decorator';
@@ -8,12 +8,10 @@ import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 
 import { BreederAdminService } from './breeder-admin.service';
 
-import { ApplicationMonitoringRequestDto } from './dto/request/application-monitoring-request.dto';
 import { BreederSuspendRequestDto } from './dto/request/breeder-suspend-request.dto';
 import { BreederRemindRequestDto } from './dto/request/breeder-remind-request.dto';
 import { SetTestAccountRequestDto } from './dto/request/set-test-account-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
-import { ApplicationMonitoringResponseDto } from './dto/response/application-monitoring-response.dto';
 import { BreederSuspendResponseDto } from './dto/response/breeder-suspend-response.dto';
 import { BreederRemindResponseDto } from './dto/response/breeder-remind-response.dto';
 import { SetTestAccountResponseDto } from './dto/response/set-test-account-response.dto';
@@ -25,13 +23,13 @@ import { SetTestAccountResponseDto } from './dto/response/set-test-account-respo
  * 모든 엔드포인트는 admin 권한이 필요합니다.
  *
  * 주요 기능:
- * - 입양 신청 모니터링
- * - 브리더 제재 처리 (향후 breeder-suspend/admin으로 분리 예정)
- * - 리마인드 알림 발송 (향후 breeder-remind/admin으로 분리 예정)
+ * - 브리더 제재 처리 (정지/해제)
+ * - 리마인드 알림 발송
+ * - 테스트 계정 설정
  *
  * 분리된 기능:
  * - 브리더 인증 관리 → BreederVerificationAdminModule (/api/breeder-verification-admin)
- * - 브리더 레벨 변경 → BreederLevelAdminModule (/api/breeder-level-admin)
+ * - 브리더 레벨 변경 → BreederVerificationAdminModule (/api/breeder-verification-admin/level)
  */
 @ApiController('브리더 관리 (Admin)')
 @Controller('breeder-admin')
@@ -39,21 +37,6 @@ import { SetTestAccountResponseDto } from './dto/response/set-test-account-respo
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class BreederAdminController {
     constructor(private readonly breederAdminService: BreederAdminService) {}
-
-    @Get('applications')
-    @ApiEndpoint({
-        summary: '입양 신청 모니터링',
-        description: '전체 입양 신청 현황을 모니터링합니다.',
-        responseType: ApplicationMonitoringResponseDto,
-        isPublic: false,
-    })
-    async getApplications(
-        @CurrentUser() user: any,
-        @Query() filter: ApplicationMonitoringRequestDto,
-    ): Promise<ApiResponseDto<ApplicationMonitoringResponseDto>> {
-        const result = await this.breederAdminService.getApplications(user.userId, filter);
-        return ApiResponseDto.success(result, '입양 신청 현황이 조회되었습니다.');
-    }
 
     @Post('suspend/:breederId')
     @ApiEndpoint({

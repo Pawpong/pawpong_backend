@@ -48,10 +48,15 @@ export class BreederManagementAdminService {
     /**
      * 활성화된 프로필 배너만 조회 (프로필 페이지 표시용)
      *
+     * @param bannerType 배너 타입 (login 또는 signup), 없으면 전체
      * @returns 활성화된 프로필 배너 목록
      */
-    async getActiveProfileBanners(): Promise<ProfileBannerResponseDto[]> {
-        const banners = await this.authBannerModel.find({ isActive: true }).sort({ order: 1 }).lean().exec();
+    async getActiveProfileBanners(bannerType?: 'login' | 'signup'): Promise<ProfileBannerResponseDto[]> {
+        const query: any = { isActive: true };
+        if (bannerType) {
+            query.bannerType = bannerType;
+        }
+        const banners = await this.authBannerModel.find(query).sort({ order: 1 }).lean().exec();
 
         return banners.map((banner) => ({
             bannerId: banner._id.toString(),

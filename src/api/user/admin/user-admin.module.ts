@@ -8,6 +8,7 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
 import { AuthBanner, AuthBannerSchema } from '../../../schema/auth-banner.schema';
+import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whitelist.schema';
 import { StorageModule } from '../../../common/storage/storage.module';
 
 /**
@@ -18,6 +19,7 @@ import { StorageModule } from '../../../common/storage/storage.module';
  * - 통합 사용자 관리 (입양자 + 브리더)
  * - 사용자 상태 변경
  * - 프로필 배너 관리
+ * - 전화번호 화이트리스트 관리
  */
 @Module({
     imports: [
@@ -26,6 +28,7 @@ import { StorageModule } from '../../../common/storage/storage.module';
             { name: Breeder.name, schema: BreederSchema },
             { name: Adopter.name, schema: AdopterSchema },
             { name: AuthBanner.name, schema: AuthBannerSchema },
+            { name: PhoneWhitelist.name, schema: PhoneWhitelistSchema },
         ]),
         StorageModule,
     ],
