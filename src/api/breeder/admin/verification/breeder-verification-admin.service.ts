@@ -4,28 +4,31 @@ import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
 
 import {
-    VerificationStatus,
     AdminAction,
     AdminTargetType,
     NotificationType,
+    BreederLevel,
     RecipientType,
-} from '../../../common/enum/user.enum';
+    VerificationStatus,
+} from '../../../../common/enum/user.enum';
 
-import { MailTemplateService } from '../../../common/mail/mail-template.service';
-import { NotificationService } from '../../../api/notification/notification.service';
-import { StorageService } from '../../../common/storage/storage.service';
-import { AlimtalkService } from '../../../common/alimtalk/alimtalk.service';
+import { StorageService } from '../../../../common/storage/storage.service';
+import { AlimtalkService } from '../../../../common/alimtalk/alimtalk.service';
+import { MailTemplateService } from '../../../../common/mail/mail-template.service';
+import { NotificationService } from '../../../notification/notification.service';
 
+import { PaginationBuilder } from '../../../../common/dto/pagination/pagination-builder.dto';
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
+import { BreederLevelChangeRequestDto } from './dto/request/breeder-level-change-request.dto';
 import { BreederVerificationRequestDto } from './dto/request/breeder-verification-request.dto';
-import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
-import { BreederDetailResponseDto } from './dto/response/breeder-detail-response.dto';
+import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { BreederStatsResponseDto } from './dto/response/breeder-stats-response.dto';
-import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
-import { PaginationBuilder } from '../../../common/dto/pagination/pagination-builder.dto';
+import { BreederDetailResponseDto } from './dto/response/breeder-detail-response.dto';
+import { BreederLevelChangeResponseDto } from './dto/response/breeder-level-change-response.dto';
+import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
 
-import { Admin, AdminDocument } from '../../../schema/admin.schema';
-import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
+import { Admin, AdminDocument } from '../../../../schema/admin.schema';
+import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
 
 /**
  * 브리더 인증 관리 Admin 서비스
@@ -712,6 +715,45 @@ export class BreederVerificationAdminService {
         return {
             sentCount,
             breederIds,
+        };
+    }
+
+    /**
+     * 브리더 레벨 변경
+     *
+     * 승인된 브리더의 레벨을 뉴 ↔ 엘리트로 변경합니다.
+     *
+     * @param adminId 관리자 고유 ID
+     * @param breederId 브리더 고유 ID
+     * @param levelData 레벨 변경 데이터
+     * @returns 변경 결과
+     */
+    async changeBreederLevel(
+        adminId: string,
+        breederId: string,
+        levelData: BreederLevelChangeRequestDto,
+    ): Promise<BreederLevelChangeResponseDto> {
+        const admin = await this.adminModel.findById(adminId);
+        if (!admin || !admin.permissions.canManageBreeders) {
+            throw new ForbiddenException('Access denied');
+        }
+
+        const breeder = await this.breederModel.findById(breederId);
+        if (!breeder) {
+            throw new BadRequestException('브리더를 찾을 수 없습니다.');
+        }
+
+        const previousLevel = breeder.verification?.level || BreederLevel.NEW;
+        breeder.verification.level = levelData.newLevel;
+        await breeder.save();
+
+        return {
+            breederId,
+            breederName: breeder.nickname,
+            previousLevel,
+            newLevel: levelData.newLevel,
+            changedAt: new Date(),
+            changedBy: admin.name,
         };
     }
 }
