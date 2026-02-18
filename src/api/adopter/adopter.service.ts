@@ -959,9 +959,18 @@ export class AdopterService {
                 // 브리더의 주요 동물 타입 추출 (첫 번째 specialization 사용)
                 const animalType = breeder?.profile?.specialization?.[0] || 'dog';
 
+                // adopterId 처리 (ObjectId이거나 populate된 객체일 수 있음)
+                const adopterIdValue =
+                    app.adopterId && typeof app.adopterId === 'object' && app.adopterId._id
+                        ? app.adopterId._id.toString()
+                        : app.adopterId
+                          ? app.adopterId.toString()
+                          : null;
+
                 return {
                     applicationId: app._id.toString(),
                     breederId: app.breederId.toString(),
+                    adopterId: adopterIdValue,
                     breederName: breeder?.nickname || breeder?.name || '알 수 없음',
                     petId: app.petId?.toString(),
                     petName: app.petName,
