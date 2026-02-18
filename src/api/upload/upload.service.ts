@@ -105,7 +105,19 @@ export class UploadService {
         }
 
         // 기존 사진 URL에서 파일명 추출 (Signed URL에서 파일 경로만 추출)
-        const existingFileNames = existingPhotos.map((url) => this.extractFileNameFromUrl(url)).filter(Boolean);
+        const existingFileNamesFromRequest = existingPhotos
+            .map((url) => this.extractFileNameFromUrl(url))
+            .filter(Boolean);
+
+        // DB에서 기존 photos 배열 가져오기 (대표사진 보존을 위해)
+        const existingFileNamesFromDB = (pet.photos || []).map((fileName: string) => fileName);
+
+        // 요청에서 온 기존 사진과 DB의 기존 사진을 병합
+        // DB의 기존 사진을 우선시하여 대표사진(첫 번째)이 보존되도록 함
+        const existingFileNames =
+            existingFileNamesFromRequest.length > 0
+                ? existingFileNamesFromRequest // 프론트엔드에서 명시적으로 보낸 경우
+                : existingFileNamesFromDB; // 프론트엔드에서 보내지 않은 경우 DB 값 사용
 
         // 전체 개수 검증 (기존 + 새 파일 = 최대 4장)
         const totalCount = existingFileNames.length + (files?.length || 0);
@@ -203,8 +215,14 @@ export class UploadService {
         const allFileNames = [...existingFileNames, ...newFileNames];
 
         // DB 업데이트: photos 배열 전체 교체 ($set)
+        // 첫 번째 사진은 photoFileName에도 저장 (대표사진)
+        const updateData: { photos: string[]; photoFileName?: string } = {
+            photos: allFileNames,
+            ...(allFileNames.length > 0 && { photoFileName: allFileNames[0] }),
+        };
+
         await this.parentPetModel.findByIdAndUpdate(petId, {
-            $set: { photos: allFileNames },
+            $set: updateData,
         });
 
         // 새로 업로드한 파일 정보만 반환
