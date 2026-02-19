@@ -1234,9 +1234,7 @@ export class BreederManagementService {
             const photos = petObj.photos || [];
 
             // photos 배열에서 photoFileName과 중복되는 파일 제거 (대표사진은 photoUrl로만 표시)
-            const additionalPhotos = photoFileName
-                ? photos.filter((photo: string) => photo !== photoFileName)
-                : photos;
+            const additionalPhotos = photoFileName ? photos.filter((photo: string) => photo !== photoFileName) : photos;
 
             return {
                 ...petObj,
