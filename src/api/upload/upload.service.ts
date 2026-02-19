@@ -183,7 +183,16 @@ export class UploadService {
         }
 
         // 기존 사진 URL에서 파일명 추출 (Signed URL에서 파일 경로만 추출)
-        const existingFileNames = existingPhotos.map((url) => this.extractFileNameFromUrl(url)).filter(Boolean);
+        const existingFileNamesFromRequest = existingPhotos
+            .map((url) => this.extractFileNameFromUrl(url))
+            .filter(Boolean);
+
+        // DB에서 기존 photos 배열 가져오기 (프론트에서 existingPhotos 누락/불완전 시 보존용)
+        const existingFileNamesFromDB = (pet.photos || []).map((fileName: string) => fileName);
+
+        // 요청에서 온 기존 사진과 DB의 기존 사진 병합: 프론트가 명시적으로 보냈으면 사용, 없으면 DB 값 사용
+        const existingFileNames =
+            existingFileNamesFromRequest.length > 0 ? existingFileNamesFromRequest : existingFileNamesFromDB;
 
         // 전체 개수 검증 (기존 + 새 파일 = 최대 4장)
         const totalCount = existingFileNames.length + (files?.length || 0);
