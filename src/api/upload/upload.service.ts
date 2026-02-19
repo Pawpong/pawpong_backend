@@ -81,7 +81,7 @@ export class UploadService {
 
     /**
      * 분양 개체 사진 다중 업로드
-     * 분양 개체의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장)
+     * 분양 개체의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 5장)
      * 기존 사진 URL과 새 파일을 함께 받아서 전체 교체합니다.
      */
     async uploadAvailablePetPhotosMultiple(
@@ -119,10 +119,10 @@ export class UploadService {
                 ? existingFileNamesFromRequest // 프론트엔드에서 명시적으로 보낸 경우
                 : existingFileNamesFromDB; // 프론트엔드에서 보내지 않은 경우 DB 값 사용
 
-        // 전체 개수 검증 (기존 + 새 파일 = 최대 4장)
+        // 전체 개수 검증 (기존 + 새 파일 = 최대 5장)
         const totalCount = existingFileNames.length + (files?.length || 0);
-        if (totalCount > 4) {
-            throw new BadRequestException(`사진은 최대 4장까지 업로드 가능합니다. (현재: ${totalCount}장)`);
+        if (totalCount > 5) {
+            throw new BadRequestException(`사진은 최대 5장까지 업로드 가능합니다. (현재: ${totalCount}장)`);
         }
 
         // 새 파일 업로드
@@ -159,7 +159,7 @@ export class UploadService {
 
     /**
      * 부모견/묘 사진 다중 업로드
-     * 부모견/묘의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장)
+     * 부모견/묘의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 5장)
      * 기존 사진 URL과 새 파일을 함께 받아서 전체 교체합니다.
      */
     async uploadParentPetPhotosMultiple(
@@ -194,10 +194,10 @@ export class UploadService {
         const existingFileNames =
             existingFileNamesFromRequest.length > 0 ? existingFileNamesFromRequest : existingFileNamesFromDB;
 
-        // 전체 개수 검증 (기존 + 새 파일 = 최대 4장)
+        // 전체 개수 검증 (기존 + 새 파일 = 최대 5장)
         const totalCount = existingFileNames.length + (files?.length || 0);
-        if (totalCount > 4) {
-            throw new BadRequestException(`사진은 최대 4장까지 업로드 가능합니다. (현재: ${totalCount}장)`);
+        if (totalCount > 5) {
+            throw new BadRequestException(`사진은 최대 5장까지 업로드 가능합니다. (현재: ${totalCount}장)`);
         }
 
         // 새 파일 업로드

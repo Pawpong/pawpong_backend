@@ -82,18 +82,18 @@ export class ParentPetUpdateDto {
     description?: string;
 
     /**
-     * 추가 사진 파일명 배열 (선택, 최대 4개)
+     * 추가 사진 파일명 배열 (선택, 최대 5개)
      * @example ["parent-pets/pet001/photo1.jpg", "parent-pets/pet001/photo2.jpg"]
      */
     @ApiPropertyOptional({
-        description: '추가 사진 파일명 배열 (최대 4개)',
+        description: '추가 사진 파일명 배열 (최대 5개)',
         example: ['parent-pets/pet001/photo1.jpg', 'parent-pets/pet001/photo2.jpg'],
         type: [String],
-        maxItems: 4,
+        maxItems: 5,
     })
     @IsOptional()
     @IsArray()
     @IsString({ each: true })
-    @ArrayMaxSize(4)
+    @ArrayMaxSize(5)
     photos?: string[];
 }
