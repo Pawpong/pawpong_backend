@@ -323,8 +323,8 @@ export class UploadService {
     }
 
     /**
-     * Signed URL에서 파일 경로(파일명) 추출
-     * URL 형식: https://cdn.pawpong.kr/pets/available/uuid.jpeg?Expires=...
+     * CDN URL에서 파일 경로(파일명) 추출
+     * 스마일서브 URL 형식: https://kr.object.iwinv.kr/pawpong_bucket/pets/available/uuid.jpeg
      * 결과: pets/available/uuid.jpeg
      */
     private extractFileNameFromUrl(url: string): string {
@@ -337,9 +337,16 @@ export class UploadService {
             }
 
             const urlObj = new URL(url);
-            // pathname은 /pets/available/uuid.jpeg 형식
-            // 맨 앞의 / 제거하여 pets/available/uuid.jpeg 형태로 만듦
-            const filePath = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+            // pathname은 /pawpong_bucket/pets/available/uuid.jpeg 형식
+            // 맨 앞의 / 제거
+            let filePath = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
+            // 스마일서브 URL인 경우 버킷 이름(pawpong_bucket/) 제거
+            if (urlObj.hostname.includes('object.iwinv.kr')) {
+                const bucketName = 'pawpong_bucket';
+                if (filePath.startsWith(`${bucketName}/`)) {
+                    filePath = filePath.slice(`${bucketName}/`.length);
+                }
+            }
             return filePath || '';
         } catch {
             // URL 파싱 실패 시 원본 반환 (이미 파일명인 경우)
