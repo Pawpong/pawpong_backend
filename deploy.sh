@@ -109,6 +109,20 @@ if [ "$HEALTHY" = true ]; then
     echo -e "${GREEN}Active Container: ${NEW_CONTAINER} (port ${NEW_PORT})${NC}"
     echo -e "${GREEN}========================================${NC}"
 
+    # Docker 정리: 최근 10개 이미지만 유지, 나머지 삭제
+    echo -e "${BLUE}Cleaning up old Docker images (keeping latest 10)...${NC}"
+    IMAGES_TO_DELETE=$(docker images pawpong-backend --format "{{.ID}} {{.CreatedAt}}" | sort -k2 -r | tail -n +11 | awk '{print $1}')
+    if [ -n "$IMAGES_TO_DELETE" ]; then
+        echo "$IMAGES_TO_DELETE" | xargs docker rmi -f 2>/dev/null || true
+        echo -e "${GREEN}Old images cleaned up${NC}"
+    else
+        echo -e "${YELLOW}No old images to clean up${NC}"
+    fi
+    # 미사용 이미지 및 빌드 캐시 정리
+    docker image prune -f 2>/dev/null || true
+    docker builder prune -f --keep-storage=2GB 2>/dev/null || true
+    echo -e "${GREEN}Docker cleanup completed${NC}"
+
     # 성공 알림
     send_discord_notification "배포 성공\nTag: \`$IMAGE_TAG\`\nActive: \`${NEW_CONTAINER}\` (port ${NEW_PORT})" 3066993
 
