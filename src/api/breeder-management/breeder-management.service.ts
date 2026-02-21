@@ -122,7 +122,7 @@ export class BreederManagementService {
                 profileViewCount: breeder.stats?.profileViews || 0,
             },
             recentApplicationList: recentApplicationsList.map((app: any) => ({
-                applicationId: (app._id as any).toString(),
+                applicationId: app._id.toString(),
                 adopterName: app.adopterName || 'Unknown',
                 petName: app.petName || 'Unknown',
                 applicationStatus: app.status,
@@ -456,7 +456,7 @@ export class BreederManagementService {
             const adopterInfo = plainApp.adopterId;
             const adopterNickname =
                 typeof adopterInfo === 'object' && adopterInfo !== null
-                    ? (adopterInfo as any).nickname || plainApp.adopterName || '알 수 없음'
+                    ? adopterInfo.nickname || plainApp.adopterName || '알 수 없음'
                     : plainApp.adopterName || '알 수 없음';
 
             return {
@@ -550,7 +550,7 @@ export class BreederManagementService {
             `[updateApplicationStatus] 현재 상태: ${application.status} → 변경할 상태: ${updateData.status}`,
         );
 
-        await this.adoptionApplicationRepository.updateStatus(applicationId, updateData.status as ApplicationStatus);
+        await this.adoptionApplicationRepository.updateStatus(applicationId, updateData.status);
 
         // 입양 승인 완료 시 통계 업데이트
         if (updateData.status === ApplicationStatus.ADOPTION_APPROVED) {
@@ -1039,7 +1039,7 @@ export class BreederManagementService {
                 // 1. tempUploads에 저장된 originalFileName (새로 업로드한 경우)
                 // 2. DB에 이미 저장된 originalFileName (기존 서류)
                 // 3. fileName에서 추출 (최후의 수단)
-                let originalFileName =
+                const originalFileName =
                     tempDoc?.originalFileName || doc.originalFileName || doc.fileName.split('/').pop();
 
                 this.logger.log(
@@ -1228,12 +1228,21 @@ export class BreederManagementService {
             : breeder.profile;
 
         // parentPets의 photoFileName과 photos를 Signed URL로 변환
-        const parentPetsWithSignedUrls = (parentPets || []).map((pet: any) => ({
-            ...(pet.toObject ? pet.toObject() : pet),
-            petId: (pet._id || pet.petId)?.toString(),
-            photoFileName: this.storageService.generateSignedUrlSafe(pet.photoFileName, 60),
-            photos: this.storageService.generateSignedUrls(pet.photos || [], 60),
-        }));
+        const parentPetsWithSignedUrls = (parentPets || []).map((pet: any) => {
+            const petObj = pet.toObject ? pet.toObject() : pet;
+            const photoFileName = petObj.photoFileName;
+            const photos = petObj.photos || [];
+
+            // photos 배열에서 photoFileName과 중복되는 파일 제거 (대표사진은 photoUrl로만 표시)
+            const additionalPhotos = photoFileName ? photos.filter((photo: string) => photo !== photoFileName) : photos;
+
+            return {
+                ...petObj,
+                petId: (pet._id || pet.petId)?.toString(),
+                photoFileName: this.storageService.generateSignedUrlSafe(photoFileName, 60),
+                photos: this.storageService.generateSignedUrls(additionalPhotos, 60),
+            };
+        });
 
         // availablePets의 photos를 Signed URL로 변환
         const availablePetsWithSignedUrls = (availablePetsData || []).map((pet: any) => ({
@@ -1298,7 +1307,7 @@ export class BreederManagementService {
         const { pets, total } = statsResult;
 
         // 각 개체별 입양 신청 수 조회
-        const petIds = pets.map((pet: any) => pet.petId || (pet._id as any).toString());
+        const petIds = pets.map((pet: any) => pet.petId || pet._id.toString());
         const applicationCountMap = await this.adoptionApplicationRepository.countByPetIds(petIds);
 
         // 데이터 변환

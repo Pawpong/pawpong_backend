@@ -50,11 +50,11 @@ export class UploadController {
     @ApiEndpoint({
         summary: '분양 개체 사진 업로드 (다중)',
         description:
-            '분양 개체의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장, 기존 사진 URL과 함께 전송 시 전체 교체)',
+            '분양 개체의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 5장, 기존 사진 URL과 함께 전송 시 전체 교체)',
         responseType: UploadResponseDto,
         isPublic: false,
     })
-    @UseInterceptors(FilesInterceptor('files', 4))
+    @UseInterceptors(FilesInterceptor('files', 5))
     async uploadAvailablePetPhotos(
         @Param('petId') petId: string,
         @UploadedFiles() files: Express.Multer.File[],
@@ -82,11 +82,11 @@ export class UploadController {
     @ApiEndpoint({
         summary: '부모견/묘 사진 업로드 (다중)',
         description:
-            '부모견/묘의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 4장, 기존 사진 URL과 함께 전송 시 전체 교체)',
+            '부모견/묘의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 5장, 기존 사진 URL과 함께 전송 시 전체 교체)',
         responseType: UploadResponseDto,
         isPublic: false,
     })
-    @UseInterceptors(FilesInterceptor('files', 4))
+    @UseInterceptors(FilesInterceptor('files', 5))
     async uploadParentPetPhotos(
         @Param('petId') petId: string,
         @UploadedFiles() files: Express.Multer.File[],
