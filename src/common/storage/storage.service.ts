@@ -185,6 +185,12 @@ export class StorageService {
             }
         }
 
+        // 방어 로직: 파일 경로에 버킷 이름이 접두사로 포함된 경우 제거
+        // (이전 버그로 인해 DB에 pawpong_bucket/representative/uuid.jpg 형태로 저장된 데이터 대응)
+        if (filePath.startsWith(`${this.bucketName}/`)) {
+            filePath = filePath.slice(`${this.bucketName}/`.length);
+        }
+
         // 스마일서브는 공개 버킷이므로 만료 시간 없이 URL 반환
         // 민감한 파일의 경우 향후 Pre-signed URL 구현 가능
         return this.getCdnUrl(filePath);
