@@ -96,18 +96,18 @@ export class AvailablePetAddDto {
     };
 
     /**
-     * 사진 파일명 배열 (선택, 최대 4개)
+     * 사진 파일명 배열 (선택, 최대 5개)
      * @example ["available-pets/pet001/photo1.jpg", "available-pets/pet001/photo2.jpg"]
      */
     @ApiPropertyOptional({
-        description: '사진 파일명 배열 (최대 4개)',
+        description: '사진 파일명 배열 (최대 5개)',
         example: ['available-pets/pet001/photo1.jpg', 'available-pets/pet001/photo2.jpg'],
         type: [String],
-        maxItems: 4,
+        maxItems: 5,
     })
     @IsOptional()
     @IsArray()
     @IsString({ each: true })
-    @ArrayMaxSize(4)
+    @ArrayMaxSize(5)
     photos?: string[];
 }
