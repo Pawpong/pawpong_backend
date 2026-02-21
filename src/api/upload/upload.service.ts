@@ -1,6 +1,7 @@
-import { Injectable, BadRequestException, ForbiddenException } from '@nestjs/common';
+import { Injectable, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
+import sharp from 'sharp';
 
 import { StorageService } from '../../common/storage/storage.service';
 
@@ -12,6 +13,11 @@ import { UploadResponseDto } from './dto/response/upload-response.dto';
 
 @Injectable()
 export class UploadService {
+    private readonly logger = new Logger(UploadService.name);
+
+    // HEIC/HEIF 매직 바이트 패턴 (ftyp box)
+    private readonly HEIC_MAGIC_BYTES = Buffer.from([0x66, 0x74, 0x79, 0x70]); // 'ftyp'
+
     // 허용되는 이미지 MIME 타입 (HEIF/HEIC 포함)
     private readonly allowedImageMimeTypes = [
         'image/jpeg',
@@ -64,6 +70,11 @@ export class UploadService {
         // 각 파일 크기 및 타입 검증
         for (const file of files) {
             this.validateMediaFile(file);
+        }
+
+        // HEIC → JPEG 변환 (브라우저 호환성)
+        for (let i = 0; i < files.length; i++) {
+            files[i] = await this.convertHeicToJpegIfNeeded(files[i]);
         }
 
         // 스토리지 업로드
@@ -141,6 +152,10 @@ export class UploadService {
                     this.validateMediaFile(file);
                 }
             }
+            // HEIC → JPEG 변환 (브라우저 호환성)
+            for (let i = 0; i < files.length; i++) {
+                files[i] = await this.convertHeicToJpegIfNeeded(files[i]);
+            }
             results = await this.storageService.uploadMultipleFiles(files, 'pets/available');
             newFileNames = results.map((r) => r.fileName);
         }
@@ -216,6 +231,10 @@ export class UploadService {
                     this.validateMediaFile(file);
                 }
             }
+            // HEIC → JPEG 변환 (브라우저 호환성)
+            for (let i = 0; i < files.length; i++) {
+                files[i] = await this.convertHeicToJpegIfNeeded(files[i]);
+            }
             results = await this.storageService.uploadMultipleFiles(files, 'pets/parent');
             newFileNames = results.map((r) => r.fileName);
         }
@@ -248,6 +267,9 @@ export class UploadService {
             throw new BadRequestException('파일이 없습니다.');
         }
 
+        // HEIC → JPEG 변환 (브라우저 호환성)
+        file = await this.convertHeicToJpegIfNeeded(file);
+
         const result = await this.storageService.uploadFile(file, folder);
 
         return new UploadResponseDto(result.cdnUrl, result.fileName, file.size);
@@ -261,6 +283,11 @@ export class UploadService {
         // 파일 존재 여부 검증
         if (!files || files.length === 0) {
             throw new BadRequestException('파일이 없습니다.');
+        }
+
+        // HEIC → JPEG 변환 (브라우저 호환성)
+        for (let i = 0; i < files.length; i++) {
+            files[i] = await this.convertHeicToJpegIfNeeded(files[i]);
         }
 
         const results = await this.storageService.uploadMultipleFiles(files, folder);
@@ -319,6 +346,39 @@ export class UploadService {
 
         if (file.size > this.IMAGE_MAX_SIZE) {
             throw new BadRequestException('이미지 파일 크기는 5MB를 초과할 수 없습니다.');
+        }
+    }
+
+    /**
+     * HEIC/HEIF 파일을 JPEG로 변환
+     * 브라우저가 HEIC 렌더링을 지원하지 않으므로 업로드 시 자동 변환
+     * 매직 바이트로 실제 파일 포맷을 감지하여 확장자와 무관하게 처리
+     */
+    private async convertHeicToJpegIfNeeded(file: Express.Multer.File): Promise<Express.Multer.File> {
+        // 매직 바이트로 실제 HEIC/HEIF 포맷 감지 (offset 4에 'ftyp' 존재)
+        if (file.buffer.length < 12 || !file.buffer.subarray(4, 8).equals(this.HEIC_MAGIC_BYTES)) {
+            return file;
+        }
+
+        try {
+            this.logger.log(`[convertHeicToJpeg] HEIC 파일 감지, JPEG 변환 시작: ${file.originalname}`);
+
+            const jpegBuffer = await sharp(file.buffer).jpeg({ quality: 90 }).toBuffer();
+
+            // 변환된 파일 정보로 업데이트
+            file.buffer = jpegBuffer;
+            file.mimetype = 'image/jpeg';
+            file.size = jpegBuffer.length;
+            file.originalname = file.originalname.replace(/\.(heic|heif|jpg|jpeg|png)$/i, '.jpg');
+            if (!file.originalname.endsWith('.jpg')) {
+                file.originalname += '.jpg';
+            }
+
+            this.logger.log(`[convertHeicToJpeg] JPEG 변환 완료: ${file.originalname} (${jpegBuffer.length} bytes)`);
+            return file;
+        } catch (error) {
+            this.logger.error(`[convertHeicToJpeg] 변환 실패, 원본 유지: ${error.message}`);
+            return file;
         }
     }
 
