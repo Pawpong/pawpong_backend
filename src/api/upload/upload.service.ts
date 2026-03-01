@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException, ForbiddenException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import sharp from 'sharp';
+import convert from 'heic-convert';
 
 import { StorageService } from '../../common/storage/storage.service';
 
@@ -15,8 +15,10 @@ import { UploadResponseDto } from './dto/response/upload-response.dto';
 export class UploadService {
     private readonly logger = new Logger(UploadService.name);
 
-    // HEIC/HEIF 매직 바이트 패턴 (ftyp box)
-    private readonly HEIC_MAGIC_BYTES = Buffer.from([0x66, 0x74, 0x79, 0x70]); // 'ftyp'
+    // ISOBMFF ftyp box 시그니처 (HEIC, MP4, MOV 등 공통)
+    private readonly FTYP_SIGNATURE = Buffer.from([0x66, 0x74, 0x79, 0x70]); // 'ftyp'
+    // HEIC/HEIF 전용 major brand 목록 (offset 8-12에서 확인)
+    private readonly HEIC_BRANDS = ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'mif1'];
 
     // 허용되는 이미지 MIME 타입 (HEIF/HEIC 포함)
     private readonly allowedImageMimeTypes = [
@@ -352,34 +354,72 @@ export class UploadService {
     /**
      * HEIC/HEIF 파일을 JPEG로 변환
      * 브라우저가 HEIC 렌더링을 지원하지 않으므로 업로드 시 자동 변환
-     * 매직 바이트로 실제 파일 포맷을 감지하여 확장자와 무관하게 처리
+     * heic-convert 사용 (순수 JS, HEVC 코덱 내장)
+     * 매직 바이트 + mimetype + 확장자 3중 감지로 누락 방지
      */
     private async convertHeicToJpegIfNeeded(file: Express.Multer.File): Promise<Express.Multer.File> {
-        // 매직 바이트로 실제 HEIC/HEIF 포맷 감지 (offset 4에 'ftyp' 존재)
-        if (file.buffer.length < 12 || !file.buffer.subarray(4, 8).equals(this.HEIC_MAGIC_BYTES)) {
+        // 동영상 파일은 HEIC 변환 대상에서 제외 (MP4/MOV도 ftyp box를 사용하므로)
+        if (this.allowedVideoMimeTypes.includes(file.mimetype)) {
             return file;
         }
 
+        // 3중 감지: 매직 바이트 OR mimetype OR 확장자
+        // ftyp 시그니처(offset 4-8) + HEIC major brand(offset 8-12) 둘 다 확인
+        const hasFtyp = file.buffer.length >= 12 && file.buffer.subarray(4, 8).equals(this.FTYP_SIGNATURE);
+        const majorBrand = hasFtyp ? file.buffer.subarray(8, 12).toString('ascii') : '';
+        const isHeicByMagic = hasFtyp && this.HEIC_BRANDS.includes(majorBrand);
+        const isHeicByMime = ['image/heic', 'image/heif'].includes(file.mimetype);
+        const isHeicByExt = /\.(heic|heif)$/i.test(file.originalname);
+
+        if (!isHeicByMagic && !isHeicByMime && !isHeicByExt) {
+            return file;
+        }
+
+        const detectedBy = [
+            isHeicByMagic && 'magic-bytes',
+            isHeicByMime && `mimetype(${file.mimetype})`,
+            isHeicByExt && `extension(${file.originalname})`,
+        ]
+            .filter(Boolean)
+            .join(', ');
+
+        this.logger.log(
+            `[convertHeicToJpeg] HEIC 파일 감지 (${detectedBy}), heic-convert로 JPEG 변환 시작: ${file.originalname}`,
+        );
+
+        // heic-convert 사용 (순수 JS, HEVC 코덱 내장)
+        // sharp의 libvips에는 HEVC 디코더가 포함되지 않아 HEIC 변환 불가
         try {
-            this.logger.log(`[convertHeicToJpeg] HEIC 파일 감지, JPEG 변환 시작: ${file.originalname}`);
-
-            const jpegBuffer = await sharp(file.buffer).jpeg({ quality: 90 }).toBuffer();
-
-            // 변환된 파일 정보로 업데이트
-            file.buffer = jpegBuffer;
-            file.mimetype = 'image/jpeg';
-            file.size = jpegBuffer.length;
-            file.originalname = file.originalname.replace(/\.(heic|heif|jpg|jpeg|png)$/i, '.jpg');
-            if (!file.originalname.endsWith('.jpg')) {
-                file.originalname += '.jpg';
-            }
-
-            this.logger.log(`[convertHeicToJpeg] JPEG 변환 완료: ${file.originalname} (${jpegBuffer.length} bytes)`);
-            return file;
+            const jpegBuffer = (await convert({
+                buffer: file.buffer as unknown as ArrayBufferLike,
+                format: 'JPEG',
+                quality: 0.9,
+            })) as unknown as Buffer;
+            return this.applyJpegConversion(file, Buffer.from(jpegBuffer), 'heic-convert');
         } catch (error) {
-            this.logger.error(`[convertHeicToJpeg] 변환 실패, 원본 유지: ${error.message}`);
-            return file;
+            this.logger.error(`[convertHeicToJpeg] 변환 실패 (${detectedBy}): ${error.message}`);
+            throw new BadRequestException(
+                'HEIC/HEIF 이미지 변환에 실패했습니다. JPG 또는 PNG 형식으로 변환 후 다시 업로드해 주세요.',
+            );
         }
+    }
+
+    /**
+     * 변환된 JPEG 버퍼를 파일 객체에 적용하는 헬퍼
+     */
+    private applyJpegConversion(file: Express.Multer.File, jpegBuffer: Buffer, converter: string): Express.Multer.File {
+        file.buffer = jpegBuffer;
+        file.mimetype = 'image/jpeg';
+        file.size = jpegBuffer.length;
+        file.originalname = file.originalname.replace(/\.(heic|heif|jpg|jpeg|png)$/i, '.jpg');
+        if (!file.originalname.endsWith('.jpg')) {
+            file.originalname += '.jpg';
+        }
+
+        this.logger.log(
+            `[convertHeicToJpeg] ${converter}로 JPEG 변환 완료: ${file.originalname} (${jpegBuffer.length} bytes)`,
+        );
+        return file;
     }
 
     /**
