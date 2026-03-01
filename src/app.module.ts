@@ -29,6 +29,7 @@ import { NotificationModule } from './api/notification/notification.module';
 import { NotificationAdminModule } from './api/notification/admin/notification-admin.module';
 import { AnnouncementModule } from './api/announcement/announcement.module';
 import { NoticeModule } from './api/notice/notice.module';
+import { InquiryModule } from './api/inquiry/inquiry.module';
 import { FeedModule } from './api/feed/feed.module';
 
 @Module({
@@ -63,6 +64,7 @@ import { FeedModule } from './api/feed/feed.module';
         NotificationAdminModule,
         AnnouncementModule,
         NoticeModule,
+        InquiryModule,
         FeedModule,
     ],
     controllers: [],
