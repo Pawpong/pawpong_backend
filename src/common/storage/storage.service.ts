@@ -12,6 +12,7 @@ import {
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as fs from 'fs';
 import { Readable } from 'stream';
+import convert from 'heic-convert';
 
 /**
  * 스마일서브 오브젝트 스토리지 서비스
@@ -58,13 +59,22 @@ export class StorageService {
         }
     }
 
+    // HEIC/HEIF 전용 major brand 목록 (ISOBMFF offset 8-12)
+    private static readonly HEIC_BRANDS = ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'mif1'];
+    private static readonly FTYP_SIG = Buffer.from([0x66, 0x74, 0x79, 0x70]); // 'ftyp'
+    private static readonly VIDEO_MIMES = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
+
     /**
      * 파일 업로드
+     * HEIC/HEIF 이미지는 자동으로 JPEG 변환 후 업로드 (브라우저 호환성)
      */
     async uploadFile(
         file: Express.Multer.File,
         folder: string = '',
     ): Promise<{ fileName: string; cdnUrl: string; storageUrl: string }> {
+        // HEIC → JPEG 자동 변환 (모든 업로드 경로에서 일관 적용)
+        file = await this.convertHeicToJpegIfNeeded(file);
+
         const fileName = this.generateFileName(file.originalname, folder);
 
         try {
@@ -344,5 +354,54 @@ export class StorageService {
             this.logger.error(`[getFileStream] Failed to get stream for ${fileKey}:`, error);
             throw error;
         }
+    }
+
+    /**
+     * HEIC/HEIF 파일을 JPEG로 자동 변환
+     * 동영상(MP4/MOV)은 ftyp box를 공유하므로 major brand로 구분
+     * 변환 실패 시 원본 파일 그대로 반환 (업로드 차단하지 않음)
+     */
+    private async convertHeicToJpegIfNeeded(file: Express.Multer.File): Promise<Express.Multer.File> {
+        // 동영상은 즉시 스킵
+        if (StorageService.VIDEO_MIMES.includes(file.mimetype)) {
+            return file;
+        }
+
+        // buffer가 없으면 스킵 (로컬 파일 업로드 등)
+        if (!file.buffer || file.buffer.length < 12) {
+            return file;
+        }
+
+        // 3중 감지: magic bytes + mimetype + 확장자
+        const hasFtyp = file.buffer.subarray(4, 8).equals(StorageService.FTYP_SIG);
+        const majorBrand = hasFtyp ? file.buffer.subarray(8, 12).toString('ascii') : '';
+        const isHeicByMagic = hasFtyp && StorageService.HEIC_BRANDS.includes(majorBrand);
+        const isHeicByMime = ['image/heic', 'image/heif'].includes(file.mimetype);
+        const isHeicByExt = /\.(heic|heif)$/i.test(file.originalname);
+
+        if (!isHeicByMagic && !isHeicByMime && !isHeicByExt) {
+            return file;
+        }
+
+        try {
+            this.logger.log(`[StorageService] HEIC 감지, JPEG 변환: ${file.originalname}`);
+            const jpegBuffer = (await convert({
+                buffer: file.buffer as unknown as ArrayBufferLike,
+                format: 'JPEG',
+                quality: 0.9,
+            })) as unknown as Buffer;
+
+            file.buffer = Buffer.from(jpegBuffer);
+            file.mimetype = 'image/jpeg';
+            file.size = file.buffer.length;
+            file.originalname = file.originalname.replace(/\.(heic|heif)$/i, '.jpg');
+            if (!file.originalname.endsWith('.jpg')) file.originalname += '.jpg';
+
+            this.logger.log(`[StorageService] JPEG 변환 완료: ${file.originalname} (${file.size} bytes)`);
+        } catch (error) {
+            this.logger.warn(`[StorageService] HEIC 변환 실패, 원본 업로드: ${error.message}`);
+        }
+
+        return file;
     }
 }
