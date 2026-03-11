@@ -1633,9 +1633,9 @@ export class AuthService {
     }
 
     private validateProfileImageFile(file: Express.Multer.File): void {
-        // 파일 크기 검증 (50MB)
-        if (file.size > 50 * 1024 * 1024) {
-            throw new BadRequestException('파일 크기는 50MB를 초과할 수 없습니다.');
+        // 파일 크기 검증 (100MB)
+        if (file.size > 100 * 1024 * 1024) {
+            throw new BadRequestException('파일 크기는 100MB를 초과할 수 없습니다.');
         }
 
         // 파일 타입 검증 제거 - 모든 파일 타입 허용
@@ -1835,8 +1835,8 @@ export class AuthService {
         ];
 
         for (const file of files) {
-            if (file.size > 10 * 1024 * 1024) {
-                throw new BadRequestException(`파일 "${file.originalname}"의 크기는 10MB를 초과할 수 없습니다.`);
+            if (file.size > 100 * 1024 * 1024) {
+                throw new BadRequestException(`파일 "${file.originalname}"의 크기는 100MB를 초과할 수 없습니다.`);
             }
 
             // 파일 확장자로도 체크 (MIME 타입이 정확하지 않을 수 있음)
