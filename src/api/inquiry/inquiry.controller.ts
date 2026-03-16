@@ -69,6 +69,38 @@ export class InquiryController {
     }
 
     /**
+     * 브리더 전용: 내게 들어온 1:1 질문 목록 조회 (내 답변 페이지)
+     * 주의: ':inquiryId' 파라미터 라우트보다 위에 선언
+     */
+    @Get('breeder')
+    @UseGuards(JwtAuthGuard, RolesGuard)
+    @Roles('breeder')
+    @ApiEndpoint({
+        summary: '브리더 문의 목록 조회',
+        description:
+            '브리더에게 들어온 1:1 질문 목록을 조회합니다. answered=true이면 답변 완료, false이면 답변 전 목록입니다.',
+        responseType: InquiryListResponseDto,
+        isPublic: false,
+    })
+    async getBreederInquiries(
+        @CurrentUser() user: any,
+        @Query('answered') answered: string = 'false',
+        @Query('page') page: string = '1',
+        @Query('limit') limit: string = '15',
+    ): Promise<ApiResponseDto<InquiryListResponseDto>> {
+        if (!user?.userId) {
+            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
+        }
+        const result = await this.inquiryService.getBreederInquiries(
+            user.userId,
+            answered === 'true',
+            parseInt(page) || 1,
+            parseInt(limit) || 15,
+        );
+        return ApiResponseDto.success(result, '브리더 문의 목록이 조회되었습니다.');
+    }
+
+    /**
      * 문의 목록 조회 (공통 질문만, 무한스크롤)
      * 인증 없이 접근 가능
      */

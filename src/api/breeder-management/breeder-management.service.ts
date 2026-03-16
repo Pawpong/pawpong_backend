@@ -634,7 +634,6 @@ export class BreederManagementService {
                                 error: emailError,
                             });
                         });
-
                 } else {
                     this.logger.logWarning(
                         'updateApplicationStatus',

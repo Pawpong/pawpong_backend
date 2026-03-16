@@ -277,6 +277,56 @@ export class InquiryService {
     }
 
     /**
+     * 브리더에게 들어온 1:1 질문 목록 조회 (내 답변 페이지)
+     * answered=true: 답변 완료, false: 답변 전
+     */
+    async getBreederInquiries(
+        breederId: string,
+        answered: boolean,
+        page: number = 1,
+        limit: number = 15,
+    ): Promise<InquiryListResponseDto> {
+        this.logger.logStart('getBreederInquiries', '브리더 문의 목록 조회', { breederId, answered, page, limit });
+
+        const skip = (page - 1) * limit;
+        const items = await this.inquiryRepository.findByTargetBreeder(breederId, answered, skip, limit + 1);
+
+        const hasMore = items.length > limit;
+        const pagedItems = hasMore ? items.slice(0, limit) : items;
+
+        const data: InquiryListItemDto[] = pagedItems.map((inquiry) => {
+            let latestAnswer: LatestAnswerDto | undefined;
+            if (inquiry.answers && inquiry.answers.length > 0) {
+                const latest = inquiry.answers[inquiry.answers.length - 1];
+                latestAnswer = {
+                    breederName: latest.breederName,
+                    answeredAt: this.formatAnsweredAt(latest.answeredAt),
+                    content: latest.content,
+                    profileImageUrl: latest.profileImageUrl
+                        ? this.storageService.generateSignedUrl(latest.profileImageUrl, 60)
+                        : undefined,
+                };
+            }
+
+            return {
+                id: inquiry._id.toString(),
+                title: inquiry.title,
+                content: inquiry.content,
+                type: inquiry.type,
+                animalType: inquiry.animalType,
+                viewCount: inquiry.viewCount,
+                answerCount: inquiry.answers?.length || 0,
+                latestAnswer,
+                createdAt: this.formatDate(inquiry.createdAt),
+            };
+        });
+
+        this.logger.logSuccess('getBreederInquiries', '브리더 문의 목록 조회 완료', { count: data.length, hasMore });
+
+        return { data, hasMore };
+    }
+
+    /**
      * 문의 수정 (작성자 본인만)
      * 답변이 달린 문의는 수정 불가
      */
