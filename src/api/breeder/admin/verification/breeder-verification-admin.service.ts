@@ -13,7 +13,6 @@ import {
 } from '../../../../common/enum/user.enum';
 
 import { StorageService } from '../../../../common/storage/storage.service';
-import { AlimtalkService } from '../../../../common/alimtalk/alimtalk.service';
 import { MailTemplateService } from '../../../../common/mail/mail-template.service';
 import { NotificationService } from '../../../notification/notification.service';
 
@@ -45,7 +44,6 @@ export class BreederVerificationAdminService {
         private readonly mailTemplateService: MailTemplateService,
         private readonly notificationService: NotificationService,
         private readonly storageService: StorageService,
-        private readonly alimtalkService: AlimtalkService,
     ) {}
 
     /**
@@ -540,7 +538,6 @@ export class BreederVerificationAdminService {
         const breederId = (breeder._id as any).toString();
         const breederName = breeder.nickname;
         const breederEmail = breeder.emailAddress;
-        const breederPhone = breeder.phoneNumber;
 
         if (verificationData.verificationStatus === VerificationStatus.APPROVED) {
             // 승인 알림 + 이메일 발송
@@ -562,22 +559,6 @@ export class BreederVerificationAdminService {
             }
 
             await builder.send();
-
-            // 카카오 알림톡 발송
-            if (breederPhone) {
-                try {
-                    const alimtalkResult = await this.alimtalkService.sendBreederApproved(breederPhone);
-                    if (alimtalkResult.success) {
-                        this.logger.log(`[sendVerificationNotification] 브리더 승인 알림톡 발송 성공: ${breederPhone}`);
-                    } else {
-                        this.logger.warn(
-                            `[sendVerificationNotification] 브리더 승인 알림톡 발송 실패: ${alimtalkResult.error}`,
-                        );
-                    }
-                } catch (error) {
-                    this.logger.error(`[sendVerificationNotification] 알림톡 발송 오류: ${error.message}`);
-                }
-            }
         } else if (verificationData.verificationStatus === VerificationStatus.REJECTED) {
             // 반려 알림 + 이메일 발송
             const rejectionReasons = verificationData.rejectionReason
@@ -603,22 +584,6 @@ export class BreederVerificationAdminService {
             }
 
             await builder.send();
-
-            // 카카오 알림톡 발송
-            if (breederPhone) {
-                try {
-                    const alimtalkResult = await this.alimtalkService.sendBreederRejected(breederPhone);
-                    if (alimtalkResult.success) {
-                        this.logger.log(`[sendVerificationNotification] 브리더 반려 알림톡 발송 성공: ${breederPhone}`);
-                    } else {
-                        this.logger.warn(
-                            `[sendVerificationNotification] 브리더 반려 알림톡 발송 실패: ${alimtalkResult.error}`,
-                        );
-                    }
-                } catch (error) {
-                    this.logger.error(`[sendVerificationNotification] 알림톡 발송 오류: ${error.message}`);
-                }
-            }
         }
     }
 
@@ -662,7 +627,6 @@ export class BreederVerificationAdminService {
             const breederId = (breeder._id as any).toString();
             const breederName = breeder.nickname;
             const breederEmail = breeder.emailAddress;
-            const breederPhone = breeder.phoneNumber;
 
             try {
                 // 이메일 발송
@@ -683,16 +647,6 @@ export class BreederVerificationAdminService {
                     });
 
                     await builder.send();
-                }
-
-                // 카카오 알림톡 발송
-                if (breederPhone) {
-                    const alimtalkResult = await this.alimtalkService.sendDocumentReminder(breederPhone, breederName);
-                    if (alimtalkResult.success) {
-                        this.logger.log(`[sendDocumentReminders] 서류 독촉 알림톡 발송 성공: ${breederPhone}`);
-                    } else {
-                        this.logger.warn(`[sendDocumentReminders] 서류 독촉 알림톡 발송 실패: ${alimtalkResult.error}`);
-                    }
                 }
 
                 breederIds.push(breederId);

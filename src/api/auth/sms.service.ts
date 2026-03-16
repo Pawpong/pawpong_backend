@@ -68,16 +68,16 @@ export class SmsService {
         const expiresAt = new Date(Date.now() + this.CODE_EXPIRY_MINUTES * 60 * 1000);
 
         try {
-            // 1. 카카오 알림톡으로 인증번호 발송 시도
-            const alimtalkResult = await this.alimtalkService.sendVerificationCode(normalizedPhone, verificationCode);
+            // SMS 직접 발송 (카카오 알림톡 없이 CoolSMS SMS 발송)
+            const smsResult = await this.alimtalkService.sendSmsDirect(
+                normalizedPhone,
+                `[포퐁] 인증번호: ${verificationCode} (3분 내 입력)`,
+            );
 
-            if (alimtalkResult.success) {
-                this.logger.log(`[sendVerificationCode] 알림톡 인증번호 발송 성공: ${normalizedPhone}`);
+            if (smsResult.success) {
+                this.logger.log(`[sendVerificationCode] SMS 인증번호 발송 성공: ${normalizedPhone}`);
             } else {
-                // 알림톡 실패 시 로그 기록 (SMS fallback은 알림톡 서비스에서 자동 처리)
-                this.logger.warn(
-                    `[sendVerificationCode] 알림톡 발송 실패, SMS fallback 시도됨: ${alimtalkResult.error}`,
-                );
+                this.logger.warn(`[sendVerificationCode] SMS 발송 실패: ${smsResult.error}`);
             }
 
             // 인증코드 저장 (알림톡/SMS 발송 성공 여부와 관계없이)
