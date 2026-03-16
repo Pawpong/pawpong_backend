@@ -112,4 +112,13 @@ export class InquiryAnswerCreateRequestDto {
     @IsNotEmpty()
     @MaxLength(5000)
     content: string;
+
+    /**
+     * 첨부 이미지 URL 목록 (최대 4장)
+     */
+    @ApiPropertyOptional({ description: '첨부 이미지 URL 배열 (최대 4장)', type: [String] })
+    @IsArray()
+    @ArrayMaxSize(4)
+    @IsOptional()
+    imageUrls?: string[];
 }
