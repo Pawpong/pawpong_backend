@@ -195,6 +195,34 @@ export class InquiryRepository {
     }
 
     /**
+     * 브리더에게 들어온 1:1 질문 목록 조회 (내 답변 페이지)
+     * answered=true: 이미 답변한 질문, false: 아직 답변 안 한 질문
+     *
+     * @param breederId 브리더 ID
+     * @param answered 답변 여부
+     * @param skip 건너뛸 문서 수
+     * @param limit 가져올 문서 수 (+1 포함)
+     */
+    async findByTargetBreeder(breederId: string, answered: boolean, skip: number, limit: number): Promise<any[]> {
+        try {
+            const filter: Record<string, any> = {
+                type: 'direct',
+                targetBreederId: new Types.ObjectId(breederId),
+            };
+
+            if (answered) {
+                filter['answers.0'] = { $exists: true }; // 답변 1개 이상
+            } else {
+                filter.answers = { $size: 0 }; // 답변 없음
+            }
+
+            return await this.inquiryModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean().exec();
+        } catch (error) {
+            throw new Error(`브리더 문의 목록 조회 실패: ${error.message}`);
+        }
+    }
+
+    /**
      * 입양자 닉네임 조회 (문의 작성 시 사용)
      *
      * @param userId 입양자 ID
