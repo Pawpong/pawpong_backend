@@ -175,6 +175,10 @@ export class InquiryRepository {
             profileImageUrl?: string;
             content: string;
             answeredAt: Date;
+            imageUrls?: string[];
+            helpfulCount?: number;
+            animalTypeName?: string;
+            breed?: string;
         },
         now: Date,
     ): Promise<void> {
@@ -226,11 +230,19 @@ export class InquiryRepository {
      * @param breederId 브리더 ID
      * @returns name, profileImageFileName 또는 null
      */
-    async findBreederInfo(breederId: string): Promise<{ name: string; profileImageFileName?: string } | null> {
+    async findBreederInfo(
+        breederId: string,
+    ): Promise<{ name: string; profileImageFileName?: string; petType?: string; breeds?: string[] } | null> {
         try {
-            return (await this.breederModel.findById(breederId).select('name profileImageFileName').lean().exec()) as {
+            return (await this.breederModel
+                .findById(breederId)
+                .select('name profileImageFileName petType breeds')
+                .lean()
+                .exec()) as {
                 name: string;
                 profileImageFileName?: string;
+                petType?: string;
+                breeds?: string[];
             } | null;
         } catch (error) {
             throw new Error(`브리더 정보 조회 실패: ${error.message}`);

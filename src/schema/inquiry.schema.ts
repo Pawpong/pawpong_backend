@@ -41,6 +41,30 @@ export class InquiryAnswer {
      */
     @Prop({ type: Date, default: Date.now })
     answeredAt: Date;
+
+    /**
+     * 답변 첨부 이미지 (스토리지 파일키)
+     */
+    @Prop({ type: [String], default: [] })
+    imageUrls: string[];
+
+    /**
+     * 도움됐어요 수 (캐시)
+     */
+    @Prop({ default: 0 })
+    helpfulCount: number;
+
+    /**
+     * 브리더 동물 유형 (캐시): '강아지' | '고양이'
+     */
+    @Prop()
+    animalTypeName?: string;
+
+    /**
+     * 브리더 주력 품종 (캐시)
+     */
+    @Prop()
+    breed?: string;
 }
 
 export const InquiryAnswerSchema = SchemaFactory.createForClass(InquiryAnswer);
