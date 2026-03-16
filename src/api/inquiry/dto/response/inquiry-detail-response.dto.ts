@@ -4,10 +4,13 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
  * 답변 상세 DTO
  */
 export class InquiryAnswerDto {
+    @ApiProperty({ description: '답변 ID' })
+    id: string;
+
     @ApiProperty({ description: '브리더 이름', example: '골든레인 리트리버' })
     breederName: string;
 
-    @ApiProperty({ description: '답변 작성 시간', example: '2025. 06. 15. 답변 작성' })
+    @ApiProperty({ description: '답변 작성 시간', example: '2025. 06. 15.' })
     answeredAt: string;
 
     @ApiProperty({ description: '답변 내용' })
@@ -15,6 +18,18 @@ export class InquiryAnswerDto {
 
     @ApiPropertyOptional({ description: '브리더 프로필 이미지 URL' })
     profileImageUrl?: string;
+
+    @ApiProperty({ description: '답변 첨부 이미지 URL 배열', type: [String] })
+    imageUrls: string[];
+
+    @ApiProperty({ description: '도움됐어요 수', example: 5 })
+    helpfulCount: number;
+
+    @ApiPropertyOptional({ description: '브리더 동물 유형', example: '강아지' })
+    animalTypeName?: string;
+
+    @ApiPropertyOptional({ description: '브리더 주력 품종', example: '골든 리트리버' })
+    breed?: string;
 }
 
 /**
@@ -53,4 +68,7 @@ export class InquiryDetailResponseDto {
 
     @ApiProperty({ description: '답변 목록', type: [InquiryAnswerDto] })
     answers: InquiryAnswerDto[];
+
+    @ApiProperty({ description: '현재 로그인한 브리더가 이미 답변했는지 여부', example: false })
+    currentUserHasAnswered: boolean;
 }

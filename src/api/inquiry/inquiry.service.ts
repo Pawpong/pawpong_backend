@@ -131,13 +131,25 @@ export class InquiryService {
 
         // 답변 변환
         const answers: InquiryAnswerDto[] = (inquiry.answers || []).map((answer) => ({
+            id: answer._id.toString(),
             breederName: answer.breederName,
-            answeredAt: this.formatAnsweredAt(answer.answeredAt),
+            answeredAt: this.formatDetailDate(answer.answeredAt),
             content: answer.content,
             profileImageUrl: answer.profileImageUrl
                 ? this.storageService.generateSignedUrl(answer.profileImageUrl, 60)
                 : undefined,
+            imageUrls: (answer.imageUrls || [])
+                .filter((url) => url && url.trim() !== '')
+                .map((url) => this.storageService.generateSignedUrl(url, 60)),
+            helpfulCount: answer.helpfulCount ?? 0,
+            animalTypeName: answer.animalTypeName,
+            breed: answer.breed,
         }));
+
+        // 현재 로그인한 브리더가 이미 답변했는지 확인
+        const currentUserHasAnswered = userId
+            ? (inquiry.answers || []).some((a) => a.breederId.toString() === userId)
+            : false;
 
         // 이미지 URL 변환
         const imageUrls = (inquiry.imageUrls || [])
@@ -158,6 +170,7 @@ export class InquiryService {
             authorNickname: inquiry.authorNickname,
             imageUrls,
             answers,
+            currentUserHasAnswered,
         };
     }
 
@@ -363,6 +376,10 @@ export class InquiryService {
                 profileImageUrl: breeder.profileImageFileName || undefined,
                 content: dto.content,
                 answeredAt: now,
+                imageUrls: dto.imageUrls || [],
+                helpfulCount: 0,
+                animalTypeName: breeder.petType === 'dog' ? '강아지' : breeder.petType === 'cat' ? '고양이' : undefined,
+                breed: breeder.breeds?.[0],
             },
             now,
         );
@@ -396,6 +413,6 @@ export class InquiryService {
      * 답변 시간 포맷: 2025. 06. 15. 답변 작성
      */
     private formatAnsweredAt(date: Date): string {
-        return `${this.formatDetailDate(date)} 답변 작성`;
+        return this.formatDetailDate(date);
     }
 }
