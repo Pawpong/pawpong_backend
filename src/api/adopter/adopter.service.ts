@@ -7,7 +7,6 @@ import { ApplicationStatus, ReportStatus, RecipientType } from '../../common/enu
 
 import { MailService } from '../../common/mail/mail.service';
 import { StorageService } from '../../common/storage/storage.service';
-import { AlimtalkService } from '../../common/alimtalk/alimtalk.service';
 import { MailTemplateService } from '../../common/mail/mail-template.service';
 import { NotificationService } from '../notification/notification.service';
 import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
@@ -58,8 +57,6 @@ export class AdopterService {
         private mailTemplateService: MailTemplateService,
         private notificationService: NotificationService,
         private discordWebhookService: DiscordWebhookService,
-        private alimtalkService: AlimtalkService,
-
         private adopterRepository: AdopterRepository,
         private breederRepository: BreederRepository,
         private availablePetManagementRepository: AvailablePetManagementRepository,
@@ -257,24 +254,6 @@ export class AdopterService {
         }
 
         await builder.send();
-
-        // 카카오 알림톡 발송 (브리더에게)
-        if (breeder.phoneNumber) {
-            try {
-                const alimtalkResult = await this.alimtalkService.sendConsultationRequest(breeder.phoneNumber);
-                if (alimtalkResult.success) {
-                    this.logger.log(
-                        `[sendNewApplicationNotification] 상담 신청 알림톡 발송 성공: ${breeder.phoneNumber}`,
-                    );
-                } else {
-                    this.logger.warn(
-                        `[sendNewApplicationNotification] 상담 신청 알림톡 발송 실패: ${alimtalkResult.error}`,
-                    );
-                }
-            } catch (error) {
-                this.logger.error(`[sendNewApplicationNotification] 알림톡 발송 오류: ${error.message}`);
-            }
-        }
     }
 
     /**
@@ -417,20 +396,6 @@ export class AdopterService {
         }
 
         await builder.send();
-
-        // 카카오 알림톡 발송
-        if (breeder.phoneNumber) {
-            try {
-                const alimtalkResult = await this.alimtalkService.sendNewReview(breeder.phoneNumber);
-                if (alimtalkResult.success) {
-                    this.logger.log(`[sendNewReviewNotification] 신규 후기 알림톡 발송 성공: ${breeder.phoneNumber}`);
-                } else {
-                    this.logger.warn(`[sendNewReviewNotification] 신규 후기 알림톡 발송 실패: ${alimtalkResult.error}`);
-                }
-            } catch (error) {
-                this.logger.error(`[sendNewReviewNotification] 알림톡 발송 오류: ${error.message}`);
-            }
-        }
     }
 
     /**
