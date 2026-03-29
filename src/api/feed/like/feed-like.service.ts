@@ -3,9 +3,9 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
-import { Video, VideoStatus } from '../../../schema/video.schema.js';
-import { VideoLike } from '../../../schema/video-like.schema.js';
-import { StorageService } from '../../../common/storage/storage.service.js';
+import { Video, VideoStatus } from '../../../schema/video.schema';
+import { VideoLike } from '../../../schema/video-like.schema';
+import { StorageService } from '../../../common/storage/storage.service';
 
 /**
  * 피드 좋아요 서비스
