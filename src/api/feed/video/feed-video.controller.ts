@@ -13,16 +13,16 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { FeedVideoService } from './services/feed-video.service.js';
-import { FeedLikeService } from '../like/feed-like.service.js';
-import { FeedCommentService } from '../comment/feed-comment.service.js';
-import { FeedTagService } from '../tag/feed-tag.service.js';
-import { UploadVideoRequestDto } from './dto/request/upload-video-request.dto.js';
-import { CreateCommentRequestDto, UpdateCommentRequestDto } from '../comment/dto/request/comment-request.dto.js';
-import { UploadUrlResponseDto, VideoMetaResponseDto, FeedResponseDto } from './dto/response/video-response.dto.js';
-import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard.js';
-import { OptionalJwtAuthGuard } from '../../../common/guard/optional-jwt-auth.guard.js';
-import { CurrentUser } from '../../../common/decorator/current-user.decorator.js';
+import { FeedVideoService } from './services/feed-video.service';
+import { FeedLikeService } from '../like/feed-like.service';
+import { FeedCommentService } from '../comment/feed-comment.service';
+import { FeedTagService } from '../tag/feed-tag.service';
+import { UploadVideoRequestDto } from './dto/request/upload-video-request.dto';
+import { CreateCommentRequestDto, UpdateCommentRequestDto } from '../comment/dto/request/comment-request.dto';
+import { UploadUrlResponseDto, VideoMetaResponseDto, FeedResponseDto } from './dto/response/video-response.dto';
+import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../../../common/guard/optional-jwt-auth.guard';
+import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 
 /**
  * 피드 동영상 API 컨트롤러
