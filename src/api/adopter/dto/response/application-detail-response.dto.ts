@@ -23,8 +23,9 @@ export class ApplicationFormDataDto {
     @ApiProperty({
         description: '자기소개 (성별, 연령대, 거주지, 생활 패턴 등)',
         example: '안녕하세요. 30대 남성이며 서울 강남구에 거주하고 있습니다.',
+        required: false,
     })
-    selfIntroduction: string;
+    selfIntroduction?: string;
 
     /**
      * 함께 거주하는 가족 구성원 정보
@@ -53,8 +54,9 @@ export class ApplicationFormDataDto {
     @ApiProperty({
         description: '알러지 검사 정보',
         example: '본인과 배우자 모두 알러지 검사 완료했으며, 반려동물 알러지 없음',
+        required: false,
     })
-    allergyTestInfo: string;
+    allergyTestInfo?: string;
 
     /**
      * 평균적으로 집을 비우는 시간
@@ -63,8 +65,9 @@ export class ApplicationFormDataDto {
     @ApiProperty({
         description: '집을 비우는 시간',
         example: '주중 9시간(오전 9시~오후 6시), 주말 집에 있음',
+        required: false,
     })
-    timeAwayFromHome: string;
+    timeAwayFromHome?: string;
 
     /**
      * 반려동물과 함께 지낼 공간 소개
@@ -73,8 +76,9 @@ export class ApplicationFormDataDto {
     @ApiProperty({
         description: '거주 공간 소개',
         example: '거실과 안방을 자유롭게 이용할 수 있습니다.',
+        required: false,
     })
-    livingSpaceDescription: string;
+    livingSpaceDescription?: string;
 
     /**
      * 현재/이전 반려동물 정보
@@ -83,8 +87,9 @@ export class ApplicationFormDataDto {
     @ApiProperty({
         description: '반려동물 경험',
         example: '5년 전 고양이 한 마리를 키웠습니다.',
+        required: false,
     })
-    previousPetExperience: string;
+    previousPetExperience?: string;
 }
 
 /**

@@ -102,10 +102,15 @@ export class AdopterService {
             }
         }
 
-        // 1-1. 프론트엔드 폼에서 입력한 이름, 이메일, 전화번호 사용 (DB 값이 아닌 사용자가 직접 입력한 값)
-        const applicantName = dto.name;
-        const applicantEmail = dto.email;
-        const applicantPhone = dto.phone;
+        // 1-1. 폼에서 입력한 연락처(선택) — 없으면 계정 정보로 저장
+        const applicantName =
+            dto.name ??
+            (userRole === 'breeder'
+                ? (applicant as { name?: string; nickname: string }).name || applicant.nickname
+                : applicant.nickname) ??
+            '';
+        const applicantEmail = dto.email ?? applicant.emailAddress ?? '';
+        const applicantPhone = dto.phone ?? applicant.phoneNumber ?? '';
 
         // 2. 개인정보 수집 동의 확인
         if (!dto.privacyConsent) {
