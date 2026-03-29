@@ -400,7 +400,7 @@ describe('Breeder Management API E2E Tests (Simple)', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .get('/api/breeder-management/applications?page=1&take=10')
+                .get('/api/breeder-management/applications?page=1&limit=10')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .expect(200);
 
