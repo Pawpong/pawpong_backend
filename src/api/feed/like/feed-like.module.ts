@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Video, VideoSchema } from '../../../schema/video.schema.js';
-import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema.js';
-import { FeedLikeService } from './feed-like.service.js';
-import { StorageModule } from '../../../common/storage/storage.module.js';
+import { Video, VideoSchema } from '../../../schema/video.schema';
+import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema';
+import { FeedLikeService } from './feed-like.service';
+import { StorageModule } from '../../../common/storage/storage.module';
 
 /**
  * 피드 좋아요 모듈

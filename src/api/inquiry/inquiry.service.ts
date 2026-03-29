@@ -131,13 +131,25 @@ export class InquiryService {
 
         // 답변 변환
         const answers: InquiryAnswerDto[] = (inquiry.answers || []).map((answer) => ({
+            id: answer._id.toString(),
             breederName: answer.breederName,
-            answeredAt: this.formatAnsweredAt(answer.answeredAt),
+            answeredAt: this.formatDetailDate(answer.answeredAt),
             content: answer.content,
             profileImageUrl: answer.profileImageUrl
                 ? this.storageService.generateSignedUrl(answer.profileImageUrl, 60)
                 : undefined,
+            imageUrls: (answer.imageUrls || [])
+                .filter((url) => url && url.trim() !== '')
+                .map((url) => this.storageService.generateSignedUrl(url, 60)),
+            helpfulCount: answer.helpfulCount ?? 0,
+            animalTypeName: answer.animalTypeName,
+            breed: answer.breed,
         }));
+
+        // 현재 로그인한 브리더가 이미 답변했는지 확인
+        const currentUserHasAnswered = userId
+            ? (inquiry.answers || []).some((a) => a.breederId.toString() === userId)
+            : false;
 
         // 이미지 URL 변환
         const imageUrls = (inquiry.imageUrls || [])
@@ -158,6 +170,7 @@ export class InquiryService {
             authorNickname: inquiry.authorNickname,
             imageUrls,
             answers,
+            currentUserHasAnswered,
         };
     }
 
@@ -264,6 +277,56 @@ export class InquiryService {
     }
 
     /**
+     * 브리더에게 들어온 1:1 질문 목록 조회 (내 답변 페이지)
+     * answered=true: 답변 완료, false: 답변 전
+     */
+    async getBreederInquiries(
+        breederId: string,
+        answered: boolean,
+        page: number = 1,
+        limit: number = 15,
+    ): Promise<InquiryListResponseDto> {
+        this.logger.logStart('getBreederInquiries', '브리더 문의 목록 조회', { breederId, answered, page, limit });
+
+        const skip = (page - 1) * limit;
+        const items = await this.inquiryRepository.findByTargetBreeder(breederId, answered, skip, limit + 1);
+
+        const hasMore = items.length > limit;
+        const pagedItems = hasMore ? items.slice(0, limit) : items;
+
+        const data: InquiryListItemDto[] = pagedItems.map((inquiry) => {
+            let latestAnswer: LatestAnswerDto | undefined;
+            if (inquiry.answers && inquiry.answers.length > 0) {
+                const latest = inquiry.answers[inquiry.answers.length - 1];
+                latestAnswer = {
+                    breederName: latest.breederName,
+                    answeredAt: this.formatAnsweredAt(latest.answeredAt),
+                    content: latest.content,
+                    profileImageUrl: latest.profileImageUrl
+                        ? this.storageService.generateSignedUrl(latest.profileImageUrl, 60)
+                        : undefined,
+                };
+            }
+
+            return {
+                id: inquiry._id.toString(),
+                title: inquiry.title,
+                content: inquiry.content,
+                type: inquiry.type,
+                animalType: inquiry.animalType,
+                viewCount: inquiry.viewCount,
+                answerCount: inquiry.answers?.length || 0,
+                latestAnswer,
+                createdAt: this.formatDate(inquiry.createdAt),
+            };
+        });
+
+        this.logger.logSuccess('getBreederInquiries', '브리더 문의 목록 조회 완료', { count: data.length, hasMore });
+
+        return { data, hasMore };
+    }
+
+    /**
      * 문의 수정 (작성자 본인만)
      * 답변이 달린 문의는 수정 불가
      */
@@ -363,6 +426,10 @@ export class InquiryService {
                 profileImageUrl: breeder.profileImageFileName || undefined,
                 content: dto.content,
                 answeredAt: now,
+                imageUrls: dto.imageUrls || [],
+                helpfulCount: 0,
+                animalTypeName: breeder.petType === 'dog' ? '강아지' : breeder.petType === 'cat' ? '고양이' : undefined,
+                breed: breeder.breeds?.[0],
             },
             now,
         );
@@ -396,6 +463,6 @@ export class InquiryService {
      * 답변 시간 포맷: 2025. 06. 15. 답변 작성
      */
     private formatAnsweredAt(date: Date): string {
-        return `${this.formatDetailDate(date)} 답변 작성`;
+        return this.formatDetailDate(date);
     }
 }
