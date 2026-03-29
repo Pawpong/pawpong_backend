@@ -40,10 +40,9 @@ export class CustomQuestionResponse {
 }
 
 /**
- * 표준 입양 신청 정보 (Figma 디자인 기반 - 모든 브리더 공통 필수)
+ * 표준 입양 신청 정보 (Figma 디자인 기반)
  *
- * 이 17개 필드는 모든 브리더에게 필수로 적용됩니다.
- * 데이터 분석과 표준화를 위해 정적으로 관리합니다.
+ * 일부 텍스트 필드는 선택이며, 동의·가족·케어 관련 필드는 필수입니다.
  */
 @Schema({ _id: false })
 export class StandardApplicationData {
@@ -57,8 +56,8 @@ export class StandardApplicationData {
      * 자기소개 (최대 1500자)
      * 성별, 연령대, 거주지, 결혼 계획, 생활 패턴 등
      */
-    @Prop({ required: true, maxlength: 1500 })
-    selfIntroduction: string;
+    @Prop({ required: false, maxlength: 1500 })
+    selfIntroduction?: string;
 
     /**
      * 함께 거주하는 가족 구성원 정보
@@ -77,29 +76,29 @@ export class StandardApplicationData {
      * 알러지 검사 정보
      * 알러지 검사 여부, 결과(유무), 향후 계획
      */
-    @Prop({ required: true })
-    allergyTestInfo: string;
+    @Prop({ required: false })
+    allergyTestInfo?: string;
 
     /**
      * 평균적으로 집을 비우는 시간
      * 출퇴근·외출 시간을 포함해 하루 중 집을 비우는 시간
      */
-    @Prop({ required: true })
-    timeAwayFromHome: string;
+    @Prop({ required: false })
+    timeAwayFromHome?: string;
 
     /**
      * 반려동물과 함께 지낼 공간 소개 (최대 1500자)
      * 반려동물이 주로 생활할 공간과 환경
      */
-    @Prop({ required: true, maxlength: 1500 })
-    livingSpaceDescription: string;
+    @Prop({ required: false, maxlength: 1500 })
+    livingSpaceDescription?: string;
 
     /**
      * 현재/이전 반려동물 정보 (최대 1500자)
      * 품종, 성격, 함께한 기간, 이별 사유 등
      */
-    @Prop({ required: true, maxlength: 1500 })
-    previousPetExperience: string;
+    @Prop({ required: false, maxlength: 1500 })
+    previousPetExperience?: string;
 
     /**
      * 기본 케어 책임 가능 여부
@@ -163,20 +162,20 @@ export class AdoptionApplication {
     /**
      * 입양자 이름 (비정규화 - 빠른 조회를 위해 저장)
      */
-    @Prop({ required: true })
-    adopterName: string;
+    @Prop({ required: false })
+    adopterName?: string;
 
     /**
      * 입양자 이메일 (비정규화)
      */
-    @Prop({ required: true })
-    adopterEmail: string;
+    @Prop({ required: false })
+    adopterEmail?: string;
 
     /**
      * 입양자 휴대폰 번호 (비정규화)
      */
-    @Prop({ required: true })
-    adopterPhone: string;
+    @Prop({ required: false })
+    adopterPhone?: string;
 
     /**
      * 신청 대상 반려동물 ID (선택사항 - 특정 개체 지정 없이 전체 상담일 수도 있음)
@@ -206,7 +205,7 @@ export class AdoptionApplication {
     status: string;
 
     /**
-     * 표준 입양 신청 폼 응답 데이터 (Figma 디자인 기반 17개 필수 필드)
+     * 표준 입양 신청 폼 응답 데이터 (Figma 디자인 기반)
      */
     @Prop({ required: true, type: StandardApplicationData })
     standardResponses: StandardApplicationData;
