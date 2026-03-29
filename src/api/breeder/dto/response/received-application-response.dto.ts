@@ -24,8 +24,9 @@ export class ApplicationFormDataDto {
         description: '자기소개 (성별, 연령대, 거주지, 결혼 계획, 생활 패턴 등)',
         example:
             '안녕하세요. 30대 남성이며 서울 강남구에 거주하고 있습니다. 재택근무를 하고 있어 반려동물과 충분한 시간을 보낼 수 있습니다.',
+        required: false,
     })
-    selfIntroduction: string;
+    selfIntroduction?: string;
 
     /**
      * 함께 거주하는 가족 구성원 정보
@@ -54,8 +55,9 @@ export class ApplicationFormDataDto {
     @ApiProperty({
         description: '알러지 검사 정보',
         example: '본인과 배우자 모두 알러지 검사 완료했으며, 반려동물 알러지 없음',
+        required: false,
     })
-    allergyTestInfo: string;
+    allergyTestInfo?: string;
 
     /**
      * 평균적으로 집을 비우는 시간
@@ -64,8 +66,9 @@ export class ApplicationFormDataDto {
     @ApiProperty({
         description: '집을 비우는 시간',
         example: '주중 9시간(오전 9시~오후 6시), 주말 집에 있음',
+        required: false,
     })
-    timeAwayFromHome: string;
+    timeAwayFromHome?: string;
 
     /**
      * 반려동물과 함께 지낼 공간 소개
@@ -75,8 +78,9 @@ export class ApplicationFormDataDto {
         description: '거주 공간 소개',
         example:
             '거실과 안방을 자유롭게 이용할 수 있습니다. 거실은 약 20평 크기이며, 캣타워와 스크래처를 설치할 예정입니다.',
+        required: false,
     })
-    livingSpaceDescription: string;
+    livingSpaceDescription?: string;
 
     /**
      * 현재/이전 반려동물 정보
@@ -86,8 +90,9 @@ export class ApplicationFormDataDto {
         description: '반려동물 경험',
         example:
             '5년 전 고양이 한 마리를 키웠습니다. 러시안블루 품종이었으며, 매우 온순한 성격이었습니다. 수명을 다해 무지개다리를 건넜습니다.',
+        required: false,
     })
-    previousPetExperience: string;
+    previousPetExperience?: string;
 
     /**
      * 기본 케어 가능 여부
@@ -176,8 +181,9 @@ export class ReceivedApplicationResponseDto {
     @ApiProperty({
         description: '입양자 이름',
         example: '김입양',
+        required: false,
     })
-    adopterName: string;
+    adopterName?: string;
 
     /**
      * 입양자 닉네임
@@ -196,8 +202,9 @@ export class ReceivedApplicationResponseDto {
     @ApiProperty({
         description: '입양자 이메일',
         example: 'adopter@example.com',
+        required: false,
     })
-    adopterEmail: string;
+    adopterEmail?: string;
 
     /**
      * 입양자 휴대폰 번호
@@ -206,8 +213,9 @@ export class ReceivedApplicationResponseDto {
     @ApiProperty({
         description: '입양자 휴대폰 번호',
         example: '01012345678',
+        required: false,
     })
-    adopterPhone: string;
+    adopterPhone?: string;
 
     /**
      * 신청한 반려동물 ID (있는 경우)

@@ -22,8 +22,9 @@ export class AdminApplicationListItemDto {
     @ApiProperty({
         description: '입양자 이름',
         example: '홍길동',
+        required: false,
     })
-    adopterName: string;
+    adopterName?: string;
 
     /**
      * 입양자 이메일
@@ -32,8 +33,9 @@ export class AdminApplicationListItemDto {
     @ApiProperty({
         description: '입양자 이메일',
         example: 'adopter@example.com',
+        required: false,
     })
-    adopterEmail: string;
+    adopterEmail?: string;
 
     /**
      * 입양자 전화번호
@@ -42,8 +44,9 @@ export class AdminApplicationListItemDto {
     @ApiProperty({
         description: '입양자 전화번호',
         example: '010-1234-5678',
+        required: false,
     })
-    adopterPhone: string;
+    adopterPhone?: string;
 
     /**
      * 브리더 ID
