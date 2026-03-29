@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Video, VideoSchema } from '../../../schema/video.schema.js';
-import { FeedTagService } from './feed-tag.service.js';
-import { StorageModule } from '../../../common/storage/storage.module.js';
+import { Video, VideoSchema } from '../../../schema/video.schema';
+import { FeedTagService } from './feed-tag.service';
+import { StorageModule } from '../../../common/storage/storage.module';
 
 /**
  * 피드 태그 모듈

@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Video, VideoSchema } from '../../../schema/video.schema.js';
-import { VideoComment, VideoCommentSchema } from '../../../schema/video-comment.schema.js';
-import { FeedCommentService } from './feed-comment.service.js';
+import { Video, VideoSchema } from '../../../schema/video.schema';
+import { VideoComment, VideoCommentSchema } from '../../../schema/video-comment.schema';
+import { FeedCommentService } from './feed-comment.service';
 
 /**
  * 피드 댓글 모듈
