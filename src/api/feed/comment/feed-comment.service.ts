@@ -3,8 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
-import { Video } from '../../../schema/video.schema.js';
-import { VideoComment } from '../../../schema/video-comment.schema.js';
+import { Video } from '../../../schema/video.schema';
+import { VideoComment } from '../../../schema/video-comment.schema';
 
 /**
  * 피드 댓글 서비스

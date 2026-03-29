@@ -14,7 +14,6 @@ import {
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
 import { MailService } from '../../../common/mail/mail.service';
 import { NotificationService } from '../../../api/notification/notification.service';
-import { AlimtalkService } from '../../../common/alimtalk/alimtalk.service';
 
 import { BreederSuspendRequestDto } from './dto/request/breeder-suspend-request.dto';
 import { BreederRemindRequestDto } from './dto/request/breeder-remind-request.dto';
@@ -45,7 +44,6 @@ export class BreederAdminService {
         private readonly mailTemplateService: MailTemplateService,
         private readonly mailService: MailService,
         private readonly notificationService: NotificationService,
-        private readonly alimtalkService: AlimtalkService,
     ) {}
 
     /**
@@ -333,23 +331,6 @@ export class BreederAdminService {
                         console.log('🔔 [프로필 완성 독려] 서비스 알림 발송 시작');
                         await builder.send();
                         console.log('✅ [프로필 완성 독려] 서비스 알림 발송 완료');
-
-                        // 카카오 알림톡 발송
-                        const breederPhone = breeder.phoneNumber;
-                        const breederName = breeder.nickname || '브리더';
-                        if (breederPhone) {
-                            const alimtalkResult = await this.alimtalkService.sendDocumentReminder(
-                                breederPhone,
-                                breederName,
-                            );
-                            if (alimtalkResult.success) {
-                                console.log(`✅ [프로필 완성 독려] 알림톡 발송 성공: ${breederPhone}`);
-                            } else {
-                                console.log(`⚠️ [프로필 완성 독려] 알림톡 발송 실패: ${alimtalkResult.error}`);
-                            }
-                        } else {
-                            console.log('⚠️ [프로필 완성 독려] 전화번호 없음 - 알림톡 발송 생략');
-                        }
 
                         await this.logAdminActivity(
                             adminId,

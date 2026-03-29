@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { Notice, NoticeSchema } from 'src/schema/notice.schema';
+import { Notice, NoticeSchema } from '../../schema/notice.schema';
 import { NoticeController } from './notice.controller';
 import { NoticeAdminController } from './admin/notice-admin.controller';
 import { NoticeService } from './notice.service';
 import { NoticeAdminService } from './admin/notice-admin.service';
-import { CustomLoggerService } from 'src/common/logger/custom-logger.service';
+import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 
 /**
  * 공지사항 모듈

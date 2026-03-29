@@ -3,31 +3,30 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { ObjectId } from 'mongodb';
+import { MongoMemoryServer } from 'mongodb-memory-server';
 
 import { AppModule } from '../../app.module';
+
+/** 테스트용 인메모리 MongoDB 인스턴스 */
+let mongod: MongoMemoryServer;
 
 /**
  * E2E 테스트용 NestJS 애플리케이션 생성
  *
  * @description
  * 모든 E2E 테스트에서 사용하는 통일된 테스트 앱 생성 함수입니다.
+ * MongoDBMemoryServer를 사용하여 외부 DB 의존 없이 독립 실행 가능합니다.
  * - 글로벌 프리픽스: /api
  * - 글로벌 파이프: ValidationPipe (transform, whitelist 활성화)
- *
- * @example
- * ```typescript
- * let app: INestApplication;
- *
- * beforeAll(async () => {
- *   app = await createTestingApp();
- * });
- *
- * afterAll(async () => {
- *   await app.close();
- * });
- * ```
  */
 export async function createTestingApp(): Promise<INestApplication> {
+    // 인메모리 MongoDB 서버 시작
+    mongod = await MongoMemoryServer.create();
+    const mongoUri = mongod.getUri();
+
+    // MONGODB_URI 환경변수를 인메모리 서버로 오버라이드
+    process.env.MONGODB_URI = mongoUri;
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
     }).compile();
@@ -65,20 +64,30 @@ export async function createTestingApp(): Promise<INestApplication> {
  * ```
  */
 export async function cleanupDatabase(app: INestApplication): Promise<void> {
-    const connection = app.get<Connection>(getConnectionToken());
+    try {
+        const connection = app.get<Connection>(getConnectionToken());
 
-    // Districts는 시딩 데이터이므로 삭제하지 않음
-    const excludedCollections = ['districts', 'breeds'];
+        // Districts는 시딩 데이터이므로 삭제하지 않음
+        const excludedCollections = ['districts', 'breeds'];
 
-    const collections = connection.collections;
+        const collections = connection.collections;
 
-    for (const key in collections) {
-        const collection = collections[key];
+        for (const key in collections) {
+            const collection = collections[key];
 
-        // 제외 목록에 없는 컬렉션만 삭제
-        if (!excludedCollections.includes(collection.collectionName)) {
-            await collection.deleteMany({});
+            // 제외 목록에 없는 컬렉션만 삭제
+            if (!excludedCollections.includes(collection.collectionName)) {
+                await collection.deleteMany({});
+            }
         }
+    } catch {
+        // 연결이 이미 닫힌 경우 무시
+    }
+
+    // 인메모리 MongoDB 서버 정리
+    if (mongod) {
+        await mongod.stop();
+        mongod = undefined as any;
     }
 }
 
@@ -186,6 +195,88 @@ export async function seedAdmin(
         adminId: result.insertedId.toString(),
         email: admin.email,
     };
+}
+
+/**
+ * 관리자 계정 생성 + 로그인하여 JWT 토큰 반환
+ *
+ * @description
+ * seedAdmin + auth-admin/login을 연결하여 바로 사용 가능한 토큰을 반환합니다.
+ * 실패 시 null을 반환합니다.
+ */
+export async function getAdminToken(app: INestApplication, password: string = 'admin1234'): Promise<string | null> {
+    const request = require('supertest');
+    const { email } = await seedAdmin(app, password);
+
+    const loginResponse = await request(app.getHttpServer())
+        .post('/api/auth-admin/login')
+        .send({ email, password });
+
+    if (loginResponse.status === 200 && loginResponse.body.data?.accessToken) {
+        return loginResponse.body.data.accessToken;
+    }
+    return null;
+}
+
+/**
+ * 입양자 등록 API를 통해 토큰 반환
+ */
+export async function getAdopterToken(
+    app: INestApplication,
+): Promise<{ token: string; adopterId: string } | null> {
+    const request = require('supertest');
+    const timestamp = Date.now();
+    const providerId = Math.random().toString().substr(2, 10);
+
+    const response = await request(app.getHttpServer())
+        .post('/api/auth/register/adopter')
+        .send({
+            tempId: `temp_kakao_${providerId}_${timestamp}`,
+            email: `adopter_${timestamp}_${providerId}@test.com`,
+            nickname: `테스트입양자${timestamp}`,
+            phone: `010-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+            profileImage: 'https://example.com/profile.jpg',
+        });
+
+    if (response.status === 200 && response.body.data?.accessToken) {
+        return {
+            token: response.body.data.accessToken,
+            adopterId: response.body.data.adopterId,
+        };
+    }
+    return null;
+}
+
+/**
+ * 브리더 등록 API를 통해 토큰 반환
+ */
+export async function getBreederToken(
+    app: INestApplication,
+): Promise<{ token: string; breederId: string } | null> {
+    const request = require('supertest');
+    const timestamp = Date.now();
+
+    const response = await request(app.getHttpServer())
+        .post('/api/auth/register/breeder')
+        .send({
+            email: `breeder_${timestamp}@test.com`,
+            phoneNumber: `010-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+            breederName: `테스트브리더${timestamp}`,
+            breederLocation: { city: '서울특별시', district: '강남구' },
+            animal: 'dog',
+            breeds: ['포메라니안'],
+            plan: 'basic',
+            level: 'new',
+            agreements: { termsOfService: true, privacyPolicy: true, marketingConsent: false },
+        });
+
+    if (response.status === 200 && response.body.data?.accessToken) {
+        return {
+            token: response.body.data.accessToken,
+            breederId: response.body.data.breederId,
+        };
+    }
+    return null;
 }
 
 /**
