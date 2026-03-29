@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { VideoStatus } from '../../../../../schema/video.schema.js';
+import { VideoStatus } from '../../../../../schema/video.schema';
 
 /**
  * 업로드 URL 응답 DTO

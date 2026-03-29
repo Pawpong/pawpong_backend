@@ -92,7 +92,7 @@ export class Notification extends Document {
     /**
      * 알림 타입
      */
-    @Prop({ required: true, enum: Object.values(NotificationType) })
+    @Prop({ required: true, type: String, enum: Object.values(NotificationType) })
     type: NotificationType;
 
     /**
