@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { FeedVideoModule } from './video/feed-video.module.js';
-import { FeedCommentModule } from './comment/feed-comment.module.js';
-import { FeedLikeModule } from './like/feed-like.module.js';
-import { FeedTagModule } from './tag/feed-tag.module.js';
+import { FeedVideoModule } from './video/feed-video.module';
+import { FeedCommentModule } from './comment/feed-comment.module';
+import { FeedLikeModule } from './like/feed-like.module';
+import { FeedTagModule } from './tag/feed-tag.module';
 
 /**
  * 피드 도메인 모듈

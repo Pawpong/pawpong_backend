@@ -1,17 +1,17 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { BullModule } from '@nestjs/bullmq';
-import { Video, VideoSchema } from '../../../schema/video.schema.js';
-import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema.js';
-import { VideoComment, VideoCommentSchema } from '../../../schema/video-comment.schema.js';
-import { FeedVideoController } from './feed-video.controller.js';
-import { FeedVideoService } from './services/feed-video.service.js';
-import { FfmpegService } from './services/ffmpeg.service.js';
-import { VideoEncodingProcessor } from './processors/video-encoding.processor.js';
-import { StorageModule } from '../../../common/storage/storage.module.js';
-import { FeedCommentModule } from '../comment/feed-comment.module.js';
-import { FeedLikeModule } from '../like/feed-like.module.js';
-import { FeedTagModule } from '../tag/feed-tag.module.js';
+import { Video, VideoSchema } from '../../../schema/video.schema';
+import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema';
+import { VideoComment, VideoCommentSchema } from '../../../schema/video-comment.schema';
+import { FeedVideoController } from './feed-video.controller';
+import { FeedVideoService } from './services/feed-video.service';
+import { FfmpegService } from './services/ffmpeg.service';
+import { VideoEncodingProcessor } from './processors/video-encoding.processor';
+import { StorageModule } from '../../../common/storage/storage.module';
+import { FeedCommentModule } from '../comment/feed-comment.module';
+import { FeedLikeModule } from '../like/feed-like.module';
+import { FeedTagModule } from '../tag/feed-tag.module';
 
 /**
  * 피드 동영상 모듈
