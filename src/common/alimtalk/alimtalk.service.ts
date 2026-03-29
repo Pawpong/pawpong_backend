@@ -318,6 +318,36 @@ export class AlimtalkService implements OnModuleInit {
     }
 
     /**
+     * CoolSMS SMS 직접 발송 (알림톡 없이)
+     * 카카오 채널 없이도 발송 가능한 일반 SMS
+     * 주로 인증번호 발송에 사용
+     */
+    async sendSmsDirect(phone: string, message: string): Promise<AlimtalkResult> {
+        if (!this.messageService) {
+            this.logger.error('[sendSmsDirect] CoolSMS 서비스가 초기화되지 않았습니다.');
+            return { success: false, error: 'CoolSMS 서비스가 초기화되지 않았습니다.' };
+        }
+
+        try {
+            const normalizedPhone = this.normalizePhoneNumber(phone);
+
+            const response = await this.messageService.sendOne({
+                to: normalizedPhone,
+                from: this.senderPhone,
+                type: 'SMS',
+                autoTypeDetect: false,
+                text: message,
+            });
+
+            this.logger.log(`[sendSmsDirect] SMS 발송 성공: ${normalizedPhone}`);
+            return { success: true, messageId: response.messageId || response.groupId };
+        } catch (error) {
+            this.logger.error(`[sendSmsDirect] SMS 발송 실패: ${error.message}`, error.stack);
+            return { success: false, error: error.message };
+        }
+    }
+
+    /**
      * 전화번호 정규화
      */
     private normalizePhoneNumber(phone: string): string {

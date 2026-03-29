@@ -26,7 +26,7 @@ describe('Platform Admin API E2E Tests', () => {
 
         // 실제 관리자 로그인 API 호출하여 토큰 획득
         const loginResponse = await request(app.getHttpServer())
-            .post('/api/auth/admin/login')
+            .post('/api/auth-admin/login')
             .send({
                 email: email,
                 password: adminPassword,

@@ -3,9 +3,9 @@ import { Job } from 'bullmq';
 import { Logger } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { FfmpegService } from '../services/ffmpeg.service.js';
-import { FeedVideoService } from '../services/feed-video.service.js';
-import { StorageService } from '../../../../common/storage/storage.service.js';
+import { FfmpegService } from '../services/ffmpeg.service';
+import { FeedVideoService } from '../services/feed-video.service';
+import { StorageService } from '../../../../common/storage/storage.service';
 
 /**
  * 동영상 인코딩 Worker
