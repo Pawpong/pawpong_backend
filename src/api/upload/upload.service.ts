@@ -34,6 +34,7 @@ export class UploadService {
     // 파일 크기 제한 (최대 100MB)
     private readonly IMAGE_MAX_SIZE = 100 * 1024 * 1024; // 100MB
     private readonly VIDEO_MAX_SIZE = 100 * 1024 * 1024; // 100MB
+    private static readonly LEGACY_BUCKET_NAMES = ['pawpong_bucket', 'pawpong_s3'];
 
     constructor(
         private readonly storageService: StorageService,
@@ -348,9 +349,16 @@ export class UploadService {
             let filePath = urlObj.pathname.startsWith('/') ? urlObj.pathname.slice(1) : urlObj.pathname;
             // 스마일서브 URL인 경우 버킷 이름(pawpong_bucket/) 제거
             if (urlObj.hostname.includes('object.iwinv.kr')) {
-                const bucketName = 'pawpong_bucket';
-                if (filePath.startsWith(`${bucketName}/`)) {
-                    filePath = filePath.slice(`${bucketName}/`.length);
+                const bucketNames = new Set([
+                    this.storageService.getBucketName(),
+                    ...UploadService.LEGACY_BUCKET_NAMES,
+                ].filter(Boolean));
+
+                for (const bucketName of bucketNames) {
+                    if (filePath.startsWith(`${bucketName}/`)) {
+                        filePath = filePath.slice(`${bucketName}/`.length);
+                        break;
+                    }
                 }
             }
             return filePath || '';
