@@ -20,6 +20,7 @@ import convert from 'heic-convert';
  */
 @Injectable()
 export class StorageService {
+    private static readonly LEGACY_BUCKET_NAMES = ['pawpong_bucket', 'pawpong_s3'];
     private s3: S3Client;
     private bucketName: string;
     private cdnBaseUrl: string;
@@ -166,6 +167,18 @@ export class StorageService {
         return `${this.cdnBaseUrl}/${fileName}`;
     }
 
+    private stripBucketPrefix(filePath: string): string {
+        const bucketNames = new Set([this.bucketName, ...StorageService.LEGACY_BUCKET_NAMES].filter(Boolean));
+
+        for (const bucketName of bucketNames) {
+            if (filePath.startsWith(`${bucketName}/`)) {
+                return filePath.slice(`${bucketName}/`.length);
+            }
+        }
+
+        return filePath;
+    }
+
     /**
      * Signed URL 생성 (스마일서브는 공개 파일이므로 일반 URL 반환)
      * 기존 GCP CDN Signed URL 호환을 위해 메서드 유지
@@ -181,7 +194,7 @@ export class StorageService {
                 if (urlObj.hostname.includes('object.iwinv.kr')) {
                     // pathname에서 버킷 이름 제거: /pawpong_bucket/path/file.jpg -> path/file.jpg
                     const pathParts = urlObj.pathname.split('/').filter((p) => p);
-                    if (pathParts[0] === this.bucketName) {
+                    if (pathParts[0] && this.stripBucketPrefix(`${pathParts[0]}/x`) !== `${pathParts[0]}/x`) {
                         pathParts.shift(); // 버킷 이름 제거
                     }
                     filePath = pathParts.join('/');
@@ -197,9 +210,7 @@ export class StorageService {
 
         // 방어 로직: 파일 경로에 버킷 이름이 접두사로 포함된 경우 제거
         // (이전 버그로 인해 DB에 pawpong_bucket/representative/uuid.jpg 형태로 저장된 데이터 대응)
-        if (filePath.startsWith(`${this.bucketName}/`)) {
-            filePath = filePath.slice(`${this.bucketName}/`.length);
-        }
+        filePath = this.stripBucketPrefix(filePath);
 
         // 스마일서브는 공개 버킷이므로 만료 시간 없이 URL 반환
         // 민감한 파일의 경우 향후 Pre-signed URL 구현 가능
