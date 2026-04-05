@@ -28,11 +28,15 @@ import { AuthBreederRepository } from './repository/auth-breeder.repository';
 import { AuthSessionAdapter } from './infrastructure/auth-session.adapter';
 import { AuthSocialCallbackAdapter } from './infrastructure/auth-social-callback.adapter';
 import { AuthTempUploadStore } from './infrastructure/auth-temp-upload.store';
+import { AuthUploadFileStoreAdapter } from './infrastructure/auth-upload-file-store.adapter';
+import { AuthProfileImageTargetAdapter } from './infrastructure/auth-profile-image-target.adapter';
 import { AuthRegistrationPort } from './application/ports/auth-registration.port';
 import { AuthRegistrationNotificationPort } from './application/ports/auth-registration-notification.port';
 import { AuthSessionPort } from './application/ports/auth-session.port';
-import { AUTH_TEMP_UPLOAD_PORT } from './application/ports/auth-temp-upload.port';
+import { AuthTempUploadPort } from './application/ports/auth-temp-upload.port';
 import { AuthSocialCallbackPort } from './application/ports/auth-social-callback.port';
+import { AuthUploadFileStorePort } from './application/ports/auth-upload-file-store.port';
+import { AuthProfileImageTargetPort } from './application/ports/auth-profile-image-target.port';
 import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
 import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
 import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
@@ -43,9 +47,14 @@ import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
 import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
 import { ProcessSocialLoginCallbackUseCase } from './application/use-cases/process-social-login-callback.use-case';
+import { UploadAuthProfileImageUseCase } from './application/use-cases/upload-auth-profile-image.use-case';
+import { UploadAuthBreederDocumentsUseCase } from './application/use-cases/upload-auth-breeder-documents.use-case';
 import { AuthSocialIdentityService } from './domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from './domain/services/auth-stored-file-name.service';
 import { AuthSocialCallbackResponseFactoryService } from './domain/services/auth-social-callback-response-factory.service';
+import { AuthProfileImageFilePolicyService } from './domain/services/auth-profile-image-file-policy.service';
+import { AuthBreederDocumentFilePolicyService } from './domain/services/auth-breeder-document-file-policy.service';
+import { AuthBreederDocumentOriginalFileNameService } from './domain/services/auth-breeder-document-original-file-name.service';
 
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
@@ -93,6 +102,8 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         RegisterAdopterUseCase,
         RegisterBreederUseCase,
         ProcessSocialLoginCallbackUseCase,
+        UploadAuthProfileImageUseCase,
+        UploadAuthBreederDocumentsUseCase,
         AuthTokenService,
         SmsService,
         AuthAdminService,
@@ -104,9 +115,14 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthSessionAdapter,
         AuthSocialCallbackAdapter,
         AuthTempUploadStore,
+        AuthUploadFileStoreAdapter,
+        AuthProfileImageTargetAdapter,
         AuthSocialIdentityService,
         AuthStoredFileNameService,
         AuthSocialCallbackResponseFactoryService,
+        AuthProfileImageFilePolicyService,
+        AuthBreederDocumentFilePolicyService,
+        AuthBreederDocumentOriginalFileNameService,
         {
             provide: AuthRegistrationPort,
             useExisting: AuthRegistrationAdapter,
@@ -124,8 +140,16 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             useExisting: AuthSocialCallbackAdapter,
         },
         {
-            provide: AUTH_TEMP_UPLOAD_PORT,
+            provide: AuthTempUploadPort,
             useExisting: AuthTempUploadStore,
+        },
+        {
+            provide: AuthUploadFileStorePort,
+            useExisting: AuthUploadFileStoreAdapter,
+        },
+        {
+            provide: AuthProfileImageTargetPort,
+            useExisting: AuthProfileImageTargetAdapter,
         },
         JwtStrategy,
         GoogleStrategy,

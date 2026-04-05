@@ -7,7 +7,7 @@ import { RegisterBreederRequestDto } from '../../dto/request/register-breeder-re
 import { RegisterBreederResponseDto } from '../../dto/response/register-breeder-response.dto';
 import { AuthRegistrationPort } from '../ports/auth-registration.port';
 import { AuthRegistrationNotificationPort } from '../ports/auth-registration-notification.port';
-import { AUTH_TEMP_UPLOAD_PORT, type AuthTempUploadPort } from '../ports/auth-temp-upload.port';
+import { AuthTempUploadPort } from '../ports/auth-temp-upload.port';
 import { AuthSocialIdentityService } from '../../domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from '../../domain/services/auth-stored-file-name.service';
 
@@ -18,7 +18,6 @@ export class RegisterBreederUseCase {
         private readonly authRegistrationPort: AuthRegistrationPort,
         @Inject(AuthRegistrationNotificationPort)
         private readonly authRegistrationNotificationPort: AuthRegistrationNotificationPort,
-        @Inject(AUTH_TEMP_UPLOAD_PORT)
         private readonly authTempUploadPort: AuthTempUploadPort,
         private readonly authTokenService: AuthTokenService,
         private readonly authSocialIdentityService: AuthSocialIdentityService,
