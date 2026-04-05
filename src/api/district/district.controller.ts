@@ -2,15 +2,14 @@ import { Controller, Get } from '@nestjs/common';
 
 import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
 
-import { DistrictService } from './district.service';
-
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetDistrictsResponseDto } from './dto/response/get-districts-response.dto';
+import { GetAllDistrictsUseCase } from './application/use-cases/get-all-districts.use-case';
 
 @ApiController('지역 관리')
 @Controller('districts')
 export class DistrictController {
-    constructor(private readonly districtService: DistrictService) {}
+    constructor(private readonly getAllDistrictsUseCase: GetAllDistrictsUseCase) {}
 
     @Get()
     @ApiEndpoint({
@@ -20,7 +19,7 @@ export class DistrictController {
         isPublic: true,
     })
     async getAllDistricts(): Promise<ApiResponseDto<GetDistrictsResponseDto[]>> {
-        const result = await this.districtService.getAllDistricts();
+        const result = await this.getAllDistrictsUseCase.execute();
         return ApiResponseDto.success(result);
     }
 }
