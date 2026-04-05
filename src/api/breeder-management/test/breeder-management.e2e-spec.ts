@@ -1,4 +1,7 @@
 import { INestApplication } from '@nestjs/common';
+import { getConnectionToken } from '@nestjs/mongoose';
+import { ObjectId } from 'mongodb';
+import { Connection } from 'mongoose';
 import request from 'supertest';
 
 import { createTestingApp } from '../../../common/test/test-utils';
@@ -20,6 +23,9 @@ describe('Breeder Management API E2E Tests (Simple)', () => {
     let breederToken: string;
     let breederId: string;
     let adopterToken: string;
+    let adopterId: string;
+    let adopterName: string;
+    let adopterEmail: string;
 
     beforeAll(async () => {
         app = await createTestingApp();
@@ -55,18 +61,21 @@ describe('Breeder Management API E2E Tests (Simple)', () => {
 
         // 테스트용 입양자 생성
         const adopterProviderId = Math.random().toString().substr(2, 10);
+        adopterName = `테스트입양자${timestamp}`;
+        adopterEmail = `adopter_test_${timestamp}@test.com`;
         const adopterResponse = await request(app.getHttpServer())
             .post('/api/auth/register/adopter')
             .send({
                 tempId: `temp_kakao_${adopterProviderId}_${timestamp}`,
-                email: `adopter_test_${timestamp}@test.com`,
-                nickname: `테스트입양자${timestamp}`,
+                email: adopterEmail,
+                nickname: adopterName,
                 phone: '010-7777-6666',
                 profileImage: 'https://example.com/adopter.jpg',
             })
             .expect(200);
 
         adopterToken = adopterResponse.body.data.accessToken;
+        adopterId = adopterResponse.body.data.adopterId;
         console.log('✅ 테스트용 입양자 생성 완료');
     });
 
@@ -377,6 +386,50 @@ describe('Breeder Management API E2E Tests (Simple)', () => {
      * 6. 입양 신청 관리 테스트
      */
     describe('입양 신청 관리', () => {
+        let applicationId: string;
+
+        beforeAll(async () => {
+            const connection = app.get<Connection>(getConnectionToken());
+            const result = await connection.collection('adoption_applications').insertOne({
+                breederId: new ObjectId(breederId),
+                adopterId: new ObjectId(adopterId),
+                adopterName,
+                adopterEmail,
+                adopterPhone: '010-7777-6666',
+                petId: new ObjectId(),
+                petName: '테스트 신청 반려동물',
+                status: 'consultation_pending',
+                standardResponses: {
+                    privacyConsent: true,
+                    selfIntroduction: '안녕하세요. 반려동물과 충분한 시간을 보낼 수 있습니다.',
+                    familyMembers: '본인 포함 2명',
+                    allFamilyConsent: true,
+                    allergyTestInfo: '알러지 검사 완료, 이상 없음',
+                    timeAwayFromHome: '평일 6시간 정도',
+                    livingSpaceDescription: '거실과 방을 자유롭게 사용할 수 있습니다.',
+                    previousPetExperience: '이전에 강아지를 5년간 키웠습니다.',
+                    canProvideBasicCare: true,
+                    canAffordMedicalExpenses: true,
+                    preferredPetDescription: '건강하고 사람을 잘 따르는 아이',
+                    desiredAdoptionTiming: '가능한 빨리',
+                    additionalNotes: '잘 부탁드립니다.',
+                },
+                customResponses: [
+                    {
+                        questionId: 'housing-type',
+                        questionLabel: '거주 형태를 알려주세요.',
+                        questionType: 'text',
+                        answer: '아파트',
+                    },
+                ],
+                appliedAt: new Date(),
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+
+            applicationId = result.insertedId.toString();
+        });
+
         it('GET /api/breeder-management/applications - 입양 신청 목록 조회', async () => {
             if (!breederToken) {
                 console.log('⚠️  브리더 토큰이 없어서 테스트 스킵');
@@ -406,6 +459,53 @@ describe('Breeder Management API E2E Tests (Simple)', () => {
 
             expect(response.body.success).toBe(true);
             console.log('✅ 페이지네이션 파라미터 적용 확인');
+        });
+
+        it('GET /api/breeder-management/applications/:applicationId - 입양 신청 상세 조회', async () => {
+            const response = await request(app.getHttpServer())
+                .get(`/api/breeder-management/applications/${applicationId}`)
+                .set('Authorization', `Bearer ${breederToken}`)
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('입양 신청 상세 정보가 조회되었습니다.');
+            expect(response.body.data.applicationId).toBe(applicationId);
+            expect(response.body.data.adopterId).toBe(adopterId);
+            expect(response.body.data.adopterName).toBe(adopterName);
+            expect(response.body.data.adopterEmail).toBe(adopterEmail);
+            expect(response.body.data.status).toBe('consultation_pending');
+            expect(response.body.data.standardResponses).toBeDefined();
+            expect(response.body.data.customResponses).toHaveLength(1);
+            console.log('✅ 입양 신청 상세 조회 성공');
+        });
+
+        it('PATCH /api/breeder-management/applications/:applicationId - 입양 신청 상태 변경', async () => {
+            const response = await request(app.getHttpServer())
+                .patch(`/api/breeder-management/applications/${applicationId}`)
+                .set('Authorization', `Bearer ${breederToken}`)
+                .send({
+                    applicationId,
+                    status: 'consultation_completed',
+                    notes: '상담이 원활하게 마무리되었습니다.',
+                })
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('입양 신청 상태가 성공적으로 변경되었습니다.');
+            expect(response.body.data.message).toBe('입양 신청 상태가 성공적으로 업데이트되었습니다.');
+            console.log('✅ 입양 신청 상태 변경 성공');
+        });
+
+        it('GET /api/breeder-management/applications/:applicationId - 상태 변경 후 상세 재조회', async () => {
+            const response = await request(app.getHttpServer())
+                .get(`/api/breeder-management/applications/${applicationId}`)
+                .set('Authorization', `Bearer ${breederToken}`)
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.data.applicationId).toBe(applicationId);
+            expect(response.body.data.status).toBe('consultation_completed');
+            console.log('✅ 입양 신청 상태 변경 후 상세 재조회 성공');
         });
 
         it('GET /api/breeder-management/applications - 인증 없이 접근 실패', async () => {
@@ -484,7 +584,80 @@ describe('Breeder Management API E2E Tests (Simple)', () => {
     });
 
     /**
-     * 8. 입양 신청 폼 관리 테스트
+     * 8. 후기 답글 관리 테스트
+     */
+    describe('후기 답글 관리', () => {
+        let reviewId: string;
+
+        beforeAll(async () => {
+            const connection = app.get<Connection>(getConnectionToken());
+            const result = await connection.collection('breeder_reviews').insertOne({
+                applicationId: new ObjectId(),
+                breederId: new ObjectId(breederId),
+                adopterId: new ObjectId(),
+                type: 'consultation',
+                content: '브리더와의 상담이 정말 친절했어요.',
+                writtenAt: new Date(),
+                isVisible: true,
+                isReported: false,
+                createdAt: new Date(),
+                updatedAt: new Date(),
+            });
+
+            reviewId = result.insertedId.toString();
+        });
+
+        it('POST /api/breeder-management/reviews/:reviewId/reply - 후기 답글 등록', async () => {
+            const response = await request(app.getHttpServer())
+                .post(`/api/breeder-management/reviews/${reviewId}/reply`)
+                .set('Authorization', `Bearer ${breederToken}`)
+                .send({
+                    content: '소중한 후기 감사합니다.',
+                })
+                .expect(201);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('답글이 등록되었습니다.');
+            expect(response.body.data.reviewId).toBe(reviewId);
+            expect(response.body.data.replyContent).toBe('소중한 후기 감사합니다.');
+            expect(response.body.data.replyWrittenAt).toBeDefined();
+            console.log('✅ 후기 답글 등록 성공');
+        });
+
+        it('PATCH /api/breeder-management/reviews/:reviewId/reply - 후기 답글 수정', async () => {
+            const response = await request(app.getHttpServer())
+                .patch(`/api/breeder-management/reviews/${reviewId}/reply`)
+                .set('Authorization', `Bearer ${breederToken}`)
+                .send({
+                    content: '소중한 후기 정말 감사합니다.',
+                })
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('답글이 수정되었습니다.');
+            expect(response.body.data.reviewId).toBe(reviewId);
+            expect(response.body.data.replyContent).toBe('소중한 후기 정말 감사합니다.');
+            expect(response.body.data.replyWrittenAt).toBeDefined();
+            expect(response.body.data.replyUpdatedAt).toBeDefined();
+            console.log('✅ 후기 답글 수정 성공');
+        });
+
+        it('DELETE /api/breeder-management/reviews/:reviewId/reply - 후기 답글 삭제', async () => {
+            const response = await request(app.getHttpServer())
+                .delete(`/api/breeder-management/reviews/${reviewId}/reply`)
+                .set('Authorization', `Bearer ${breederToken}`)
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('답글이 삭제되었습니다.');
+            expect(response.body.data.reviewId).toBe(reviewId);
+            expect(response.body.data.message).toBe('답글이 삭제되었습니다.');
+            console.log('✅ 후기 답글 삭제 성공');
+        });
+    });
+
+    /**
+     * 9. 입양 신청 폼 관리 테스트
      */
     describe('입양 신청 폼 관리', () => {
         it('GET /api/breeder-management/application-form - 입양 신청 폼 조회', async () => {
@@ -569,7 +742,7 @@ describe('Breeder Management API E2E Tests (Simple)', () => {
     });
 
     /**
-     * 9. 응답 형식 검증 테스트
+     * 10. 응답 형식 검증 테스트
      */
     describe('응답 형식 검증', () => {
         it('표준 API 응답 형식 확인', async () => {
@@ -591,6 +764,68 @@ describe('Breeder Management API E2E Tests (Simple)', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.code).toBe(200);
             console.log('✅ 표준 API 응답 형식 검증 완료');
+        });
+    });
+
+    /**
+     * 11. 계정 탈퇴 테스트
+     */
+    describe('계정 탈퇴', () => {
+        let deleteBreederToken: string;
+        let deleteBreederId: string;
+
+        beforeAll(async () => {
+            const timestamp = Date.now();
+            const deleteBreederResponse = await request(app.getHttpServer())
+                .post('/api/auth/register/breeder')
+                .send({
+                    email: `breeder_delete_${timestamp}@test.com`,
+                    phoneNumber: '010-2222-1111',
+                    breederName: '탈퇴 테스트 브리더',
+                    breederLocation: {
+                        city: '서울특별시',
+                        district: '마포구',
+                    },
+                    animal: 'dog',
+                    breeds: ['비숑프리제'],
+                    plan: 'basic',
+                    level: 'new',
+                    agreements: {
+                        termsOfService: true,
+                        privacyPolicy: true,
+                        marketingConsent: false,
+                    },
+                })
+                .expect(200);
+
+            deleteBreederToken = deleteBreederResponse.body.data.accessToken;
+            deleteBreederId = deleteBreederResponse.body.data.breederId;
+        });
+
+        it('DELETE /api/breeder-management/account - 브리더 회원 탈퇴 성공', async () => {
+            const response = await request(app.getHttpServer())
+                .delete('/api/breeder-management/account')
+                .set('Authorization', `Bearer ${deleteBreederToken}`)
+                .send({
+                    reason: 'no_inquiry',
+                })
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('브리더 회원 탈퇴가 성공적으로 처리되었습니다.');
+            expect(response.body.data.breederId).toBe(deleteBreederId);
+            expect(response.body.data.deletedAt).toBeDefined();
+            expect(response.body.data.message).toBe('브리더 회원 탈퇴가 성공적으로 처리되었습니다.');
+
+            const connection = app.get<Connection>(getConnectionToken());
+            const deletedBreeder = await connection
+                .collection('breeders')
+                .findOne({ _id: new ObjectId(deleteBreederId) });
+
+            expect(deletedBreeder?.accountStatus).toBe('deleted');
+            expect(deletedBreeder?.deletedAt).toBeDefined();
+            expect(deletedBreeder?.deleteReason).toBe('no_inquiry');
+            console.log('✅ 브리더 회원 탈퇴 성공');
         });
     });
 });

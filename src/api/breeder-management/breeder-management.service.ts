@@ -1,15 +1,9 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import { ConfigService } from '@nestjs/config';
+import { Injectable, BadRequestException } from '@nestjs/common';
 
-import { VerificationStatus, ApplicationStatus, PetStatus } from '../../common/enum/user.enum';
+import { VerificationStatus, PetStatus } from '../../common/enum/user.enum';
 
 import { StorageService } from '../../common/storage/storage.service';
-import { NotificationService } from '../notification/notification.service';
-import { NotificationType } from '../../schema/notification.schema';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
-import { MailService } from '../../common/mail/mail.service';
 import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
 
 import { ParentPetAddDto } from './dto/request/parent-pet-add-request.dto';
@@ -23,13 +17,32 @@ import { BreederDashboardResponseDto } from '../breeder/dto/response/breeder-das
 import { UploadDocumentsResponseDto, UploadedDocumentDto } from './dto/response/upload-documents-response.dto';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
+import { GetBreederManagementDashboardUseCase } from './application/use-cases/get-breeder-management-dashboard.use-case';
+import { GetBreederManagementProfileUseCase } from './application/use-cases/get-breeder-management-profile.use-case';
+import { UpdateBreederManagementProfileUseCase } from './application/use-cases/update-breeder-management-profile.use-case';
+import { GetBreederManagementReceivedApplicationsUseCase } from './application/use-cases/get-breeder-management-received-applications.use-case';
+import { GetBreederManagementMyPetsUseCase } from './application/use-cases/get-breeder-management-my-pets.use-case';
+import { GetBreederManagementMyReviewsUseCase } from './application/use-cases/get-breeder-management-my-reviews.use-case';
+import { GetBreederManagementVerificationStatusUseCase } from './application/use-cases/get-breeder-management-verification-status.use-case';
+import { SubmitBreederManagementVerificationUseCase } from './application/use-cases/submit-breeder-management-verification.use-case';
+import { GetBreederManagementApplicationFormUseCase } from './application/use-cases/get-breeder-management-application-form.use-case';
+import { UpdateBreederManagementApplicationFormUseCase } from './application/use-cases/update-breeder-management-application-form.use-case';
+import { UpdateBreederManagementSimpleApplicationFormUseCase } from './application/use-cases/update-breeder-management-simple-application-form.use-case';
+import { AddBreederManagementParentPetUseCase } from './application/use-cases/add-breeder-management-parent-pet.use-case';
+import { UpdateBreederManagementParentPetUseCase } from './application/use-cases/update-breeder-management-parent-pet.use-case';
+import { RemoveBreederManagementParentPetUseCase } from './application/use-cases/remove-breeder-management-parent-pet.use-case';
+import { AddBreederManagementAvailablePetUseCase } from './application/use-cases/add-breeder-management-available-pet.use-case';
+import { UpdateBreederManagementAvailablePetUseCase } from './application/use-cases/update-breeder-management-available-pet.use-case';
+import { UpdateBreederManagementAvailablePetStatusUseCase } from './application/use-cases/update-breeder-management-available-pet-status.use-case';
+import { RemoveBreederManagementAvailablePetUseCase } from './application/use-cases/remove-breeder-management-available-pet.use-case';
+import { AddBreederManagementReviewReplyUseCase } from './application/use-cases/add-breeder-management-review-reply.use-case';
+import { UpdateBreederManagementReviewReplyUseCase } from './application/use-cases/update-breeder-management-review-reply.use-case';
+import { RemoveBreederManagementReviewReplyUseCase } from './application/use-cases/remove-breeder-management-review-reply.use-case';
+import { GetBreederManagementApplicationDetailUseCase } from './application/use-cases/get-breeder-management-application-detail.use-case';
+import { UpdateBreederManagementApplicationStatusUseCase } from './application/use-cases/update-breeder-management-application-status.use-case';
+import { DeleteBreederManagementAccountUseCase } from './application/use-cases/delete-breeder-management-account.use-case';
 
-import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
-import { BreederReview, BreederReviewDocument } from '../../schema/breeder-review.schema';
 import { BreederRepository } from './repository/breeder.repository';
-import { ParentPetRepository } from './repository/parent-pet.repository';
-import { AdoptionApplicationRepository } from './repository/adoption-application.repository';
-import { AvailablePetManagementRepository } from './repository/available-pet-management.repository';
 
 /**
  * 브리더 관리 비즈니스 로직 처리 Service
@@ -61,18 +74,33 @@ export class BreederManagementService {
 
     constructor(
         private storageService: StorageService,
-
-        @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
-        @InjectModel(BreederReview.name) private breederReviewModel: Model<BreederReviewDocument>,
         private breederRepository: BreederRepository,
-        private parentPetRepository: ParentPetRepository,
-        private availablePetRepository: AvailablePetManagementRepository,
-        private adoptionApplicationRepository: AdoptionApplicationRepository,
-        private notificationService: NotificationService,
-        private mailService: MailService,
-        private configService: ConfigService,
         private logger: CustomLoggerService,
         private discordWebhookService: DiscordWebhookService,
+        private getBreederManagementDashboardUseCase: GetBreederManagementDashboardUseCase,
+        private getBreederManagementProfileUseCase: GetBreederManagementProfileUseCase,
+        private updateBreederManagementProfileUseCase: UpdateBreederManagementProfileUseCase,
+        private getBreederManagementReceivedApplicationsUseCase: GetBreederManagementReceivedApplicationsUseCase,
+        private getBreederManagementMyPetsUseCase: GetBreederManagementMyPetsUseCase,
+        private getBreederManagementMyReviewsUseCase: GetBreederManagementMyReviewsUseCase,
+        private getBreederManagementVerificationStatusUseCase: GetBreederManagementVerificationStatusUseCase,
+        private submitBreederManagementVerificationUseCase: SubmitBreederManagementVerificationUseCase,
+        private getBreederManagementApplicationFormUseCase: GetBreederManagementApplicationFormUseCase,
+        private updateBreederManagementApplicationFormUseCase: UpdateBreederManagementApplicationFormUseCase,
+        private updateBreederManagementSimpleApplicationFormUseCase: UpdateBreederManagementSimpleApplicationFormUseCase,
+        private addBreederManagementParentPetUseCase: AddBreederManagementParentPetUseCase,
+        private updateBreederManagementParentPetUseCase: UpdateBreederManagementParentPetUseCase,
+        private removeBreederManagementParentPetUseCase: RemoveBreederManagementParentPetUseCase,
+        private addBreederManagementAvailablePetUseCase: AddBreederManagementAvailablePetUseCase,
+        private updateBreederManagementAvailablePetUseCase: UpdateBreederManagementAvailablePetUseCase,
+        private updateBreederManagementAvailablePetStatusUseCase: UpdateBreederManagementAvailablePetStatusUseCase,
+        private removeBreederManagementAvailablePetUseCase: RemoveBreederManagementAvailablePetUseCase,
+        private addBreederManagementReviewReplyUseCase: AddBreederManagementReviewReplyUseCase,
+        private updateBreederManagementReviewReplyUseCase: UpdateBreederManagementReviewReplyUseCase,
+        private removeBreederManagementReviewReplyUseCase: RemoveBreederManagementReviewReplyUseCase,
+        private getBreederManagementApplicationDetailUseCase: GetBreederManagementApplicationDetailUseCase,
+        private updateBreederManagementApplicationStatusUseCase: UpdateBreederManagementApplicationStatusUseCase,
+        private deleteBreederManagementAccountUseCase: DeleteBreederManagementAccountUseCase,
     ) {}
 
     /**
@@ -84,50 +112,7 @@ export class BreederManagementService {
      * @throws BadRequestException 존재하지 않는 브리더
      */
     async getDashboard(userId: string): Promise<BreederDashboardResponseDto> {
-        const breeder = await this.breederRepository.findById(userId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        // 대기 중인 입양 신청 수 계산 (별도 컬렉션 조회)
-        const pendingApplications = await this.adoptionApplicationRepository.countByStatus(
-            userId,
-            ApplicationStatus.CONSULTATION_PENDING,
-        );
-
-        // 최근 신청 내역 (최대 5개)
-        const recentApplicationsList = await this.adoptionApplicationRepository.findRecentByBreeder(userId, 5);
-
-        // 분양 가능한 반려동물 수 계산 (별도 컬렉션 조회)
-        const availablePetsCount = await this.availablePetRepository.countByStatus(userId, PetStatus.AVAILABLE, true);
-
-        return {
-            profileInfo: {
-                verificationInfo: {
-                    verificationStatus: breeder.verification?.status || VerificationStatus.PENDING,
-                    subscriptionPlan: breeder.verification?.plan || 'basic',
-                    submittedAt: breeder.verification?.submittedAt,
-                    reviewedAt: breeder.verification?.reviewedAt,
-                    rejectionReason: breeder.verification?.rejectionReason,
-                },
-            },
-            statisticsInfo: {
-                totalApplicationCount: breeder.stats?.totalApplications || 0,
-                pendingApplicationCount: pendingApplications,
-                completedAdoptionCount: breeder.stats?.completedAdoptions || 0,
-                averageRating: breeder.stats?.averageRating || 0,
-                totalReviewCount: breeder.stats?.totalReviews || 0,
-                profileViewCount: breeder.stats?.profileViews || 0,
-            },
-            recentApplicationList: recentApplicationsList.map((app: any) => ({
-                applicationId: app._id.toString(),
-                adopterName: app.adopterName || 'Unknown',
-                petName: app.petName || 'Unknown',
-                applicationStatus: app.status,
-                appliedAt: app.appliedAt,
-            })),
-            availablePetCount: availablePetsCount,
-        };
+        return this.getBreederManagementDashboardUseCase.execute(userId);
     }
 
     /**
@@ -145,84 +130,7 @@ export class BreederManagementService {
      * @throws BadRequestException 유효성 검사 실패 또는 존재하지 않는 브리더
      */
     async updateProfile(userId: string, updateData: ProfileUpdateRequestDto): Promise<any> {
-        const breeder = await this.breederRepository.findByIdWithAllData(userId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        const profileUpdateData: any = {};
-
-        // 프로필 객체가 존재하지 않는 경우 초기화
-        if (!breeder.profile) {
-            profileUpdateData.profile = {};
-        }
-
-        // 각 필드별 업데이트 데이터 구성 (MongoDB 중첩 객체 업데이트)
-        if (updateData.profileDescription !== undefined) {
-            // 줄바꿈 문자(\n, \r\n)는 완전히 유지
-            // 각 줄의 앞뒤 공백/탭만 제거 (줄바꿈 자체는 절대 제거하지 않음)
-            const description = updateData.profileDescription
-                .split('\n') // 줄바꿈으로 분리
-                .map((line) => line.replace(/^[ \t]+|[ \t]+$/g, '')) // 각 줄의 앞뒤 공백/탭만 제거
-                .join('\n'); // 줄바꿈으로 다시 결합
-            profileUpdateData['profile.description'] = description;
-        }
-        if (updateData.locationInfo) {
-            profileUpdateData['profile.location'] = {
-                city: updateData.locationInfo.cityName,
-                district: updateData.locationInfo.districtName,
-                address: updateData.locationInfo.detailAddress || '',
-            };
-        }
-        if (updateData.profilePhotos) {
-            if (updateData.profilePhotos.length > 3) {
-                throw new BadRequestException('프로필 사진은 최대 3장까지만 업로드할 수 있습니다.');
-            }
-            profileUpdateData['profile.representativePhotos'] = updateData.profilePhotos;
-        }
-        if (updateData.specializationTypes) {
-            profileUpdateData['profile.specialization'] = updateData.specializationTypes;
-        }
-        if (updateData.breeds) {
-            profileUpdateData['breeds'] = updateData.breeds;
-        }
-        if (updateData.experienceYears !== undefined) {
-            profileUpdateData['profile.experienceYears'] = updateData.experienceYears;
-        }
-        if (updateData.priceRangeInfo) {
-            const min = updateData.priceRangeInfo.minimumPrice;
-            const max = updateData.priceRangeInfo.maximumPrice;
-
-            // display는 프론트엔드에서 전달받거나, 값에 따라 자동 계산
-            let display: string;
-            if (min === 0 && max === 0) {
-                // 0, 0인 경우는 프론트엔드에서 display를 명시해야 함
-                // not_set(미설정) vs consultation(상담 후 공개) 구분
-                display = updateData.priceRangeInfo.display || 'not_set';
-            } else {
-                display = 'range';
-            }
-
-            profileUpdateData['profile.priceRange'] = {
-                min,
-                max,
-                display,
-            };
-        }
-        if (updateData.profileImage !== undefined) {
-            // null이면 삭제, 문자열이면 업데이트
-            profileUpdateData['profileImageFileName'] = updateData.profileImage;
-        }
-        if (updateData.marketingAgreed !== undefined) {
-            profileUpdateData['marketingAgreed'] = updateData.marketingAgreed;
-        }
-        if (updateData.consultationAgreed !== undefined) {
-            profileUpdateData['consultationAgreed'] = updateData.consultationAgreed;
-        }
-
-        await this.breederRepository.updateProfile(userId, profileUpdateData);
-
-        return { message: '프로필이 성공적으로 수정되었습니다.' };
+        return this.updateBreederManagementProfileUseCase.execute(userId, updateData);
     }
 
     /**
@@ -241,24 +149,7 @@ export class BreederManagementService {
      * @throws BadRequestException 유효성 검사 실패 또는 존재하지 않는 브리더
      */
     async addParentPet(userId: string, parentPetDto: ParentPetAddDto): Promise<any> {
-        const breeder = await this.breederRepository.findById(userId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        const savedParentPet = await this.parentPetRepository.create({
-            breederId: new Types.ObjectId(userId) as any,
-            name: parentPetDto.name,
-            breed: parentPetDto.breed,
-            gender: parentPetDto.gender,
-            birthDate: new Date(parentPetDto.birthDate),
-            photoFileName: parentPetDto.photoFileName,
-            description: parentPetDto.description || '',
-            photos: parentPetDto.photos || [],
-            isActive: true,
-        });
-
-        return { petId: (savedParentPet._id as any).toString(), message: '부모견/부모묘가 성공적으로 등록되었습니다.' };
+        return this.addBreederManagementParentPetUseCase.execute(userId, parentPetDto);
     }
 
     /**
@@ -271,23 +162,7 @@ export class BreederManagementService {
      * @throws BadRequestException 존재하지 않는 브리더 또는 부모견
      */
     async updateParentPet(userId: string, petId: string, updateData: ParentPetUpdateDto): Promise<any> {
-        const pet = await this.parentPetRepository.findByIdAndBreeder(petId, userId);
-        if (!pet) {
-            throw new BadRequestException('해당 부모견/부모묘를 찾을 수 없습니다.');
-        }
-
-        const updateFields: any = {};
-        if (updateData.name) updateFields.name = updateData.name;
-        if (updateData.breed) updateFields.breed = updateData.breed;
-        if (updateData.gender) updateFields.gender = updateData.gender;
-        if (updateData.birthDate) updateFields.birthDate = new Date(updateData.birthDate);
-        if (updateData.photoFileName) updateFields.photoFileName = updateData.photoFileName;
-        if (updateData.description !== undefined) updateFields.description = updateData.description;
-        if (updateData.photos !== undefined) updateFields.photos = updateData.photos;
-
-        await this.parentPetRepository.update(petId, updateFields);
-
-        return { message: '부모견/부모묘 정보가 성공적으로 수정되었습니다.' };
+        return this.updateBreederManagementParentPetUseCase.execute(userId, petId, updateData);
     }
 
     /**
@@ -299,14 +174,7 @@ export class BreederManagementService {
      * @throws BadRequestException 존재하지 않는 브리더 또는 부모견
      */
     async removeParentPet(userId: string, petId: string): Promise<any> {
-        const pet = await this.parentPetRepository.findByIdAndBreeder(petId, userId);
-        if (!pet) {
-            throw new BadRequestException('해당 부모견/부모묘를 찾을 수 없습니다.');
-        }
-
-        await this.parentPetRepository.delete(petId);
-
-        return { message: '부모견/부모묘가 성공적으로 삭제되었습니다.' };
+        return this.removeBreederManagementParentPetUseCase.execute(userId, petId);
     }
 
     /**
@@ -325,33 +193,7 @@ export class BreederManagementService {
      * @throws BadRequestException 유효성 검사 실패 또는 존재하지 않는 브리더
      */
     async addAvailablePet(userId: string, availablePetDto: AvailablePetAddDto): Promise<any> {
-        const breeder = await this.breederRepository.findById(userId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        const savedPet = await this.availablePetRepository.create({
-            breederId: new Types.ObjectId(userId) as any,
-            name: availablePetDto.name,
-            breed: availablePetDto.breed,
-            gender: availablePetDto.gender,
-            birthDate: new Date(availablePetDto.birthDate),
-            price: availablePetDto.price,
-            status: 'available',
-            photos: availablePetDto.photos || [],
-            description: availablePetDto.description || '',
-            parentInfo: availablePetDto.parentInfo
-                ? {
-                      mother: availablePetDto.parentInfo.mother as any,
-                      father: availablePetDto.parentInfo.father as any,
-                  }
-                : undefined,
-        });
-
-        return {
-            petId: (savedPet._id as any).toString(),
-            message: '분양 가능한 반려동물이 성공적으로 등록되었습니다.',
-        };
+        return this.addBreederManagementAvailablePetUseCase.execute(userId, availablePetDto);
     }
 
     /**
@@ -364,29 +206,7 @@ export class BreederManagementService {
      * @throws BadRequestException 존재하지 않는 브리더 또는 반려동물
      */
     async updateAvailablePet(userId: string, petId: string, updateData: Partial<AvailablePetAddDto>): Promise<any> {
-        const pet = await this.availablePetRepository.findByIdAndBreeder(petId, userId);
-        if (!pet) {
-            throw new BadRequestException('해당 분양 개체를 찾을 수 없습니다.');
-        }
-
-        const updateFields: any = {};
-        if (updateData.name) updateFields.name = updateData.name;
-        if (updateData.breed) updateFields.breed = updateData.breed;
-        if (updateData.gender) updateFields.gender = updateData.gender;
-        if (updateData.birthDate) updateFields.birthDate = new Date(updateData.birthDate);
-        if (updateData.price) updateFields.price = updateData.price;
-        if (updateData.description !== undefined) updateFields.description = updateData.description;
-        if (updateData.photos !== undefined) updateFields.photos = updateData.photos;
-        if (updateData.parentInfo) {
-            updateFields.parentInfo = {
-                mother: updateData.parentInfo.mother,
-                father: updateData.parentInfo.father,
-            };
-        }
-
-        await this.availablePetRepository.update(petId, updateFields);
-
-        return { message: '분양 개체 정보가 성공적으로 수정되었습니다.' };
+        return this.updateBreederManagementAvailablePetUseCase.execute(userId, petId, updateData);
     }
 
     /**
@@ -405,14 +225,7 @@ export class BreederManagementService {
      * @throws BadRequestException 존재하지 않는 브리더 또는 반려동물
      */
     async updatePetStatus(userId: string, petId: string, status: PetStatus): Promise<any> {
-        const pet = await this.availablePetRepository.findByIdAndBreeder(petId, userId);
-        if (!pet) {
-            throw new BadRequestException('해당 분양 개체를 찾을 수 없습니다.');
-        }
-
-        await this.availablePetRepository.updateStatus(petId, status);
-
-        return { message: '반려동물 상태가 성공적으로 업데이트되었습니다.' };
+        return this.updateBreederManagementAvailablePetStatusUseCase.execute(userId, petId, status);
     }
 
     /**
@@ -424,14 +237,7 @@ export class BreederManagementService {
      * @throws BadRequestException 존재하지 않는 브리더 또는 반려동물
      */
     async removeAvailablePet(userId: string, petId: string): Promise<any> {
-        const pet = await this.availablePetRepository.findByIdAndBreeder(petId, userId);
-        if (!pet) {
-            throw new BadRequestException('해당 분양 개체를 찾을 수 없습니다.');
-        }
-
-        await this.availablePetRepository.delete(petId);
-
-        return { message: '분양 개체가 성공적으로 삭제되었습니다.' };
+        return this.removeBreederManagementAvailablePetUseCase.execute(userId, petId);
     }
 
     /**
@@ -444,34 +250,7 @@ export class BreederManagementService {
      * @throws BadRequestException 존재하지 않는 브리더
      */
     async getReceivedApplications(userId: string, page: number = 1, limit: number = 10): Promise<any> {
-        const { applications, total } = await this.adoptionApplicationRepository.findByBreederId(userId, page, limit);
-
-        // MongoDB _id를 applicationId로 매핑 + preferredPetInfo 추출 + 입양자 닉네임 추출
-        const mappedApplications = applications.map((app) => {
-            const plainApp = app.toObject ? app.toObject() : app;
-            // populate된 adopterId에서 nickname 추출
-            // adopterId가 객체인 경우(populate됨) nickname 사용, 아니면 adopterName 사용
-            const adopterInfo = plainApp.adopterId;
-            const adopterNickname =
-                typeof adopterInfo === 'object' && adopterInfo !== null
-                    ? adopterInfo.nickname || plainApp.adopterName || '알 수 없음'
-                    : plainApp.adopterName || '알 수 없음';
-
-            return {
-                ...plainApp,
-                applicationId: (app._id as any).toString(),
-                adopterNickname, // 입양자 닉네임 추가
-                // 입양 원하는 아이 정보를 최상위 필드로 추출 (프론트엔드 편의성)
-                preferredPetInfo: plainApp.standardResponses?.preferredPetDescription || null,
-            };
-        });
-
-        return new PaginationBuilder<any>()
-            .setItems(mappedApplications)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(total)
-            .build();
+        return this.getBreederManagementReceivedApplicationsUseCase.execute(userId, page, limit);
     }
 
     /**
@@ -484,31 +263,7 @@ export class BreederManagementService {
      * @throws BadRequestException 존재하지 않는 신청 또는 권한 없음
      */
     async getApplicationDetail(userId: string, applicationId: string): Promise<any> {
-        // 신청 조회 (본인이 받은 신청만 조회 가능)
-        const application = await this.adoptionApplicationRepository.findByIdAndBreeder(applicationId, userId);
-
-        if (!application) {
-            throw new BadRequestException('해당 입양 신청을 찾을 수 없거나 조회 권한이 없습니다.');
-        }
-
-        // 입양자 정보 조회
-        const adopter = await this.adopterModel.findById(application.adopterId).lean();
-
-        return {
-            applicationId: (application as any)._id.toString(),
-            adopterId: application.adopterId.toString(),
-            adopterName: application.adopterName,
-            adopterEmail: application.adopterEmail,
-            adopterPhone: application.adopterPhone,
-            petId: application.petId?.toString(),
-            petName: application.petName,
-            status: application.status,
-            standardResponses: application.standardResponses,
-            customResponses: application.customResponses || [],
-            appliedAt: application.appliedAt.toISOString(),
-            processedAt: application.processedAt?.toISOString(),
-            breederNotes: application.breederNotes,
-        };
+        return this.getBreederManagementApplicationDetailUseCase.execute(userId, applicationId);
     }
 
     /**
@@ -532,128 +287,7 @@ export class BreederManagementService {
         applicationId: string,
         updateData: ApplicationStatusUpdateRequestDto,
     ): Promise<any> {
-        this.logger.logStart('updateApplicationStatus', '입양 신청 상태 업데이트 시작', {
-            userId,
-            applicationId,
-            newStatus: updateData.status,
-        });
-
-        const application = await this.adoptionApplicationRepository.findByIdAndBreeder(applicationId, userId);
-
-        if (!application) {
-            throw new BadRequestException('해당 입양 신청을 찾을 수 없습니다.');
-        }
-
-        this.logger.log(
-            `[updateApplicationStatus] 현재 상태: ${application.status} → 변경할 상태: ${updateData.status}`,
-        );
-
-        await this.adoptionApplicationRepository.updateStatus(applicationId, updateData.status);
-
-        // 입양 승인 완료 시 통계 업데이트
-        if (updateData.status === ApplicationStatus.ADOPTION_APPROVED) {
-            await this.breederRepository.incrementCompletedAdoptions(userId);
-        }
-
-        // 상담 완료 시 입양자에게 알림 및 이메일 발송
-        this.logger.log(
-            `[updateApplicationStatus] 상담 완료 체크: ${updateData.status} === ${ApplicationStatus.CONSULTATION_COMPLETED} ? ${updateData.status === ApplicationStatus.CONSULTATION_COMPLETED}`,
-        );
-
-        if (updateData.status === ApplicationStatus.CONSULTATION_COMPLETED) {
-            try {
-                this.logger.log('[updateApplicationStatus] 상담 완료 알림 발송 시작');
-
-                const breeder = await this.breederRepository.findById(userId);
-                const adopterId = application.adopterId.toString();
-                const adopter = await this.adopterModel.findById(adopterId).lean().exec();
-
-                this.logger.log(
-                    `[updateApplicationStatus] 브리더 조회 결과: ${breeder ? `찾음 (name: ${breeder.name})` : '없음'}`,
-                );
-                this.logger.log(
-                    `[updateApplicationStatus] 입양자 조회 결과: ${adopter ? `찾음 (email: ${adopter.emailAddress})` : '없음'}`,
-                );
-
-                if (breeder && adopter) {
-                    this.logger.log(`[updateApplicationStatus] 알림 발송 대상 입양자 ID: ${adopterId}`);
-
-                    // breederName이 빈 값일 경우를 대비하여 기본값 설정
-                    const breederDisplayName = breeder.name || breeder.nickname || '브리더';
-
-                    // 1. 인앱 알림 생성
-                    await this.notificationService.createNotification(
-                        adopterId,
-                        'adopter',
-                        NotificationType.CONSULT_COMPLETED,
-                        {
-                            breederId: userId,
-                            breederName: breederDisplayName,
-                            applicationId: applicationId,
-                        },
-                        `/applications/${applicationId}`,
-                    );
-
-                    this.logger.logSuccess('updateApplicationStatus', '상담 완료 인앱 알림 발송 완료', {
-                        adopterId,
-                        breederName: breederDisplayName,
-                    });
-
-                    // 2. 이메일 발송 (비동기, 결과를 기다리지 않음)
-                    const appUrl = this.configService.get('APP_URL', 'https://pawpong.com');
-                    this.mailService
-                        .sendMail({
-                            to: adopter.emailAddress,
-                            subject: `${breederDisplayName}님과의 상담이 완료되었어요!`,
-                            html: `
-                                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                                    <h2 style="color: #4F3B2E;">🐾 상담이 완료되었습니다!</h2>
-                                    <p>${breederDisplayName}님과의 상담이 완료되었어요.</p>
-                                    <p>어떠셨는지 후기를 남겨주세요!</p>
-                                    <div style="margin: 30px 0;">
-                                        <a href="${appUrl}/applications/${applicationId}"
-                                           style="background-color: #4F3B2E; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                                            후기 작성하기
-                                        </a>
-                                    </div>
-                                    <p style="color: #666; font-size: 12px;">
-                                        이 이메일은 발신 전용입니다. 문의사항은 포퐁 고객센터를 이용해주세요.
-                                    </p>
-                                </div>
-                            `,
-                        })
-                        .then(() => {
-                            this.logger.logSuccess('updateApplicationStatus', '상담 완료 이메일 발송 완료', {
-                                adopterEmail: adopter.emailAddress,
-                                breederName: breeder.name,
-                            });
-                        })
-                        .catch((emailError) => {
-                            // 이메일 발송 실패는 로그만 남기고 계속 진행
-                            this.logger.logWarning('updateApplicationStatus', '상담 완료 이메일 발송 실패', {
-                                error: emailError,
-                            });
-                        });
-                } else {
-                    this.logger.logWarning(
-                        'updateApplicationStatus',
-                        '브리더 또는 입양자 정보를 찾을 수 없어 알림 발송 실패',
-                        {
-                            breederId: userId,
-                            adopterId,
-                        },
-                    );
-                }
-            } catch (error) {
-                // 알림 발송 실패해도 상담 완료 처리는 계속 진행
-                this.logger.logError('updateApplicationStatus', '상담 완료 알림 발송 실패', error);
-            }
-        }
-
-        // ✅ 참조 방식: AdoptionApplication 컬렉션만 업데이트하면 됨
-        // (입양자 문서에 신청 내역 없음)
-
-        return { message: '입양 신청 상태가 성공적으로 업데이트되었습니다.' };
+        return this.updateBreederManagementApplicationStatusUseCase.execute(userId, applicationId, updateData);
     }
 
     /**
@@ -672,26 +306,7 @@ export class BreederManagementService {
      * @throws BadRequestException 이미 인증된 브리더 또는 존재하지 않는 브리더
      */
     async submitVerification(userId: string, verificationData: VerificationSubmitRequestDto): Promise<any> {
-        const breeder = await this.breederRepository.findById(userId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        if (breeder.verification?.status === VerificationStatus.APPROVED) {
-            throw new BadRequestException('이미 인증이 완료된 브리더입니다.');
-        }
-
-        const verification = {
-            status: VerificationStatus.REVIEWING,
-            plan: verificationData.plan,
-            submittedAt: new Date(),
-            documents: verificationData.documents || [],
-            submittedByEmail: verificationData.submittedByEmail,
-        };
-
-        await this.breederRepository.updateVerification(userId, verification);
-
-        return { message: '브리더 인증 신청이 성공적으로 제출되었습니다. 관리자 검토 후 결과를 알려드립니다.' };
+        return this.submitBreederManagementVerificationUseCase.execute(userId, verificationData);
     }
 
     /**
@@ -1074,61 +689,7 @@ export class BreederManagementService {
      * @throws BadRequestException 존재하지 않는 브리더
      */
     async getVerificationStatus(userId: string): Promise<any> {
-        const breeder = await this.breederRepository.findById(userId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        const verification = breeder.verification;
-
-        this.logger.log(
-            `[getVerificationStatus] userId: ${userId}, documents count: ${verification?.documents?.length || 0}`,
-        );
-        verification?.documents?.forEach((doc: any, index: number) => {
-            this.logger.log(
-                `[getVerificationStatus] Document ${index + 1} - type: ${doc.type}, fileName: ${doc.fileName}, originalFileName: ${doc.originalFileName}`,
-            );
-        });
-
-        // 문서 URL을 Signed URL로 변환 (1시간 유효)
-        const documents =
-            verification?.documents
-                ?.map((doc: any) => {
-                    // fileName이 올바른 GCS 경로인지 검증
-                    // verification/ 또는 documents/verification/ 형식 모두 허용
-                    const isValidFileName =
-                        doc.fileName &&
-                        (doc.fileName.startsWith('verification/') ||
-                            doc.fileName.startsWith('documents/verification/'));
-
-                    if (!isValidFileName) {
-                        this.logger.logWarning(
-                            'getVerificationStatus',
-                            `Invalid fileName detected - type: ${doc.type}, fileName: ${doc.fileName}. This document will be skipped in the response.`,
-                        );
-                        return null; // 잘못된 서류는 제외
-                    }
-
-                    return {
-                        type: doc.type,
-                        fileName: doc.fileName, // 재제출 시 필요한 GCS 경로
-                        url: this.storageService.generateSignedUrl(doc.fileName, 60),
-                        originalFileName: doc.originalFileName,
-                        uploadedAt: doc.uploadedAt,
-                    };
-                })
-                .filter((doc) => doc !== null) || [];
-
-        return {
-            status: verification?.status || 'pending',
-            plan: verification?.plan,
-            level: verification?.level,
-            submittedAt: verification?.submittedAt,
-            reviewedAt: verification?.reviewedAt,
-            documents,
-            rejectionReason: verification?.rejectionReason,
-            submittedByEmail: verification?.submittedByEmail || false,
-        };
+        return this.getBreederManagementVerificationStatusUseCase.execute(userId);
     }
 
     /**
@@ -1147,102 +708,7 @@ export class BreederManagementService {
      * @throws BadRequestException 존재하지 않는 브리더
      */
     async getBreederProfile(userId: string): Promise<any> {
-        const breeder = await this.breederRepository.findById(userId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        // 별도 컬렉션에서 데이터 조회
-        const [parentPets, availablePets] = await Promise.all([
-            this.parentPetRepository.findByBreederId(userId, true),
-            this.availablePetRepository.findByBreederIdWithFilters(userId, { includeInactive: false }),
-        ]);
-
-        const availablePetsData = (availablePets as any).pets || availablePets;
-
-        // 파일명을 Signed URL로 변환 (1시간 유효)
-        const profileImageFileName = this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60);
-
-        // verification.documents의 fileName을 동적으로 Signed URL로 변환
-        const verificationWithSignedUrls = {
-            ...breeder.verification,
-            documents: breeder.verification.documents.map((doc: any) => ({
-                type: doc.type,
-                url: this.storageService.generateSignedUrl(doc.fileName, 60), // fileName → Signed URL 변환
-                originalFileName: doc.originalFileName,
-                uploadedAt: doc.uploadedAt,
-            })),
-        };
-
-        // profile.representativePhotos를 Signed URL로 변환
-        const profileWithSignedUrls = breeder.profile
-            ? {
-                  ...breeder.profile,
-                  representativePhotos: this.storageService.generateSignedUrls(
-                      breeder.profile.representativePhotos || [],
-                      60,
-                  ),
-                  priceRange: (() => {
-                      const priceRange = breeder.profile.priceRange;
-                      if (!priceRange) return { min: 0, max: 0, display: 'not_set' };
-
-                      // display 필드가 없는 경우 (마이그레이션 전 데이터) 자동 결정
-                      if (!priceRange.display) {
-                          return {
-                              min: priceRange.min || 0,
-                              max: priceRange.max || 0,
-                              display: priceRange.min > 0 || priceRange.max > 0 ? 'range' : 'not_set',
-                          };
-                      }
-
-                      return priceRange;
-                  })(),
-              }
-            : breeder.profile;
-
-        // parentPets의 photoFileName과 photos를 Signed URL로 변환
-        const parentPetsWithSignedUrls = (parentPets || []).map((pet: any) => {
-            const petObj = pet.toObject ? pet.toObject() : pet;
-            const photoFileName = petObj.photoFileName;
-            const photos = petObj.photos || [];
-
-            // photos 배열에서 photoFileName과 중복되는 파일 제거 (대표사진은 photoUrl로만 표시)
-            const additionalPhotos = photoFileName ? photos.filter((photo: string) => photo !== photoFileName) : photos;
-
-            return {
-                ...petObj,
-                petId: (pet._id || pet.petId)?.toString(),
-                photoFileName: this.storageService.generateSignedUrlSafe(photoFileName, 60),
-                photos: this.storageService.generateSignedUrls(additionalPhotos, 60),
-            };
-        });
-
-        // availablePets의 photos를 Signed URL로 변환
-        const availablePetsWithSignedUrls = (availablePetsData || []).map((pet: any) => ({
-            ...pet,
-            petId: (pet._id || pet.petId)?.toString(),
-            photos: this.storageService.generateSignedUrls(pet.photos || [], 60),
-        }));
-
-        return {
-            breederId: (breeder._id as any).toString(),
-            breederName: breeder.name,
-            breederEmail: breeder.emailAddress,
-            breederPhone: breeder.phoneNumber,
-            authProvider: breeder.socialAuthInfo?.authProvider || 'local',
-            marketingAgreed: breeder.marketingAgreed ?? false,
-            profileImageFileName: profileImageFileName,
-            accountStatus: breeder.accountStatus,
-            petType: breeder.petType,
-            verificationInfo: verificationWithSignedUrls,
-            profileInfo: profileWithSignedUrls,
-            breeds: breeder.breeds || [],
-            parentPetInfo: parentPetsWithSignedUrls,
-            availablePetInfo: availablePetsWithSignedUrls,
-            applicationForm: breeder.applicationForm,
-            statsInfo: breeder.stats,
-            consultationAgreed: breeder.consultationAgreed ?? true,
-        };
+        return this.getBreederManagementProfileUseCase.execute(userId);
     }
 
     /**
@@ -1263,67 +729,7 @@ export class BreederManagementService {
         page: number = 1,
         limit: number = 20,
     ): Promise<any> {
-        const breeder = await this.breederRepository.findById(userId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        // 통계 계산 및 데이터 조회
-        const [statsResult, availableCount, reservedCount, adoptedCount, inactiveCount] = await Promise.all([
-            this.availablePetRepository.findByBreederIdWithFilters(userId, { status, includeInactive, page, limit }),
-            this.availablePetRepository.countByStatus(userId, PetStatus.AVAILABLE, true),
-            this.availablePetRepository.countByStatus(userId, PetStatus.RESERVED, true),
-            this.availablePetRepository.countByStatus(userId, PetStatus.ADOPTED, true),
-            this.availablePetRepository.countInactive(userId),
-        ]);
-
-        const { pets, total } = statsResult;
-
-        // 각 개체별 입양 신청 수 조회
-        const petIds = pets.map((pet: any) => pet.petId || pet._id.toString());
-        const applicationCountMap = await this.adoptionApplicationRepository.countByPetIds(petIds);
-
-        // 데이터 변환
-        const items = pets.map((pet: any) => {
-            const birthDate = new Date(pet.birthDate);
-            const now = new Date();
-            const ageInMonths = Math.floor((now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
-
-            return {
-                petId: pet.petId,
-                name: pet.name,
-                breed: pet.breed,
-                gender: pet.gender,
-                birthDate: pet.birthDate,
-                ageInMonths,
-                price: pet.price,
-                status: pet.status,
-                isActive: pet.isActive,
-                mainPhoto: pet.photos?.[0] || '',
-                photoCount: pet.photos?.length || 0,
-                viewCount: pet.viewCount || 0,
-                applicationCount: applicationCountMap.get(pet.petId) || 0,
-                createdAt: pet.createdAt,
-                updatedAt: pet.updatedAt,
-            };
-        });
-
-        const totalPages = Math.ceil(total / limit);
-
-        const paginationResponse = new PaginationBuilder<any>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(total)
-            .build();
-
-        return {
-            ...paginationResponse,
-            availableCount,
-            reservedCount,
-            adoptedCount,
-            inactiveCount,
-        };
+        return this.getBreederManagementMyPetsUseCase.execute(userId, status, includeInactive, page, limit);
     }
 
     /**
@@ -1337,78 +743,7 @@ export class BreederManagementService {
      * @returns 페이지네이션된 후기 목록과 통계
      */
     async getMyReviews(userId: string, visibility: string = 'all', page: number = 1, limit: number = 10): Promise<any> {
-        const breeder = await this.breederRepository.findById(userId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        // BreederReview 컬렉션에서 직접 조회 (reply 정보 포함)
-        const breederId = new Types.ObjectId(userId);
-
-        // 기본 필터: 해당 브리더의 후기
-        const filter: any = { breederId };
-
-        // 공개 여부 필터링
-        if (visibility === 'visible') {
-            filter.isVisible = true;
-        } else if (visibility === 'hidden') {
-            filter.isVisible = false;
-        }
-
-        // 전체 통계 조회
-        const [totalCount, visibleCount] = await Promise.all([
-            this.breederReviewModel.countDocuments({ breederId }),
-            this.breederReviewModel.countDocuments({ breederId, isVisible: true }),
-        ]);
-        const hiddenCount = totalCount - visibleCount;
-
-        // 페이지네이션 조회
-        const skip = (page - 1) * limit;
-        const reviewDocs = await this.breederReviewModel
-            .find(filter)
-            .sort({ writtenAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate('adopterId', 'name nickname')
-            .lean();
-
-        // 데이터 변환
-        const reviews = reviewDocs.map((review: any) => ({
-            reviewId: review._id.toString(),
-            adopterId: review.adopterId?._id?.toString() || '',
-            adopterName: review.adopterId?.name || review.adopterId?.nickname || '익명',
-            petName: '', // 필요시 추가 조회
-            rating: 0, // 현재 스키마에 rating 없음
-            petHealthRating: undefined,
-            communicationRating: undefined,
-            content: review.content,
-            photos: [],
-            writtenAt: review.writtenAt,
-            type: review.type || 'consultation',
-            isVisible: review.isVisible,
-            reportCount: review.isReported ? 1 : 0,
-            // 답글 정보 추가
-            replyContent: review.replyContent,
-            replyWrittenAt: review.replyWrittenAt,
-            replyUpdatedAt: review.replyUpdatedAt,
-        }));
-
-        const total = visibility === 'all' ? totalCount : await this.breederReviewModel.countDocuments(filter);
-
-        const paginationResponse = new PaginationBuilder<any>()
-            .setItems(reviews)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(total)
-            .build();
-
-        return {
-            ...paginationResponse,
-            averageRating: breeder.stats?.averageRating || 0,
-            totalReviews: totalCount,
-            visibleReviews: visibleCount,
-            hiddenReviews: hiddenCount,
-        };
+        return this.getBreederManagementMyReviewsUseCase.execute(userId, visibility, page, limit);
     }
 
     /**
@@ -1416,115 +751,6 @@ export class BreederManagementService {
      *
      * 모든 브리더에게 자동으로 포함되는 필수 질문들입니다.
      */
-    private getStandardQuestions() {
-        return [
-            {
-                id: 'privacyConsent',
-                type: 'checkbox',
-                label: '개인정보 수집 및 이용에 동의하시나요?',
-                required: true,
-                order: 1,
-                isStandard: true,
-            },
-            {
-                id: 'selfIntroduction',
-                type: 'textarea',
-                label: '간단하게 자기소개 부탁드려요 (성별, 연령대, 거주지, 생활 패턴 등)',
-                required: true,
-                order: 2,
-                isStandard: true,
-            },
-            {
-                id: 'familyMembers',
-                type: 'text',
-                label: '함께 거주하는 가족 구성원을 알려주세요',
-                required: true,
-                order: 3,
-                isStandard: true,
-            },
-            {
-                id: 'allFamilyConsent',
-                type: 'checkbox',
-                label: '모든 가족 구성원들이 입양에 동의하셨나요?',
-                required: true,
-                order: 4,
-                isStandard: true,
-            },
-            {
-                id: 'allergyTestInfo',
-                type: 'text',
-                label: '본인을 포함한 모든 가족 구성원분들께서 알러지 검사를 마치셨나요?',
-                required: true,
-                order: 5,
-                isStandard: true,
-            },
-            {
-                id: 'timeAwayFromHome',
-                type: 'text',
-                label: '평균적으로 집을 비우는 시간은 얼마나 되나요?',
-                required: true,
-                order: 6,
-                isStandard: true,
-            },
-            {
-                id: 'livingSpaceDescription',
-                type: 'textarea',
-                label: '아이와 함께 지내게 될 공간을 소개해 주세요',
-                required: true,
-                order: 7,
-                isStandard: true,
-            },
-            {
-                id: 'previousPetExperience',
-                type: 'textarea',
-                label: '현재 함께하는, 또는 이전에 함께했던 반려동물에 대해 알려주세요',
-                required: true,
-                order: 8,
-                isStandard: true,
-            },
-            {
-                id: 'canProvideBasicCare',
-                type: 'checkbox',
-                label: '정기 예방접종·건강검진·훈련 등 기본 케어를 책임지고 해주실 수 있나요?',
-                required: true,
-                order: 9,
-                isStandard: true,
-            },
-            {
-                id: 'canAffordMedicalExpenses',
-                type: 'checkbox',
-                label: '예상치 못한 질병이나 사고 등으로 치료비가 발생할 경우 감당 가능하신가요?',
-                required: true,
-                order: 10,
-                isStandard: true,
-            },
-            {
-                id: 'preferredPetDescription',
-                type: 'textarea',
-                label: '마음에 두신 아이가 있으신가요? (특징: 성별, 타입, 외모, 컬러패턴, 성격 등)',
-                required: false,
-                order: 11,
-                isStandard: true,
-            },
-            {
-                id: 'desiredAdoptionTiming',
-                type: 'text',
-                label: '원하시는 입양 시기가 있나요?',
-                required: false,
-                order: 12,
-                isStandard: true,
-            },
-            {
-                id: 'additionalNotes',
-                type: 'textarea',
-                label: '마지막으로 궁금하신 점이나 남기시고 싶으신 말씀이 있나요?',
-                required: false,
-                order: 13,
-                isStandard: true,
-            },
-        ]; // 총 13개 표준 질문
-    }
-
     /**
      * 입양 신청 폼 조회 (표준 + 커스텀 질문)
      *
@@ -1535,30 +761,7 @@ export class BreederManagementService {
      * @returns 전체 폼 구조 (표준 + 커스텀 질문)
      */
     async getApplicationForm(breederId: string): Promise<any> {
-        const breeder = await this.breederRepository.findById(breederId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        const standardQuestions = this.getStandardQuestions();
-
-        // 브리더의 커스텀 질문 가져오기
-        const customQuestions = (breeder.applicationForm || []).map((q, index) => ({
-            id: q.id,
-            type: q.type,
-            label: q.label,
-            required: q.required,
-            options: q.options,
-            placeholder: q.placeholder,
-            order: standardQuestions.length + index + 1, // 표준 질문 다음에 순서 배치
-            isStandard: false,
-        }));
-
-        return {
-            standardQuestions,
-            customQuestions,
-            totalQuestions: standardQuestions.length + customQuestions.length,
-        };
+        return this.getBreederManagementApplicationFormUseCase.execute(breederId);
     }
 
     /**
@@ -1572,42 +775,7 @@ export class BreederManagementService {
      * @returns 성공 메시지
      */
     async updateApplicationForm(breederId: string, updateDto: any): Promise<any> {
-        const breeder = await this.breederRepository.findByIdForUpdate(breederId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        // 커스텀 질문 ID 중복 검증
-        const ids = updateDto.customQuestions.map((q: any) => q.id);
-        const uniqueIds = new Set(ids);
-        if (ids.length !== uniqueIds.size) {
-            throw new BadRequestException('질문 ID가 중복되었습니다.');
-        }
-
-        // 표준 질문 ID와 충돌 방지
-        const standardIds = this.getStandardQuestions().map((q) => q.id);
-        const conflicts = ids.filter((id: string) => standardIds.includes(id));
-        if (conflicts.length > 0) {
-            throw new BadRequestException(`다음 ID는 표준 질문과 중복되어 사용할 수 없습니다: ${conflicts.join(', ')}`);
-        }
-
-        // 브리더 문서 업데이트
-        breeder.applicationForm = updateDto.customQuestions.map((q: any) => ({
-            id: q.id,
-            type: q.type,
-            label: q.label,
-            required: q.required,
-            options: q.options,
-            placeholder: q.placeholder,
-            order: q.order,
-        }));
-
-        await breeder.save();
-
-        return {
-            message: '입양 신청 폼이 성공적으로 업데이트되었습니다.',
-            customQuestions: breeder.applicationForm,
-        };
+        return this.updateBreederManagementApplicationFormUseCase.execute(breederId, updateDto);
     }
 
     /**
@@ -1632,46 +800,7 @@ export class BreederManagementService {
      * @throws BadRequestException 브리더를 찾을 수 없거나 유효성 검증 실패
      */
     async updateApplicationFormSimple(breederId: string, questions: Array<{ question: string }>): Promise<any> {
-        const breeder = await this.breederRepository.findByIdForUpdate(breederId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        // 1. 빈 질문 제거 (공백만 있는 질문)
-        const validQuestions = questions.filter((q) => q.question && q.question.trim().length > 0);
-
-        // 2. 최대 5개 제한 (DTO에서도 체크하지만 이중 검증)
-        if (validQuestions.length > 5) {
-            throw new BadRequestException('커스텀 질문은 최대 5개까지만 추가할 수 있습니다.');
-        }
-
-        // 3. 중복 질문 체크
-        const questionTexts = validQuestions.map((q) => q.question.trim().toLowerCase());
-        const uniqueQuestions = new Set(questionTexts);
-        if (questionTexts.length !== uniqueQuestions.size) {
-            throw new BadRequestException('중복된 질문이 있습니다. 각 질문은 고유해야 합니다.');
-        }
-
-        const timestamp = Date.now();
-
-        // 질문 텍스트를 전체 커스텀 질문 객체로 변환
-        breeder.applicationForm = validQuestions.map((q, index) => ({
-            id: `custom_${timestamp}_${index}`,
-            type: 'textarea',
-            label: q.question.trim(), // 앞뒤 공백 제거
-            required: false,
-            options: undefined,
-            placeholder: undefined,
-            order: index + 1,
-        }));
-
-        await breeder.save();
-
-        return {
-            message: '입양 신청 폼이 성공적으로 업데이트되었습니다.',
-            customQuestions: breeder.applicationForm,
-            totalQuestions: breeder.applicationForm.length,
-        };
+        return this.updateBreederManagementSimpleApplicationFormUseCase.execute(breederId, questions);
     }
 
     /**
@@ -1687,77 +816,7 @@ export class BreederManagementService {
         userId: string,
         deleteData?: { reason?: string; otherReason?: string },
     ): Promise<{ breederId: string; deletedAt: string; message: string }> {
-        this.logger.logStart('deleteBreederAccount', '브리더 계정 탈퇴 처리 시작', { userId });
-
-        const breeder = await this.breederRepository.findById(userId);
-        if (!breeder) {
-            this.logger.logError('deleteBreederAccount', '브리더를 찾을 수 없음', new Error('Breeder not found'));
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        // 이미 탈퇴된 계정인지 확인
-        if (breeder.accountStatus === 'deleted') {
-            throw new BadRequestException('이미 탈퇴된 계정입니다.');
-        }
-
-        // 기타 사유인 경우 otherReason 필수 검증
-        if (deleteData?.reason === 'other' && !deleteData?.otherReason) {
-            throw new BadRequestException('기타 사유를 입력해주세요.');
-        }
-
-        // 진행 중인 입양 신청 확인 (선택적 - 비즈니스 요구사항에 따라 활성화)
-        const pendingApplications = await this.adoptionApplicationRepository.countByStatus(
-            userId,
-            ApplicationStatus.CONSULTATION_PENDING,
-        );
-
-        if (pendingApplications > 0) {
-            this.logger.logWarning('deleteBreederAccount', `진행 중인 입양 신청 ${pendingApplications}건 존재`, {
-                userId,
-                pendingApplications,
-            });
-            // 필요시 여기서 에러를 던질 수 있음:
-            // throw new BadRequestException(`진행 중인 입양 신청 ${pendingApplications}건을 먼저 처리해주세요.`);
-        }
-
-        // 소프트 딜리트: accountStatus를 'deleted'로 변경하고 탈퇴 정보 저장
-        const deletedAt = new Date();
-        await this.breederRepository.updateProfile(userId, {
-            accountStatus: 'deleted',
-            deletedAt: deletedAt,
-            deleteReason: deleteData?.reason || null,
-            deleteReasonDetail: deleteData?.otherReason || null,
-            updatedAt: deletedAt,
-        });
-
-        // 브리더의 모든 분양 개체 비활성화 (홈에서 노출되지 않도록)
-        const deactivatedPetsCount = await this.availablePetRepository.deactivateAllByBreeder(userId);
-        this.logger.log(`[deleteBreederAccount] 분양 개체 ${deactivatedPetsCount}개 비활성화 완료`);
-
-        // Discord 탈퇴 알림 전송
-        await this.discordWebhookService.notifyUserWithdrawal({
-            userId: userId,
-            userType: 'breeder',
-            email: breeder.emailAddress,
-            name: breeder.name || breeder.nickname || '알 수 없음',
-            nickname: breeder.nickname,
-            reason: deleteData?.reason || 'unknown',
-            reasonDetail: deleteData?.otherReason || undefined,
-            deletedAt: deletedAt,
-        });
-
-        this.logger.logSuccess('deleteBreederAccount', '브리더 계정 탈퇴 완료', {
-            userId,
-            deletedAt,
-            reason: deleteData?.reason,
-            pendingApplications,
-        });
-
-        return {
-            breederId: userId,
-            deletedAt: deletedAt.toISOString(),
-            message: '브리더 회원 탈퇴가 성공적으로 처리되었습니다.',
-        };
+        return this.deleteBreederManagementAccountUseCase.execute(userId, deleteData);
     }
 
     /**
@@ -1765,41 +824,7 @@ export class BreederManagementService {
      * 브리더가 자신에게 달린 후기에 답글을 작성합니다.
      */
     async addReviewReply(breederId: string, reviewId: string, content: string): Promise<any> {
-        // 후기 조회 및 권한 확인
-        const review = await this.breederReviewModel.findOne({
-            _id: new Types.ObjectId(reviewId),
-            breederId: new Types.ObjectId(breederId),
-        });
-
-        if (!review) {
-            throw new BadRequestException('해당 후기를 찾을 수 없거나 권한이 없습니다.');
-        }
-
-        // 이미 답글이 있는지 확인
-        if (review.replyContent) {
-            throw new BadRequestException('이미 답글이 작성되어 있습니다. 수정 기능을 이용해주세요.');
-        }
-
-        const now = new Date();
-
-        // 답글 저장
-        await this.breederReviewModel.findByIdAndUpdate(reviewId, {
-            $set: {
-                replyContent: content,
-                replyWrittenAt: now,
-            },
-        });
-
-        this.logger.logSuccess('addReviewReply', '후기 답글 등록 완료', {
-            breederId,
-            reviewId,
-        });
-
-        return {
-            reviewId,
-            replyContent: content,
-            replyWrittenAt: now.toISOString(),
-        };
+        return this.addBreederManagementReviewReplyUseCase.execute(breederId, reviewId, content);
     }
 
     /**
@@ -1807,42 +832,7 @@ export class BreederManagementService {
      * 브리더가 자신이 작성한 답글을 수정합니다.
      */
     async updateReviewReply(breederId: string, reviewId: string, content: string): Promise<any> {
-        // 후기 조회 및 권한 확인
-        const review = await this.breederReviewModel.findOne({
-            _id: new Types.ObjectId(reviewId),
-            breederId: new Types.ObjectId(breederId),
-        });
-
-        if (!review) {
-            throw new BadRequestException('해당 후기를 찾을 수 없거나 권한이 없습니다.');
-        }
-
-        // 기존 답글이 있는지 확인
-        if (!review.replyContent) {
-            throw new BadRequestException('수정할 답글이 없습니다. 먼저 답글을 작성해주세요.');
-        }
-
-        const now = new Date();
-
-        // 답글 수정
-        await this.breederReviewModel.findByIdAndUpdate(reviewId, {
-            $set: {
-                replyContent: content,
-                replyUpdatedAt: now,
-            },
-        });
-
-        this.logger.logSuccess('updateReviewReply', '후기 답글 수정 완료', {
-            breederId,
-            reviewId,
-        });
-
-        return {
-            reviewId,
-            replyContent: content,
-            replyWrittenAt: review.replyWrittenAt?.toISOString(),
-            replyUpdatedAt: now.toISOString(),
-        };
+        return this.updateBreederManagementReviewReplyUseCase.execute(breederId, reviewId, content);
     }
 
     /**
@@ -1850,38 +840,6 @@ export class BreederManagementService {
      * 브리더가 자신이 작성한 답글을 삭제합니다.
      */
     async deleteReviewReply(breederId: string, reviewId: string): Promise<any> {
-        // 후기 조회 및 권한 확인
-        const review = await this.breederReviewModel.findOne({
-            _id: new Types.ObjectId(reviewId),
-            breederId: new Types.ObjectId(breederId),
-        });
-
-        if (!review) {
-            throw new BadRequestException('해당 후기를 찾을 수 없거나 권한이 없습니다.');
-        }
-
-        // 기존 답글이 있는지 확인
-        if (!review.replyContent) {
-            throw new BadRequestException('삭제할 답글이 없습니다.');
-        }
-
-        // 답글 삭제 (필드 제거)
-        await this.breederReviewModel.findByIdAndUpdate(reviewId, {
-            $unset: {
-                replyContent: '',
-                replyWrittenAt: '',
-                replyUpdatedAt: '',
-            },
-        });
-
-        this.logger.logSuccess('deleteReviewReply', '후기 답글 삭제 완료', {
-            breederId,
-            reviewId,
-        });
-
-        return {
-            reviewId,
-            message: '답글이 삭제되었습니다.',
-        };
+        return this.removeBreederManagementReviewReplyUseCase.execute(breederId, reviewId);
     }
 }
