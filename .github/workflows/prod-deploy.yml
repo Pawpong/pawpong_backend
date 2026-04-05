@@ -65,6 +65,8 @@ jobs:
                   GCP_PROJECT_ID: ${{ env.GCP_PROJECT_ID }}
                   SERVICE_NAME: ${{ env.SERVICE_NAME }}
                   COMMIT_SHA: ${{ github.sha }}
+                  PROD_APP_DIR: ${{ vars.PROD_APP_DIR }}
+                  PROD_GCP_KEYFILE: ${{ vars.PROD_GCP_KEYFILE }}
               run: |
                   echo "🚀 Starting deployment to production server..."
                   ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no ${{ env.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << ENDSSH > deploy.log 2>&1
