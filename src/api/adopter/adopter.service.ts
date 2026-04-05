@@ -1,21 +1,18 @@
-import { Injectable, BadRequestException, ConflictException, Logger } from '@nestjs/common';
+import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { randomUUID } from 'crypto';
 import { Model } from 'mongoose';
 
 import { ApplicationStatus, ReportStatus, RecipientType } from '../../common/enum/user.enum';
 
-import { MailService } from '../../common/mail/mail.service';
 import { StorageService } from '../../common/storage/storage.service';
-import { MailTemplateService } from '../../common/mail/mail-template.service';
-import { NotificationService } from '../notification/notification.service';
 import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
 import { CreateAdopterApplicationUseCase } from './application/use-cases/create-adopter-application.use-case';
 import { CreateAdopterReportUseCase } from './application/use-cases/create-adopter-report.use-case';
 import { GetAdopterApplicationsUseCase } from './application/use-cases/get-adopter-applications.use-case';
 import { GetAdopterApplicationDetailUseCase } from './application/use-cases/get-adopter-application-detail.use-case';
+import { CreateAdopterReviewUseCase } from './application/use-cases/create-adopter-review.use-case';
+import { ReportAdopterReviewUseCase } from './application/use-cases/report-adopter-review.use-case';
 
-import { NotificationType } from '../../schema/notification.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
 import { BreederReview, BreederReviewDocument } from '../../schema/breeder-review.schema';
 import { AdoptionApplication, AdoptionApplicationDocument } from '../../schema/adoption-application.schema';
@@ -53,18 +50,15 @@ import { AdopterProfileResponseDto } from './dto/response/adopter-profile-respon
  */
 @Injectable()
 export class AdopterService {
-    private readonly logger = new Logger(AdopterService.name);
-
     constructor(
         private storageService: StorageService,
-        private mailService: MailService,
-        private mailTemplateService: MailTemplateService,
-        private notificationService: NotificationService,
         private discordWebhookService: DiscordWebhookService,
         private readonly createAdopterApplicationUseCase: CreateAdopterApplicationUseCase,
         private readonly createAdopterReportUseCase: CreateAdopterReportUseCase,
         private readonly getAdopterApplicationsUseCase: GetAdopterApplicationsUseCase,
         private readonly getAdopterApplicationDetailUseCase: GetAdopterApplicationDetailUseCase,
+        private readonly createAdopterReviewUseCase: CreateAdopterReviewUseCase,
+        private readonly reportAdopterReviewUseCase: ReportAdopterReviewUseCase,
         private adopterRepository: AdopterRepository,
         private breederRepository: BreederRepository,
         private availablePetManagementRepository: AvailablePetManagementRepository,
@@ -99,70 +93,6 @@ export class AdopterService {
     }
 
     /**
-     * 새 상담 신청 알림 및 이메일 발송 (브리더용)
-     * @private
-     */
-    private async sendNewApplicationNotification(breeder: any): Promise<void> {
-        const breederId = breeder._id.toString();
-        const emailContent = breeder.emailAddress
-            ? this.mailTemplateService.getNewApplicationEmail(breeder.name)
-            : null;
-
-        const builder = this.notificationService
-            .to(breederId, RecipientType.BREEDER)
-            .type(NotificationType.NEW_CONSULT_REQUEST)
-            .title('💬 새로운 입양 상담 신청이 도착했어요!')
-            .content('지금 확인해보세요.')
-            .related('/application', 'page');
-
-        if (emailContent && breeder.emailAddress) {
-            builder.withEmail({
-                to: breeder.emailAddress,
-                subject: emailContent.subject,
-                html: emailContent.html,
-            });
-        }
-
-        await builder.send();
-    }
-
-    /**
-     * 상담 신청 확인 알림 및 이메일 발송 (신청자용)
-     * @private
-     */
-    private async sendApplicationConfirmationNotification(
-        applicantId: string,
-        applicantRole: string,
-        applicantName: string,
-        applicantEmail: string,
-        breederName: string,
-    ): Promise<void> {
-        const emailContent = applicantEmail
-            ? this.mailTemplateService.getApplicationConfirmationEmail(applicantName, breederName)
-            : null;
-
-        const recipientType = applicantRole === 'breeder' ? RecipientType.BREEDER : RecipientType.ADOPTER;
-
-        const builder = this.notificationService
-            .to(applicantId, recipientType)
-            .type(NotificationType.CONSULT_REQUEST_CONFIRMED)
-            .title('✅ 상담 신청이 접수되었습니다!')
-            .content(`${breederName}님이 확인 후 연락드릴 예정입니다.`)
-            .metadata({ breederName })
-            .related(applicantId, 'applications');
-
-        if (emailContent && applicantEmail) {
-            builder.withEmail({
-                to: applicantEmail,
-                subject: emailContent.subject,
-                html: emailContent.html,
-            });
-        }
-
-        await builder.send();
-    }
-
-    /**
      * 입양 후기 작성 처리
      *
      * 변경사항:
@@ -176,96 +106,7 @@ export class AdopterService {
      * @throws BadRequestException 잘못된 요청
      */
     async createReview(userId: string, createReviewDto: ReviewCreateRequestDto): Promise<any> {
-        const { applicationId, reviewType, content } = createReviewDto;
-
-        // 1. 입양자 존재 확인
-        const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-        }
-
-        // 2. 입양 신청 조회 및 검증
-        const application = await this.adoptionApplicationModel.findById(applicationId);
-        if (!application) {
-            throw new BadRequestException('해당 입양 신청을 찾을 수 없습니다.');
-        }
-
-        // 3. 본인 신청인지 확인
-        if (application.adopterId.toString() !== userId) {
-            throw new BadRequestException('본인의 입양 신청에 대해서만 후기를 작성할 수 있습니다.');
-        }
-
-        // 4. 상담 완료 상태인지 확인
-        if (application.status !== ApplicationStatus.CONSULTATION_COMPLETED) {
-            throw new BadRequestException(
-                '상담이 완료된 신청에 대해서만 후기를 작성할 수 있습니다. 현재 상태: ' + application.status,
-            );
-        }
-
-        // 5. 브리더 존재 확인
-        const breeder = await this.breederRepository.findById(application.breederId.toString());
-        if (!breeder) {
-            throw new BadRequestException('해당 브리더를 찾을 수 없습니다.');
-        }
-
-        // 7. BreederReview 컬렉션에 후기 저장
-        const newReview = new this.breederReviewModel({
-            applicationId: applicationId,
-            breederId: application.breederId,
-            adopterId: userId,
-            type: reviewType,
-            content: content,
-            writtenAt: new Date(),
-            isVisible: true,
-        });
-
-        const savedReview = await newReview.save();
-
-        // 8. 브리더 통계 업데이트
-        await this.breederRepository.incrementReviewCount(application.breederId.toString());
-
-        // 9. 브리더에게 새 후기 알림 발송 (이메일 없음, 서비스 알림만)
-        await this.sendNewReviewNotification(application.breederId.toString());
-
-        return {
-            reviewId: (savedReview._id as any).toString(),
-            applicationId: applicationId,
-            breederId: application.breederId.toString(),
-            reviewType: reviewType,
-            writtenAt: savedReview.writtenAt.toISOString(),
-        };
-    }
-
-    /**
-     * 새 후기 등록 알림 및 이메일 발송 (브리더용)
-     * @private
-     */
-    private async sendNewReviewNotification(breederId: string): Promise<void> {
-        // 브리더 정보 조회
-        const breeder = await this.breederRepository.findById(breederId);
-        if (!breeder) {
-            return; // 브리더를 찾을 수 없으면 알림 발송 중단
-        }
-
-        const emailContent = breeder.emailAddress ? this.mailTemplateService.getNewReviewEmail(breeder.name) : null;
-
-        const builder = this.notificationService
-            .to(breederId, RecipientType.BREEDER)
-            .type(NotificationType.NEW_REVIEW_REGISTERED)
-            .title('⭐ 새로운 후기가 등록되었어요!')
-            .content('브리더 프로필에서 후기를 확인해보세요.')
-            .related(`/explore/breeder/${breederId}#reviews`, 'profile')
-            .metadata({ breederId });
-
-        if (emailContent && breeder.emailAddress) {
-            builder.withEmail({
-                to: breeder.emailAddress,
-                subject: emailContent.subject,
-                html: emailContent.html,
-            });
-        }
-
-        await builder.send();
+        return this.createAdopterReviewUseCase.execute(userId, createReviewDto);
     }
 
     /**
@@ -640,32 +481,11 @@ export class AdopterService {
      * @throws BadRequestException 존재하지 않는 후기
      */
     async reportReview(userId: string, reviewId: string, reason: string, description?: string): Promise<any> {
-        // 신고자 존재 확인 (입양자 또는 브리더)
-        const adopter = await this.adopterRepository.findById(userId);
-        const breeder = await this.breederRepository.findById(userId);
-
-        if (!adopter && !breeder) {
-            throw new BadRequestException('사용자 정보를 찾을 수 없습니다.');
-        }
-
-        // 후기 존재 확인
-        const review = await this.breederReviewModel.findById(reviewId);
-        if (!review) {
-            throw new BadRequestException('신고할 후기를 찾을 수 없습니다.');
-        }
-
-        // 후기 신고 정보 업데이트
-        review.isReported = true;
-        review.reportedBy = userId as any;
-        review.reportReason = reason;
-        review.reportDescription = description || '';
-        review.reportedAt = new Date();
-
-        await review.save();
-
-        return {
-            message: '후기가 신고되었습니다. 관리자가 검토 후 처리합니다.',
-        };
+        return this.reportAdopterReviewUseCase.execute(userId, {
+            reviewId,
+            reason,
+            description,
+        });
     }
 
     /**

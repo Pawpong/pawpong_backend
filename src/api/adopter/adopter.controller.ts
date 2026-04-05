@@ -16,6 +16,8 @@ import { CreateAdopterApplicationUseCase } from './application/use-cases/create-
 import { CreateAdopterReportUseCase } from './application/use-cases/create-adopter-report.use-case';
 import { GetAdopterApplicationsUseCase } from './application/use-cases/get-adopter-applications.use-case';
 import { GetAdopterApplicationDetailUseCase } from './application/use-cases/get-adopter-application-detail.use-case';
+import { CreateAdopterReviewUseCase } from './application/use-cases/create-adopter-review.use-case';
+import { ReportAdopterReviewUseCase } from './application/use-cases/report-adopter-review.use-case';
 
 import { FavoriteAddRequestDto } from './dto/request/favorite-add-request.dto';
 import { ReviewCreateRequestDto } from './dto/request/review-create-request.dto';
@@ -57,6 +59,8 @@ export class AdopterController {
         private readonly createAdopterReportUseCase: CreateAdopterReportUseCase,
         private readonly getAdopterApplicationsUseCase: GetAdopterApplicationsUseCase,
         private readonly getAdopterApplicationDetailUseCase: GetAdopterApplicationDetailUseCase,
+        private readonly createAdopterReviewUseCase: CreateAdopterReviewUseCase,
+        private readonly reportAdopterReviewUseCase: ReportAdopterReviewUseCase,
     ) {}
 
     @Post('application')
@@ -180,7 +184,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Body() createReviewDto: ReviewCreateRequestDto,
     ): Promise<ApiResponseDto<ReviewCreateResponseDto>> {
-        const result = await this.adopterService.createReview(user.userId, createReviewDto);
+        const result = await this.createAdopterReviewUseCase.execute(user.userId, createReviewDto);
         return ApiResponseDto.success(result, '후기가 성공적으로 작성되었습니다.');
     }
 
@@ -258,12 +262,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Body() reportDto: ReviewReportRequestDto,
     ): Promise<ApiResponseDto<ReviewReportResponseDto>> {
-        const result = await this.adopterService.reportReview(
-            user.userId,
-            reportDto.reviewId,
-            reportDto.reason,
-            reportDto.description,
-        );
+        const result = await this.reportAdopterReviewUseCase.execute(user.userId, reportDto);
         return ApiResponseDto.success(result, '후기가 신고되었습니다.');
     }
 
