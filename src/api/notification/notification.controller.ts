@@ -3,9 +3,12 @@ import { Controller, Get, Patch, Delete, Param, Query, UseGuards } from '@nestjs
 import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
-
-import { NotificationService } from './notification.service';
 import { NotificationListRequestDto } from './dto/request/notification-list-request.dto';
+import { GetNotificationsUseCase } from './application/use-cases/get-notifications.use-case';
+import { GetUnreadNotificationCountUseCase } from './application/use-cases/get-unread-notification-count.use-case';
+import { MarkNotificationReadUseCase } from './application/use-cases/mark-notification-read.use-case';
+import { MarkAllNotificationsReadUseCase } from './application/use-cases/mark-all-notifications-read.use-case';
+import { DeleteNotificationUseCase } from './application/use-cases/delete-notification.use-case';
 
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
@@ -24,7 +27,13 @@ import {
 @Controller('notification')
 @UseGuards(JwtAuthGuard)
 export class NotificationController {
-    constructor(private readonly notificationService: NotificationService) {}
+    constructor(
+        private readonly getNotificationsUseCase: GetNotificationsUseCase,
+        private readonly getUnreadNotificationCountUseCase: GetUnreadNotificationCountUseCase,
+        private readonly markNotificationReadUseCase: MarkNotificationReadUseCase,
+        private readonly markAllNotificationsReadUseCase: MarkAllNotificationsReadUseCase,
+        private readonly deleteNotificationUseCase: DeleteNotificationUseCase,
+    ) {}
 
     @Get()
     @ApiEndpoint({
@@ -36,7 +45,7 @@ export class NotificationController {
         @CurrentUser() user: any,
         @Query() filter: NotificationListRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<NotificationResponseDto>>> {
-        const result = await this.notificationService.getNotifications(user.userId, filter);
+        const result = await this.getNotificationsUseCase.execute(user.userId, filter);
         return ApiResponseDto.success(result, '알림 목록이 조회되었습니다.');
     }
 
@@ -47,7 +56,7 @@ export class NotificationController {
         responseType: UnreadCountResponseDto,
     })
     async getUnreadCount(@CurrentUser() user: any): Promise<ApiResponseDto<UnreadCountResponseDto>> {
-        const result = await this.notificationService.getUnreadCount(user.userId);
+        const result = await this.getUnreadNotificationCountUseCase.execute(user.userId);
         return ApiResponseDto.success(result, '읽지 않은 알림 수가 조회되었습니다.');
     }
 
@@ -61,7 +70,7 @@ export class NotificationController {
         @Param('id') notificationId: string,
         @CurrentUser() user: any,
     ): Promise<ApiResponseDto<MarkAsReadResponseDto>> {
-        const result = await this.notificationService.markAsRead(user.userId, notificationId);
+        const result = await this.markNotificationReadUseCase.execute(user.userId, notificationId);
         return ApiResponseDto.success(result, '알림이 읽음 처리되었습니다.');
     }
 
@@ -72,7 +81,7 @@ export class NotificationController {
         responseType: MarkAllAsReadResponseDto,
     })
     async markAllAsRead(@CurrentUser() user: any): Promise<ApiResponseDto<MarkAllAsReadResponseDto>> {
-        const result = await this.notificationService.markAllAsRead(user.userId);
+        const result = await this.markAllNotificationsReadUseCase.execute(user.userId);
         return ApiResponseDto.success(result, `${result.updatedCount}개의 알림이 읽음 처리되었습니다.`);
     }
 
@@ -85,7 +94,7 @@ export class NotificationController {
         @Param('id') notificationId: string,
         @CurrentUser() user: any,
     ): Promise<ApiResponseDto<null>> {
-        await this.notificationService.deleteNotification(user.userId, notificationId);
+        await this.deleteNotificationUseCase.execute(user.userId, notificationId);
         return ApiResponseDto.success(null, '알림이 삭제되었습니다.');
     }
 }
