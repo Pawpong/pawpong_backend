@@ -12,10 +12,10 @@ import { GetAdopterApplicationsUseCase } from './application/use-cases/get-adopt
 import { GetAdopterApplicationDetailUseCase } from './application/use-cases/get-adopter-application-detail.use-case';
 import { CreateAdopterReviewUseCase } from './application/use-cases/create-adopter-review.use-case';
 import { ReportAdopterReviewUseCase } from './application/use-cases/report-adopter-review.use-case';
+import { GetAdopterReviewsUseCase } from './application/use-cases/get-adopter-reviews.use-case';
+import { GetAdopterReviewDetailUseCase } from './application/use-cases/get-adopter-review-detail.use-case';
 
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
-import { BreederReview, BreederReviewDocument } from '../../schema/breeder-review.schema';
-import { AdoptionApplication, AdoptionApplicationDocument } from '../../schema/adoption-application.schema';
 
 import { AdopterRepository } from './adopter.repository';
 import { BreederRepository } from '../breeder-management/repository/breeder.repository';
@@ -29,7 +29,6 @@ import { ReportCreateRequestDto } from './dto/request/report-create-request.dto'
 import { AccountDeleteRequestDto } from './dto/request/account-delete-request.dto';
 import { ApplicationCreateRequestDto } from './dto/request/application-create-request.dto';
 import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
-import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { AccountDeleteResponseDto } from './dto/response/account-delete-response.dto';
 import { AdopterProfileResponseDto } from './dto/response/adopter-profile-response.dto';
 
@@ -59,13 +58,13 @@ export class AdopterService {
         private readonly getAdopterApplicationDetailUseCase: GetAdopterApplicationDetailUseCase,
         private readonly createAdopterReviewUseCase: CreateAdopterReviewUseCase,
         private readonly reportAdopterReviewUseCase: ReportAdopterReviewUseCase,
+        private readonly getAdopterReviewsUseCase: GetAdopterReviewsUseCase,
+        private readonly getAdopterReviewDetailUseCase: GetAdopterReviewDetailUseCase,
         private adopterRepository: AdopterRepository,
         private breederRepository: BreederRepository,
         private availablePetManagementRepository: AvailablePetManagementRepository,
 
         @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
-        @InjectModel(BreederReview.name) private breederReviewModel: Model<BreederReviewDocument>,
-        @InjectModel(AdoptionApplication.name) private adoptionApplicationModel: Model<AdoptionApplicationDocument>,
     ) {}
 
     /**
@@ -384,51 +383,7 @@ export class AdopterService {
      * @returns 후기 목록과 페이지네이션 정보
      */
     async getMyReviews(userId: string, page: number = 1, limit: number = 10): Promise<any> {
-        const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-        }
-
-        const skip = (page - 1) * limit;
-
-        const [reviews, total] = await Promise.all([
-            this.breederReviewModel
-                .find({ adopterId: userId })
-                .sort({ writtenAt: -1 }) // 최신순 정렬
-                .skip(skip)
-                .limit(limit)
-                .populate('breederId', 'nickname profileImageFileName verification.level petType') // 브리더 상세 정보
-                .lean()
-                .exec(),
-            this.breederReviewModel.countDocuments({ adopterId: userId }).exec(),
-        ]);
-
-        const formattedReviews = reviews.map((review: any) => {
-            const breeder = review.breederId;
-            return {
-                reviewId: review._id.toString(),
-                applicationId: review.applicationId?.toString() || null,
-                breederId: breeder?._id?.toString() || null,
-                breederNickname: breeder?.nickname || '알 수 없음',
-                breederProfileImage: breeder?.profileImageFileName
-                    ? this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60)
-                    : null,
-                breederLevel: breeder?.verification?.level || 'new',
-                breedingPetType: breeder?.petType || 'unknown',
-                content: review.content,
-                reviewType: review.type,
-                writtenAt: review.writtenAt,
-            };
-        });
-
-        const totalPages = Math.ceil(total / limit);
-
-        return new PaginationBuilder<any>()
-            .setItems(formattedReviews)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(total)
-            .build();
+        return this.getAdopterReviewsUseCase.execute(userId, page, limit);
     }
 
     /**
@@ -439,31 +394,7 @@ export class AdopterService {
      * @returns 후기 세부 정보
      */
     async getReviewDetail(userId: string, reviewId: string): Promise<any> {
-        const review = await this.breederReviewModel
-            .findOne({ _id: reviewId, adopterId: userId })
-            .populate('breederId', 'nickname profileImageFileName verification.level petType')
-            .lean()
-            .exec();
-
-        if (!review) {
-            throw new BadRequestException('후기를 찾을 수 없습니다.');
-        }
-
-        const breeder = review.breederId as any;
-
-        return {
-            reviewId: review._id.toString(),
-            breederNickname: breeder?.nickname || '알 수 없음',
-            breederProfileImage: breeder?.profileImageFileName
-                ? this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60)
-                : null,
-            breederLevel: breeder?.verification?.level || 'new',
-            breedingPetType: breeder?.petType || 'unknown',
-            content: review.content,
-            reviewType: review.type,
-            writtenAt: review.writtenAt,
-            isVisible: review.isVisible,
-        };
+        return this.getAdopterReviewDetailUseCase.execute(userId, reviewId);
     }
 
     /**
