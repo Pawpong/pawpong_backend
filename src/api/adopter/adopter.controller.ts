@@ -18,6 +18,8 @@ import { GetAdopterApplicationsUseCase } from './application/use-cases/get-adopt
 import { GetAdopterApplicationDetailUseCase } from './application/use-cases/get-adopter-application-detail.use-case';
 import { CreateAdopterReviewUseCase } from './application/use-cases/create-adopter-review.use-case';
 import { ReportAdopterReviewUseCase } from './application/use-cases/report-adopter-review.use-case';
+import { GetAdopterReviewsUseCase } from './application/use-cases/get-adopter-reviews.use-case';
+import { GetAdopterReviewDetailUseCase } from './application/use-cases/get-adopter-review-detail.use-case';
 
 import { FavoriteAddRequestDto } from './dto/request/favorite-add-request.dto';
 import { ReviewCreateRequestDto } from './dto/request/review-create-request.dto';
@@ -61,6 +63,8 @@ export class AdopterController {
         private readonly getAdopterApplicationDetailUseCase: GetAdopterApplicationDetailUseCase,
         private readonly createAdopterReviewUseCase: CreateAdopterReviewUseCase,
         private readonly reportAdopterReviewUseCase: ReportAdopterReviewUseCase,
+        private readonly getAdopterReviewsUseCase: GetAdopterReviewsUseCase,
+        private readonly getAdopterReviewDetailUseCase: GetAdopterReviewDetailUseCase,
     ) {}
 
     @Post('application')
@@ -315,7 +319,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 10,
     ): Promise<ApiResponseDto<PaginationResponseDto<MyReviewItemDto>>> {
-        const result = await this.adopterService.getMyReviews(user.userId, Number(page), Number(limit));
+        const result = await this.getAdopterReviewsUseCase.execute(user.userId, Number(page), Number(limit));
         return ApiResponseDto.success(result, '내가 작성한 후기 목록이 조회되었습니다.');
     }
 
@@ -335,7 +339,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Param('id') reviewId: string,
     ): Promise<ApiResponseDto<MyReviewDetailDto>> {
-        const result = await this.adopterService.getReviewDetail(user.userId, reviewId);
+        const result = await this.getAdopterReviewDetailUseCase.execute(user.userId, reviewId);
         return ApiResponseDto.success(result, '후기 세부 정보가 조회되었습니다.');
     }
 
