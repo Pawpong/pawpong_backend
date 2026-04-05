@@ -27,6 +27,15 @@ import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard
 import { SmsService } from './sms.service';
 import { AuthService } from './auth.service';
 import { BreederManagementAdminService } from '../breeder-management/admin/breeder-management-admin.service';
+import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
+import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
+import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
+import { CheckBreederNameDuplicateUseCase } from './application/use-cases/check-breeder-name-duplicate.use-case';
+import { CompleteSocialRegistrationUseCase } from './application/use-cases/complete-social-registration.use-case';
+import { RefreshAuthTokenUseCase } from './application/use-cases/refresh-auth-token.use-case';
+import { LogoutUseCase } from './application/use-cases/logout.use-case';
+import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
+import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
 
 import { RefreshTokenRequestDto } from './dto/request/refresh-token-request.dto';
 import { CheckNicknameRequestDto } from './dto/request/check-nickname-request.dto';
@@ -54,6 +63,15 @@ export class AuthController {
         private readonly authService: AuthService,
         private readonly smsService: SmsService,
         private readonly breederManagementAdminService: BreederManagementAdminService,
+        private readonly checkSocialUserUseCase: CheckSocialUserUseCase,
+        private readonly checkEmailDuplicateUseCase: CheckEmailDuplicateUseCase,
+        private readonly checkNicknameDuplicateUseCase: CheckNicknameDuplicateUseCase,
+        private readonly checkBreederNameDuplicateUseCase: CheckBreederNameDuplicateUseCase,
+        private readonly completeSocialRegistrationUseCase: CompleteSocialRegistrationUseCase,
+        private readonly refreshAuthTokenUseCase: RefreshAuthTokenUseCase,
+        private readonly logoutUseCase: LogoutUseCase,
+        private readonly registerAdopterUseCase: RegisterAdopterUseCase,
+        private readonly registerBreederUseCase: RegisterBreederUseCase,
     ) {}
 
     @Post('refresh')
@@ -65,7 +83,7 @@ export class AuthController {
         isPublic: true,
     })
     async refreshToken(@Body() refreshTokenDto: RefreshTokenRequestDto): Promise<ApiResponseDto<TokenResponseDto>> {
-        const result = await this.authService.refreshToken(refreshTokenDto);
+        const result = await this.refreshAuthTokenUseCase.execute(refreshTokenDto);
         return ApiResponseDto.success(result, '토큰이 재발급되었습니다.');
     }
 
@@ -82,7 +100,7 @@ export class AuthController {
         @CurrentUser() user: any,
         @Res({ passthrough: true }) res: Response,
     ): Promise<ApiResponseDto<LogoutResponseDto>> {
-        const response = await this.authService.logout(user.userId, user.role);
+        const response = await this.logoutUseCase.execute(user.userId, user.role);
 
         // HTTP-only 쿠키 삭제 (maxAge: 0으로 설정하여 즉시 만료)
         const isProduction = process.env.NODE_ENV === 'production';
@@ -323,7 +341,7 @@ export class AuthController {
     async completeSocialRegistration(
         @Body() dto: SocialCompleteRequestDto,
     ): Promise<ApiResponseDto<RegisterAdopterResponseDto | RegisterBreederResponseDto>> {
-        const result = await this.authService.completeSocialRegistrationValidated(dto);
+        const result = await this.completeSocialRegistrationUseCase.execute(dto);
         const message =
             dto.role === 'adopter' ? '입양자 회원가입이 완료되었습니다.' : '브리더 회원가입이 완료되었습니다.';
         return ApiResponseDto.success(result, message);
@@ -338,7 +356,7 @@ export class AuthController {
         isPublic: true,
     })
     async checkEmailDuplicate(@Body('email') email: string): Promise<ApiResponseDto<{ isDuplicate: boolean }>> {
-        const isDuplicate = await this.authService.checkEmailDuplicate(email);
+        const isDuplicate = await this.checkEmailDuplicateUseCase.execute(email);
         return ApiResponseDto.success(
             { isDuplicate },
             isDuplicate ? '이미 가입된 이메일입니다.' : '사용 가능한 이메일입니다.',
@@ -356,7 +374,7 @@ export class AuthController {
     async checkNicknameDuplicate(
         @Body() checkNicknameDto: CheckNicknameRequestDto,
     ): Promise<ApiResponseDto<{ isDuplicate: boolean }>> {
-        const isDuplicate = await this.authService.checkNicknameDuplicate(checkNicknameDto.nickname);
+        const isDuplicate = await this.checkNicknameDuplicateUseCase.execute(checkNicknameDto.nickname);
         return ApiResponseDto.success(
             { isDuplicate },
             isDuplicate ? '이미 사용 중인 닉네임입니다.' : '사용 가능한 닉네임입니다.',
@@ -374,7 +392,7 @@ export class AuthController {
     async checkBreederNameDuplicate(
         @Body('breederName') breederName: string,
     ): Promise<ApiResponseDto<{ isDuplicate: boolean }>> {
-        const isDuplicate = await this.authService.checkBreederNameDuplicate(breederName);
+        const isDuplicate = await this.checkBreederNameDuplicateUseCase.execute(breederName);
         return ApiResponseDto.success(
             { isDuplicate },
             isDuplicate ? '이미 사용 중인 상호명입니다.' : '사용 가능한 상호명입니다.',
@@ -395,7 +413,7 @@ export class AuthController {
         @Body('providerId') providerId: string,
         @Body('email') email?: string,
     ): Promise<ApiResponseDto<SocialCheckUserResponseDto>> {
-        const result = await this.authService.checkSocialUser(provider, providerId, email);
+        const result = await this.checkSocialUserUseCase.execute(provider, providerId, email);
         return ApiResponseDto.success(result, result.exists ? '가입된 사용자입니다.' : '미가입 사용자입니다.');
     }
 
@@ -432,7 +450,7 @@ export class AuthController {
         isPublic: true,
     })
     async registerAdopter(@Body() dto: RegisterAdopterRequestDto): Promise<ApiResponseDto<RegisterAdopterResponseDto>> {
-        const result = await this.authService.registerAdopter(dto);
+        const result = await this.registerAdopterUseCase.execute(dto);
         return ApiResponseDto.success(result, '입양자 회원가입이 완료되었습니다.');
     }
 
@@ -459,7 +477,7 @@ export class AuthController {
         isPublic: true,
     })
     async registerBreeder(@Body() dto: RegisterBreederRequestDto): Promise<ApiResponseDto<RegisterBreederResponseDto>> {
-        const result = await this.authService.registerBreeder(dto);
+        const result = await this.registerBreederUseCase.execute(dto);
         return ApiResponseDto.success(result, '브리더 회원가입이 완료되었습니다.');
     }
 
