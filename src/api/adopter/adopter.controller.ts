@@ -7,6 +7,15 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../common/decorator/swagger.decorator';
 
 import { AdopterService } from './adopter.service';
+import { GetAdopterProfileUseCase } from './application/use-cases/get-adopter-profile.use-case';
+import { UpdateAdopterProfileUseCase } from './application/use-cases/update-adopter-profile.use-case';
+import { AddFavoriteBreederUseCase } from './application/use-cases/add-favorite-breeder.use-case';
+import { RemoveFavoriteBreederUseCase } from './application/use-cases/remove-favorite-breeder.use-case';
+import { GetFavoriteBreedersUseCase } from './application/use-cases/get-favorite-breeders.use-case';
+import { CreateAdopterApplicationUseCase } from './application/use-cases/create-adopter-application.use-case';
+import { CreateAdopterReportUseCase } from './application/use-cases/create-adopter-report.use-case';
+import { GetAdopterApplicationsUseCase } from './application/use-cases/get-adopter-applications.use-case';
+import { GetAdopterApplicationDetailUseCase } from './application/use-cases/get-adopter-application-detail.use-case';
 
 import { FavoriteAddRequestDto } from './dto/request/favorite-add-request.dto';
 import { ReviewCreateRequestDto } from './dto/request/review-create-request.dto';
@@ -37,7 +46,18 @@ import { AccountDeleteResponseDto } from './dto/response/account-delete-response
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('adopter')
 export class AdopterController {
-    constructor(private readonly adopterService: AdopterService) {}
+    constructor(
+        private readonly adopterService: AdopterService,
+        private readonly getAdopterProfileUseCase: GetAdopterProfileUseCase,
+        private readonly updateAdopterProfileUseCase: UpdateAdopterProfileUseCase,
+        private readonly addFavoriteBreederUseCase: AddFavoriteBreederUseCase,
+        private readonly removeFavoriteBreederUseCase: RemoveFavoriteBreederUseCase,
+        private readonly getFavoriteBreedersUseCase: GetFavoriteBreedersUseCase,
+        private readonly createAdopterApplicationUseCase: CreateAdopterApplicationUseCase,
+        private readonly createAdopterReportUseCase: CreateAdopterReportUseCase,
+        private readonly getAdopterApplicationsUseCase: GetAdopterApplicationsUseCase,
+        private readonly getAdopterApplicationDetailUseCase: GetAdopterApplicationDetailUseCase,
+    ) {}
 
     @Post('application')
     @ApiEndpoint({
@@ -70,7 +90,11 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Body() createApplicationDto: ApplicationCreateRequestDto,
     ): Promise<ApiResponseDto<ApplicationCreateResponseDto>> {
-        const result = await this.adopterService.createApplication(user.userId, createApplicationDto, user.role);
+        const result = await this.createAdopterApplicationUseCase.execute(
+            user.userId,
+            createApplicationDto,
+            user.role,
+        );
         return ApiResponseDto.success(result, '입양 신청이 성공적으로 제출되었습니다.');
     }
 
@@ -100,13 +124,8 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 10,
         @Query('animalType') animalType?: 'cat' | 'dog',
-    ): Promise<ApiResponseDto<PaginationResponseDto<ApplicationListItemResponseDto>>> {
-        const result = await this.adopterService.getMyApplications(
-            user.userId,
-            Number(page),
-            Number(limit),
-            animalType,
-        );
+    ): Promise<ApiResponseDto<ApplicationListResponseDto>> {
+        const result = await this.getAdopterApplicationsUseCase.execute(user.userId, Number(page), Number(limit), animalType);
         return ApiResponseDto.success(result, '입양 신청 목록이 조회되었습니다.');
     }
 
@@ -130,7 +149,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Param('id') applicationId: string,
     ): Promise<ApiResponseDto<ApplicationDetailResponseDto>> {
-        const result = await this.adopterService.getApplicationDetail(user.userId, applicationId);
+        const result = await this.getAdopterApplicationDetailUseCase.execute(user.userId, applicationId);
         return ApiResponseDto.success(result, '입양 신청 상세 정보가 조회되었습니다.');
     }
 
@@ -176,7 +195,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Body() addFavoriteDto: FavoriteAddRequestDto,
     ): Promise<ApiResponseDto<FavoriteAddResponseDto>> {
-        const result = await this.adopterService.addFavorite(user.userId, addFavoriteDto, user.role);
+        const result = await this.addFavoriteBreederUseCase.execute(user.userId, addFavoriteDto);
         return ApiResponseDto.success(result, '즐겨찾기에 성공적으로 추가되었습니다.');
     }
 
@@ -191,7 +210,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Param('breederId') breederId: string,
     ): Promise<ApiResponseDto<FavoriteRemoveResponseDto>> {
-        const result = await this.adopterService.removeFavorite(user.userId, breederId, user.role);
+        const result = await this.removeFavoriteBreederUseCase.execute(user.userId, breederId);
         return ApiResponseDto.success(result, '즐겨찾기에서 성공적으로 삭제되었습니다.');
     }
 
@@ -209,7 +228,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 10,
     ): Promise<ApiResponseDto<PaginationResponseDto<FavoriteBreederDataDto>>> {
-        const result = await this.adopterService.getFavoriteList(user.userId, Number(page), Number(limit), user.role);
+        const result = await this.getFavoriteBreedersUseCase.execute(user.userId, Number(page), Number(limit));
         return ApiResponseDto.success(result, '즐겨찾기 목록이 조회되었습니다.');
     }
 
@@ -224,7 +243,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Body() createReportDto: ReportCreateRequestDto,
     ): Promise<ApiResponseDto<ReportCreateResponseDto>> {
-        const result = await this.adopterService.createReport(user.userId, createReportDto);
+        const result = await this.createAdopterReportUseCase.execute(user.userId, createReportDto);
         return ApiResponseDto.success(result, '신고가 성공적으로 제출되었습니다.');
     }
 
@@ -256,7 +275,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         isPublic: false,
     })
     async getProfile(@CurrentUser() user: any): Promise<ApiResponseDto<AdopterProfileResponseDto>> {
-        const result = await this.adopterService.getProfile(user.userId);
+        const result = await this.getAdopterProfileUseCase.execute(user.userId);
         return ApiResponseDto.success(result, '입양자 프로필이 조회되었습니다.');
     }
 
@@ -271,7 +290,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Body() updateData: { name?: string; phone?: string; profileImage?: string },
     ): Promise<ApiResponseDto<AdopterProfileUpdateResponseDto>> {
-        const result = await this.adopterService.updateProfile(user.userId, updateData);
+        const result = await this.updateAdopterProfileUseCase.execute(user.userId, updateData);
         return ApiResponseDto.success(result, '프로필이 성공적으로 수정되었습니다.');
     }
 
