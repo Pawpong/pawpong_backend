@@ -165,7 +165,7 @@ export class AlimtalkAdminService {
             // 템플릿 생성
             const newTemplate = await this.alimtalkTemplateModel.create({
                 ...createData,
-                fallbackToSms: createData.fallbackToSms ?? true,
+                fallbackToSms: createData.fallbackToSms ?? false,
                 isActive: createData.isActive ?? true,
                 reviewStatus: createData.reviewStatus ?? 'approved',
                 buttons: createData.buttons ?? [],
