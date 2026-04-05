@@ -159,3 +159,10 @@ controller -> use-case -> domain
   - 기존 응답/메시지 유지
   - breeder e2e 테스트 통과
   - 타입체크 통과
+- `announcement` 도메인:
+  - 공개 공지사항 `list + detail` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
+  - 공지사항 응답 조립과 페이지네이션 응답 조립 책임을 response mapper/domain service로 이동
+  - 기존 `AnnouncementService`는 호환을 위해 유지하고, 분리된 조회 메서드를 use-case 위임 형태로 얇게 정리
+  - 기존 응답/상태코드 유지
+  - announcement unit/e2e 테스트 통과
+  - 타입체크 통과
