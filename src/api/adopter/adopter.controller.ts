@@ -6,7 +6,6 @@ import { Roles } from '../../common/decorator/roles.decorator';
 import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../common/decorator/swagger.decorator';
 
-import { AdopterService } from './adopter.service';
 import { GetAdopterProfileUseCase } from './application/use-cases/get-adopter-profile.use-case';
 import { UpdateAdopterProfileUseCase } from './application/use-cases/update-adopter-profile.use-case';
 import { AddFavoriteBreederUseCase } from './application/use-cases/add-favorite-breeder.use-case';
@@ -20,6 +19,7 @@ import { CreateAdopterReviewUseCase } from './application/use-cases/create-adopt
 import { ReportAdopterReviewUseCase } from './application/use-cases/report-adopter-review.use-case';
 import { GetAdopterReviewsUseCase } from './application/use-cases/get-adopter-reviews.use-case';
 import { GetAdopterReviewDetailUseCase } from './application/use-cases/get-adopter-review-detail.use-case';
+import { DeleteAdopterAccountUseCase } from './application/use-cases/delete-adopter-account.use-case';
 
 import { FavoriteAddRequestDto } from './dto/request/favorite-add-request.dto';
 import { ReviewCreateRequestDto } from './dto/request/review-create-request.dto';
@@ -51,7 +51,6 @@ import { AccountDeleteResponseDto } from './dto/response/account-delete-response
 @Roles('adopter')
 export class AdopterController {
     constructor(
-        private readonly adopterService: AdopterService,
         private readonly getAdopterProfileUseCase: GetAdopterProfileUseCase,
         private readonly updateAdopterProfileUseCase: UpdateAdopterProfileUseCase,
         private readonly addFavoriteBreederUseCase: AddFavoriteBreederUseCase,
@@ -65,6 +64,7 @@ export class AdopterController {
         private readonly reportAdopterReviewUseCase: ReportAdopterReviewUseCase,
         private readonly getAdopterReviewsUseCase: GetAdopterReviewsUseCase,
         private readonly getAdopterReviewDetailUseCase: GetAdopterReviewDetailUseCase,
+        private readonly deleteAdopterAccountUseCase: DeleteAdopterAccountUseCase,
     ) {}
 
     @Post('application')
@@ -368,7 +368,7 @@ Figma 상담 신청 폼 기반으로 재설계된 API입니다.
         @CurrentUser() user: any,
         @Body() deleteData: AccountDeleteRequestDto,
     ): Promise<ApiResponseDto<AccountDeleteResponseDto>> {
-        const result = await this.adopterService.deleteAccount(user.userId, deleteData);
+        const result = await this.deleteAdopterAccountUseCase.execute(user.userId, deleteData);
         return ApiResponseDto.success(result, '회원 탈퇴가 완료되었습니다.');
     }
 }

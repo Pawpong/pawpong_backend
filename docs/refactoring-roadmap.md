@@ -109,11 +109,13 @@ controller -> use-case -> domain
   - 후기 작성/후기 신고 명령 흐름을 `controller -> use-case -> port -> adapter` 구조로 분리
   - 후기 목록/상세 조회 흐름을 `controller -> use-case -> port -> adapter` 구조로 분리
   - 입양 신청 목록/상세 조회 흐름을 `controller -> use-case -> port -> adapter` 구조로 분리
+  - 회원 탈퇴 명령 흐름을 `controller -> use-case -> port -> adapter` 구조로 분리
   - 신청 생성의 표준 응답/커스텀 응답 조립, 생성 응답 조립 책임을 domain service로 분리
   - 신청 생성의 개체 조회/중복 신청 검사/알림 발송을 command port와 notifier port 뒤로 이동
   - 후기 생성 응답과 후기 신고 응답 조립 책임을 response factory/domain service로 이동
   - 후기 생성의 신청 조회/후기 저장/브리더 통계 갱신을 review command port 뒤로 이동
   - 후기 목록/상세 조회 응답 조립 책임을 response factory/domain service로 이동
+  - 회원 탈퇴 응답 조립 책임을 response factory/domain service로 이동
   - 새로 추가한 adopter 내부 계약은 `DTO class + type + abstract class` 기준으로 정리
   - 신청 목록/상세 응답 조립 책임을 assembler/domain service로 이동
   - 즐겨찾기 추가/삭제 규칙을 domain service로 이동

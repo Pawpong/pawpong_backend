@@ -317,4 +317,22 @@ describe('Adopter API E2E Tests (Simple)', () => {
             console.log('✅ 브리더 신고 성공');
         });
     });
+
+    describe('회원 탈퇴', () => {
+        it('DELETE /api/adopter/account - 회원 탈퇴 성공', async () => {
+            const response = await request(app.getHttpServer())
+                .delete('/api/adopter/account')
+                .set('Authorization', `Bearer ${adopterToken}`)
+                .send({
+                    reason: 'privacy_concern',
+                })
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('회원 탈퇴가 완료되었습니다.');
+            expect(response.body.data.adopterId).toBe(adopterUserId);
+            expect(response.body.data.message).toBe('회원 탈퇴가 성공적으로 처리되었습니다.');
+            console.log('✅ 회원 탈퇴 성공');
+        });
+    });
 });

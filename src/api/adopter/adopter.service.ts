@@ -5,7 +5,6 @@ import { Model } from 'mongoose';
 import { ApplicationStatus, ReportStatus, RecipientType } from '../../common/enum/user.enum';
 
 import { StorageService } from '../../common/storage/storage.service';
-import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
 import { CreateAdopterApplicationUseCase } from './application/use-cases/create-adopter-application.use-case';
 import { CreateAdopterReportUseCase } from './application/use-cases/create-adopter-report.use-case';
 import { GetAdopterApplicationsUseCase } from './application/use-cases/get-adopter-applications.use-case';
@@ -14,6 +13,7 @@ import { CreateAdopterReviewUseCase } from './application/use-cases/create-adopt
 import { ReportAdopterReviewUseCase } from './application/use-cases/report-adopter-review.use-case';
 import { GetAdopterReviewsUseCase } from './application/use-cases/get-adopter-reviews.use-case';
 import { GetAdopterReviewDetailUseCase } from './application/use-cases/get-adopter-review-detail.use-case';
+import { DeleteAdopterAccountUseCase } from './application/use-cases/delete-adopter-account.use-case';
 
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
 
@@ -51,7 +51,6 @@ import { AdopterProfileResponseDto } from './dto/response/adopter-profile-respon
 export class AdopterService {
     constructor(
         private storageService: StorageService,
-        private discordWebhookService: DiscordWebhookService,
         private readonly createAdopterApplicationUseCase: CreateAdopterApplicationUseCase,
         private readonly createAdopterReportUseCase: CreateAdopterReportUseCase,
         private readonly getAdopterApplicationsUseCase: GetAdopterApplicationsUseCase,
@@ -60,6 +59,7 @@ export class AdopterService {
         private readonly reportAdopterReviewUseCase: ReportAdopterReviewUseCase,
         private readonly getAdopterReviewsUseCase: GetAdopterReviewsUseCase,
         private readonly getAdopterReviewDetailUseCase: GetAdopterReviewDetailUseCase,
+        private readonly deleteAdopterAccountUseCase: DeleteAdopterAccountUseCase,
         private adopterRepository: AdopterRepository,
         private breederRepository: BreederRepository,
         private availablePetManagementRepository: AvailablePetManagementRepository,
@@ -464,52 +464,6 @@ export class AdopterService {
      * @returns 탈퇴 처리 결과
      */
     async deleteAccount(userId: string, deleteData: AccountDeleteRequestDto): Promise<AccountDeleteResponseDto> {
-        // 1. 입양자 정보 조회
-        const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-        }
-
-        // 2. 이미 탈퇴한 계정인지 확인
-        if (adopter.accountStatus === 'deleted') {
-            throw new BadRequestException('이미 탈퇴한 계정입니다.');
-        }
-
-        // 3. 기타 사유인 경우 otherReason 필수 검증
-        if (deleteData.reason === 'other' && !deleteData.otherReason) {
-            throw new BadRequestException('기타 사유를 입력해주세요.');
-        }
-
-        try {
-            // 4. 계정 상태를 'deleted'로 변경하고 탈퇴 정보 저장
-            const deletedAt = new Date();
-            await this.adopterRepository.updateProfile(userId, {
-                accountStatus: 'deleted',
-                deletedAt: deletedAt,
-                deleteReason: deleteData.reason,
-                deleteReasonDetail: deleteData.otherReason || null,
-                updatedAt: deletedAt,
-            });
-
-            // 5. Discord 탈퇴 알림 전송
-            await this.discordWebhookService.notifyUserWithdrawal({
-                userId: userId,
-                userType: 'adopter',
-                email: adopter.emailAddress,
-                name: adopter.nickname || '알 수 없음',
-                nickname: adopter.nickname,
-                reason: deleteData.reason,
-                reasonDetail: deleteData.otherReason || undefined,
-                deletedAt: deletedAt,
-            });
-
-            return {
-                adopterId: userId,
-                deletedAt: deletedAt.toISOString(),
-                message: '회원 탈퇴가 성공적으로 처리되었습니다.',
-            };
-        } catch (error) {
-            throw new BadRequestException('회원 탈퇴 처리 중 오류가 발생했습니다.');
-        }
+        return this.deleteAdopterAccountUseCase.execute(userId, deleteData);
     }
 }
