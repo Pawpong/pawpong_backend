@@ -19,6 +19,7 @@ import { CreateAdopterReviewUseCase } from './application/use-cases/create-adopt
 import { ReportAdopterReviewUseCase } from './application/use-cases/report-adopter-review.use-case';
 import { GetAdopterReviewsUseCase } from './application/use-cases/get-adopter-reviews.use-case';
 import { GetAdopterReviewDetailUseCase } from './application/use-cases/get-adopter-review-detail.use-case';
+import { DeleteAdopterAccountUseCase } from './application/use-cases/delete-adopter-account.use-case';
 import { AdopterFavoritePolicyService } from './domain/services/adopter-favorite-policy.service';
 import { AdopterApplicationCustomResponseBuilderService } from './domain/services/adopter-application-custom-response-builder.service';
 import { AdopterApplicationStandardResponseBuilderService } from './domain/services/adopter-application-standard-response-builder.service';
@@ -29,6 +30,7 @@ import { AdopterReviewCreateResponseFactoryService } from './domain/services/ado
 import { AdopterReviewReportResponseFactoryService } from './domain/services/adopter-review-report-response-factory.service';
 import { AdopterReviewListResponseFactoryService } from './domain/services/adopter-review-list-response-factory.service';
 import { AdopterReviewDetailResponseFactoryService } from './domain/services/adopter-review-detail-response-factory.service';
+import { AdopterAccountDeleteResponseFactoryService } from './domain/services/adopter-account-delete-response-factory.service';
 import { AdopterApplicationListAssemblerService } from './domain/services/adopter-application-list-assembler.service';
 import { AdopterApplicationDetailAssemblerService } from './domain/services/adopter-application-detail-assembler.service';
 import { AdopterProfileAdapter } from './infrastructure/adopter-profile.adapter';
@@ -40,6 +42,7 @@ import { AdopterReportCommandAdapter } from './infrastructure/adopter-report-com
 import { AdopterReviewCommandAdapter } from './infrastructure/adopter-review-command.adapter';
 import { AdopterReviewNotifierAdapter } from './infrastructure/adopter-review-notifier.adapter';
 import { AdopterReviewReaderAdapter } from './infrastructure/adopter-review-reader.adapter';
+import { AdopterAccountCommandAdapter } from './infrastructure/adopter-account-command.adapter';
 import { AdopterApplicationReaderAdapter } from './infrastructure/adopter-application-reader.adapter';
 import { AdopterFileUrlAdapter } from './infrastructure/adopter-file-url.adapter';
 import { ADOPTER_PROFILE_PORT } from './application/ports/adopter-profile.port';
@@ -51,6 +54,7 @@ import { AdopterReportCommandPort } from './application/ports/adopter-report-com
 import { AdopterReviewCommandPort } from './application/ports/adopter-review-command.port';
 import { AdopterReviewNotifierPort } from './application/ports/adopter-review-notifier.port';
 import { AdopterReviewReaderPort } from './application/ports/adopter-review-reader.port';
+import { AdopterAccountCommandPort } from './application/ports/adopter-account-command.port';
 import { ADOPTER_APPLICATION_READER_PORT } from './application/ports/adopter-application-reader.port';
 import { ADOPTER_FILE_URL_PORT } from './application/ports/adopter-file-url.port';
 
@@ -102,6 +106,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AdopterReviewReportResponseFactoryService,
         AdopterReviewListResponseFactoryService,
         AdopterReviewDetailResponseFactoryService,
+        AdopterAccountDeleteResponseFactoryService,
         AdopterApplicationListAssemblerService,
         AdopterApplicationDetailAssemblerService,
         AdopterProfileAdapter,
@@ -113,6 +118,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AdopterReviewCommandAdapter,
         AdopterReviewNotifierAdapter,
         AdopterReviewReaderAdapter,
+        AdopterAccountCommandAdapter,
         AdopterApplicationReaderAdapter,
         AdopterFileUrlAdapter,
         GetAdopterProfileUseCase,
@@ -126,6 +132,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         ReportAdopterReviewUseCase,
         GetAdopterReviewsUseCase,
         GetAdopterReviewDetailUseCase,
+        DeleteAdopterAccountUseCase,
         GetAdopterApplicationsUseCase,
         GetAdopterApplicationDetailUseCase,
         {
@@ -163,6 +170,10 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         {
             provide: AdopterReviewReaderPort,
             useExisting: AdopterReviewReaderAdapter,
+        },
+        {
+            provide: AdopterAccountCommandPort,
+            useExisting: AdopterAccountCommandAdapter,
         },
         {
             provide: ADOPTER_APPLICATION_READER_PORT,
