@@ -25,7 +25,6 @@ import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard';
 
 import { SmsService } from './sms.service';
-import { AuthService } from './auth.service';
 import { BreederManagementAdminService } from '../breeder-management/admin/breeder-management-admin.service';
 import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
 import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
@@ -37,6 +36,8 @@ import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
 import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
 import { ProcessSocialLoginCallbackUseCase } from './application/use-cases/process-social-login-callback.use-case';
+import { UploadAuthProfileImageUseCase } from './application/use-cases/upload-auth-profile-image.use-case';
+import { UploadAuthBreederDocumentsUseCase } from './application/use-cases/upload-auth-breeder-documents.use-case';
 
 import { RefreshTokenRequestDto } from './dto/request/refresh-token-request.dto';
 import { CheckNicknameRequestDto } from './dto/request/check-nickname-request.dto';
@@ -61,7 +62,6 @@ export class AuthController {
     private readonly logger = new Logger(AuthController.name);
 
     constructor(
-        private readonly authService: AuthService,
         private readonly smsService: SmsService,
         private readonly breederManagementAdminService: BreederManagementAdminService,
         private readonly checkSocialUserUseCase: CheckSocialUserUseCase,
@@ -74,6 +74,8 @@ export class AuthController {
         private readonly registerAdopterUseCase: RegisterAdopterUseCase,
         private readonly registerBreederUseCase: RegisterBreederUseCase,
         private readonly processSocialLoginCallbackUseCase: ProcessSocialLoginCallbackUseCase,
+        private readonly uploadAuthProfileImageUseCase: UploadAuthProfileImageUseCase,
+        private readonly uploadAuthBreederDocumentsUseCase: UploadAuthBreederDocumentsUseCase,
     ) {}
 
     @Post('refresh')
@@ -510,7 +512,7 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
         @Query('tempId') tempId?: string,
         @CurrentUser() user?: any,
     ): Promise<ApiResponseDto<UploadResponseDto>> {
-        const result = await this.authService.uploadProfileImage(file, user, tempId);
+        const result = await this.uploadAuthProfileImageUseCase.execute(file, user, tempId);
         const response = new UploadResponseDto(result.cdnUrl, result.fileName, result.size);
 
         const message = user
@@ -609,7 +611,7 @@ documentUrls에 filename 필드 값을 넣는 경우
         @Body() dto: UploadBreederDocumentsRequestDto,
         @Query('tempId') tempId?: string,
     ): Promise<ApiResponseDto<VerificationDocumentsResponseDto>> {
-        const result = await this.authService.uploadBreederDocuments(files, dto.types, dto.level, tempId);
+        const result = await this.uploadAuthBreederDocumentsUseCase.execute(files, dto.types, dto.level, tempId);
 
         const message = tempId
             ? `${dto.level} 레벨 브리더 인증 서류 ${result.count}개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.`

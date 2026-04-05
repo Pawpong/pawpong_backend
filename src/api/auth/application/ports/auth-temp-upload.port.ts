@@ -1,20 +1,18 @@
-export const AUTH_TEMP_UPLOAD_PORT = Symbol('AUTH_TEMP_UPLOAD_PORT');
-
-export interface AuthTempUploadDocument {
+export type AuthTempUploadDocument = {
     fileName: string;
     originalFileName?: string;
     type: string;
-}
+};
 
-export interface AuthTempUploadInfo {
+export type AuthTempUploadInfo = {
     profileImage?: string;
     documents?: AuthTempUploadDocument[];
     createdAt: Date;
-}
+};
 
-export interface AuthTempUploadPort {
-    get(tempId: string): AuthTempUploadInfo | undefined;
-    saveProfileImage(tempId: string, fileName: string): void;
-    saveDocuments(tempId: string, documents: AuthTempUploadDocument[]): void;
-    delete(tempId: string): void;
+export abstract class AuthTempUploadPort {
+    abstract get(tempId: string): AuthTempUploadInfo | undefined;
+    abstract saveProfileImage(tempId: string, fileName: string): void;
+    abstract saveDocuments(tempId: string, documents: AuthTempUploadDocument[]): void;
+    abstract delete(tempId: string): void;
 }

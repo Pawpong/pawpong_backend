@@ -4,7 +4,6 @@ import { UserStatus, VerificationStatus, BreederPlan } from '../../common/enum/u
 
 import { StorageService } from '../../common/storage/storage.service';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
-import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
 
 import { AuthMapper } from './mapper/auth.mapper';
 import { AuthTokenService } from './services/auth-token.service';
@@ -18,7 +17,8 @@ import { CheckBreederNameDuplicateUseCase } from './application/use-cases/check-
 import { CompleteSocialRegistrationUseCase } from './application/use-cases/complete-social-registration.use-case';
 import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
 import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
-import { AuthTempUploadStore } from './infrastructure/auth-temp-upload.store';
+import { UploadAuthProfileImageUseCase } from './application/use-cases/upload-auth-profile-image.use-case';
+import { UploadAuthBreederDocumentsUseCase } from './application/use-cases/upload-auth-breeder-documents.use-case';
 
 import { SocialCompleteRequestDto } from './dto/request/social-complete-request.dto';
 import { RegisterBreederRequestDto } from './dto/request/register-breeder-request.dto';
@@ -35,7 +35,6 @@ export class AuthService {
         private readonly authBreederRepository: AuthBreederRepository,
         private readonly logger: CustomLoggerService,
         private readonly storageService: StorageService,
-        private readonly discordWebhookService: DiscordWebhookService,
         private readonly authTokenService: AuthTokenService,
         private readonly completeSocialRegistrationUseCase: CompleteSocialRegistrationUseCase,
         private readonly checkSocialUserUseCase: CheckSocialUserUseCase,
@@ -44,7 +43,8 @@ export class AuthService {
         private readonly checkBreederNameDuplicateUseCase: CheckBreederNameDuplicateUseCase,
         private readonly registerAdopterUseCase: RegisterAdopterUseCase,
         private readonly registerBreederUseCase: RegisterBreederUseCase,
-        private readonly authTempUploadStore: AuthTempUploadStore,
+        private readonly uploadAuthProfileImageUseCase: UploadAuthProfileImageUseCase,
+        private readonly uploadAuthBreederDocumentsUseCase: UploadAuthBreederDocumentsUseCase,
     ) {}
 
     // 유틸리티 메서드들은 AuthMapper로 이동되었습니다.
@@ -566,65 +566,7 @@ export class AuthService {
         user?: { userId: string; role: string },
         tempId?: string,
     ): Promise<{ cdnUrl: string; fileName: string; size: number }> {
-        this.logger.logStart('uploadProfileImage', '프로필 이미지 업로드 시작', {
-            fileSize: file.size,
-            mimeType: file.mimetype,
-            hasUser: !!user,
-            tempId: tempId || 'N/A',
-        });
-
-        this.validateProfileImageFile(file);
-
-        // GCP Storage에 업로드
-        const result = await this.storageService.uploadFile(file, 'profiles');
-
-        // 로그인 사용자인 경우 DB 업데이트 (파일명만 저장)
-        if (user) {
-            if (user.role === 'breeder') {
-                await this.authBreederRepository.updateProfileImage(user.userId, result.fileName);
-                this.logger.logSuccess('uploadProfileImage', '브리더 프로필 이미지 파일명 DB 저장 완료', {
-                    userId: user.userId,
-                    fileName: result.fileName,
-                });
-            } else if (user.role === 'adopter') {
-                await this.authAdopterRepository.updateProfileImage(user.userId, result.fileName);
-                this.logger.logSuccess('uploadProfileImage', '입양자 프로필 이미지 파일명 DB 저장 완료', {
-                    userId: user.userId,
-                    fileName: result.fileName,
-                });
-            }
-        }
-        // tempId가 있으면 임시 저장 (로그인 여부와 무관하게 저장)
-        // 사용자가 로그인 상태에서 다시 회원가입을 시도할 수 있으므로 둘 다 저장
-        if (tempId) {
-            this.authTempUploadStore.saveProfileImage(tempId, result.fileName);
-            this.logger.logSuccess('uploadProfileImage', 'tempId로 프로필 이미지 임시 저장 완료', {
-                tempId,
-                fileName: result.fileName,
-                hasUser: !!user,
-            });
-        }
-
-        this.logger.logSuccess('uploadProfileImage', '프로필 이미지 업로드 완료', {
-            cdnUrl: result.cdnUrl,
-            fileName: result.fileName,
-        });
-
-        return {
-            cdnUrl: result.cdnUrl,
-            fileName: result.fileName,
-            size: file.size,
-        };
-    }
-
-    private validateProfileImageFile(file: Express.Multer.File): void {
-        // 파일 크기 검증 (100MB)
-        if (file.size > 100 * 1024 * 1024) {
-            throw new BadRequestException('파일 크기는 100MB를 초과할 수 없습니다.');
-        }
-
-        // 파일 타입 검증 제거 - 모든 파일 타입 허용
-        // 브리더 프로필 이미지는 다양한 형식(.png, .jpg, .ico, .webp 등)을 지원
+        return this.uploadAuthProfileImageUseCase.execute(file, user, tempId);
     }
 
     /**
@@ -638,214 +580,6 @@ export class AuthService {
         level: 'new' | 'elite',
         tempId?: string,
     ): Promise<{ response: VerificationDocumentsResponseDto; count: number }> {
-        this.logger.logStart('uploadBreederDocuments', '브리더 인증 서류 업로드 시작', {
-            fileCount: files.length,
-            types,
-            level,
-            tempId: tempId || 'N/A',
-        });
-
-        this.validateBreederDocumentFiles(files, types, level);
-
-        // 파일 업로드
-        const uploadedDocuments: Array<{
-            type: string;
-            url: string;
-            filename: string;
-            originalFileName: string;
-            size: number;
-            uploadedAt: Date;
-        }> = [];
-
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const type = types[i];
-
-            // 원본 파일명 처리 (한글 파일명 인코딩 수정)
-            let originalFileName = file.originalname;
-
-            // 한글 파일명이 깨진 경우 UTF-8로 재인코딩
-            try {
-                // 파일명이 ISO-8859-1로 인코딩되어 있는지 확인
-                if (originalFileName && /[^\x00-\x7F]/.test(originalFileName)) {
-                    // 이미 올바른 UTF-8 문자가 포함된 경우 그대로 사용
-                    this.logger.log(`[uploadBreederDocuments] UTF-8 filename detected: ${originalFileName}`);
-                } else if (originalFileName) {
-                    // ASCII 범위 밖의 문자가 없으면 ISO-8859-1로 인코딩되어 있을 가능성
-                    try {
-                        const decoded = Buffer.from(originalFileName, 'latin1').toString('utf8');
-                        if (decoded !== originalFileName) {
-                            this.logger.log(
-                                `[uploadBreederDocuments] Filename re-encoded from latin1 to utf8: ${originalFileName} -> ${decoded}`,
-                            );
-                            originalFileName = decoded;
-                        }
-                    } catch (error) {
-                        // 재인코딩 실패 시 원본 사용
-                        this.logger.logWarning(
-                            'uploadBreederDocuments',
-                            'Failed to re-encode filename, using original',
-                            error,
-                        );
-                    }
-                }
-            } catch (error) {
-                this.logger.logWarning('uploadBreederDocuments', 'Filename encoding check failed', error);
-            }
-
-            // 파일 업로드 (임시 폴더에 저장, 회원가입 완료 시 브리더 ID 폴더로 이동 가능)
-            const result = await this.storageService.uploadFile(file, `documents/verification/temp/${level}`);
-
-            uploadedDocuments.push({
-                type,
-                url: result.cdnUrl, // 응답용 Signed URL
-                filename: result.fileName, // DB 저장용 파일명
-                originalFileName, // 원본 파일명 저장
-                size: file.size,
-                uploadedAt: new Date(),
-            });
-
-            this.logger.logSuccess('uploadBreederDocuments', `서류 업로드 완료 (${i + 1}/${files.length})`, {
-                level,
-                type,
-                fileName: result.fileName,
-                originalFileName,
-            });
-        }
-
-        this.logger.logSuccess('uploadBreederDocuments', `${level} 레벨 인증 서류 업로드 완료`, {
-            totalCount: uploadedDocuments.length,
-            level,
-        });
-
-        // tempId가 있으면 임시 저장소에 보관
-        if (tempId) {
-            this.authTempUploadStore.saveDocuments(
-                tempId,
-                uploadedDocuments.map((doc) => ({
-                    fileName: doc.filename,
-                    originalFileName: doc.originalFileName,
-                    type: doc.type,
-                })),
-            );
-            this.logger.logSuccess('uploadBreederDocuments', 'tempId로 서류 정보 임시 저장 완료', {
-                tempId,
-                documentCount: uploadedDocuments.length,
-            });
-        }
-
-        const response = new VerificationDocumentsResponseDto(uploadedDocuments, uploadedDocuments);
-
-        return {
-            response,
-            count: uploadedDocuments.length,
-        };
-    }
-
-    private validateBreederDocumentFiles(files: Express.Multer.File[], types: string[], level: 'new' | 'elite'): void {
-        if (!files || files.length === 0) {
-            throw new BadRequestException('파일이 업로드되지 않았습니다.');
-        }
-
-        // New/Elite 레벨별 허용 서류 타입 정의
-        const allowedTypes = {
-            new: ['idCard', 'animalProductionLicense'],
-            elite: [
-                'idCard',
-                'animalProductionLicense',
-                'adoptionContractSample',
-                'recentAssociationDocument',
-                'breederCertification',
-                'ticaCfaDocument', // 선택
-            ],
-        };
-
-        // 레벨 검증
-        if (!['new', 'elite'].includes(level)) {
-            throw new BadRequestException('레벨은 "new" 또는 "elite"만 가능합니다.');
-        }
-
-        // 서류 타입 검증 (허용된 타입인지만 검증, 필수 검증 제거)
-        const validTypes = allowedTypes[level];
-        for (const type of types) {
-            if (!validTypes.includes(type)) {
-                throw new BadRequestException(
-                    `${level} 레벨에서 유효하지 않은 서류 타입입니다: ${type}. 허용된 타입: ${validTypes.join(', ')}`,
-                );
-            }
-        }
-
-        // 중복 서류 타입 검증
-        const uniqueTypes = new Set(types);
-        if (uniqueTypes.size !== types.length) {
-            throw new BadRequestException('중복된 서류 타입이 있습니다. 각 서류는 한 번만 업로드해야 합니다.');
-        }
-
-        // 필수 서류 검증 제거 - 부분 업로드 허용
-        // 사용자가 원하는 만큼만 업로드할 수 있도록 변경
-
-        // files와 types 배열 길이 일치 검증
-        if (files.length !== types.length) {
-            throw new BadRequestException(
-                `파일 개수(${files.length})와 서류 타입 개수(${types.length})가 일치하지 않습니다.`,
-            );
-        }
-
-        // 파일 타입 및 크기 검증 (PDF, 문서, 엑셀, 모든 이미지 허용, 최대 10MB)
-        const allowedMimeTypes = [
-            // PDF
-            'application/pdf',
-            // 이미지
-            'image/jpeg',
-            'image/jpg',
-            'image/png',
-            'image/webp',
-            'image/heic',
-            'image/heif',
-            'image/gif',
-            'image/bmp',
-            'image/tiff',
-            // 문서 (HWP, DOC, DOCX)
-            'application/haansofthwp', // HWP
-            'application/x-hwp', // HWP (alternative)
-            'application/vnd.hancom.hwp', // HWP (alternative)
-            'application/msword', // DOC
-            'application/vnd.openxmlformats-officedocument.wordprocessingml.document', // DOCX
-            // 엑셀 (XLS, XLSX)
-            'application/vnd.ms-excel', // XLS
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', // XLSX
-        ];
-
-        for (const file of files) {
-            if (file.size > 100 * 1024 * 1024) {
-                throw new BadRequestException(`파일 "${file.originalname}"의 크기는 100MB를 초과할 수 없습니다.`);
-            }
-
-            // 파일 확장자로도 체크 (MIME 타입이 정확하지 않을 수 있음)
-            const fileExtension = file.originalname.split('.').pop()?.toLowerCase();
-            const allowedExtensions = [
-                'pdf',
-                'jpg',
-                'jpeg',
-                'png',
-                'webp',
-                'heic',
-                'heif',
-                'gif',
-                'bmp',
-                'tiff',
-                'hwp',
-                'doc',
-                'docx',
-                'xls',
-                'xlsx',
-            ];
-
-            if (!allowedMimeTypes.includes(file.mimetype) && !allowedExtensions.includes(fileExtension || '')) {
-                throw new BadRequestException(
-                    `파일 "${file.originalname}"은(는) 지원되지 않는 형식입니다. (지원: pdf, jpg, jpeg, png, webp, heic, gif, hwp, doc, docx, xls, xlsx)`,
-                );
-            }
-        }
+        return this.uploadAuthBreederDocumentsUseCase.execute(files, types, level, tempId);
     }
 }

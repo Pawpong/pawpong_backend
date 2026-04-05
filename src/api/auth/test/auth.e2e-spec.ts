@@ -1,7 +1,10 @@
 import { INestApplication } from '@nestjs/common';
+import * as fs from 'fs';
+import * as path from 'path';
 import request from 'supertest';
 
-import { createTestingApp } from '../../../common/test/test-utils';
+import { StorageService } from '../../../common/storage/storage.service';
+import { createTestingApp, getAdopterToken } from '../../../common/test/test-utils';
 
 /**
  * Auth 도메인 E2E 테스트 (간소화 버전)
@@ -16,12 +19,33 @@ import { createTestingApp } from '../../../common/test/test-utils';
  */
 describe('Auth API E2E Tests (Simple)', () => {
     let app: INestApplication;
+    const uploadTestFilePath = path.join(__dirname, 'auth-upload-test.jpg');
 
     beforeAll(async () => {
         app = await createTestingApp();
+        fs.writeFileSync(
+            uploadTestFilePath,
+            Buffer.from(
+                '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=',
+                'base64',
+            ),
+        );
+
+        const storageService = app.get(StorageService);
+        jest.spyOn(storageService, 'uploadFile').mockImplementation(async (file: Express.Multer.File, folder?: string) => {
+            const fileName = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${file.originalname}`;
+            return {
+                fileName,
+                cdnUrl: `https://cdn.test/${fileName}`,
+                storageUrl: `https://cdn.test/${fileName}`,
+            };
+        });
     });
 
     afterAll(async () => {
+        if (fs.existsSync(uploadTestFilePath)) {
+            fs.unlinkSync(uploadTestFilePath);
+        }
         await app.close();
     });
 
@@ -501,6 +525,79 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.data.exists).toBe(true);
             expect(response.body.message).toContain('가입된 사용자');
             console.log('✅ 기가입 사용자 확인');
+        });
+    });
+
+    describe('회원가입 전 업로드', () => {
+        it('POST /api/auth/upload-breeder-profile - tempId 업로드 응답 계약 유지', async () => {
+            const response = await request(app.getHttpServer())
+                .post(`/api/auth/upload-breeder-profile?tempId=temp-upload-${Date.now()}`)
+                .attach('file', uploadTestFilePath)
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.data).toMatchObject({
+                url: expect.stringContaining('https://cdn.test/profiles/'),
+                cdnUrl: expect.stringContaining('https://cdn.test/profiles/'),
+                filename: expect.stringMatching(/^profiles\//),
+                fileName: expect.stringMatching(/^profiles\//),
+            });
+            expect(typeof response.body.data.size).toBe('number');
+            expect(response.body.message).toBe(
+                '프로필 이미지가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.',
+            );
+            console.log('✅ 프로필 이미지 temp 업로드 응답 계약 유지');
+        });
+
+        it('POST /api/auth/upload-breeder-profile - 로그인 사용자 업로드 응답 계약 유지', async () => {
+            const adopter = await getAdopterToken(app);
+            expect(adopter).not.toBeNull();
+
+            const response = await request(app.getHttpServer())
+                .post('/api/auth/upload-breeder-profile')
+                .set('Authorization', `Bearer ${adopter!.token}`)
+                .attach('file', uploadTestFilePath)
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.data).toMatchObject({
+                url: expect.stringContaining('https://cdn.test/profiles/'),
+                cdnUrl: expect.stringContaining('https://cdn.test/profiles/'),
+                filename: expect.stringMatching(/^profiles\//),
+                fileName: expect.stringMatching(/^profiles\//),
+            });
+            expect(response.body.message).toBe('프로필 이미지가 업로드되고 저장되었습니다.');
+            console.log('✅ 로그인 사용자 프로필 업로드 응답 계약 유지');
+        });
+
+        it('POST /api/auth/upload-breeder-documents - tempId 업로드 응답 계약 유지', async () => {
+            const response = await request(app.getHttpServer())
+                .post(`/api/auth/upload-breeder-documents?tempId=temp-docs-${Date.now()}`)
+                .field('types', JSON.stringify(['idCard', 'animalProductionLicense']))
+                .field('level', 'new')
+                .attach('files', uploadTestFilePath)
+                .attach('files', uploadTestFilePath)
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.data.uploadedDocuments).toHaveLength(2);
+            expect(response.body.data.allDocuments).toHaveLength(2);
+            expect(response.body.data.uploadedDocuments[0]).toMatchObject({
+                type: 'idCard',
+                url: expect.stringContaining('https://cdn.test/documents/verification/temp/new/'),
+                filename: expect.stringMatching(/^documents\/verification\/temp\/new\//),
+                size: expect.any(Number),
+            });
+            expect(response.body.data.uploadedDocuments[1]).toMatchObject({
+                type: 'animalProductionLicense',
+                url: expect.stringContaining('https://cdn.test/documents/verification/temp/new/'),
+                filename: expect.stringMatching(/^documents\/verification\/temp\/new\//),
+                size: expect.any(Number),
+            });
+            expect(response.body.message).toBe(
+                'new 레벨 브리더 인증 서류 2개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.',
+            );
+            console.log('✅ 브리더 인증 서류 업로드 응답 계약 유지');
         });
     });
 });

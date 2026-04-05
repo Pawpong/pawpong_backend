@@ -2,16 +2,17 @@ import { Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
 import {
+    AuthTempUploadPort,
     type AuthTempUploadDocument,
     type AuthTempUploadInfo,
-    type AuthTempUploadPort,
 } from '../application/ports/auth-temp-upload.port';
 
 @Injectable()
-export class AuthTempUploadStore implements AuthTempUploadPort {
+export class AuthTempUploadStore extends AuthTempUploadPort {
     private readonly tempUploads = new Map<string, AuthTempUploadInfo>();
 
     constructor(private readonly logger: CustomLoggerService) {
+        super();
         const cleanupTimer = setInterval(() => this.cleanupOldTempUploads(), 60 * 60 * 1000);
         cleanupTimer.unref?.();
     }
