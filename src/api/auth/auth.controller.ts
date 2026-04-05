@@ -36,6 +36,7 @@ import { RefreshAuthTokenUseCase } from './application/use-cases/refresh-auth-to
 import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
 import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
+import { ProcessSocialLoginCallbackUseCase } from './application/use-cases/process-social-login-callback.use-case';
 
 import { RefreshTokenRequestDto } from './dto/request/refresh-token-request.dto';
 import { CheckNicknameRequestDto } from './dto/request/check-nickname-request.dto';
@@ -72,6 +73,7 @@ export class AuthController {
         private readonly logoutUseCase: LogoutUseCase,
         private readonly registerAdopterUseCase: RegisterAdopterUseCase,
         private readonly registerBreederUseCase: RegisterBreederUseCase,
+        private readonly processSocialLoginCallbackUseCase: ProcessSocialLoginCallbackUseCase,
     ) {}
 
     @Post('refresh')
@@ -185,17 +187,13 @@ export class AuthController {
         // Strategy에서 전달된 originUrl 사용 (state 파라미터에서 추출됨)
         const originUrl = req.user?.originUrl || '';
 
-        const { redirectUrl, cookies } = await this.authService.processSocialLoginCallback(
+        const { redirectUrl, cookies } = await this.processSocialLoginCallbackUseCase.execute(
             req.user,
             originUrl,
             originUrl,
         );
 
-        if (cookies) {
-            cookies.forEach((cookie) => {
-                res.cookie(cookie.name, cookie.value, cookie.options);
-            });
-        }
+        this.applySocialLoginCookies(res, cookies);
 
         return res.redirect(redirectUrl);
     }
@@ -233,17 +231,13 @@ export class AuthController {
         // Strategy에서 전달된 originUrl 사용 (state 파라미터에서 추출됨)
         const originUrl = req.user?.originUrl || '';
 
-        const { redirectUrl, cookies } = await this.authService.processSocialLoginCallback(
+        const { redirectUrl, cookies } = await this.processSocialLoginCallbackUseCase.execute(
             req.user,
             originUrl,
             originUrl,
         );
 
-        if (cookies) {
-            cookies.forEach((cookie) => {
-                res.cookie(cookie.name, cookie.value, cookie.options);
-            });
-        }
+        this.applySocialLoginCookies(res, cookies);
 
         return res.redirect(redirectUrl);
     }
@@ -281,17 +275,13 @@ export class AuthController {
         // Strategy에서 전달된 originUrl 사용 (state 파라미터에서 추출됨)
         const originUrl = req.user?.originUrl || '';
 
-        const { redirectUrl, cookies } = await this.authService.processSocialLoginCallback(
+        const { redirectUrl, cookies } = await this.processSocialLoginCallbackUseCase.execute(
             req.user,
             originUrl,
             originUrl,
         );
 
-        if (cookies) {
-            cookies.forEach((cookie) => {
-                res.cookie(cookie.name, cookie.value, cookie.options);
-            });
-        }
+        this.applySocialLoginCookies(res, cookies);
 
         return res.redirect(redirectUrl);
     }
@@ -626,5 +616,22 @@ documentUrls에 filename 필드 값을 넣는 경우
             : `${dto.level} 레벨 브리더 인증 서류 ${result.count}개가 업로드되었습니다.`;
 
         return ApiResponseDto.success(result.response, message);
+    }
+
+    private applySocialLoginCookies(
+        res: Response,
+        cookies?: {
+            name: string;
+            value: string;
+            options: Record<string, any>;
+        }[],
+    ) {
+        if (!cookies) {
+            return;
+        }
+
+        cookies.forEach((cookie) => {
+            res.cookie(cookie.name, cookie.value, cookie.options);
+        });
     }
 }

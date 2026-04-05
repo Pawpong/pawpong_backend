@@ -5,11 +5,8 @@ import { AuthTokenService } from '../../services/auth-token.service';
 import { AuthMapper } from '../../mapper/auth.mapper';
 import { RegisterBreederRequestDto } from '../../dto/request/register-breeder-request.dto';
 import { RegisterBreederResponseDto } from '../../dto/response/register-breeder-response.dto';
-import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../ports/auth-registration.port';
-import {
-    AUTH_REGISTRATION_NOTIFICATION_PORT,
-    type AuthRegistrationNotificationPort,
-} from '../ports/auth-registration-notification.port';
+import { AuthRegistrationPort } from '../ports/auth-registration.port';
+import { AuthRegistrationNotificationPort } from '../ports/auth-registration-notification.port';
 import { AUTH_TEMP_UPLOAD_PORT, type AuthTempUploadPort } from '../ports/auth-temp-upload.port';
 import { AuthSocialIdentityService } from '../../domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from '../../domain/services/auth-stored-file-name.service';
@@ -17,9 +14,9 @@ import { AuthStoredFileNameService } from '../../domain/services/auth-stored-fil
 @Injectable()
 export class RegisterBreederUseCase {
     constructor(
-        @Inject(AUTH_REGISTRATION_PORT)
+        @Inject(AuthRegistrationPort)
         private readonly authRegistrationPort: AuthRegistrationPort,
-        @Inject(AUTH_REGISTRATION_NOTIFICATION_PORT)
+        @Inject(AuthRegistrationNotificationPort)
         private readonly authRegistrationNotificationPort: AuthRegistrationNotificationPort,
         @Inject(AUTH_TEMP_UPLOAD_PORT)
         private readonly authTempUploadPort: AuthTempUploadPort,
