@@ -166,3 +166,10 @@ controller -> use-case -> domain
   - 기존 응답/상태코드 유지
   - announcement unit/e2e 테스트 통과
   - 타입체크 통과
+- `filter-options` 도메인:
+  - 정적 필터 옵션 조회를 `controller -> use-case -> domain service` 구조로 분리
+  - 필터 옵션 카탈로그를 domain service로 이동하고 내부 계약은 `type`으로 정리
+  - 기존 `FilterOptionsService`는 호환을 위해 유지하고, 분리된 조회 메서드를 use-case 위임 형태로 얇게 정리
+  - 기존 응답/메시지 유지
+  - filter-options unit/e2e 테스트 통과
+  - 타입체크 통과
