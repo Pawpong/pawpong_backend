@@ -121,6 +121,22 @@ export class BreederRepository {
             .exec();
     }
 
+    async updateApplicationForm(breederId: string, applicationForm: any[]): Promise<BreederDocument | null> {
+        return this.breederModel
+            .findByIdAndUpdate(
+                breederId,
+                {
+                    $set: {
+                        applicationForm,
+                        updatedAt: new Date(),
+                    },
+                },
+                { new: true, runValidators: true },
+            )
+            .select('-password')
+            .exec() as any;
+    }
+
     /**
      * 완료된 입양 건수 증가
      * @param breederId 브리더 ID

@@ -23,6 +23,30 @@ import { RolesGuard } from '../../common/guard/roles.guard';
 import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
 
 import { BreederManagementService } from './breeder-management.service';
+import { GetBreederManagementDashboardUseCase } from './application/use-cases/get-breeder-management-dashboard.use-case';
+import { GetBreederManagementProfileUseCase } from './application/use-cases/get-breeder-management-profile.use-case';
+import { UpdateBreederManagementProfileUseCase } from './application/use-cases/update-breeder-management-profile.use-case';
+import { GetBreederManagementReceivedApplicationsUseCase } from './application/use-cases/get-breeder-management-received-applications.use-case';
+import { GetBreederManagementMyPetsUseCase } from './application/use-cases/get-breeder-management-my-pets.use-case';
+import { GetBreederManagementMyReviewsUseCase } from './application/use-cases/get-breeder-management-my-reviews.use-case';
+import { GetBreederManagementVerificationStatusUseCase } from './application/use-cases/get-breeder-management-verification-status.use-case';
+import { SubmitBreederManagementVerificationUseCase } from './application/use-cases/submit-breeder-management-verification.use-case';
+import { GetBreederManagementApplicationFormUseCase } from './application/use-cases/get-breeder-management-application-form.use-case';
+import { UpdateBreederManagementApplicationFormUseCase } from './application/use-cases/update-breeder-management-application-form.use-case';
+import { UpdateBreederManagementSimpleApplicationFormUseCase } from './application/use-cases/update-breeder-management-simple-application-form.use-case';
+import { AddBreederManagementParentPetUseCase } from './application/use-cases/add-breeder-management-parent-pet.use-case';
+import { UpdateBreederManagementParentPetUseCase } from './application/use-cases/update-breeder-management-parent-pet.use-case';
+import { RemoveBreederManagementParentPetUseCase } from './application/use-cases/remove-breeder-management-parent-pet.use-case';
+import { AddBreederManagementAvailablePetUseCase } from './application/use-cases/add-breeder-management-available-pet.use-case';
+import { UpdateBreederManagementAvailablePetUseCase } from './application/use-cases/update-breeder-management-available-pet.use-case';
+import { UpdateBreederManagementAvailablePetStatusUseCase } from './application/use-cases/update-breeder-management-available-pet-status.use-case';
+import { RemoveBreederManagementAvailablePetUseCase } from './application/use-cases/remove-breeder-management-available-pet.use-case';
+import { AddBreederManagementReviewReplyUseCase } from './application/use-cases/add-breeder-management-review-reply.use-case';
+import { UpdateBreederManagementReviewReplyUseCase } from './application/use-cases/update-breeder-management-review-reply.use-case';
+import { RemoveBreederManagementReviewReplyUseCase } from './application/use-cases/remove-breeder-management-review-reply.use-case';
+import { GetBreederManagementApplicationDetailUseCase } from './application/use-cases/get-breeder-management-application-detail.use-case';
+import { UpdateBreederManagementApplicationStatusUseCase } from './application/use-cases/update-breeder-management-application-status.use-case';
+import { DeleteBreederManagementAccountUseCase } from './application/use-cases/delete-breeder-management-account.use-case';
 
 import { ParentPetAddDto } from './dto/request/parent-pet-add-request.dto';
 import { ParentPetUpdateDto } from './dto/request/parent-pet-update-request.dto';
@@ -56,13 +80,42 @@ import { MyReviewsListResponseDto, MyReviewItemDto } from './dto/response/my-rev
 import { UploadDocumentsResponseDto } from './dto/response/upload-documents-response.dto';
 import { ReviewReplyRequestDto } from './dto/request/review-reply-request.dto';
 import { ReviewReplyResponseDto, ReviewReplyDeleteResponseDto } from './dto/response/review-reply-response.dto';
+import { SimpleApplicationFormUpdateRequestDto } from './dto/request/simple-application-form-update-request.dto';
+import { BreederAccountDeleteRequestDto } from './dto/request/breeder-account-delete-request.dto';
+import { BreederAccountDeleteResponseDto } from './dto/response/breeder-account-delete-response.dto';
 
 @ApiController('브리더 관리')
 @Controller('breeder-management')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('breeder')
 export class BreederManagementController {
-    constructor(private readonly breederManagementService: BreederManagementService) {}
+    constructor(
+        private readonly breederManagementService: BreederManagementService,
+        private readonly getBreederManagementDashboardUseCase: GetBreederManagementDashboardUseCase,
+        private readonly getBreederManagementProfileUseCase: GetBreederManagementProfileUseCase,
+        private readonly updateBreederManagementProfileUseCase: UpdateBreederManagementProfileUseCase,
+        private readonly getBreederManagementReceivedApplicationsUseCase: GetBreederManagementReceivedApplicationsUseCase,
+        private readonly getBreederManagementMyPetsUseCase: GetBreederManagementMyPetsUseCase,
+        private readonly getBreederManagementMyReviewsUseCase: GetBreederManagementMyReviewsUseCase,
+        private readonly getBreederManagementVerificationStatusUseCase: GetBreederManagementVerificationStatusUseCase,
+        private readonly submitBreederManagementVerificationUseCase: SubmitBreederManagementVerificationUseCase,
+        private readonly getBreederManagementApplicationFormUseCase: GetBreederManagementApplicationFormUseCase,
+        private readonly updateBreederManagementApplicationFormUseCase: UpdateBreederManagementApplicationFormUseCase,
+        private readonly updateBreederManagementSimpleApplicationFormUseCase: UpdateBreederManagementSimpleApplicationFormUseCase,
+        private readonly addBreederManagementParentPetUseCase: AddBreederManagementParentPetUseCase,
+        private readonly updateBreederManagementParentPetUseCase: UpdateBreederManagementParentPetUseCase,
+        private readonly removeBreederManagementParentPetUseCase: RemoveBreederManagementParentPetUseCase,
+        private readonly addBreederManagementAvailablePetUseCase: AddBreederManagementAvailablePetUseCase,
+        private readonly updateBreederManagementAvailablePetUseCase: UpdateBreederManagementAvailablePetUseCase,
+        private readonly updateBreederManagementAvailablePetStatusUseCase: UpdateBreederManagementAvailablePetStatusUseCase,
+        private readonly removeBreederManagementAvailablePetUseCase: RemoveBreederManagementAvailablePetUseCase,
+        private readonly addBreederManagementReviewReplyUseCase: AddBreederManagementReviewReplyUseCase,
+        private readonly updateBreederManagementReviewReplyUseCase: UpdateBreederManagementReviewReplyUseCase,
+        private readonly removeBreederManagementReviewReplyUseCase: RemoveBreederManagementReviewReplyUseCase,
+        private readonly getBreederManagementApplicationDetailUseCase: GetBreederManagementApplicationDetailUseCase,
+        private readonly updateBreederManagementApplicationStatusUseCase: UpdateBreederManagementApplicationStatusUseCase,
+        private readonly deleteBreederManagementAccountUseCase: DeleteBreederManagementAccountUseCase,
+    ) {}
 
     @Get('dashboard')
     @ApiEndpoint({
@@ -72,7 +125,7 @@ export class BreederManagementController {
         isPublic: false,
     })
     async getDashboard(@CurrentUser() user: any): Promise<ApiResponseDto<BreederDashboardResponseDto>> {
-        const result = await this.breederManagementService.getDashboard(user.userId);
+        const result = await this.getBreederManagementDashboardUseCase.execute(user.userId);
         return ApiResponseDto.success(result, '대시보드 정보가 조회되었습니다.');
     }
 
@@ -84,7 +137,7 @@ export class BreederManagementController {
         isPublic: false,
     })
     async getProfile(@CurrentUser() user: any): Promise<ApiResponseDto<BreederProfileResponseDto>> {
-        const result = await this.breederManagementService.getBreederProfile(user.userId);
+        const result = await this.getBreederManagementProfileUseCase.execute(user.userId);
         return ApiResponseDto.success(result, '브리더 프로필이 조회되었습니다.');
     }
 
@@ -98,8 +151,8 @@ export class BreederManagementController {
     async updateProfile(
         @CurrentUser() user: any,
         @Body() updateData: ProfileUpdateRequestDto,
-    ): Promise<ApiResponseDto<BreederProfileUpdateResponseDto>> {
-        const result = await this.breederManagementService.updateProfile(user.userId, updateData);
+    ): Promise<ApiResponseDto<{ message: string }>> {
+        const result = await this.updateBreederManagementProfileUseCase.execute(user.userId, updateData);
         return ApiResponseDto.success(result, '프로필이 성공적으로 수정되었습니다.');
     }
 
@@ -112,8 +165,8 @@ export class BreederManagementController {
         isPublic: false,
     })
     async getVerificationStatus(@CurrentUser() user: any): Promise<ApiResponseDto<VerificationStatusResponseDto>> {
-        const result = await this.breederManagementService.getVerificationStatus(user.userId);
-        return ApiResponseDto.success(result, '인증 상태가 조회되었습니다.');
+        const result = await this.getBreederManagementVerificationStatusUseCase.execute(user.userId);
+        return ApiResponseDto.success(result as VerificationStatusResponseDto, '인증 상태가 조회되었습니다.');
     }
 
     @Post('verification')
@@ -127,8 +180,8 @@ export class BreederManagementController {
         @CurrentUser() user: any,
         @Body() verificationData: VerificationSubmitRequestDto,
     ): Promise<ApiResponseDto<VerificationSubmitResponseDto>> {
-        const result = await this.breederManagementService.submitVerification(user.userId, verificationData);
-        return ApiResponseDto.success(result, '인증 신청이 성공적으로 제출되었습니다.');
+        const result = await this.submitBreederManagementVerificationUseCase.execute(user.userId, verificationData);
+        return ApiResponseDto.success(result as unknown as VerificationSubmitResponseDto, '인증 신청이 성공적으로 제출되었습니다.');
     }
 
     @Post('verification/upload')
@@ -219,8 +272,8 @@ export class BreederManagementController {
         @CurrentUser() user: any,
         @Body() parentPetDto: ParentPetAddDto,
     ): Promise<ApiResponseDto<PetAddResponseDto>> {
-        const result = await this.breederManagementService.addParentPet(user.userId, parentPetDto);
-        return ApiResponseDto.success(result, '부모 반려동물이 성공적으로 등록되었습니다.');
+        const result = await this.addBreederManagementParentPetUseCase.execute(user.userId, parentPetDto);
+        return ApiResponseDto.success(result as unknown as PetAddResponseDto, '부모 반려동물이 성공적으로 등록되었습니다.');
     }
 
     @Patch('parent-pets/:petId')
@@ -235,8 +288,11 @@ export class BreederManagementController {
         @Param('petId') petId: string,
         @Body() updateData: ParentPetUpdateDto,
     ): Promise<ApiResponseDto<PetUpdateResponseDto>> {
-        const result = await this.breederManagementService.updateParentPet(user.userId, petId, updateData);
-        return ApiResponseDto.success(result, '부모 반려동물 정보가 성공적으로 수정되었습니다.');
+        const result = await this.updateBreederManagementParentPetUseCase.execute(user.userId, petId, updateData);
+        return ApiResponseDto.success(
+            result as unknown as PetUpdateResponseDto,
+            '부모 반려동물 정보가 성공적으로 수정되었습니다.',
+        );
     }
 
     @Delete('parent-pets/:petId')
@@ -250,8 +306,8 @@ export class BreederManagementController {
         @CurrentUser() user: any,
         @Param('petId') petId: string,
     ): Promise<ApiResponseDto<PetRemoveResponseDto>> {
-        const result = await this.breederManagementService.removeParentPet(user.userId, petId);
-        return ApiResponseDto.success(result, '부모 반려동물이 성공적으로 삭제되었습니다.');
+        const result = await this.removeBreederManagementParentPetUseCase.execute(user.userId, petId);
+        return ApiResponseDto.success(result as unknown as PetRemoveResponseDto, '부모 반려동물이 성공적으로 삭제되었습니다.');
     }
 
     @Post('available-pets')
@@ -265,8 +321,8 @@ export class BreederManagementController {
         @CurrentUser() user: any,
         @Body() availablePetDto: AvailablePetAddDto,
     ): Promise<ApiResponseDto<PetAddResponseDto>> {
-        const result = await this.breederManagementService.addAvailablePet(user.userId, availablePetDto);
-        return ApiResponseDto.success(result, '분양 반려동물이 성공적으로 등록되었습니다.');
+        const result = await this.addBreederManagementAvailablePetUseCase.execute(user.userId, availablePetDto);
+        return ApiResponseDto.success(result as unknown as PetAddResponseDto, '분양 반려동물이 성공적으로 등록되었습니다.');
     }
 
     @Patch('available-pets/:petId')
@@ -281,8 +337,11 @@ export class BreederManagementController {
         @Param('petId') petId: string,
         @Body() updateData: Partial<AvailablePetAddDto>,
     ): Promise<ApiResponseDto<PetUpdateResponseDto>> {
-        const result = await this.breederManagementService.updateAvailablePet(user.userId, petId, updateData);
-        return ApiResponseDto.success(result, '분양 반려동물 정보가 성공적으로 수정되었습니다.');
+        const result = await this.updateBreederManagementAvailablePetUseCase.execute(user.userId, petId, updateData);
+        return ApiResponseDto.success(
+            result as unknown as PetUpdateResponseDto,
+            '분양 반려동물 정보가 성공적으로 수정되었습니다.',
+        );
     }
 
     @Patch('available-pets/:petId/status')
@@ -297,8 +356,15 @@ export class BreederManagementController {
         @Param('petId') petId: string,
         @Body() statusData: PetStatusUpdateRequestDto,
     ): Promise<ApiResponseDto<PetStatusUpdateResponseDto>> {
-        const result = await this.breederManagementService.updatePetStatus(user.userId, petId, statusData.petStatus);
-        return ApiResponseDto.success(result, '반려동물 상태가 성공적으로 변경되었습니다.');
+        const result = await this.updateBreederManagementAvailablePetStatusUseCase.execute(
+            user.userId,
+            petId,
+            statusData.petStatus,
+        );
+        return ApiResponseDto.success(
+            result as unknown as PetStatusUpdateResponseDto,
+            '반려동물 상태가 성공적으로 변경되었습니다.',
+        );
     }
 
     @Delete('available-pets/:petId')
@@ -312,8 +378,8 @@ export class BreederManagementController {
         @CurrentUser() user: any,
         @Param('petId') petId: string,
     ): Promise<ApiResponseDto<PetRemoveResponseDto>> {
-        const result = await this.breederManagementService.removeAvailablePet(user.userId, petId);
-        return ApiResponseDto.success(result, '분양 반려동물이 성공적으로 삭제되었습니다.');
+        const result = await this.removeBreederManagementAvailablePetUseCase.execute(user.userId, petId);
+        return ApiResponseDto.success(result as unknown as PetRemoveResponseDto, '분양 반려동물이 성공적으로 삭제되었습니다.');
     }
 
     @Get('applications')
@@ -327,7 +393,7 @@ export class BreederManagementController {
         @CurrentUser() user: any,
         @Query() queryParams: ApplicationsGetRequestDto,
     ): Promise<ApiResponseDto<ReceivedApplicationListResponseDto>> {
-        const result = await this.breederManagementService.getReceivedApplications(
+        const result = await this.getBreederManagementReceivedApplicationsUseCase.execute(
             user.userId,
             queryParams.page || 1,
             queryParams.limit || 10,
@@ -356,8 +422,11 @@ export class BreederManagementController {
         @CurrentUser() user: any,
         @Param('applicationId') applicationId: string,
     ): Promise<ApiResponseDto<ReceivedApplicationResponseDto>> {
-        const result = await this.breederManagementService.getApplicationDetail(user.userId, applicationId);
-        return ApiResponseDto.success(result, '입양 신청 상세 정보가 조회되었습니다.');
+        const result = await this.getBreederManagementApplicationDetailUseCase.execute(user.userId, applicationId);
+        return ApiResponseDto.success(
+            result as unknown as ReceivedApplicationResponseDto,
+            '입양 신청 상세 정보가 조회되었습니다.',
+        );
     }
 
     @Patch('applications/:applicationId')
@@ -372,12 +441,15 @@ export class BreederManagementController {
         @Param('applicationId') applicationId: string,
         @Body() updateData: ApplicationStatusUpdateRequestDto,
     ): Promise<ApiResponseDto<ApplicationStatusUpdateResponseDto>> {
-        const result = await this.breederManagementService.updateApplicationStatus(
+        const result = await this.updateBreederManagementApplicationStatusUseCase.execute(
             user.userId,
             applicationId,
             updateData,
         );
-        return ApiResponseDto.success(result, '입양 신청 상태가 성공적으로 변경되었습니다.');
+        return ApiResponseDto.success(
+            result as ApplicationStatusUpdateResponseDto,
+            '입양 신청 상태가 성공적으로 변경되었습니다.',
+        );
     }
 
     @Get('my-pets')
@@ -394,8 +466,8 @@ export class BreederManagementController {
         @Query('includeInactive') includeInactive?: string,
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 20,
-    ): Promise<ApiResponseDto<PaginationResponseDto<MyPetItemDto>>> {
-        const result = await this.breederManagementService.getMyPets(
+    ): Promise<ApiResponseDto<MyPetsListResponseDto>> {
+        const result = await this.getBreederManagementMyPetsUseCase.execute(
             user.userId,
             status,
             includeInactive === 'true',
@@ -418,8 +490,8 @@ export class BreederManagementController {
         @Query('visibility') visibility?: string,
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 10,
-    ): Promise<ApiResponseDto<PaginationResponseDto<MyReviewItemDto>>> {
-        const result = await this.breederManagementService.getMyReviews(
+    ): Promise<ApiResponseDto<MyReviewsListResponseDto>> {
+        const result = await this.getBreederManagementMyReviewsUseCase.execute(
             user.userId,
             visibility || 'all',
             Number(page),
@@ -458,7 +530,7 @@ export class BreederManagementController {
         isPublic: false,
     })
     async getApplicationForm(@CurrentUser() user: any): Promise<ApiResponseDto<ApplicationFormResponseDto>> {
-        const result = await this.breederManagementService.getApplicationForm(user.userId);
+        const result = await this.getBreederManagementApplicationFormUseCase.execute(user.userId);
         return ApiResponseDto.success(result, '입양 신청 폼이 조회되었습니다.');
     }
 
@@ -508,8 +580,8 @@ export class BreederManagementController {
         @CurrentUser() user: any,
         @Body() updateDto: ApplicationFormUpdateRequestDto,
     ): Promise<ApiResponseDto<ApplicationFormUpdateResponseDto>> {
-        const result = await this.breederManagementService.updateApplicationForm(user.userId, updateDto);
-        return ApiResponseDto.success(result, '입양 신청 폼이 업데이트되었습니다.');
+        const result = await this.updateBreederManagementApplicationFormUseCase.execute(user.userId, updateDto);
+        return ApiResponseDto.success(result as ApplicationFormUpdateResponseDto, '입양 신청 폼이 업데이트되었습니다.');
     }
 
     @Patch('application-form/simple')
@@ -546,8 +618,11 @@ export class BreederManagementController {
         responseType: ApplicationFormUpdateResponseDto,
         isPublic: false,
     })
-    async updateApplicationFormSimple(@CurrentUser() user: any, @Body() updateDto: any): Promise<ApiResponseDto<any>> {
-        const result = await this.breederManagementService.updateApplicationFormSimple(
+    async updateApplicationFormSimple(
+        @CurrentUser() user: any,
+        @Body() updateDto: SimpleApplicationFormUpdateRequestDto,
+    ): Promise<ApiResponseDto<any>> {
+        const result = await this.updateBreederManagementSimpleApplicationFormUseCase.execute(
             user.userId,
             updateDto.questions,
         );
@@ -577,14 +652,14 @@ export class BreederManagementController {
 **주의사항:**
 - 탈퇴 후에는 계정 복구 불가능
 - 진행 중인 입양 신청이 있는 경우 먼저 처리 필요`,
-        responseType: Object,
+        responseType: BreederAccountDeleteResponseDto,
         isPublic: false,
     })
     async deleteAccount(
         @CurrentUser() user: any,
-        @Body() deleteData?: { reason?: string; otherReason?: string },
-    ): Promise<ApiResponseDto<{ breederId: string; deletedAt: string; message: string }>> {
-        const result = await this.breederManagementService.deleteBreederAccount(user.userId, deleteData);
+        @Body() deleteData?: BreederAccountDeleteRequestDto,
+    ): Promise<ApiResponseDto<BreederAccountDeleteResponseDto>> {
+        const result = await this.deleteBreederManagementAccountUseCase.execute(user.userId, deleteData);
         return ApiResponseDto.success(result, '브리더 회원 탈퇴가 성공적으로 처리되었습니다.');
     }
 
@@ -607,7 +682,7 @@ export class BreederManagementController {
         @Param('reviewId') reviewId: string,
         @Body() dto: ReviewReplyRequestDto,
     ): Promise<ApiResponseDto<ReviewReplyResponseDto>> {
-        const result = await this.breederManagementService.addReviewReply(user.userId, reviewId, dto.content);
+        const result = await this.addBreederManagementReviewReplyUseCase.execute(user.userId, reviewId, dto.content);
         return ApiResponseDto.success(result, '답글이 등록되었습니다.');
     }
 
@@ -627,8 +702,8 @@ export class BreederManagementController {
         @Param('reviewId') reviewId: string,
         @Body() dto: ReviewReplyRequestDto,
     ): Promise<ApiResponseDto<ReviewReplyResponseDto>> {
-        const result = await this.breederManagementService.updateReviewReply(user.userId, reviewId, dto.content);
-        return ApiResponseDto.success(result, '답글이 수정되었습니다.');
+        const result = await this.updateBreederManagementReviewReplyUseCase.execute(user.userId, reviewId, dto.content);
+        return ApiResponseDto.success(result as ReviewReplyResponseDto, '답글이 수정되었습니다.');
     }
 
     @Delete('reviews/:reviewId/reply')
@@ -645,7 +720,7 @@ export class BreederManagementController {
         @CurrentUser() user: any,
         @Param('reviewId') reviewId: string,
     ): Promise<ApiResponseDto<ReviewReplyDeleteResponseDto>> {
-        const result = await this.breederManagementService.deleteReviewReply(user.userId, reviewId);
+        const result = await this.removeBreederManagementReviewReplyUseCase.execute(user.userId, reviewId);
         return ApiResponseDto.success(result, '답글이 삭제되었습니다.');
     }
 }
