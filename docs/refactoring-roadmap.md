@@ -79,7 +79,8 @@ controller -> use-case -> domain
   - 회원가입/소셜 사용자 체크 흐름을 `controller -> use-case -> port -> adapter`로 분리
   - 이메일/닉네임/브리더명 중복 확인 흐름을 `controller -> use-case -> registration port -> adapter`로 분리
   - 회원가입 전 임시 업로드 저장소를 별도 store로 분리하고, 프로필/서류 업로드와 가입 플로우가 같은 저장소를 공유하도록 정리
-  - OAuth callback / redirect 쿠키 플로우는 아직 유지하고, 회원가입 본체만 먼저 분리
+  - OAuth callback / redirect 쿠키 플로우를 `ProcessSocialLoginCallbackUseCase + social callback adapter + response factory`로 분리
+  - `auth-registration`, `auth-registration-notification`, `auth-session` 포트를 `abstract class + type` 기준으로 정리
   - 기존 응답/메시지 유지
   - 기존 auth e2e 테스트 통과
   - 타입체크 통과

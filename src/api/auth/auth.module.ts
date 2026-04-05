@@ -26,11 +26,13 @@ import { AuthRegistrationNotificationAdapter } from './infrastructure/auth-regis
 import { AuthAdopterRepository } from './repository/auth-adopter.repository';
 import { AuthBreederRepository } from './repository/auth-breeder.repository';
 import { AuthSessionAdapter } from './infrastructure/auth-session.adapter';
+import { AuthSocialCallbackAdapter } from './infrastructure/auth-social-callback.adapter';
 import { AuthTempUploadStore } from './infrastructure/auth-temp-upload.store';
-import { AUTH_REGISTRATION_PORT } from './application/ports/auth-registration.port';
-import { AUTH_REGISTRATION_NOTIFICATION_PORT } from './application/ports/auth-registration-notification.port';
-import { AUTH_SESSION_PORT } from './application/ports/auth-session.port';
+import { AuthRegistrationPort } from './application/ports/auth-registration.port';
+import { AuthRegistrationNotificationPort } from './application/ports/auth-registration-notification.port';
+import { AuthSessionPort } from './application/ports/auth-session.port';
 import { AUTH_TEMP_UPLOAD_PORT } from './application/ports/auth-temp-upload.port';
+import { AuthSocialCallbackPort } from './application/ports/auth-social-callback.port';
 import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
 import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
 import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
@@ -40,8 +42,10 @@ import { RefreshAuthTokenUseCase } from './application/use-cases/refresh-auth-to
 import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
 import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
+import { ProcessSocialLoginCallbackUseCase } from './application/use-cases/process-social-login-callback.use-case';
 import { AuthSocialIdentityService } from './domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from './domain/services/auth-stored-file-name.service';
+import { AuthSocialCallbackResponseFactoryService } from './domain/services/auth-social-callback-response-factory.service';
 
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
@@ -88,6 +92,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         LogoutUseCase,
         RegisterAdopterUseCase,
         RegisterBreederUseCase,
+        ProcessSocialLoginCallbackUseCase,
         AuthTokenService,
         SmsService,
         AuthAdminService,
@@ -97,20 +102,26 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthRegistrationAdapter,
         AuthRegistrationNotificationAdapter,
         AuthSessionAdapter,
+        AuthSocialCallbackAdapter,
         AuthTempUploadStore,
         AuthSocialIdentityService,
         AuthStoredFileNameService,
+        AuthSocialCallbackResponseFactoryService,
         {
-            provide: AUTH_REGISTRATION_PORT,
+            provide: AuthRegistrationPort,
             useExisting: AuthRegistrationAdapter,
         },
         {
-            provide: AUTH_REGISTRATION_NOTIFICATION_PORT,
+            provide: AuthRegistrationNotificationPort,
             useExisting: AuthRegistrationNotificationAdapter,
         },
         {
-            provide: AUTH_SESSION_PORT,
+            provide: AuthSessionPort,
             useExisting: AuthSessionAdapter,
+        },
+        {
+            provide: AuthSocialCallbackPort,
+            useExisting: AuthSocialCallbackAdapter,
         },
         {
             provide: AUTH_TEMP_UPLOAD_PORT,

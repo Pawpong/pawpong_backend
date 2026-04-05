@@ -1,10 +1,6 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
-import {
-    AUTH_SESSION_PORT,
-    type AuthSessionPort,
-    type AuthSessionRole,
-} from '../ports/auth-session.port';
+import { AuthSessionPort, type AuthSessionRole } from '../ports/auth-session.port';
 import { AuthTokenService } from '../../services/auth-token.service';
 import { RefreshTokenRequestDto } from '../../dto/request/refresh-token-request.dto';
 import { TokenResponseDto } from '../../dto/response/token-response.dto';
@@ -12,7 +8,7 @@ import { TokenResponseDto } from '../../dto/response/token-response.dto';
 @Injectable()
 export class RefreshAuthTokenUseCase {
     constructor(
-        @Inject(AUTH_SESSION_PORT)
+        @Inject(AuthSessionPort)
         private readonly authSessionPort: AuthSessionPort,
         private readonly authTokenService: AuthTokenService,
     ) {}

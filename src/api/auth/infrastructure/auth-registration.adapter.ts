@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { AuthAdopterRepository } from '../repository/auth-adopter.repository';
 import { AuthBreederRepository } from '../repository/auth-breeder.repository';
-import { type AuthRegistrationPort, type AuthRegistrationRecord } from '../application/ports/auth-registration.port';
+import { AuthRegistrationPort, type AuthRegistrationRecord } from '../application/ports/auth-registration.port';
 
 @Injectable()
 export class AuthRegistrationAdapter implements AuthRegistrationPort {

@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { StorageService } from '../../../common/storage/storage.service';
 import { DiscordWebhookService } from '../../../common/discord/discord-webhook.service';
 import {
+    AuthRegistrationNotificationPort,
     type AuthRegistrationDocumentNotificationItem,
-    type AuthRegistrationNotificationPort,
 } from '../application/ports/auth-registration-notification.port';
 
 @Injectable()

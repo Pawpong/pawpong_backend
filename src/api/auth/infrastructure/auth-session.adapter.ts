@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { AuthAdopterRepository } from '../repository/auth-adopter.repository';
 import { AuthBreederRepository } from '../repository/auth-breeder.repository';
-import { type AuthSessionPort, type AuthSessionRole, type AuthSessionUser } from '../application/ports/auth-session.port';
+import { AuthSessionPort, type AuthSessionRole, type AuthSessionUser } from '../application/ports/auth-session.port';
 
 @Injectable()
 export class AuthSessionAdapter implements AuthSessionPort {

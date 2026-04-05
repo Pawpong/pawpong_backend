@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AuthMapper } from '../../mapper/auth.mapper';
-import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../ports/auth-registration.port';
+import { AuthRegistrationPort } from '../ports/auth-registration.port';
 import { SocialCheckUserResponseDto } from '../../dto/response/social-check-user-response.dto';
 
 @Injectable()
 export class CheckSocialUserUseCase {
     constructor(
-        @Inject(AUTH_REGISTRATION_PORT)
+        @Inject(AuthRegistrationPort)
         private readonly authRegistrationPort: AuthRegistrationPort,
     ) {}
 

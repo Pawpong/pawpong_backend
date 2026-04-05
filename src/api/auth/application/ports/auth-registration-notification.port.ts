@@ -1,13 +1,11 @@
-export const AUTH_REGISTRATION_NOTIFICATION_PORT = Symbol('AUTH_REGISTRATION_NOTIFICATION_PORT');
-
-export interface AuthRegistrationDocumentNotificationItem {
+export type AuthRegistrationDocumentNotificationItem = {
     type: string;
     fileName: string;
     originalFileName?: string;
-}
+};
 
-export interface AuthRegistrationNotificationPort {
-    notifyAdopterRegistered(input: {
+export abstract class AuthRegistrationNotificationPort {
+    abstract notifyAdopterRegistered(input: {
         userId: string;
         email: string;
         nickname: string;
@@ -15,7 +13,7 @@ export interface AuthRegistrationNotificationPort {
         registrationType: 'email' | 'social';
         provider?: string;
     }): Promise<void>;
-    notifyBreederRegistered(input: {
+    abstract notifyBreederRegistered(input: {
         userId: string;
         email: string;
         name: string;
@@ -23,7 +21,7 @@ export interface AuthRegistrationNotificationPort {
         registrationType: 'email' | 'social';
         provider?: string;
     }): Promise<void>;
-    notifyBreederDocumentsSubmitted(input: {
+    abstract notifyBreederDocumentsSubmitted(input: {
         userId: string;
         email: string;
         name: string;
