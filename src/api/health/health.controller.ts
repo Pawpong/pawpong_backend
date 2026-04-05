@@ -2,15 +2,14 @@ import { Controller, Get } from '@nestjs/common';
 
 import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
 
-import { HealthService } from './health.service';
-
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { HealthCheckResponseDto } from './dto/response/health-check-response.dto';
+import { GetHealthUseCase } from './application/use-cases/get-health.use-case';
 
 @ApiController('시스템')
 @Controller('health')
 export class HealthController {
-    constructor(private readonly healthService: HealthService) {}
+    constructor(private readonly getHealthUseCase: GetHealthUseCase) {}
 
     @Get()
     @ApiEndpoint({
@@ -20,7 +19,7 @@ export class HealthController {
         isPublic: true,
     })
     getHealth(): ApiResponseDto<HealthCheckResponseDto> {
-        const healthData = this.healthService.getHealth();
+        const healthData = this.getHealthUseCase.execute();
         return ApiResponseDto.success(healthData, '시스템이 정상 작동 중입니다.');
     }
 }
