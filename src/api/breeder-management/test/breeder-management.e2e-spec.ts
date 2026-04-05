@@ -2,8 +2,12 @@ import { INestApplication } from '@nestjs/common';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
 import { Connection } from 'mongoose';
+import * as fs from 'fs';
+import * as path from 'path';
 import request from 'supertest';
 
+import { DiscordWebhookService } from '../../../common/discord/discord-webhook.service';
+import { StorageService } from '../../../common/storage/storage.service';
 import { createTestingApp } from '../../../common/test/test-utils';
 
 /**
@@ -26,9 +30,31 @@ describe('Breeder Management API E2E Tests (Simple)', () => {
     let adopterId: string;
     let adopterName: string;
     let adopterEmail: string;
+    const verificationUploadTestFilePath = path.join(__dirname, 'verification-upload-test.jpg');
 
     beforeAll(async () => {
         app = await createTestingApp();
+        fs.writeFileSync(
+            verificationUploadTestFilePath,
+            Buffer.from(
+                '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=',
+                'base64',
+            ),
+        );
+
+        const storageService = app.get(StorageService);
+        jest.spyOn(storageService, 'uploadFile').mockImplementation(async (file: Express.Multer.File, folder?: string) => {
+            const fileName = `${folder}/${Date.now()}-${file.originalname}`;
+            return {
+                fileName,
+                cdnUrl: `https://cdn.test/${fileName}`,
+                storageUrl: `https://cdn.test/${fileName}`,
+            };
+        });
+        jest.spyOn(storageService, 'generateSignedUrl').mockImplementation((fileName: string) => `https://signed.test/${fileName}`);
+
+        const discordWebhookService = app.get(DiscordWebhookService);
+        jest.spyOn(discordWebhookService, 'notifyBreederVerificationSubmission').mockResolvedValue();
 
         // 테스트용 브리더 생성
         const timestamp = Date.now();
@@ -80,6 +106,9 @@ describe('Breeder Management API E2E Tests (Simple)', () => {
     });
 
     afterAll(async () => {
+        if (fs.existsSync(verificationUploadTestFilePath)) {
+            fs.unlinkSync(verificationUploadTestFilePath);
+        }
         await app.close();
     });
 
@@ -221,6 +250,88 @@ describe('Breeder Management API E2E Tests (Simple)', () => {
 
             expect(response.status).toBe(401);
             console.log('✅ 인증 없이 접근 거부 확인');
+        });
+    });
+
+    describe('인증 서류 업로드/제출', () => {
+        let verificationDocumentBreederToken: string;
+        let uploadedDocuments: Array<{ type: string; fileName: string; originalFileName?: string }> = [];
+
+        beforeAll(async () => {
+            const timestamp = Date.now();
+            const breederResponse = await request(app.getHttpServer())
+                .post('/api/auth/register/breeder')
+                .send({
+                    email: `breeder_docs_${timestamp}@test.com`,
+                    phoneNumber: '010-8888-7777',
+                    breederName: '서류 테스트 브리더',
+                    breederLocation: {
+                        city: '서울특별시',
+                        district: '서초구',
+                    },
+                    animal: 'dog',
+                    breeds: ['푸들'],
+                    plan: 'basic',
+                    level: 'new',
+                    agreements: {
+                        termsOfService: true,
+                        privacyPolicy: true,
+                        marketingConsent: false,
+                    },
+                })
+                .expect(200);
+
+            verificationDocumentBreederToken = breederResponse.body.data.accessToken;
+        });
+
+        it('POST /api/breeder-management/verification/upload - 서류 업로드 응답 계약 유지', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/api/breeder-management/verification/upload')
+                .set('Authorization', `Bearer ${verificationDocumentBreederToken}`)
+                .field('types', JSON.stringify(['idCard', 'businessLicense']))
+                .field('level', 'new')
+                .attach('files', verificationUploadTestFilePath)
+                .attach('files', verificationUploadTestFilePath)
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('new 레벨 브리더 인증 서류 2개가 업로드되었습니다.');
+            expect(response.body.data.count).toBe(2);
+            expect(response.body.data.level).toBe('new');
+            expect(response.body.data.documents).toHaveLength(2);
+            expect(response.body.data.documents[0]).toEqual(
+                expect.objectContaining({
+                    type: 'idCard',
+                    fileName: expect.stringContaining('verification/'),
+                    url: expect.stringContaining('https://signed.test/'),
+                    originalFileName: 'verification-upload-test.jpg',
+                }),
+            );
+
+            uploadedDocuments = response.body.data.documents;
+            console.log('✅ 인증 서류 업로드 응답 계약 유지 확인');
+        });
+
+        it('POST /api/breeder-management/verification/submit - 서류 제출 응답 계약 유지', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/api/breeder-management/verification/submit')
+                .set('Authorization', `Bearer ${verificationDocumentBreederToken}`)
+                .send({
+                    level: 'new',
+                    documents: uploadedDocuments.map((document) => ({
+                        type: document.type,
+                        fileName: document.fileName,
+                        originalFileName: document.originalFileName,
+                    })),
+                })
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.message).toBe('입점 서류 제출이 완료되었습니다.');
+            expect(response.body.data).toEqual({
+                message: '입점 서류 제출이 완료되었습니다. 관리자 검토 후 결과를 알려드립니다.',
+            });
+            console.log('✅ 인증 서류 제출 응답 계약 유지 확인');
         });
     });
 

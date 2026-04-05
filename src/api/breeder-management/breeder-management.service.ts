@@ -1,10 +1,6 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
-import { VerificationStatus, PetStatus } from '../../common/enum/user.enum';
-
-import { StorageService } from '../../common/storage/storage.service';
-import { CustomLoggerService } from '../../common/logger/custom-logger.service';
-import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
+import { PetStatus } from '../../common/enum/user.enum';
 
 import { ParentPetAddDto } from './dto/request/parent-pet-add-request.dto';
 import { ParentPetUpdateDto } from './dto/request/parent-pet-update-request.dto';
@@ -14,9 +10,7 @@ import { VerificationSubmitRequestDto } from './dto/request/verification-submit-
 import { ApplicationStatusUpdateRequestDto } from './dto/request/application-status-update-request.dto';
 import { SubmitDocumentsRequestDto } from './dto/request/submit-documents-request.dto';
 import { BreederDashboardResponseDto } from '../breeder/dto/response/breeder-dashboard-response.dto';
-import { UploadDocumentsResponseDto, UploadedDocumentDto } from './dto/response/upload-documents-response.dto';
-import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
-import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
+import { UploadDocumentsResponseDto } from './dto/response/upload-documents-response.dto';
 import { GetBreederManagementDashboardUseCase } from './application/use-cases/get-breeder-management-dashboard.use-case';
 import { GetBreederManagementProfileUseCase } from './application/use-cases/get-breeder-management-profile.use-case';
 import { UpdateBreederManagementProfileUseCase } from './application/use-cases/update-breeder-management-profile.use-case';
@@ -41,8 +35,8 @@ import { RemoveBreederManagementReviewReplyUseCase } from './application/use-cas
 import { GetBreederManagementApplicationDetailUseCase } from './application/use-cases/get-breeder-management-application-detail.use-case';
 import { UpdateBreederManagementApplicationStatusUseCase } from './application/use-cases/update-breeder-management-application-status.use-case';
 import { DeleteBreederManagementAccountUseCase } from './application/use-cases/delete-breeder-management-account.use-case';
-
-import { BreederRepository } from './repository/breeder.repository';
+import { UploadBreederManagementVerificationDocumentsUseCase } from './application/use-cases/upload-breeder-management-verification-documents.use-case';
+import { SubmitBreederManagementVerificationDocumentsUseCase } from './application/use-cases/submit-breeder-management-verification-documents.use-case';
 
 /**
  * 브리더 관리 비즈니스 로직 처리 Service
@@ -60,23 +54,9 @@ import { BreederRepository } from './repository/breeder.repository';
  * - 도메인 간 동기화: 입양자와 브리더 데이터 일관성 유지
  * - 실시간 통계: 신청, 승인, 완료 등 실시간 데이터 반영
  */
-// 임시 업로드 정보 타입
-interface TempUploadDocument {
-    type: string;
-    fileName: string;
-    originalFileName: string;
-}
-
 @Injectable()
 export class BreederManagementService {
-    // 임시 업로드 저장소 (userId를 키로 사용)
-    private tempUploads: Map<string, TempUploadDocument[]> = new Map();
-
     constructor(
-        private storageService: StorageService,
-        private breederRepository: BreederRepository,
-        private logger: CustomLoggerService,
-        private discordWebhookService: DiscordWebhookService,
         private getBreederManagementDashboardUseCase: GetBreederManagementDashboardUseCase,
         private getBreederManagementProfileUseCase: GetBreederManagementProfileUseCase,
         private updateBreederManagementProfileUseCase: UpdateBreederManagementProfileUseCase,
@@ -101,6 +81,8 @@ export class BreederManagementService {
         private getBreederManagementApplicationDetailUseCase: GetBreederManagementApplicationDetailUseCase,
         private updateBreederManagementApplicationStatusUseCase: UpdateBreederManagementApplicationStatusUseCase,
         private deleteBreederManagementAccountUseCase: DeleteBreederManagementAccountUseCase,
+        private uploadBreederManagementVerificationDocumentsUseCase: UploadBreederManagementVerificationDocumentsUseCase,
+        private submitBreederManagementVerificationDocumentsUseCase: SubmitBreederManagementVerificationDocumentsUseCase,
     ) {}
 
     /**
@@ -325,101 +307,7 @@ export class BreederManagementService {
         types: string[],
         level: 'new' | 'elite',
     ): Promise<UploadDocumentsResponseDto> {
-        const breeder = await this.breederRepository.findById(userId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        if (!files || files.length === 0) {
-            throw new BadRequestException('업로드할 파일이 없습니다.');
-        }
-
-        if (files.length !== types.length) {
-            throw new BadRequestException('파일 수와 타입 수가 일치하지 않습니다.');
-        }
-
-        const uploadedDocuments: UploadedDocumentDto[] = [];
-
-        const tempDocuments: TempUploadDocument[] = [];
-
-        for (let i = 0; i < files.length; i++) {
-            const file = files[i];
-            const type = types[i];
-
-            // 원본 파일명을 먼저 저장 (UUID 변경 전)
-            // multer가 자동으로 디코딩한 파일명을 사용
-            let originalFileName = file.originalname;
-
-            // 한글 파일명이 깨진 경우 UTF-8로 재인코딩
-            try {
-                // 파일명이 ISO-8859-1로 인코딩되어 있는지 확인
-                if (originalFileName && /[^\x00-\x7F]/.test(originalFileName)) {
-                    // 이미 올바른 UTF-8 문자가 포함된 경우 그대로 사용
-                    this.logger.log(`[uploadVerificationDocuments] UTF-8 filename detected: ${originalFileName}`);
-                } else if (originalFileName) {
-                    // ASCII 범위 밖의 문자가 없으면 ISO-8859-1로 인코딩되어 있을 가능성
-                    try {
-                        const decoded = Buffer.from(originalFileName, 'latin1').toString('utf8');
-                        if (decoded !== originalFileName) {
-                            this.logger.log(
-                                `[uploadVerificationDocuments] Filename re-encoded from latin1 to utf8: ${originalFileName} -> ${decoded}`,
-                            );
-                            originalFileName = decoded;
-                        }
-                    } catch (error) {
-                        // 재인코딩 실패 시 원본 사용
-                        this.logger.logWarning(
-                            'uploadVerificationDocuments',
-                            'Failed to re-encode filename, using original',
-                            error,
-                        );
-                    }
-                }
-            } catch (error) {
-                this.logger.logWarning('uploadVerificationDocuments', 'Filename encoding check failed', error);
-            }
-
-            // 디버깅 로그: 업로드 시점의 파일명 확인
-            this.logger.log(
-                `[uploadVerificationDocuments] File upload - type: ${type}, originalname: ${originalFileName}, mimetype: ${file.mimetype}, size: ${file.size}`,
-            );
-
-            // 폴더 경로: verification/{breederId}
-            const folder = `verification/${userId}`;
-
-            // GCS에 업로드 (generateFileName에서 UUID로 변경됨)
-            const uploadResult = await this.storageService.uploadFile(file, folder);
-
-            // Signed URL 생성 (미리보기용, 1시간)
-            const signedUrl = this.storageService.generateSignedUrl(uploadResult.fileName, 60);
-
-            this.logger.log(
-                `[uploadVerificationDocuments] Upload result - fileName: ${uploadResult.fileName}, originalFileName to save: ${originalFileName}`,
-            );
-
-            uploadedDocuments.push({
-                type,
-                url: signedUrl,
-                fileName: uploadResult.fileName,
-                size: file.size,
-                originalFileName, // 원본 파일명 저장
-            });
-
-            // tempUploads에 저장 (신규 가입 방식과 동일)
-            tempDocuments.push({
-                type,
-                fileName: uploadResult.fileName,
-                originalFileName,
-            });
-        }
-
-        // userId를 키로 tempUploads에 저장
-        this.tempUploads.set(userId, tempDocuments);
-        this.logger.log(
-            `[uploadVerificationDocuments] Saved to tempUploads - userId: ${userId}, documents: ${tempDocuments.length}`,
-        );
-
-        return new UploadDocumentsResponseDto(uploadedDocuments.length, level, uploadedDocuments);
+        return this.uploadBreederManagementVerificationDocumentsUseCase.execute(userId, files, types, level);
     }
 
     /**
@@ -431,246 +319,7 @@ export class BreederManagementService {
      * @returns 성공 메시지
      */
     async submitVerificationDocuments(userId: string, dto: SubmitDocumentsRequestDto): Promise<any> {
-        const breeder = await this.breederRepository.findById(userId);
-        if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-        }
-
-        // APPROVED 상태에서는 서류 제출 불가
-        if (breeder.verification?.status === VerificationStatus.APPROVED) {
-            throw new BadRequestException('이미 인증이 완료된 브리더입니다.');
-        }
-
-        // 필수 서류 검증 (재제출인 경우 기존 서류 + 새 서류 합쳐서 검증)
-        const requiredTypes =
-            dto.level === 'new' ? ['idCard', 'businessLicense'] : ['idCard', 'businessLicense', 'contractSample'];
-
-        // 재제출인 경우 기존 서류 타입도 포함
-        const isResubmissionCheck =
-            breeder.verification?.status === VerificationStatus.REVIEWING ||
-            breeder.verification?.status === VerificationStatus.REJECTED;
-
-        const submittedTypes = dto.documents.map((d) => d.type);
-        const existingTypes = isResubmissionCheck ? breeder.verification?.documents?.map((d) => d.type) || [] : [];
-        const allTypes = [...new Set([...submittedTypes, ...existingTypes])]; // 중복 제거
-
-        // Elite 레벨인 경우 브리더 인증 서류 검증 (breederCatCertificate 또는 breederDogCertificate 중 하나 필수)
-        if (dto.level === 'elite') {
-            const hasBreederCertificate =
-                allTypes.includes('breederCatCertificate') || allTypes.includes('breederDogCertificate');
-            if (!hasBreederCertificate) {
-                throw new BadRequestException('Elite 레벨은 브리더 인증 서류가 필수입니다.');
-            }
-        }
-
-        const missingTypes = requiredTypes.filter((t) => !allTypes.includes(t));
-
-        this.logger.log(
-            `[submitVerificationDocuments] Required validation - isResubmission: ${isResubmissionCheck}, submittedTypes: ${submittedTypes.join(', ')}, existingTypes: ${existingTypes.join(', ')}, allTypes: ${allTypes.join(', ')}, missingTypes: ${missingTypes.join(', ')}`,
-        );
-
-        if (missingTypes.length > 0) {
-            throw new BadRequestException(`필수 서류가 누락되었습니다: ${missingTypes.join(', ')}`);
-        }
-
-        // 프론트엔드에서 받은 원본 데이터 로깅
-        this.logger.log(
-            `[submitVerificationDocuments] Received DTO - userId: ${userId}, level: ${dto.level}, documents count: ${dto.documents.length}`,
-        );
-        dto.documents.forEach((doc, index) => {
-            this.logger.log(
-                `[submitVerificationDocuments] DTO Document ${index + 1} - type: ${doc.type}, fileName: ${doc.fileName}, originalFileName: ${doc.originalFileName}`,
-            );
-        });
-
-        // tempUploads에서 업로드 정보 조회 (신규 가입 방식과 동일)
-        const tempDocuments = this.tempUploads.get(userId);
-        if (tempDocuments) {
-            this.logger.log(
-                `[submitVerificationDocuments] Found tempUploads - userId: ${userId}, documents: ${tempDocuments.length}`,
-            );
-            tempDocuments.forEach((temp, index) => {
-                this.logger.log(
-                    `[submitVerificationDocuments] TempUpload ${index + 1} - fileName: ${temp.fileName}, originalFileName: ${temp.originalFileName}`,
-                );
-            });
-        } else {
-            this.logger.logWarning('submitVerificationDocuments', `No tempUploads found for userId: ${userId}`);
-        }
-
-        // DTO에서 받은 서류를 "새로 업로드한 서류"와 "기존 서류" 구분
-        // fileName이 "verification/"으로 시작하면 올바른 GCS 경로 (새 업로드 or 기존 유지)
-        // 그렇지 않으면 잘못된 데이터 (프론트엔드가 originalFileName을 fileName에 넣은 경우)
-        const actualNewDocuments: Array<{
-            type: string;
-            fileName: string;
-            originalFileName?: string;
-            uploadedAt: Date;
-        }> = [];
-
-        const typesToKeepFromExisting: string[] = [];
-
-        dto.documents.forEach((doc) => {
-            const isValidGcsPath = doc.fileName && doc.fileName.startsWith('verification/');
-            const tempDoc = tempDocuments?.find((temp) => temp.fileName === doc.fileName);
-
-            this.logger.log(
-                `[submitVerificationDocuments] Processing document - type: ${doc.type}, fileName: ${doc.fileName}, isValidGcsPath: ${isValidGcsPath}, inTempUploads: ${!!tempDoc}`,
-            );
-
-            if (isValidGcsPath) {
-                // 올바른 GCS 경로 → 새로 업로드했거나 기존 서류를 유지
-                const originalFileName = doc.originalFileName || tempDoc?.originalFileName;
-                actualNewDocuments.push({
-                    type: doc.type,
-                    fileName: doc.fileName,
-                    originalFileName: originalFileName,
-                    uploadedAt: new Date(),
-                });
-            } else {
-                // 잘못된 fileName (originalFileName이 들어옴) → 기존 서류를 유지하려는 의도
-                this.logger.logWarning(
-                    'submitVerificationDocuments',
-                    `Invalid fileName received for type ${doc.type}: ${doc.fileName}. Will keep existing document.`,
-                );
-                typesToKeepFromExisting.push(doc.type);
-            }
-        });
-
-        const submittedAt = new Date();
-        // 이미 서류를 제출한 적이 있으면 재제출 (REVIEWING, REJECTED 상태)
-        const isResubmission =
-            breeder.verification?.status === VerificationStatus.REVIEWING ||
-            breeder.verification?.status === VerificationStatus.REJECTED;
-
-        this.logger.log(
-            `[submitVerificationDocuments] Resubmission check - current status: ${breeder.verification?.status}, isResubmission: ${isResubmission}`,
-        );
-
-        // 기존 서류와 새로 제출된 서류 병합 (재제출인 경우)
-        let finalDocuments = actualNewDocuments;
-        if (isResubmission && breeder.verification?.documents) {
-            // 기존 서류 중에서:
-            // 1. actualNewDocuments에 포함된 type은 제외 (새로 업로드했으므로 덮어쓰기)
-            // 2. typesToKeepFromExisting에 포함된 type은 유지 (프론트가 유지 요청)
-            const existingDocuments = breeder.verification.documents.filter((existingDoc) => {
-                const isBeingReplaced = actualNewDocuments.some((newDoc) => newDoc.type === existingDoc.type);
-                const shouldKeep = typesToKeepFromExisting.includes(existingDoc.type);
-
-                // 올바른 fileName을 가진 서류만 유지
-                const hasValidFileName = existingDoc.fileName && existingDoc.fileName.startsWith('verification/');
-
-                this.logger.log(
-                    `[submitVerificationDocuments] Existing doc ${existingDoc.type} - isBeingReplaced: ${isBeingReplaced}, shouldKeep: ${shouldKeep}, hasValidFileName: ${hasValidFileName}`,
-                );
-
-                return !isBeingReplaced && shouldKeep && hasValidFileName;
-            });
-
-            // 기존 서류 + 새로 제출된 서류 병합
-            finalDocuments = [...existingDocuments, ...actualNewDocuments];
-
-            this.logger.log(
-                `[submitVerificationDocuments] Merged documents - existing: ${existingDocuments.length}, new: ${actualNewDocuments.length}, total: ${finalDocuments.length}`,
-            );
-            this.logger.log(
-                `[submitVerificationDocuments] Existing document types kept: ${existingDocuments.map((d) => d.type).join(', ')}`,
-            );
-            this.logger.log(
-                `[submitVerificationDocuments] New document types: ${actualNewDocuments.map((d) => d.type).join(', ')}`,
-            );
-        }
-
-        // 최종 서류 목록으로 필수 서류 재검증
-        const finalDocumentTypes = finalDocuments.map((d) => d.type);
-        const finalMissingTypes = requiredTypes.filter((t) => !finalDocumentTypes.includes(t));
-
-        this.logger.log(
-            `[submitVerificationDocuments] Final validation - finalDocumentTypes: ${finalDocumentTypes.join(', ')}, finalMissingTypes: ${finalMissingTypes.join(', ')}`,
-        );
-
-        if (finalMissingTypes.length > 0) {
-            throw new BadRequestException(`필수 서류가 누락되었습니다: ${finalMissingTypes.join(', ')}`);
-        }
-
-        // Elite 레벨인 경우 최종 서류 목록에서 브리더 인증 서류 검증
-        if (dto.level === 'elite') {
-            const hasBreederCertificateInFinal =
-                finalDocumentTypes.includes('breederCatCertificate') ||
-                finalDocumentTypes.includes('breederDogCertificate');
-            if (!hasBreederCertificateInFinal) {
-                throw new BadRequestException('Elite 레벨은 브리더 인증 서류가 필수입니다.');
-            }
-        }
-
-        const verification: any = {
-            status: VerificationStatus.REVIEWING,
-            level: dto.level,
-            submittedAt,
-            documents: finalDocuments,
-            submittedByEmail: dto.submittedByEmail || false,
-        };
-
-        await this.breederRepository.updateVerification(userId, verification);
-
-        // DB 업데이트 후 최신 정보 다시 조회 (originalFileName 포함)
-        const updatedBreeder = await this.breederRepository.findById(userId);
-
-        // 디스코드 알림 전송 (브리더 입점 서류 제출)
-        try {
-            // finalDocuments(기존 + 새 서류)의 모든 문서에 대해 Signed URL 생성
-            const documentsWithOriginalName = finalDocuments.map((doc) => {
-                // tempUploads에서 해당 fileName을 가진 문서 찾기
-                const tempDoc = tempDocuments?.find((temp) => temp.fileName === doc.fileName);
-
-                // 원본 파일명 결정 우선순위:
-                // 1. tempUploads에 저장된 originalFileName (새로 업로드한 경우)
-                // 2. DB에 이미 저장된 originalFileName (기존 서류)
-                // 3. fileName에서 추출 (최후의 수단)
-                const originalFileName =
-                    tempDoc?.originalFileName || doc.originalFileName || doc.fileName.split('/').pop();
-
-                this.logger.log(
-                    `[submitVerificationDocuments] Discord webhook document - type: ${doc.type}, fileName: ${doc.fileName}, tempDoc.originalFileName: ${tempDoc?.originalFileName}, doc.originalFileName: ${doc.originalFileName}, final: ${originalFileName}`,
-                );
-
-                return {
-                    type: doc.type,
-                    url: this.storageService.generateSignedUrl(doc.fileName, 60 * 24 * 7), // 7일 유효
-                    originalFileName,
-                };
-            });
-
-            await this.discordWebhookService.notifyBreederVerificationSubmission({
-                breederId: userId,
-                breederName: breeder.name || '이름 미설정',
-                email: breeder.emailAddress,
-                phone: breeder.phoneNumber,
-                level: dto.level,
-                isResubmission,
-                documents: documentsWithOriginalName,
-                submittedAt,
-            });
-
-            this.logger.logSuccess('submitVerificationDocuments', '디스코드 웹훅 전송 성공', {
-                breederId: userId,
-                documentsCount: documentsWithOriginalName.length,
-                documents: documentsWithOriginalName.map((d) => ({
-                    type: d.type,
-                    originalFileName: d.originalFileName,
-                })),
-            });
-        } catch (error) {
-            this.logger.logWarning('submitVerificationDocuments', '디스코드 알림 전송 실패 (서류 제출은 성공)', error);
-        }
-
-        // 임시 업로드 정보 정리
-        if (tempDocuments) {
-            this.tempUploads.delete(userId);
-            this.logger.log(`[submitVerificationDocuments] Cleaned up tempUploads for userId: ${userId}`);
-        }
-
-        return { message: '입점 서류 제출이 완료되었습니다. 관리자 검토 후 결과를 알려드립니다.' };
+        return this.submitBreederManagementVerificationDocumentsUseCase.execute(userId, dto);
     }
 
     /**

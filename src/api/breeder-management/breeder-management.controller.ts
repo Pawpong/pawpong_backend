@@ -22,7 +22,6 @@ import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../common/d
 import { RolesGuard } from '../../common/guard/roles.guard';
 import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
 
-import { BreederManagementService } from './breeder-management.service';
 import { GetBreederManagementDashboardUseCase } from './application/use-cases/get-breeder-management-dashboard.use-case';
 import { GetBreederManagementProfileUseCase } from './application/use-cases/get-breeder-management-profile.use-case';
 import { UpdateBreederManagementProfileUseCase } from './application/use-cases/update-breeder-management-profile.use-case';
@@ -47,6 +46,8 @@ import { RemoveBreederManagementReviewReplyUseCase } from './application/use-cas
 import { GetBreederManagementApplicationDetailUseCase } from './application/use-cases/get-breeder-management-application-detail.use-case';
 import { UpdateBreederManagementApplicationStatusUseCase } from './application/use-cases/update-breeder-management-application-status.use-case';
 import { DeleteBreederManagementAccountUseCase } from './application/use-cases/delete-breeder-management-account.use-case';
+import { UploadBreederManagementVerificationDocumentsUseCase } from './application/use-cases/upload-breeder-management-verification-documents.use-case';
+import { SubmitBreederManagementVerificationDocumentsUseCase } from './application/use-cases/submit-breeder-management-verification-documents.use-case';
 
 import { ParentPetAddDto } from './dto/request/parent-pet-add-request.dto';
 import { ParentPetUpdateDto } from './dto/request/parent-pet-update-request.dto';
@@ -90,7 +91,6 @@ import { BreederAccountDeleteResponseDto } from './dto/response/breeder-account-
 @Roles('breeder')
 export class BreederManagementController {
     constructor(
-        private readonly breederManagementService: BreederManagementService,
         private readonly getBreederManagementDashboardUseCase: GetBreederManagementDashboardUseCase,
         private readonly getBreederManagementProfileUseCase: GetBreederManagementProfileUseCase,
         private readonly updateBreederManagementProfileUseCase: UpdateBreederManagementProfileUseCase,
@@ -115,6 +115,8 @@ export class BreederManagementController {
         private readonly getBreederManagementApplicationDetailUseCase: GetBreederManagementApplicationDetailUseCase,
         private readonly updateBreederManagementApplicationStatusUseCase: UpdateBreederManagementApplicationStatusUseCase,
         private readonly deleteBreederManagementAccountUseCase: DeleteBreederManagementAccountUseCase,
+        private readonly uploadBreederManagementVerificationDocumentsUseCase: UploadBreederManagementVerificationDocumentsUseCase,
+        private readonly submitBreederManagementVerificationDocumentsUseCase: SubmitBreederManagementVerificationDocumentsUseCase,
     ) {}
 
     @Get('dashboard')
@@ -225,7 +227,7 @@ export class BreederManagementController {
         @UploadedFiles() files: Express.Multer.File[],
         @Body() dto: UploadDocumentsRequestDto,
     ): Promise<ApiResponseDto<UploadDocumentsResponseDto>> {
-        const result = await this.breederManagementService.uploadVerificationDocuments(
+        const result = await this.uploadBreederManagementVerificationDocumentsUseCase.execute(
             user.userId,
             files,
             dto.types,
@@ -257,7 +259,7 @@ export class BreederManagementController {
         @CurrentUser() user: any,
         @Body() dto: SubmitDocumentsRequestDto,
     ): Promise<ApiResponseDto<VerificationSubmitResponseDto>> {
-        const result = await this.breederManagementService.submitVerificationDocuments(user.userId, dto);
+        const result = await this.submitBreederManagementVerificationDocumentsUseCase.execute(user.userId, dto);
         return ApiResponseDto.success(result, '입점 서류 제출이 완료되었습니다.');
     }
 
