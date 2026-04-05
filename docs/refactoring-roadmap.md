@@ -126,7 +126,7 @@ controller -> use-case -> domain
   - 타입체크 통과
 - `breeder-management` 도메인:
   - `dashboard + profile` 슬라이스를 먼저 `controller -> use-case -> port -> adapter` 구조로 분리
-  - `verification + application-form` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 추가 분리
+  - `verification status + verification submit + verification document upload/submit + application-form` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 추가 분리
   - `received applications + my-pets + my-reviews` 조회 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
   - `parent-pets + available-pets` 명령 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
   - `review reply` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
@@ -136,11 +136,12 @@ controller -> use-case -> domain
   - 부모견/분양개체 DTO -> 저장 모델 변환 책임을 command mapper/domain service로 이동
   - 답글 응답 조립 책임을 response factory/domain service로 이동
   - 신청 상세 응답 조립과 상태 변경 응답 생성을 assembler/factory domain service로 이동
-  - verification 문서 signed URL 조립 책임을 assembler/domain service로 이동
+  - verification 문서 signed URL 조립, 임시 draft 저장, 디스코드 payload 생성 책임을 domain service + port로 이동
   - 표준 질문 카탈로그, 신청 폼 검증, 간소화 질문 빌드 책임을 domain service로 이동
-  - 기존 `BreederManagementService`는 나머지 인증 업로드 흐름 호환을 위해 유지하고, 분리된 메서드는 use-case 위임 형태로 얇게 정리
+  - 기존 `BreederManagementService`는 남은 미분리 슬라이스 호환을 위해 유지하고, 분리된 메서드는 use-case 위임 형태로 얇게 정리
   - 기존 응답/메시지 유지
   - breeder-management e2e 테스트 통과
+  - verification 문서 upload/submit 응답 계약 e2e 테스트 추가
   - 타입체크 통과
 - `breeder` 도메인:
   - 공개 조회 `search + profile` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리

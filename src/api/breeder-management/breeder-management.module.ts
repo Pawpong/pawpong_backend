@@ -30,6 +30,8 @@ import { RemoveBreederManagementReviewReplyUseCase } from './application/use-cas
 import { GetBreederManagementApplicationDetailUseCase } from './application/use-cases/get-breeder-management-application-detail.use-case';
 import { UpdateBreederManagementApplicationStatusUseCase } from './application/use-cases/update-breeder-management-application-status.use-case';
 import { DeleteBreederManagementAccountUseCase } from './application/use-cases/delete-breeder-management-account.use-case';
+import { UploadBreederManagementVerificationDocumentsUseCase } from './application/use-cases/upload-breeder-management-verification-documents.use-case';
+import { SubmitBreederManagementVerificationDocumentsUseCase } from './application/use-cases/submit-breeder-management-verification-documents.use-case';
 import { BreederManagementDashboardAssemblerService } from './domain/services/breeder-management-dashboard-assembler.service';
 import { BreederManagementProfileUpdateMapperService } from './domain/services/breeder-management-profile-update-mapper.service';
 import { BreederManagementProfileAssemblerService } from './domain/services/breeder-management-profile-assembler.service';
@@ -39,6 +41,9 @@ import { BreederManagementMyReviewMapperService } from './domain/services/breede
 import { BreederManagementStandardQuestionCatalogService } from './domain/services/breeder-management-standard-question-catalog.service';
 import { BreederManagementVerificationStatusAssemblerService } from './domain/services/breeder-management-verification-status-assembler.service';
 import { BreederManagementVerificationSubmissionMapperService } from './domain/services/breeder-management-verification-submission-mapper.service';
+import { BreederManagementVerificationOriginalFileNameService } from './domain/services/breeder-management-verification-original-file-name.service';
+import { BreederManagementVerificationDocumentPolicyService } from './domain/services/breeder-management-verification-document-policy.service';
+import { BreederManagementVerificationNotificationPayloadFactoryService } from './domain/services/breeder-management-verification-notification-payload-factory.service';
 import { BreederManagementApplicationFormAssemblerService } from './domain/services/breeder-management-application-form-assembler.service';
 import { BreederManagementApplicationFormValidatorService } from './domain/services/breeder-management-application-form-validator.service';
 import { BreederManagementSimpleApplicationFormBuilderService } from './domain/services/breeder-management-simple-application-form-builder.service';
@@ -56,6 +61,9 @@ import { BreederManagementPetCommandAdapter } from './infrastructure/breeder-man
 import { BreederManagementReviewReplyAdapter } from './infrastructure/breeder-management-review-reply.adapter';
 import { BreederManagementApplicationWorkflowAdapter } from './infrastructure/breeder-management-application-workflow.adapter';
 import { BreederManagementAccountCommandAdapter } from './infrastructure/breeder-management-account-command.adapter';
+import { BreederManagementVerificationDocumentStoreAdapter } from './infrastructure/breeder-management-verification-document-store.adapter';
+import { BreederManagementVerificationDraftStoreAdapter } from './infrastructure/breeder-management-verification-draft-store.adapter';
+import { BreederManagementVerificationNotifierAdapter } from './infrastructure/breeder-management-verification-notifier.adapter';
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from './application/ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_FILE_URL_PORT } from './application/ports/breeder-management-file-url.port';
 import { BREEDER_MANAGEMENT_LIST_READER_PORT } from './application/ports/breeder-management-list-reader.port';
@@ -64,6 +72,9 @@ import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from './application/ports/breeder
 import { BREEDER_MANAGEMENT_REVIEW_REPLY_PORT } from './application/ports/breeder-management-review-reply.port';
 import { BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT } from './application/ports/breeder-management-application-workflow.port';
 import { BREEDER_MANAGEMENT_ACCOUNT_COMMAND_PORT } from './application/ports/breeder-management-account-command.port';
+import { BreederManagementVerificationDocumentStorePort } from './application/ports/breeder-management-verification-document-store.port';
+import { BreederManagementVerificationDraftStorePort } from './application/ports/breeder-management-verification-draft-store.port';
+import { BreederManagementVerificationNotifierPort } from './application/ports/breeder-management-verification-notifier.port';
 
 import { BreederRepository } from './repository/breeder.repository';
 import { ParentPetRepository } from './repository/parent-pet.repository';
@@ -118,6 +129,9 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederManagementStandardQuestionCatalogService,
         BreederManagementVerificationStatusAssemblerService,
         BreederManagementVerificationSubmissionMapperService,
+        BreederManagementVerificationOriginalFileNameService,
+        BreederManagementVerificationDocumentPolicyService,
+        BreederManagementVerificationNotificationPayloadFactoryService,
         BreederManagementApplicationFormAssemblerService,
         BreederManagementApplicationFormValidatorService,
         BreederManagementSimpleApplicationFormBuilderService,
@@ -135,6 +149,9 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederManagementReviewReplyAdapter,
         BreederManagementApplicationWorkflowAdapter,
         BreederManagementAccountCommandAdapter,
+        BreederManagementVerificationDocumentStoreAdapter,
+        BreederManagementVerificationDraftStoreAdapter,
+        BreederManagementVerificationNotifierAdapter,
         GetBreederManagementDashboardUseCase,
         GetBreederManagementProfileUseCase,
         UpdateBreederManagementProfileUseCase,
@@ -159,6 +176,8 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         GetBreederManagementApplicationDetailUseCase,
         UpdateBreederManagementApplicationStatusUseCase,
         DeleteBreederManagementAccountUseCase,
+        UploadBreederManagementVerificationDocumentsUseCase,
+        SubmitBreederManagementVerificationDocumentsUseCase,
         {
             provide: BREEDER_MANAGEMENT_PROFILE_PORT,
             useExisting: BreederManagementProfileAdapter,
@@ -190,6 +209,18 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         {
             provide: BREEDER_MANAGEMENT_ACCOUNT_COMMAND_PORT,
             useExisting: BreederManagementAccountCommandAdapter,
+        },
+        {
+            provide: BreederManagementVerificationDocumentStorePort,
+            useExisting: BreederManagementVerificationDocumentStoreAdapter,
+        },
+        {
+            provide: BreederManagementVerificationDraftStorePort,
+            useExisting: BreederManagementVerificationDraftStoreAdapter,
+        },
+        {
+            provide: BreederManagementVerificationNotifierPort,
+            useExisting: BreederManagementVerificationNotifierAdapter,
         },
     ],
     exports: [
