@@ -1,8 +1,93 @@
-import { INestApplication } from '@nestjs/common';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import { createTestingApp } from '../../../common/test/test-utils';
 import * as path from 'path';
 import * as fs from 'fs';
+import { MongoMemoryServer } from 'mongodb-memory-server';
+
+import { AppModule } from '../../../app.module';
+import { StorageService } from '../../../common/storage/storage.service';
+
+let mongod: MongoMemoryServer;
+
+function createStorageServiceMock(): Pick<
+    StorageService,
+    | 'uploadFile'
+    | 'uploadMultipleFiles'
+    | 'deleteFile'
+    | 'generateSignedUrl'
+    | 'generateSignedUrls'
+    | 'generateSignedUrlSafe'
+    | 'getBucketName'
+    | 'getCdnUrl'
+    | 'listObjects'
+    | 'fileExists'
+> {
+    const buildFileName = (file: Express.Multer.File, folder?: string, index?: number) => {
+        const fileLabel = index === undefined ? file.originalname : `${index}-${file.originalname}`;
+        return folder ? `${folder}/${fileLabel}` : fileLabel;
+    };
+
+    const buildUrl = (fileName: string) => `https://cdn.test/${fileName}`;
+
+    return {
+        uploadFile: jest.fn(async (file: Express.Multer.File, folder?: string) => {
+            const fileName = buildFileName(file, folder);
+            return {
+                fileName,
+                cdnUrl: buildUrl(fileName),
+                storageUrl: buildUrl(fileName),
+            };
+        }),
+        uploadMultipleFiles: jest.fn(async (files: Express.Multer.File[], folder?: string) =>
+            files.map((file, index) => {
+                const fileName = buildFileName(file, folder, index);
+                return {
+                    fileName,
+                    cdnUrl: buildUrl(fileName),
+                    storageUrl: buildUrl(fileName),
+                };
+            }),
+        ),
+        deleteFile: jest.fn(async () => undefined),
+        generateSignedUrl: jest.fn((fileName: string) => buildUrl(fileName)),
+        generateSignedUrls: jest.fn((fileNames: string[]) => fileNames.map((fileName) => buildUrl(fileName))),
+        generateSignedUrlSafe: jest.fn((fileName?: string | null) => (fileName ? buildUrl(fileName) : undefined)),
+        getBucketName: jest.fn(() => 'pawpong_s3'),
+        getCdnUrl: jest.fn((fileName: string) => buildUrl(fileName)),
+        listObjects: jest.fn(async () => ({
+            Contents: [],
+            IsTruncated: false,
+            $metadata: {},
+        })),
+        fileExists: jest.fn(async () => true),
+    };
+}
+
+async function createUploadTestingApp(): Promise<INestApplication> {
+    mongod = await MongoMemoryServer.create();
+    process.env.MONGODB_URI = mongod.getUri();
+
+    const moduleFixture: TestingModule = await Test.createTestingModule({
+        imports: [AppModule],
+    })
+        .overrideProvider(StorageService)
+        .useValue(createStorageServiceMock())
+        .compile();
+
+    const app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
+    app.useGlobalPipes(
+        new ValidationPipe({
+            transform: true,
+            whitelist: true,
+            forbidNonWhitelisted: true,
+        }),
+    );
+
+    await app.init();
+    return app;
+}
 
 describe('Upload API E2E Tests (Simple)', () => {
     let app: INestApplication;
@@ -24,7 +109,7 @@ describe('Upload API E2E Tests (Simple)', () => {
     };
 
     beforeAll(async () => {
-        app = await createTestingApp();
+        app = await createUploadTestingApp();
         createTestImage();
 
         // 1. 테스트용 브리더 생성
@@ -97,6 +182,10 @@ describe('Upload API E2E Tests (Simple)', () => {
         }
 
         await app.close();
+        if (mongod) {
+            await mongod.stop();
+            mongod = undefined as any;
+        }
     });
 
     describe('브리더 대표 사진 업로드', () => {
