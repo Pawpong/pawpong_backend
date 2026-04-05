@@ -1,7 +1,5 @@
 import { Injectable, UnauthorizedException, ConflictException, BadRequestException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
-import * as bcrypt from 'bcryptjs';
 
 import { UserStatus, VerificationStatus, BreederPlan } from '../../common/enum/user.enum';
 
@@ -10,161 +8,46 @@ import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
 
 import { AuthMapper } from './mapper/auth.mapper';
+import { AuthTokenService } from './services/auth-token.service';
 
 import { AuthAdopterRepository } from './repository/auth-adopter.repository';
 import { AuthBreederRepository } from './repository/auth-breeder.repository';
+import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
+import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
+import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
+import { CheckBreederNameDuplicateUseCase } from './application/use-cases/check-breeder-name-duplicate.use-case';
+import { CompleteSocialRegistrationUseCase } from './application/use-cases/complete-social-registration.use-case';
+import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
+import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
+import { AuthTempUploadStore } from './infrastructure/auth-temp-upload.store';
 
-import { RefreshTokenRequestDto } from './dto/request/refresh-token-request.dto';
 import { SocialCompleteRequestDto } from './dto/request/social-complete-request.dto';
 import { RegisterBreederRequestDto } from './dto/request/register-breeder-request.dto';
 import { RegisterAdopterRequestDto } from './dto/request/register-adopter-request.dto';
 import { AuthResponseDto } from './dto/response/auth-response.dto';
-import { TokenResponseDto } from './dto/response/token-response.dto';
-import { LogoutResponseDto } from './dto/response/logout-response.dto';
 import { RegisterAdopterResponseDto } from './dto/response/register-adopter-response.dto';
 import { RegisterBreederResponseDto } from './dto/response/register-breeder-response.dto';
 import { VerificationDocumentsResponseDto } from './dto/response/verification-documents-response.dto';
 
-/**
- * 임시 업로드 파일 정보 (tempId 기반)
- */
-interface TempUploadInfo {
-    profileImage?: string; // 파일명
-    documents?: Array<{
-        fileName: string;
-        originalFileName?: string;
-        type: string;
-    }>;
-    createdAt: Date;
-}
-
 @Injectable()
 export class AuthService {
-    /**
-     * tempId를 키로 사용하는 임시 파일 저장소
-     * 회원가입 전 업로드된 파일 정보를 임시 보관
-     */
-    private tempUploads = new Map<string, TempUploadInfo>();
-
     constructor(
         private readonly authAdopterRepository: AuthAdopterRepository,
         private readonly authBreederRepository: AuthBreederRepository,
-        private jwtService: JwtService,
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
         private readonly storageService: StorageService,
         private readonly discordWebhookService: DiscordWebhookService,
-    ) {
-        // 1시간마다 오래된 임시 데이터 정리 (메모리 누수 방지)
-        setInterval(() => this.cleanupOldTempUploads(), 60 * 60 * 1000);
-    }
-
-    /**
-     * 1시간 이상 된 임시 업로드 데이터 삭제
-     */
-    private cleanupOldTempUploads(): void {
-        const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
-        let deletedCount = 0;
-
-        for (const [tempId, info] of this.tempUploads.entries()) {
-            if (info.createdAt < oneHourAgo) {
-                this.tempUploads.delete(tempId);
-                deletedCount++;
-            }
-        }
-
-        if (deletedCount > 0) {
-            this.logger.log(`[cleanupOldTempUploads] ${deletedCount}개의 오래된 임시 업로드 데이터 삭제됨`);
-        }
-    }
-
-    /**
-     * URL에서 파일명 추출 (프론트엔드가 잘못된 값을 보낼 경우 대비)
-     *
-     * @param urlOrFilename - Signed URL 또는 파일명
-     * @returns 파일명 (예: "profiles/uuid.png")
-     *
-     * @example
-     * // URL인 경우
-     * extractFilenameFromUrl("https://cdn.pawpong.kr/profiles/uuid.png?Expires=123&Signature=abc")
-     * // → "profiles/uuid.png"
-     *
-     * // 이미 파일명인 경우
-     * extractFilenameFromUrl("profiles/uuid.png")
-     * // → "profiles/uuid.png"
-     */
-    private extractFilenameFromUrl(urlOrFilename: string): string {
-        if (!urlOrFilename) {
-            return urlOrFilename;
-        }
-
-        // URL인지 확인 (http:// 또는 https://로 시작)
-        if (urlOrFilename.startsWith('http://') || urlOrFilename.startsWith('https://')) {
-            try {
-                const url = new URL(urlOrFilename);
-                // 도메인 이후 경로 추출 (맨 앞 / 제거)
-                let pathname = url.pathname;
-                if (pathname.startsWith('/')) {
-                    pathname = pathname.substring(1);
-                }
-                this.logger.logWarning(
-                    'extractFilenameFromUrl',
-                    `URL에서 파일명 추출됨 (프론트엔드가 url 대신 filename을 보내야 함)`,
-                    {
-                        원본URL: urlOrFilename,
-                        추출된파일명: pathname,
-                    },
-                );
-                return pathname;
-            } catch (error) {
-                this.logger.logError('extractFilenameFromUrl', 'URL 파싱 실패', error);
-                return urlOrFilename;
-            }
-        }
-
-        // 이미 파일명인 경우 그대로 반환
-        return urlOrFilename;
-    }
-
-    /**
-     * Access 토큰과 Refresh 토큰을 생성합니다.
-     */
-    private generateTokens(userId: string, email: string, role: string) {
-        const payload = {
-            sub: userId,
-            email,
-            role,
-        };
-
-        // Access 토큰 (.env JWT_EXPIRATION 설정 사용, 기본값 24시간)
-        const jwtExpiration = (this.configService.get<string>('JWT_EXPIRATION') || '24h') as string;
-        const accessToken = this.jwtService.sign(payload, {
-            expiresIn: jwtExpiration as any,
-        });
-
-        // Refresh 토큰 (.env JWT_REFRESH_EXPIRATION 설정 사용, 기본값 7일)
-        const jwtRefreshExpiration = (this.configService.get<string>('JWT_REFRESH_EXPIRATION') || '7d') as string;
-        const refreshToken = this.jwtService.sign(
-            { ...payload, type: 'refresh' },
-            {
-                expiresIn: jwtRefreshExpiration as any,
-            },
-        );
-
-        return {
-            accessToken,
-            refreshToken,
-            accessTokenExpiresIn: 3600, // 1시간 (초)
-            refreshTokenExpiresIn: 604800, // 7일 (초)
-        };
-    }
-
-    /**
-     * Refresh 토큰을 해시하여 저장합니다.
-     */
-    private async hashRefreshToken(refreshToken: string): Promise<string> {
-        return bcrypt.hash(refreshToken, 10);
-    }
+        private readonly authTokenService: AuthTokenService,
+        private readonly completeSocialRegistrationUseCase: CompleteSocialRegistrationUseCase,
+        private readonly checkSocialUserUseCase: CheckSocialUserUseCase,
+        private readonly checkEmailDuplicateUseCase: CheckEmailDuplicateUseCase,
+        private readonly checkNicknameDuplicateUseCase: CheckNicknameDuplicateUseCase,
+        private readonly checkBreederNameDuplicateUseCase: CheckBreederNameDuplicateUseCase,
+        private readonly registerAdopterUseCase: RegisterAdopterUseCase,
+        private readonly registerBreederUseCase: RegisterBreederUseCase,
+        private readonly authTempUploadStore: AuthTempUploadStore,
+    ) {}
 
     // 유틸리티 메서드들은 AuthMapper로 이동되었습니다.
 
@@ -175,88 +58,6 @@ export class AuthService {
             return this.authBreederRepository.findById(userId);
         }
         return null;
-    }
-
-    /**
-     * Refresh 토큰을 사용하여 새로운 Access 토큰을 발급합니다.
-     */
-    async refreshToken(refreshTokenDto: RefreshTokenRequestDto): Promise<TokenResponseDto> {
-        try {
-            // Refresh 토큰 검증
-            const payload = this.jwtService.verify(refreshTokenDto.refreshToken);
-
-            // Refresh 토큰인지 확인
-            if (!payload.type || payload.type !== 'refresh') {
-                throw new UnauthorizedException('유효하지 않은 리프레시 토큰입니다.');
-            }
-
-            // 사용자 조회
-            let user: any;
-            let hashedToken: string;
-
-            if (payload.role === 'adopter') {
-                user = await this.authAdopterRepository.findById(payload.sub);
-                hashedToken = user?.refreshToken;
-            } else if (payload.role === 'breeder') {
-                user = await this.authBreederRepository.findById(payload.sub);
-                hashedToken = user?.refreshToken;
-            } else {
-                throw new UnauthorizedException('유효하지 않은 사용자 역할입니다.');
-            }
-
-            if (!user) {
-                throw new UnauthorizedException('사용자를 찾을 수 없습니다.');
-            }
-
-            // 저장된 Refresh 토큰과 비교
-            if (!hashedToken) {
-                throw new UnauthorizedException('리프레시 토큰이 존재하지 않습니다.');
-            }
-
-            const isTokenValid = await bcrypt.compare(refreshTokenDto.refreshToken, hashedToken);
-            if (!isTokenValid) {
-                throw new UnauthorizedException('유효하지 않은 리프레시 토큰입니다.');
-            }
-
-            // 새로운 토큰 생성
-            const tokens = this.generateTokens(payload.sub, payload.email, payload.role);
-
-            // 새 Refresh 토큰 해시 후 저장
-            const newHashedRefreshToken = await this.hashRefreshToken(tokens.refreshToken);
-
-            if (payload.role === 'adopter') {
-                await this.authAdopterRepository.updateRefreshToken(payload.sub, newHashedRefreshToken);
-            } else if (payload.role === 'breeder') {
-                await this.authBreederRepository.updateRefreshToken(payload.sub, newHashedRefreshToken);
-            }
-
-            return tokens;
-        } catch (error) {
-            if (error.name === 'TokenExpiredError') {
-                throw new UnauthorizedException('리프레시 토큰이 만료되었습니다.');
-            }
-            if (error.name === 'JsonWebTokenError') {
-                throw new UnauthorizedException('유효하지 않은 토큰 형식입니다.');
-            }
-            throw error;
-        }
-    }
-
-    /**
-     * 로그아웃 시 Refresh 토큰을 제거하고 응답 DTO를 반환합니다.
-     */
-    async logout(userId: string, role: string): Promise<LogoutResponseDto> {
-        if (role === 'adopter') {
-            await this.authAdopterRepository.updateRefreshToken(userId, null);
-        } else if (role === 'breeder') {
-            await this.authBreederRepository.updateRefreshToken(userId, null);
-        }
-
-        return {
-            success: true,
-            loggedOutAt: new Date().toISOString(),
-            message: '로그아웃되었습니다.',
-        };
     }
 
     /**
@@ -333,97 +134,28 @@ export class AuthService {
     async completeSocialRegistrationValidated(
         dto: SocialCompleteRequestDto,
     ): Promise<RegisterAdopterResponseDto | RegisterBreederResponseDto> {
-        if (dto.role === 'adopter') {
-            // 입양자 회원가입 필수 필드 검증
-            if (!dto.nickname) {
-                throw new BadRequestException('입양자 회원가입 시 닉네임은 필수입니다.');
-            }
-
-            const adopterDto: RegisterAdopterRequestDto = {
-                tempId: dto.tempId,
-                email: dto.email,
-                nickname: dto.nickname,
-                phone: dto.phone,
-                marketingAgreed: dto.marketingAgreed,
-            };
-            return this.registerAdopter(adopterDto);
-        } else if (dto.role === 'breeder') {
-            // 브리더 회원가입 필수 필드 검증
-            if (!dto.phone) {
-                throw new BadRequestException('브리더 회원가입 시 전화번호는 필수입니다.');
-            }
-            if (!dto.breederName) {
-                throw new BadRequestException('브리더 회원가입 시 브리더명은 필수입니다.');
-            }
-            if (!dto.city) {
-                throw new BadRequestException('브리더 회원가입 시 시/도는 필수입니다.');
-            }
-            if (!dto.petType) {
-                throw new BadRequestException('브리더 회원가입 시 브리딩 동물 종류는 필수입니다.');
-            }
-            if (!dto.breeds || dto.breeds.length === 0) {
-                throw new BadRequestException('브리더 회원가입 시 품종 목록은 필수입니다.');
-            }
-            if (!dto.plan) {
-                throw new BadRequestException('브리더 회원가입 시 플랜은 필수입니다.');
-            }
-            if (!dto.level) {
-                throw new BadRequestException('브리더 회원가입 시 레벨은 필수입니다.');
-            }
-
-            const breederDto: RegisterBreederRequestDto = {
-                tempId: dto.tempId,
-                provider: dto.provider,
-                email: dto.email,
-                phoneNumber: dto.phone,
-                breederName: dto.breederName,
-                breederLocation: {
-                    city: dto.city,
-                    district: dto.district,
-                },
-                animal: dto.petType,
-                breeds: dto.breeds,
-                plan: dto.plan,
-                level: dto.level,
-                agreements: {
-                    termsOfService: true,
-                    privacyPolicy: true,
-                    marketingConsent: dto.marketingAgreed ?? false,
-                },
-            };
-            return this.registerBreeder(breederDto);
-        } else {
-            throw new BadRequestException('유효하지 않은 역할입니다.');
-        }
+        return this.completeSocialRegistrationUseCase.execute(dto);
     }
 
     /**
      * 이메일 중복 체크 - 입양자와 브리더 모두 확인
      */
     async checkEmailDuplicate(email: string): Promise<boolean> {
-        const adopter = await this.authAdopterRepository.findByEmail(email);
-        if (adopter) return true;
-
-        const breeder = await this.authBreederRepository.findByEmail(email);
-        if (breeder) return true;
-
-        return false;
+        return this.checkEmailDuplicateUseCase.execute(email);
     }
 
     /**
      * 닉네임 중복 체크 - 입양자만 확인
      */
     async checkNicknameDuplicate(nickname: string): Promise<boolean> {
-        const adopter = await this.authAdopterRepository.findByNickname(nickname);
-        return !!adopter;
+        return this.checkNicknameDuplicateUseCase.execute(nickname);
     }
 
     /**
      * 브리더 상호명 중복 체크
      */
     async checkBreederNameDuplicate(breederName: string): Promise<boolean> {
-        const breeder = await this.authBreederRepository.findByBreederName(breederName);
-        return !!breeder;
+        return this.checkBreederNameDuplicateUseCase.execute(breederName);
     }
 
     /**
@@ -541,107 +273,7 @@ export class AuthService {
      * 입양자 회원가입 처리 (일반 + 소셜 로그인 모두 지원)
      */
     async registerAdopter(dto: RegisterAdopterRequestDto): Promise<RegisterAdopterResponseDto> {
-        this.logger.logStart('registerAdopter', '입양자 회원가입 처리 시작', dto, 'AuthService');
-
-        // tempId 파싱: "temp_kakao_4479198661_1759826027884" 또는 "temp_naver_providerId_timestamp" 형식
-        // providerId에 언더스코어가 포함될 수 있으므로 (네이버 등) 마지막 파트를 timestamp로 처리
-        const tempIdParts = dto.tempId.split('_');
-        if (tempIdParts.length < 4 || tempIdParts[0] !== 'temp') {
-            throw new BadRequestException('유효하지 않은 임시 ID 형식입니다.');
-        }
-
-        const provider = tempIdParts[1]; // kakao, google, naver
-        // providerId는 2번째부터 마지막 전까지의 모든 파트를 합침 (언더스코어 포함될 수 있음)
-        const providerId = tempIdParts.slice(2, -1).join('_'); // 소셜 제공자의 사용자 ID
-
-        this.logger.logSuccess(
-            'registerAdopter',
-            'tempId 파싱 완료',
-            { provider, providerId, nickname: dto.nickname },
-            'AuthService',
-        );
-
-        // 소셜 제공자로부터 기존 사용자 정보 조회 (이미 가입했는지 확인)
-        const existingAdopter = await this.authAdopterRepository.findBySocialAuth(provider, providerId);
-
-        if (existingAdopter) {
-            throw new ConflictException('이미 입양자로 가입된 소셜 계정입니다.');
-        }
-
-        // 필수 필드 검증
-        if (!dto.email) {
-            throw new BadRequestException('이메일 정보가 필요합니다.');
-        }
-
-        if (!dto.nickname) {
-            throw new BadRequestException('닉네임이 필요합니다.');
-        }
-
-        // 닉네임 중복 체크
-        const existingNickname = await this.authAdopterRepository.findByNickname(dto.nickname);
-
-        if (existingNickname) {
-            throw new ConflictException('이미 사용 중인 닉네임입니다.');
-        }
-
-        // 입양자 생성
-        const savedAdopter = await this.authAdopterRepository.create({
-            emailAddress: dto.email,
-            nickname: dto.nickname,
-            phoneNumber: AuthMapper.normalizePhoneNumber(dto.phone),
-            profileImageFileName: dto.profileImage ? this.extractFilenameFromUrl(dto.profileImage) : '',
-            socialAuthInfo: {
-                authProvider: provider,
-                providerUserId: providerId,
-                providerEmail: dto.email,
-            },
-            accountStatus: UserStatus.ACTIVE,
-            userRole: 'adopter',
-            marketingAgreed: dto.marketingAgreed || false,
-            notificationSettings: {
-                emailNotifications: true,
-                pushNotifications: true,
-                applicationStatusNotifications: true,
-                favoriteBreederNotifications: true,
-            },
-            favoriteBreederList: [],
-            submittedReportList: [],
-            // ✅ 제거: adoptionApplicationList (별도 컬렉션에서 관리)
-            // ✅ 제거: writtenReviewList (별도 컬렉션에서 관리)
-        });
-
-        // 토큰 생성
-        const tokens = this.generateTokens((savedAdopter._id as any).toString(), savedAdopter.emailAddress, 'adopter');
-
-        // Refresh 토큰 저장
-        const hashedRefreshToken = await this.hashRefreshToken(tokens.refreshToken);
-        await this.authAdopterRepository.update((savedAdopter._id as any).toString(), {
-            refreshToken: hashedRefreshToken,
-            lastActivityAt: new Date(),
-        });
-
-        this.logger.logSuccess('registerAdopter', '입양자 회원가입 완료', {
-            userId: (savedAdopter._id as any).toString(),
-            nickname: savedAdopter.nickname,
-        });
-
-        // 디스코드 웹훅 알림 전송 (비동기, 에러 발생해도 회원가입은 성공)
-        this.discordWebhookService
-            .notifyAdopterRegistration({
-                userId: (savedAdopter._id as any).toString(),
-                email: savedAdopter.emailAddress,
-                name: dto.nickname || '알 수 없음',
-                phone: savedAdopter.phoneNumber,
-                nickname: savedAdopter.nickname,
-                registrationType: 'social',
-                provider: provider,
-            })
-            .catch((error) => {
-                this.logger.logError('registerAdopter', '디스코드 알림 전송 실패 (무시됨)', error);
-            });
-
-        // 응답 데이터 구성 (Mapper 패턴 사용)
-        return AuthMapper.toAdopterRegisterResponse(savedAdopter, tokens);
+        return this.registerAdopterUseCase.execute(dto);
     }
 
     /**
@@ -706,14 +338,14 @@ export class AuthService {
             });
 
             // 토큰 생성
-            const tokens = this.generateTokens(
+            const tokens = this.authTokenService.generateTokens(
                 (savedAdopter._id as any).toString(),
                 savedAdopter.emailAddress,
                 'adopter',
             );
 
             // Refresh 토큰 저장
-            const hashedRefreshToken = await this.hashRefreshToken(tokens.refreshToken);
+            const hashedRefreshToken = await this.authTokenService.hashRefreshToken(tokens.refreshToken);
             await this.authAdopterRepository.update((savedAdopter._id as any).toString(), {
                 refreshToken: hashedRefreshToken,
                 lastActivityAt: new Date(),
@@ -795,14 +427,14 @@ export class AuthService {
             });
 
             // 토큰 생성
-            const tokens = this.generateTokens(
+            const tokens = this.authTokenService.generateTokens(
                 (savedBreeder._id as any).toString(),
                 savedBreeder.emailAddress,
                 'breeder',
             );
 
             // Refresh 토큰 저장
-            const hashedRefreshToken = await this.hashRefreshToken(tokens.refreshToken);
+            const hashedRefreshToken = await this.authTokenService.hashRefreshToken(tokens.refreshToken);
             await this.authBreederRepository.update((savedBreeder._id as any).toString(), {
                 refreshToken: hashedRefreshToken,
                 lastLoginAt: new Date(),
@@ -830,10 +462,10 @@ export class AuthService {
      * 소셜 로그인 기존 사용자 토큰 발급
      */
     async generateSocialLoginTokens(user: any) {
-        const tokens = this.generateTokens(user.userId, user.email, user.role);
+        const tokens = this.authTokenService.generateTokens(user.userId, user.email, user.role);
 
         // Refresh 토큰 저장
-        const hashedRefreshToken = await this.hashRefreshToken(tokens.refreshToken);
+        const hashedRefreshToken = await this.authTokenService.hashRefreshToken(tokens.refreshToken);
 
         if (user.role === 'adopter') {
             await this.authAdopterRepository.update(user.userId, {
@@ -1251,43 +883,7 @@ export class AuthService {
         nickname?: string;
         profileImageFileName?: string;
     }> {
-        this.logger.logStart('checkSocialUser', '소셜 사용자 존재 여부 확인', {
-            provider,
-            providerId,
-            email,
-        });
-
-        // 입양자 검색
-        const adopter = await this.authAdopterRepository.findBySocialAuth(provider, providerId);
-
-        if (adopter) {
-            this.logger.logSuccess('checkSocialUser', '입양자 계정 발견', {
-                userId: adopter._id,
-            });
-
-            // 입양자 응답 (Mapper 패턴 사용)
-            return AuthMapper.toSocialUserCheckResponseAdopter(adopter);
-        }
-
-        // 브리더 검색
-        const breeder = await this.authBreederRepository.findBySocialAuth(provider, providerId);
-
-        if (breeder) {
-            this.logger.logSuccess('checkSocialUser', '브리더 계정 발견', {
-                userId: breeder._id,
-            });
-
-            // 브리더 응답 (Mapper 패턴 사용)
-            return AuthMapper.toSocialUserCheckResponseBreeder(breeder);
-        }
-
-        this.logger.logSuccess('checkSocialUser', '미가입 사용자', {
-            provider,
-            providerId,
-        });
-
-        // 미가입 사용자 응답 (Mapper 패턴 사용)
-        return AuthMapper.toSocialUserCheckResponseNotFound();
+        return this.checkSocialUserUseCase.execute(provider, providerId, email);
     }
 
     /**
@@ -1329,240 +925,7 @@ export class AuthService {
         accessToken: string;
         refreshToken: string;
     }> {
-        this.logger.logStart('registerBreeder', '브리더 회원가입 시작', {
-            email: dto.email,
-            breederName: dto.breederName,
-            animal: dto.animal,
-            plan: dto.plan,
-            level: dto.level,
-            tempId: dto.tempId,
-        });
-
-        // 필수 약관 동의 확인
-        if (!dto.agreements.termsOfService || !dto.agreements.privacyPolicy) {
-            throw new BadRequestException('필수 약관에 동의해야 합니다.');
-        }
-
-        // 이메일 중복 체크
-        const existingBreeder = await this.authBreederRepository.findByEmail(dto.email);
-
-        if (existingBreeder) {
-            throw new ConflictException('이미 가입된 이메일입니다.');
-        }
-
-        // 입양자로도 가입되어 있는지 확인
-        const existingAdopter = await this.authAdopterRepository.findByEmail(dto.email);
-
-        if (existingAdopter) {
-            throw new ConflictException('해당 이메일로 입양자 계정이 이미 존재합니다.');
-        }
-
-        // 소셜 로그인 정보 파싱 (tempId가 있는 경우)
-        let socialAuthInfo: any = undefined;
-
-        if (dto.tempId && dto.provider) {
-            // tempId 파싱: "temp_kakao_4479198661_1759826027884" 또는 "temp_naver_providerId_timestamp" 형식
-            // providerId에 언더스코어가 포함될 수 있으므로 (네이버 등) 마지막 파트를 timestamp로 처리
-            const tempIdParts = dto.tempId.split('_');
-            if (tempIdParts.length >= 4 && tempIdParts[0] === 'temp') {
-                const provider = tempIdParts[1];
-                const providerId = tempIdParts.slice(2, -1).join('_');
-
-                socialAuthInfo = {
-                    authProvider: provider,
-                    providerUserId: providerId,
-                    providerEmail: dto.email,
-                };
-
-                this.logger.logSuccess('registerBreeder', '소셜 로그인 정보 파싱 완료', {
-                    provider,
-                    providerId,
-                });
-            }
-        }
-
-        // breederLocation은 이미 객체 형태로 전달됨 (district는 선택)
-        const city = dto.breederLocation.city;
-        const district = dto.breederLocation.district || '';
-
-        // tempId로 임시 저장된 파일 정보 조회 (회원가입 전 업로드한 파일)
-        let tempUploadInfo: TempUploadInfo | undefined;
-        if (dto.tempId) {
-            tempUploadInfo = this.tempUploads.get(dto.tempId);
-            if (tempUploadInfo) {
-                this.logger.logSuccess('registerBreeder', 'tempId로 임시 저장된 파일 정보 조회 완료', {
-                    tempId: dto.tempId,
-                    hasProfileImage: !!tempUploadInfo.profileImage,
-                    documentCount: tempUploadInfo.documents?.length || 0,
-                });
-            } else {
-                this.logger.log(`[registerBreeder] tempId로 임시 저장된 파일 정보가 없습니다: ${dto.tempId}`);
-            }
-        }
-
-        // 프론트엔드가 보낸 값과 임시 저장된 값 병합
-        const finalProfileImage = dto.profileImage || tempUploadInfo?.profileImage;
-        const finalDocumentUrls = dto.documentUrls || tempUploadInfo?.documents?.map((doc) => doc.fileName);
-        const finalOriginalFileNames = tempUploadInfo?.documents?.map((doc) => doc.originalFileName);
-        const finalDocumentTypes =
-            dto.documentTypes ||
-            tempUploadInfo?.documents?.map((doc) => {
-                // snake_case를 camelCase로 변환
-                const typeMapping: Record<string, string> = {
-                    id_card: 'idCard',
-                    animal_production_license: 'animalProductionLicense',
-                    adoption_contract_sample: 'adoptionContractSample',
-                    recent_association_document: 'recentAssociationDocument',
-                    breeder_certification: 'breederCertification',
-                    tica_cfa_document: 'ticaCfaDocument',
-                };
-                return typeMapping[doc.type] || doc.type;
-            });
-
-        // 프론트엔드가 보낸 값 로깅 (디버깅용)
-        this.logger.log(`[registerBreeder] 프론트엔드가 보낸 profileImage: ${dto.profileImage}`);
-        this.logger.log(`[registerBreeder] 프론트엔드가 보낸 documentUrls: ${JSON.stringify(dto.documentUrls)}`);
-        this.logger.log(`[registerBreeder] 최종 profileImage: ${finalProfileImage}`);
-        this.logger.log(`[registerBreeder] 최종 documentUrls: ${JSON.stringify(finalDocumentUrls)}`);
-
-        // 업로드된 서류 파일명 배열을 documents 배열로 변환 (Mapper 패턴 사용)
-        // 최종 파일명과 타입을 사용 (프론트엔드 또는 tempId에서 가져온 값)
-        const verificationDocuments =
-            finalDocumentUrls?.map((urlOrFilename, index) => {
-                // URL에서 파일명 추출 (URL이면 경고 로그와 함께 변환, 파일명이면 그대로 사용)
-                const fileName = this.extractFilenameFromUrl(urlOrFilename);
-                const originalFileName = finalOriginalFileNames?.[index];
-                const camelCaseType = finalDocumentTypes?.[index] || AuthMapper.extractDocumentType(fileName);
-                // camelCase를 snake_case로 변환 (스키마 enum 형식에 맞춤)
-                const snakeCaseType = AuthMapper.convertDocumentTypeToSnakeCase(camelCaseType);
-                return {
-                    fileName: fileName, // 파일명만 저장 (조회 시 동적으로 Signed URL 생성)
-                    originalFileName: originalFileName, // 원본 파일명 저장
-                    type: snakeCaseType,
-                    uploadedAt: new Date(),
-                };
-            }) || [];
-
-        if (verificationDocuments.length > 0) {
-            this.logger.logSuccess('registerBreeder', '인증 서류 파일명 처리 완료', {
-                documentCount: verificationDocuments.length,
-                documentTypes: verificationDocuments.map((doc) => doc.type),
-                savedFileNames: verificationDocuments.map((doc) => doc.fileName), // 실제 저장되는 파일명
-            });
-        }
-
-        // 회원가입 완료 후 tempId 임시 저장소에서 삭제
-        if (dto.tempId && tempUploadInfo) {
-            this.tempUploads.delete(dto.tempId);
-            this.logger.log(`[registerBreeder] tempId 임시 저장소에서 삭제됨: ${dto.tempId}`);
-        }
-
-        // 브리더 생성
-        const savedBreeder = await this.authBreederRepository.create({
-            // User 스키마 필드 (상속)
-            emailAddress: dto.email,
-            nickname: dto.breederName, // 브리더명을 nickname으로 사용
-            phoneNumber: AuthMapper.normalizePhoneNumber(dto.phoneNumber),
-            profileImageFileName: finalProfileImage ? this.extractFilenameFromUrl(finalProfileImage) : undefined,
-            socialAuthInfo: socialAuthInfo,
-            userRole: 'breeder',
-            accountStatus: UserStatus.ACTIVE,
-            termsAgreed: dto.agreements.termsOfService,
-            privacyAgreed: dto.agreements.privacyPolicy,
-            marketingAgreed: dto.agreements.marketingConsent || false,
-            lastLoginAt: new Date(),
-            lastActivityAt: new Date(),
-
-            // Breeder 전용 필드
-            name: dto.breederName, // 업체명
-            petType: dto.animal, // cat or dog
-            breeds: dto.breeds,
-            verification: {
-                status: VerificationStatus.PENDING,
-                plan: dto.plan === 'pro' ? BreederPlan.PRO : BreederPlan.BASIC,
-                level: dto.level, // elite or new
-                documents: verificationDocuments,
-            },
-            profile: {
-                description: '', // 초기에는 빈 문자열
-                specialization: [dto.animal], // cat or dog
-                location: {
-                    city: city,
-                    district: district,
-                },
-                representativePhotos: [],
-            },
-            applicationForm: [],
-            stats: {
-                totalApplications: 0,
-                totalFavorites: 0,
-                completedAdoptions: 0,
-                averageRating: 0,
-                totalReviews: 0,
-                profileViews: 0,
-                lastUpdated: new Date(),
-            },
-        });
-
-        this.logger.logSuccess('registerBreeder', '브리더 생성 완료', {
-            breederId: savedBreeder._id,
-            email: savedBreeder.emailAddress,
-            name: savedBreeder.name,
-        });
-
-        // 토큰 생성
-        const tokens = this.generateTokens((savedBreeder._id as any).toString(), savedBreeder.emailAddress, 'breeder');
-
-        // Refresh 토큰 저장
-        const hashedRefreshToken = await this.hashRefreshToken(tokens.refreshToken);
-        await this.authBreederRepository.updateRefreshToken((savedBreeder._id as any).toString(), hashedRefreshToken);
-
-        this.logger.logSuccess('registerBreeder', '브리더 회원가입 완료', {
-            breederId: savedBreeder._id,
-            accessToken: tokens.accessToken.substring(0, 20) + '...',
-        });
-
-        // 디스코드 웹훅 알림 전송 (비동기, 에러 발생해도 회원가입은 성공)
-        // 1. 회원가입 알림 (서류 정보 제외)
-        this.discordWebhookService
-            .notifyBreederRegistration({
-                userId: (savedBreeder._id as any).toString(),
-                email: savedBreeder.emailAddress,
-                name: savedBreeder.name,
-                phone: savedBreeder.phoneNumber,
-                registrationType: socialAuthInfo ? 'social' : 'email',
-                provider: socialAuthInfo?.authProvider,
-            })
-            .catch((error) => {
-                this.logger.logError('registerBreeder', '디스코드 회원가입 알림 전송 실패 (무시됨)', error);
-            });
-
-        // 2. 서류 제출 알림 (서류가 있는 경우에만)
-        if (verificationDocuments.length > 0) {
-            const documentsForWebhook = verificationDocuments.map((doc) => {
-                const signedUrl = this.storageService.generateSignedUrl(doc.fileName);
-                return {
-                    type: doc.type,
-                    url: signedUrl,
-                    originalFileName: doc.originalFileName,
-                };
-            });
-
-            this.discordWebhookService
-                .notifyRegistrationDocuments({
-                    userId: (savedBreeder._id as any).toString(),
-                    email: savedBreeder.emailAddress,
-                    name: savedBreeder.name,
-                    userType: 'breeder',
-                    documents: documentsForWebhook,
-                })
-                .catch((error) => {
-                    this.logger.logError('registerBreeder', '디스코드 서류 제출 알림 전송 실패 (무시됨)', error);
-                });
-        }
-
-        // 응답 데이터 구성 (Mapper 패턴 사용)
-        return AuthMapper.toBreederRegisterResponse(savedBreeder, tokens);
+        return this.registerBreederUseCase.execute(dto as RegisterBreederRequestDto);
     }
 
     /**
@@ -1606,17 +969,11 @@ export class AuthService {
         // tempId가 있으면 임시 저장 (로그인 여부와 무관하게 저장)
         // 사용자가 로그인 상태에서 다시 회원가입을 시도할 수 있으므로 둘 다 저장
         if (tempId) {
-            const existing = this.tempUploads.get(tempId) || { createdAt: new Date() };
-            this.tempUploads.set(tempId, {
-                ...existing,
-                profileImage: result.fileName,
-                createdAt: existing.createdAt, // 기존 생성 시간 유지
-            });
+            this.authTempUploadStore.saveProfileImage(tempId, result.fileName);
             this.logger.logSuccess('uploadProfileImage', 'tempId로 프로필 이미지 임시 저장 완료', {
                 tempId,
                 fileName: result.fileName,
                 hasUser: !!user,
-                tempUploadsSize: this.tempUploads.size,
             });
         }
 
@@ -1735,20 +1092,17 @@ export class AuthService {
 
         // tempId가 있으면 임시 저장소에 보관
         if (tempId) {
-            const existing = this.tempUploads.get(tempId) || { createdAt: new Date() };
-            this.tempUploads.set(tempId, {
-                ...existing,
-                documents: uploadedDocuments.map((doc) => ({
+            this.authTempUploadStore.saveDocuments(
+                tempId,
+                uploadedDocuments.map((doc) => ({
                     fileName: doc.filename,
                     originalFileName: doc.originalFileName,
                     type: doc.type,
                 })),
-                createdAt: existing.createdAt, // 기존 생성 시간 유지
-            });
+            );
             this.logger.logSuccess('uploadBreederDocuments', 'tempId로 서류 정보 임시 저장 완료', {
                 tempId,
                 documentCount: uploadedDocuments.length,
-                tempUploadsSize: this.tempUploads.size,
             });
         }
 

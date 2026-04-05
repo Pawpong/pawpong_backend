@@ -18,10 +18,30 @@ import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { SmsService } from './sms.service';
 import { AuthService } from './auth.service';
 import { AuthAdminService } from './admin/auth-admin.service';
+import { AuthTokenService } from './services/auth-token.service';
 
 import { AuthAdminRepository } from './repository/auth-admin.repository';
+import { AuthRegistrationAdapter } from './infrastructure/auth-registration.adapter';
+import { AuthRegistrationNotificationAdapter } from './infrastructure/auth-registration-notification.adapter';
 import { AuthAdopterRepository } from './repository/auth-adopter.repository';
 import { AuthBreederRepository } from './repository/auth-breeder.repository';
+import { AuthSessionAdapter } from './infrastructure/auth-session.adapter';
+import { AuthTempUploadStore } from './infrastructure/auth-temp-upload.store';
+import { AUTH_REGISTRATION_PORT } from './application/ports/auth-registration.port';
+import { AUTH_REGISTRATION_NOTIFICATION_PORT } from './application/ports/auth-registration-notification.port';
+import { AUTH_SESSION_PORT } from './application/ports/auth-session.port';
+import { AUTH_TEMP_UPLOAD_PORT } from './application/ports/auth-temp-upload.port';
+import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
+import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
+import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
+import { CheckBreederNameDuplicateUseCase } from './application/use-cases/check-breeder-name-duplicate.use-case';
+import { CompleteSocialRegistrationUseCase } from './application/use-cases/complete-social-registration.use-case';
+import { RefreshAuthTokenUseCase } from './application/use-cases/refresh-auth-token.use-case';
+import { LogoutUseCase } from './application/use-cases/logout.use-case';
+import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
+import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
+import { AuthSocialIdentityService } from './domain/services/auth-social-identity.service';
+import { AuthStoredFileNameService } from './domain/services/auth-stored-file-name.service';
 
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
@@ -59,11 +79,43 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
     controllers: [AuthController, AuthAdminController],
     providers: [
         AuthService,
+        CheckSocialUserUseCase,
+        CheckEmailDuplicateUseCase,
+        CheckNicknameDuplicateUseCase,
+        CheckBreederNameDuplicateUseCase,
+        CompleteSocialRegistrationUseCase,
+        RefreshAuthTokenUseCase,
+        LogoutUseCase,
+        RegisterAdopterUseCase,
+        RegisterBreederUseCase,
+        AuthTokenService,
         SmsService,
         AuthAdminService,
         AuthAdopterRepository,
         AuthBreederRepository,
         AuthAdminRepository,
+        AuthRegistrationAdapter,
+        AuthRegistrationNotificationAdapter,
+        AuthSessionAdapter,
+        AuthTempUploadStore,
+        AuthSocialIdentityService,
+        AuthStoredFileNameService,
+        {
+            provide: AUTH_REGISTRATION_PORT,
+            useExisting: AuthRegistrationAdapter,
+        },
+        {
+            provide: AUTH_REGISTRATION_NOTIFICATION_PORT,
+            useExisting: AuthRegistrationNotificationAdapter,
+        },
+        {
+            provide: AUTH_SESSION_PORT,
+            useExisting: AuthSessionAdapter,
+        },
+        {
+            provide: AUTH_TEMP_UPLOAD_PORT,
+            useExisting: AuthTempUploadStore,
+        },
         JwtStrategy,
         GoogleStrategy,
         NaverStrategy,
