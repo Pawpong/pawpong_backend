@@ -13,7 +13,9 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-cd /root/pawpong_backend
+APP_DIR=${APP_DIR:-$(pwd)}
+
+cd "${APP_DIR}"
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}Pawpong Backend Rollback${NC}"
