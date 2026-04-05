@@ -16,15 +16,26 @@ import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
 
-import { UploadService } from './upload.service';
-
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { UploadResponseDto } from './dto/response/upload-response.dto';
+import { UploadRepresentativePhotosUseCase } from './application/use-cases/upload-representative-photos.use-case';
+import { UploadAvailablePetPhotosUseCase } from './application/use-cases/upload-available-pet-photos.use-case';
+import { UploadParentPetPhotosUseCase } from './application/use-cases/upload-parent-pet-photos.use-case';
+import { UploadSingleFileUseCase } from './application/use-cases/upload-single-file.use-case';
+import { UploadMultipleFilesUseCase } from './application/use-cases/upload-multiple-files.use-case';
+import { DeleteUploadedFileUseCase } from './application/use-cases/delete-uploaded-file.use-case';
 
 @ApiController('업로드')
 @Controller('upload')
 export class UploadController {
-    constructor(private readonly uploadService: UploadService) {}
+    constructor(
+        private readonly uploadRepresentativePhotosUseCase: UploadRepresentativePhotosUseCase,
+        private readonly uploadAvailablePetPhotosUseCase: UploadAvailablePetPhotosUseCase,
+        private readonly uploadParentPetPhotosUseCase: UploadParentPetPhotosUseCase,
+        private readonly uploadSingleFileUseCase: UploadSingleFileUseCase,
+        private readonly uploadMultipleFilesUseCase: UploadMultipleFilesUseCase,
+        private readonly deleteUploadedFileUseCase: DeleteUploadedFileUseCase,
+    ) {}
 
     @Post('representative-photos')
     @UseGuards(JwtAuthGuard)
@@ -40,7 +51,7 @@ export class UploadController {
         @UploadedFiles() files: Express.Multer.File[],
         @CurrentUser() user: any,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
-        const responses = await this.uploadService.uploadRepresentativePhotos(files, user);
+        const responses = await this.uploadRepresentativePhotosUseCase.execute(files, user);
         return ApiResponseDto.success(responses, '대표 사진이 업로드되고 저장되었습니다.');
     }
 
@@ -67,7 +78,7 @@ export class UploadController {
                 ? existingPhotos
                 : [existingPhotos]
             : [];
-        const responses = await this.uploadService.uploadAvailablePetPhotosMultiple(
+        const responses = await this.uploadAvailablePetPhotosUseCase.execute(
             petId,
             files || [],
             existingPhotoArray,
@@ -99,7 +110,7 @@ export class UploadController {
                 ? existingPhotos
                 : [existingPhotos]
             : [];
-        const responses = await this.uploadService.uploadParentPetPhotosMultiple(
+        const responses = await this.uploadParentPetPhotosUseCase.execute(
             petId,
             files || [],
             existingPhotoArray,
@@ -121,7 +132,7 @@ export class UploadController {
         @UploadedFile() file: Express.Multer.File,
         @Body('folder') folder?: string,
     ): Promise<ApiResponseDto<UploadResponseDto>> {
-        const response = await this.uploadService.uploadSingle(file, folder);
+        const response = await this.uploadSingleFileUseCase.execute(file, folder);
         return ApiResponseDto.success(response, '파일 업로드 성공');
     }
 
@@ -138,7 +149,7 @@ export class UploadController {
         @UploadedFiles() files: Express.Multer.File[],
         @Body('folder') folder?: string,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
-        const responses = await this.uploadService.uploadMultiple(files, folder);
+        const responses = await this.uploadMultipleFilesUseCase.execute(files, folder);
         return ApiResponseDto.success(responses, `${files.length}개 파일 업로드 성공`);
     }
 
@@ -149,7 +160,7 @@ export class UploadController {
         isPublic: true,
     })
     async deleteFile(@Body('fileName') fileName: string): Promise<ApiResponseDto<null>> {
-        await this.uploadService.deleteFile(fileName);
+        await this.deleteUploadedFileUseCase.execute(fileName);
         return ApiResponseDto.success(null, '파일 삭제 성공');
     }
 }
