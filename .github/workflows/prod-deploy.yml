@@ -69,30 +69,37 @@ jobs:
                   PROD_GCP_KEYFILE: ${{ vars.PROD_GCP_KEYFILE }}
               run: |
                   echo "🚀 Starting deployment to production server..."
-                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no ${{ env.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << ENDSSH > deploy.log 2>&1
-                  set -e
 
-                  echo "📦 Authenticating with Artifact Registry..."
-                  gcloud auth activate-service-account --key-file=${PROD_GCP_KEYFILE}
-                  gcloud auth configure-docker ${GAR_LOCATION} --quiet
+                  SSH_CMD="ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no -o ConnectTimeout=10"
+                  SERVER="${{ env.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }}"
 
-                  cd ${PROD_APP_DIR} || { echo "❌ Directory not found"; exit 1; }
+                  # SSH 접속 테스트
+                  $SSH_CMD $SERVER "echo 'SSH connection OK'" || { echo "❌ SSH connection failed"; exit 1; }
 
-                  echo "📥 Pulling latest code..."
-                  git pull origin main
+                  # 배포 스크립트를 서버에서 실행
+                  $SSH_CMD $SERVER "
+                    set -e
+                    echo '📦 Authenticating with Artifact Registry...'
+                    gcloud auth activate-service-account --key-file=${{ vars.PROD_GCP_KEYFILE }}
+                    gcloud auth configure-docker ${GAR_LOCATION} --quiet
 
-                  echo "🐳 Pulling Docker image from Artifact Registry..."
-                  IMAGE_TAG="${GAR_LOCATION}/${GCP_PROJECT_ID}/${SERVICE_NAME}/pawpong-backend:${COMMIT_SHA}"
-                  docker pull "\$IMAGE_TAG"
-                  docker tag "\$IMAGE_TAG" pawpong-backend:latest
-                  docker tag "\$IMAGE_TAG" pawpong-backend:${COMMIT_SHA}
+                    cd ${{ vars.PROD_APP_DIR }} || { echo '❌ Directory not found'; exit 1; }
 
-                  echo "Running Blue-Green deployment..."
-                  bash deploy.sh ${COMMIT_SHA}
+                    echo '📥 Pulling latest code...'
+                    git pull origin main
 
-                  echo "✅ Deployment completed successfully!"
-                  ENDSSH
-                  cat deploy.log
+                    echo '🐳 Pulling Docker image from Artifact Registry...'
+                    IMAGE_TAG=\"${GAR_LOCATION}/${GCP_PROJECT_ID}/${SERVICE_NAME}/pawpong-backend:${COMMIT_SHA}\"
+                    docker pull \"\$IMAGE_TAG\"
+                    docker tag \"\$IMAGE_TAG\" pawpong-backend:latest
+                    docker tag \"\$IMAGE_TAG\" pawpong-backend:${COMMIT_SHA}
+
+                    echo 'Running Blue-Green deployment...'
+                    bash deploy.sh ${COMMIT_SHA}
+
+                    echo '✅ Deployment completed successfully!'
+                  " 2>&1 | tee deploy.log
+
                   echo "DEPLOY_LOG<<EOF" >> $GITHUB_ENV
                   cat deploy.log >> $GITHUB_ENV
                   echo "EOF" >> $GITHUB_ENV
