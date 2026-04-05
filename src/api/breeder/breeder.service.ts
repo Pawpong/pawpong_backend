@@ -15,6 +15,13 @@ import { PaginationBuilder } from '../../common/dto/pagination/pagination-builde
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
 import { BreederSearchResponseDto } from './dto/response/breeder-search-response.dto';
 import { BreederProfileResponseDto } from './dto/response/breeder-profile-response.dto';
+import { SearchBreedersUseCase } from './application/use-cases/search-breeders.use-case';
+import { GetBreederProfileUseCase } from './application/use-cases/get-breeder-profile.use-case';
+import { GetBreederReviewsUseCase } from './application/use-cases/get-breeder-reviews.use-case';
+import { GetBreederPetsUseCase } from './application/use-cases/get-breeder-pets.use-case';
+import { GetBreederPetDetailUseCase } from './application/use-cases/get-breeder-pet-detail.use-case';
+import { GetBreederParentPetsUseCase } from './application/use-cases/get-breeder-parent-pets.use-case';
+import { GetBreederApplicationFormUseCase } from './application/use-cases/get-breeder-application-form.use-case';
 
 @Injectable()
 export class BreederService {
@@ -25,178 +32,21 @@ export class BreederService {
         @InjectModel(ParentPet.name) private parentPetModel: Model<ParentPetDocument>,
         @InjectModel(AvailablePet.name) private availablePetModel: Model<AvailablePetDocument>,
         private readonly storageService: StorageService,
+        private readonly searchBreedersUseCase: SearchBreedersUseCase,
+        private readonly getBreederProfileUseCase: GetBreederProfileUseCase,
+        private readonly getBreederReviewsUseCase: GetBreederReviewsUseCase,
+        private readonly getBreederPetsUseCase: GetBreederPetsUseCase,
+        private readonly getBreederPetDetailUseCase: GetBreederPetDetailUseCase,
+        private readonly getBreederParentPetsUseCase: GetBreederParentPetsUseCase,
+        private readonly getBreederApplicationFormUseCase: GetBreederApplicationFormUseCase,
     ) {}
 
     async searchBreeders(searchDto: BreederSearchRequestDto): Promise<BreederSearchResponseDto> {
-        const {
-            petType,
-            breedName,
-            cityName,
-            districtName,
-            isImmediatelyAvailable,
-            minPrice,
-            maxPrice,
-            page = 1,
-            limit = 10,
-            sortCriteria = 'rating',
-        } = searchDto;
-
-        // Build filter query
-        const filter: any = {
-            'verification.status': VerificationStatus.APPROVED,
-            status: 'active',
-        };
-
-        if (petType) {
-            filter['profile.specialization'] = petType;
-        }
-
-        if (cityName) {
-            filter['profile.location.city'] = cityName;
-        }
-
-        if (districtName) {
-            filter['profile.location.district'] = districtName;
-        }
-
-        if (isImmediatelyAvailable) {
-            filter['availablePets.status'] = PetStatus.AVAILABLE;
-        }
-
-        if (breedName) {
-            filter['availablePets.breed'] = new RegExp(breedName, 'i');
-        }
-
-        if (minPrice !== undefined || maxPrice !== undefined) {
-            const priceFilter: any = {};
-            if (minPrice !== undefined) {
-                priceFilter.$gte = minPrice;
-            }
-            if (maxPrice !== undefined) {
-                priceFilter.$lte = maxPrice;
-            }
-            filter['profile.priceRange.min'] = priceFilter;
-        }
-
-        // Build sort criteria
-        let sortOrder: any = {};
-        switch (sortCriteria) {
-            case 'rating':
-                sortOrder = { 'stats.averageRating': -1 };
-                break;
-            case 'experience':
-                sortOrder = { 'profile.experienceYears': -1 };
-                break;
-            case 'recent':
-                sortOrder = { createdAt: -1 };
-                break;
-            case 'applications':
-                sortOrder = { 'stats.totalApplications': -1 };
-                break;
-        }
-
-        const skip = (page - 1) * limit;
-
-        // Execute query with pagination
-        const [breeders, total] = await Promise.all([
-            this.breederModel
-                .find(filter)
-                .select('-password -socialAuth -receivedApplications -reports')
-                .sort(sortOrder)
-                .skip(skip)
-                .limit(limit)
-                .lean(),
-            this.breederModel.countDocuments(filter),
-        ]);
-
-        // 브리더 데이터 변환
-        const transformedBreeders = breeders.map((breeder: any) => ({
-            breederId: breeder._id.toString(),
-            breederName: breeder.name,
-            location: breeder.profile?.location?.city || 'Unknown',
-            specialization: breeder.profile?.specialization || '',
-            averageRating: breeder.stats?.averageRating || 0,
-            totalReviews: breeder.stats?.totalReviews || 0,
-            profileImage: breeder.profileImageFileName
-                ? this.storageService.generateSignedUrl(breeder.profileImageFileName, 60 * 24)
-                : undefined,
-            profilePhotos: (breeder.profile?.representativePhotos || []).map((photo: string) =>
-                this.storageService.generateSignedUrl(photo, 60 * 24),
-            ),
-            verificationStatus: breeder.verification?.status || 'pending',
-            availablePets: breeder.availablePets?.length || 0,
-        }));
-
-        // PaginationBuilder를 사용하여 응답 생성
-        return new PaginationBuilder<any>()
-            .setItems(transformedBreeders as any[])
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(total)
-            .build();
+        return this.searchBreedersUseCase.execute(searchDto);
     }
 
     async getBreederProfile(breederId: string, userId?: string): Promise<BreederProfileResponseDto> {
-        // ObjectId 형식 검증
-        if (!Types.ObjectId.isValid(breederId)) {
-            throw new BadRequestException('올바르지 않은 브리더 ID 형식입니다.');
-        }
-
-        const breeder = await this.breederModel
-            .findById(breederId)
-            .select('-password -socialAuth -receivedApplications -reports')
-            .lean();
-
-        if (!breeder) {
-            throw new BadRequestException('브리더를 찾을 수 없습니다.');
-        }
-
-        // 탈퇴한 브리더는 프로필 조회 불가 (소프트 삭제)
-        if ((breeder as any).accountStatus === 'deleted') {
-            throw new BadRequestException('탈퇴한 브리더의 프로필은 조회할 수 없습니다.');
-        }
-
-        // 승인되지 않은 브리더도 프로필 조회 가능 (단, 검색에는 노출되지 않음)
-        // 테스트 및 본인 확인 용도로 허용
-        // if (breeder.verification?.status !== VerificationStatus.APPROVED) {
-        //     throw new BadRequestException('브리더 프로필을 찾을 수 없습니다.');
-        // }
-
-        // Check if user has favorited this breeder (입양자 또는 브리더 모두 지원)
-        let isFavorited = false;
-        if (userId) {
-            // 먼저 입양자에서 조회
-            const adopter = await this.adopterModel.findById(userId).select('favoriteBreederList').lean();
-
-            if (adopter && adopter.favoriteBreederList) {
-                isFavorited = adopter.favoriteBreederList.some((fav: any) => fav.favoriteBreederId === breederId);
-            } else {
-                // 입양자가 아니면 브리더에서 조회
-                const breederUser = await this.breederModel.findById(userId).select('favoriteBreederList').lean();
-                if (breederUser && (breederUser as any).favoriteBreederList) {
-                    isFavorited = (breederUser as any).favoriteBreederList.some(
-                        (fav: any) => fav.favoriteBreederId === breederId,
-                    );
-                }
-            }
-
-            // Increment profile view count if user is logged in
-            await this.breederModel.findByIdAndUpdate(breederId, { $inc: { 'stats.profileViews': 1 } });
-        }
-
-        // AvailablePet 컬렉션에서 부모 정보와 함께 조회
-        const availablePets = await this.availablePetModel
-            .find({ breederId: new Types.ObjectId(breederId), isActive: true })
-            .populate('parentInfo.mother')
-            .populate('parentInfo.father')
-            .lean();
-
-        // ParentPet 컬렉션에서 조회
-        const parentPets = await this.parentPetModel
-            .find({ breederId: new Types.ObjectId(breederId), isActive: true })
-            .lean();
-
-        return this.transformToResponseDto(breeder, isFavorited, availablePets, parentPets);
+        return this.getBreederProfileUseCase.execute(breederId, userId);
     }
 
     private transformToResponseDto(
@@ -390,57 +240,7 @@ export class BreederService {
      * @returns 후기 목록과 페이지네이션 정보
      */
     async getBreederReviews(breederId: string, page: number = 1, limit: number = 10): Promise<any> {
-        // ObjectId 형식 검증
-        if (!Types.ObjectId.isValid(breederId)) {
-            throw new BadRequestException('올바르지 않은 브리더 ID 형식입니다.');
-        }
-
-        // 1. 브리더 존재 확인
-        const breeder = await this.breederModel.findById(breederId).select('stats').lean();
-        if (!breeder) {
-            throw new BadRequestException('브리더를 찾을 수 없습니다.');
-        }
-
-        // 2. BreederReview 컬렉션에서 조회 (참조 방식)
-        const skip = (page - 1) * limit;
-        const breederOid = new Types.ObjectId(breederId); // ObjectId 변환
-
-        const [reviews, total] = await Promise.all([
-            this.breederReviewModel
-                .find({ breederId: breederOid, isVisible: true }) // ObjectId로 쿼리
-                .sort({ writtenAt: -1 }) // 최신순 정렬
-                .skip(skip)
-                .limit(limit)
-                .populate('adopterId', 'nickname') // 입양자 닉네임 조회
-                .populate('applicationId', 'petName') // 입양 신청의 반려동물 이름 조회
-                .lean()
-                .exec(),
-            this.breederReviewModel.countDocuments({ breederId: breederOid, isVisible: true }).exec(), // ObjectId로 쿼리
-        ]);
-
-        // 3. 응답 데이터 포맷팅 (답글 정보 포함)
-        const formattedReviews = reviews.map((review: any) => ({
-            reviewId: review._id.toString(),
-            applicationId: review.applicationId?._id?.toString() || review.applicationId?.toString(),
-            adopterName: review.adopterId?.nickname || '알 수 없음',
-            petName: review.applicationId?.petName || undefined,
-            content: review.content,
-            writtenAt: review.writtenAt,
-            type: review.type,
-            // 브리더 답글 정보 추가
-            replyContent: review.replyContent || null,
-            replyWrittenAt: review.replyWrittenAt || null,
-            replyUpdatedAt: review.replyUpdatedAt || null,
-        }));
-
-        const totalPages = Math.ceil(total / limit);
-
-        return new PaginationBuilder<any>()
-            .setItems(formattedReviews)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(total)
-            .build();
+        return this.getBreederReviewsUseCase.execute(breederId, page, limit);
     }
 
     /**
@@ -451,61 +251,7 @@ export class BreederService {
      * @returns 개체 상세 정보
      */
     async getPetDetail(breederId: string, petId: string): Promise<any> {
-        // ObjectId 형식 검증
-        if (!Types.ObjectId.isValid(breederId)) {
-            throw new BadRequestException('올바르지 않은 브리더 ID 형식입니다.');
-        }
-
-        const breeder = await this.breederModel.findById(breederId).lean();
-
-        if (!breeder) {
-            throw new BadRequestException('브리더를 찾을 수 없습니다.');
-        }
-
-        const pet = (breeder as any).availablePets?.find((p: any) => p.petId === petId && p.isActive);
-
-        if (!pet) {
-            throw new BadRequestException('반려동물을 찾을 수 없습니다.');
-        }
-
-        // 부모견/부모묘 정보 찾기
-        const parentPets = (breeder as any).parentPets || [];
-        const father = pet.fatherId ? parentPets.find((p: any) => p.petId === pet.fatherId) : null;
-        const mother = pet.motherId ? parentPets.find((p: any) => p.petId === pet.motherId) : null;
-
-        return {
-            petId: pet.petId,
-            name: pet.name,
-            breed: pet.breed,
-            gender: pet.gender,
-            birthDate: pet.birthDate,
-            description: pet.description || '',
-            price: pet.price,
-            status: pet.status,
-            photos: pet.photos || [],
-            vaccinations: pet.vaccinations || [],
-            healthRecords: pet.healthRecords || [],
-            father: father
-                ? {
-                      petId: father.petId,
-                      name: father.name,
-                      breed: father.breed,
-                      photo: father.photos?.[0] || '',
-                  }
-                : undefined,
-            mother: mother
-                ? {
-                      petId: mother.petId,
-                      name: mother.name,
-                      breed: mother.breed,
-                      photo: mother.photos?.[0] || '',
-                  }
-                : undefined,
-            availableFrom: pet.availableFrom,
-            microchipNumber: pet.microchipNumber,
-            specialNotes: pet.specialNotes,
-            createdAt: pet.createdAt,
-        };
+        return this.getBreederPetDetailUseCase.execute(breederId, petId);
     }
 
     /**
@@ -521,73 +267,7 @@ export class BreederService {
      * @throws BadRequestException 존재하지 않는 브리더
      */
     async getParentPets(breederId: string, page?: number, limit?: number): Promise<any> {
-        // ObjectId 형식 검증
-        if (!Types.ObjectId.isValid(breederId)) {
-            throw new BadRequestException('올바르지 않은 브리더 ID 형식입니다.');
-        }
-
-        // 브리더 존재 확인
-        const breeder = await this.breederModel.findById(breederId).select('_id').lean();
-        if (!breeder) {
-            throw new BadRequestException('브리더를 찾을 수 없습니다.');
-        }
-
-        // 페이지네이션 설정
-        const currentPage = page && page > 0 ? page : 1;
-        const itemsPerPage = limit && limit > 0 ? limit : 0; // 0이면 전체 조회
-        const skip = itemsPerPage > 0 ? (currentPage - 1) * itemsPerPage : 0;
-
-        // ParentPet 컬렉션에서 활성화된 부모견/부모묘 조회
-        let query = this.parentPetModel.find({ breederId: new Types.ObjectId(breederId), isActive: true });
-
-        // 페이지네이션 적용
-        if (itemsPerPage > 0) {
-            query = query.skip(skip).limit(itemsPerPage);
-        }
-
-        const [parentPets, totalCount] = await Promise.all([
-            query.lean(),
-            this.parentPetModel.countDocuments({ breederId: new Types.ObjectId(breederId), isActive: true }),
-        ]);
-
-        // 데이터 변환 (사진 URL은 Signed URL로 변환)
-        const items = parentPets.map((pet: any) => {
-            // photos 배열 전체를 Signed URL로 변환
-            const photos = (pet.photos || []).map((photo: string) =>
-                this.storageService.generateSignedUrl(photo, 60 * 24),
-            );
-
-            return {
-                petId: pet._id.toString(),
-                name: pet.name,
-                breed: pet.breed,
-                gender: pet.gender,
-                birthDate: pet.birthDate,
-                photoUrl: pet.photoFileName ? this.storageService.generateSignedUrl(pet.photoFileName, 60 * 24) : '',
-                photos, // photos 배열 전체 반환
-                healthRecords: pet.healthRecords || [],
-                description: pet.description || '',
-            };
-        });
-
-        // 페이지네이션 정보
-        const totalPages = itemsPerPage > 0 ? Math.ceil(totalCount / itemsPerPage) : 1;
-        const hasNextPage = itemsPerPage > 0 && currentPage < totalPages;
-        const hasPrevPage = currentPage > 1;
-
-        return {
-            items,
-            pagination:
-                itemsPerPage > 0
-                    ? {
-                          currentPage,
-                          totalPages,
-                          totalCount,
-                          hasNextPage,
-                          hasPrevPage,
-                      }
-                    : undefined,
-        };
+        return this.getBreederParentPetsUseCase.execute(breederId, page, limit);
     }
 
     /**
@@ -600,143 +280,7 @@ export class BreederService {
      * @returns 페이지네이션된 개체 목록
      */
     async getBreederPets(breederId: string, status?: string, page: number = 1, limit: number = 20): Promise<any> {
-        // ObjectId 형식 검증
-        if (!Types.ObjectId.isValid(breederId)) {
-            throw new BadRequestException('올바르지 않은 브리더 ID 형식입니다.');
-        }
-
-        // 브리더 존재 확인
-        const breeder = await this.breederModel.findById(breederId).select('_id').lean();
-        if (!breeder) {
-            throw new BadRequestException('브리더를 찾을 수 없습니다.');
-        }
-
-        // AvailablePet 컬렉션에서 조회
-        const breederOid = new Types.ObjectId(breederId);
-
-        // 상태별 카운트 계산
-        const availableCount = await this.availablePetModel.countDocuments({
-            breederId: breederOid,
-            isActive: true,
-            status: 'available',
-        });
-        const reservedCount = await this.availablePetModel.countDocuments({
-            breederId: breederOid,
-            isActive: true,
-            status: 'reserved',
-        });
-        const adoptedCount = await this.availablePetModel.countDocuments({
-            breederId: breederOid,
-            isActive: true,
-            status: 'adopted',
-        });
-
-        // 필터 조건
-        const filter: any = { breederId: breederOid, isActive: true };
-        if (status) {
-            filter.status = status;
-        }
-
-        // 전체 개수
-        const total = await this.availablePetModel.countDocuments(filter);
-
-        // 페이지네이션 조회
-        const skip = (page - 1) * limit;
-        const pets = await this.availablePetModel
-            .find(filter)
-            .populate('parentInfo.mother')
-            .populate('parentInfo.father')
-            .skip(skip)
-            .limit(limit)
-            .lean();
-
-        // 데이터 변환
-        const items = pets.map((pet: any) => {
-            const birthDate = new Date(pet.birthDate);
-            const now = new Date();
-            const ageInMonths = Math.floor((now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
-
-            // photos 배열 전체를 Signed URL로 변환
-            const photos = (pet.photos || []).map((photo: string) =>
-                this.storageService.generateSignedUrl(photo, 60 * 24),
-            );
-
-            // 부모 정보 변환 (populate된 데이터)
-            const parents: any[] = [];
-            if (pet.parentInfo?.mother) {
-                const mother = pet.parentInfo.mother;
-                const motherPhotos = (mother.photos || []).map((photo: string) =>
-                    this.storageService.generateSignedUrl(photo, 60 * 24),
-                );
-                // avatarUrl: photos 배열 우선, 없으면 photoFileName 사용
-                const motherAvatarUrl =
-                    motherPhotos[0] ||
-                    (mother.photoFileName ? this.storageService.generateSignedUrl(mother.photoFileName, 60 * 24) : '');
-                parents.push({
-                    id: mother._id.toString(),
-                    avatarUrl: motherAvatarUrl,
-                    name: mother.name,
-                    sex: mother.gender,
-                    birth: this.formatBirthDateToKorean(mother.birthDate),
-                    breed: mother.breed,
-                    photos: motherPhotos,
-                });
-            }
-            if (pet.parentInfo?.father) {
-                const father = pet.parentInfo.father;
-                const fatherPhotos = (father.photos || []).map((photo: string) =>
-                    this.storageService.generateSignedUrl(photo, 60 * 24),
-                );
-                // avatarUrl: photos 배열 우선, 없으면 photoFileName 사용
-                const fatherAvatarUrl =
-                    fatherPhotos[0] ||
-                    (father.photoFileName ? this.storageService.generateSignedUrl(father.photoFileName, 60 * 24) : '');
-                parents.push({
-                    id: father._id.toString(),
-                    avatarUrl: fatherAvatarUrl,
-                    name: father.name,
-                    sex: father.gender,
-                    birth: this.formatBirthDateToKorean(father.birthDate),
-                    breed: father.breed,
-                    photos: fatherPhotos,
-                });
-            }
-
-            return {
-                petId: pet._id.toString(),
-                name: pet.name,
-                breed: pet.breed,
-                gender: pet.gender,
-                birthDate: pet.birthDate,
-                ageInMonths,
-                price: pet.price,
-                status: pet.status,
-                description: pet.description || '',
-                mainPhoto: photos[0] || '',
-                photos, // photos 배열 전체 반환
-                photoCount: photos.length,
-                isVaccinated: (pet.vaccinations?.length || 0) > 0,
-                hasMicrochip: !!pet.microchipNumber,
-                availableFrom: pet.availableFrom,
-                parents, // 부모 정보 추가
-            };
-        });
-
-        const totalPages = Math.ceil(total / limit);
-
-        const paginationResponse = new PaginationBuilder<any>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(total)
-            .build();
-
-        return {
-            ...paginationResponse,
-            availableCount,
-            reservedCount,
-            adoptedCount,
-        };
+        return this.getBreederPetsUseCase.execute(breederId, status, page, limit);
     }
 
     /**
@@ -863,34 +407,6 @@ export class BreederService {
      * @returns 전체 폼 구조 (표준 + 커스텀 질문)
      */
     async getApplicationForm(breederId: string): Promise<any> {
-        // ObjectId 형식 검증
-        if (!Types.ObjectId.isValid(breederId)) {
-            throw new BadRequestException('올바르지 않은 브리더 ID 형식입니다.');
-        }
-
-        const breeder = await this.breederModel.findById(breederId).select('applicationForm').lean();
-        if (!breeder) {
-            throw new BadRequestException('브리더를 찾을 수 없습니다.');
-        }
-
-        const standardQuestions = this.getStandardQuestions();
-
-        // 브리더의 커스텀 질문 가져오기
-        const customQuestions = ((breeder as any).applicationForm || []).map((q: any, index: number) => ({
-            id: q.id,
-            type: q.type,
-            label: q.label,
-            required: q.required,
-            options: q.options,
-            placeholder: q.placeholder,
-            order: standardQuestions.length + index + 1,
-            isStandard: false,
-        }));
-
-        return {
-            standardQuestions,
-            customQuestions,
-            totalQuestions: standardQuestions.length + customQuestions.length,
-        };
+        return this.getBreederApplicationFormUseCase.execute(breederId);
     }
 }

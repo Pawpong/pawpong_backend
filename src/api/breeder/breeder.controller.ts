@@ -4,8 +4,15 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard';
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../common/decorator/swagger.decorator';
 
-import { BreederService } from './breeder.service';
-import { BreederExploreService } from './breeder-explore.service';
+import { SearchBreedersUseCase } from './application/use-cases/search-breeders.use-case';
+import { ExploreBreedersUseCase } from './application/use-cases/explore-breeders.use-case';
+import { GetPopularBreedersUseCase } from './application/use-cases/get-popular-breeders.use-case';
+import { GetBreederProfileUseCase } from './application/use-cases/get-breeder-profile.use-case';
+import { GetBreederReviewsUseCase } from './application/use-cases/get-breeder-reviews.use-case';
+import { GetBreederPetsUseCase } from './application/use-cases/get-breeder-pets.use-case';
+import { GetBreederPetDetailUseCase } from './application/use-cases/get-breeder-pet-detail.use-case';
+import { GetBreederParentPetsUseCase } from './application/use-cases/get-breeder-parent-pets.use-case';
+import { GetBreederApplicationFormUseCase } from './application/use-cases/get-breeder-application-form.use-case';
 
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
 import { SearchBreederRequestDto } from './dto/request/search-breeder-request.dto';
@@ -27,8 +34,15 @@ import { BreederSwaggerDocs } from './swagger';
 @Controller('breeder')
 export class BreederController {
     constructor(
-        private readonly breederService: BreederService,
-        private readonly breederExploreService: BreederExploreService,
+        private readonly searchBreedersUseCase: SearchBreedersUseCase,
+        private readonly exploreBreedersUseCase: ExploreBreedersUseCase,
+        private readonly getPopularBreedersUseCase: GetPopularBreedersUseCase,
+        private readonly getBreederProfileUseCase: GetBreederProfileUseCase,
+        private readonly getBreederReviewsUseCase: GetBreederReviewsUseCase,
+        private readonly getBreederPetsUseCase: GetBreederPetsUseCase,
+        private readonly getBreederPetDetailUseCase: GetBreederPetDetailUseCase,
+        private readonly getBreederParentPetsUseCase: GetBreederParentPetsUseCase,
+        private readonly getBreederApplicationFormUseCase: GetBreederApplicationFormUseCase,
     ) {}
 
     @Get('search')
@@ -40,7 +54,7 @@ export class BreederController {
     async searchBreeders(
         @Query() searchDto: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<BreederSearchResponseDto>> {
-        const result = await this.breederService.searchBreeders(searchDto);
+        const result = await this.searchBreedersUseCase.execute(searchDto);
         return ApiResponseDto.success(result, '브리더 검색이 완료되었습니다.');
     }
 
@@ -56,7 +70,7 @@ export class BreederController {
         @Body() searchDto: SearchBreederRequestDto,
         @CurrentUser() user?: any,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederCardResponseDto>>> {
-        const result = await this.breederExploreService.searchBreeders(searchDto, user?.userId);
+        const result = await this.exploreBreedersUseCase.execute(searchDto, user?.userId);
         return ApiResponseDto.success(result, '브리더 목록이 조회되었습니다.');
     }
 
@@ -67,7 +81,7 @@ export class BreederController {
         isPublic: true,
     })
     async getPopularBreeders(): Promise<ApiResponseDto<BreederCardResponseDto[]>> {
-        const result = await this.breederExploreService.getPopularBreeders(10);
+        const result = await this.getPopularBreedersUseCase.execute(10);
         return ApiResponseDto.success(result, '인기 브리더 목록이 조회되었습니다.');
     }
 
@@ -82,7 +96,7 @@ export class BreederController {
         @Param('id') breederId: string,
         @CurrentUser() user?: any, // 선택적 파라미터로 변경
     ): Promise<ApiResponseDto<BreederProfileResponseDto>> {
-        const result = await this.breederService.getBreederProfile(breederId, user?.userId);
+        const result = await this.getBreederProfileUseCase.execute(breederId, user?.userId);
         return ApiResponseDto.success(result, '브리더 프로필이 조회되었습니다.');
     }
 
@@ -99,7 +113,7 @@ export class BreederController {
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 10,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederReviewItemDto>>> {
-        const result = await this.breederService.getBreederReviews(breederId, Number(page), Number(limit));
+        const result = await this.getBreederReviewsUseCase.execute(breederId, Number(page), Number(limit));
         return ApiResponseDto.success(result, '후기 목록이 조회되었습니다.');
     }
 
@@ -116,8 +130,8 @@ export class BreederController {
         @Query('status') status?: string,
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 20,
-    ): Promise<ApiResponseDto<PaginationResponseDto<PetItemDto>>> {
-        const result = await this.breederService.getBreederPets(breederId, status, Number(page), Number(limit));
+    ): Promise<ApiResponseDto<PetsListResponseDto>> {
+        const result = await this.getBreederPetsUseCase.execute(breederId, status, Number(page), Number(limit));
         return ApiResponseDto.success(result, '개체 목록이 조회되었습니다.');
     }
 
@@ -131,7 +145,7 @@ export class BreederController {
         @Param('id') breederId: string,
         @Param('petId') petId: string,
     ): Promise<ApiResponseDto<PetDetailResponseDto>> {
-        const result = await this.breederService.getPetDetail(breederId, petId);
+        const result = await this.getBreederPetDetailUseCase.execute(breederId, petId);
         return ApiResponseDto.success(result, '개체 상세 정보가 조회되었습니다.');
     }
 
@@ -139,15 +153,15 @@ export class BreederController {
     @UseGuards(OptionalJwtAuthGuard) // 선택적 인증 - 로그인 선택사항
     @ApiEndpoint({
         ...BreederSwaggerDocs.getParentPets,
-        responseType: [ParentPetListResponseDto],
+        responseType: ParentPetListResponseDto,
         isPublic: true,
     })
     async getParentPets(
         @Param('id') breederId: string,
         @Query('page') page?: number,
         @Query('limit') limit?: number,
-    ): Promise<ApiResponseDto<ParentPetListResponseDto[]>> {
-        const result = await this.breederService.getParentPets(breederId, page, limit);
+    ): Promise<ApiResponseDto<ParentPetListResponseDto>> {
+        const result = await this.getBreederParentPetsUseCase.execute(breederId, page, limit);
         return ApiResponseDto.success(result, '부모견/부모묘 목록이 조회되었습니다.');
     }
 
@@ -160,7 +174,7 @@ export class BreederController {
     async getApplicationForm(
         @Param('id') breederId: string,
     ): Promise<ApiResponseDto<PublicApplicationFormResponseDto>> {
-        const result = await this.breederService.getApplicationForm(breederId);
+        const result = await this.getBreederApplicationFormUseCase.execute(breederId);
         return ApiResponseDto.success(result, '입양 신청 폼 구조가 조회되었습니다.');
     }
 }
