@@ -10,6 +10,10 @@ import { StorageService } from '../../common/storage/storage.service';
 import { MailTemplateService } from '../../common/mail/mail-template.service';
 import { NotificationService } from '../notification/notification.service';
 import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
+import { CreateAdopterApplicationUseCase } from './application/use-cases/create-adopter-application.use-case';
+import { CreateAdopterReportUseCase } from './application/use-cases/create-adopter-report.use-case';
+import { GetAdopterApplicationsUseCase } from './application/use-cases/get-adopter-applications.use-case';
+import { GetAdopterApplicationDetailUseCase } from './application/use-cases/get-adopter-application-detail.use-case';
 
 import { NotificationType } from '../../schema/notification.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
@@ -57,6 +61,10 @@ export class AdopterService {
         private mailTemplateService: MailTemplateService,
         private notificationService: NotificationService,
         private discordWebhookService: DiscordWebhookService,
+        private readonly createAdopterApplicationUseCase: CreateAdopterApplicationUseCase,
+        private readonly createAdopterReportUseCase: CreateAdopterReportUseCase,
+        private readonly getAdopterApplicationsUseCase: GetAdopterApplicationsUseCase,
+        private readonly getAdopterApplicationDetailUseCase: GetAdopterApplicationDetailUseCase,
         private adopterRepository: AdopterRepository,
         private breederRepository: BreederRepository,
         private availablePetManagementRepository: AvailablePetManagementRepository,
@@ -87,145 +95,7 @@ export class AdopterService {
      * @throws ConflictException 중복 신청 시도
      */
     async createApplication(userId: string, dto: ApplicationCreateRequestDto, userRole?: string): Promise<any> {
-        // 1. 신청자 계정 존재 및 상태 검증 (입양자 또는 브리더)
-        let applicant: any;
-
-        if (userRole === 'breeder') {
-            applicant = await this.breederRepository.findById(userId);
-            if (!applicant) {
-                throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-            }
-        } else {
-            applicant = await this.adopterRepository.findById(userId);
-            if (!applicant) {
-                throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-            }
-        }
-
-        // 1-1. 프론트엔드 폼에서 입력한 이름, 이메일, 전화번호 사용 (DB 값이 아닌 사용자가 직접 입력한 값)
-        const applicantName = dto.name;
-        const applicantEmail = dto.email;
-        const applicantPhone = dto.phone;
-
-        // 2. 개인정보 수집 동의 확인
-        if (!dto.privacyConsent) {
-            throw new BadRequestException('개인정보 수집 및 이용에 동의해야 신청이 가능합니다.');
-        }
-
-        // 3. 브리더 계정 존재 검증 및 커스텀 폼 가져오기
-        const breeder = await this.breederRepository.findById(dto.breederId);
-        if (!breeder) {
-            throw new BadRequestException('해당 브리더를 찾을 수 없습니다.');
-        }
-
-        // 3-1. 커스텀 질문 validation (브리더가 설정한 필수 질문 체크)
-        // TODO: 프론트엔드에서 커스텀 질문 기능 구현 후 주석 해제
-        const customQuestions = breeder.applicationForm || [];
-        // const customResponsesMap = new Map((dto.customResponses || []).map((r) => [r.questionId, r.answer]));
-
-        // for (const question of customQuestions) {
-        //     if (question.required) {
-        //         const answer = customResponsesMap.get(question.id);
-        //         if (!answer || (typeof answer === 'string' && answer.trim() === '')) {
-        //             throw new BadRequestException(`필수 질문에 답변해주세요: ${question.label}`);
-        //         }
-        //     }
-        // }
-
-        // 4. 반려동물 검증 (petId가 있는 경우에만)
-        let pet: any = null;
-        if (dto.petId) {
-            pet = await this.availablePetManagementRepository.findByIdAndBreeder(dto.petId, dto.breederId);
-            if (!pet) {
-                throw new BadRequestException('해당 반려동물을 찾을 수 없습니다.');
-            }
-
-            if (pet.status !== 'available') {
-                throw new BadRequestException('현재 분양 신청이 불가능한 반려동물입니다.');
-            }
-        }
-
-        // 5. 중복 신청 방지 검증 (같은 브리더에게 대기 중인 신청이 있는지 확인)
-        const existingPendingApplication = await this.adoptionApplicationModel.findOne({
-            adopterId: userId,
-            breederId: dto.breederId,
-            status: ApplicationStatus.CONSULTATION_PENDING,
-        });
-
-        if (existingPendingApplication) {
-            throw new ConflictException('해당 브리더에게 이미 대기 중인 상담 신청이 있습니다.');
-        }
-
-        // 6. 커스텀 응답 스냅샷 생성 (브리더가 나중에 질문을 수정/삭제해도 기록 유지)
-        const customResponsesSnapshot = (dto.customResponses || []).map((response) => {
-            const question = customQuestions.find((q) => q.id === response.questionId);
-            if (!question) {
-                throw new BadRequestException(`존재하지 않는 질문 ID입니다: ${response.questionId}`);
-            }
-
-            // answer 필드가 실제로 전달되었는지 확인
-            if (response.answer === undefined || response.answer === null) {
-                throw new BadRequestException(
-                    `질문 "${question.label}"에 대한 답변이 필요합니다. (questionId: ${response.questionId})`,
-                );
-            }
-
-            return {
-                questionId: response.questionId,
-                questionLabel: question.label,
-                questionType: question.type,
-                answer: response.answer,
-            };
-        });
-
-        // 7. AdoptionApplication 컬렉션에 저장할 데이터 구성
-        const newApplication = new this.adoptionApplicationModel({
-            breederId: dto.breederId,
-            adopterId: userId,
-            adopterName: applicantName,
-            adopterEmail: applicantEmail,
-            adopterPhone: applicantPhone,
-            petId: pet ? dto.petId : undefined,
-            petName: pet ? pet.name : undefined,
-            status: ApplicationStatus.CONSULTATION_PENDING,
-            standardResponses: {
-                privacyConsent: dto.privacyConsent,
-                selfIntroduction: dto.selfIntroduction,
-                familyMembers: dto.familyMembers,
-                allFamilyConsent: dto.allFamilyConsent,
-                allergyTestInfo: dto.allergyTestInfo,
-                timeAwayFromHome: dto.timeAwayFromHome,
-                livingSpaceDescription: dto.livingSpaceDescription,
-                previousPetExperience: dto.previousPetExperience,
-                // 추가된 Figma 디자인 기반 필드들
-                canProvideBasicCare: dto.canProvideBasicCare,
-                canAffordMedicalExpenses: dto.canAffordMedicalExpenses,
-                preferredPetDescription: dto.preferredPetDescription,
-                desiredAdoptionTiming: dto.desiredAdoptionTiming,
-                additionalNotes: dto.additionalNotes,
-            },
-            customResponses: customResponsesSnapshot,
-            appliedAt: new Date(),
-        });
-
-        const savedApplication = await newApplication.save();
-
-        // 8. 브리더에게 새 상담 신청 알림 및 이메일 발송
-        await this.sendNewApplicationNotification(breeder);
-
-        // 9. 신청자에게 상담 신청 확인 알림 및 이메일 발송
-        // breeder.name이 빈 값일 경우를 대비하여 기본값 설정
-        const breederDisplayName = breeder.name || breeder.nickname || '브리더';
-        await this.sendApplicationConfirmationNotification(
-            userId,
-            userRole || 'adopter',
-            applicantName,
-            applicantEmail,
-            breederDisplayName,
-        );
-
-        // 10. 응답 데이터 구성 (Mapper 패턴 사용)
-        return AdopterMapper.toApplicationCreateResponse(savedApplication, breederDisplayName, pet?.name);
+        return this.createAdopterApplicationUseCase.execute(userId, dto, userRole);
     }
 
     /**
@@ -603,51 +473,7 @@ export class AdopterService {
      * @returns 생성된 신고 ID 및 성공 메시지
      */
     async createReport(userId: string, createReportDto: ReportCreateRequestDto): Promise<any> {
-        const { breederId, type, reason, description } = createReportDto;
-
-        // 기타(other) 사유 선택 시 description 필수 검증
-        if (reason === 'other' && (!description || description.trim() === '')) {
-            throw new BadRequestException('기타 사유를 선택한 경우 상세 내용을 입력해주세요.');
-        }
-
-        // 신고자 정보 조회 (입양자 또는 브리더)
-        let reporterNickname = '';
-        const adopter = await this.adopterRepository.findById(userId);
-        if (adopter) {
-            reporterNickname = adopter.nickname;
-        } else {
-            const reporterBreeder = await this.breederRepository.findById(userId);
-            if (reporterBreeder) {
-                reporterNickname = reporterBreeder.name;
-            } else {
-                throw new BadRequestException('사용자 정보를 찾을 수 없습니다.');
-            }
-        }
-
-        const breeder = await this.breederRepository.findById(breederId);
-        if (!breeder) {
-            throw new BadRequestException('신고할 브리더를 찾을 수 없습니다.');
-        }
-
-        const reportId = randomUUID();
-
-        // 신고 데이터 구성 (Mapper 패턴 사용)
-        // reason을 type으로 매핑 (reason이 실제 신고 사유)
-        const report = AdopterMapper.toReport(
-            reportId,
-            userId,
-            reporterNickname,
-            reason,
-            description || '',
-            ReportStatus.PENDING,
-        );
-
-        await this.breederRepository.addReport(breederId, report);
-
-        return {
-            reportId,
-            message: '신고가 성공적으로 접수되었습니다. 관리자 검토 후 처리됩니다.',
-        };
+        return this.createAdopterReportUseCase.execute(userId, createReportDto);
     }
 
     /**
@@ -858,111 +684,7 @@ export class AdopterService {
         limit: number = 10,
         animalType?: 'cat' | 'dog',
     ): Promise<any> {
-        // 입양자 존재 확인
-        const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-        }
-
-        // animalType 필터가 있는 경우 해당 타입을 브리딩하는 브리더 ID 목록 조회
-        let breederIds: string[] | undefined;
-        if (animalType) {
-            const breeders = await this.breederModel
-                .find({
-                    'profile.specialization': animalType,
-                })
-                .select('_id')
-                .exec();
-            breederIds = breeders.map((breeder: any) => breeder._id.toString());
-
-            // 해당 동물 타입을 브리딩하는 브리더가 없는 경우 빈 결과 반환
-            if (breederIds.length === 0) {
-                return {
-                    items: [],
-                    pagination: {
-                        currentPage: page,
-                        pageSize: limit,
-                        totalItems: 0,
-                        totalPages: 0,
-                        hasNextPage: false,
-                        hasPrevPage: false,
-                    },
-                };
-            }
-        }
-
-        // 쿼리 조건 구성
-        const queryConditions: any = { adopterId: userId };
-        if (breederIds) {
-            queryConditions.breederId = { $in: breederIds };
-        }
-
-        // 전체 신청 수 조회
-        const totalItems = await this.adoptionApplicationModel.countDocuments(queryConditions);
-
-        // 페이지네이션된 신청 목록 조회
-        const applications = await this.adoptionApplicationModel
-            .find(queryConditions)
-            .sort({ appliedAt: -1 }) // 최신순 정렬
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .exec();
-
-        // 응답 데이터 매핑
-        const items = await Promise.all(
-            applications.map(async (app: any) => {
-                const breeder = await this.breederRepository.findById(app.breederId.toString());
-
-                // 날짜를 "2024. 01. 15." 형식으로 변환
-                const formatDate = (date: Date): string => {
-                    const year = date.getFullYear();
-                    const month = String(date.getMonth() + 1).padStart(2, '0');
-                    const day = String(date.getDate()).padStart(2, '0');
-                    return `${year}. ${month}. ${day}.`;
-                };
-
-                // 브리더의 주요 동물 타입 추출 (첫 번째 specialization 사용)
-                const animalType = breeder?.profile?.specialization?.[0] || 'dog';
-
-                // adopterId 처리 (ObjectId이거나 populate된 객체일 수 있음)
-                const adopterIdValue =
-                    app.adopterId && typeof app.adopterId === 'object' && app.adopterId._id
-                        ? app.adopterId._id.toString()
-                        : app.adopterId
-                          ? app.adopterId.toString()
-                          : null;
-
-                return {
-                    applicationId: app._id.toString(),
-                    breederId: app.breederId.toString(),
-                    adopterId: adopterIdValue,
-                    breederName: breeder?.nickname || breeder?.name || '알 수 없음',
-                    petId: app.petId?.toString(),
-                    petName: app.petName,
-                    status: app.status,
-                    appliedAt: app.appliedAt.toISOString(),
-                    processedAt: app.processedAt?.toISOString(),
-                    // 프론트엔드 요구사항 필드 추가
-                    breederLevel: (breeder?.verification?.level || 'new') as 'elite' | 'new',
-                    profileImage: breeder?.profileImageFileName
-                        ? this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60)
-                        : null,
-                    animalType: animalType as 'cat' | 'dog',
-                    applicationDate: formatDate(app.appliedAt),
-                    customResponses: app.customResponses || [],
-                };
-            }),
-        );
-
-        // 페이지네이션 정보 계산
-        const totalPages = Math.ceil(totalItems / limit);
-
-        return new PaginationBuilder<any>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(totalItems)
-            .build();
+        return this.getAdopterApplicationsUseCase.execute(userId, page, limit, animalType);
     }
 
     /**
@@ -974,38 +696,7 @@ export class AdopterService {
      * @throws BadRequestException 존재하지 않는 신청 또는 권한 없음
      */
     async getApplicationDetail(userId: string, applicationId: string): Promise<any> {
-        // 입양자 존재 확인
-        const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-        }
-
-        // 신청 조회 (본인 신청만 조회 가능)
-        const application = await this.adoptionApplicationModel.findOne({
-            _id: applicationId,
-            adopterId: userId,
-        });
-
-        if (!application) {
-            throw new BadRequestException('해당 입양 신청을 찾을 수 없거나 조회 권한이 없습니다.');
-        }
-
-        // 브리더 정보 조회
-        const breeder = await this.breederRepository.findById(application.breederId.toString());
-
-        return {
-            applicationId: (application as any)._id.toString(),
-            breederId: application.breederId.toString(),
-            breederName: breeder?.name || '알 수 없음',
-            petId: application.petId?.toString(),
-            petName: application.petName,
-            status: application.status,
-            standardResponses: application.standardResponses,
-            customResponses: application.customResponses || [],
-            appliedAt: application.appliedAt.toISOString(),
-            processedAt: application.processedAt?.toISOString(),
-            breederNotes: application.breederNotes,
-        };
+        return this.getAdopterApplicationDetailUseCase.execute(userId, applicationId);
     }
 
     /**
