@@ -5,6 +5,19 @@ import { UploadController } from './upload.controller';
 import { UploadAdminController } from './admin/upload-admin.controller';
 
 import { UploadAdminService } from './admin/upload-admin.service';
+import { UPLOAD_ADMIN_STORAGE } from './admin/application/ports/upload-admin-storage.port';
+import { UPLOAD_ADMIN_REFERENCE_READER } from './admin/application/ports/upload-admin-reference-reader.port';
+import { ListAllFilesUseCase } from './admin/application/use-cases/list-all-files.use-case';
+import { ListFilesByFolderUseCase } from './admin/application/use-cases/list-files-by-folder.use-case';
+import { DeleteFileUseCase } from './admin/application/use-cases/delete-file.use-case';
+import { DeleteMultipleFilesUseCase } from './admin/application/use-cases/delete-multiple-files.use-case';
+import { DeleteFolderUseCase } from './admin/application/use-cases/delete-folder.use-case';
+import { CheckFileReferencesUseCase } from './admin/application/use-cases/check-file-references.use-case';
+import { GetAllReferencedFilesUseCase } from './admin/application/use-cases/get-all-referenced-files.use-case';
+import { UploadAdminStoragePolicyService } from './admin/domain/services/upload-admin-storage-policy.service';
+import { UploadAdminStoragePresentationService } from './admin/domain/services/upload-admin-storage-presentation.service';
+import { UploadAdminStorageAdapter } from './admin/infrastructure/upload-admin-storage.adapter';
+import { UploadAdminFileReferenceReaderAdapter } from './admin/infrastructure/upload-admin-file-reference-reader.adapter';
 import { UPLOAD_FILE_STORE } from './application/ports/upload-file-store.port';
 import { UPLOAD_OWNER_PORT } from './application/ports/upload-owner.port';
 import { UploadRepresentativePhotosUseCase } from './application/use-cases/upload-representative-photos.use-case';
@@ -53,11 +66,22 @@ import { StorageModule } from '../../common/storage/storage.module';
         UploadSingleFileUseCase,
         UploadMultipleFilesUseCase,
         DeleteUploadedFileUseCase,
+        ListAllFilesUseCase,
+        ListFilesByFolderUseCase,
+        DeleteFileUseCase,
+        DeleteMultipleFilesUseCase,
+        DeleteFolderUseCase,
+        CheckFileReferencesUseCase,
+        GetAllReferencedFilesUseCase,
         UploadFilePolicyService,
         UploadStoredFilePathService,
         UploadPhotoCollectionService,
+        UploadAdminStoragePolicyService,
+        UploadAdminStoragePresentationService,
         UploadStorageAdapter,
         UploadMongooseOwnerAdapter,
+        UploadAdminStorageAdapter,
+        UploadAdminFileReferenceReaderAdapter,
         UploadAdminService, // 서비스만 추가
         {
             provide: UPLOAD_FILE_STORE,
@@ -66,6 +90,14 @@ import { StorageModule } from '../../common/storage/storage.module';
         {
             provide: UPLOAD_OWNER_PORT,
             useExisting: UploadMongooseOwnerAdapter,
+        },
+        {
+            provide: UPLOAD_ADMIN_STORAGE,
+            useExisting: UploadAdminStorageAdapter,
+        },
+        {
+            provide: UPLOAD_ADMIN_REFERENCE_READER,
+            useExisting: UploadAdminFileReferenceReaderAdapter,
         },
     ],
 })
