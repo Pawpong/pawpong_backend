@@ -18,6 +18,16 @@ import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { SmsService } from './sms.service';
 import { AuthService } from './auth.service';
 import { AuthAdminService } from './admin/auth-admin.service';
+import { LoginAdminUseCase } from './admin/application/use-cases/login-admin.use-case';
+import { RefreshAdminTokenUseCase } from './admin/application/use-cases/refresh-admin-token.use-case';
+import { AuthAdminAuthenticationService } from './admin/domain/services/auth-admin-authentication.service';
+import { AuthAdminPresentationService } from './admin/domain/services/auth-admin-presentation.service';
+import { AuthAdminRepositoryAdapter } from './admin/infrastructure/auth-admin-repository.adapter';
+import { AuthAdminBcryptAdapter } from './admin/infrastructure/auth-admin-bcrypt.adapter';
+import { AuthAdminJwtAdapter } from './admin/infrastructure/auth-admin-jwt.adapter';
+import { AUTH_ADMIN_READER } from './admin/application/ports/auth-admin-reader.port';
+import { AUTH_ADMIN_PASSWORD } from './admin/application/ports/auth-admin-password.port';
+import { AUTH_ADMIN_TOKEN } from './admin/application/ports/auth-admin-token.port';
 import { AuthTokenService } from './services/auth-token.service';
 
 import { AuthAdminRepository } from './repository/auth-admin.repository';
@@ -104,12 +114,19 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         ProcessSocialLoginCallbackUseCase,
         UploadAuthProfileImageUseCase,
         UploadAuthBreederDocumentsUseCase,
+        LoginAdminUseCase,
+        RefreshAdminTokenUseCase,
         AuthTokenService,
         SmsService,
         AuthAdminService,
+        AuthAdminAuthenticationService,
+        AuthAdminPresentationService,
         AuthAdopterRepository,
         AuthBreederRepository,
         AuthAdminRepository,
+        AuthAdminRepositoryAdapter,
+        AuthAdminBcryptAdapter,
+        AuthAdminJwtAdapter,
         AuthRegistrationAdapter,
         AuthRegistrationNotificationAdapter,
         AuthSessionAdapter,
@@ -126,6 +143,18 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         {
             provide: AuthRegistrationPort,
             useExisting: AuthRegistrationAdapter,
+        },
+        {
+            provide: AUTH_ADMIN_READER,
+            useExisting: AuthAdminRepositoryAdapter,
+        },
+        {
+            provide: AUTH_ADMIN_PASSWORD,
+            useExisting: AuthAdminBcryptAdapter,
+        },
+        {
+            provide: AUTH_ADMIN_TOKEN,
+            useExisting: AuthAdminJwtAdapter,
         },
         {
             provide: AuthRegistrationNotificationPort,
