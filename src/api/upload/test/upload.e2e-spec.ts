@@ -1,8 +1,6 @@
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import request from 'supertest';
-import * as path from 'path';
-import * as fs from 'fs';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 import { AppModule } from '../../../app.module';
@@ -96,21 +94,13 @@ describe('Upload API E2E Tests (Simple)', () => {
     let availablePetId: string;
     let parentPetId: string;
     let uploadedFileNames: string[] = [];
-
-    // 테스트용 이미지 파일 생성
-    const testImagePath = path.join(__dirname, 'test-image.jpg');
-    const createTestImage = () => {
-        // 1x1 픽셀 JPEG 이미지 (최소 유효 JPEG)
-        const buffer = Buffer.from(
-            '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=',
-            'base64',
-        );
-        fs.writeFileSync(testImagePath, buffer);
-    };
+    const testImageBuffer = Buffer.from(
+        '/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCwAA8A/9k=',
+        'base64',
+    );
 
     beforeAll(async () => {
         app = await createUploadTestingApp();
-        createTestImage();
 
         // 1. 테스트용 브리더 생성
         const timestamp = Date.now();
@@ -118,49 +108,58 @@ describe('Upload API E2E Tests (Simple)', () => {
             .post('/api/auth/register/breeder')
             .send({
                 email: `upload_breeder_${timestamp}@test.com`,
-                password: 'Breeder123!@#',
-                name: '파일 업로드 브리더',
                 phoneNumber: '010-3333-4444',
-                businessNumber: '123-45-67890',
-                businessName: '테스트 브리더리',
-            });
+                breederName: '파일 업로드 브리더',
+                breederLocation: {
+                    city: '서울특별시',
+                    district: '강남구',
+                },
+                animal: 'dog',
+                breeds: ['포메라니안'],
+                plan: 'basic',
+                level: 'new',
+                agreements: {
+                    termsOfService: true,
+                    privacyPolicy: true,
+                    marketingConsent: false,
+                },
+            })
+            .expect(200);
 
-        if (breederResponse.status === 200 && breederResponse.body.data?.accessToken) {
-            breederToken = breederResponse.body.data.accessToken;
-            breederId = breederResponse.body.data.user.userId;
-        }
+        breederToken = breederResponse.body.data.accessToken;
+        breederId = breederResponse.body.data.breederId;
 
         // 2. 테스트용 분양 개체 생성
         if (breederToken) {
             const availablePetResponse = await request(app.getHttpServer())
-                .post('/api/breeder-management/available-pet')
+                .post('/api/breeder-management/available-pets')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .send({
                     name: '테스트 분양 개체',
-                    breedId: '507f1f77bcf86cd799439011',
+                    breed: '포메라니안',
                     birthDate: '2024-01-15',
                     gender: 'male',
                     price: 1500000,
                     description: '테스트용 분양 개체입니다.',
                 });
 
-            if (availablePetResponse.status === 200 && availablePetResponse.body.data?.petId) {
+            if ([200, 201].includes(availablePetResponse.status) && availablePetResponse.body.data?.petId) {
                 availablePetId = availablePetResponse.body.data.petId;
             }
 
             // 3. 테스트용 부모견/묘 생성
             const parentPetResponse = await request(app.getHttpServer())
-                .post('/api/breeder-management/parent-pet')
+                .post('/api/breeder-management/parent-pets')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .send({
                     name: '테스트 부모견',
-                    breedId: '507f1f77bcf86cd799439011',
+                    breed: '포메라니안',
                     birthDate: '2020-01-01',
                     gender: 'female',
                     description: '테스트용 부모견입니다.',
                 });
 
-            if (parentPetResponse.status === 200 && parentPetResponse.body.data?.petId) {
+            if ([200, 201].includes(parentPetResponse.status) && parentPetResponse.body.data?.petId) {
                 parentPetId = parentPetResponse.body.data.petId;
             }
         }
@@ -176,11 +175,6 @@ describe('Upload API E2E Tests (Simple)', () => {
             }
         }
 
-        // 테스트 이미지 파일 삭제
-        if (fs.existsSync(testImagePath)) {
-            fs.unlinkSync(testImagePath);
-        }
-
         await app.close();
         if (mongod) {
             await mongod.stop();
@@ -193,30 +187,25 @@ describe('Upload API E2E Tests (Simple)', () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/representative-photos')
                 .set('Authorization', `Bearer ${breederToken}`)
-                .attach('files', testImagePath)
-                .attach('files', testImagePath)
-                .attach('files', testImagePath);
+                .attach('files', testImageBuffer, 'representative-1.jpg')
+                .attach('files', testImageBuffer, 'representative-2.jpg')
+                .attach('files', testImageBuffer, 'representative-3.jpg');
 
-            expect([200, 400, 401]).toContain(response.status);
-
-            if (response.status === 200) {
-                expect(response.body.data).toBeDefined();
-                expect(Array.isArray(response.body.data)).toBe(true);
-                if (response.body.data.length > 0) {
-                    response.body.data.forEach((item: any) => {
-                        uploadedFileNames.push(item.filename || item.fileName);
-                    });
-                }
-                console.log('✅ 브리더 대표 사진 업로드 성공');
-            } else {
-                console.log('⚠️  브리더 대표 사진 업로드 실패 (GCP 설정 필요 또는 인증 실패)');
-            }
+            expect([200, 201]).toContain(response.status);
+            expect(Array.isArray(response.body.data)).toBe(true);
+            expect(response.body.data).toHaveLength(3);
+            response.body.data.forEach((item: any) => {
+                expect(item).toHaveProperty('filename');
+                expect(item).toHaveProperty('url');
+                uploadedFileNames.push(item.filename);
+            });
+            console.log('✅ 브리더 대표 사진 업로드 성공');
         });
 
         it('POST /api/upload/representative-photos - 인증 없이 접근 실패', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/representative-photos')
-                .attach('files', testImagePath);
+                .attach('files', testImageBuffer, 'representative.jpg');
 
             expect(response.status).toBe(401);
             console.log('✅ 인증 없이 접근 거부 확인');
@@ -242,18 +231,14 @@ describe('Upload API E2E Tests (Simple)', () => {
             const response = await request(app.getHttpServer())
                 .post(`/api/upload/available-pet-photos/${availablePetId}`)
                 .set('Authorization', `Bearer ${breederToken}`)
-                .attach('file', testImagePath);
+                .attach('files', testImageBuffer, 'available-pet.jpg');
 
-            expect([200, 400]).toContain(response.status);
-
-            if (response.status === 200) {
-                expect(response.body.data).toBeDefined();
-                expect(response.body.data).toHaveProperty('filename');
-                uploadedFileNames.push(response.body.data.filename);
-                console.log('✅ 분양 개체 사진 업로드 성공');
-            } else {
-                console.log('⚠️  분양 개체 사진 업로드 실패 (GCP 설정 필요)');
-            }
+            expect([200, 201]).toContain(response.status);
+            expect(Array.isArray(response.body.data)).toBe(true);
+            expect(response.body.data).toHaveLength(1);
+            expect(response.body.data[0]).toHaveProperty('filename');
+            uploadedFileNames.push(response.body.data[0].filename);
+            console.log('✅ 분양 개체 사진 업로드 성공');
         });
 
         it('POST /api/upload/available-pet-photos/:petId - 인증 없이 접근 실패', async () => {
@@ -264,7 +249,7 @@ describe('Upload API E2E Tests (Simple)', () => {
 
             const response = await request(app.getHttpServer())
                 .post(`/api/upload/available-pet-photos/${availablePetId}`)
-                .attach('file', testImagePath);
+                .attach('files', testImageBuffer, 'available-pet.jpg');
 
             expect(response.status).toBe(401);
             console.log('✅ 인증 없이 접근 거부 확인');
@@ -274,9 +259,9 @@ describe('Upload API E2E Tests (Simple)', () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/available-pet-photos/invalid_pet_id')
                 .set('Authorization', `Bearer ${breederToken}`)
-                .attach('file', testImagePath);
+                .attach('files', testImageBuffer, 'available-pet.jpg');
 
-            expect([400, 401, 500]).toContain(response.status);
+            expect(response.status).toBe(400);
             console.log('✅ 잘못된 petId로 요청 거부 확인');
         });
     });
@@ -291,18 +276,14 @@ describe('Upload API E2E Tests (Simple)', () => {
             const response = await request(app.getHttpServer())
                 .post(`/api/upload/parent-pet-photos/${parentPetId}`)
                 .set('Authorization', `Bearer ${breederToken}`)
-                .attach('file', testImagePath);
+                .attach('files', testImageBuffer, 'parent-pet.jpg');
 
-            expect([200, 400]).toContain(response.status);
-
-            if (response.status === 200) {
-                expect(response.body.data).toBeDefined();
-                expect(response.body.data).toHaveProperty('filename');
-                uploadedFileNames.push(response.body.data.filename);
-                console.log('✅ 부모견/묘 사진 업로드 성공');
-            } else {
-                console.log('⚠️  부모견/묘 사진 업로드 실패 (GCP 설정 필요)');
-            }
+            expect([200, 201]).toContain(response.status);
+            expect(Array.isArray(response.body.data)).toBe(true);
+            expect(response.body.data).toHaveLength(1);
+            expect(response.body.data[0]).toHaveProperty('filename');
+            uploadedFileNames.push(response.body.data[0].filename);
+            console.log('✅ 부모견/묘 사진 업로드 성공');
         });
 
         it('POST /api/upload/parent-pet-photos/:petId - 인증 없이 접근 실패', async () => {
@@ -313,7 +294,7 @@ describe('Upload API E2E Tests (Simple)', () => {
 
             const response = await request(app.getHttpServer())
                 .post(`/api/upload/parent-pet-photos/${parentPetId}`)
-                .attach('file', testImagePath);
+                .attach('files', testImageBuffer, 'parent-pet.jpg');
 
             expect(response.status).toBe(401);
             console.log('✅ 인증 없이 접근 거부 확인');
@@ -324,7 +305,7 @@ describe('Upload API E2E Tests (Simple)', () => {
         it('POST /api/upload/single - 단일 파일 업로드 성공', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/single')
-                .attach('file', testImagePath)
+                .attach('file', testImageBuffer, 'single-upload.jpg')
                 .field('folder', 'test');
 
             expect([200, 201, 400]).toContain(response.status);
@@ -353,8 +334,8 @@ describe('Upload API E2E Tests (Simple)', () => {
         it('POST /api/upload/multiple - 다중 파일 업로드 성공', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/multiple')
-                .attach('files', testImagePath)
-                .attach('files', testImagePath)
+                .attach('files', testImageBuffer, 'multiple-1.jpg')
+                .attach('files', testImageBuffer, 'multiple-2.jpg')
                 .field('folder', 'test');
 
             expect([200, 201, 400]).toContain(response.status);
@@ -408,7 +389,7 @@ describe('Upload API E2E Tests (Simple)', () => {
         it('모든 업로드 응답은 표준 형식을 따름', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/single')
-                .attach('file', testImagePath);
+                .attach('file', testImageBuffer, 'response-shape.jpg');
 
             expect(response.body).toHaveProperty('success');
             expect(response.body).toHaveProperty('code');

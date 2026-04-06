@@ -15,6 +15,10 @@ export class UploadMongooseOwnerAdapter implements UploadOwnerPort {
         @InjectModel(ParentPet.name) private readonly parentPetModel: Model<ParentPetDocument>,
     ) {}
 
+    private toObjectIdOrNull(value: string): Types.ObjectId | null {
+        return Types.ObjectId.isValid(value) ? new Types.ObjectId(value) : null;
+    }
+
     async replaceRepresentativePhotos(breederId: string, photoPaths: string[]): Promise<void> {
         await this.breederModel.findByIdAndUpdate(breederId, {
             $set: { 'profile.representativePhotos': photoPaths },
@@ -22,9 +26,15 @@ export class UploadMongooseOwnerAdapter implements UploadOwnerPort {
     }
 
     async findOwnedAvailablePet(petId: string, breederId: string): Promise<UploadPhotoTarget | null> {
+        const petObjectId = this.toObjectIdOrNull(petId);
+        const breederObjectId = this.toObjectIdOrNull(breederId);
+        if (!petObjectId || !breederObjectId) {
+            return null;
+        }
+
         const pet = await this.availablePetModel.findOne({
-            _id: new Types.ObjectId(petId),
-            breederId: new Types.ObjectId(breederId),
+            _id: petObjectId,
+            breederId: breederObjectId,
         });
 
         if (!pet) {
@@ -35,10 +45,16 @@ export class UploadMongooseOwnerAdapter implements UploadOwnerPort {
     }
 
     async replaceAvailablePetPhotos(petId: string, breederId: string, photoPaths: string[]): Promise<void> {
+        const petObjectId = this.toObjectIdOrNull(petId);
+        const breederObjectId = this.toObjectIdOrNull(breederId);
+        if (!petObjectId || !breederObjectId) {
+            return;
+        }
+
         await this.availablePetModel.findOneAndUpdate(
             {
-                _id: new Types.ObjectId(petId),
-                breederId: new Types.ObjectId(breederId),
+                _id: petObjectId,
+                breederId: breederObjectId,
             },
             {
                 $set: { photos: photoPaths },
@@ -47,9 +63,15 @@ export class UploadMongooseOwnerAdapter implements UploadOwnerPort {
     }
 
     async findOwnedParentPet(petId: string, breederId: string): Promise<UploadPhotoTarget | null> {
+        const petObjectId = this.toObjectIdOrNull(petId);
+        const breederObjectId = this.toObjectIdOrNull(breederId);
+        if (!petObjectId || !breederObjectId) {
+            return null;
+        }
+
         const pet = await this.parentPetModel.findOne({
-            _id: new Types.ObjectId(petId),
-            breederId: new Types.ObjectId(breederId),
+            _id: petObjectId,
+            breederId: breederObjectId,
         });
 
         if (!pet) {
@@ -60,6 +82,12 @@ export class UploadMongooseOwnerAdapter implements UploadOwnerPort {
     }
 
     async replaceParentPetPhotos(petId: string, breederId: string, photoPaths: string[]): Promise<void> {
+        const petObjectId = this.toObjectIdOrNull(petId);
+        const breederObjectId = this.toObjectIdOrNull(breederId);
+        if (!petObjectId || !breederObjectId) {
+            return;
+        }
+
         const updateData: { photos: string[]; photoFileName?: string } = {
             photos: photoPaths,
             ...(photoPaths.length > 0 && { photoFileName: photoPaths[0] }),
@@ -67,8 +95,8 @@ export class UploadMongooseOwnerAdapter implements UploadOwnerPort {
 
         await this.parentPetModel.findOneAndUpdate(
             {
-                _id: new Types.ObjectId(petId),
-                breederId: new Types.ObjectId(breederId),
+                _id: petObjectId,
+                breederId: breederObjectId,
             },
             {
                 $set: updateData,
