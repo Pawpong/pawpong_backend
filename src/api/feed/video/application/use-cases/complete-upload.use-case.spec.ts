@@ -25,6 +25,9 @@ describe('CompleteUploadUseCase', () => {
         countMine: jest.fn(),
         deleteById: jest.fn(),
         updateVisibility: jest.fn(),
+        incrementViewCount: jest.fn(),
+        markEncodingComplete: jest.fn(),
+        markEncodingFailed: jest.fn(),
     });
 
     it('pending 영상이면 processing으로 전환하고 인코딩 큐에 넣는다', async () => {

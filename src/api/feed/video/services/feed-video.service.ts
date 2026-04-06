@@ -1,14 +1,6 @@
-import { Injectable, Inject, BadRequestException, Logger } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import type { Cache } from 'cache-manager';
+import { Injectable, BadRequestException, Logger } from '@nestjs/common';
 import { Response } from 'express';
 
-import { StorageService } from '../../../../common/storage/storage.service';
-import { RedisService } from '../../../../common/redis/redis.module';
-
-import { Video, VideoStatus } from '../../../../schema/video.schema';
 import { GetFeedUseCase } from '../application/use-cases/get-feed.use-case';
 import { GetPopularVideosUseCase } from '../application/use-cases/get-popular-videos.use-case';
 import { GetVideoMetaUseCase } from '../application/use-cases/get-video-meta.use-case';
@@ -17,6 +9,13 @@ import { CompleteUploadUseCase } from '../application/use-cases/complete-upload.
 import { GetMyVideosUseCase } from '../application/use-cases/get-my-videos.use-case';
 import { DeleteVideoUseCase } from '../application/use-cases/delete-video.use-case';
 import { ToggleVideoVisibilityUseCase } from '../application/use-cases/toggle-video-visibility.use-case';
+import { IncrementViewCountUseCase } from '../application/use-cases/increment-view-count.use-case';
+import { UpdateEncodingCompleteUseCase } from '../application/use-cases/update-encoding-complete.use-case';
+import { UpdateEncodingFailedUseCase } from '../application/use-cases/update-encoding-failed.use-case';
+import { ProxyHlsFileUseCase } from '../application/use-cases/proxy-hls-file.use-case';
+import { PreloadHlsSegmentsUseCase } from '../application/use-cases/preload-hls-segments.use-case';
+import { PrefetchAllQualitySegmentsUseCase } from '../application/use-cases/prefetch-all-quality-segments.use-case';
+import { FeedVideoEncodingResult } from '../application/ports/feed-video-command.port';
 
 /**
  * 피드 동영상 서비스
@@ -28,10 +27,6 @@ export class FeedVideoService {
     private readonly logger = new Logger(FeedVideoService.name);
 
     constructor(
-        @InjectModel(Video.name) private videoModel: Model<Video>,
-        @Inject(CACHE_MANAGER) private cacheManager: Cache,
-        private storageService: StorageService,
-        private redisService: RedisService,
         private readonly getFeedUseCase: GetFeedUseCase,
         private readonly getPopularVideosUseCase: GetPopularVideosUseCase,
         private readonly getVideoMetaUseCase: GetVideoMetaUseCase,
@@ -40,6 +35,12 @@ export class FeedVideoService {
         private readonly getMyVideosUseCase: GetMyVideosUseCase,
         private readonly deleteVideoUseCase: DeleteVideoUseCase,
         private readonly toggleVideoVisibilityUseCase: ToggleVideoVisibilityUseCase,
+        private readonly incrementViewCountUseCase: IncrementViewCountUseCase,
+        private readonly updateEncodingCompleteUseCase: UpdateEncodingCompleteUseCase,
+        private readonly updateEncodingFailedUseCase: UpdateEncodingFailedUseCase,
+        private readonly proxyHlsFileUseCase: ProxyHlsFileUseCase,
+        private readonly preloadHlsSegmentsUseCase: PreloadHlsSegmentsUseCase,
+        private readonly prefetchAllQualitySegmentsUseCase: PrefetchAllQualitySegmentsUseCase,
     ) {}
 
     /**
@@ -81,17 +82,7 @@ export class FeedVideoService {
      */
     async incrementViewCount(videoId: string) {
         this.logger.log(`[incrementViewCount] 조회수 증가 - videoId: ${videoId}`);
-
-        // DB 업데이트 (await 없이 비동기로 처리)
-        this.videoModel
-            .updateOne({ _id: videoId }, { $inc: { viewCount: 1 } })
-            .exec()
-            .catch((err) => {
-                this.logger.error(`[incrementViewCount] 조회수 증가 실패:`, err);
-            });
-
-        // 캐시 무효화
-        await this.cacheManager.del(`video:meta:${videoId}`);
+        await this.incrementViewCountUseCase.execute(videoId);
     }
 
     /**
@@ -139,26 +130,9 @@ export class FeedVideoService {
      */
     async updateEncodingComplete(
         videoId: string,
-        data: {
-            hlsManifestKey: string;
-            thumbnailKey: string;
-            duration: number;
-            width: number;
-            height: number;
-        },
+        data: FeedVideoEncodingResult,
     ) {
-        await this.videoModel.updateOne(
-            { _id: videoId },
-            {
-                status: VideoStatus.READY,
-                hlsManifestKey: data.hlsManifestKey,
-                thumbnailKey: data.thumbnailKey,
-                duration: data.duration,
-                width: data.width,
-                height: data.height,
-            },
-        );
-
+        await this.updateEncodingCompleteUseCase.execute(videoId, data);
         this.logger.log(`[updateEncodingComplete] 인코딩 완료 - videoId: ${videoId}`);
     }
 
@@ -166,14 +140,7 @@ export class FeedVideoService {
      * 인코딩 실패 처리 (Worker에서 호출)
      */
     async updateEncodingFailed(videoId: string, reason: string) {
-        await this.videoModel.updateOne(
-            { _id: videoId },
-            {
-                status: VideoStatus.FAILED,
-                failureReason: reason,
-            },
-        );
-
+        await this.updateEncodingFailedUseCase.execute(videoId, reason);
         this.logger.log(`[updateEncodingFailed] 인코딩 실패 - videoId: ${videoId}, reason: ${reason}`);
     }
 
@@ -183,90 +150,24 @@ export class FeedVideoService {
      * .ts 세그먼트는 Redis에 캐싱하여 화질 전환 시 지연 최소화
      */
     async proxyHLSFile(videoId: string, filename: string, res: Response) {
-        // 파일 확장자 검증 (보안)
-        const allowedExtensions = ['.m3u8', '.ts'];
-        const ext = filename.substring(filename.lastIndexOf('.'));
-        if (!allowedExtensions.includes(ext)) {
-            throw new BadRequestException('허용되지 않은 파일 형식입니다.');
-        }
-
-        // Content-Type 설정
-        let contentType = 'application/octet-stream';
-        if (filename.endsWith('.m3u8')) {
-            contentType = 'application/vnd.apple.mpegurl';
-        } else if (filename.endsWith('.ts')) {
-            contentType = 'video/mp2t';
-        }
-
         // CORS 헤더 설정
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-        res.setHeader('Content-Type', contentType);
-
-        // S3 키 구성
-        const s3Key = `videos/hls/${videoId}/${filename}`;
-        const cacheKey = `hls:${videoId}:${filename}`;
 
         try {
-            // .ts 세그먼트 파일은 Redis 캐싱 (불변 파일이므로 장기 캐싱 가능)
-            if (filename.endsWith('.ts')) {
-                // Redis에서 캐시된 데이터 확인 (직접 ioredis 사용)
-                const cachedData = await this.redisService.get(cacheKey);
+            const proxyResponse = await this.proxyHlsFileUseCase.execute(videoId, filename);
 
-                if (cachedData) {
-                    this.logger.debug(`[proxyHLSFile] Redis 캐시 히트 - ${filename}`);
-                    res.setHeader('X-Cache', 'HIT');
-                    res.setHeader('Cache-Control', 'public, max-age=86400'); // 24시간 브라우저 캐싱
-                    // Base64 디코딩하여 Buffer로 전송
-                    const buffer = Buffer.from(cachedData, 'base64');
-                    return res.send(buffer);
-                }
+            res.setHeader('Content-Type', proxyResponse.contentType);
+            res.setHeader('X-Cache', proxyResponse.cacheStatus);
+            res.setHeader('Cache-Control', proxyResponse.cacheControl);
 
-                // S3에서 파일 가져오기
-                this.logger.debug(`[proxyHLSFile] Redis 캐시 미스, S3 요청 - ${filename}`);
-                const fileStream = await this.storageService.getFileStream(s3Key);
-                const chunks: Buffer[] = [];
-                for await (const chunk of fileStream) {
-                    chunks.push(chunk);
-                }
-                const buffer = Buffer.concat(chunks);
-
-                // Redis에 Base64로 캐싱 (3600초 = 1시간 TTL)
-                // 초기 서비스라 유저/영상 적으므로 넉넉하게 설정
-                await this.redisService.set(cacheKey, buffer.toString('base64'), 3600);
-
-                res.setHeader('X-Cache', 'MISS');
-                res.setHeader('Cache-Control', 'public, max-age=86400');
-                return res.send(buffer);
-            }
-
-            // m3u8 파일은 캐싱 시간 짧게 (변경될 수 있음, 하지만 VOD는 불변)
-            if (filename.endsWith('.m3u8')) {
-                const cachedContent = await this.redisService.get(cacheKey);
-
-                if (cachedContent) {
-                    this.logger.debug(`[proxyHLSFile] Redis 캐시 히트 - ${filename}`);
-                    res.setHeader('X-Cache', 'HIT');
-                    res.setHeader('Cache-Control', 'public, max-age=3600');
-                    return res.send(cachedContent);
-                }
-
-                const fileStream = await this.storageService.getFileStream(s3Key);
-                const chunks: Buffer[] = [];
-                for await (const chunk of fileStream) {
-                    chunks.push(chunk);
-                }
-                const content = Buffer.concat(chunks).toString('utf-8');
-
-                // Redis에 캐싱 (1800초 = 30분 TTL)
-                await this.redisService.set(cacheKey, content, 1800);
-
-                res.setHeader('X-Cache', 'MISS');
-                res.setHeader('Cache-Control', 'public, max-age=3600');
-                return res.send(content);
-            }
+            return res.send(proxyResponse.body);
         } catch (error) {
+            if (error instanceof BadRequestException) {
+                throw error;
+            }
+
             this.logger.error(`[proxyHLSFile] 파일 프록시 실패 - ${filename}:`, error);
             throw new BadRequestException('파일을 가져올 수 없습니다.');
         }
@@ -278,34 +179,7 @@ export class FeedVideoService {
      */
     async preloadHLSSegments(videoId: string, resolutions: number[] = [360, 480, 720]) {
         this.logger.log(`[preloadHLSSegments] 세그먼트 프리로드 시작 - videoId: ${videoId}`);
-
-        for (const height of resolutions) {
-            // 각 화질의 처음 3개 세그먼트 프리로드
-            for (let i = 0; i <= 2; i++) {
-                const filename = `stream_${height}p_${String(i).padStart(3, '0')}.ts`;
-                const s3Key = `videos/hls/${videoId}/${filename}`;
-                const cacheKey = `hls:${videoId}:${filename}`;
-
-                try {
-                    // 이미 캐시되어 있으면 스킵
-                    const cached = await this.redisService.exists(cacheKey);
-                    if (cached) continue;
-
-                    const fileStream = await this.storageService.getFileStream(s3Key);
-                    const chunks: Buffer[] = [];
-                    for await (const chunk of fileStream) {
-                        chunks.push(chunk);
-                    }
-                    const buffer = Buffer.concat(chunks);
-
-                    await this.redisService.set(cacheKey, buffer.toString('base64'), 3600);
-                    this.logger.debug(`[preloadHLSSegments] 프리로드 완료 - ${filename}`);
-                } catch (error) {
-                    // 파일이 없을 수 있음 (해당 해상도가 없는 경우)
-                    this.logger.debug(`[preloadHLSSegments] 프리로드 스킵 - ${filename}`);
-                }
-            }
-        }
+        await this.preloadHlsSegmentsUseCase.execute(videoId, resolutions);
 
         this.logger.log(`[preloadHLSSegments] 세그먼트 프리로드 완료 - videoId: ${videoId}`);
     }
@@ -325,47 +199,13 @@ export class FeedVideoService {
             `[prefetchAllQualitySegments] 프리페치 시작 - videoId: ${videoId}, segment: ${currentSegment}, count: ${count}`,
         );
 
-        const prefetchPromises: Promise<void>[] = [];
+        const processedCount = await this.prefetchAllQualitySegmentsUseCase.execute(
+            videoId,
+            currentSegment,
+            count,
+            resolutions,
+        );
 
-        for (const height of resolutions) {
-            for (let i = 0; i < count; i++) {
-                const segmentNum = currentSegment + i;
-                const filename = `stream_${height}p_${String(segmentNum).padStart(3, '0')}.ts`;
-                const cacheKey = `hls:${videoId}:${filename}`;
-
-                // 병렬로 프리페치 실행
-                prefetchPromises.push(
-                    (async () => {
-                        try {
-                            // 이미 캐시되어 있으면 스킵
-                            const cached = await this.redisService.exists(cacheKey);
-                            if (cached) {
-                                this.logger.debug(`[prefetchAllQualitySegments] 이미 캐시됨 - ${filename}`);
-                                return;
-                            }
-
-                            const s3Key = `videos/hls/${videoId}/${filename}`;
-                            const fileStream = await this.storageService.getFileStream(s3Key);
-                            const chunks: Buffer[] = [];
-                            for await (const chunk of fileStream) {
-                                chunks.push(chunk);
-                            }
-                            const buffer = Buffer.concat(chunks);
-
-                            await this.redisService.set(cacheKey, buffer.toString('base64'), 3600);
-                            this.logger.debug(`[prefetchAllQualitySegments] 프리페치 완료 - ${filename}`);
-                        } catch (error) {
-                            // 파일이 없을 수 있음 (영상 끝 또는 해당 해상도 없음)
-                            this.logger.debug(`[prefetchAllQualitySegments] 프리페치 스킵 - ${filename}`);
-                        }
-                    })(),
-                );
-            }
-        }
-
-        // 모든 프리페치 병렬 실행 (최대한 빠르게)
-        await Promise.allSettled(prefetchPromises);
-
-        this.logger.log(`[prefetchAllQualitySegments] 프리페치 완료 - ${resolutions.length * count}개 세그먼트 처리`);
+        this.logger.log(`[prefetchAllQualitySegments] 프리페치 완료 - ${processedCount}개 세그먼트 처리`);
     }
 }

@@ -20,13 +20,22 @@ import { CompleteUploadUseCase } from './application/use-cases/complete-upload.u
 import { GetMyVideosUseCase } from './application/use-cases/get-my-videos.use-case';
 import { DeleteVideoUseCase } from './application/use-cases/delete-video.use-case';
 import { ToggleVideoVisibilityUseCase } from './application/use-cases/toggle-video-visibility.use-case';
+import { IncrementViewCountUseCase } from './application/use-cases/increment-view-count.use-case';
+import { UpdateEncodingCompleteUseCase } from './application/use-cases/update-encoding-complete.use-case';
+import { UpdateEncodingFailedUseCase } from './application/use-cases/update-encoding-failed.use-case';
+import { ProxyHlsFileUseCase } from './application/use-cases/proxy-hls-file.use-case';
+import { PreloadHlsSegmentsUseCase } from './application/use-cases/preload-hls-segments.use-case';
+import { PrefetchAllQualitySegmentsUseCase } from './application/use-cases/prefetch-all-quality-segments.use-case';
 import { FeedVideoPresentationService } from './domain/services/feed-video-presentation.service';
 import { FeedVideoCommandPolicyService } from './domain/services/feed-video-command-policy.service';
+import { FeedVideoStreamingService } from './domain/services/feed-video-streaming.service';
 import { FeedVideoAssetUrlService } from './infrastructure/feed-video-asset-url.service';
 import { FeedVideoMongooseReaderAdapter } from './infrastructure/feed-video-mongoose-reader.adapter';
 import { FeedVideoMongooseCommandAdapter } from './infrastructure/feed-video-mongoose-command.adapter';
+import { FeedVideoStorageStreamAdapter } from './infrastructure/feed-video-storage-stream.adapter';
 import { FEED_VIDEO_READER } from './application/ports/feed-video-reader.port';
 import { FEED_VIDEO_COMMAND } from './application/ports/feed-video-command.port';
+import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
 
 /**
  * 피드 동영상 모듈
@@ -76,11 +85,19 @@ import { FEED_VIDEO_COMMAND } from './application/ports/feed-video-command.port'
         GetMyVideosUseCase,
         DeleteVideoUseCase,
         ToggleVideoVisibilityUseCase,
+        IncrementViewCountUseCase,
+        UpdateEncodingCompleteUseCase,
+        UpdateEncodingFailedUseCase,
+        ProxyHlsFileUseCase,
+        PreloadHlsSegmentsUseCase,
+        PrefetchAllQualitySegmentsUseCase,
         FeedVideoPresentationService,
         FeedVideoCommandPolicyService,
+        FeedVideoStreamingService,
         FeedVideoAssetUrlService,
         FeedVideoMongooseReaderAdapter,
         FeedVideoMongooseCommandAdapter,
+        FeedVideoStorageStreamAdapter,
         {
             provide: FEED_VIDEO_READER,
             useExisting: FeedVideoMongooseReaderAdapter,
@@ -88,6 +105,10 @@ import { FEED_VIDEO_COMMAND } from './application/ports/feed-video-command.port'
         {
             provide: FEED_VIDEO_COMMAND,
             useExisting: FeedVideoMongooseCommandAdapter,
+        },
+        {
+            provide: FEED_VIDEO_STREAM,
+            useExisting: FeedVideoStorageStreamAdapter,
         },
     ],
     exports: [FeedVideoService],
