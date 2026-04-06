@@ -1,13 +1,14 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
-import { HomeService } from './home.service';
-
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { FaqResponseDto } from './dto/response/faq-response.dto';
 import { BannerResponseDto } from './dto/response/banner-response.dto';
 import { CurrentUser } from '../../common/decorator/user.decorator';
 import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard';
+import { GetActiveBannersUseCase } from './application/use-cases/get-active-banners.use-case';
+import { GetFaqsUseCase } from './application/use-cases/get-faqs.use-case';
+import { GetAvailablePetsUseCase } from './application/use-cases/get-available-pets.use-case';
 
 /**
  * 홈페이지 공개 API 컨트롤러
@@ -15,7 +16,11 @@ import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard
 @ApiTags('홈페이지')
 @Controller('home')
 export class HomeController {
-    constructor(private readonly homeService: HomeService) {}
+    constructor(
+        private readonly getActiveBannersUseCase: GetActiveBannersUseCase,
+        private readonly getFaqsUseCase: GetFaqsUseCase,
+        private readonly getAvailablePetsUseCase: GetAvailablePetsUseCase,
+    ) {}
 
     /**
      * 활성화된 배너 목록 조회
@@ -32,7 +37,7 @@ export class HomeController {
         type: [BannerResponseDto],
     })
     async getBanners(): Promise<ApiResponseDto<BannerResponseDto[]>> {
-        const banners = await this.homeService.getActiveBanners();
+        const banners = await this.getActiveBannersUseCase.execute();
         return ApiResponseDto.success(banners, '배너 목록이 조회되었습니다.');
     }
 
@@ -58,8 +63,7 @@ export class HomeController {
         type: [FaqResponseDto],
     })
     async getFaqs(@Query('userType') userType: string = 'adopter'): Promise<ApiResponseDto<FaqResponseDto[]>> {
-        const faqs =
-            userType === 'breeder' ? await this.homeService.getBreederFaqs() : await this.homeService.getAdopterFaqs();
+        const faqs = await this.getFaqsUseCase.execute(userType);
         return ApiResponseDto.success(faqs, 'FAQ 목록이 조회되었습니다.');
     }
 
@@ -89,7 +93,7 @@ export class HomeController {
         @CurrentUser() user?: any,
     ): Promise<ApiResponseDto<any[]>> {
         const isAuthenticated = !!user?.userId;
-        const pets = await this.homeService.getAvailablePets(limit, isAuthenticated);
+        const pets = await this.getAvailablePetsUseCase.execute(limit, isAuthenticated);
         return ApiResponseDto.success(pets, '분양중인 아이들이 조회되었습니다.');
     }
 }
