@@ -1,0 +1,64 @@
+import { BadRequestException, Injectable } from '@nestjs/common';
+
+import { InquiryAnswerCreateRequestDto } from '../../dto/request/inquiry-create-request.dto';
+import {
+    InquiryBreederInfoSnapshot,
+    InquiryCommandSnapshot,
+} from '../../application/ports/inquiry-command.port';
+
+@Injectable()
+export class InquiryCommandPolicyService {
+    ensureTargetBreederId(targetBreederId?: string): void {
+        if (!targetBreederId) {
+            throw new BadRequestException('1:1 질문은 대상 브리더를 지정해야 합니다.');
+        }
+    }
+
+    ensureAuthorOwnsInquiry(inquiry: InquiryCommandSnapshot, userId: string, message: string): void {
+        if (inquiry.authorId !== userId) {
+            throw new BadRequestException(message);
+        }
+    }
+
+    ensureNoAnswers(inquiry: InquiryCommandSnapshot, message: string): void {
+        if (inquiry.answerCount > 0) {
+            throw new BadRequestException(message);
+        }
+    }
+
+    ensureInquiryAnswerable(inquiry: InquiryCommandSnapshot, breederId: string): void {
+        if (inquiry.status === 'closed') {
+            throw new BadRequestException('종료된 문의에는 답변할 수 없습니다.');
+        }
+
+        if (inquiry.type === 'direct' && inquiry.targetBreederId !== breederId) {
+            throw new BadRequestException('해당 문의에 답변할 권한이 없습니다.');
+        }
+    }
+
+    buildAnswerData(
+        breederId: string,
+        breeder: InquiryBreederInfoSnapshot,
+        dto: InquiryAnswerCreateRequestDto,
+    ): {
+        breederId: string;
+        breederName: string;
+        profileImageUrl?: string;
+        content: string;
+        imageUrls: string[];
+        helpfulCount: number;
+        animalTypeName?: string;
+        breed?: string;
+    } {
+        return {
+            breederId,
+            breederName: breeder.name,
+            profileImageUrl: breeder.profileImageFileName || undefined,
+            content: dto.content,
+            imageUrls: dto.imageUrls || [],
+            helpfulCount: 0,
+            animalTypeName: breeder.petType === 'dog' ? '강아지' : breeder.petType === 'cat' ? '고양이' : undefined,
+            breed: breeder.breeds?.[0],
+        };
+    }
+}
