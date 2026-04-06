@@ -5,6 +5,11 @@ import { NotificationAdminController } from './notification-admin.controller';
 
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
 import { NotificationAdminService } from './notification-admin.service';
+import { NOTIFICATION_ADMIN_READER } from './application/ports/notification-admin-reader.port';
+import { GetAdminNotificationsUseCase } from './application/use-cases/get-admin-notifications.use-case';
+import { GetNotificationAdminStatsUseCase } from './application/use-cases/get-notification-admin-stats.use-case';
+import { NotificationAdminPresentationService } from './domain/services/notification-admin-presentation.service';
+import { NotificationAdminMongooseReaderAdapter } from './infrastructure/notification-admin-mongoose-reader.adapter';
 
 import { Notification, NotificationSchema } from '../../../schema/notification.schema';
 
@@ -15,7 +20,18 @@ import { Notification, NotificationSchema } from '../../../schema/notification.s
 @Module({
     imports: [MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }])],
     controllers: [NotificationAdminController],
-    providers: [NotificationAdminService, CustomLoggerService],
+    providers: [
+        NotificationAdminService,
+        CustomLoggerService,
+        GetAdminNotificationsUseCase,
+        GetNotificationAdminStatsUseCase,
+        NotificationAdminPresentationService,
+        NotificationAdminMongooseReaderAdapter,
+        {
+            provide: NOTIFICATION_ADMIN_READER,
+            useExisting: NotificationAdminMongooseReaderAdapter,
+        },
+    ],
     exports: [NotificationAdminService],
 })
 export class NotificationAdminModule {}
