@@ -12,14 +12,14 @@ export class RemoveFavoriteBreederUseCase {
         private readonly adopterFavoritePolicyService: AdopterFavoritePolicyService,
     ) {}
 
-    async execute(userId: string, breederId: string): Promise<any> {
-        const adopter = await this.adopterProfilePort.findById(userId);
+    async execute(userId: string, breederId: string, userRole?: string): Promise<any> {
+        const adopter = await this.adopterProfilePort.findById(userId, userRole);
         if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            throw new BadRequestException(userRole === 'breeder' ? '브리더 정보를 찾을 수 없습니다.' : '입양자 정보를 찾을 수 없습니다.');
         }
 
         this.adopterFavoritePolicyService.ensureCanRemove(adopter.favoriteBreederList || [], breederId);
-        await this.adopterProfilePort.removeFavoriteBreeder(userId, breederId);
+        await this.adopterProfilePort.removeFavoriteBreeder(userId, breederId, userRole);
 
         return { message: '즐겨찾기에서 브리더를 제거했습니다.' };
     }

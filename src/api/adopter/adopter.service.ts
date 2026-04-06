@@ -1,10 +1,5 @@
-import { Injectable, BadRequestException, ConflictException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Injectable } from '@nestjs/common';
 
-import { ApplicationStatus, ReportStatus, RecipientType } from '../../common/enum/user.enum';
-
-import { StorageService } from '../../common/storage/storage.service';
 import { CreateAdopterApplicationUseCase } from './application/use-cases/create-adopter-application.use-case';
 import { CreateAdopterReportUseCase } from './application/use-cases/create-adopter-report.use-case';
 import { GetAdopterApplicationsUseCase } from './application/use-cases/get-adopter-applications.use-case';
@@ -14,21 +9,17 @@ import { ReportAdopterReviewUseCase } from './application/use-cases/report-adopt
 import { GetAdopterReviewsUseCase } from './application/use-cases/get-adopter-reviews.use-case';
 import { GetAdopterReviewDetailUseCase } from './application/use-cases/get-adopter-review-detail.use-case';
 import { DeleteAdopterAccountUseCase } from './application/use-cases/delete-adopter-account.use-case';
-
-import { Breeder, BreederDocument } from '../../schema/breeder.schema';
-
-import { AdopterRepository } from './adopter.repository';
-import { BreederRepository } from '../breeder-management/repository/breeder.repository';
-import { AvailablePetManagementRepository } from '../breeder-management/repository/available-pet-management.repository';
-
-import { AdopterMapper } from './mapper/adopter.mapper';
+import { GetAdopterProfileUseCase } from './application/use-cases/get-adopter-profile.use-case';
+import { UpdateAdopterProfileUseCase } from './application/use-cases/update-adopter-profile.use-case';
+import { AddFavoriteBreederUseCase } from './application/use-cases/add-favorite-breeder.use-case';
+import { RemoveFavoriteBreederUseCase } from './application/use-cases/remove-favorite-breeder.use-case';
+import { GetFavoriteBreedersUseCase } from './application/use-cases/get-favorite-breeders.use-case';
 
 import { FavoriteAddRequestDto } from './dto/request/favorite-add-request.dto';
 import { ReviewCreateRequestDto } from './dto/request/review-create-request.dto';
 import { ReportCreateRequestDto } from './dto/request/report-create-request.dto';
 import { AccountDeleteRequestDto } from './dto/request/account-delete-request.dto';
 import { ApplicationCreateRequestDto } from './dto/request/application-create-request.dto';
-import { PaginationBuilder } from '../../common/dto/pagination/pagination-builder.dto';
 import { AccountDeleteResponseDto } from './dto/response/account-delete-response.dto';
 import { AdopterProfileResponseDto } from './dto/response/adopter-profile-response.dto';
 
@@ -50,7 +41,11 @@ import { AdopterProfileResponseDto } from './dto/response/adopter-profile-respon
 @Injectable()
 export class AdopterService {
     constructor(
-        private storageService: StorageService,
+        private readonly getAdopterProfileUseCase: GetAdopterProfileUseCase,
+        private readonly updateAdopterProfileUseCase: UpdateAdopterProfileUseCase,
+        private readonly addFavoriteBreederUseCase: AddFavoriteBreederUseCase,
+        private readonly removeFavoriteBreederUseCase: RemoveFavoriteBreederUseCase,
+        private readonly getFavoriteBreedersUseCase: GetFavoriteBreedersUseCase,
         private readonly createAdopterApplicationUseCase: CreateAdopterApplicationUseCase,
         private readonly createAdopterReportUseCase: CreateAdopterReportUseCase,
         private readonly getAdopterApplicationsUseCase: GetAdopterApplicationsUseCase,
@@ -60,11 +55,6 @@ export class AdopterService {
         private readonly getAdopterReviewsUseCase: GetAdopterReviewsUseCase,
         private readonly getAdopterReviewDetailUseCase: GetAdopterReviewDetailUseCase,
         private readonly deleteAdopterAccountUseCase: DeleteAdopterAccountUseCase,
-        private adopterRepository: AdopterRepository,
-        private breederRepository: BreederRepository,
-        private availablePetManagementRepository: AvailablePetManagementRepository,
-
-        @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
     ) {}
 
     /**
@@ -125,60 +115,7 @@ export class AdopterService {
      * @throws ConflictException 이미 즐겨찾기된 브리더
      */
     async addFavorite(userId: string, addFavoriteDto: FavoriteAddRequestDto, userRole?: string): Promise<any> {
-        const { breederId } = addFavoriteDto;
-
-        // 역할에 따라 적절한 사용자 조회
-        let user: any;
-        if (userRole === 'breeder') {
-            user = await this.breederRepository.findById(userId);
-            if (!user) {
-                throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-            }
-        } else {
-            user = await this.adopterRepository.findById(userId);
-            if (!user) {
-                throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-            }
-        }
-
-        const targetBreeder = await this.breederRepository.findById(breederId);
-        if (!targetBreeder) {
-            throw new BadRequestException('해당 브리더를 찾을 수 없습니다.');
-        }
-
-        // 중복 즐겨찾기 검증
-        const favoriteList = user.favoriteBreederList || [];
-        const existingFavorite = favoriteList.find((fav: any) => fav.favoriteBreederId === breederId);
-        if (existingFavorite) {
-            throw new ConflictException('이미 즐겨찾기에 추가된 브리더입니다.');
-        }
-
-        // 즐겨찾기 데이터 구성 (Mapper 패턴 사용)
-        const favorite = AdopterMapper.toFavoriteBreeder(breederId, targetBreeder);
-
-        // 역할에 따라 적절한 레포지토리 사용
-        if (userRole === 'breeder') {
-            console.log('[AdopterService.addFavorite] Adding favorite for breeder:', userId);
-            console.log('[AdopterService.addFavorite] favorite data:', JSON.stringify(favorite));
-            const result = await this.breederModel
-                .findByIdAndUpdate(
-                    userId,
-                    {
-                        $push: { favoriteBreederList: favorite },
-                        $set: { updatedAt: new Date() },
-                    },
-                    { new: true },
-                )
-                .exec();
-            console.log(
-                '[AdopterService.addFavorite] Updated breeder favoriteBreederList:',
-                JSON.stringify(result?.favoriteBreederList),
-            );
-        } else {
-            await this.adopterRepository.addFavoriteBreeder(userId, favorite);
-        }
-
-        return { message: '브리더를 즐겨찾기에 추가했습니다.' };
+        return this.addFavoriteBreederUseCase.execute(userId, addFavoriteDto, userRole);
     }
 
     /**
@@ -192,40 +129,7 @@ export class AdopterService {
      * @throws BadRequestException 존재하지 않는 즐겨찾기
      */
     async removeFavorite(userId: string, breederId: string, userRole?: string): Promise<any> {
-        // 역할에 따라 적절한 사용자 조회
-        let user: any;
-        if (userRole === 'breeder') {
-            user = await this.breederRepository.findById(userId);
-            if (!user) {
-                throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-            }
-        } else {
-            user = await this.adopterRepository.findById(userId);
-            if (!user) {
-                throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-            }
-        }
-
-        // 즐겨찾기 존재 여부 확인
-        const favoriteList = user.favoriteBreederList || [];
-        const existingFavorite = favoriteList.find((fav: any) => fav.favoriteBreederId === breederId);
-        if (!existingFavorite) {
-            throw new BadRequestException('즐겨찾기 목록에서 해당 브리더를 찾을 수 없습니다.');
-        }
-
-        // 역할에 따라 적절한 레포지토리 사용
-        if (userRole === 'breeder') {
-            await this.breederModel
-                .findByIdAndUpdate(userId, {
-                    $pull: { favoriteBreederList: { favoriteBreederId: breederId } },
-                    $set: { updatedAt: new Date() },
-                })
-                .exec();
-        } else {
-            await this.adopterRepository.removeFavoriteBreeder(userId, breederId);
-        }
-
-        return { message: '즐겨찾기에서 브리더를 제거했습니다.' };
+        return this.removeFavoriteBreederUseCase.execute(userId, breederId, userRole);
     }
 
     /**
@@ -241,62 +145,7 @@ export class AdopterService {
      * @throws BadRequestException 존재하지 않는 사용자
      */
     async getFavoriteList(userId: string, page: number = 1, limit: number = 10, userRole?: string): Promise<any> {
-        let favorites: any[];
-        let total: number;
-
-        if (userRole === 'breeder') {
-            const breeder = await this.breederRepository.findById(userId);
-            if (!breeder) {
-                throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
-            }
-
-            // 브리더의 즐겨찾기 목록에서 페이지네이션 적용
-            const allFavorites = breeder.favoriteBreederList || [];
-            total = allFavorites.length;
-            const startIndex = (page - 1) * limit;
-            favorites = allFavorites.slice(startIndex, startIndex + limit);
-        } else {
-            const adopter = await this.adopterRepository.findById(userId);
-            if (!adopter) {
-                throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-            }
-
-            const result = await this.adopterRepository.findFavoriteList(userId, page, limit);
-            favorites = result.favorites;
-            total = result.total;
-        }
-
-        // 각 즐겨찾기 브리더의 최신 정보 조회 (Mapper 패턴 사용)
-        const favoriteListWithDetails = await Promise.all(
-            favorites.map(async (fav: any) => {
-                try {
-                    const breeder = await this.breederRepository.findById(fav.favoriteBreederId);
-
-                    // 브리더 프로필 이미지 Signed URL 생성
-                    let profileImageUrl = '';
-                    if (breeder?.profileImageFileName) {
-                        profileImageUrl = this.storageService.generateSignedUrl(breeder.profileImageFileName);
-                    }
-
-                    // 대표 사진들 Signed URL 생성
-                    const representativePhotos = breeder?.profile?.representativePhotos
-                        ? this.storageService.generateSignedUrls(breeder.profile.representativePhotos)
-                        : [];
-
-                    return AdopterMapper.toFavoriteDetail(fav, breeder, profileImageUrl, representativePhotos);
-                } catch (error) {
-                    // 에러 발생 시 기본 정보 반환
-                    return AdopterMapper.toFavoriteDetail(fav, null, '', []);
-                }
-            }),
-        );
-
-        return new PaginationBuilder<any>()
-            .setItems(favoriteListWithDetails)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(total)
-            .build();
+        return this.getFavoriteBreedersUseCase.execute(userId, page, limit, userRole);
     }
 
     /**
@@ -325,23 +174,7 @@ export class AdopterService {
      * @throws BadRequestException 존재하지 않는 입양자
      */
     async getProfile(userId: string): Promise<AdopterProfileResponseDto> {
-        const adopter = await this.adopterRepository.findById(userId);
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-        }
-
-        // 프로필 응답 데이터 구성 (Mapper 패턴 사용)
-        const profileResponse = AdopterMapper.toProfileResponse(adopter);
-
-        // 파일명을 Signed URL로 변환 (1시간 유효)
-        if (profileResponse.profileImageFileName) {
-            profileResponse.profileImageFileName = this.storageService.generateSignedUrlSafe(
-                profileResponse.profileImageFileName,
-                60,
-            );
-        }
-
-        return profileResponse;
+        return this.getAdopterProfileUseCase.execute(userId);
     }
 
     /**
@@ -357,16 +190,7 @@ export class AdopterService {
         userId: string,
         updateData: { name?: string; phone?: string; profileImage?: string },
     ): Promise<any> {
-        // 요청 데이터를 데이터베이스 스키마에 맞게 변환 (Mapper 패턴 사용)
-        const mappedUpdateData = AdopterMapper.toProfileUpdateData(updateData);
-
-        const adopter = await this.adopterRepository.updateProfile(userId, mappedUpdateData);
-
-        if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
-        }
-
-        return { message: '프로필이 성공적으로 수정되었습니다.' };
+        return this.updateAdopterProfileUseCase.execute(userId, updateData);
     }
 
     /**

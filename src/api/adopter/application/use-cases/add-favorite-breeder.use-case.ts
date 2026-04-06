@@ -18,10 +18,10 @@ export class AddFavoriteBreederUseCase {
         private readonly adopterFavoritePolicyService: AdopterFavoritePolicyService,
     ) {}
 
-    async execute(userId: string, addFavoriteDto: FavoriteAddRequestDto): Promise<any> {
-        const adopter = await this.adopterProfilePort.findById(userId);
+    async execute(userId: string, addFavoriteDto: FavoriteAddRequestDto, userRole?: string): Promise<any> {
+        const adopter = await this.adopterProfilePort.findById(userId, userRole);
         if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            throw new BadRequestException(userRole === 'breeder' ? '브리더 정보를 찾을 수 없습니다.' : '입양자 정보를 찾을 수 없습니다.');
         }
 
         const targetBreeder = await this.adopterBreederReaderPort.findById(addFavoriteDto.breederId);
@@ -39,7 +39,7 @@ export class AddFavoriteBreederUseCase {
         }
 
         const favorite = AdopterMapper.toFavoriteBreeder(addFavoriteDto.breederId, targetBreeder);
-        await this.adopterProfilePort.addFavoriteBreeder(userId, favorite);
+        await this.adopterProfilePort.addFavoriteBreeder(userId, favorite, userRole);
 
         return { message: '브리더를 즐겨찾기에 추가했습니다.' };
     }
