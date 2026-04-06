@@ -12,6 +12,14 @@ import { GetActiveAnnouncementsUseCase } from './application/use-cases/get-activ
 import { GetAnnouncementByIdUseCase } from './application/use-cases/get-announcement-by-id.use-case';
 import { AnnouncementResponseMapperService } from './domain/services/announcement-response-mapper.service';
 import { AnnouncementMongoosePublicReaderAdapter } from './infrastructure/announcement-mongoose-public-reader.adapter';
+import { AnnouncementAdminReaderPort } from './admin/application/ports/announcement-admin-reader.port';
+import { ANNOUNCEMENT_WRITER } from './admin/application/ports/announcement-writer.port';
+import { GetAllAnnouncementsUseCase } from './admin/application/use-cases/get-all-announcements.use-case';
+import { CreateAnnouncementUseCase } from './admin/application/use-cases/create-announcement.use-case';
+import { UpdateAnnouncementUseCase } from './admin/application/use-cases/update-announcement.use-case';
+import { DeleteAnnouncementUseCase } from './admin/application/use-cases/delete-announcement.use-case';
+import { AnnouncementMongooseAdminReaderAdapter } from './admin/infrastructure/announcement-mongoose-admin-reader.adapter';
+import { AnnouncementMongooseWriterAdapter } from './admin/infrastructure/announcement-mongoose-writer.adapter';
 
 import { Announcement, AnnouncementSchema } from '../../schema/announcement.schema';
 
@@ -27,11 +35,25 @@ import { Announcement, AnnouncementSchema } from '../../schema/announcement.sche
         AnnouncementAdminService,
         GetActiveAnnouncementsUseCase,
         GetAnnouncementByIdUseCase,
+        GetAllAnnouncementsUseCase,
+        CreateAnnouncementUseCase,
+        UpdateAnnouncementUseCase,
+        DeleteAnnouncementUseCase,
         AnnouncementResponseMapperService,
         AnnouncementMongoosePublicReaderAdapter,
+        AnnouncementMongooseAdminReaderAdapter,
+        AnnouncementMongooseWriterAdapter,
         {
             provide: AnnouncementPublicReaderPort,
             useExisting: AnnouncementMongoosePublicReaderAdapter,
+        },
+        {
+            provide: AnnouncementAdminReaderPort,
+            useExisting: AnnouncementMongooseAdminReaderAdapter,
+        },
+        {
+            provide: ANNOUNCEMENT_WRITER,
+            useExisting: AnnouncementMongooseWriterAdapter,
         },
         CustomLoggerService,
     ],
