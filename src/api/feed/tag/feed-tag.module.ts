@@ -3,6 +3,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Video, VideoSchema } from '../../../schema/video.schema';
 import { FeedTagService } from './feed-tag.service';
 import { StorageModule } from '../../../common/storage/storage.module';
+import { SearchByTagUseCase } from './application/use-cases/search-by-tag.use-case';
+import { GetPopularTagsUseCase } from './application/use-cases/get-popular-tags.use-case';
+import { SuggestTagsUseCase } from './application/use-cases/suggest-tags.use-case';
+import { FeedTagQueryService } from './domain/services/feed-tag-query.service';
+import { FeedTagPresentationService } from './domain/services/feed-tag-presentation.service';
+import { FeedTagMongooseReaderAdapter } from './infrastructure/feed-tag-mongoose-reader.adapter';
+import { FEED_TAG_READER } from './application/ports/feed-tag-reader.port';
 
 /**
  * 피드 태그 모듈
@@ -12,7 +19,19 @@ import { StorageModule } from '../../../common/storage/storage.module';
  */
 @Module({
     imports: [MongooseModule.forFeature([{ name: Video.name, schema: VideoSchema }]), StorageModule],
-    providers: [FeedTagService],
+    providers: [
+        FeedTagService,
+        SearchByTagUseCase,
+        GetPopularTagsUseCase,
+        SuggestTagsUseCase,
+        FeedTagQueryService,
+        FeedTagPresentationService,
+        FeedTagMongooseReaderAdapter,
+        {
+            provide: FEED_TAG_READER,
+            useExisting: FeedTagMongooseReaderAdapter,
+        },
+    ],
     exports: [FeedTagService],
 })
 export class FeedTagModule {}
