@@ -28,13 +28,14 @@ export interface AdopterProfileRecord {
 }
 
 export interface AdopterProfilePort {
-    findById(adopterId: string): Promise<AdopterProfileRecord | null>;
-    updateProfile(adopterId: string, updateData: any): Promise<AdopterProfileRecord | null>;
+    findById(adopterId: string, userRole?: string): Promise<AdopterProfileRecord | null>;
+    updateProfile(adopterId: string, updateData: any, userRole?: string): Promise<AdopterProfileRecord | null>;
     findFavoriteList(
         adopterId: string,
         page: number,
         limit: number,
+        userRole?: string,
     ): Promise<{ favorites: FavoriteBreederRecord[]; total: number }>;
-    addFavoriteBreeder(adopterId: string, favoriteData: any): Promise<void>;
-    removeFavoriteBreeder(adopterId: string, breederId: string): Promise<void>;
+    addFavoriteBreeder(adopterId: string, favoriteData: any, userRole?: string): Promise<void>;
+    removeFavoriteBreeder(adopterId: string, breederId: string, userRole?: string): Promise<void>;
 }

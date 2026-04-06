@@ -26,13 +26,14 @@ export class GetFavoriteBreedersUseCase {
         userId: string,
         page: number = 1,
         limit: number = 10,
+        userRole?: string,
     ): Promise<PaginationResponseDto<FavoriteBreederDataDto>> {
-        const adopter = await this.adopterProfilePort.findById(userId);
+        const adopter = await this.adopterProfilePort.findById(userId, userRole);
         if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            throw new BadRequestException(userRole === 'breeder' ? '브리더 정보를 찾을 수 없습니다.' : '입양자 정보를 찾을 수 없습니다.');
         }
 
-        const result = await this.adopterProfilePort.findFavoriteList(userId, page, limit);
+        const result = await this.adopterProfilePort.findFavoriteList(userId, page, limit, userRole);
         const favoriteListWithDetails = await Promise.all(
             result.favorites.map(async (favorite) => this.toFavoriteDetail(favorite)),
         );
