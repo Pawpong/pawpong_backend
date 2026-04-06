@@ -1,12 +1,14 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-
-import { StandardQuestion, StandardQuestionDocument } from '../../../schema/standard-question.schema';
+import { Injectable } from '@nestjs/common';
 
 import { StandardQuestionResponseDto } from './dto/response/standard-question-response.dto';
-
-import { STANDARD_QUESTIONS } from '../../../common/data/standard-questions.data';
+import { StandardQuestionSnapshot } from '../application/ports/standard-question-reader.port';
+import { GetAllStandardQuestionsUseCase } from './application/use-cases/get-all-standard-questions.use-case';
+import { UpdateStandardQuestionUseCase } from './application/use-cases/update-standard-question.use-case';
+import { ToggleStandardQuestionStatusUseCase } from './application/use-cases/toggle-standard-question-status.use-case';
+import { ReorderStandardQuestionsUseCase } from './application/use-cases/reorder-standard-questions.use-case';
+import { ReseedStandardQuestionsUseCase } from './application/use-cases/reseed-standard-questions.use-case';
+import { GetStandardQuestionByIdUseCase } from '../application/use-cases/get-standard-question-by-id.use-case';
+import { UpdateStandardQuestionDto } from './dto/request/update-standard-question.dto';
 
 /**
  * 표준 입양 신청 질문 관리 Admin 서비스
@@ -17,7 +19,12 @@ import { STANDARD_QUESTIONS } from '../../../common/data/standard-questions.data
 @Injectable()
 export class StandardQuestionAdminService {
     constructor(
-        @InjectModel(StandardQuestion.name) private readonly standardQuestionModel: Model<StandardQuestionDocument>,
+        private readonly getAllStandardQuestionsUseCase: GetAllStandardQuestionsUseCase,
+        private readonly updateStandardQuestionUseCase: UpdateStandardQuestionUseCase,
+        private readonly toggleStandardQuestionStatusUseCase: ToggleStandardQuestionStatusUseCase,
+        private readonly reorderStandardQuestionsUseCase: ReorderStandardQuestionsUseCase,
+        private readonly reseedStandardQuestionsUseCase: ReseedStandardQuestionsUseCase,
+        private readonly getStandardQuestionByIdUseCase: GetStandardQuestionByIdUseCase,
     ) {}
 
     /**
@@ -25,8 +32,7 @@ export class StandardQuestionAdminService {
      * @returns 모든 표준 질문 목록 (DTO 형태)
      */
     async getAllQuestions(): Promise<StandardQuestionResponseDto[]> {
-        const questions = await this.standardQuestionModel.find().sort({ order: 1 }).exec();
-        return questions.map((q) => new StandardQuestionResponseDto(q)) as unknown as StandardQuestionResponseDto[];
+        return this.getAllStandardQuestionsUseCase.execute();
     }
 
     /**
@@ -34,8 +40,8 @@ export class StandardQuestionAdminService {
      * @param id 질문 ID
      * @returns 표준 질문 또는 null
      */
-    async getQuestionById(id: string): Promise<StandardQuestionDocument | null> {
-        return this.standardQuestionModel.findOne({ id }).exec() as any;
+    async getQuestionById(id: string): Promise<StandardQuestionSnapshot | null> {
+        return this.getStandardQuestionByIdUseCase.execute(id);
     }
 
     /**
@@ -44,18 +50,8 @@ export class StandardQuestionAdminService {
      * @param updateData 수정할 데이터
      * @returns 수정된 질문 (DTO 형태)
      */
-    async updateQuestion(id: string, updateData: Partial<StandardQuestion>): Promise<StandardQuestionResponseDto> {
-        const question = await this.standardQuestionModel.findOne({ id });
-        if (!question) {
-            throw new BadRequestException('해당 질문을 찾을 수 없습니다.');
-        }
-
-        // ID는 수정 불가
-        delete updateData.id;
-
-        Object.assign(question, updateData);
-        const savedQuestion = await question.save();
-        return new StandardQuestionResponseDto(savedQuestion);
+    async updateQuestion(id: string, updateData: UpdateStandardQuestionDto): Promise<StandardQuestionResponseDto> {
+        return this.updateStandardQuestionUseCase.execute(id, updateData);
     }
 
     /**
@@ -65,14 +61,7 @@ export class StandardQuestionAdminService {
      * @returns 수정된 질문 (DTO 형태)
      */
     async toggleQuestionStatus(id: string, isActive: boolean): Promise<StandardQuestionResponseDto> {
-        const question = await this.standardQuestionModel.findOne({ id });
-        if (!question) {
-            throw new BadRequestException('해당 질문을 찾을 수 없습니다.');
-        }
-
-        question.isActive = isActive;
-        const savedQuestion = await question.save();
-        return new StandardQuestionResponseDto(savedQuestion);
+        return this.toggleStandardQuestionStatusUseCase.execute(id, isActive);
     }
 
     /**
@@ -81,15 +70,7 @@ export class StandardQuestionAdminService {
      * @returns 성공 메시지
      */
     async reorderQuestions(reorderData: Array<{ id: string; order: number }>): Promise<{ message: string }> {
-        const bulkOps = reorderData.map((item) => ({
-            updateOne: {
-                filter: { id: item.id },
-                update: { $set: { order: item.order } },
-            },
-        }));
-
-        await this.standardQuestionModel.bulkWrite(bulkOps);
-        return { message: '질문 순서가 성공적으로 변경되었습니다.' };
+        return this.reorderStandardQuestionsUseCase.execute(reorderData);
     }
 
     /**
@@ -97,14 +78,6 @@ export class StandardQuestionAdminService {
      * @returns 성공 메시지
      */
     async reseedQuestions(): Promise<{ message: string }> {
-        // 기존 데이터 삭제
-        await this.standardQuestionModel.deleteMany({});
-
-        // 새로운 데이터 삽입
-        await this.standardQuestionModel.insertMany(STANDARD_QUESTIONS);
-
-        console.log(`[StandardQuestionAdminService] 표준 질문 재시딩 완료: ${STANDARD_QUESTIONS.length}개`);
-
-        return { message: `${STANDARD_QUESTIONS.length}개의 표준 질문이 재시딩되었습니다.` };
+        return this.reseedStandardQuestionsUseCase.execute();
     }
 }
