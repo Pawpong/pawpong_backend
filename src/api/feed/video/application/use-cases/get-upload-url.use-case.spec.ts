@@ -15,6 +15,9 @@ describe('GetUploadUrlUseCase', () => {
             countMine: jest.fn(),
             deleteById: jest.fn(),
             updateVisibility: jest.fn(),
+            incrementViewCount: jest.fn(),
+            markEncodingComplete: jest.fn(),
+            markEncodingFailed: jest.fn(),
         };
         const storageService = {
             generatePresignedUploadUrl: jest.fn().mockResolvedValue('https://upload.example/video'),

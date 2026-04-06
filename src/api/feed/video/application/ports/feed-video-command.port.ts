@@ -14,6 +14,14 @@ export interface FeedVideoCommandSnapshot {
     failureReason?: string;
 }
 
+export interface FeedVideoEncodingResult {
+    hlsManifestKey: string;
+    thumbnailKey: string;
+    duration: number;
+    width: number;
+    height: number;
+}
+
 export const FEED_VIDEO_COMMAND = Symbol('FEED_VIDEO_COMMAND');
 
 export interface FeedVideoCommandPort {
@@ -31,4 +39,7 @@ export interface FeedVideoCommandPort {
     countMine(userId: string): Promise<number>;
     deleteById(videoId: string): Promise<void>;
     updateVisibility(videoId: string, isPublic: boolean): Promise<void>;
+    incrementViewCount(videoId: string): Promise<void>;
+    markEncodingComplete(videoId: string, data: FeedVideoEncodingResult): Promise<void>;
+    markEncodingFailed(videoId: string, reason: string): Promise<void>;
 }

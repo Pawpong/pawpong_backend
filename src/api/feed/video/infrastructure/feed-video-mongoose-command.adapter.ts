@@ -3,7 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { Video, VideoStatus } from '../../../../schema/video.schema';
-import { FeedVideoCommandPort, FeedVideoCommandSnapshot } from '../application/ports/feed-video-command.port';
+import {
+    FeedVideoCommandPort,
+    FeedVideoCommandSnapshot,
+    FeedVideoEncodingResult,
+} from '../application/ports/feed-video-command.port';
 
 @Injectable()
 export class FeedVideoMongooseCommandAdapter implements FeedVideoCommandPort {
@@ -63,6 +67,50 @@ export class FeedVideoMongooseCommandAdapter implements FeedVideoCommandPort {
 
     async updateVisibility(videoId: string, isPublic: boolean): Promise<void> {
         await this.videoModel.updateOne({ _id: videoId }, { isPublic }).exec();
+    }
+
+    async incrementViewCount(videoId: string): Promise<void> {
+        if (!Types.ObjectId.isValid(videoId)) {
+            return;
+        }
+
+        await this.videoModel.updateOne({ _id: videoId }, { $inc: { viewCount: 1 } }).exec();
+    }
+
+    async markEncodingComplete(videoId: string, data: FeedVideoEncodingResult): Promise<void> {
+        if (!Types.ObjectId.isValid(videoId)) {
+            return;
+        }
+
+        await this.videoModel
+            .updateOne(
+                { _id: videoId },
+                {
+                    status: VideoStatus.READY,
+                    hlsManifestKey: data.hlsManifestKey,
+                    thumbnailKey: data.thumbnailKey,
+                    duration: data.duration,
+                    width: data.width,
+                    height: data.height,
+                },
+            )
+            .exec();
+    }
+
+    async markEncodingFailed(videoId: string, reason: string): Promise<void> {
+        if (!Types.ObjectId.isValid(videoId)) {
+            return;
+        }
+
+        await this.videoModel
+            .updateOne(
+                { _id: videoId },
+                {
+                    status: VideoStatus.FAILED,
+                    failureReason: reason,
+                },
+            )
+            .exec();
     }
 
     private toSnapshot(video: any): FeedVideoCommandSnapshot {
