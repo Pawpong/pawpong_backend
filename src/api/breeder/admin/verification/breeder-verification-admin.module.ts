@@ -4,6 +4,24 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { BreederVerificationAdminController } from './breeder-verification-admin.controller';
 
 import { BreederVerificationAdminService } from './breeder-verification-admin.service';
+import { GetLevelChangeRequestsUseCase } from './application/use-cases/get-level-change-requests.use-case';
+import { GetPendingBreederVerificationsUseCase } from './application/use-cases/get-pending-breeder-verifications.use-case';
+import { GetBreedersUseCase } from './application/use-cases/get-breeders.use-case';
+import { UpdateBreederVerificationUseCase } from './application/use-cases/update-breeder-verification.use-case';
+import { GetBreederDetailUseCase } from './application/use-cases/get-breeder-detail.use-case';
+import { GetBreederStatsUseCase } from './application/use-cases/get-breeder-stats.use-case';
+import { SendDocumentRemindersUseCase } from './application/use-cases/send-document-reminders.use-case';
+import { ChangeBreederLevelUseCase } from './application/use-cases/change-breeder-level.use-case';
+import { BREEDER_VERIFICATION_ADMIN_READER } from './application/ports/breeder-verification-admin-reader.port';
+import { BREEDER_VERIFICATION_ADMIN_WRITER } from './application/ports/breeder-verification-admin-writer.port';
+import { BREEDER_VERIFICATION_ADMIN_NOTIFIER } from './application/ports/breeder-verification-admin-notifier.port';
+import { BREEDER_VERIFICATION_ADMIN_FILE_URL_PORT } from './application/ports/breeder-verification-admin-file-url.port';
+import { BreederVerificationAdminPolicyService } from './domain/services/breeder-verification-admin-policy.service';
+import { BreederVerificationAdminActivityLogFactoryService } from './domain/services/breeder-verification-admin-activity-log-factory.service';
+import { BreederVerificationAdminPresentationService } from './domain/services/breeder-verification-admin-presentation.service';
+import { BreederVerificationAdminMongooseRepositoryAdapter } from './infrastructure/breeder-verification-admin-mongoose.repository.adapter';
+import { BreederVerificationAdminNotifierAdapter } from './infrastructure/breeder-verification-admin-notifier.adapter';
+import { BreederVerificationAdminFileUrlAdapter } from './infrastructure/breeder-verification-admin-file-url.adapter';
 
 import { Admin, AdminSchema } from '../../../../schema/admin.schema';
 import { Breeder, BreederSchema } from '../../../../schema/breeder.schema';
@@ -31,7 +49,39 @@ import { NotificationModule } from '../../../notification/notification.module';
         StorageModule, // StorageService 제공
     ],
     controllers: [BreederVerificationAdminController],
-    providers: [BreederVerificationAdminService],
+    providers: [
+        BreederVerificationAdminService,
+        GetLevelChangeRequestsUseCase,
+        GetPendingBreederVerificationsUseCase,
+        GetBreedersUseCase,
+        UpdateBreederVerificationUseCase,
+        GetBreederDetailUseCase,
+        GetBreederStatsUseCase,
+        SendDocumentRemindersUseCase,
+        ChangeBreederLevelUseCase,
+        BreederVerificationAdminPolicyService,
+        BreederVerificationAdminActivityLogFactoryService,
+        BreederVerificationAdminPresentationService,
+        BreederVerificationAdminMongooseRepositoryAdapter,
+        BreederVerificationAdminNotifierAdapter,
+        BreederVerificationAdminFileUrlAdapter,
+        {
+            provide: BREEDER_VERIFICATION_ADMIN_READER,
+            useExisting: BreederVerificationAdminMongooseRepositoryAdapter,
+        },
+        {
+            provide: BREEDER_VERIFICATION_ADMIN_WRITER,
+            useExisting: BreederVerificationAdminMongooseRepositoryAdapter,
+        },
+        {
+            provide: BREEDER_VERIFICATION_ADMIN_NOTIFIER,
+            useExisting: BreederVerificationAdminNotifierAdapter,
+        },
+        {
+            provide: BREEDER_VERIFICATION_ADMIN_FILE_URL_PORT,
+            useExisting: BreederVerificationAdminFileUrlAdapter,
+        },
+    ],
     exports: [BreederVerificationAdminService],
 })
 export class BreederVerificationAdminModule {}
