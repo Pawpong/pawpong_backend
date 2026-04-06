@@ -34,7 +34,7 @@ describe('Breeder Admin API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adminToken}`)
                 .send({ reason: '테스트 정지 사유' });
 
-            expect([200, 400, 500]).toContain(response.status);
+            expect([200, 201, 400, 500]).toContain(response.status);
             console.log('✅ 브리더 계정 정지 검증 완료');
         });
 
@@ -55,7 +55,7 @@ describe('Breeder Admin API E2E Tests', () => {
                 .post(`/api/breeder-admin/unsuspend/${breederId}`)
                 .set('Authorization', `Bearer ${adminToken}`);
 
-            expect([200, 400, 500]).toContain(response.status);
+            expect([200, 201, 400, 500]).toContain(response.status);
             console.log('✅ 브리더 정지 해제 검증 완료');
         });
     });

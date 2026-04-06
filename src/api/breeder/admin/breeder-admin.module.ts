@@ -10,6 +10,19 @@ import { BreederVerificationAdminModule } from './verification/breeder-verificat
 
 import { BreederAdminController } from './breeder-admin.controller';
 import { BreederAdminService } from './breeder-admin.service';
+import { SuspendBreederUseCase } from './application/use-cases/suspend-breeder.use-case';
+import { UnsuspendBreederUseCase } from './application/use-cases/unsuspend-breeder.use-case';
+import { SendBreederRemindNotificationsUseCase } from './application/use-cases/send-breeder-remind-notifications.use-case';
+import { SetBreederTestAccountUseCase } from './application/use-cases/set-breeder-test-account.use-case';
+import { BREEDER_ADMIN_READER } from './application/ports/breeder-admin-reader.port';
+import { BREEDER_ADMIN_WRITER } from './application/ports/breeder-admin-writer.port';
+import { BREEDER_ADMIN_NOTIFIER } from './application/ports/breeder-admin-notifier.port';
+import { BreederAdminPolicyService } from './domain/services/breeder-admin-policy.service';
+import { BreederAdminActivityLogFactoryService } from './domain/services/breeder-admin-activity-log-factory.service';
+import { BreederAdminPresentationService } from './domain/services/breeder-admin-presentation.service';
+import { BreederAdminReminderPolicyService } from './domain/services/breeder-admin-reminder-policy.service';
+import { BreederAdminMongooseRepositoryAdapter } from './infrastructure/breeder-admin-mongoose.repository.adapter';
+import { BreederAdminNotifierAdapter } from './infrastructure/breeder-admin-notifier.adapter';
 
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 import { Admin, AdminSchema } from '../../../schema/admin.schema';
@@ -42,7 +55,31 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
         BreederVerificationAdminModule,
     ],
     controllers: [BreederAdminController],
-    providers: [BreederAdminService],
+    providers: [
+        BreederAdminService,
+        SuspendBreederUseCase,
+        UnsuspendBreederUseCase,
+        SendBreederRemindNotificationsUseCase,
+        SetBreederTestAccountUseCase,
+        BreederAdminPolicyService,
+        BreederAdminActivityLogFactoryService,
+        BreederAdminPresentationService,
+        BreederAdminReminderPolicyService,
+        BreederAdminMongooseRepositoryAdapter,
+        BreederAdminNotifierAdapter,
+        {
+            provide: BREEDER_ADMIN_READER,
+            useExisting: BreederAdminMongooseRepositoryAdapter,
+        },
+        {
+            provide: BREEDER_ADMIN_WRITER,
+            useExisting: BreederAdminMongooseRepositoryAdapter,
+        },
+        {
+            provide: BREEDER_ADMIN_NOTIFIER,
+            useExisting: BreederAdminNotifierAdapter,
+        },
+    ],
     exports: [BreederAdminService, BreederReportAdminModule, BreederVerificationAdminModule],
 })
 export class BreederAdminModule {}
