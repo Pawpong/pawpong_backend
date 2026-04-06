@@ -4,6 +4,12 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { PlatformAdminController } from './platform-admin.controller';
 
 import { PlatformAdminService } from './platform-admin.service';
+import { PLATFORM_ADMIN_READER } from './application/ports/platform-admin-reader.port';
+import { GetPlatformMvpStatsUseCase } from './application/use-cases/get-platform-mvp-stats.use-case';
+import { GetPlatformStatsUseCase } from './application/use-cases/get-platform-stats.use-case';
+import { PlatformAdminPresentationService } from './domain/services/platform-admin-presentation.service';
+import { PlatformAdminQueryPolicyService } from './domain/services/platform-admin-query-policy.service';
+import { PlatformAdminMongooseReaderAdapter } from './infrastructure/platform-admin-mongoose-reader.adapter';
 
 import { Admin, AdminSchema } from '../../../schema/admin.schema';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
@@ -29,7 +35,18 @@ import { AdoptionApplication, AdoptionApplicationSchema } from '../../../schema/
         ]),
     ],
     controllers: [PlatformAdminController],
-    providers: [PlatformAdminService],
+    providers: [
+        PlatformAdminService,
+        GetPlatformStatsUseCase,
+        GetPlatformMvpStatsUseCase,
+        PlatformAdminPresentationService,
+        PlatformAdminQueryPolicyService,
+        PlatformAdminMongooseReaderAdapter,
+        {
+            provide: PLATFORM_ADMIN_READER,
+            useExisting: PlatformAdminMongooseReaderAdapter,
+        },
+    ],
     exports: [PlatformAdminService],
 })
 export class PlatformAdminModule {}
