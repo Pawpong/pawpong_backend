@@ -12,6 +12,21 @@ import { StorageModule } from '../../../common/storage/storage.module';
 import { FeedCommentModule } from '../comment/feed-comment.module';
 import { FeedLikeModule } from '../like/feed-like.module';
 import { FeedTagModule } from '../tag/feed-tag.module';
+import { GetFeedUseCase } from './application/use-cases/get-feed.use-case';
+import { GetPopularVideosUseCase } from './application/use-cases/get-popular-videos.use-case';
+import { GetVideoMetaUseCase } from './application/use-cases/get-video-meta.use-case';
+import { GetUploadUrlUseCase } from './application/use-cases/get-upload-url.use-case';
+import { CompleteUploadUseCase } from './application/use-cases/complete-upload.use-case';
+import { GetMyVideosUseCase } from './application/use-cases/get-my-videos.use-case';
+import { DeleteVideoUseCase } from './application/use-cases/delete-video.use-case';
+import { ToggleVideoVisibilityUseCase } from './application/use-cases/toggle-video-visibility.use-case';
+import { FeedVideoPresentationService } from './domain/services/feed-video-presentation.service';
+import { FeedVideoCommandPolicyService } from './domain/services/feed-video-command-policy.service';
+import { FeedVideoAssetUrlService } from './infrastructure/feed-video-asset-url.service';
+import { FeedVideoMongooseReaderAdapter } from './infrastructure/feed-video-mongoose-reader.adapter';
+import { FeedVideoMongooseCommandAdapter } from './infrastructure/feed-video-mongoose-command.adapter';
+import { FEED_VIDEO_READER } from './application/ports/feed-video-reader.port';
+import { FEED_VIDEO_COMMAND } from './application/ports/feed-video-command.port';
 
 /**
  * 피드 동영상 모듈
@@ -49,7 +64,32 @@ import { FeedTagModule } from '../tag/feed-tag.module';
         FeedTagModule,
     ],
     controllers: [FeedVideoController],
-    providers: [FeedVideoService, FfmpegService, VideoEncodingProcessor],
+    providers: [
+        FeedVideoService,
+        FfmpegService,
+        VideoEncodingProcessor,
+        GetFeedUseCase,
+        GetPopularVideosUseCase,
+        GetVideoMetaUseCase,
+        GetUploadUrlUseCase,
+        CompleteUploadUseCase,
+        GetMyVideosUseCase,
+        DeleteVideoUseCase,
+        ToggleVideoVisibilityUseCase,
+        FeedVideoPresentationService,
+        FeedVideoCommandPolicyService,
+        FeedVideoAssetUrlService,
+        FeedVideoMongooseReaderAdapter,
+        FeedVideoMongooseCommandAdapter,
+        {
+            provide: FEED_VIDEO_READER,
+            useExisting: FeedVideoMongooseReaderAdapter,
+        },
+        {
+            provide: FEED_VIDEO_COMMAND,
+            useExisting: FeedVideoMongooseCommandAdapter,
+        },
+    ],
     exports: [FeedVideoService],
 })
 export class FeedVideoModule {}

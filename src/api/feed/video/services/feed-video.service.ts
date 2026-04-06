@@ -1,17 +1,22 @@
 import { Injectable, Inject, BadRequestException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
-import { v4 as uuidv4 } from 'uuid';
 import { Response } from 'express';
 
 import { StorageService } from '../../../../common/storage/storage.service';
 import { RedisService } from '../../../../common/redis/redis.module';
 
 import { Video, VideoStatus } from '../../../../schema/video.schema';
+import { GetFeedUseCase } from '../application/use-cases/get-feed.use-case';
+import { GetPopularVideosUseCase } from '../application/use-cases/get-popular-videos.use-case';
+import { GetVideoMetaUseCase } from '../application/use-cases/get-video-meta.use-case';
+import { GetUploadUrlUseCase } from '../application/use-cases/get-upload-url.use-case';
+import { CompleteUploadUseCase } from '../application/use-cases/complete-upload.use-case';
+import { GetMyVideosUseCase } from '../application/use-cases/get-my-videos.use-case';
+import { DeleteVideoUseCase } from '../application/use-cases/delete-video.use-case';
+import { ToggleVideoVisibilityUseCase } from '../application/use-cases/toggle-video-visibility.use-case';
 
 /**
  * 피드 동영상 서비스
@@ -26,8 +31,15 @@ export class FeedVideoService {
         @InjectModel(Video.name) private videoModel: Model<Video>,
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
         private storageService: StorageService,
-        @InjectQueue('video') private videoQueue: Queue,
         private redisService: RedisService,
+        private readonly getFeedUseCase: GetFeedUseCase,
+        private readonly getPopularVideosUseCase: GetPopularVideosUseCase,
+        private readonly getVideoMetaUseCase: GetVideoMetaUseCase,
+        private readonly getUploadUrlUseCase: GetUploadUrlUseCase,
+        private readonly completeUploadUseCase: CompleteUploadUseCase,
+        private readonly getMyVideosUseCase: GetMyVideosUseCase,
+        private readonly deleteVideoUseCase: DeleteVideoUseCase,
+        private readonly toggleVideoVisibilityUseCase: ToggleVideoVisibilityUseCase,
     ) {}
 
     /**
@@ -42,31 +54,9 @@ export class FeedVideoService {
         tags?: string[],
     ) {
         this.logger.log(`[getUploadUrl] 업로드 URL 발급 요청 - userId: ${userId}`);
-
-        // 고유한 파일 키 생성
-        const videoKey = `videos/raw/${uuidv4()}.mp4`;
-
-        // Presigned Upload URL 생성 (10분 유효)
-        const uploadUrl = await this.storageService.generatePresignedUploadUrl(videoKey, 600);
-
-        // DB에 pending 상태로 저장
-        const video = await this.videoModel.create({
-            uploadedBy: new Types.ObjectId(userId),
-            uploaderModel,
-            title,
-            description,
-            tags: tags || [],
-            status: VideoStatus.PENDING,
-            originalKey: videoKey,
-        });
-
-        this.logger.log(`[getUploadUrl] 동영상 레코드 생성 - videoId: ${video.id}`);
-
-        return {
-            videoId: video.id as string,
-            uploadUrl,
-            videoKey,
-        };
+        const result = await this.getUploadUrlUseCase.execute(userId, uploaderModel, title, description, tags);
+        this.logger.log(`[getUploadUrl] 동영상 레코드 생성 - videoId: ${result.videoId}`);
+        return result;
     }
 
     /**
@@ -74,136 +64,16 @@ export class FeedVideoService {
      */
     async completeUpload(videoId: string, userId: string) {
         this.logger.log(`[completeUpload] 업로드 완료 알림 - videoId: ${videoId}`);
-
-        const video = await this.videoModel.findById(videoId);
-
-        if (!video) {
-            throw new BadRequestException('동영상을 찾을 수 없습니다.');
-        }
-
-        // 권한 확인
-        if (video.uploadedBy.toString() !== userId) {
-            throw new BadRequestException('권한이 없습니다.');
-        }
-
-        // 이미 처리 중인 경우
-        if (video.status !== VideoStatus.PENDING) {
-            throw new BadRequestException('이미 처리 중이거나 완료된 동영상입니다.');
-        }
-
-        // 상태 업데이트
-        video.status = VideoStatus.PROCESSING;
-        await video.save();
-
-        // BullMQ 작업 큐에 추가
-        await this.videoQueue.add(
-            'encode-hls',
-            {
-                videoId: video.id as string,
-                originalKey: video.originalKey,
-            },
-            {
-                priority: 1, // 높은 우선순위
-            },
-        );
-
+        const result = await this.completeUploadUseCase.execute(videoId, userId);
         this.logger.log(`[completeUpload] 인코딩 작업 큐에 추가됨 - videoId: ${videoId}`);
-
-        return { status: VideoStatus.PROCESSING };
+        return result;
     }
 
     /**
      * 동영상 메타데이터 조회 (Redis 캐싱)
      */
     async getVideoMeta(videoId: string) {
-        this.logger.log(`[getVideoMeta] 동영상 조회 - videoId: ${videoId}`);
-
-        // 1. Redis 캐시 확인
-        const cacheKey = `video:meta:${videoId}`;
-        const cached = await this.cacheManager.get(cacheKey);
-        if (cached) {
-            this.logger.debug(`[getVideoMeta] 캐시 히트 - videoId: ${videoId}`);
-            return cached;
-        }
-
-        // 2. DB 조회
-        const video = await this.videoModel
-            .findById(videoId)
-            .populate('uploadedBy', 'name profileImageFileName businessName')
-            .lean();
-
-        if (!video) {
-            throw new BadRequestException('동영상을 찾을 수 없습니다.');
-        }
-
-        if (video.status !== VideoStatus.READY) {
-            // 처리 중인 경우 상태만 반환
-            return {
-                videoId: video._id,
-                status: video.status,
-                title: video.title,
-                failureReason: video.failureReason,
-            };
-        }
-
-        // 3. Signed URL 생성 (50분 유효, Redis 캐싱)
-        const playUrl = await this.getSignedUrlWithCache(
-            video.hlsManifestKey,
-            3000, // 50분
-        );
-        const thumbnailUrl = await this.getSignedUrlWithCache(video.thumbnailKey, 3000);
-
-        const result = {
-            videoId: video._id,
-            title: video.title,
-            description: video.description,
-            status: video.status,
-            playUrl,
-            thumbnailUrl,
-            duration: video.duration,
-            width: video.width,
-            height: video.height,
-            viewCount: video.viewCount,
-            likeCount: video.likeCount,
-            commentCount: video.commentCount,
-            tags: video.tags,
-            uploadedBy: video.uploadedBy,
-            createdAt: video.createdAt,
-        };
-
-        // 4. Redis에 캐싱 (5분)
-        await this.cacheManager.set(cacheKey, result, 300000);
-
-        // 5. 세그먼트 프리로드 (비동기, 응답 지연 없음)
-        this.preloadHLSSegments(videoId).catch((err) => {
-            this.logger.debug(`[getVideoMeta] 세그먼트 프리로드 실패 (무시):`, err);
-        });
-
-        return result;
-    }
-
-    /**
-     * Signed URL Redis 캐싱
-     * S3 요청 최소화가 핵심!
-     */
-    private async getSignedUrlWithCache(fileKey: string, ttlSeconds: number): Promise<string> {
-        if (!fileKey) return '';
-
-        const cacheKey = `signed-url:${fileKey}`;
-
-        // Redis에서 확인
-        const cached = await this.cacheManager.get<string>(cacheKey);
-        if (cached) {
-            return cached;
-        }
-
-        // Signed URL 생성
-        const url = this.storageService.generateSignedUrl(fileKey, ttlSeconds / 60);
-
-        // Redis에 캐싱 (URL 유효시간보다 10분 짧게)
-        await this.cacheManager.set(cacheKey, url, (ttlSeconds - 600) * 1000);
-
-        return url;
+        return this.getVideoMetaUseCase.execute(videoId);
     }
 
     /**
@@ -228,100 +98,14 @@ export class FeedVideoService {
      * 피드 조회 (최신순, Redis 캐싱)
      */
     async getFeed(page: number = 1, limit: number = 20) {
-        this.logger.log(`[getFeed] 피드 조회 - page: ${page}, limit: ${limit}`);
-
-        const cacheKey = `video:feed:${page}:${limit}`;
-
-        // Redis 캐시 확인
-        const cached = await this.cacheManager.get(cacheKey);
-        if (cached) {
-            this.logger.debug(`[getFeed] 캐시 히트`);
-            return cached;
-        }
-
-        const skip = (page - 1) * limit;
-
-        const [videos, totalCount] = await Promise.all([
-            this.videoModel
-                .find({ status: VideoStatus.READY, isPublic: true })
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .populate('uploadedBy', 'name profileImageFileName businessName')
-                .lean(),
-            this.videoModel.countDocuments({
-                status: VideoStatus.READY,
-                isPublic: true,
-            }),
-        ]);
-
-        // 썸네일 Signed URL 생성 (캐싱)
-        const videosWithUrls = await Promise.all(
-            videos.map(async (video) => ({
-                videoId: video._id,
-                title: video.title,
-                thumbnailUrl: await this.getSignedUrlWithCache(video.thumbnailKey, 3000),
-                duration: video.duration,
-                viewCount: video.viewCount,
-                likeCount: video.likeCount,
-                uploadedBy: video.uploadedBy,
-                createdAt: video.createdAt,
-            })),
-        );
-
-        const result = {
-            items: videosWithUrls,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: totalCount,
-                totalPages: Math.ceil(totalCount / limit),
-                hasNextPage: page < Math.ceil(totalCount / limit),
-                hasPrevPage: page > 1,
-            },
-        };
-
-        // Redis에 캐싱 (2분)
-        await this.cacheManager.set(cacheKey, result, 120000);
-
-        return result;
+        return this.getFeedUseCase.execute(page, limit);
     }
 
     /**
      * 인기 동영상 조회 (조회수 기준)
      */
     async getPopularVideos(limit: number = 10) {
-        this.logger.log(`[getPopularVideos] 인기 동영상 조회 - limit: ${limit}`);
-
-        const cacheKey = `video:popular:${limit}`;
-
-        const cached = await this.cacheManager.get(cacheKey);
-        if (cached) {
-            return cached;
-        }
-
-        const videos = await this.videoModel
-            .find({ status: VideoStatus.READY, isPublic: true })
-            .sort({ viewCount: -1 })
-            .limit(limit)
-            .populate('uploadedBy', 'name profileImageFileName businessName')
-            .lean();
-
-        const videosWithUrls = await Promise.all(
-            videos.map(async (video) => ({
-                videoId: video._id,
-                title: video.title,
-                thumbnailUrl: await this.getSignedUrlWithCache(video.thumbnailKey, 3000),
-                duration: video.duration,
-                viewCount: video.viewCount,
-                uploadedBy: video.uploadedBy,
-            })),
-        );
-
-        // 10분 캐싱
-        await this.cacheManager.set(cacheKey, videosWithUrls, 600000);
-
-        return videosWithUrls;
+        return this.getPopularVideosUseCase.execute(limit);
     }
 
     /**
@@ -329,46 +113,7 @@ export class FeedVideoService {
      */
     async getMyVideos(userId: string, page: number = 1, limit: number = 20) {
         this.logger.log(`[getMyVideos] 내 동영상 조회 - userId: ${userId}`);
-
-        const skip = (page - 1) * limit;
-
-        const [videos, totalCount] = await Promise.all([
-            this.videoModel
-                .find({ uploadedBy: new Types.ObjectId(userId) })
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .lean(),
-            this.videoModel.countDocuments({
-                uploadedBy: new Types.ObjectId(userId),
-            }),
-        ]);
-
-        const videosWithUrls = await Promise.all(
-            videos.map(async (video) => ({
-                videoId: video._id,
-                title: video.title,
-                status: video.status,
-                thumbnailUrl: video.thumbnailKey ? await this.getSignedUrlWithCache(video.thumbnailKey, 3000) : null,
-                duration: video.duration,
-                viewCount: video.viewCount,
-                isPublic: video.isPublic,
-                createdAt: video.createdAt,
-                failureReason: video.failureReason,
-            })),
-        );
-
-        return {
-            items: videosWithUrls,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: totalCount,
-                totalPages: Math.ceil(totalCount / limit),
-                hasNextPage: page < Math.ceil(totalCount / limit),
-                hasPrevPage: page > 1,
-            },
-        };
+        return this.getMyVideosUseCase.execute(userId, page, limit);
     }
 
     /**
@@ -376,42 +121,9 @@ export class FeedVideoService {
      */
     async deleteVideo(videoId: string, userId: string) {
         this.logger.log(`[deleteVideo] 동영상 삭제 - videoId: ${videoId}`);
-
-        const video = await this.videoModel.findById(videoId);
-
-        if (!video) {
-            throw new BadRequestException('동영상을 찾을 수 없습니다.');
-        }
-
-        if (video.uploadedBy.toString() !== userId) {
-            throw new BadRequestException('권한이 없습니다.');
-        }
-
-        // S3 파일 삭제 (원본, HLS, 썸네일)
-        const deletePromises: Promise<any>[] = [];
-
-        if (video.originalKey) {
-            deletePromises.push(this.storageService.deleteFile(video.originalKey).catch(() => {}));
-        }
-
-        if (video.thumbnailKey) {
-            deletePromises.push(this.storageService.deleteFile(video.thumbnailKey).catch(() => {}));
-        }
-
-        // HLS 폴더 전체 삭제 (videos/hls/{videoId}/*)
-        // TODO: HLS 파일들 삭제 로직 추가
-
-        await Promise.all(deletePromises);
-
-        // DB에서 삭제
-        await this.videoModel.deleteOne({ _id: videoId });
-
-        // 캐시 무효화
-        await this.cacheManager.del(`video:meta:${videoId}`);
-
+        const result = await this.deleteVideoUseCase.execute(videoId, userId);
         this.logger.log(`[deleteVideo] 동영상 삭제 완료 - videoId: ${videoId}`);
-
-        return { success: true };
+        return result;
     }
 
     /**
@@ -419,24 +131,7 @@ export class FeedVideoService {
      */
     async toggleVisibility(videoId: string, userId: string) {
         this.logger.log(`[toggleVisibility] 공개 상태 전환 - videoId: ${videoId}`);
-
-        const video = await this.videoModel.findById(videoId);
-
-        if (!video) {
-            throw new BadRequestException('동영상을 찾을 수 없습니다.');
-        }
-
-        if (video.uploadedBy.toString() !== userId) {
-            throw new BadRequestException('권한이 없습니다.');
-        }
-
-        video.isPublic = !video.isPublic;
-        await video.save();
-
-        // 캐시 무효화
-        await this.cacheManager.del(`video:meta:${videoId}`);
-
-        return { isPublic: video.isPublic };
+        return this.toggleVideoVisibilityUseCase.execute(videoId, userId);
     }
 
     /**
