@@ -9,9 +9,21 @@ import {
 } from '../../dto/response/notification-response.dto';
 import { NotificationInboxRecord } from '../../application/ports/notification-inbox.port';
 
+type NotificationReadableRecord = {
+    _id: { toString(): string };
+    type: NotificationInboxRecord['type'];
+    title: string;
+    body: string;
+    metadata?: Record<string, any>;
+    isRead: boolean;
+    readAt?: Date;
+    targetUrl?: string;
+    createdAt: Date;
+};
+
 @Injectable()
 export class NotificationResponseMapperService {
-    toItem(notification: NotificationInboxRecord): NotificationResponseDto {
+    toItem(notification: NotificationReadableRecord): NotificationResponseDto {
         return {
             notificationId: notification._id.toString(),
             type: notification.type,
