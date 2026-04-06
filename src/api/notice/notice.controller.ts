@@ -1,12 +1,12 @@
 import { Controller, Get, Query, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
-import { NoticeService } from './notice.service';
-
 import { PaginationRequestDto } from '../../common/dto/pagination/pagination-request.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { NoticeResponseDto } from './dto/response/notice-response.dto';
+import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';
+import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
 
 /**
  * 공지사항 컨트롤러 (공개 API)
@@ -15,7 +15,10 @@ import { NoticeResponseDto } from './dto/response/notice-response.dto';
 @ApiTags('공지사항')
 @Controller('notice')
 export class NoticeController {
-    constructor(private readonly noticeService: NoticeService) {}
+    constructor(
+        private readonly getNoticeListUseCase: GetNoticeListUseCase,
+        private readonly getNoticeDetailUseCase: GetNoticeDetailUseCase,
+    ) {}
 
     /**
      * 공지사항 목록 조회 (공개)
@@ -31,7 +34,7 @@ export class NoticeController {
     async getNoticeList(
         @Query() paginationData: PaginationRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<NoticeResponseDto>>> {
-        const result = await this.noticeService.getNoticeList(paginationData, 'published');
+        const result = await this.getNoticeListUseCase.execute(paginationData, 'published');
         return {
             success: true,
             code: 200,
@@ -53,7 +56,7 @@ export class NoticeController {
     @ApiResponse({ status: 400, description: '잘못된 요청' })
     @ApiResponse({ status: 404, description: '공지사항을 찾을 수 없음' })
     async getNoticeDetail(@Param('noticeId') noticeId: string): Promise<ApiResponseDto<NoticeResponseDto>> {
-        const result = await this.noticeService.getNoticeDetail(noticeId, true);
+        const result = await this.getNoticeDetailUseCase.execute(noticeId, true);
         return {
             success: true,
             code: 200,
