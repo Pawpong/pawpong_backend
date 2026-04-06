@@ -1,0 +1,19 @@
+import { Inject, Injectable } from '@nestjs/common';
+
+import { FaqResponseDto } from '../../../dto/response/faq-response.dto';
+import { HomeFaqCatalogService } from '../../../domain/services/home-faq-catalog.service';
+import { HOME_ADMIN_MANAGER, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
+
+@Injectable()
+export class GetAllFaqsUseCase {
+    constructor(
+        @Inject(HOME_ADMIN_MANAGER)
+        private readonly homeAdminManager: HomeAdminManagerPort,
+        private readonly homeFaqCatalogService: HomeFaqCatalogService,
+    ) {}
+
+    async execute(): Promise<FaqResponseDto[]> {
+        const faqs = await this.homeAdminManager.readAllFaqs();
+        return this.homeFaqCatalogService.buildResponse(faqs);
+    }
+}
