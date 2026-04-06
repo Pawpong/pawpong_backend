@@ -1,0 +1,46 @@
+import { Inject, Injectable } from '@nestjs/common';
+
+import { BreederLevel } from '../../../../../../common/enum/user.enum';
+import { BreederLevelChangeRequestDto } from '../../dto/request/breeder-level-change-request.dto';
+import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
+import { BREEDER_VERIFICATION_ADMIN_WRITER } from '../ports/breeder-verification-admin-writer.port';
+import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
+import type { BreederVerificationAdminWriterPort } from '../ports/breeder-verification-admin-writer.port';
+import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
+import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
+
+@Injectable()
+export class ChangeBreederLevelUseCase {
+    constructor(
+        @Inject(BREEDER_VERIFICATION_ADMIN_READER)
+        private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
+        @Inject(BREEDER_VERIFICATION_ADMIN_WRITER)
+        private readonly breederVerificationAdminWriter: BreederVerificationAdminWriterPort,
+        private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
+        private readonly breederVerificationAdminPresentationService: BreederVerificationAdminPresentationService,
+    ) {}
+
+    async execute(adminId: string, breederId: string, levelData: BreederLevelChangeRequestDto) {
+        const admin = this.breederVerificationAdminPolicyService.assertCanManageBreeders(
+            await this.breederVerificationAdminReader.findAdminById(adminId),
+            'Access denied',
+        );
+
+        const breeder = this.breederVerificationAdminPolicyService.assertBreederExists(
+            await this.breederVerificationAdminReader.findBreederById(breederId),
+        );
+
+        const changedAt = new Date();
+        const previousLevel = breeder.verification?.level || BreederLevel.NEW;
+
+        await this.breederVerificationAdminWriter.updateBreederLevel(breederId, levelData.newLevel);
+
+        return this.breederVerificationAdminPresentationService.toLevelChangeResponse(
+            breeder,
+            previousLevel,
+            levelData.newLevel,
+            changedAt,
+            admin.name,
+        );
+    }
+}
