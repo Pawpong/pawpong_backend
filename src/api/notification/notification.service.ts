@@ -1,7 +1,5 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Notification, NotificationType, NOTIFICATION_MESSAGES } from '../../schema/notification.schema';
+import { Injectable } from '@nestjs/common';
+import { Notification, NotificationType } from '../../schema/notification.schema';
 import { NotificationListRequestDto } from './dto/request/notification-list-request.dto';
 import {
     NotificationResponseDto,
@@ -9,28 +7,29 @@ import {
     MarkAsReadResponseDto,
     MarkAllAsReadResponseDto,
 } from './dto/response/notification-response.dto';
-import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { NotificationBuilder, NotificationCreateData, EmailData } from './builder/notification.builder';
 import { RecipientType } from '../../common/enum/user.enum';
-import { MailService } from '../../common/mail/mail.service';
+import { CreateNotificationUseCase } from './application/use-cases/create-notification.use-case';
+import { CreateNotificationFromBuilderUseCase } from './application/use-cases/create-notification-from-builder.use-case';
 import { GetNotificationsUseCase } from './application/use-cases/get-notifications.use-case';
 import { GetUnreadNotificationCountUseCase } from './application/use-cases/get-unread-notification-count.use-case';
 import { MarkNotificationReadUseCase } from './application/use-cases/mark-notification-read.use-case';
 import { MarkAllNotificationsReadUseCase } from './application/use-cases/mark-all-notifications-read.use-case';
 import { DeleteNotificationUseCase } from './application/use-cases/delete-notification.use-case';
+import { SendNotificationEmailUseCase } from './application/use-cases/send-notification-email.use-case';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 
 @Injectable()
 export class NotificationService {
     constructor(
-        @InjectModel(Notification.name) private notificationModel: Model<Notification>,
-        private readonly logger: CustomLoggerService,
-        private readonly mailService: MailService,
+        private readonly createNotificationUseCase: CreateNotificationUseCase,
+        private readonly createNotificationFromBuilderUseCase: CreateNotificationFromBuilderUseCase,
         private readonly getNotificationsUseCase: GetNotificationsUseCase,
         private readonly getUnreadNotificationCountUseCase: GetUnreadNotificationCountUseCase,
         private readonly markNotificationReadUseCase: MarkNotificationReadUseCase,
         private readonly markAllNotificationsReadUseCase: MarkAllNotificationsReadUseCase,
         private readonly deleteNotificationUseCase: DeleteNotificationUseCase,
+        private readonly sendNotificationEmailUseCase: SendNotificationEmailUseCase,
     ) {}
 
     /**
@@ -43,45 +42,7 @@ export class NotificationService {
         metadata?: Record<string, any>,
         targetUrl?: string,
     ): Promise<Notification> {
-        this.logger.logStart('createNotification', '알림 생성 시작', { userId, type });
-
-        // 메시지 템플릿 가져오기
-        const template = NOTIFICATION_MESSAGES[type];
-        if (!template) {
-            throw new BadRequestException(`알 수 없는 알림 타입: ${type}`);
-        }
-
-        // 동적 데이터로 메시지 생성
-        let title = template.title;
-        let body = template.body;
-
-        // 메타데이터에서 치환
-        if (metadata) {
-            Object.entries(metadata).forEach(([key, value]) => {
-                const placeholder = `{${key}}`;
-                title = title.replace(placeholder, String(value));
-                body = body.replace(placeholder, String(value));
-            });
-        }
-
-        const notification = new this.notificationModel({
-            userId,
-            userRole,
-            type,
-            title,
-            body,
-            metadata,
-            targetUrl,
-            isRead: false,
-        });
-
-        await notification.save();
-
-        this.logger.logSuccess('createNotification', '알림 생성 완료', {
-            notificationId: (notification._id as any).toString(),
-        });
-
-        return notification;
+        return this.createNotificationUseCase.execute(userId, userRole, type, metadata, targetUrl);
     }
 
     /**
@@ -140,39 +101,7 @@ export class NotificationService {
      * 하위 호환성을 위해 구 버전 NotificationType도 처리
      */
     private async createNotificationFromBuilder(data: NotificationCreateData): Promise<NotificationResponseDto> {
-        // RecipientType을 userRole로 변환
-        const userRole = data.recipientType === RecipientType.BREEDER ? 'breeder' : 'adopter';
-
-        // 구 버전 빌더는 직접 DB에 저장 (NOTIFICATION_MESSAGES를 사용하지 않음)
-        const notification = new this.notificationModel({
-            userId: data.recipientId,
-            userRole,
-            type: data.type, // NotificationType enum은 이미 소문자 값으로 정의됨 (e.g., 'consult_request_confirmed')
-            title: data.title,
-            body: data.content,
-            metadata: data.metadata,
-            targetUrl: data.targetUrl, // targetUrl 필드 사용
-            isRead: false,
-        });
-
-        await notification.save();
-
-        this.logger.logSuccess('createNotificationFromBuilder', '빌더를 통한 알림 생성 완료', {
-            notificationId: (notification._id as any).toString(),
-        });
-
-        // Notification을 NotificationResponseDto로 변환
-        return {
-            notificationId: (notification._id as any).toString(),
-            type: notification.type,
-            title: notification.title,
-            body: notification.body,
-            metadata: notification.metadata,
-            isRead: notification.isRead,
-            readAt: notification.readAt,
-            targetUrl: notification.targetUrl,
-            createdAt: notification.createdAt,
-        };
+        return this.createNotificationFromBuilderUseCase.execute(data);
     }
 
     /**
@@ -181,31 +110,6 @@ export class NotificationService {
      * @returns 발송 시작 여부 (비동기 발송, 결과를 기다리지 않음)
      */
     private sendEmail(emailData: EmailData): boolean {
-        this.logger.logStart('sendEmail', '이메일 발송 시작 (비동기)', {
-            to: emailData.to,
-            subject: emailData.subject,
-        });
-
-        // MailService를 사용하여 비동기 이메일 발송 (결과를 기다리지 않음)
-        this.mailService
-            .sendMail({
-                to: emailData.to,
-                subject: emailData.subject,
-                html: emailData.html,
-            })
-            .then((result) => {
-                if (result) {
-                    this.logger.logSuccess('sendEmail', '이메일 발송 완료', { to: emailData.to });
-                } else {
-                    this.logger.logWarning('sendEmail', '이메일 발송 실패 (MailService 반환값 false)', {
-                        to: emailData.to,
-                    });
-                }
-            })
-            .catch((error) => {
-                this.logger.logError('sendEmail', '이메일 발송 중 에러 발생', error);
-            });
-
-        return true; // 발송 시작됨
+        return this.sendNotificationEmailUseCase.execute(emailData);
     }
 }
