@@ -1,7 +1,7 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
 
-import { AppVersionService } from './app-version.service';
+import { CheckAppVersionUseCase } from './application/use-cases/check-app-version.use-case';
 
 import { AppVersionCheckResponseDto } from './dto/response/app-version-check-response.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
@@ -13,7 +13,7 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 @ApiTags('앱 버전')
 @Controller('app-version')
 export class AppVersionController {
-    constructor(private readonly appVersionService: AppVersionService) {}
+    constructor(private readonly checkAppVersionUseCase: CheckAppVersionUseCase) {}
 
     /**
      * 앱 버전 체크 (RN 앱 시작 시 호출)
@@ -43,13 +43,7 @@ export class AppVersionController {
         @Query('platform') platform: 'ios' | 'android',
         @Query('currentVersion') currentVersion: string,
     ): Promise<ApiResponseDto<AppVersionCheckResponseDto>> {
-        const result = await this.appVersionService.checkVersion(platform, currentVersion);
-        return {
-            success: true,
-            code: 200,
-            data: result,
-            message: '버전 체크 완료',
-            timestamp: new Date().toISOString(),
-        };
+        const result = await this.checkAppVersionUseCase.execute(platform, currentVersion);
+        return ApiResponseDto.success(result, '버전 체크 완료');
     }
 }
