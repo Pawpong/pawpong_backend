@@ -75,6 +75,21 @@ import { BREEDER_MANAGEMENT_ACCOUNT_COMMAND_PORT } from './application/ports/bre
 import { BreederManagementVerificationDocumentStorePort } from './application/ports/breeder-management-verification-document-store.port';
 import { BreederManagementVerificationDraftStorePort } from './application/ports/breeder-management-verification-draft-store.port';
 import { BreederManagementVerificationNotifierPort } from './application/ports/breeder-management-verification-notifier.port';
+import { BREEDER_MANAGEMENT_ADMIN_BANNER_READER } from './admin/application/ports/breeder-management-admin-banner-reader.port';
+import { BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER } from './admin/application/ports/breeder-management-admin-banner-writer.port';
+import { GetAllProfileBannersUseCase } from './admin/application/use-cases/get-all-profile-banners.use-case';
+import { GetActiveProfileBannersUseCase } from './admin/application/use-cases/get-active-profile-banners.use-case';
+import { CreateProfileBannerUseCase } from './admin/application/use-cases/create-profile-banner.use-case';
+import { UpdateProfileBannerUseCase } from './admin/application/use-cases/update-profile-banner.use-case';
+import { DeleteProfileBannerUseCase } from './admin/application/use-cases/delete-profile-banner.use-case';
+import { GetAllCounselBannersUseCase } from './admin/application/use-cases/get-all-counsel-banners.use-case';
+import { GetActiveCounselBannersUseCase } from './admin/application/use-cases/get-active-counsel-banners.use-case';
+import { CreateCounselBannerUseCase } from './admin/application/use-cases/create-counsel-banner.use-case';
+import { UpdateCounselBannerUseCase } from './admin/application/use-cases/update-counsel-banner.use-case';
+import { DeleteCounselBannerUseCase } from './admin/application/use-cases/delete-counsel-banner.use-case';
+import { BreederManagementBannerPresentationService } from './admin/domain/services/breeder-management-banner-presentation.service';
+import { BreederManagementAdminBannerReaderAdapter } from './admin/infrastructure/breeder-management-admin-banner-reader.adapter';
+import { BreederManagementAdminBannerWriterAdapter } from './admin/infrastructure/breeder-management-admin-banner-writer.adapter';
 
 import { BreederRepository } from './repository/breeder.repository';
 import { ParentPetRepository } from './repository/parent-pet.repository';
@@ -120,6 +135,16 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         ParentPetRepository,
         AdoptionApplicationRepository,
         AvailablePetManagementRepository,
+        GetAllProfileBannersUseCase,
+        GetActiveProfileBannersUseCase,
+        CreateProfileBannerUseCase,
+        UpdateProfileBannerUseCase,
+        DeleteProfileBannerUseCase,
+        GetAllCounselBannersUseCase,
+        GetActiveCounselBannersUseCase,
+        CreateCounselBannerUseCase,
+        UpdateCounselBannerUseCase,
+        DeleteCounselBannerUseCase,
         BreederManagementDashboardAssemblerService,
         BreederManagementProfileUpdateMapperService,
         BreederManagementProfileAssemblerService,
@@ -141,8 +166,11 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederManagementApplicationDetailAssemblerService,
         BreederManagementApplicationStatusResponseFactoryService,
         BreederManagementAccountDeleteResponseFactoryService,
+        BreederManagementBannerPresentationService,
         BreederManagementProfileAdapter,
         BreederManagementFileUrlAdapter,
+        BreederManagementAdminBannerReaderAdapter,
+        BreederManagementAdminBannerWriterAdapter,
         BreederManagementListReaderAdapter,
         BreederManagementSettingsAdapter,
         BreederManagementPetCommandAdapter,
@@ -185,6 +213,14 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         {
             provide: BREEDER_MANAGEMENT_FILE_URL_PORT,
             useExisting: BreederManagementFileUrlAdapter,
+        },
+        {
+            provide: BREEDER_MANAGEMENT_ADMIN_BANNER_READER,
+            useExisting: BreederManagementAdminBannerReaderAdapter,
+        },
+        {
+            provide: BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER,
+            useExisting: BreederManagementAdminBannerWriterAdapter,
         },
         {
             provide: BREEDER_MANAGEMENT_LIST_READER_PORT,

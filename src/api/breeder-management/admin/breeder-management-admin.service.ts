@@ -1,10 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-
-import { StorageService } from '../../../common/storage/storage.service';
-import { AuthBanner, AuthBannerDocument } from '../../../schema/auth-banner.schema';
-import { CounselBanner, CounselBannerDocument } from '../../../schema/counsel-banner.schema';
+import { Injectable } from '@nestjs/common';
 
 import { ProfileBannerCreateRequestDto } from './dto/request/profile-banner-create-request.dto';
 import { ProfileBannerUpdateRequestDto } from './dto/request/profile-banner-update-request.dto';
@@ -12,13 +6,30 @@ import { ProfileBannerResponseDto } from './dto/response/profile-banner-response
 import { CounselBannerCreateRequestDto } from './dto/request/counsel-banner-create-request.dto';
 import { CounselBannerUpdateRequestDto } from './dto/request/counsel-banner-update-request.dto';
 import { CounselBannerResponseDto } from './dto/response/counsel-banner-response.dto';
+import { GetAllProfileBannersUseCase } from './application/use-cases/get-all-profile-banners.use-case';
+import { GetActiveProfileBannersUseCase } from './application/use-cases/get-active-profile-banners.use-case';
+import { CreateProfileBannerUseCase } from './application/use-cases/create-profile-banner.use-case';
+import { UpdateProfileBannerUseCase } from './application/use-cases/update-profile-banner.use-case';
+import { DeleteProfileBannerUseCase } from './application/use-cases/delete-profile-banner.use-case';
+import { GetAllCounselBannersUseCase } from './application/use-cases/get-all-counsel-banners.use-case';
+import { GetActiveCounselBannersUseCase } from './application/use-cases/get-active-counsel-banners.use-case';
+import { CreateCounselBannerUseCase } from './application/use-cases/create-counsel-banner.use-case';
+import { UpdateCounselBannerUseCase } from './application/use-cases/update-counsel-banner.use-case';
+import { DeleteCounselBannerUseCase } from './application/use-cases/delete-counsel-banner.use-case';
 
 @Injectable()
 export class BreederManagementAdminService {
     constructor(
-        @InjectModel(AuthBanner.name) private authBannerModel: Model<AuthBannerDocument>,
-        @InjectModel(CounselBanner.name) private counselBannerModel: Model<CounselBannerDocument>,
-        private readonly storageService: StorageService,
+        private readonly getAllProfileBannersUseCase: GetAllProfileBannersUseCase,
+        private readonly getActiveProfileBannersUseCase: GetActiveProfileBannersUseCase,
+        private readonly createProfileBannerUseCase: CreateProfileBannerUseCase,
+        private readonly updateProfileBannerUseCase: UpdateProfileBannerUseCase,
+        private readonly deleteProfileBannerUseCase: DeleteProfileBannerUseCase,
+        private readonly getAllCounselBannersUseCase: GetAllCounselBannersUseCase,
+        private readonly getActiveCounselBannersUseCase: GetActiveCounselBannersUseCase,
+        private readonly createCounselBannerUseCase: CreateCounselBannerUseCase,
+        private readonly updateCounselBannerUseCase: UpdateCounselBannerUseCase,
+        private readonly deleteCounselBannerUseCase: DeleteCounselBannerUseCase,
     ) {}
 
     // ==================== 프로필 배너 관리 ====================
@@ -29,20 +40,7 @@ export class BreederManagementAdminService {
      * @returns 프로필 배너 목록
      */
     async getAllProfileBanners(): Promise<ProfileBannerResponseDto[]> {
-        const banners = await this.authBannerModel.find().sort({ bannerType: 1, order: 1 }).lean().exec();
-
-        return banners.map((banner) => ({
-            bannerId: banner._id.toString(),
-            imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
-            imageFileName: banner.imageFileName,
-            bannerType: banner.bannerType,
-            linkType: banner.linkType,
-            linkUrl: banner.linkUrl,
-            title: banner.title,
-            description: banner.description,
-            order: banner.order,
-            isActive: banner.isActive !== false,
-        }));
+        return this.getAllProfileBannersUseCase.execute();
     }
 
     /**
@@ -52,24 +50,7 @@ export class BreederManagementAdminService {
      * @returns 활성화된 프로필 배너 목록
      */
     async getActiveProfileBanners(bannerType?: 'login' | 'signup'): Promise<ProfileBannerResponseDto[]> {
-        const query: any = { isActive: true };
-        if (bannerType) {
-            query.bannerType = bannerType;
-        }
-        const banners = await this.authBannerModel.find(query).sort({ order: 1 }).lean().exec();
-
-        return banners.map((banner) => ({
-            bannerId: banner._id.toString(),
-            imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
-            imageFileName: banner.imageFileName,
-            bannerType: banner.bannerType,
-            linkType: banner.linkType,
-            linkUrl: banner.linkUrl,
-            title: banner.title,
-            description: banner.description,
-            order: banner.order,
-            isActive: banner.isActive !== false,
-        }));
+        return this.getActiveProfileBannersUseCase.execute(bannerType);
     }
 
     /**
@@ -79,20 +60,7 @@ export class BreederManagementAdminService {
      * @returns 생성된 배너 정보
      */
     async createProfileBanner(data: ProfileBannerCreateRequestDto): Promise<ProfileBannerResponseDto> {
-        const newBanner = await this.authBannerModel.create(data);
-
-        return {
-            bannerId: String(newBanner._id),
-            imageUrl: this.storageService.generateSignedUrl(newBanner.imageFileName, 60 * 24),
-            imageFileName: newBanner.imageFileName,
-            bannerType: newBanner.bannerType,
-            linkType: newBanner.linkType,
-            linkUrl: newBanner.linkUrl,
-            title: newBanner.title,
-            description: newBanner.description,
-            order: newBanner.order,
-            isActive: newBanner.isActive !== false,
-        };
+        return this.createProfileBannerUseCase.execute(data);
     }
 
     /**
@@ -106,24 +74,7 @@ export class BreederManagementAdminService {
         bannerId: string,
         data: ProfileBannerUpdateRequestDto,
     ): Promise<ProfileBannerResponseDto> {
-        const banner = await this.authBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
-
-        if (!banner) {
-            throw new BadRequestException('프로필 배너를 찾을 수 없습니다.');
-        }
-
-        return {
-            bannerId: banner._id.toString(),
-            imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
-            imageFileName: banner.imageFileName,
-            bannerType: banner.bannerType,
-            linkType: banner.linkType,
-            linkUrl: banner.linkUrl,
-            title: banner.title,
-            description: banner.description,
-            order: banner.order,
-            isActive: banner.isActive !== false,
-        };
+        return this.updateProfileBannerUseCase.execute(bannerId, data);
     }
 
     /**
@@ -132,11 +83,7 @@ export class BreederManagementAdminService {
      * @param bannerId 배너 고유 ID
      */
     async deleteProfileBanner(bannerId: string): Promise<void> {
-        const result = await this.authBannerModel.findByIdAndDelete(bannerId).exec();
-
-        if (!result) {
-            throw new BadRequestException('프로필 배너를 찾을 수 없습니다.');
-        }
+        return this.deleteProfileBannerUseCase.execute(bannerId);
     }
 
     // ==================== 상담 배너 관리 ====================
@@ -147,19 +94,7 @@ export class BreederManagementAdminService {
      * @returns 상담 배너 목록
      */
     async getAllCounselBanners(): Promise<CounselBannerResponseDto[]> {
-        const banners = await this.counselBannerModel.find().sort({ order: 1 }).lean().exec();
-
-        return banners.map((banner) => ({
-            bannerId: banner._id.toString(),
-            imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
-            imageFileName: banner.imageFileName,
-            linkType: banner.linkType,
-            linkUrl: banner.linkUrl,
-            title: banner.title,
-            description: banner.description,
-            order: banner.order,
-            isActive: banner.isActive !== false,
-        }));
+        return this.getAllCounselBannersUseCase.execute();
     }
 
     /**
@@ -168,19 +103,7 @@ export class BreederManagementAdminService {
      * @returns 활성화된 상담 배너 목록
      */
     async getActiveCounselBanners(): Promise<CounselBannerResponseDto[]> {
-        const banners = await this.counselBannerModel.find({ isActive: true }).sort({ order: 1 }).lean().exec();
-
-        return banners.map((banner) => ({
-            bannerId: banner._id.toString(),
-            imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
-            imageFileName: banner.imageFileName,
-            linkType: banner.linkType,
-            linkUrl: banner.linkUrl,
-            title: banner.title,
-            description: banner.description,
-            order: banner.order,
-            isActive: banner.isActive !== false,
-        }));
+        return this.getActiveCounselBannersUseCase.execute();
     }
 
     /**
@@ -190,19 +113,7 @@ export class BreederManagementAdminService {
      * @returns 생성된 배너 정보
      */
     async createCounselBanner(data: CounselBannerCreateRequestDto): Promise<CounselBannerResponseDto> {
-        const newBanner = await this.counselBannerModel.create(data);
-
-        return {
-            bannerId: String(newBanner._id),
-            imageUrl: this.storageService.generateSignedUrl(newBanner.imageFileName, 60 * 24),
-            imageFileName: newBanner.imageFileName,
-            linkType: newBanner.linkType,
-            linkUrl: newBanner.linkUrl,
-            title: newBanner.title,
-            description: newBanner.description,
-            order: newBanner.order,
-            isActive: newBanner.isActive !== false,
-        };
+        return this.createCounselBannerUseCase.execute(data);
     }
 
     /**
@@ -216,23 +127,7 @@ export class BreederManagementAdminService {
         bannerId: string,
         data: CounselBannerUpdateRequestDto,
     ): Promise<CounselBannerResponseDto> {
-        const banner = await this.counselBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
-
-        if (!banner) {
-            throw new BadRequestException('상담 배너를 찾을 수 없습니다.');
-        }
-
-        return {
-            bannerId: banner._id.toString(),
-            imageUrl: this.storageService.generateSignedUrl(banner.imageFileName, 60 * 24),
-            imageFileName: banner.imageFileName,
-            linkType: banner.linkType,
-            linkUrl: banner.linkUrl,
-            title: banner.title,
-            description: banner.description,
-            order: banner.order,
-            isActive: banner.isActive !== false,
-        };
+        return this.updateCounselBannerUseCase.execute(bannerId, data);
     }
 
     /**
@@ -241,10 +136,6 @@ export class BreederManagementAdminService {
      * @param bannerId 배너 고유 ID
      */
     async deleteCounselBanner(bannerId: string): Promise<void> {
-        const result = await this.counselBannerModel.findByIdAndDelete(bannerId).exec();
-
-        if (!result) {
-            throw new BadRequestException('상담 배너를 찾을 수 없습니다.');
-        }
+        return this.deleteCounselBannerUseCase.execute(bannerId);
     }
 }
