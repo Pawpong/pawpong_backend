@@ -29,8 +29,8 @@ describe('Upload Admin API E2E Tests', () => {
                 .get('/api/upload-admin/files')
                 .set('Authorization', `Bearer ${adminToken}`);
 
-            // S3 연결 미설정 시 500 가능
-            expect([200, 500]).toContain(response.status);
+            // 스토리지 미설정/오류 시 서비스가 BadRequestException(400)으로 감싼다.
+            expect([200, 400]).toContain(response.status);
             if (response.status === 200) {
                 expect(response.body.success).toBe(true);
             }
