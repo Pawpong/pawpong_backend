@@ -52,6 +52,7 @@ import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-
 import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
 import { CheckBreederNameDuplicateUseCase } from './application/use-cases/check-breeder-name-duplicate.use-case';
 import { CompleteSocialRegistrationUseCase } from './application/use-cases/complete-social-registration.use-case';
+import { CompleteLegacySocialRegistrationUseCase } from './application/use-cases/complete-legacy-social-registration.use-case';
 import { RefreshAuthTokenUseCase } from './application/use-cases/refresh-auth-token.use-case';
 import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
@@ -112,6 +113,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         CheckNicknameDuplicateUseCase,
         CheckBreederNameDuplicateUseCase,
         CompleteSocialRegistrationUseCase,
+        CompleteLegacySocialRegistrationUseCase,
         RefreshAuthTokenUseCase,
         LogoutUseCase,
         RegisterAdopterUseCase,
