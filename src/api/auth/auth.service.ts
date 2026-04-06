@@ -19,6 +19,8 @@ import { RegisterAdopterUseCase } from './application/use-cases/register-adopter
 import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
 import { UploadAuthProfileImageUseCase } from './application/use-cases/upload-auth-profile-image.use-case';
 import { UploadAuthBreederDocumentsUseCase } from './application/use-cases/upload-auth-breeder-documents.use-case';
+import { SubmitAuthBreederDocumentsUseCase } from './application/use-cases/submit-auth-breeder-documents.use-case';
+import { UploadAndSubmitAuthBreederDocumentsUseCase } from './application/use-cases/upload-and-submit-auth-breeder-documents.use-case';
 
 import { SocialCompleteRequestDto } from './dto/request/social-complete-request.dto';
 import { RegisterBreederRequestDto } from './dto/request/register-breeder-request.dto';
@@ -45,6 +47,8 @@ export class AuthService {
         private readonly registerBreederUseCase: RegisterBreederUseCase,
         private readonly uploadAuthProfileImageUseCase: UploadAuthProfileImageUseCase,
         private readonly uploadAuthBreederDocumentsUseCase: UploadAuthBreederDocumentsUseCase,
+        private readonly submitAuthBreederDocumentsUseCase: SubmitAuthBreederDocumentsUseCase,
+        private readonly uploadAndSubmitAuthBreederDocumentsUseCase: UploadAndSubmitAuthBreederDocumentsUseCase,
     ) {}
 
     // 유틸리티 메서드들은 AuthMapper로 이동되었습니다.
@@ -292,87 +296,7 @@ export class AuthService {
         submittedAt: Date;
         estimatedProcessingTime: string;
     }> {
-        this.logger.logStart('uploadAndSubmitBreederDocuments', '브리더 서류 파일 업로드 시작', {
-            userId,
-            breederLevel,
-        });
-
-        // 필수 파일 검증
-        if (!files.idCard || files.idCard.length === 0) {
-            throw new BadRequestException('신분증 사본 파일이 필요합니다.');
-        }
-        if (!files.animalProductionLicense || files.animalProductionLicense.length === 0) {
-            throw new BadRequestException('동물생산업 등록증 파일이 필요합니다.');
-        }
-
-        // Elite 레벨은 서류를 나중에 제출할 수 있으므로 필수 검증 제거
-        // 업로드된 서류만 처리합니다.
-
-        // 파일 업로드 (GCP Storage)
-        const uploadedUrls: {
-            idCardUrl: string;
-            animalProductionLicenseUrl: string;
-            adoptionContractSampleUrl?: string;
-            breederCertificationUrl?: string;
-            ticaCfaDocumentUrl?: string;
-        } = {
-            idCardUrl: '',
-            animalProductionLicenseUrl: '',
-        };
-
-        try {
-            // 신분증 업로드
-            const idCardResult = await this.storageService.uploadFile(files.idCard[0], 'breeder-documents');
-            uploadedUrls.idCardUrl = idCardResult.cdnUrl;
-
-            // 동물생산업 등록증 업로드
-            const licenseResult = await this.storageService.uploadFile(
-                files.animalProductionLicense[0],
-                'breeder-documents',
-            );
-            uploadedUrls.animalProductionLicenseUrl = licenseResult.cdnUrl;
-
-            // Elite 레벨 서류 업로드 (선택적)
-            if (breederLevel === 'elite') {
-                // 표준 입양계약서 (선택)
-                if (files.adoptionContractSample && files.adoptionContractSample.length > 0) {
-                    const contractResult = await this.storageService.uploadFile(
-                        files.adoptionContractSample[0],
-                        'breeder-documents',
-                    );
-                    uploadedUrls.adoptionContractSampleUrl = contractResult.cdnUrl;
-                }
-
-                // 브리더 인증 서류 (선택)
-                if (files.breederCertification && files.breederCertification.length > 0) {
-                    const certificationResult = await this.storageService.uploadFile(
-                        files.breederCertification[0],
-                        'breeder-documents',
-                    );
-                    uploadedUrls.breederCertificationUrl = certificationResult.cdnUrl;
-                }
-
-                // TICA/CFA 서류 (선택사항)
-                if (files.ticaCfaDocument && files.ticaCfaDocument.length > 0) {
-                    const ticaCfaResult = await this.storageService.uploadFile(
-                        files.ticaCfaDocument[0],
-                        'breeder-documents',
-                    );
-                    uploadedUrls.ticaCfaDocumentUrl = ticaCfaResult.cdnUrl;
-                }
-            }
-
-            this.logger.logSuccess('uploadAndSubmitBreederDocuments', '파일 업로드 완료', {
-                uploadedCount: Object.keys(uploadedUrls).filter((k) => uploadedUrls[k as keyof typeof uploadedUrls])
-                    .length,
-            });
-        } catch (error) {
-            this.logger.logError('uploadAndSubmitBreederDocuments', '파일 업로드 실패', error);
-            throw new BadRequestException('파일 업로드에 실패했습니다. 다시 시도해주세요.');
-        }
-
-        // 기존 submitBreederDocuments 메서드 호출
-        return this.submitBreederDocuments(userId, breederLevel, uploadedUrls);
+        return this.uploadAndSubmitAuthBreederDocumentsUseCase.execute(userId, breederLevel, files);
     }
 
     /**
@@ -398,101 +322,7 @@ export class AuthService {
         submittedAt: Date;
         estimatedProcessingTime: string;
     }> {
-        this.logger.logStart('submitBreederDocuments', '브리더 서류 제출 시작', {
-            userId,
-            breederLevel,
-        });
-
-        const breeder = await this.authBreederRepository.findById(userId);
-
-        if (!breeder) {
-            this.logger.logError('submitBreederDocuments', '브리더를 찾을 수 없음', new Error('Breeder not found'));
-            throw new BadRequestException('브리더를 찾을 수 없습니다.');
-        }
-
-        // 브리더 레벨에 따른 필수 서류 검증
-        const documentArray: { type: string; url: string; uploadedAt: Date }[] = [];
-
-        // 공통 필수 서류 (모든 레벨)
-        documentArray.push({
-            type: 'id_card',
-            url: documents.idCardUrl,
-            uploadedAt: new Date(),
-        });
-        documentArray.push({
-            type: 'animal_production_license',
-            url: documents.animalProductionLicenseUrl,
-            uploadedAt: new Date(),
-        });
-
-        // Elite 레벨 서류는 선택적으로 처리 (필수 검증 제거)
-        if (breederLevel === 'elite') {
-            // 표준 입양계약서 (선택)
-            if (documents.adoptionContractSampleUrl) {
-                documentArray.push({
-                    type: 'adoption_contract_sample',
-                    url: documents.adoptionContractSampleUrl,
-                    uploadedAt: new Date(),
-                });
-            }
-
-            // 브리더 인증 서류 (선택)
-            if (documents.breederCertificationUrl) {
-                documentArray.push({
-                    type: 'breeder_certification',
-                    url: documents.breederCertificationUrl,
-                    uploadedAt: new Date(),
-                });
-            }
-
-            // TICA/CFA 서류 (선택)
-            if (documents.ticaCfaDocumentUrl) {
-                documentArray.push({
-                    type: 'tica_cfa_document',
-                    url: documents.ticaCfaDocumentUrl,
-                    uploadedAt: new Date(),
-                });
-            }
-        }
-
-        // 서류 정보를 verification.documents에 저장
-        const submittedAt = new Date();
-        await this.authBreederRepository.updateVerificationDocuments(
-            userId,
-            documentArray,
-            breederLevel,
-            VerificationStatus.REVIEWING,
-            submittedAt,
-        );
-
-        this.logger.logSuccess('submitBreederDocuments', '브리더 서류 제출 완료', {
-            breederId: breeder._id,
-            level: breederLevel,
-            documentsCount: documentArray.length,
-        });
-
-        const uploadedDocuments: any = {
-            idCard: documents.idCardUrl,
-            animalProductionLicense: documents.animalProductionLicenseUrl,
-        };
-
-        if (breederLevel === 'elite') {
-            uploadedDocuments.adoptionContractSample = documents.adoptionContractSampleUrl;
-            uploadedDocuments.recentAssociationDocument = documents.recentAssociationDocumentUrl;
-            uploadedDocuments.breederCertification = documents.breederCertificationUrl;
-            if (documents.ticaCfaDocumentUrl) {
-                uploadedDocuments.ticaCfaDocument = documents.ticaCfaDocumentUrl;
-            }
-        }
-
-        return {
-            breederId: (breeder._id as any).toString(),
-            verificationStatus: VerificationStatus.REVIEWING,
-            uploadedDocuments,
-            isDocumentsComplete: true,
-            submittedAt: submittedAt,
-            estimatedProcessingTime: '3-5일',
-        };
+        return this.submitAuthBreederDocumentsUseCase.execute(userId, breederLevel, documents);
     }
 
     /**

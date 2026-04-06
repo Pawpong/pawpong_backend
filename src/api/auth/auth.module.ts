@@ -59,12 +59,17 @@ import { RegisterBreederUseCase } from './application/use-cases/register-breeder
 import { ProcessSocialLoginCallbackUseCase } from './application/use-cases/process-social-login-callback.use-case';
 import { UploadAuthProfileImageUseCase } from './application/use-cases/upload-auth-profile-image.use-case';
 import { UploadAuthBreederDocumentsUseCase } from './application/use-cases/upload-auth-breeder-documents.use-case';
+import { SubmitAuthBreederDocumentsUseCase } from './application/use-cases/submit-auth-breeder-documents.use-case';
+import { UploadAndSubmitAuthBreederDocumentsUseCase } from './application/use-cases/upload-and-submit-auth-breeder-documents.use-case';
 import { AuthSocialIdentityService } from './domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from './domain/services/auth-stored-file-name.service';
 import { AuthSocialCallbackResponseFactoryService } from './domain/services/auth-social-callback-response-factory.service';
 import { AuthProfileImageFilePolicyService } from './domain/services/auth-profile-image-file-policy.service';
 import { AuthBreederDocumentFilePolicyService } from './domain/services/auth-breeder-document-file-policy.service';
 import { AuthBreederDocumentOriginalFileNameService } from './domain/services/auth-breeder-document-original-file-name.service';
+import { AuthBreederDocumentSubmissionService } from './domain/services/auth-breeder-document-submission.service';
+import { AuthBreederVerificationCommandAdapter } from './infrastructure/auth-breeder-verification-command.adapter';
+import { AUTH_BREEDER_VERIFICATION_COMMAND_PORT } from './application/ports/auth-breeder-verification-command.port';
 
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
@@ -114,6 +119,8 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         ProcessSocialLoginCallbackUseCase,
         UploadAuthProfileImageUseCase,
         UploadAuthBreederDocumentsUseCase,
+        SubmitAuthBreederDocumentsUseCase,
+        UploadAndSubmitAuthBreederDocumentsUseCase,
         LoginAdminUseCase,
         RefreshAdminTokenUseCase,
         AuthTokenService,
@@ -140,9 +147,15 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthProfileImageFilePolicyService,
         AuthBreederDocumentFilePolicyService,
         AuthBreederDocumentOriginalFileNameService,
+        AuthBreederDocumentSubmissionService,
+        AuthBreederVerificationCommandAdapter,
         {
             provide: AuthRegistrationPort,
             useExisting: AuthRegistrationAdapter,
+        },
+        {
+            provide: AUTH_BREEDER_VERIFICATION_COMMAND_PORT,
+            useExisting: AuthBreederVerificationCommandAdapter,
         },
         {
             provide: AUTH_ADMIN_READER,
