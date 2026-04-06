@@ -3,8 +3,15 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { BreederReportAdminController } from './breeder-report-admin.controller';
 import { BreederReportAdminService } from './breeder-report-admin.service';
+import { GetBreederReportsUseCase } from './application/use-cases/get-breeder-reports.use-case';
+import { HandleBreederReportUseCase } from './application/use-cases/handle-breeder-report.use-case';
+import { BREEDER_REPORT_ADMIN_READER } from './application/ports/breeder-report-admin-reader.port';
+import { BREEDER_REPORT_ADMIN_WRITER } from './application/ports/breeder-report-admin-writer.port';
+import { BreederReportAdminPolicyService } from './domain/services/breeder-report-admin-policy.service';
+import { BreederReportAdminActivityLogFactoryService } from './domain/services/breeder-report-admin-activity-log-factory.service';
+import { BreederReportAdminPresentationService } from './domain/services/breeder-report-admin-presentation.service';
+import { BreederReportAdminMongooseRepositoryAdapter } from './infrastructure/breeder-report-admin-mongoose.repository.adapter';
 
-import { BreederReport, BreederReportSchema } from '../../../../schema/breeder-report.schema';
 import { Breeder, BreederSchema } from '../../../../schema/breeder.schema';
 import { Admin, AdminSchema } from '../../../../schema/admin.schema';
 
@@ -18,13 +25,28 @@ import { Admin, AdminSchema } from '../../../../schema/admin.schema';
 @Module({
     imports: [
         MongooseModule.forFeature([
-            { name: BreederReport.name, schema: BreederReportSchema },
             { name: Breeder.name, schema: BreederSchema },
             { name: Admin.name, schema: AdminSchema },
         ]),
     ],
     controllers: [BreederReportAdminController],
-    providers: [BreederReportAdminService],
+    providers: [
+        BreederReportAdminService,
+        GetBreederReportsUseCase,
+        HandleBreederReportUseCase,
+        BreederReportAdminPolicyService,
+        BreederReportAdminActivityLogFactoryService,
+        BreederReportAdminPresentationService,
+        BreederReportAdminMongooseRepositoryAdapter,
+        {
+            provide: BREEDER_REPORT_ADMIN_READER,
+            useExisting: BreederReportAdminMongooseRepositoryAdapter,
+        },
+        {
+            provide: BREEDER_REPORT_ADMIN_WRITER,
+            useExisting: BreederReportAdminMongooseRepositoryAdapter,
+        },
+    ],
     exports: [BreederReportAdminService],
 })
 export class BreederReportAdminModule {}
