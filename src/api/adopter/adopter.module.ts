@@ -6,6 +6,17 @@ import { AdopterAdminController } from './admin/adopter-admin.controller';
 
 import { AdopterService } from './adopter.service';
 import { AdopterAdminService } from './admin/adopter-admin.service';
+import { GetAdopterAdminReviewReportsUseCase } from './admin/application/use-cases/get-adopter-admin-review-reports.use-case';
+import { DeleteAdopterAdminReviewUseCase } from './admin/application/use-cases/delete-adopter-admin-review.use-case';
+import { GetAdopterAdminApplicationListUseCase } from './admin/application/use-cases/get-adopter-admin-application-list.use-case';
+import { GetAdopterAdminApplicationDetailUseCase } from './admin/application/use-cases/get-adopter-admin-application-detail.use-case';
+import { AdopterAdminPolicyService } from './admin/domain/services/adopter-admin-policy.service';
+import { AdopterAdminPresentationService } from './admin/domain/services/adopter-admin-presentation.service';
+import { AdopterAdminActivityLogFactoryService } from './admin/domain/services/adopter-admin-activity-log-factory.service';
+import { ADOPTER_ADMIN_READER } from './admin/application/ports/adopter-admin-reader.port';
+import { ADOPTER_ADMIN_WRITER } from './admin/application/ports/adopter-admin-writer.port';
+import { AdopterAdminReaderAdapter } from './admin/infrastructure/adopter-admin-reader.adapter';
+import { AdopterAdminWriterAdapter } from './admin/infrastructure/adopter-admin-writer.adapter';
 import { GetAdopterProfileUseCase } from './application/use-cases/get-adopter-profile.use-case';
 import { UpdateAdopterProfileUseCase } from './application/use-cases/update-adopter-profile.use-case';
 import { AddFavoriteBreederUseCase } from './application/use-cases/add-favorite-breeder.use-case';
@@ -93,9 +104,16 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
     providers: [
         AdopterService,
         AdopterAdminService,
+        GetAdopterAdminReviewReportsUseCase,
+        DeleteAdopterAdminReviewUseCase,
+        GetAdopterAdminApplicationListUseCase,
+        GetAdopterAdminApplicationDetailUseCase,
         AdopterRepository,
         BreederRepository,
         AvailablePetManagementRepository,
+        AdopterAdminPolicyService,
+        AdopterAdminPresentationService,
+        AdopterAdminActivityLogFactoryService,
         AdopterFavoritePolicyService,
         AdopterApplicationCustomResponseBuilderService,
         AdopterApplicationStandardResponseBuilderService,
@@ -121,6 +139,8 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AdopterAccountCommandAdapter,
         AdopterApplicationReaderAdapter,
         AdopterFileUrlAdapter,
+        AdopterAdminReaderAdapter,
+        AdopterAdminWriterAdapter,
         GetAdopterProfileUseCase,
         UpdateAdopterProfileUseCase,
         AddFavoriteBreederUseCase,
@@ -138,6 +158,14 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         {
             provide: ADOPTER_PROFILE_PORT,
             useExisting: AdopterProfileAdapter,
+        },
+        {
+            provide: ADOPTER_ADMIN_READER,
+            useExisting: AdopterAdminReaderAdapter,
+        },
+        {
+            provide: ADOPTER_ADMIN_WRITER,
+            useExisting: AdopterAdminWriterAdapter,
         },
         {
             provide: ADOPTER_BREEDER_READER_PORT,
