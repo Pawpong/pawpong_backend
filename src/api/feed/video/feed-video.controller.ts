@@ -14,15 +14,23 @@ import {
 import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { FeedVideoService } from './services/feed-video.service';
-import { FeedLikeService } from '../like/feed-like.service';
-import { FeedCommentService } from '../comment/feed-comment.service';
-import { FeedTagService } from '../tag/feed-tag.service';
 import { UploadVideoRequestDto } from './dto/request/upload-video-request.dto';
 import { CreateCommentRequestDto, UpdateCommentRequestDto } from '../comment/dto/request/comment-request.dto';
 import { UploadUrlResponseDto, VideoMetaResponseDto, FeedResponseDto } from './dto/response/video-response.dto';
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../../../common/guard/optional-jwt-auth.guard';
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
+import { ToggleLikeUseCase } from '../like/application/use-cases/toggle-like.use-case';
+import { GetLikeStatusUseCase } from '../like/application/use-cases/get-like-status.use-case';
+import { GetMyLikedVideosUseCase } from '../like/application/use-cases/get-my-liked-videos.use-case';
+import { CreateCommentUseCase } from '../comment/application/use-cases/create-comment.use-case';
+import { GetCommentsUseCase } from '../comment/application/use-cases/get-comments.use-case';
+import { GetRepliesUseCase } from '../comment/application/use-cases/get-replies.use-case';
+import { UpdateCommentUseCase } from '../comment/application/use-cases/update-comment.use-case';
+import { DeleteCommentUseCase } from '../comment/application/use-cases/delete-comment.use-case';
+import { SearchByTagUseCase } from '../tag/application/use-cases/search-by-tag.use-case';
+import { GetPopularTagsUseCase } from '../tag/application/use-cases/get-popular-tags.use-case';
+import { SuggestTagsUseCase } from '../tag/application/use-cases/suggest-tags.use-case';
 
 /**
  * 피드 동영상 API 컨트롤러
@@ -33,9 +41,17 @@ import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 export class FeedVideoController {
     constructor(
         private readonly feedVideoService: FeedVideoService,
-        private readonly likeService: FeedLikeService,
-        private readonly commentService: FeedCommentService,
-        private readonly tagService: FeedTagService,
+        private readonly toggleLikeUseCase: ToggleLikeUseCase,
+        private readonly getLikeStatusUseCase: GetLikeStatusUseCase,
+        private readonly getMyLikedVideosUseCase: GetMyLikedVideosUseCase,
+        private readonly createCommentUseCase: CreateCommentUseCase,
+        private readonly getCommentsUseCase: GetCommentsUseCase,
+        private readonly getRepliesUseCase: GetRepliesUseCase,
+        private readonly updateCommentUseCase: UpdateCommentUseCase,
+        private readonly deleteCommentUseCase: DeleteCommentUseCase,
+        private readonly searchByTagUseCase: SearchByTagUseCase,
+        private readonly getPopularTagsUseCase: GetPopularTagsUseCase,
+        private readonly suggestTagsUseCase: SuggestTagsUseCase,
     ) {}
 
     // =========================================================================
@@ -257,12 +273,7 @@ export class FeedVideoController {
     })
     @ApiResponse({ status: 200, description: '좋아요 토글 성공' })
     async toggleLike(@Param('videoId') videoId: string, @CurrentUser() user: any) {
-        if (!user?.userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
-        }
-
-        const userModel = user.role === 'breeder' ? 'Breeder' : 'Adopter';
-        return this.likeService.toggleLike(videoId, user.userId, userModel);
+        return this.toggleLikeUseCase.execute(videoId, this.getRequiredUserId(user), this.getUserModel(user));
     }
 
     /**
@@ -277,11 +288,7 @@ export class FeedVideoController {
     })
     @ApiResponse({ status: 200, description: '상태 조회 성공' })
     async getLikeStatus(@Param('videoId') videoId: string, @CurrentUser() user: any) {
-        if (!user?.userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
-        }
-
-        return this.likeService.getLikeStatus(videoId, user.userId);
+        return this.getLikeStatusUseCase.execute(videoId, this.getRequiredUserId(user));
     }
 
     /**
@@ -302,11 +309,7 @@ export class FeedVideoController {
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 20,
     ) {
-        if (!user?.userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
-        }
-
-        return this.likeService.getMyLikedVideos(user.userId, Number(page), Number(limit));
+        return this.getMyLikedVideosUseCase.execute(this.getRequiredUserId(user), Number(page), Number(limit));
     }
 
     // =========================================================================
@@ -329,12 +332,13 @@ export class FeedVideoController {
         @CurrentUser() user: any,
         @Body() dto: CreateCommentRequestDto,
     ) {
-        if (!user?.userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
-        }
-
-        const userModel = user.role === 'breeder' ? 'Breeder' : 'Adopter';
-        return this.commentService.createComment(videoId, user.userId, userModel, dto.content, dto.parentId);
+        return this.createCommentUseCase.execute(
+            videoId,
+            this.getRequiredUserId(user),
+            this.getUserModel(user),
+            dto.content,
+            dto.parentId,
+        );
     }
 
     /**
@@ -355,7 +359,7 @@ export class FeedVideoController {
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 20,
     ) {
-        return this.commentService.getComments(videoId, user?.userId, Number(page), Number(limit));
+        return this.getCommentsUseCase.execute(videoId, user?.userId, Number(page), Number(limit));
     }
 
     /**
@@ -376,7 +380,7 @@ export class FeedVideoController {
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 20,
     ) {
-        return this.commentService.getReplies(commentId, user?.userId, Number(page), Number(limit));
+        return this.getRepliesUseCase.execute(commentId, user?.userId, Number(page), Number(limit));
     }
 
     /**
@@ -395,11 +399,7 @@ export class FeedVideoController {
         @CurrentUser() user: any,
         @Body() dto: UpdateCommentRequestDto,
     ) {
-        if (!user?.userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
-        }
-
-        return this.commentService.updateComment(commentId, user.userId, dto.content);
+        return this.updateCommentUseCase.execute(commentId, this.getRequiredUserId(user), dto.content);
     }
 
     /**
@@ -414,11 +414,7 @@ export class FeedVideoController {
     })
     @ApiResponse({ status: 200, description: '삭제 성공' })
     async deleteComment(@Param('commentId') commentId: string, @CurrentUser() user: any) {
-        if (!user?.userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
-        }
-
-        return this.commentService.deleteComment(commentId, user.userId);
+        return this.deleteCommentUseCase.execute(commentId, this.getRequiredUserId(user));
     }
 
     // =========================================================================
@@ -442,7 +438,7 @@ export class FeedVideoController {
             throw new BadRequestException('검색할 태그를 입력해주세요.');
         }
 
-        return this.tagService.searchByTag(tag, Number(page), Number(limit));
+        return this.searchByTagUseCase.execute(tag, Number(page), Number(limit));
     }
 
     /**
@@ -456,7 +452,7 @@ export class FeedVideoController {
     @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
     @ApiResponse({ status: 200, description: '조회 성공' })
     async getPopularTags(@Query('limit') limit: number = 20) {
-        return this.tagService.getPopularTags(Number(limit));
+        return this.getPopularTagsUseCase.execute(Number(limit));
     }
 
     /**
@@ -475,6 +471,18 @@ export class FeedVideoController {
             return [];
         }
 
-        return this.tagService.suggestTags(query, Number(limit));
+        return this.suggestTagsUseCase.execute(query, Number(limit));
+    }
+
+    private getRequiredUserId(user: any): string {
+        if (!user?.userId) {
+            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
+        }
+
+        return user.userId;
+    }
+
+    private getUserModel(user: any): 'Breeder' | 'Adopter' {
+        return user?.role === 'breeder' ? 'Breeder' : 'Adopter';
     }
 }
