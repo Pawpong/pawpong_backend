@@ -1,17 +1,17 @@
 import { Controller, Get, Query, Param } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 import { PaginationRequestDto } from '../../common/dto/pagination/pagination-request.dto';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { AnnouncementResponseDto } from './dto/response/announcement-response.dto';
 import { GetActiveAnnouncementsUseCase } from './application/use-cases/get-active-announcements.use-case';
 import { GetAnnouncementByIdUseCase } from './application/use-cases/get-announcement-by-id.use-case';
+import { ApiAnnouncementController, ApiGetActiveAnnouncementsEndpoint, ApiGetAnnouncementByIdEndpoint } from './swagger';
 
 /**
  * 공지사항 컨트롤러 (공개 API)
  * 인증 없이 활성화된 공지사항 조회 가능
  */
-@ApiTags('공지사항')
+@ApiAnnouncementController()
 @Controller('announcement')
 export class AnnouncementController {
     constructor(
@@ -25,19 +25,7 @@ export class AnnouncementController {
      * @returns 공지사항 목록 및 페이지네이션 정보
      */
     @Get('list')
-    @ApiOperation({
-        summary: '공지사항 목록 조회',
-        description: '활성화된 공지사항 목록을 페이지네이션하여 조회합니다. (인증 불필요)',
-    })
-    @ApiResponse({
-        status: 200,
-        description: '공지사항 목록 조회 성공',
-        type: PaginationResponseDto,
-    })
-    @ApiResponse({
-        status: 400,
-        description: '잘못된 요청',
-    })
+    @ApiGetActiveAnnouncementsEndpoint()
     async getActiveAnnouncements(
         @Query() paginationDto: PaginationRequestDto,
     ): Promise<PaginationResponseDto<AnnouncementResponseDto>> {
@@ -50,19 +38,7 @@ export class AnnouncementController {
      * @returns 공지사항 상세 정보
      */
     @Get(':announcementId')
-    @ApiOperation({
-        summary: '공지사항 상세 조회',
-        description: '특정 공지사항의 상세 정보를 조회합니다. (인증 불필요)',
-    })
-    @ApiResponse({
-        status: 200,
-        description: '공지사항 조회 성공',
-        type: AnnouncementResponseDto,
-    })
-    @ApiResponse({
-        status: 400,
-        description: '잘못된 요청 또는 공지사항을 찾을 수 없음',
-    })
+    @ApiGetAnnouncementByIdEndpoint()
     async getAnnouncementById(@Param('announcementId') announcementId: string): Promise<AnnouncementResponseDto> {
         return this.getAnnouncementByIdUseCase.execute(announcementId);
     }
