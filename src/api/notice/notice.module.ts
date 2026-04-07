@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Notice, NoticeSchema } from '../../schema/notice.schema';
 import { NoticeController } from './notice.controller';
-import { NoticeAdminController } from './admin/notice-admin.controller';
+import { NoticeAdminCommandController } from './admin/notice-admin-command.controller';
+import { NoticeAdminQueryController } from './admin/notice-admin-query.controller';
 import { NoticeService } from './notice.service';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';
@@ -22,7 +23,7 @@ import { NOTICE_WRITER } from './admin/application/ports/notice-writer.port';
  */
 @Module({
     imports: [MongooseModule.forFeature([{ name: Notice.name, schema: NoticeSchema }])],
-    controllers: [NoticeController, NoticeAdminController],
+    controllers: [NoticeController, NoticeAdminQueryController, NoticeAdminCommandController],
     providers: [
         NoticeService,
         CustomLoggerService,
