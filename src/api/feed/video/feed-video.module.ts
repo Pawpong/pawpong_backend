@@ -41,10 +41,13 @@ import { FeedVideoPrefetchController } from './feed-video-prefetch.controller';
 import { FeedVideoUploadController } from './feed-video-upload.controller';
 import { FeedVideoLibraryController } from './feed-video-library.controller';
 import { FeedVideoOwnershipController } from './feed-video-ownership.controller';
-import { FeedVideoLikeController } from './feed-video-like.controller';
+import { FeedVideoLikeCommandController } from './feed-video-like-command.controller';
+import { FeedVideoLikeStatusController } from './feed-video-like-status.controller';
+import { FeedVideoLikedVideosController } from './feed-video-liked-videos.controller';
 import { FeedVideoCommentQueryController } from './feed-video-comment-query.controller';
 import { FeedVideoCommentCommandController } from './feed-video-comment-command.controller';
-import { FeedVideoTagController } from './feed-video-tag.controller';
+import { FeedVideoTagSearchController } from './feed-video-tag-search.controller';
+import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controller';
 
 /**
  * 피드 동영상 모듈
@@ -89,10 +92,13 @@ import { FeedVideoTagController } from './feed-video-tag.controller';
         FeedVideoUploadController,
         FeedVideoLibraryController,
         FeedVideoOwnershipController,
-        FeedVideoLikeController,
+        FeedVideoLikeCommandController,
+        FeedVideoLikeStatusController,
+        FeedVideoLikedVideosController,
         FeedVideoCommentQueryController,
         FeedVideoCommentCommandController,
-        FeedVideoTagController,
+        FeedVideoTagSearchController,
+        FeedVideoTagCatalogController,
     ],
     providers: [
         FfmpegService,
