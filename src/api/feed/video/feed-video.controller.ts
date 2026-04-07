@@ -13,7 +13,6 @@ import {
 } from '@nestjs/common';
 import type { Response } from 'express';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
-import { FeedVideoService } from './services/feed-video.service';
 import { UploadVideoRequestDto } from './dto/request/upload-video-request.dto';
 import { CreateCommentRequestDto, UpdateCommentRequestDto } from '../comment/dto/request/comment-request.dto';
 import { UploadUrlResponseDto, VideoMetaResponseDto, FeedResponseDto } from './dto/response/video-response.dto';
@@ -31,6 +30,17 @@ import { DeleteCommentUseCase } from '../comment/application/use-cases/delete-co
 import { SearchByTagUseCase } from '../tag/application/use-cases/search-by-tag.use-case';
 import { GetPopularTagsUseCase } from '../tag/application/use-cases/get-popular-tags.use-case';
 import { SuggestTagsUseCase } from '../tag/application/use-cases/suggest-tags.use-case';
+import { GetFeedUseCase } from './application/use-cases/get-feed.use-case';
+import { GetPopularVideosUseCase } from './application/use-cases/get-popular-videos.use-case';
+import { GetVideoMetaUseCase } from './application/use-cases/get-video-meta.use-case';
+import { GetUploadUrlUseCase } from './application/use-cases/get-upload-url.use-case';
+import { CompleteUploadUseCase } from './application/use-cases/complete-upload.use-case';
+import { GetMyVideosUseCase } from './application/use-cases/get-my-videos.use-case';
+import { DeleteVideoUseCase } from './application/use-cases/delete-video.use-case';
+import { ToggleVideoVisibilityUseCase } from './application/use-cases/toggle-video-visibility.use-case';
+import { IncrementViewCountUseCase } from './application/use-cases/increment-view-count.use-case';
+import { ProxyHlsFileUseCase } from './application/use-cases/proxy-hls-file.use-case';
+import { PrefetchAllQualitySegmentsUseCase } from './application/use-cases/prefetch-all-quality-segments.use-case';
 
 /**
  * 피드 동영상 API 컨트롤러
@@ -40,7 +50,17 @@ import { SuggestTagsUseCase } from '../tag/application/use-cases/suggest-tags.us
 @Controller('feed')
 export class FeedVideoController {
     constructor(
-        private readonly feedVideoService: FeedVideoService,
+        private readonly getFeedUseCase: GetFeedUseCase,
+        private readonly getPopularVideosUseCase: GetPopularVideosUseCase,
+        private readonly getVideoMetaUseCase: GetVideoMetaUseCase,
+        private readonly getUploadUrlUseCase: GetUploadUrlUseCase,
+        private readonly completeUploadUseCase: CompleteUploadUseCase,
+        private readonly getMyVideosUseCase: GetMyVideosUseCase,
+        private readonly deleteVideoUseCase: DeleteVideoUseCase,
+        private readonly toggleVideoVisibilityUseCase: ToggleVideoVisibilityUseCase,
+        private readonly incrementViewCountUseCase: IncrementViewCountUseCase,
+        private readonly proxyHlsFileUseCase: ProxyHlsFileUseCase,
+        private readonly prefetchAllQualitySegmentsUseCase: PrefetchAllQualitySegmentsUseCase,
         private readonly toggleLikeUseCase: ToggleLikeUseCase,
         private readonly getLikeStatusUseCase: GetLikeStatusUseCase,
         private readonly getMyLikedVideosUseCase: GetMyLikedVideosUseCase,
@@ -70,7 +90,7 @@ export class FeedVideoController {
     @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
     @ApiResponse({ status: 200, description: '피드 조회 성공', type: FeedResponseDto })
     async getFeed(@Query('page') page: number = 1, @Query('limit') limit: number = 20) {
-        return this.feedVideoService.getFeed(Number(page), Number(limit));
+        return this.getFeedUseCase.execute(Number(page), Number(limit));
     }
 
     /**
@@ -84,7 +104,7 @@ export class FeedVideoController {
     @ApiQuery({ name: 'limit', required: false, type: Number, example: 10 })
     @ApiResponse({ status: 200, description: '인기 동영상 조회 성공' })
     async getPopularVideos(@Query('limit') limit: number = 10) {
-        return this.feedVideoService.getPopularVideos(Number(limit));
+        return this.getPopularVideosUseCase.execute(Number(limit));
     }
 
     /**
@@ -96,7 +116,25 @@ export class FeedVideoController {
         description: 'S3의 HLS 파일을 프록시하여 CORS 문제를 해결합니다.',
     })
     async streamHLS(@Param('videoId') videoId: string, @Param('filename') filename: string, @Res() res: Response) {
-        return this.feedVideoService.proxyHLSFile(videoId, filename, res);
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Access-Control-Allow-Methods', 'GET, OPTIONS');
+        res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+        try {
+            const proxyResponse = await this.proxyHlsFileUseCase.execute(videoId, filename);
+
+            res.setHeader('Content-Type', proxyResponse.contentType);
+            res.setHeader('X-Cache', proxyResponse.cacheStatus);
+            res.setHeader('Cache-Control', proxyResponse.cacheControl);
+
+            return res.send(proxyResponse.body);
+        } catch (error) {
+            if (error instanceof BadRequestException) {
+                throw error;
+            }
+
+            throw new BadRequestException('파일을 가져올 수 없습니다.');
+        }
     }
 
     /**
@@ -115,7 +153,7 @@ export class FeedVideoController {
         @Query('segment') segment: number,
         @Query('count') count: number = 5,
     ) {
-        await this.feedVideoService.prefetchAllQualitySegments(videoId, Number(segment), Number(count));
+        await this.prefetchAllQualitySegmentsUseCase.execute(videoId, Number(segment), Number(count));
         return { success: true, message: `${count}개 세그먼트 프리페치 완료` };
     }
 
@@ -130,7 +168,7 @@ export class FeedVideoController {
     @ApiResponse({ status: 200, description: '조회 성공', type: VideoMetaResponseDto })
     @ApiResponse({ status: 400, description: '동영상을 찾을 수 없음' })
     async getVideoMeta(@Param('videoId') videoId: string) {
-        return this.feedVideoService.getVideoMeta(videoId);
+        return this.getVideoMetaUseCase.execute(videoId);
     }
 
     /**
@@ -143,7 +181,7 @@ export class FeedVideoController {
     })
     @ApiResponse({ status: 200, description: '조회수 증가 성공' })
     async incrementView(@Param('videoId') videoId: string) {
-        await this.feedVideoService.incrementViewCount(videoId);
+        await this.incrementViewCountUseCase.execute(videoId);
         return { success: true };
     }
 
@@ -167,14 +205,13 @@ export class FeedVideoController {
         type: UploadUrlResponseDto,
     })
     async getUploadUrl(@CurrentUser() user: any, @Body() dto: UploadVideoRequestDto) {
-        if (!user?.userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
-        }
-
-        // 업로더 모델 결정 (breeder 또는 adopter)
-        const uploaderModel = user.role === 'breeder' ? 'Breeder' : 'Adopter';
-
-        return this.feedVideoService.getUploadUrl(user.userId, uploaderModel, dto.title, dto.description, dto.tags);
+        return this.getUploadUrlUseCase.execute(
+            this.getRequiredUserId(user),
+            this.getUserModel(user),
+            dto.title,
+            dto.description,
+            dto.tags,
+        );
     }
 
     /**
@@ -190,11 +227,7 @@ export class FeedVideoController {
     @ApiResponse({ status: 200, description: '인코딩 시작됨' })
     @ApiResponse({ status: 400, description: '동영상을 찾을 수 없음' })
     async completeUpload(@Param('videoId') videoId: string, @CurrentUser() user: any) {
-        if (!user?.userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
-        }
-
-        return this.feedVideoService.completeUpload(videoId, user.userId);
+        return this.completeUploadUseCase.execute(videoId, this.getRequiredUserId(user));
     }
 
     /**
@@ -211,11 +244,7 @@ export class FeedVideoController {
     @ApiQuery({ name: 'limit', required: false, type: Number, example: 20 })
     @ApiResponse({ status: 200, description: '조회 성공' })
     async getMyVideos(@CurrentUser() user: any, @Query('page') page: number = 1, @Query('limit') limit: number = 20) {
-        if (!user?.userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
-        }
-
-        return this.feedVideoService.getMyVideos(user.userId, Number(page), Number(limit));
+        return this.getMyVideosUseCase.execute(this.getRequiredUserId(user), Number(page), Number(limit));
     }
 
     /**
@@ -231,11 +260,7 @@ export class FeedVideoController {
     @ApiResponse({ status: 200, description: '삭제 성공' })
     @ApiResponse({ status: 400, description: '동영상을 찾을 수 없음 또는 권한 없음' })
     async deleteVideo(@Param('videoId') videoId: string, @CurrentUser() user: any) {
-        if (!user?.userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
-        }
-
-        return this.feedVideoService.deleteVideo(videoId, user.userId);
+        return this.deleteVideoUseCase.execute(videoId, this.getRequiredUserId(user));
     }
 
     /**
@@ -250,11 +275,7 @@ export class FeedVideoController {
     })
     @ApiResponse({ status: 200, description: '전환 성공' })
     async toggleVisibility(@Param('videoId') videoId: string, @CurrentUser() user: any) {
-        if (!user?.userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
-        }
-
-        return this.feedVideoService.toggleVisibility(videoId, user.userId);
+        return this.toggleVideoVisibilityUseCase.execute(videoId, this.getRequiredUserId(user));
     }
 
     // =========================================================================

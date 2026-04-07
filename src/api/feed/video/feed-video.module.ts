@@ -5,7 +5,6 @@ import { Video, VideoSchema } from '../../../schema/video.schema';
 import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema';
 import { VideoComment, VideoCommentSchema } from '../../../schema/video-comment.schema';
 import { FeedVideoController } from './feed-video.controller';
-import { FeedVideoService } from './services/feed-video.service';
 import { FfmpegService } from './services/ffmpeg.service';
 import { VideoEncodingProcessor } from './processors/video-encoding.processor';
 import { StorageModule } from '../../../common/storage/storage.module';
@@ -24,7 +23,6 @@ import { IncrementViewCountUseCase } from './application/use-cases/increment-vie
 import { UpdateEncodingCompleteUseCase } from './application/use-cases/update-encoding-complete.use-case';
 import { UpdateEncodingFailedUseCase } from './application/use-cases/update-encoding-failed.use-case';
 import { ProxyHlsFileUseCase } from './application/use-cases/proxy-hls-file.use-case';
-import { PreloadHlsSegmentsUseCase } from './application/use-cases/preload-hls-segments.use-case';
 import { PrefetchAllQualitySegmentsUseCase } from './application/use-cases/prefetch-all-quality-segments.use-case';
 import { FeedVideoPresentationService } from './domain/services/feed-video-presentation.service';
 import { FeedVideoCommandPolicyService } from './domain/services/feed-video-command-policy.service';
@@ -74,7 +72,6 @@ import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
     ],
     controllers: [FeedVideoController],
     providers: [
-        FeedVideoService,
         FfmpegService,
         VideoEncodingProcessor,
         GetFeedUseCase,
@@ -89,7 +86,6 @@ import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
         UpdateEncodingCompleteUseCase,
         UpdateEncodingFailedUseCase,
         ProxyHlsFileUseCase,
-        PreloadHlsSegmentsUseCase,
         PrefetchAllQualitySegmentsUseCase,
         FeedVideoPresentationService,
         FeedVideoCommandPolicyService,
@@ -111,6 +107,5 @@ import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
             useExisting: FeedVideoStorageStreamAdapter,
         },
     ],
-    exports: [FeedVideoService],
 })
 export class FeedVideoModule {}
