@@ -2,12 +2,14 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { BreederManagementAccountController } from './breeder-management-account.controller';
+import { BreederManagementApplicationFormController } from './breeder-management-application-form.controller';
+import { BreederManagementApplicationStatusController } from './breeder-management-application-status.controller';
+import { BreederManagementApplicationsQueryController } from './breeder-management-applications-query.controller';
 import { BreederManagementAvailablePetsController } from './breeder-management-available-pets.controller';
 import { BreederManagementDashboardController } from './breeder-management-dashboard.controller';
 import { BreederManagementAdminCounselBannersController } from './admin/breeder-management-admin-counsel-banners.controller';
 import { BreederManagementAdminProfileBannersController } from './admin/breeder-management-admin-profile-banners.controller';
 import { BreederManagementAdminPublicBannersController } from './admin/breeder-management-admin-public-banners.controller';
-import { BreederManagementApplicationsController } from './breeder-management-applications.controller';
 import { BreederManagementMyPetsController } from './breeder-management-my-pets.controller';
 import { BreederManagementParentPetsController } from './breeder-management-parent-pets.controller';
 import { BreederManagementProfileInfoController } from './breeder-management-profile-info.controller';
@@ -143,7 +145,9 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederManagementParentPetsController,
         BreederManagementAvailablePetsController,
         BreederManagementMyPetsController,
-        BreederManagementApplicationsController,
+        BreederManagementApplicationsQueryController,
+        BreederManagementApplicationStatusController,
+        BreederManagementApplicationFormController,
         BreederManagementReviewsController,
         BreederManagementAccountController,
         BreederManagementAdminProfileBannersController,
