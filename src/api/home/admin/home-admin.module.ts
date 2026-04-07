@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { HomeAdminController } from './home-admin.controller';
-
-import { HomeAdminService } from './home-admin.service';
 import { GetAllBannersUseCase } from './application/use-cases/get-all-banners.use-case';
 import { CreateBannerUseCase } from './application/use-cases/create-banner.use-case';
 import { UpdateBannerUseCase } from './application/use-cases/update-banner.use-case';
@@ -32,7 +30,6 @@ import { StorageModule } from '../../../common/storage/storage.module';
     ],
     controllers: [HomeAdminController],
     providers: [
-        HomeAdminService,
         GetAllBannersUseCase,
         CreateBannerUseCase,
         UpdateBannerUseCase,
@@ -49,6 +46,5 @@ import { StorageModule } from '../../../common/storage/storage.module';
             useExisting: HomeAdminMongooseManagerAdapter,
         },
     ],
-    exports: [HomeAdminService],
 })
 export class HomeAdminModule {}
