@@ -2,18 +2,21 @@ import { Controller, Get, Patch, Param, Query, Body, UseGuards } from '@nestjs/c
 
 import { Roles } from '../../../../common/decorator/roles.decorator';
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
-import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { RolesGuard } from '../../../../common/guard/roles.guard';
 import { JwtAuthGuard } from '../../../../common/guard/jwt-auth.guard';
-
-import { BreederReportAdminService } from './breeder-report-admin.service';
-
 import { ReportListRequestDto } from './dto/request/report-list-request.dto';
 import { ReportActionRequestDto } from './dto/request/report-action-request.dto';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { ReportListResponseDto } from './dto/response/report-list-response.dto';
 import { ReportActionResponseDto } from './dto/response/report-action-response.dto';
+import { GetBreederReportsUseCase } from './application/use-cases/get-breeder-reports.use-case';
+import { HandleBreederReportUseCase } from './application/use-cases/handle-breeder-report.use-case';
+import {
+    ApiBreederReportAdminController,
+    ApiGetBreederReportsAdminEndpoint,
+    ApiHandleBreederReportAdminEndpoint,
+} from './swagger';
 
 /**
  * 브리더 신고 관리 Admin 컨트롤러
@@ -25,41 +28,34 @@ import { ReportActionResponseDto } from './dto/response/report-action-response.d
  * - 브리더 신고 목록 조회
  * - 브리더 신고 처리 (승인/반려)
  */
-@ApiController('브리더 신고 관리 (Admin)')
+@ApiBreederReportAdminController()
 @Controller('breeder-report-admin')
 @Roles('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class BreederReportAdminController {
-    constructor(private readonly breederReportAdminService: BreederReportAdminService) {}
+    constructor(
+        private readonly getBreederReportsUseCase: GetBreederReportsUseCase,
+        private readonly handleBreederReportUseCase: HandleBreederReportUseCase,
+    ) {}
 
     @Get('reports')
-    @ApiEndpoint({
-        summary: '브리더 신고 목록 조회',
-        description: '브리더에 대한 신고 목록을 조회합니다. 상태별 필터링 및 페이지네이션을 지원합니다.',
-        responseType: ReportListResponseDto,
-        isPublic: false,
-    })
+    @ApiGetBreederReportsAdminEndpoint()
     async getReports(
-        @CurrentUser() user: any,
+        @CurrentUser('userId') adminId: string,
         @Query() filter: ReportListRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<ReportListResponseDto>>> {
-        const result = await this.breederReportAdminService.getReports(user.userId, filter);
+        const result = await this.getBreederReportsUseCase.execute(adminId, filter);
         return ApiResponseDto.success(result, '브리더 신고 목록이 조회되었습니다.');
     }
 
     @Patch('reports/:reportId')
-    @ApiEndpoint({
-        summary: '브리더 신고 처리',
-        description: '브리더 신고를 승인(제재) 또는 반려 처리합니다.',
-        responseType: ReportActionResponseDto,
-        isPublic: false,
-    })
+    @ApiHandleBreederReportAdminEndpoint()
     async handleReport(
-        @CurrentUser() user: any,
+        @CurrentUser('userId') adminId: string,
         @Param('reportId') reportId: string,
         @Body() actionData: ReportActionRequestDto,
     ): Promise<ApiResponseDto<ReportActionResponseDto>> {
-        const result = await this.breederReportAdminService.handleReport(user.userId, reportId, actionData);
+        const result = await this.handleBreederReportUseCase.execute(adminId, reportId, actionData);
         const message =
             actionData.action === 'resolve' ? '신고가 승인되었습니다. 브리더가 제재됩니다.' : '신고가 반려되었습니다.';
         return ApiResponseDto.success(result, message);

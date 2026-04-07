@@ -2,8 +2,6 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { BreederVerificationAdminController } from './breeder-verification-admin.controller';
-
-import { BreederVerificationAdminService } from './breeder-verification-admin.service';
 import { GetLevelChangeRequestsUseCase } from './application/use-cases/get-level-change-requests.use-case';
 import { GetPendingBreederVerificationsUseCase } from './application/use-cases/get-pending-breeder-verifications.use-case';
 import { GetBreedersUseCase } from './application/use-cases/get-breeders.use-case';
@@ -50,7 +48,6 @@ import { NotificationModule } from '../../../notification/notification.module';
     ],
     controllers: [BreederVerificationAdminController],
     providers: [
-        BreederVerificationAdminService,
         GetLevelChangeRequestsUseCase,
         GetPendingBreederVerificationsUseCase,
         GetBreedersUseCase,
@@ -82,6 +79,5 @@ import { NotificationModule } from '../../../notification/notification.module';
             useExisting: BreederVerificationAdminFileUrlAdapter,
         },
     ],
-    exports: [BreederVerificationAdminService],
 })
 export class BreederVerificationAdminModule {}

@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { BreederReportAdminController } from './breeder-report-admin.controller';
-import { BreederReportAdminService } from './breeder-report-admin.service';
 import { GetBreederReportsUseCase } from './application/use-cases/get-breeder-reports.use-case';
 import { HandleBreederReportUseCase } from './application/use-cases/handle-breeder-report.use-case';
 import { BREEDER_REPORT_ADMIN_READER } from './application/ports/breeder-report-admin-reader.port';
@@ -31,7 +30,6 @@ import { Admin, AdminSchema } from '../../../../schema/admin.schema';
     ],
     controllers: [BreederReportAdminController],
     providers: [
-        BreederReportAdminService,
         GetBreederReportsUseCase,
         HandleBreederReportUseCase,
         BreederReportAdminPolicyService,
@@ -47,6 +45,5 @@ import { Admin, AdminSchema } from '../../../../schema/admin.schema';
             useExisting: BreederReportAdminMongooseRepositoryAdapter,
         },
     ],
-    exports: [BreederReportAdminService],
 })
 export class BreederReportAdminModule {}

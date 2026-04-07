@@ -1,69 +1,69 @@
 import { Controller, Get, Post, Patch, Delete, Param, Body } from '@nestjs/common';
 
-import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
-
-import { AdminBreedService } from './admin-breed.service';
-
 import { CreateBreedRequestDto } from './dto/request/create-breed-request.dto';
 import { UpdateBreedRequestDto } from './dto/request/update-breed-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { BreedResponseDto } from '../dto/response/breed-response.dto';
-import { BreedAdminSwaggerDocs } from './swagger';
+import { CreateBreedUseCase } from './application/use-cases/create-breed.use-case';
+import { DeleteBreedUseCase } from './application/use-cases/delete-breed.use-case';
+import { GetAllBreedsAdminUseCase } from './application/use-cases/get-all-breeds-admin.use-case';
+import { GetBreedByIdUseCase } from './application/use-cases/get-breed-by-id.use-case';
+import { UpdateBreedUseCase } from './application/use-cases/update-breed.use-case';
+import {
+    ApiBreedAdminController,
+    ApiCreateBreedAdminEndpoint,
+    ApiDeleteBreedAdminEndpoint,
+    ApiGetAllBreedsAdminEndpoint,
+    ApiGetBreedByIdAdminEndpoint,
+    ApiUpdateBreedAdminEndpoint,
+} from './swagger';
 
-@ApiController('품종 관리 (Admin)')
+@ApiBreedAdminController()
 @Controller('breeds-admin')
 export class AdminBreedController {
-    constructor(private readonly adminBreedService: AdminBreedService) {}
+    constructor(
+        private readonly createBreedUseCase: CreateBreedUseCase,
+        private readonly getAllBreedsAdminUseCase: GetAllBreedsAdminUseCase,
+        private readonly getBreedByIdUseCase: GetBreedByIdUseCase,
+        private readonly updateBreedUseCase: UpdateBreedUseCase,
+        private readonly deleteBreedUseCase: DeleteBreedUseCase,
+    ) {}
 
     @Post()
-    @ApiEndpoint({
-        ...BreedAdminSwaggerDocs.createBreed,
-        responseType: BreedResponseDto,
-    })
+    @ApiCreateBreedAdminEndpoint()
     async createBreed(@Body() dto: CreateBreedRequestDto): Promise<ApiResponseDto<BreedResponseDto>> {
-        const result = await this.adminBreedService.createBreed(dto);
+        const result = await this.createBreedUseCase.execute(dto);
         return ApiResponseDto.success(result);
     }
 
     @Get()
-    @ApiEndpoint({
-        ...BreedAdminSwaggerDocs.getAllBreeds,
-        responseType: [BreedResponseDto],
-    })
+    @ApiGetAllBreedsAdminEndpoint()
     async getAllBreeds(): Promise<ApiResponseDto<BreedResponseDto[]>> {
-        const result = await this.adminBreedService.getAllBreeds();
+        const result = await this.getAllBreedsAdminUseCase.execute();
         return ApiResponseDto.success(result);
     }
 
     @Get(':id')
-    @ApiEndpoint({
-        ...BreedAdminSwaggerDocs.getBreedById,
-        responseType: BreedResponseDto,
-    })
+    @ApiGetBreedByIdAdminEndpoint()
     async getBreedById(@Param('id') id: string): Promise<ApiResponseDto<BreedResponseDto>> {
-        const result = await this.adminBreedService.getBreedById(id);
+        const result = await this.getBreedByIdUseCase.execute(id);
         return ApiResponseDto.success(result);
     }
 
     @Patch(':id')
-    @ApiEndpoint({
-        ...BreedAdminSwaggerDocs.updateBreed,
-        responseType: BreedResponseDto,
-    })
+    @ApiUpdateBreedAdminEndpoint()
     async updateBreed(
         @Param('id') id: string,
         @Body() dto: UpdateBreedRequestDto,
     ): Promise<ApiResponseDto<BreedResponseDto>> {
-        const result = await this.adminBreedService.updateBreed(id, dto);
+        const result = await this.updateBreedUseCase.execute(id, dto);
         return ApiResponseDto.success(result);
     }
 
     @Delete(':id')
-    @ApiEndpoint({
-        ...BreedAdminSwaggerDocs.deleteBreed,
-    })
+    @ApiDeleteBreedAdminEndpoint()
     async deleteBreed(@Param('id') id: string): Promise<ApiResponseDto<null>> {
-        await this.adminBreedService.deleteBreed(id);
+        await this.deleteBreedUseCase.execute(id);
         return ApiResponseDto.success(null, '품종 카테고리가 삭제되었습니다.');
     }
 }
