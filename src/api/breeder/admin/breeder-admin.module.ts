@@ -9,7 +9,6 @@ import { BreederReportAdminModule } from './report/breeder-report-admin.module';
 import { BreederVerificationAdminModule } from './verification/breeder-verification-admin.module';
 
 import { BreederAdminController } from './breeder-admin.controller';
-import { BreederAdminService } from './breeder-admin.service';
 import { SuspendBreederUseCase } from './application/use-cases/suspend-breeder.use-case';
 import { UnsuspendBreederUseCase } from './application/use-cases/unsuspend-breeder.use-case';
 import { SendBreederRemindNotificationsUseCase } from './application/use-cases/send-breeder-remind-notifications.use-case';
@@ -56,7 +55,6 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
     ],
     controllers: [BreederAdminController],
     providers: [
-        BreederAdminService,
         SuspendBreederUseCase,
         UnsuspendBreederUseCase,
         SendBreederRemindNotificationsUseCase,
@@ -80,6 +78,6 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
             useExisting: BreederAdminNotifierAdapter,
         },
     ],
-    exports: [BreederAdminService, BreederReportAdminModule, BreederVerificationAdminModule],
+    exports: [BreederReportAdminModule, BreederVerificationAdminModule],
 })
 export class BreederAdminModule {}

@@ -2,12 +2,8 @@ import { Controller, Get, Post, Patch, Param, Query, Body, UseGuards } from '@ne
 
 import { Roles } from '../../../../common/decorator/roles.decorator';
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
-import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { RolesGuard } from '../../../../common/guard/roles.guard';
 import { JwtAuthGuard } from '../../../../common/guard/jwt-auth.guard';
-
-import { BreederVerificationAdminService } from './breeder-verification-admin.service';
-
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
 import { BreederLevelChangeRequestDto } from './dto/request/breeder-level-change-request.dto';
 import { BreederVerificationRequestDto } from './dto/request/breeder-verification-request.dto';
@@ -17,137 +13,122 @@ import { BreederStatsResponseDto } from './dto/response/breeder-stats-response.d
 import { BreederDetailResponseDto } from './dto/response/breeder-detail-response.dto';
 import { BreederLevelChangeResponseDto } from './dto/response/breeder-level-change-response.dto';
 import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
+import { ChangeBreederLevelUseCase } from './application/use-cases/change-breeder-level.use-case';
+import { GetBreederDetailUseCase } from './application/use-cases/get-breeder-detail.use-case';
+import { GetBreederStatsUseCase } from './application/use-cases/get-breeder-stats.use-case';
+import { GetBreedersUseCase } from './application/use-cases/get-breeders.use-case';
+import { GetLevelChangeRequestsUseCase } from './application/use-cases/get-level-change-requests.use-case';
+import { GetPendingBreederVerificationsUseCase } from './application/use-cases/get-pending-breeder-verifications.use-case';
+import { SendDocumentRemindersUseCase } from './application/use-cases/send-document-reminders.use-case';
+import { UpdateBreederVerificationUseCase } from './application/use-cases/update-breeder-verification.use-case';
+import {
+    ApiBreederVerificationAdminController,
+    ApiChangeBreederLevelAdminEndpoint,
+    ApiGetBreederDetailAdminEndpoint,
+    ApiGetBreederStatsAdminEndpoint,
+    ApiGetBreedersAdminEndpoint,
+    ApiGetLevelChangeRequestsAdminEndpoint,
+    ApiGetPendingBreederVerificationsAdminEndpoint,
+    ApiSendDocumentRemindersAdminEndpoint,
+    ApiUpdateBreederVerificationAdminEndpoint,
+} from './swagger';
 
 /**
  * 브리더 인증 관리 Admin 컨트롤러
  *
  * 브리더 인증 승인/거절 기능을 제공합니다.
  */
-@ApiController('브리더 인증 관리 (Admin)')
+@ApiBreederVerificationAdminController()
 @Controller('breeder-verification-admin')
 @Roles('admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class BreederVerificationAdminController {
-    constructor(private readonly breederVerificationAdminService: BreederVerificationAdminService) {}
+    constructor(
+        private readonly getLevelChangeRequestsUseCase: GetLevelChangeRequestsUseCase,
+        private readonly getPendingBreederVerificationsUseCase: GetPendingBreederVerificationsUseCase,
+        private readonly getBreedersUseCase: GetBreedersUseCase,
+        private readonly updateBreederVerificationUseCase: UpdateBreederVerificationUseCase,
+        private readonly getBreederDetailUseCase: GetBreederDetailUseCase,
+        private readonly getBreederStatsUseCase: GetBreederStatsUseCase,
+        private readonly sendDocumentRemindersUseCase: SendDocumentRemindersUseCase,
+        private readonly changeBreederLevelUseCase: ChangeBreederLevelUseCase,
+    ) {}
 
     @Get('breeders')
-    @ApiEndpoint({
-        summary: '브리더 목록 조회 (통합 검색)',
-        description: '전체 브리더 목록을 조회합니다. 상태, 도시, 키워드 필터링을 지원합니다.',
-        responseType: BreederVerificationResponseDto,
-        isPublic: false,
-    })
+    @ApiGetBreedersAdminEndpoint()
     async getBreeders(
-        @CurrentUser() user: any,
+        @CurrentUser('userId') adminId: string,
         @Query() filter: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
-        const result = await this.breederVerificationAdminService.getBreeders(user.userId, filter);
+        const result = await this.getBreedersUseCase.execute(adminId, filter);
         return ApiResponseDto.success(result, '브리더 목록이 조회되었습니다.');
     }
 
     @Get('verification/pending')
-    @ApiEndpoint({
-        summary: '승인 대기 브리더 목록 조회',
-        description: '인증 승인을 대기중인 브리더 목록을 조회합니다.',
-        responseType: BreederVerificationResponseDto,
-        isPublic: false,
-    })
+    @ApiGetPendingBreederVerificationsAdminEndpoint()
     async getPendingBreederVerifications(
-        @CurrentUser() user: any,
+        @CurrentUser('userId') adminId: string,
         @Query() filter: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
-        const result = await this.breederVerificationAdminService.getPendingBreederVerifications(user.userId, filter);
+        const result = await this.getPendingBreederVerificationsUseCase.execute(adminId, filter);
         return ApiResponseDto.success(result, '승인 대기 브리더 목록이 조회되었습니다.');
     }
 
     @Get('verification/level-change-requests')
-    @ApiEndpoint({
-        summary: '레벨 변경 신청 목록 조회',
-        description: '승인된 브리더가 제출한 레벨 변경 신청 목록을 조회합니다 (New ↔ Elite).',
-        responseType: BreederVerificationResponseDto,
-        isPublic: false,
-    })
+    @ApiGetLevelChangeRequestsAdminEndpoint()
     async getLevelChangeRequests(
-        @CurrentUser() user: any,
+        @CurrentUser('userId') adminId: string,
         @Query() filter: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
-        const result = await this.breederVerificationAdminService.getLevelChangeRequests(user.userId, filter);
+        const result = await this.getLevelChangeRequestsUseCase.execute(adminId, filter);
         return ApiResponseDto.success(result, '레벨 변경 신청 목록이 조회되었습니다.');
     }
 
     @Get('verification/:breederId')
-    @ApiEndpoint({
-        summary: '브리더 상세 정보 조회',
-        description: '특정 브리더의 상세 정보를 조회합니다 (서류, 프로필 포함).',
-        responseType: BreederDetailResponseDto,
-        isPublic: false,
-    })
+    @ApiGetBreederDetailAdminEndpoint()
     async getBreederDetail(
-        @CurrentUser() user: any,
+        @CurrentUser('userId') adminId: string,
         @Param('breederId') breederId: string,
     ): Promise<ApiResponseDto<BreederDetailResponseDto>> {
-        const result = await this.breederVerificationAdminService.getBreederDetail(user.userId, breederId);
+        const result = await this.getBreederDetailUseCase.execute(adminId, breederId);
         return ApiResponseDto.success(result, '브리더 상세 정보가 조회되었습니다.');
     }
 
     @Patch('verification/:breederId')
-    @ApiEndpoint({
-        summary: '브리더 인증 승인/거절',
-        description: '브리더의 인증 신청을 승인하거나 거절합니다.',
-        responseType: Object,
-        isPublic: false,
-    })
+    @ApiUpdateBreederVerificationAdminEndpoint()
     async updateBreederVerification(
-        @CurrentUser() user: any,
+        @CurrentUser('userId') adminId: string,
         @Param('breederId') breederId: string,
         @Body() verificationData: BreederVerificationRequestDto,
-    ): Promise<ApiResponseDto<any>> {
-        const result = await this.breederVerificationAdminService.updateBreederVerification(
-            user.userId,
-            breederId,
-            verificationData,
-        );
+    ): Promise<ApiResponseDto<{ message: string }>> {
+        const result = await this.updateBreederVerificationUseCase.execute(adminId, breederId, verificationData);
         return ApiResponseDto.success(result, '브리더 인증 처리가 완료되었습니다.');
     }
 
     @Get('stats')
-    @ApiEndpoint({
-        summary: '승인된 브리더 통계 조회',
-        description: '전체 승인된 브리더의 레벨별 통계를 조회합니다 (전체/엘리트/뉴).',
-        responseType: BreederStatsResponseDto,
-        isPublic: false,
-    })
-    async getBreederStats(@CurrentUser() user: any): Promise<ApiResponseDto<BreederStatsResponseDto>> {
-        const result = await this.breederVerificationAdminService.getBreederStats(user.userId);
+    @ApiGetBreederStatsAdminEndpoint()
+    async getBreederStats(@CurrentUser('userId') adminId: string): Promise<ApiResponseDto<BreederStatsResponseDto>> {
+        const result = await this.getBreederStatsUseCase.execute(adminId);
         return ApiResponseDto.success(result, '브리더 통계가 조회되었습니다.');
     }
 
     @Post('document-reminders/send')
-    @ApiEndpoint({
-        summary: '서류 미제출 브리더에게 독촉 메일 발송',
-        description:
-            '승인 후 4주 경과했지만 서류를 제출하지 않은 브리더들에게 독촉 이메일을 발송합니다. Cloud Run으로 스케줄링하여 사용할 수 있습니다.',
-        responseType: Object,
-        isPublic: false,
-    })
-    async sendDocumentReminders(@CurrentUser() user: any): Promise<ApiResponseDto<any>> {
-        const result = await this.breederVerificationAdminService.sendDocumentReminders(user.userId);
+    @ApiSendDocumentRemindersAdminEndpoint()
+    async sendDocumentReminders(
+        @CurrentUser('userId') adminId: string,
+    ): Promise<ApiResponseDto<{ sentCount: number; breederIds: string[] }>> {
+        const result = await this.sendDocumentRemindersUseCase.execute(adminId);
         return ApiResponseDto.success(result, `${result.sentCount}명의 브리더에게 서류 독촉 이메일이 발송되었습니다.`);
     }
 
     @Patch('level/:breederId')
-    @ApiEndpoint({
-        summary: '브리더 레벨 변경',
-        description: '승인된 브리더의 레벨을 뉴 ↔ 엘리트로 변경합니다.',
-        responseType: BreederLevelChangeResponseDto,
-        isPublic: false,
-    })
+    @ApiChangeBreederLevelAdminEndpoint()
     async changeBreederLevel(
-        @CurrentUser() user: any,
+        @CurrentUser('userId') adminId: string,
         @Param('breederId') breederId: string,
         @Body() levelData: BreederLevelChangeRequestDto,
     ): Promise<ApiResponseDto<BreederLevelChangeResponseDto>> {
-        const result = await this.breederVerificationAdminService.changeBreederLevel(user.userId, breederId, levelData);
+        const result = await this.changeBreederLevelUseCase.execute(adminId, breederId, levelData);
         return ApiResponseDto.success(result, '브리더 레벨이 변경되었습니다.');
     }
 }

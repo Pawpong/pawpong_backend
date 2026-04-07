@@ -5,7 +5,6 @@ import { AdopterController } from './adopter.controller';
 import { AdopterAdminController } from './admin/adopter-admin.controller';
 
 import { AdopterService } from './adopter.service';
-import { AdopterAdminService } from './admin/adopter-admin.service';
 import { GetAdopterAdminReviewReportsUseCase } from './admin/application/use-cases/get-adopter-admin-review-reports.use-case';
 import { DeleteAdopterAdminReviewUseCase } from './admin/application/use-cases/delete-adopter-admin-review.use-case';
 import { GetAdopterAdminApplicationListUseCase } from './admin/application/use-cases/get-adopter-admin-application-list.use-case';
@@ -103,7 +102,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
     controllers: [AdopterController, AdopterAdminController],
     providers: [
         AdopterService,
-        AdopterAdminService,
         GetAdopterAdminReviewReportsUseCase,
         DeleteAdopterAdminReviewUseCase,
         GetAdopterAdminApplicationListUseCase,
