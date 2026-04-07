@@ -36,6 +36,18 @@ type ApiPaginatedEndpointOptions = {
     additionalModels?: Type<any>[];
 };
 
+type ApiRawEndpointOptions = {
+    summary: string;
+    description?: string;
+    responseType?: Type<any> | [Type<any>];
+    responseSchema?: Record<string, any>;
+    isPublic?: boolean;
+    successStatus?: number;
+    successDescription?: string;
+    errorResponses?: ApiErrorResponseOption[];
+    additionalModels?: Type<any>[];
+};
+
 function buildErrorResponses(
     isPublic?: boolean,
     customErrorResponses: ApiErrorResponseOption[] = [],
@@ -77,6 +89,13 @@ function buildErrorResponseDecorator(errorResponse: ApiErrorResponseOption) {
             },
             required: ['success', 'code', 'error', 'timestamp'],
         },
+    });
+}
+
+function buildRawErrorResponseDecorator(errorResponse: ApiErrorResponseOption) {
+    return ApiResponse({
+        status: errorResponse.status,
+        description: errorResponse.description,
     });
 }
 
@@ -255,4 +274,62 @@ export function ApiPaginatedEndpoint(options: ApiPaginatedEndpointOptions) {
  */
 export function ApiController(tagName: string) {
     return applyDecorators(ApiTags(tagName), ApiBearerAuth('JWT-Auth'));
+}
+
+export function ApiPublicController(tagName: string) {
+    return applyDecorators(ApiTags(tagName));
+}
+
+export function ApiRawEndpoint(options: ApiRawEndpointOptions) {
+    const successStatus = options.successStatus ?? 200;
+    const successDescription = options.successDescription ?? '성공';
+    const decorators = [
+        ApiOperation({
+            summary: options.summary,
+            description: options.description || options.summary,
+        }),
+    ];
+
+    if (options.responseType) {
+        const isArray = Array.isArray(options.responseType);
+        const DtoType = isArray ? options.responseType[0] : options.responseType;
+
+        decorators.push(ApiExtraModels(DtoType, ...(options.additionalModels || [])));
+        decorators.push(
+            ApiResponse({
+                status: successStatus,
+                description: successDescription,
+                schema: isArray
+                    ? {
+                          type: 'array',
+                          items: { $ref: getSchemaPath(DtoType) },
+                      }
+                    : {
+                          $ref: getSchemaPath(DtoType),
+                      },
+            }),
+        );
+    } else if (options.responseSchema) {
+        if (options.additionalModels?.length) {
+            decorators.push(ApiExtraModels(...options.additionalModels));
+        }
+
+        decorators.push(
+            ApiResponse({
+                status: successStatus,
+                description: successDescription,
+                schema: options.responseSchema,
+            }),
+        );
+    }
+
+    if (!options.isPublic) {
+        decorators.push(ApiBearerAuth('JWT-Auth'));
+    }
+
+    buildErrorResponses(options.isPublic, options.errorResponses).forEach((errorResponse) => {
+        decorators.push(buildRawErrorResponseDecorator(errorResponse));
+    });
+
+    return applyDecorators(...decorators);
 }
