@@ -11,11 +11,17 @@ import { NaverStrategy } from '../../common/strategy/naver.strategy';
 import { KakaoStrategy } from '../../common/strategy/kakao.strategy';
 import { GoogleStrategy } from '../../common/strategy/google.strategy';
 
-import { AuthController } from './auth.controller';
+import { AuthBannerController } from './auth-banner.controller';
+import { AuthDuplicateCheckController } from './auth-duplicate-check.controller';
+import { AuthPhoneController } from './auth-phone.controller';
 import { AuthAdminController } from './admin/auth-admin.controller';
+import { AuthSessionController } from './auth-session.controller';
+import { AuthSignupController } from './auth-signup.controller';
+import { AuthSocialLoginController } from './auth-social-login.controller';
+import { AuthSocialRegistrationController } from './auth-social-registration.controller';
+import { AuthUploadController } from './auth-upload.controller';
 
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
-import { AuthService } from './auth.service';
 import { LoginAdminUseCase } from './admin/application/use-cases/login-admin.use-case';
 import { RefreshAdminTokenUseCase } from './admin/application/use-cases/refresh-admin-token.use-case';
 import { AuthAdminAuthenticationService } from './admin/domain/services/auth-admin-authentication.service';
@@ -74,6 +80,9 @@ import { AuthBreederDocumentFilePolicyService } from './domain/services/auth-bre
 import { AuthBreederDocumentOriginalFileNameService } from './domain/services/auth-breeder-document-original-file-name.service';
 import { AuthBreederDocumentSubmissionService } from './domain/services/auth-breeder-document-submission.service';
 import { AuthPhoneVerificationPolicyService } from './domain/services/auth-phone-verification-policy.service';
+import { AuthHttpCookieService } from './domain/services/auth-http-cookie.service';
+import { AuthSocialHttpFlowService } from './domain/services/auth-social-http-flow.service';
+import { AuthUploadPresentationService } from './domain/services/auth-upload-presentation.service';
 import { AuthBreederVerificationCommandAdapter } from './infrastructure/auth-breeder-verification-command.adapter';
 import { AuthPhoneVerificationMemoryStore } from './infrastructure/auth-phone-verification-memory.store';
 import { AuthPhoneVerificationMongooseRegistryAdapter } from './infrastructure/auth-phone-verification-mongoose-registry.adapter';
@@ -113,9 +122,18 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             inject: [ConfigService],
         }),
     ],
-    controllers: [AuthController, AuthAdminController],
+    controllers: [
+        AuthSessionController,
+        AuthPhoneController,
+        AuthSocialLoginController,
+        AuthSocialRegistrationController,
+        AuthDuplicateCheckController,
+        AuthSignupController,
+        AuthBannerController,
+        AuthUploadController,
+        AuthAdminController,
+    ],
     providers: [
-        AuthService,
         CheckSocialUserUseCase,
         CheckEmailDuplicateUseCase,
         CheckNicknameDuplicateUseCase,
@@ -160,6 +178,9 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthBreederDocumentOriginalFileNameService,
         AuthBreederDocumentSubmissionService,
         AuthPhoneVerificationPolicyService,
+        AuthHttpCookieService,
+        AuthSocialHttpFlowService,
+        AuthUploadPresentationService,
         AuthBreederVerificationCommandAdapter,
         AuthPhoneVerificationMemoryStore,
         AuthPhoneVerificationMongooseRegistryAdapter,
@@ -226,6 +247,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         KakaoStrategy,
         CustomLoggerService,
     ],
-    exports: [AuthService],
+    exports: [],
 })
 export class AuthModule {}
