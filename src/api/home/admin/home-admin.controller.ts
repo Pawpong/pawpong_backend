@@ -1,122 +1,114 @@
 import { Controller, Get, Post, Put, Delete, Body, Param, UseGuards } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth } from '@nestjs/swagger';
 
-import { HomeAdminService } from './home-admin.service';
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { RolesGuard } from '../../../common/guard/roles.guard';
 import { Roles } from '../../../common/decorator/roles.decorator';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
-
 import { BannerCreateRequestDto } from './dto/request/banner-create-request.dto';
 import { BannerUpdateRequestDto } from './dto/request/banner-update-request.dto';
 import { FaqCreateRequestDto } from './dto/request/faq-create-request.dto';
 import { FaqUpdateRequestDto } from './dto/request/faq-update-request.dto';
 import { BannerResponseDto } from '../dto/response/banner-response.dto';
 import { FaqResponseDto } from '../dto/response/faq-response.dto';
+import { GetAllBannersUseCase } from './application/use-cases/get-all-banners.use-case';
+import { CreateBannerUseCase } from './application/use-cases/create-banner.use-case';
+import { UpdateBannerUseCase } from './application/use-cases/update-banner.use-case';
+import { DeleteBannerUseCase } from './application/use-cases/delete-banner.use-case';
+import { GetAllFaqsUseCase } from './application/use-cases/get-all-faqs.use-case';
+import { CreateFaqUseCase } from './application/use-cases/create-faq.use-case';
+import { UpdateFaqUseCase } from './application/use-cases/update-faq.use-case';
+import { DeleteFaqUseCase } from './application/use-cases/delete-faq.use-case';
+import {
+    ApiCreateBannerAdminEndpoint,
+    ApiCreateFaqAdminEndpoint,
+    ApiDeleteBannerAdminEndpoint,
+    ApiDeleteFaqAdminEndpoint,
+    ApiGetAllBannersAdminEndpoint,
+    ApiGetAllFaqsAdminEndpoint,
+    ApiHomeAdminController,
+    ApiUpdateBannerAdminEndpoint,
+    ApiUpdateFaqAdminEndpoint,
+} from './swagger';
 
 /**
  * 홈페이지 Admin 컨트롤러
  * 배너 및 FAQ 관리
  */
-@ApiTags('홈페이지 관리자')
-@ApiBearerAuth('JWT-Auth')
+@ApiHomeAdminController()
 @Controller('home-admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
 export class HomeAdminController {
-    constructor(private readonly homeAdminService: HomeAdminService) {}
+    constructor(
+        private readonly getAllBannersUseCase: GetAllBannersUseCase,
+        private readonly createBannerUseCase: CreateBannerUseCase,
+        private readonly updateBannerUseCase: UpdateBannerUseCase,
+        private readonly deleteBannerUseCase: DeleteBannerUseCase,
+        private readonly getAllFaqsUseCase: GetAllFaqsUseCase,
+        private readonly createFaqUseCase: CreateFaqUseCase,
+        private readonly updateFaqUseCase: UpdateFaqUseCase,
+        private readonly deleteFaqUseCase: DeleteFaqUseCase,
+    ) {}
 
     @Get('banners')
-    @ApiOperation({
-        summary: '배너 전체 목록 조회 (관리자)',
-        description: '활성/비활성 포함 모든 배너를 조회합니다.',
-    })
-    @ApiResponse({ status: 200, description: '성공', type: [BannerResponseDto] })
+    @ApiGetAllBannersAdminEndpoint()
     async getAllBanners(): Promise<ApiResponseDto<BannerResponseDto[]>> {
-        const banners = await this.homeAdminService.getAllBanners();
+        const banners = await this.getAllBannersUseCase.execute();
         return ApiResponseDto.success(banners, '배너 목록이 조회되었습니다.');
     }
 
     @Post('banner')
-    @ApiOperation({
-        summary: '배너 생성',
-        description: '새로운 배너를 생성합니다.',
-    })
-    @ApiResponse({ status: 200, description: '생성 성공', type: BannerResponseDto })
+    @ApiCreateBannerAdminEndpoint()
     async createBanner(@Body() data: BannerCreateRequestDto): Promise<ApiResponseDto<BannerResponseDto>> {
-        const banner = await this.homeAdminService.createBanner(data);
+        const banner = await this.createBannerUseCase.execute(data);
         return ApiResponseDto.success(banner, '배너가 생성되었습니다.');
     }
 
     @Put('banner/:bannerId')
-    @ApiOperation({
-        summary: '배너 수정',
-        description: '기존 배너를 수정합니다.',
-    })
-    @ApiResponse({ status: 200, description: '수정 성공', type: BannerResponseDto })
+    @ApiUpdateBannerAdminEndpoint()
     async updateBanner(
         @Param('bannerId') bannerId: string,
         @Body() data: BannerUpdateRequestDto,
     ): Promise<ApiResponseDto<BannerResponseDto>> {
-        const banner = await this.homeAdminService.updateBanner(bannerId, data);
+        const banner = await this.updateBannerUseCase.execute(bannerId, data);
         return ApiResponseDto.success(banner, '배너가 수정되었습니다.');
     }
 
     @Delete('banner/:bannerId')
-    @ApiOperation({
-        summary: '배너 삭제',
-        description: '배너를 삭제합니다.',
-    })
-    @ApiResponse({ status: 200, description: '삭제 성공' })
+    @ApiDeleteBannerAdminEndpoint()
     async deleteBanner(@Param('bannerId') bannerId: string): Promise<ApiResponseDto<null>> {
-        await this.homeAdminService.deleteBanner(bannerId);
+        await this.deleteBannerUseCase.execute(bannerId);
         return ApiResponseDto.success(null, '배너가 삭제되었습니다.');
     }
 
     @Get('faqs')
-    @ApiOperation({
-        summary: 'FAQ 전체 목록 조회 (관리자)',
-        description: '활성/비활성 포함 모든 FAQ를 조회합니다.',
-    })
-    @ApiResponse({ status: 200, description: '성공', type: [FaqResponseDto] })
+    @ApiGetAllFaqsAdminEndpoint()
     async getAllFaqs(): Promise<ApiResponseDto<FaqResponseDto[]>> {
-        const faqs = await this.homeAdminService.getAllFaqs();
+        const faqs = await this.getAllFaqsUseCase.execute();
         return ApiResponseDto.success(faqs, 'FAQ 목록이 조회되었습니다.');
     }
 
     @Post('faq')
-    @ApiOperation({
-        summary: 'FAQ 생성',
-        description: '새로운 FAQ를 생성합니다.',
-    })
-    @ApiResponse({ status: 200, description: '생성 성공', type: FaqResponseDto })
+    @ApiCreateFaqAdminEndpoint()
     async createFaq(@Body() data: FaqCreateRequestDto): Promise<ApiResponseDto<FaqResponseDto>> {
-        const faq = await this.homeAdminService.createFaq(data);
+        const faq = await this.createFaqUseCase.execute(data);
         return ApiResponseDto.success(faq, 'FAQ가 생성되었습니다.');
     }
 
     @Put('faq/:faqId')
-    @ApiOperation({
-        summary: 'FAQ 수정',
-        description: '기존 FAQ를 수정합니다.',
-    })
-    @ApiResponse({ status: 200, description: '수정 성공', type: FaqResponseDto })
+    @ApiUpdateFaqAdminEndpoint()
     async updateFaq(
         @Param('faqId') faqId: string,
         @Body() data: FaqUpdateRequestDto,
     ): Promise<ApiResponseDto<FaqResponseDto>> {
-        const faq = await this.homeAdminService.updateFaq(faqId, data);
+        const faq = await this.updateFaqUseCase.execute(faqId, data);
         return ApiResponseDto.success(faq, 'FAQ가 수정되었습니다.');
     }
 
     @Delete('faq/:faqId')
-    @ApiOperation({
-        summary: 'FAQ 삭제',
-        description: 'FAQ를 삭제합니다.',
-    })
-    @ApiResponse({ status: 200, description: '삭제 성공' })
+    @ApiDeleteFaqAdminEndpoint()
     async deleteFaq(@Param('faqId') faqId: string): Promise<ApiResponseDto<null>> {
-        await this.homeAdminService.deleteFaq(faqId);
+        await this.deleteFaqUseCase.execute(faqId);
         return ApiResponseDto.success(null, 'FAQ가 삭제되었습니다.');
     }
 }
