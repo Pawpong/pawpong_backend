@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestingApp, cleanupDatabase, getAdminToken } from '../../../../common/test/test-utils';
+import { createTestingApp, cleanupDatabase, getAdminToken, getAdopterToken } from '../../../../common/test/test-utils';
 
 /**
  * Breeder Management Admin API E2E 테스트
@@ -9,10 +9,13 @@ import { createTestingApp, cleanupDatabase, getAdminToken } from '../../../../co
 describe('Breeder Management Admin API E2E Tests', () => {
     let app: INestApplication;
     let adminToken: string;
+    let adopterToken: string;
 
     beforeAll(async () => {
         app = await createTestingApp();
         adminToken = await getAdminToken(app) || '';
+        const adopter = await getAdopterToken(app);
+        adopterToken = adopter?.token || '';
         if (!adminToken) console.log('⚠️  관리자 토큰 획득 실패');
     }, 30000);
 
@@ -51,6 +54,16 @@ describe('Breeder Management Admin API E2E Tests', () => {
                 .get('/api/breeder-management-admin/profile-banners')
                 .expect(401);
             console.log('✅ 인증 없이 접근 401 확인');
+        });
+
+        it('일반 사용자의 전체 프로필 배너 접근 시 403', async () => {
+            if (!adopterToken) { console.log('⚠️  스킵'); return; }
+
+            await request(app.getHttpServer())
+                .get('/api/breeder-management-admin/profile-banners')
+                .set('Authorization', `Bearer ${adopterToken}`)
+                .expect(403);
+            console.log('✅ 일반 사용자 접근 403 확인');
         });
     });
 
