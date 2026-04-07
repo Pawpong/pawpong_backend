@@ -3,7 +3,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { InquiryController } from './inquiry.controller';
 
-import { InquiryService } from './inquiry.service';
 import { InquiryRepository } from './inquiry.repository';
 import { CreateInquiryUseCase } from './application/use-cases/create-inquiry.use-case';
 import { UpdateInquiryUseCase } from './application/use-cases/update-inquiry.use-case';
@@ -25,7 +24,6 @@ import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 
 import { StorageModule } from '../../common/storage/storage.module';
-import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 
 /**
  * 문의 모듈
@@ -42,9 +40,7 @@ import { CustomLoggerService } from '../../common/logger/custom-logger.service';
     ],
     controllers: [InquiryController],
     providers: [
-        InquiryService,
         InquiryRepository,
-        CustomLoggerService,
         GetInquiryListUseCase,
         GetInquiryDetailUseCase,
         GetMyInquiriesUseCase,
@@ -66,6 +62,5 @@ import { CustomLoggerService } from '../../common/logger/custom-logger.service';
             useExisting: InquiryRepositoryCommandAdapter,
         },
     ],
-    exports: [InquiryService],
 })
 export class InquiryModule {}
