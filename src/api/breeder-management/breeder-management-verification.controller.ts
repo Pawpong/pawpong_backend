@@ -1,23 +1,17 @@
-import { Body, Get, HttpCode, HttpStatus, Patch, Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Get, HttpCode, HttpStatus, Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { CurrentUser } from '../../common/decorator/user.decorator';
+import { ApiEndpoint } from '../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
-import { BreederDashboardResponseDto } from '../breeder/dto/response/breeder-dashboard-response.dto';
-import { BreederProfileResponseDto } from '../breeder/dto/response/breeder-profile-response.dto';
-import { GetBreederManagementDashboardUseCase } from './application/use-cases/get-breeder-management-dashboard.use-case';
-import { GetBreederManagementProfileUseCase } from './application/use-cases/get-breeder-management-profile.use-case';
 import { GetBreederManagementVerificationStatusUseCase } from './application/use-cases/get-breeder-management-verification-status.use-case';
 import { SubmitBreederManagementVerificationDocumentsUseCase } from './application/use-cases/submit-breeder-management-verification-documents.use-case';
 import { SubmitBreederManagementVerificationUseCase } from './application/use-cases/submit-breeder-management-verification.use-case';
-import { UpdateBreederManagementProfileUseCase } from './application/use-cases/update-breeder-management-profile.use-case';
 import { UploadBreederManagementVerificationDocumentsUseCase } from './application/use-cases/upload-breeder-management-verification-documents.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
-import { ProfileUpdateRequestDto } from './dto/request/profile-update-request.dto';
 import { SubmitDocumentsRequestDto } from './dto/request/submit-documents-request.dto';
 import { UploadDocumentsRequestDto } from './dto/request/upload-documents-request.dto';
 import { VerificationSubmitRequestDto } from './dto/request/verification-submit-request.dto';
-import { BreederProfileUpdateResponseDto } from './dto/response/profile-update-response.dto';
 import { UploadDocumentsResponseDto } from './dto/response/upload-documents-response.dto';
 import { VerificationStatusResponseDto } from './dto/response/verification-status-response.dto';
 import { VerificationSubmitResponseDto } from './dto/response/verification-submit-response.dto';
@@ -25,43 +19,15 @@ import {
     ApiUploadBreederManagementVerificationDocumentsEndpoint,
     BreederManagementSwaggerDocs,
 } from './swagger';
-import { ApiEndpoint } from '../../common/decorator/swagger.decorator';
 
 @BreederManagementProtectedController()
-export class BreederManagementProfileController {
+export class BreederManagementVerificationController {
     constructor(
-        private readonly getBreederManagementDashboardUseCase: GetBreederManagementDashboardUseCase,
-        private readonly getBreederManagementProfileUseCase: GetBreederManagementProfileUseCase,
-        private readonly updateBreederManagementProfileUseCase: UpdateBreederManagementProfileUseCase,
         private readonly getBreederManagementVerificationStatusUseCase: GetBreederManagementVerificationStatusUseCase,
         private readonly submitBreederManagementVerificationUseCase: SubmitBreederManagementVerificationUseCase,
         private readonly uploadBreederManagementVerificationDocumentsUseCase: UploadBreederManagementVerificationDocumentsUseCase,
         private readonly submitBreederManagementVerificationDocumentsUseCase: SubmitBreederManagementVerificationDocumentsUseCase,
     ) {}
-
-    @Get('dashboard')
-    @ApiEndpoint(BreederManagementSwaggerDocs.dashboard)
-    async getDashboard(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<BreederDashboardResponseDto>> {
-        const result = await this.getBreederManagementDashboardUseCase.execute(userId);
-        return ApiResponseDto.success(result, '대시보드 정보가 조회되었습니다.');
-    }
-
-    @Get('profile')
-    @ApiEndpoint(BreederManagementSwaggerDocs.profile)
-    async getProfile(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<BreederProfileResponseDto>> {
-        const result = await this.getBreederManagementProfileUseCase.execute(userId);
-        return ApiResponseDto.success(result, '브리더 프로필이 조회되었습니다.');
-    }
-
-    @Patch('profile')
-    @ApiEndpoint(BreederManagementSwaggerDocs.updateProfile)
-    async updateProfile(
-        @CurrentUser('userId') userId: string,
-        @Body() updateData: ProfileUpdateRequestDto,
-    ): Promise<ApiResponseDto<BreederProfileUpdateResponseDto>> {
-        const result = await this.updateBreederManagementProfileUseCase.execute(userId, updateData);
-        return ApiResponseDto.success(result, '프로필이 성공적으로 수정되었습니다.');
-    }
 
     @Get('verification')
     @ApiEndpoint(BreederManagementSwaggerDocs.verificationStatus)

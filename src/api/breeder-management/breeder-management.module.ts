@@ -3,14 +3,16 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { BreederManagementAccountController } from './breeder-management-account.controller';
 import { BreederManagementAvailablePetsController } from './breeder-management-available-pets.controller';
+import { BreederManagementDashboardController } from './breeder-management-dashboard.controller';
 import { BreederManagementAdminCounselBannersController } from './admin/breeder-management-admin-counsel-banners.controller';
 import { BreederManagementAdminProfileBannersController } from './admin/breeder-management-admin-profile-banners.controller';
 import { BreederManagementAdminPublicBannersController } from './admin/breeder-management-admin-public-banners.controller';
 import { BreederManagementApplicationsController } from './breeder-management-applications.controller';
 import { BreederManagementMyPetsController } from './breeder-management-my-pets.controller';
 import { BreederManagementParentPetsController } from './breeder-management-parent-pets.controller';
-import { BreederManagementProfileController } from './breeder-management-profile.controller';
+import { BreederManagementProfileInfoController } from './breeder-management-profile-info.controller';
 import { BreederManagementReviewsController } from './breeder-management-reviews.controller';
+import { BreederManagementVerificationController } from './breeder-management-verification.controller';
 
 import { BreederManagementService } from './breeder-management.service';
 import { GetBreederManagementDashboardUseCase } from './application/use-cases/get-breeder-management-dashboard.use-case';
@@ -135,7 +137,9 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         DiscordWebhookModule,
     ],
     controllers: [
-        BreederManagementProfileController,
+        BreederManagementDashboardController,
+        BreederManagementProfileInfoController,
+        BreederManagementVerificationController,
         BreederManagementParentPetsController,
         BreederManagementAvailablePetsController,
         BreederManagementMyPetsController,
