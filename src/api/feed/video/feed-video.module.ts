@@ -36,7 +36,9 @@ import { FEED_VIDEO_COMMAND } from './application/ports/feed-video-command.port'
 import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
 import { FeedVideoPublicController } from './feed-video-public.controller';
 import { FeedVideoStreamController } from './feed-video-stream.controller';
-import { FeedVideoManageController } from './feed-video-manage.controller';
+import { FeedVideoUploadController } from './feed-video-upload.controller';
+import { FeedVideoLibraryController } from './feed-video-library.controller';
+import { FeedVideoOwnershipController } from './feed-video-ownership.controller';
 import { FeedVideoLikeController } from './feed-video-like.controller';
 import { FeedVideoCommentQueryController } from './feed-video-comment-query.controller';
 import { FeedVideoCommentCommandController } from './feed-video-comment-command.controller';
@@ -80,7 +82,9 @@ import { FeedVideoTagController } from './feed-video-tag.controller';
     controllers: [
         FeedVideoPublicController,
         FeedVideoStreamController,
-        FeedVideoManageController,
+        FeedVideoUploadController,
+        FeedVideoLibraryController,
+        FeedVideoOwnershipController,
         FeedVideoLikeController,
         FeedVideoCommentQueryController,
         FeedVideoCommentCommandController,
