@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { BreederManagementAccountController } from './breeder-management-account.controller';
-import { BreederManagementApplicationFormController } from './breeder-management-application-form.controller';
+import { BreederManagementApplicationFormCommandController } from './breeder-management-application-form-command.controller';
+import { BreederManagementApplicationFormQueryController } from './breeder-management-application-form-query.controller';
 import { BreederManagementApplicationStatusController } from './breeder-management-application-status.controller';
 import { BreederManagementApplicationsQueryController } from './breeder-management-applications-query.controller';
 import { BreederManagementAvailablePetsController } from './breeder-management-available-pets.controller';
@@ -13,10 +14,11 @@ import { BreederManagementAdminPublicBannersController } from './admin/breeder-m
 import { BreederManagementMyPetsController } from './breeder-management-my-pets.controller';
 import { BreederManagementParentPetsController } from './breeder-management-parent-pets.controller';
 import { BreederManagementProfileInfoController } from './breeder-management-profile-info.controller';
-import { BreederManagementReviewsController } from './breeder-management-reviews.controller';
-import { BreederManagementVerificationController } from './breeder-management-verification.controller';
-
-import { BreederManagementService } from './breeder-management.service';
+import { BreederManagementReviewReplyController } from './breeder-management-review-reply.controller';
+import { BreederManagementReviewsQueryController } from './breeder-management-reviews-query.controller';
+import { BreederManagementVerificationCommandController } from './breeder-management-verification-command.controller';
+import { BreederManagementVerificationDocumentsController } from './breeder-management-verification-documents.controller';
+import { BreederManagementVerificationQueryController } from './breeder-management-verification-query.controller';
 import { GetBreederManagementDashboardUseCase } from './application/use-cases/get-breeder-management-dashboard.use-case';
 import { GetBreederManagementProfileUseCase } from './application/use-cases/get-breeder-management-profile.use-case';
 import { UpdateBreederManagementProfileUseCase } from './application/use-cases/update-breeder-management-profile.use-case';
@@ -141,21 +143,24 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
     controllers: [
         BreederManagementDashboardController,
         BreederManagementProfileInfoController,
-        BreederManagementVerificationController,
+        BreederManagementVerificationQueryController,
+        BreederManagementVerificationCommandController,
+        BreederManagementVerificationDocumentsController,
         BreederManagementParentPetsController,
         BreederManagementAvailablePetsController,
         BreederManagementMyPetsController,
         BreederManagementApplicationsQueryController,
         BreederManagementApplicationStatusController,
-        BreederManagementApplicationFormController,
-        BreederManagementReviewsController,
+        BreederManagementApplicationFormQueryController,
+        BreederManagementApplicationFormCommandController,
+        BreederManagementReviewsQueryController,
+        BreederManagementReviewReplyController,
         BreederManagementAccountController,
         BreederManagementAdminProfileBannersController,
         BreederManagementAdminCounselBannersController,
         BreederManagementAdminPublicBannersController,
     ],
     providers: [
-        BreederManagementService,
         BreederRepository,
         ParentPetRepository,
         AdoptionApplicationRepository,
@@ -285,7 +290,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         },
     ],
     exports: [
-        BreederManagementService,
         GetActiveProfileBannersUseCase,
         BreederRepository,
         AvailablePetManagementRepository,
