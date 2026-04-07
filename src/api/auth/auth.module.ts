@@ -47,12 +47,17 @@ import { AuthTempUploadPort } from './application/ports/auth-temp-upload.port';
 import { AuthSocialCallbackPort } from './application/ports/auth-social-callback.port';
 import { AuthUploadFileStorePort } from './application/ports/auth-upload-file-store.port';
 import { AuthProfileImageTargetPort } from './application/ports/auth-profile-image-target.port';
+import { AUTH_PHONE_VERIFICATION_REGISTRY_PORT } from './application/ports/auth-phone-verification-registry.port';
+import { AUTH_PHONE_VERIFICATION_SENDER_PORT } from './application/ports/auth-phone-verification-sender.port';
+import { AUTH_PHONE_VERIFICATION_STORE_PORT } from './application/ports/auth-phone-verification-store.port';
 import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
 import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
 import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
 import { CheckBreederNameDuplicateUseCase } from './application/use-cases/check-breeder-name-duplicate.use-case';
 import { CompleteSocialRegistrationUseCase } from './application/use-cases/complete-social-registration.use-case';
 import { CompleteLegacySocialRegistrationUseCase } from './application/use-cases/complete-legacy-social-registration.use-case';
+import { SendPhoneVerificationCodeUseCase } from './application/use-cases/send-phone-verification-code.use-case';
+import { VerifyPhoneVerificationCodeUseCase } from './application/use-cases/verify-phone-verification-code.use-case';
 import { RefreshAuthTokenUseCase } from './application/use-cases/refresh-auth-token.use-case';
 import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
@@ -69,7 +74,11 @@ import { AuthProfileImageFilePolicyService } from './domain/services/auth-profil
 import { AuthBreederDocumentFilePolicyService } from './domain/services/auth-breeder-document-file-policy.service';
 import { AuthBreederDocumentOriginalFileNameService } from './domain/services/auth-breeder-document-original-file-name.service';
 import { AuthBreederDocumentSubmissionService } from './domain/services/auth-breeder-document-submission.service';
+import { AuthPhoneVerificationPolicyService } from './domain/services/auth-phone-verification-policy.service';
 import { AuthBreederVerificationCommandAdapter } from './infrastructure/auth-breeder-verification-command.adapter';
+import { AuthPhoneVerificationMemoryStore } from './infrastructure/auth-phone-verification-memory.store';
+import { AuthPhoneVerificationMongooseRegistryAdapter } from './infrastructure/auth-phone-verification-mongoose-registry.adapter';
+import { AuthPhoneVerificationAlimtalkAdapter } from './infrastructure/auth-phone-verification-alimtalk.adapter';
 import { AUTH_BREEDER_VERIFICATION_COMMAND_PORT } from './application/ports/auth-breeder-verification-command.port';
 
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
@@ -114,6 +123,8 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         CheckBreederNameDuplicateUseCase,
         CompleteSocialRegistrationUseCase,
         CompleteLegacySocialRegistrationUseCase,
+        SendPhoneVerificationCodeUseCase,
+        VerifyPhoneVerificationCodeUseCase,
         RefreshAuthTokenUseCase,
         LogoutUseCase,
         RegisterAdopterUseCase,
@@ -150,10 +161,26 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthBreederDocumentFilePolicyService,
         AuthBreederDocumentOriginalFileNameService,
         AuthBreederDocumentSubmissionService,
+        AuthPhoneVerificationPolicyService,
         AuthBreederVerificationCommandAdapter,
+        AuthPhoneVerificationMemoryStore,
+        AuthPhoneVerificationMongooseRegistryAdapter,
+        AuthPhoneVerificationAlimtalkAdapter,
         {
             provide: AuthRegistrationPort,
             useExisting: AuthRegistrationAdapter,
+        },
+        {
+            provide: AUTH_PHONE_VERIFICATION_REGISTRY_PORT,
+            useExisting: AuthPhoneVerificationMongooseRegistryAdapter,
+        },
+        {
+            provide: AUTH_PHONE_VERIFICATION_STORE_PORT,
+            useExisting: AuthPhoneVerificationMemoryStore,
+        },
+        {
+            provide: AUTH_PHONE_VERIFICATION_SENDER_PORT,
+            useExisting: AuthPhoneVerificationAlimtalkAdapter,
         },
         {
             provide: AUTH_BREEDER_VERIFICATION_COMMAND_PORT,
