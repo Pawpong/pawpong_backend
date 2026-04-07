@@ -1,30 +1,23 @@
-import { Controller, Get, Post, Patch, Delete, Param, Body } from '@nestjs/common';
+import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
 
-import { CreateBreedRequestDto } from './dto/request/create-breed-request.dto';
-import { UpdateBreedRequestDto } from './dto/request/update-breed-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
-import { BreedResponseDto } from '../dto/response/breed-response.dto';
 import { CreateBreedUseCase } from './application/use-cases/create-breed.use-case';
 import { DeleteBreedUseCase } from './application/use-cases/delete-breed.use-case';
-import { GetAllBreedsAdminUseCase } from './application/use-cases/get-all-breeds-admin.use-case';
-import { GetBreedByIdUseCase } from './application/use-cases/get-breed-by-id.use-case';
 import { UpdateBreedUseCase } from './application/use-cases/update-breed.use-case';
+import { BreedAdminControllerBase } from './decorator/breed-admin-controller.decorator';
+import { CreateBreedRequestDto } from './dto/request/create-breed-request.dto';
+import { UpdateBreedRequestDto } from './dto/request/update-breed-request.dto';
+import { BreedResponseDto } from '../dto/response/breed-response.dto';
 import {
-    ApiBreedAdminController,
     ApiCreateBreedAdminEndpoint,
     ApiDeleteBreedAdminEndpoint,
-    ApiGetAllBreedsAdminEndpoint,
-    ApiGetBreedByIdAdminEndpoint,
     ApiUpdateBreedAdminEndpoint,
 } from './swagger';
 
-@ApiBreedAdminController()
-@Controller('breeds-admin')
-export class AdminBreedController {
+@BreedAdminControllerBase()
+export class BreedAdminCommandController {
     constructor(
         private readonly createBreedUseCase: CreateBreedUseCase,
-        private readonly getAllBreedsAdminUseCase: GetAllBreedsAdminUseCase,
-        private readonly getBreedByIdUseCase: GetBreedByIdUseCase,
         private readonly updateBreedUseCase: UpdateBreedUseCase,
         private readonly deleteBreedUseCase: DeleteBreedUseCase,
     ) {}
@@ -33,20 +26,6 @@ export class AdminBreedController {
     @ApiCreateBreedAdminEndpoint()
     async createBreed(@Body() dto: CreateBreedRequestDto): Promise<ApiResponseDto<BreedResponseDto>> {
         const result = await this.createBreedUseCase.execute(dto);
-        return ApiResponseDto.success(result);
-    }
-
-    @Get()
-    @ApiGetAllBreedsAdminEndpoint()
-    async getAllBreeds(): Promise<ApiResponseDto<BreedResponseDto[]>> {
-        const result = await this.getAllBreedsAdminUseCase.execute();
-        return ApiResponseDto.success(result);
-    }
-
-    @Get(':id')
-    @ApiGetBreedByIdAdminEndpoint()
-    async getBreedById(@Param('id') id: string): Promise<ApiResponseDto<BreedResponseDto>> {
-        const result = await this.getBreedByIdUseCase.execute(id);
         return ApiResponseDto.success(result);
     }
 
