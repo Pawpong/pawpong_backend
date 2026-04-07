@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AnnouncementController } from './announcement.controller';
-import { AnnouncementAdminController } from './admin/announcement-admin.controller';
+import { AnnouncementAdminCommandController } from './admin/announcement-admin-command.controller';
+import { AnnouncementAdminQueryController } from './admin/announcement-admin-query.controller';
 
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { AnnouncementService } from './announcement.service';
@@ -28,7 +29,7 @@ import { Announcement, AnnouncementSchema } from '../../schema/announcement.sche
  */
 @Module({
     imports: [MongooseModule.forFeature([{ name: Announcement.name, schema: AnnouncementSchema }])],
-    controllers: [AnnouncementController, AnnouncementAdminController],
+    controllers: [AnnouncementController, AnnouncementAdminQueryController, AnnouncementAdminCommandController],
     providers: [
         AnnouncementService,
         GetActiveAnnouncementsUseCase,
