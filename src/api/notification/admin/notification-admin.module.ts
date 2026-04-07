@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { NotificationAdminController } from './notification-admin.controller';
+import { NotificationAdminQueryController } from './notification-admin-query.controller';
+import { NotificationAdminStatsController } from './notification-admin-stats.controller';
 
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
 import { NOTIFICATION_ADMIN_READER } from './application/ports/notification-admin-reader.port';
@@ -18,7 +19,7 @@ import { Notification, NotificationSchema } from '../../../schema/notification.s
  */
 @Module({
     imports: [MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }])],
-    controllers: [NotificationAdminController],
+    controllers: [NotificationAdminQueryController, NotificationAdminStatsController],
     providers: [
         CustomLoggerService,
         GetAdminNotificationsUseCase,
