@@ -4,7 +4,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { DistrictController } from './district.controller';
 import { DistrictAdminController } from './admin/district-admin.controller';
 
-import { DistrictAdminService } from './admin/district-admin.service';
 import { GetAllDistrictsUseCase } from './application/use-cases/get-all-districts.use-case';
 import { DISTRICT_READER } from './application/ports/district-reader.port';
 import { DistrictOrderingService } from './domain/services/district-ordering.service';
@@ -37,7 +36,6 @@ import { District, DistrictSchema } from '../../schema/district.schema';
         DistrictMongooseReaderAdapter,
         DistrictMongooseAdminReaderAdapter,
         DistrictMongooseWriterAdapter,
-        DistrictAdminService,
         {
             provide: DISTRICT_READER,
             useExisting: DistrictMongooseReaderAdapter,
@@ -51,6 +49,5 @@ import { District, DistrictSchema } from '../../schema/district.schema';
             useExisting: DistrictMongooseWriterAdapter,
         },
     ],
-    exports: [DistrictAdminService],
 })
 export class DistrictModule {}
