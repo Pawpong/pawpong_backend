@@ -1,8 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { UploadController } from './upload.controller';
 import { UploadAdminController } from './admin/upload-admin.controller';
+import { UploadFileController } from './upload-file.controller';
+import { UploadPhotoController } from './upload-photo.controller';
 import { UPLOAD_ADMIN_STORAGE } from './admin/application/ports/upload-admin-storage.port';
 import { UPLOAD_ADMIN_REFERENCE_READER } from './admin/application/ports/upload-admin-reference-reader.port';
 import { ListAllFilesUseCase } from './admin/application/use-cases/list-all-files.use-case';
@@ -54,7 +55,8 @@ import { StorageModule } from '../../common/storage/storage.module';
         StorageModule,
     ],
     controllers: [
-        UploadController,
+        UploadPhotoController,
+        UploadFileController,
         UploadAdminController, // 컨트롤러 제외하고 서비스만 테스트
     ],
     providers: [
