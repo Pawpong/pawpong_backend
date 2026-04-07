@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AppVersion, AppVersionSchema } from '../../schema/app-version.schema';
 import { AppVersionController } from './app-version.controller';
-import { AppVersionAdminController } from './admin/app-version-admin.controller';
+import { AppVersionAdminCommandController } from './admin/app-version-admin-command.controller';
+import { AppVersionAdminQueryController } from './admin/app-version-admin-query.controller';
 import { AppVersionService } from './app-version.service';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { CheckAppVersionUseCase } from './application/use-cases/check-app-version.use-case';
@@ -26,7 +27,7 @@ import { AppVersionMongooseWriterAdapter } from './admin/infrastructure/app-vers
  */
 @Module({
     imports: [MongooseModule.forFeature([{ name: AppVersion.name, schema: AppVersionSchema }])],
-    controllers: [AppVersionController, AppVersionAdminController],
+    controllers: [AppVersionController, AppVersionAdminQueryController, AppVersionAdminCommandController],
     providers: [
         AppVersionService,
         CustomLoggerService,
