@@ -10,14 +10,24 @@ import {
     Param,
 } from '@nestjs/common';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
 import { CurrentUser } from '../../common/decorator/user.decorator';
-import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
-
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
+import { DeleteUploadedFileRequestDto } from './dto/request/delete-uploaded-file-request.dto';
+import { UploadFolderRequestDto } from './dto/request/upload-folder-request.dto';
+import { UploadPhotoReplaceRequestDto } from './dto/request/upload-photo-replace-request.dto';
 import { UploadResponseDto } from './dto/response/upload-response.dto';
+import {
+    ApiDeleteUploadedFileEndpoint,
+    ApiUploadAvailablePetPhotosEndpoint,
+    ApiUploadController,
+    ApiUploadMultipleFilesEndpoint,
+    ApiUploadParentPetPhotosEndpoint,
+    ApiUploadRepresentativePhotosEndpoint,
+    ApiUploadSingleFileEndpoint,
+} from './swagger';
+
 import { UploadRepresentativePhotosUseCase } from './application/use-cases/upload-representative-photos.use-case';
 import { UploadAvailablePetPhotosUseCase } from './application/use-cases/upload-available-pet-photos.use-case';
 import { UploadParentPetPhotosUseCase } from './application/use-cases/upload-parent-pet-photos.use-case';
@@ -25,7 +35,7 @@ import { UploadSingleFileUseCase } from './application/use-cases/upload-single-f
 import { UploadMultipleFilesUseCase } from './application/use-cases/upload-multiple-files.use-case';
 import { DeleteUploadedFileUseCase } from './application/use-cases/delete-uploaded-file.use-case';
 
-@ApiController('업로드')
+@ApiUploadController()
 @Controller('upload')
 export class UploadController {
     constructor(
@@ -39,128 +49,85 @@ export class UploadController {
 
     @Post('representative-photos')
     @UseGuards(JwtAuthGuard)
-    @ApiConsumes('multipart/form-data')
-    @ApiEndpoint({
-        summary: '대표 사진 업로드',
-        description: '브리더의 대표 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 3장, 각 5MB)',
-        responseType: UploadResponseDto,
-        isPublic: false,
-    })
+    @ApiUploadRepresentativePhotosEndpoint()
     @UseInterceptors(FilesInterceptor('files', 3))
     async uploadRepresentativePhotos(
         @UploadedFiles() files: Express.Multer.File[],
-        @CurrentUser() user: any,
+        @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
-        const responses = await this.uploadRepresentativePhotosUseCase.execute(files, user);
+        const responses = await this.uploadRepresentativePhotosUseCase.execute(files, userId, role);
         return ApiResponseDto.success(responses, '대표 사진이 업로드되고 저장되었습니다.');
     }
 
     @Post('available-pet-photos/:petId')
     @UseGuards(JwtAuthGuard)
-    @ApiConsumes('multipart/form-data')
-    @ApiEndpoint({
-        summary: '분양 개체 사진 업로드 (다중)',
-        description:
-            '분양 개체의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 5장, 기존 사진 URL과 함께 전송 시 전체 교체)',
-        responseType: UploadResponseDto,
-        isPublic: false,
-    })
+    @ApiUploadAvailablePetPhotosEndpoint()
     @UseInterceptors(FilesInterceptor('files', 5))
     async uploadAvailablePetPhotos(
         @Param('petId') petId: string,
         @UploadedFiles() files: Express.Multer.File[],
-        @Body('existingPhotos') existingPhotos: string | string[],
-        @CurrentUser() user: any,
+        @Body() requestDto: UploadPhotoReplaceRequestDto,
+        @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
-        // existingPhotos가 문자열이면 배열로 변환 (multipart에서 단일 값은 문자열로 올 수 있음)
-        const existingPhotoArray = existingPhotos
-            ? Array.isArray(existingPhotos)
-                ? existingPhotos
-                : [existingPhotos]
-            : [];
         const responses = await this.uploadAvailablePetPhotosUseCase.execute(
             petId,
             files || [],
-            existingPhotoArray,
-            user,
+            requestDto.existingPhotos || [],
+            userId,
+            role,
         );
         return ApiResponseDto.success(responses, '분양 개체 사진이 업로드되고 저장되었습니다.');
     }
 
     @Post('parent-pet-photos/:petId')
     @UseGuards(JwtAuthGuard)
-    @ApiConsumes('multipart/form-data')
-    @ApiEndpoint({
-        summary: '부모견/묘 사진 업로드 (다중)',
-        description:
-            '부모견/묘의 사진을 업로드하고 자동으로 DB에 저장합니다. (최대 5장, 기존 사진 URL과 함께 전송 시 전체 교체)',
-        responseType: UploadResponseDto,
-        isPublic: false,
-    })
+    @ApiUploadParentPetPhotosEndpoint()
     @UseInterceptors(FilesInterceptor('files', 5))
     async uploadParentPetPhotos(
         @Param('petId') petId: string,
         @UploadedFiles() files: Express.Multer.File[],
-        @Body('existingPhotos') existingPhotos: string | string[],
-        @CurrentUser() user: any,
+        @Body() requestDto: UploadPhotoReplaceRequestDto,
+        @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
-        // existingPhotos가 문자열이면 배열로 변환 (multipart에서 단일 값은 문자열로 올 수 있음)
-        const existingPhotoArray = existingPhotos
-            ? Array.isArray(existingPhotos)
-                ? existingPhotos
-                : [existingPhotos]
-            : [];
         const responses = await this.uploadParentPetPhotosUseCase.execute(
             petId,
             files || [],
-            existingPhotoArray,
-            user,
+            requestDto.existingPhotos || [],
+            userId,
+            role,
         );
         return ApiResponseDto.success(responses, '부모견/묘 사진이 업로드되고 저장되었습니다.');
     }
 
     @Post('single')
-    @ApiConsumes('multipart/form-data')
-    @ApiEndpoint({
-        summary: '단일 파일 업로드',
-        description: '단일 파일을 Google Cloud Storage에 업로드합니다.',
-        responseType: UploadResponseDto,
-        isPublic: true,
-    })
+    @ApiUploadSingleFileEndpoint()
     @UseInterceptors(FileInterceptor('file'))
     async uploadSingle(
         @UploadedFile() file: Express.Multer.File,
-        @Body('folder') folder?: string,
+        @Body() requestDto: UploadFolderRequestDto,
     ): Promise<ApiResponseDto<UploadResponseDto>> {
-        const response = await this.uploadSingleFileUseCase.execute(file, folder);
+        const response = await this.uploadSingleFileUseCase.execute(file, requestDto.folder);
         return ApiResponseDto.success(response, '파일 업로드 성공');
     }
 
     @Post('multiple')
-    @ApiConsumes('multipart/form-data')
-    @ApiEndpoint({
-        summary: '다중 파일 업로드',
-        description: '다중 파일을 Google Cloud Storage에 업로드합니다. (최대 10개)',
-        responseType: UploadResponseDto,
-        isPublic: true,
-    })
+    @ApiUploadMultipleFilesEndpoint()
     @UseInterceptors(FilesInterceptor('files', 10))
     async uploadMultiple(
         @UploadedFiles() files: Express.Multer.File[],
-        @Body('folder') folder?: string,
+        @Body() requestDto: UploadFolderRequestDto,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
-        const responses = await this.uploadMultipleFilesUseCase.execute(files, folder);
+        const responses = await this.uploadMultipleFilesUseCase.execute(files, requestDto.folder);
         return ApiResponseDto.success(responses, `${files.length}개 파일 업로드 성공`);
     }
 
     @Delete()
-    @ApiEndpoint({
-        summary: '파일 삭제',
-        description: 'Google Cloud Storage에서 파일을 삭제합니다.',
-        isPublic: true,
-    })
-    async deleteFile(@Body('fileName') fileName: string): Promise<ApiResponseDto<null>> {
-        await this.deleteUploadedFileUseCase.execute(fileName);
+    @ApiDeleteUploadedFileEndpoint()
+    async deleteFile(@Body() requestDto: DeleteUploadedFileRequestDto): Promise<ApiResponseDto<null>> {
+        await this.deleteUploadedFileUseCase.execute(requestDto.fileName);
         return ApiResponseDto.success(null, '파일 삭제 성공');
     }
 }

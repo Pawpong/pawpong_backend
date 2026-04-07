@@ -24,13 +24,14 @@ export class UploadParentPetPhotosUseCase {
         petId: string,
         files: Express.Multer.File[],
         existingPhotos: string[],
-        user: any,
+        userId: string,
+        role: string,
     ): Promise<UploadResponseDto[]> {
-        if (user.role !== 'breeder') {
+        if (role !== 'breeder') {
             throw new ForbiddenException('브리더만 부모견/묘 사진을 업로드할 수 있습니다.');
         }
 
-        const pet = await this.uploadOwner.findOwnedParentPet(petId, user.userId);
+        const pet = await this.uploadOwner.findOwnedParentPet(petId, userId);
         if (!pet) {
             throw new BadRequestException('해당 부모견/묘를 찾을 수 없습니다.');
         }
@@ -57,7 +58,7 @@ export class UploadParentPetPhotosUseCase {
             uploadedResources.map((resource) => resource.fileName),
         );
 
-        await this.uploadOwner.replaceParentPetPhotos(petId, user.userId, allPhotoPaths);
+        await this.uploadOwner.replaceParentPetPhotos(petId, userId, allPhotoPaths);
 
         return UploadResponseMapper.toDtos(uploadedResources, files || []);
     }
