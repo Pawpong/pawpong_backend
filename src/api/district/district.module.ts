@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { DistrictController } from './district.controller';
-import { DistrictAdminController } from './admin/district-admin.controller';
+import { DistrictAdminCommandController } from './admin/district-admin-command.controller';
+import { DistrictAdminQueryController } from './admin/district-admin-query.controller';
 
 import { GetAllDistrictsUseCase } from './application/use-cases/get-all-districts.use-case';
 import { DISTRICT_READER } from './application/ports/district-reader.port';
@@ -23,7 +24,7 @@ import { District, DistrictSchema } from '../../schema/district.schema';
 
 @Module({
     imports: [MongooseModule.forFeature([{ name: District.name, schema: DistrictSchema }])],
-    controllers: [DistrictController, DistrictAdminController],
+    controllers: [DistrictController, DistrictAdminQueryController, DistrictAdminCommandController],
     providers: [
         GetAllDistrictsUseCase,
         CreateDistrictUseCase,
