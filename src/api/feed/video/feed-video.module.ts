@@ -4,7 +4,6 @@ import { BullModule } from '@nestjs/bullmq';
 import { Video, VideoSchema } from '../../../schema/video.schema';
 import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema';
 import { VideoComment, VideoCommentSchema } from '../../../schema/video-comment.schema';
-import { FeedVideoController } from './feed-video.controller';
 import { FfmpegService } from './services/ffmpeg.service';
 import { VideoEncodingProcessor } from './processors/video-encoding.processor';
 import { StorageModule } from '../../../common/storage/storage.module';
@@ -31,9 +30,17 @@ import { FeedVideoAssetUrlService } from './infrastructure/feed-video-asset-url.
 import { FeedVideoMongooseReaderAdapter } from './infrastructure/feed-video-mongoose-reader.adapter';
 import { FeedVideoMongooseCommandAdapter } from './infrastructure/feed-video-mongoose-command.adapter';
 import { FeedVideoStorageStreamAdapter } from './infrastructure/feed-video-storage-stream.adapter';
+import { FeedVideoStreamHttpService } from './infrastructure/feed-video-stream-http.service';
 import { FEED_VIDEO_READER } from './application/ports/feed-video-reader.port';
 import { FEED_VIDEO_COMMAND } from './application/ports/feed-video-command.port';
 import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
+import { FeedVideoPublicController } from './feed-video-public.controller';
+import { FeedVideoStreamController } from './feed-video-stream.controller';
+import { FeedVideoManageController } from './feed-video-manage.controller';
+import { FeedVideoLikeController } from './feed-video-like.controller';
+import { FeedVideoCommentQueryController } from './feed-video-comment-query.controller';
+import { FeedVideoCommentCommandController } from './feed-video-comment-command.controller';
+import { FeedVideoTagController } from './feed-video-tag.controller';
 
 /**
  * 피드 동영상 모듈
@@ -70,7 +77,15 @@ import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
         FeedLikeModule,
         FeedTagModule,
     ],
-    controllers: [FeedVideoController],
+    controllers: [
+        FeedVideoPublicController,
+        FeedVideoStreamController,
+        FeedVideoManageController,
+        FeedVideoLikeController,
+        FeedVideoCommentQueryController,
+        FeedVideoCommentCommandController,
+        FeedVideoTagController,
+    ],
     providers: [
         FfmpegService,
         VideoEncodingProcessor,
@@ -94,6 +109,7 @@ import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
         FeedVideoMongooseReaderAdapter,
         FeedVideoMongooseCommandAdapter,
         FeedVideoStorageStreamAdapter,
+        FeedVideoStreamHttpService,
         {
             provide: FEED_VIDEO_READER,
             useExisting: FeedVideoMongooseReaderAdapter,
