@@ -18,7 +18,9 @@ import { AuthAdminLoginController } from './admin/auth-admin-login.controller';
 import { AuthAdminTokenController } from './admin/auth-admin-token.controller';
 import { AuthSessionController } from './auth-session.controller';
 import { AuthSignupController } from './auth-signup.controller';
-import { AuthSocialLoginController } from './auth-social-login.controller';
+import { AuthGoogleLoginController } from './auth-google-login.controller';
+import { AuthKakaoLoginController } from './auth-kakao-login.controller';
+import { AuthNaverLoginController } from './auth-naver-login.controller';
 import { AuthSocialRegistrationController } from './auth-social-registration.controller';
 import { AuthProfileUploadController } from './auth-profile-upload.controller';
 import { AuthBreederDocumentsUploadController } from './auth-breeder-documents-upload.controller';
@@ -127,7 +129,9 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
     controllers: [
         AuthSessionController,
         AuthPhoneController,
-        AuthSocialLoginController,
+        AuthGoogleLoginController,
+        AuthNaverLoginController,
+        AuthKakaoLoginController,
         AuthSocialRegistrationController,
         AuthDuplicateCheckController,
         AuthSignupController,
