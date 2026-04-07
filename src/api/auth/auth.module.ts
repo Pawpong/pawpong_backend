@@ -20,7 +20,8 @@ import { AuthSessionController } from './auth-session.controller';
 import { AuthSignupController } from './auth-signup.controller';
 import { AuthSocialLoginController } from './auth-social-login.controller';
 import { AuthSocialRegistrationController } from './auth-social-registration.controller';
-import { AuthUploadController } from './auth-upload.controller';
+import { AuthProfileUploadController } from './auth-profile-upload.controller';
+import { AuthBreederDocumentsUploadController } from './auth-breeder-documents-upload.controller';
 
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { LoginAdminUseCase } from './admin/application/use-cases/login-admin.use-case';
@@ -131,7 +132,8 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthDuplicateCheckController,
         AuthSignupController,
         AuthBannerController,
-        AuthUploadController,
+        AuthProfileUploadController,
+        AuthBreederDocumentsUploadController,
         AuthAdminLoginController,
         AuthAdminTokenController,
     ],
