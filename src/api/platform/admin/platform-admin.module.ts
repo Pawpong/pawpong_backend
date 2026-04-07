@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { PlatformAdminController } from './platform-admin.controller';
+import { PlatformAdminMvpStatsController } from './platform-admin-mvp-stats.controller';
+import { PlatformAdminStatsController } from './platform-admin-stats.controller';
 import { PLATFORM_ADMIN_READER } from './application/ports/platform-admin-reader.port';
 import { GetPlatformMvpStatsUseCase } from './application/use-cases/get-platform-mvp-stats.use-case';
 import { GetPlatformStatsUseCase } from './application/use-cases/get-platform-stats.use-case';
@@ -32,7 +33,7 @@ import { AdoptionApplication, AdoptionApplicationSchema } from '../../../schema/
             { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
         ]),
     ],
-    controllers: [PlatformAdminController],
+    controllers: [PlatformAdminStatsController, PlatformAdminMvpStatsController],
     providers: [
         GetPlatformStatsUseCase,
         GetPlatformMvpStatsUseCase,
