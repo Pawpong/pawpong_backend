@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { InquiryController } from './inquiry.controller';
+import { InquiryAdopterController } from './inquiry-adopter.controller';
+import { InquiryBreederController } from './inquiry-breeder.controller';
+import { InquiryPublicHttpController } from './inquiry-public.controller';
 
 import { InquiryRepository } from './inquiry.repository';
 import { CreateInquiryUseCase } from './application/use-cases/create-inquiry.use-case';
@@ -38,7 +40,7 @@ import { StorageModule } from '../../common/storage/storage.module';
         ]),
         StorageModule,
     ],
-    controllers: [InquiryController],
+    controllers: [InquiryAdopterController, InquiryBreederController, InquiryPublicHttpController],
     providers: [
         InquiryRepository,
         GetInquiryListUseCase,
