@@ -13,6 +13,7 @@ type ApiEndpointOptions = {
     summary: string;
     description?: string;
     responseType?: Type<any> | [Type<any>];
+    dataSchema?: Record<string, any>;
     isPublic?: boolean;
     successStatus?: number;
     successDescription?: string;
@@ -129,6 +130,16 @@ export function ApiEndpoint(options: ApiEndpointOptions) {
             }),
         );
     } else {
+        const dataSchema = options.dataSchema
+            ? options.dataSchema
+            : options.nullableData
+              ? { type: 'object', nullable: true, example: null }
+              : { type: 'object', example: {} };
+
+        if (options.additionalModels?.length) {
+            decorators.push(ApiExtraModels(...options.additionalModels));
+        }
+
         decorators.push(
             ApiResponse({
                 status: successStatus,
@@ -138,9 +149,7 @@ export function ApiEndpoint(options: ApiEndpointOptions) {
                     properties: {
                         success: { type: 'boolean', example: true },
                         code: { type: 'number', example: successStatus },
-                        data: options.nullableData
-                            ? { type: 'object', nullable: true, example: null }
-                            : { type: 'object', example: {} },
+                        data: dataSchema,
                         message: { type: 'string', example: successMessageExample },
                         timestamp: { type: 'string', example: '2025-01-26T10:30:00.000Z' },
                     },
