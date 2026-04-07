@@ -8,7 +8,8 @@ import { NotificationModule } from '../../../api/notification/notification.modul
 import { BreederReportAdminModule } from './report/breeder-report-admin.module';
 import { BreederVerificationAdminModule } from './verification/breeder-verification-admin.module';
 
-import { BreederAdminController } from './breeder-admin.controller';
+import { BreederAdminAccountController } from './breeder-admin-account.controller';
+import { BreederAdminReminderController } from './breeder-admin-reminder.controller';
 import { SuspendBreederUseCase } from './application/use-cases/suspend-breeder.use-case';
 import { UnsuspendBreederUseCase } from './application/use-cases/unsuspend-breeder.use-case';
 import { SendBreederRemindNotificationsUseCase } from './application/use-cases/send-breeder-remind-notifications.use-case';
@@ -30,7 +31,7 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
  * 브리더 관리자 모듈 (통합)
  *
  * 관리자가 브리더를 관리하는 모든 기능을 통합 제공합니다:
- * - 브리더 계정 관리 (정지/해제) - BreederAdminController
+ * - 브리더 계정 관리 (정지/해제/테스트 계정/리마인드)
  * - 브리더 인증 관리 - BreederVerificationAdminModule
  * - 브리더 신고 관리 - BreederReportAdminModule
  *
@@ -53,7 +54,7 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
         BreederReportAdminModule,
         BreederVerificationAdminModule,
     ],
-    controllers: [BreederAdminController],
+    controllers: [BreederAdminAccountController, BreederAdminReminderController],
     providers: [
         SuspendBreederUseCase,
         UnsuspendBreederUseCase,
