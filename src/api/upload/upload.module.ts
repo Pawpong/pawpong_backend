@@ -3,8 +3,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { UploadController } from './upload.controller';
 import { UploadAdminController } from './admin/upload-admin.controller';
-
-import { UploadAdminService } from './admin/upload-admin.service';
 import { UPLOAD_ADMIN_STORAGE } from './admin/application/ports/upload-admin-storage.port';
 import { UPLOAD_ADMIN_REFERENCE_READER } from './admin/application/ports/upload-admin-reference-reader.port';
 import { ListAllFilesUseCase } from './admin/application/use-cases/list-all-files.use-case';
@@ -82,7 +80,6 @@ import { StorageModule } from '../../common/storage/storage.module';
         UploadMongooseOwnerAdapter,
         UploadAdminStorageAdapter,
         UploadAdminFileReferenceReaderAdapter,
-        UploadAdminService, // 서비스만 추가
         {
             provide: UPLOAD_FILE_STORE,
             useExisting: UploadStorageAdapter,
