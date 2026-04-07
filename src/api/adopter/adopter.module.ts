@@ -4,11 +4,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AdopterAccountController } from './adopter-account.controller';
 import { AdopterAdminApplicationController } from './admin/adopter-admin-application.controller';
 import { AdopterAdminReviewController } from './admin/adopter-admin-review.controller';
-import { AdopterApplicationController } from './adopter-application.controller';
-import { AdopterFavoriteController } from './adopter-favorite.controller';
+import { AdopterApplicationCommandController } from './adopter-application-command.controller';
+import { AdopterApplicationQueryController } from './adopter-application-query.controller';
+import { AdopterFavoriteCommandController } from './adopter-favorite-command.controller';
+import { AdopterFavoriteQueryController } from './adopter-favorite-query.controller';
 import { AdopterProfileController } from './adopter-profile.controller';
 import { AdopterReportController } from './adopter-report.controller';
-import { AdopterReviewController } from './adopter-review.controller';
+import { AdopterReviewCommandController } from './adopter-review-command.controller';
+import { AdopterReviewQueryController } from './adopter-review-query.controller';
 
 import { GetAdopterAdminReviewReportsUseCase } from './admin/application/use-cases/get-adopter-admin-review-reports.use-case';
 import { DeleteAdopterAdminReviewUseCase } from './admin/application/use-cases/delete-adopter-admin-review.use-case';
@@ -106,9 +109,12 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
     ],
     controllers: [
         AdopterProfileController,
-        AdopterApplicationController,
-        AdopterReviewController,
-        AdopterFavoriteController,
+        AdopterApplicationCommandController,
+        AdopterApplicationQueryController,
+        AdopterReviewCommandController,
+        AdopterReviewQueryController,
+        AdopterFavoriteCommandController,
+        AdopterFavoriteQueryController,
         AdopterReportController,
         AdopterAccountController,
         AdopterAdminReviewController,
