@@ -60,7 +60,7 @@ export class VerificationStatusResponseDto {
         type: string;
         fileName: string;
         url: string;
-        uploadedAt: Date;
+        uploadedAt?: Date;
         originalFileName?: string;
     }>;
 

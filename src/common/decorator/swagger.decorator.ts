@@ -18,7 +18,7 @@ type ApiEndpointOptions = {
     successStatus?: number;
     successDescription?: string;
     successMessageExample?: string;
-    errorResponses?: ApiErrorResponseOption[];
+    errorResponses?: readonly ApiErrorResponseOption[];
     additionalModels?: Type<any>[];
     nullableData?: boolean;
 };
@@ -32,7 +32,7 @@ type ApiPaginatedEndpointOptions = {
     successStatus?: number;
     successDescription?: string;
     successMessageExample?: string;
-    errorResponses?: ApiErrorResponseOption[];
+    errorResponses?: readonly ApiErrorResponseOption[];
     additionalModels?: Type<any>[];
 };
 
@@ -44,13 +44,13 @@ type ApiRawEndpointOptions = {
     isPublic?: boolean;
     successStatus?: number;
     successDescription?: string;
-    errorResponses?: ApiErrorResponseOption[];
+    errorResponses?: readonly ApiErrorResponseOption[];
     additionalModels?: Type<any>[];
 };
 
 function buildErrorResponses(
     isPublic?: boolean,
-    customErrorResponses: ApiErrorResponseOption[] = [],
+    customErrorResponses: readonly ApiErrorResponseOption[] = [],
 ): ApiErrorResponseOption[] {
     const errorResponses = new Map<number, ApiErrorResponseOption>();
 

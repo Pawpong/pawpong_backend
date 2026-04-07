@@ -1,8 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { BreederManagementController } from './breeder-management.controller';
+import { BreederManagementAccountController } from './breeder-management-account.controller';
 import { BreederManagementAdminController } from './admin/breeder-management-admin.controller';
+import { BreederManagementApplicationsController } from './breeder-management-applications.controller';
+import { BreederManagementPetsController } from './breeder-management-pets.controller';
+import { BreederManagementProfileController } from './breeder-management-profile.controller';
+import { BreederManagementReviewsController } from './breeder-management-reviews.controller';
 
 import { BreederManagementService } from './breeder-management.service';
 import { GetBreederManagementDashboardUseCase } from './application/use-cases/get-breeder-management-dashboard.use-case';
@@ -126,7 +130,14 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         NotificationModule,
         DiscordWebhookModule,
     ],
-    controllers: [BreederManagementController, BreederManagementAdminController],
+    controllers: [
+        BreederManagementProfileController,
+        BreederManagementPetsController,
+        BreederManagementApplicationsController,
+        BreederManagementReviewsController,
+        BreederManagementAccountController,
+        BreederManagementAdminController,
+    ],
     providers: [
         BreederManagementService,
         BreederRepository,
