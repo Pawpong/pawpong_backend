@@ -1,14 +1,12 @@
 import { Controller, Post, Body, HttpCode, HttpStatus } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
-
-import { ApiEndpoint } from '../../../common/decorator/swagger.decorator';
-
-import { AuthAdminService } from './auth-admin.service';
 
 import { AdminLoginRequestDto } from '../dto/request/admin-login-request.dto';
 import { RefreshTokenRequestDto } from '../dto/request/refresh-token-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { AdminLoginResponseDto } from '../dto/response/admin-login-response.dto';
+import { LoginAdminUseCase } from './application/use-cases/login-admin.use-case';
+import { RefreshAdminTokenUseCase } from './application/use-cases/refresh-admin-token.use-case';
+import { ApiAdminLoginEndpoint, ApiAuthAdminController, ApiRefreshAdminTokenEndpoint } from './swagger';
 
 /**
  * 관리자 인증 컨트롤러
@@ -19,10 +17,13 @@ import { AdminLoginResponseDto } from '../dto/response/admin-login-response.dto'
  *
  * @tag Auth Admin - 관리자 인증
  */
-@ApiTags('인증 관리 (Admin)')
+@ApiAuthAdminController()
 @Controller('auth-admin')
 export class AuthAdminController {
-    constructor(private readonly authAdminService: AuthAdminService) {}
+    constructor(
+        private readonly loginAdminUseCase: LoginAdminUseCase,
+        private readonly refreshAdminTokenUseCase: RefreshAdminTokenUseCase,
+    ) {}
 
     /**
      * 관리자 로그인
@@ -37,14 +38,9 @@ export class AuthAdminController {
      */
     @Post('login')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '관리자 로그인',
-        description: '이메일과 비밀번호로 관리자 인증 후 JWT 토큰을 발급받습니다.',
-        responseType: AdminLoginResponseDto,
-        isPublic: true,
-    })
+    @ApiAdminLoginEndpoint()
     async loginAdmin(@Body() dto: AdminLoginRequestDto): Promise<ApiResponseDto<AdminLoginResponseDto>> {
-        const result = await this.authAdminService.loginAdmin(dto.email, dto.password);
+        const result = await this.loginAdminUseCase.execute(dto.email, dto.password);
         return ApiResponseDto.success(result, '관리자 로그인이 완료되었습니다.');
     }
 
@@ -61,13 +57,9 @@ export class AuthAdminController {
      */
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '관리자 토큰 갱신',
-        description: 'Refresh Token을 사용하여 새로운 Access Token을 발급받습니다.',
-        isPublic: true,
-    })
+    @ApiRefreshAdminTokenEndpoint()
     async refreshAdminToken(@Body() dto: RefreshTokenRequestDto): Promise<ApiResponseDto<{ accessToken: string }>> {
-        const result = await this.authAdminService.refreshAdminToken(dto.refreshToken);
+        const result = await this.refreshAdminTokenUseCase.execute(dto.refreshToken);
         return ApiResponseDto.success(result, '토큰이 갱신되었습니다.');
     }
 }

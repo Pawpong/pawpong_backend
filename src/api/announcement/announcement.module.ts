@@ -6,7 +6,6 @@ import { AnnouncementAdminController } from './admin/announcement-admin.controll
 
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { AnnouncementService } from './announcement.service';
-import { AnnouncementAdminService } from './admin/announcement-admin.service';
 import { AnnouncementPublicReaderPort } from './application/ports/announcement-public-reader.port';
 import { GetActiveAnnouncementsUseCase } from './application/use-cases/get-active-announcements.use-case';
 import { GetAnnouncementByIdUseCase } from './application/use-cases/get-announcement-by-id.use-case';
@@ -32,7 +31,6 @@ import { Announcement, AnnouncementSchema } from '../../schema/announcement.sche
     controllers: [AnnouncementController, AnnouncementAdminController],
     providers: [
         AnnouncementService,
-        AnnouncementAdminService,
         GetActiveAnnouncementsUseCase,
         GetAnnouncementByIdUseCase,
         GetAllAnnouncementsUseCase,
@@ -57,6 +55,6 @@ import { Announcement, AnnouncementSchema } from '../../schema/announcement.sche
         },
         CustomLoggerService,
     ],
-    exports: [AnnouncementService, AnnouncementAdminService],
+    exports: [AnnouncementService],
 })
 export class AnnouncementModule {}

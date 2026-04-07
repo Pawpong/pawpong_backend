@@ -17,7 +17,6 @@ import { AuthAdminController } from './admin/auth-admin.controller';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { SmsService } from './sms.service';
 import { AuthService } from './auth.service';
-import { AuthAdminService } from './admin/auth-admin.service';
 import { LoginAdminUseCase } from './admin/application/use-cases/login-admin.use-case';
 import { RefreshAdminTokenUseCase } from './admin/application/use-cases/refresh-admin-token.use-case';
 import { AuthAdminAuthenticationService } from './admin/domain/services/auth-admin-authentication.service';
@@ -138,7 +137,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         RefreshAdminTokenUseCase,
         AuthTokenService,
         SmsService,
-        AuthAdminService,
         AuthAdminAuthenticationService,
         AuthAdminPresentationService,
         AuthAdopterRepository,
