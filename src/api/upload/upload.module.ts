@@ -5,7 +5,9 @@ import { UploadAdminFileCommandController } from './admin/upload-admin-file-comm
 import { UploadAdminFileQueryController } from './admin/upload-admin-file-query.controller';
 import { UploadAdminReferenceController } from './admin/upload-admin-reference.controller';
 import { UploadFileController } from './upload-file.controller';
-import { UploadPhotoController } from './upload-photo.controller';
+import { UploadAvailablePetPhotoController } from './upload-available-pet-photo.controller';
+import { UploadParentPetPhotoController } from './upload-parent-pet-photo.controller';
+import { UploadRepresentativePhotoController } from './upload-representative-photo.controller';
 import { UPLOAD_ADMIN_STORAGE } from './admin/application/ports/upload-admin-storage.port';
 import { UPLOAD_ADMIN_REFERENCE_READER } from './admin/application/ports/upload-admin-reference-reader.port';
 import { ListAllFilesUseCase } from './admin/application/use-cases/list-all-files.use-case';
@@ -57,7 +59,9 @@ import { StorageModule } from '../../common/storage/storage.module';
         StorageModule,
     ],
     controllers: [
-        UploadPhotoController,
+        UploadRepresentativePhotoController,
+        UploadAvailablePetPhotoController,
+        UploadParentPetPhotoController,
         UploadFileController,
         UploadAdminFileQueryController,
         UploadAdminFileCommandController,
