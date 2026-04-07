@@ -1,43 +1,23 @@
-import { Body, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../common/decorator/user.decorator';
-import { ApiEndpoint, ApiPaginatedEndpoint } from '../../common/decorator/swagger.decorator';
+import { ApiEndpoint } from '../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { AddBreederManagementReviewReplyUseCase } from './application/use-cases/add-breeder-management-review-reply.use-case';
-import { GetBreederManagementMyReviewsUseCase } from './application/use-cases/get-breeder-management-my-reviews.use-case';
 import { RemoveBreederManagementReviewReplyUseCase } from './application/use-cases/remove-breeder-management-review-reply.use-case';
 import { UpdateBreederManagementReviewReplyUseCase } from './application/use-cases/update-breeder-management-review-reply.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
 import { ReviewReplyRequestDto } from './dto/request/review-reply-request.dto';
-import { MyReviewsListResponseDto } from './dto/response/my-reviews-list-response.dto';
 import { ReviewReplyDeleteResponseDto, ReviewReplyResponseDto } from './dto/response/review-reply-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
 
 @BreederManagementProtectedController()
-export class BreederManagementReviewsController {
+export class BreederManagementReviewReplyController {
     constructor(
-        private readonly getBreederManagementMyReviewsUseCase: GetBreederManagementMyReviewsUseCase,
         private readonly addBreederManagementReviewReplyUseCase: AddBreederManagementReviewReplyUseCase,
         private readonly updateBreederManagementReviewReplyUseCase: UpdateBreederManagementReviewReplyUseCase,
         private readonly removeBreederManagementReviewReplyUseCase: RemoveBreederManagementReviewReplyUseCase,
     ) {}
-
-    @Get('my-reviews')
-    @ApiPaginatedEndpoint(BreederManagementSwaggerDocs.myReviews)
-    async getMyReviews(
-        @CurrentUser('userId') userId: string,
-        @Query('visibility') visibility?: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 10,
-    ): Promise<ApiResponseDto<MyReviewsListResponseDto>> {
-        const result = await this.getBreederManagementMyReviewsUseCase.execute(
-            userId,
-            visibility || 'all',
-            Number(page),
-            Number(limit),
-        );
-        return ApiResponseDto.success(result, '후기 목록이 조회되었습니다.');
-    }
 
     @Post('reviews/:reviewId/reply')
     @ApiEndpoint(BreederManagementSwaggerDocs.addReviewReply)
