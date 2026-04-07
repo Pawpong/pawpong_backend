@@ -106,3 +106,11 @@ export class ApplicationFormUpdateResponseDto {
     })
     customQuestions: CustomQuestionDto[];
 }
+
+export class SimpleApplicationFormUpdateResponseDto extends ApplicationFormUpdateResponseDto {
+    @ApiProperty({
+        description: '총 커스텀 질문 수',
+        example: 2,
+    })
+    totalQuestions: number;
+}

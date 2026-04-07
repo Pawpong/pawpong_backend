@@ -28,8 +28,9 @@ export class ReviewReplyResponseDto {
     @ApiProperty({
         description: '답글 작성 일시',
         example: '2025-01-26T10:30:00.000Z',
+        required: false,
     })
-    replyWrittenAt: string;
+    replyWrittenAt?: string;
 
     /**
      * 답글 수정 일시 (수정된 경우에만)
