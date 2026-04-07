@@ -25,7 +25,7 @@ import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard';
 
 import { SmsService } from './sms.service';
-import { BreederManagementAdminService } from '../breeder-management/admin/breeder-management-admin.service';
+import { GetActiveProfileBannersUseCase } from '../breeder-management/admin/application/use-cases/get-active-profile-banners.use-case';
 import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
 import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
 import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
@@ -55,6 +55,7 @@ import { RegisterBreederResponseDto } from './dto/response/register-breeder-resp
 import { SocialCheckUserResponseDto } from './dto/response/social-check-user-response.dto';
 import { PhoneVerificationResponseDto } from './dto/response/phone-verification-response.dto';
 import { VerificationDocumentsResponseDto } from './dto/response/verification-documents-response.dto';
+import { ProfileBannerResponseDto } from '../breeder-management/admin/dto/response/profile-banner-response.dto';
 
 @ApiController('인증')
 @Controller('auth')
@@ -63,7 +64,7 @@ export class AuthController {
 
     constructor(
         private readonly smsService: SmsService,
-        private readonly breederManagementAdminService: BreederManagementAdminService,
+        private readonly getActiveProfileBannersUseCase: GetActiveProfileBannersUseCase,
         private readonly checkSocialUserUseCase: CheckSocialUserUseCase,
         private readonly checkEmailDuplicateUseCase: CheckEmailDuplicateUseCase,
         private readonly checkNicknameDuplicateUseCase: CheckNicknameDuplicateUseCase,
@@ -529,11 +530,11 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
     @ApiEndpoint({
         summary: '로그인 페이지 배너 조회 (공개)',
         description: '로그인 초기 페이지에 표시할 활성화된 로그인 배너를 조회합니다. 인증 없이 접근 가능합니다.',
-        responseType: Array,
+        responseType: [ProfileBannerResponseDto],
         isPublic: true,
     })
-    async getLoginBanners(): Promise<ApiResponseDto<any[]>> {
-        const banners = await this.breederManagementAdminService.getActiveProfileBanners('login');
+    async getLoginBanners(): Promise<ApiResponseDto<ProfileBannerResponseDto[]>> {
+        const banners = await this.getActiveProfileBannersUseCase.execute('login');
         return ApiResponseDto.success(banners, '로그인 페이지 배너가 조회되었습니다.');
     }
 
@@ -542,11 +543,11 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
     @ApiEndpoint({
         summary: '회원가입 페이지 배너 조회 (공개)',
         description: '회원가입 도중에 표시할 활성화된 회원가입 배너를 조회합니다. 인증 없이 접근 가능합니다.',
-        responseType: Array,
+        responseType: [ProfileBannerResponseDto],
         isPublic: true,
     })
-    async getRegisterBanners(): Promise<ApiResponseDto<any[]>> {
-        const banners = await this.breederManagementAdminService.getActiveProfileBanners('signup');
+    async getRegisterBanners(): Promise<ApiResponseDto<ProfileBannerResponseDto[]>> {
+        const banners = await this.getActiveProfileBannersUseCase.execute('signup');
         return ApiResponseDto.success(banners, '회원가입 페이지 배너가 조회되었습니다.');
     }
 
