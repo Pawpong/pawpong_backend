@@ -4,8 +4,9 @@ import { Logger } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { FfmpegService } from '../services/ffmpeg.service';
-import { FeedVideoService } from '../services/feed-video.service';
 import { StorageService } from '../../../../common/storage/storage.service';
+import { UpdateEncodingCompleteUseCase } from '../application/use-cases/update-encoding-complete.use-case';
+import { UpdateEncodingFailedUseCase } from '../application/use-cases/update-encoding-failed.use-case';
 
 /**
  * 동영상 인코딩 Worker
@@ -19,7 +20,8 @@ export class VideoEncodingProcessor extends WorkerHost {
 
     constructor(
         private readonly ffmpegService: FfmpegService,
-        private readonly feedVideoService: FeedVideoService,
+        private readonly updateEncodingCompleteUseCase: UpdateEncodingCompleteUseCase,
+        private readonly updateEncodingFailedUseCase: UpdateEncodingFailedUseCase,
         private readonly storageService: StorageService,
     ) {
         super();
@@ -103,7 +105,7 @@ export class VideoEncodingProcessor extends WorkerHost {
             this.logger.log(`[${videoId}] S3 업로드 완료`);
 
             // 7. DB 업데이트
-            await this.feedVideoService.updateEncodingComplete(videoId, {
+            await this.updateEncodingCompleteUseCase.execute(videoId, {
                 hlsManifestKey: `videos/hls/${videoId}/master.m3u8`,
                 thumbnailKey,
                 duration: metadata.duration,
@@ -122,7 +124,7 @@ export class VideoEncodingProcessor extends WorkerHost {
             this.logger.error(`[${videoId}] 인코딩 작업 실패:`, error);
 
             // DB 상태 업데이트
-            await this.feedVideoService.updateEncodingFailed(videoId, error.message || '알 수 없는 오류');
+            await this.updateEncodingFailedUseCase.execute(videoId, error.message || '알 수 없는 오류');
 
             // 임시 파일 정리
             try {
