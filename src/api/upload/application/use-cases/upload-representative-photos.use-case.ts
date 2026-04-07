@@ -16,8 +16,8 @@ export class UploadRepresentativePhotosUseCase {
         private readonly uploadFilePolicy: UploadFilePolicyService,
     ) {}
 
-    async execute(files: Express.Multer.File[], user: any): Promise<UploadResponseDto[]> {
-        if (user.role !== 'breeder') {
+    async execute(files: Express.Multer.File[], userId: string, role: string): Promise<UploadResponseDto[]> {
+        if (role !== 'breeder') {
             throw new ForbiddenException('브리더만 대표 사진을 업로드할 수 있습니다.');
         }
 
@@ -25,7 +25,7 @@ export class UploadRepresentativePhotosUseCase {
 
         const resources = await this.fileStore.uploadFiles(files, 'representative');
         await this.uploadOwner.replaceRepresentativePhotos(
-            user.userId,
+            userId,
             resources.map((resource) => resource.fileName),
         );
 
