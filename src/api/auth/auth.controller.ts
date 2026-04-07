@@ -12,19 +12,15 @@ import {
     UseInterceptors,
     UploadedFiles,
     UploadedFile,
-    Logger,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor, FilesInterceptor } from '@nestjs/platform-express';
-import { ApiConsumes } from '@nestjs/swagger';
 import type { Response } from 'express';
 
 import { CurrentUser } from '../../common/decorator/current-user.decorator';
-import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
 import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard';
 
-import { SmsService } from './sms.service';
 import { GetActiveProfileBannersUseCase } from '../breeder-management/admin/application/use-cases/get-active-profile-banners.use-case';
 import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
 import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
@@ -36,11 +32,17 @@ import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
 import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
 import { ProcessSocialLoginCallbackUseCase } from './application/use-cases/process-social-login-callback.use-case';
+import { GetSocialLoginRedirectUrlUseCase } from './application/use-cases/get-social-login-redirect-url.use-case';
+import { SendPhoneVerificationCodeUseCase } from './application/use-cases/send-phone-verification-code.use-case';
+import { VerifyPhoneVerificationCodeUseCase } from './application/use-cases/verify-phone-verification-code.use-case';
 import { UploadAuthProfileImageUseCase } from './application/use-cases/upload-auth-profile-image.use-case';
 import { UploadAuthBreederDocumentsUseCase } from './application/use-cases/upload-auth-breeder-documents.use-case';
 
 import { RefreshTokenRequestDto } from './dto/request/refresh-token-request.dto';
 import { CheckNicknameRequestDto } from './dto/request/check-nickname-request.dto';
+import { CheckEmailRequestDto } from './dto/request/check-email-request.dto';
+import { CheckBreederNameRequestDto } from './dto/request/check-breeder-name-request.dto';
+import { CheckSocialUserRequestDto } from './dto/request/check-social-user-request.dto';
 import { SocialCompleteRequestDto } from './dto/request/social-complete-request.dto';
 import { RegisterAdopterRequestDto } from './dto/request/register-adopter-request.dto';
 import { RegisterBreederRequestDto } from './dto/request/register-breeder-request.dto';
@@ -56,14 +58,35 @@ import { SocialCheckUserResponseDto } from './dto/response/social-check-user-res
 import { PhoneVerificationResponseDto } from './dto/response/phone-verification-response.dto';
 import { VerificationDocumentsResponseDto } from './dto/response/verification-documents-response.dto';
 import { ProfileBannerResponseDto } from '../breeder-management/admin/dto/response/profile-banner-response.dto';
+import {
+    ApiAuthController,
+    ApiCheckBreederNameDuplicateEndpoint,
+    ApiCheckEmailDuplicateEndpoint,
+    ApiCheckNicknameDuplicateEndpoint,
+    ApiCheckSocialUserEndpoint,
+    ApiCompleteSocialRegistrationEndpoint,
+    ApiGetLoginBannersEndpoint,
+    ApiGetRegisterBannersEndpoint,
+    ApiGoogleCallbackEndpoint,
+    ApiGoogleLoginEndpoint,
+    ApiKakaoCallbackEndpoint,
+    ApiKakaoLoginEndpoint,
+    ApiLogoutAuthEndpoint,
+    ApiNaverCallbackEndpoint,
+    ApiNaverLoginEndpoint,
+    ApiRefreshAuthEndpoint,
+    ApiRegisterAdopterEndpoint,
+    ApiRegisterBreederEndpoint,
+    ApiSendPhoneVerificationCodeEndpoint,
+    ApiUploadBreederDocumentsEndpoint,
+    ApiUploadProfileEndpoint,
+    ApiVerifyPhoneVerificationCodeEndpoint,
+} from './swagger';
 
-@ApiController('인증')
+@ApiAuthController()
 @Controller('auth')
 export class AuthController {
-    private readonly logger = new Logger(AuthController.name);
-
     constructor(
-        private readonly smsService: SmsService,
         private readonly getActiveProfileBannersUseCase: GetActiveProfileBannersUseCase,
         private readonly checkSocialUserUseCase: CheckSocialUserUseCase,
         private readonly checkEmailDuplicateUseCase: CheckEmailDuplicateUseCase,
@@ -75,18 +98,16 @@ export class AuthController {
         private readonly registerAdopterUseCase: RegisterAdopterUseCase,
         private readonly registerBreederUseCase: RegisterBreederUseCase,
         private readonly processSocialLoginCallbackUseCase: ProcessSocialLoginCallbackUseCase,
+        private readonly getSocialLoginRedirectUrlUseCase: GetSocialLoginRedirectUrlUseCase,
+        private readonly sendPhoneVerificationCodeUseCase: SendPhoneVerificationCodeUseCase,
+        private readonly verifyPhoneVerificationCodeUseCase: VerifyPhoneVerificationCodeUseCase,
         private readonly uploadAuthProfileImageUseCase: UploadAuthProfileImageUseCase,
         private readonly uploadAuthBreederDocumentsUseCase: UploadAuthBreederDocumentsUseCase,
     ) {}
 
     @Post('refresh')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '토큰 재발급',
-        description: 'Refresh 토큰을 사용하여 새로운 토큰을 발급받습니다.',
-        responseType: TokenResponseDto,
-        isPublic: true,
-    })
+    @ApiRefreshAuthEndpoint()
     async refreshToken(@Body() refreshTokenDto: RefreshTokenRequestDto): Promise<ApiResponseDto<TokenResponseDto>> {
         const result = await this.refreshAuthTokenUseCase.execute(refreshTokenDto);
         return ApiResponseDto.success(result, '토큰이 재발급되었습니다.');
@@ -95,17 +116,13 @@ export class AuthController {
     @Post('logout')
     @UseGuards(JwtAuthGuard)
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '로그아웃',
-        description: 'Refresh 토큰을 무효화하고 인증 쿠키를 삭제하여 로그아웃 처리합니다.',
-        responseType: LogoutResponseDto,
-        isPublic: false,
-    })
+    @ApiLogoutAuthEndpoint()
     async logout(
-        @CurrentUser() user: any,
+        @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
         @Res({ passthrough: true }) res: Response,
     ): Promise<ApiResponseDto<LogoutResponseDto>> {
-        const response = await this.logoutUseCase.execute(user.userId, user.role);
+        const response = await this.logoutUseCase.execute(userId, role);
 
         // HTTP-only 쿠키 삭제 (maxAge: 0으로 설정하여 즉시 만료)
         const isProduction = process.env.NODE_ENV === 'production';
@@ -129,208 +146,66 @@ export class AuthController {
 
     @Post('phone/send-code')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '전화번호 인증코드 발송',
-        description: '전화번호로 6자리 인증코드를 발송합니다.',
-        responseType: PhoneVerificationResponseDto,
-        isPublic: true,
-    })
+    @ApiSendPhoneVerificationCodeEndpoint()
     async sendVerificationCode(
         @Body() sendCodeDto: SendVerificationCodeRequestDto,
     ): Promise<ApiResponseDto<PhoneVerificationResponseDto>> {
-        const result = await this.smsService.sendVerificationCode(sendCodeDto.phone);
+        const result = await this.sendPhoneVerificationCodeUseCase.execute(sendCodeDto.phone);
         return ApiResponseDto.success(new PhoneVerificationResponseDto(result.success, result.message));
     }
 
     @Post('phone/verify-code')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '전화번호 인증코드 확인',
-        description: '발송된 인증코드를 검증합니다.',
-        responseType: PhoneVerificationResponseDto,
-        isPublic: true,
-    })
+    @ApiVerifyPhoneVerificationCodeEndpoint()
     async verifyCode(
         @Body() verifyCodeDto: VerifyCodeRequestDto,
     ): Promise<ApiResponseDto<PhoneVerificationResponseDto>> {
-        const result = await this.smsService.verifyCode(verifyCodeDto.phone, verifyCodeDto.code);
+        const result = await this.verifyPhoneVerificationCodeUseCase.execute(verifyCodeDto.phone, verifyCodeDto.code);
         return ApiResponseDto.success(new PhoneVerificationResponseDto(result.success, result.message));
     }
 
     @Get('google')
-    @ApiEndpoint({
-        summary: '구글 로그인',
-        description: '구글 OAuth 로그인을 시작합니다. state 파라미터로 원래 origin을 전달합니다.',
-        isPublic: true,
-    })
+    @ApiGoogleLoginEndpoint()
     async googleLogin(@Req() req, @Res() res: Response) {
-        // 원래 origin을 state 파라미터로 전달 (OAuth 콜백에서 사용)
-        const referer = req.headers.referer || '';
-        const origin = req.headers.origin || '';
-        const originUrl = referer || origin || '';
-
-        // 디버그 로그
-        this.logger.log(`[googleLogin] referer: ${referer}`);
-        this.logger.log(`[googleLogin] origin: ${origin}`);
-        this.logger.log(`[googleLogin] originUrl: ${originUrl}`);
-
-        // returnUrl 쿼리 파라미터가 있으면 origin과 함께 전달 (형식: "originUrl|/returnPath")
-        const returnUrl = req.query.returnUrl as string;
-        const stateValue = returnUrl ? `${originUrl}|${returnUrl}` : originUrl;
-        const encodedState = encodeURIComponent(stateValue);
-
-        // Google OAuth URL로 리다이렉트 (state 파라미터 포함)
-        const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?client_id=${process.env.GOOGLE_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.GOOGLE_CALLBACK_URL || '')}&response_type=code&scope=email%20profile&state=${encodedState}`;
-        return res.redirect(googleAuthUrl);
+        return this.redirectToSocialLogin('google', req, res);
     }
 
     @Get('google/callback')
     @UseGuards(AuthGuard('google'))
+    @ApiGoogleCallbackEndpoint()
     async googleCallback(@Req() req, @Res() res: Response) {
-        // Strategy에서 전달된 originUrl 사용 (state 파라미터에서 추출됨)
-        const originUrl = req.user?.originUrl || '';
-
-        const { redirectUrl, cookies } = await this.processSocialLoginCallbackUseCase.execute(
-            req.user,
-            originUrl,
-            originUrl,
-        );
-
-        this.applySocialLoginCookies(res, cookies);
-
-        return res.redirect(redirectUrl);
+        return this.handleSocialCallback(req, res);
     }
 
     @Get('naver')
-    @ApiEndpoint({
-        summary: '네이버 로그인',
-        description: '네이버 OAuth 로그인을 시작합니다. state 파라미터로 원래 origin을 전달합니다.',
-        isPublic: true,
-    })
+    @ApiNaverLoginEndpoint()
     async naverLogin(@Req() req, @Res() res: Response) {
-        // 원래 origin을 state 파라미터로 전달 (OAuth 콜백에서 사용)
-        const referer = req.headers.referer || '';
-        const origin = req.headers.origin || '';
-        const originUrl = referer || origin || '';
-
-        // 디버그 로그
-        this.logger.log(`[naverLogin] referer: ${referer}`);
-        this.logger.log(`[naverLogin] origin: ${origin}`);
-        this.logger.log(`[naverLogin] originUrl: ${originUrl}`);
-
-        // returnUrl 쿼리 파라미터가 있으면 origin과 함께 전달 (형식: "originUrl|/returnPath")
-        const returnUrl = req.query.returnUrl as string;
-        const stateValue = returnUrl ? `${originUrl}|${returnUrl}` : originUrl;
-        const encodedState = encodeURIComponent(stateValue);
-
-        // Naver OAuth URL로 리다이렉트 (state 파라미터 포함)
-        const naverAuthUrl = `https://nid.naver.com/oauth2.0/authorize?client_id=${process.env.NAVER_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.NAVER_CALLBACK_URL || '')}&response_type=code&state=${encodedState}`;
-        return res.redirect(naverAuthUrl);
+        return this.redirectToSocialLogin('naver', req, res);
     }
 
     @Get('naver/callback')
     @UseGuards(AuthGuard('naver'))
+    @ApiNaverCallbackEndpoint()
     async naverCallback(@Req() req, @Res() res: Response) {
-        // Strategy에서 전달된 originUrl 사용 (state 파라미터에서 추출됨)
-        const originUrl = req.user?.originUrl || '';
-
-        const { redirectUrl, cookies } = await this.processSocialLoginCallbackUseCase.execute(
-            req.user,
-            originUrl,
-            originUrl,
-        );
-
-        this.applySocialLoginCookies(res, cookies);
-
-        return res.redirect(redirectUrl);
+        return this.handleSocialCallback(req, res);
     }
 
     @Get('kakao')
-    @ApiEndpoint({
-        summary: '카카오 로그인',
-        description: '카카오 OAuth 로그인을 시작합니다. state 파라미터로 원래 origin을 전달합니다.',
-        isPublic: true,
-    })
+    @ApiKakaoLoginEndpoint()
     async kakaoLogin(@Req() req, @Res() res: Response) {
-        // 원래 origin을 state 파라미터로 전달 (OAuth 콜백에서 사용)
-        const referer = req.headers.referer || '';
-        const origin = req.headers.origin || '';
-        const originUrl = referer || origin || '';
-
-        // 디버그 로그
-        this.logger.log(`[kakaoLogin] referer: ${referer}`);
-        this.logger.log(`[kakaoLogin] origin: ${origin}`);
-        this.logger.log(`[kakaoLogin] originUrl: ${originUrl}`);
-
-        // returnUrl 쿼리 파라미터가 있으면 origin과 함께 전달 (형식: "originUrl|/returnPath")
-        const returnUrl = req.query.returnUrl as string;
-        const stateValue = returnUrl ? `${originUrl}|${returnUrl}` : originUrl;
-        const encodedState = encodeURIComponent(stateValue);
-
-        // Kakao OAuth URL로 리다이렉트 (state 파라미터 포함)
-        const kakaoAuthUrl = `https://kauth.kakao.com/oauth/authorize?client_id=${process.env.KAKAO_CLIENT_ID}&redirect_uri=${encodeURIComponent(process.env.KAKAO_CALLBACK_URL || '')}&response_type=code&state=${encodedState}`;
-        return res.redirect(kakaoAuthUrl);
+        return this.redirectToSocialLogin('kakao', req, res);
     }
 
     @Get('kakao/callback')
     @UseGuards(AuthGuard('kakao'))
+    @ApiKakaoCallbackEndpoint()
     async kakaoCallback(@Req() req, @Res() res: Response) {
-        // Strategy에서 전달된 originUrl 사용 (state 파라미터에서 추출됨)
-        const originUrl = req.user?.originUrl || '';
-
-        const { redirectUrl, cookies } = await this.processSocialLoginCallbackUseCase.execute(
-            req.user,
-            originUrl,
-            originUrl,
-        );
-
-        this.applySocialLoginCookies(res, cookies);
-
-        return res.redirect(redirectUrl);
+        return this.handleSocialCallback(req, res);
     }
 
     @Post('social/complete')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '소셜 로그인 회원가입 완료',
-        description: `소셜 로그인 후 역할(role)에 따라 입양자 또는 브리더 회원가입을 완료합니다.
-
-**프론트엔드 회원가입 플로우:**
-1. 소셜 로그인 (Google/Naver/Kakao) → tempId 획득
-2. 역할 선택 (adopter/breeder)
-3. 필수 정보 입력
-4. 이 엔드포인트로 회원가입 완료
-
-**공통 필수 필드:**
-- tempId: 소셜 로그인 후 받은 임시 ID
-- email: 이메일 주소
-- name: 이름
-- role: 역할 (adopter 또는 breeder)
-
-**입양자 전용 필드:**
-- nickname: 닉네임 (필수)
-- phone: 전화번호 (선택)
-- marketingAgreed: 마케팅 수신 동의 (선택)
-
-**브리더 전용 필드:**
-- phone: 전화번호 (필수)
-- petType: 브리딩 동물 종류 (cat/dog)
-- plan: 플랜 유형 (basic/pro)
-- breederName: 브리더명
-- introduction: 소개글 (선택)
-- city: 시/도
-- district: 시/군/구 (선택)
-- breeds: 품종 목록
-- level: 브리더 레벨 (elite/new)
-- marketingAgreed: 마케팅 수신 동의 (선택)
-
-**응답 데이터:**
-- accessToken: JWT Access 토큰
-- refreshToken: JWT Refresh 토큰
-- userInfo: 사용자 정보`,
-        responseType: RegisterAdopterResponseDto,
-        isPublic: true,
-    })
+    @ApiCompleteSocialRegistrationEndpoint()
     async completeSocialRegistration(
         @Body() dto: SocialCompleteRequestDto,
     ): Promise<ApiResponseDto<RegisterAdopterResponseDto | RegisterBreederResponseDto>> {
@@ -342,14 +217,9 @@ export class AuthController {
 
     @Post('check-email')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '이메일 중복 체크',
-        description: '입력한 이메일이 이미 가입되어 있는지 확인합니다.',
-        responseType: Boolean,
-        isPublic: true,
-    })
-    async checkEmailDuplicate(@Body('email') email: string): Promise<ApiResponseDto<{ isDuplicate: boolean }>> {
-        const isDuplicate = await this.checkEmailDuplicateUseCase.execute(email);
+    @ApiCheckEmailDuplicateEndpoint()
+    async checkEmailDuplicate(@Body() dto: CheckEmailRequestDto): Promise<ApiResponseDto<{ isDuplicate: boolean }>> {
+        const isDuplicate = await this.checkEmailDuplicateUseCase.execute(dto.email);
         return ApiResponseDto.success(
             { isDuplicate },
             isDuplicate ? '이미 가입된 이메일입니다.' : '사용 가능한 이메일입니다.',
@@ -358,12 +228,7 @@ export class AuthController {
 
     @Post('check-nickname')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '닉네임 중복 체크',
-        description: '입력한 닉네임이 이미 사용 중인지 확인합니다.',
-        responseType: Boolean,
-        isPublic: true,
-    })
+    @ApiCheckNicknameDuplicateEndpoint()
     async checkNicknameDuplicate(
         @Body() checkNicknameDto: CheckNicknameRequestDto,
     ): Promise<ApiResponseDto<{ isDuplicate: boolean }>> {
@@ -376,16 +241,11 @@ export class AuthController {
 
     @Post('check-breeder-name')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '브리더 상호명 중복 체크',
-        description: '입력한 브리더 상호명이 이미 사용 중인지 확인합니다.',
-        responseType: Boolean,
-        isPublic: true,
-    })
+    @ApiCheckBreederNameDuplicateEndpoint()
     async checkBreederNameDuplicate(
-        @Body('breederName') breederName: string,
+        @Body() dto: CheckBreederNameRequestDto,
     ): Promise<ApiResponseDto<{ isDuplicate: boolean }>> {
-        const isDuplicate = await this.checkBreederNameDuplicateUseCase.execute(breederName);
+        const isDuplicate = await this.checkBreederNameDuplicateUseCase.execute(dto.breederName);
         return ApiResponseDto.success(
             { isDuplicate },
             isDuplicate ? '이미 사용 중인 상호명입니다.' : '사용 가능한 상호명입니다.',
@@ -394,54 +254,17 @@ export class AuthController {
 
     @Post('social/check-user')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '소셜 로그인 사용자 존재 여부 확인',
-        description:
-            '소셜 로그인 제공자와 사용자 ID로 기존 가입 여부를 확인합니다. 존재하면 로그인, 없으면 회원가입 플로우로 진행합니다.',
-        responseType: SocialCheckUserResponseDto,
-        isPublic: true,
-    })
+    @ApiCheckSocialUserEndpoint()
     async checkSocialUser(
-        @Body('provider') provider: string,
-        @Body('providerId') providerId: string,
-        @Body('email') email?: string,
+        @Body() dto: CheckSocialUserRequestDto,
     ): Promise<ApiResponseDto<SocialCheckUserResponseDto>> {
-        const result = await this.checkSocialUserUseCase.execute(provider, providerId, email);
+        const result = await this.checkSocialUserUseCase.execute(dto.provider, dto.providerId, dto.email);
         return ApiResponseDto.success(result, result.exists ? '가입된 사용자입니다.' : '미가입 사용자입니다.');
     }
 
     @Post('register/adopter')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '입양자 회원가입',
-        description: `입양자 회원가입을 처리합니다. 소셜 로그인을 통한 회원가입을 지원합니다.
-
-**프론트엔드 회원가입 플로우:**
-1. 소셜 로그인 (Google/Naver/Kakao) → tempId 획득
-2. (선택) 프로필 이미지 업로드 (/api/auth/upload-breeder-profile) → cdnUrl 획득
-3. UserInfoSection: nickname, phoneNumber 입력
-4. 이 엔드포인트로 회원가입 완료
-
-**필수 필드:**
-- tempId: 소셜 로그인 후 받은 임시 ID (형식: "temp_provider_userId_timestamp")
-- nickname: 닉네임 (중복 체크 필수)
-- phoneNumber: 전화번호 (SMS 인증 완료 필요)
-
-**선택 필드:**
-- profileImage: 프로필 이미지 CDN URL
-
-**응답 데이터:**
-- adopterId: 생성된 입양자 고유 ID
-- accessToken: JWT Access 토큰 (1시간)
-- refreshToken: JWT Refresh 토큰 (7일)
-
-**주의사항:**
-- email과 name은 소셜 로그인 정보에서 자동으로 가져옵니다.
-- tempId는 한 번만 사용 가능합니다 (사용 후 만료).
-- 이미 가입된 소셜 계정으로는 재가입할 수 없습니다.`,
-        responseType: RegisterAdopterResponseDto,
-        isPublic: true,
-    })
+    @ApiRegisterAdopterEndpoint()
     async registerAdopter(@Body() dto: RegisterAdopterRequestDto): Promise<ApiResponseDto<RegisterAdopterResponseDto>> {
         const result = await this.registerAdopterUseCase.execute(dto);
         return ApiResponseDto.success(result, '입양자 회원가입이 완료되었습니다.');
@@ -449,26 +272,7 @@ export class AuthController {
 
     @Post('register/breeder')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '브리더 회원가입',
-        description: `브리더 회원가입을 처리합니다. 일반 가입과 소셜 로그인 모두 지원합니다.
-
-**프론트엔드 회원가입 플로우:**
-1. UserTypeSection: userType 선택 (breeder)
-2. AnimalSection: animal 선택 (cat/dog)
-3. PlanSection: plan 선택 (basic/pro)
-4. UserInfoSection: email, phoneNumber, agreements 입력
-5. BreederInfoSection: breederName, breederLocation, breeds, photo 입력
-6. DocumentSection: level 선택 (MVP에서는 서류 제출 skip 가능)
-7. SignupComplete: 완료
-
-**주의사항:**
-- 버킷(파일 업로드) 연결은 제외되어 있습니다.
-- 서류 제출은 나중에 별도로 진행할 수 있습니다.
-- 소셜 로그인 사용자는 tempId와 provider를 함께 전송합니다.`,
-        responseType: RegisterBreederResponseDto,
-        isPublic: true,
-    })
+    @ApiRegisterBreederEndpoint()
     async registerBreeder(@Body() dto: RegisterBreederRequestDto): Promise<ApiResponseDto<RegisterBreederResponseDto>> {
         const result = await this.registerBreederUseCase.execute(dto);
         return ApiResponseDto.success(result, '브리더 회원가입이 완료되었습니다.');
@@ -476,37 +280,8 @@ export class AuthController {
 
     @Post('upload-breeder-profile')
     @UseGuards(OptionalJwtAuthGuard)
-    @ApiConsumes('multipart/form-data')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '프로필 이미지 업로드',
-        description: `브리더 또는 입양자의 프로필 이미지를 Google Cloud Storage에 업로드합니다.
-
-**회원가입 플로우:**
-1. 이 엔드포인트로 프로필 이미지 업로드
-2. 응답의 **filename** 필드를 회원가입 API의 profileImage 필드에 포함
-3. url 필드는 미리보기용 Signed URL (1시간 유효)
-
-**⚠️ 중요: 응답 필드 사용법**
-- url: Signed URL (미리보기용, 1시간 유효) - ❌ DB 저장 금지
-- filename: 파일 경로 (DB 저장용) - ✅ 회원가입 시 profileImage에 사용
-- size: 파일 크기
-
-**잘못된 사용 (X):**
-profileImage에 url 필드 값을 넣는 경우 (예: "https://cdn.pawpong.kr/profiles/uuid.png?Expires=...")
-
-**올바른 사용 (O):**
-profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
-
-**로그인 후 사용:**
-- 로그인 상태에서 업로드하면 자동으로 DB에 저장됩니다.
-
-**제한사항:**
-- 최대 5MB
-- 허용 형식: jpg, jpeg, png, gif, webp`,
-        responseType: UploadResponseDto,
-        isPublic: true,
-    })
+    @ApiUploadProfileEndpoint()
     @UseInterceptors(FileInterceptor('file'))
     async uploadProfile(
         @UploadedFile() file: Express.Multer.File,
@@ -527,12 +302,7 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
 
     @Get('login-banners')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '로그인 페이지 배너 조회 (공개)',
-        description: '로그인 초기 페이지에 표시할 활성화된 로그인 배너를 조회합니다. 인증 없이 접근 가능합니다.',
-        responseType: [ProfileBannerResponseDto],
-        isPublic: true,
-    })
+    @ApiGetLoginBannersEndpoint()
     async getLoginBanners(): Promise<ApiResponseDto<ProfileBannerResponseDto[]>> {
         const banners = await this.getActiveProfileBannersUseCase.execute('login');
         return ApiResponseDto.success(banners, '로그인 페이지 배너가 조회되었습니다.');
@@ -540,65 +310,15 @@ profileImage에 filename 필드 값을 넣는 경우 (예: "profiles/uuid.png")
 
     @Get('register-banners')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '회원가입 페이지 배너 조회 (공개)',
-        description: '회원가입 도중에 표시할 활성화된 회원가입 배너를 조회합니다. 인증 없이 접근 가능합니다.',
-        responseType: [ProfileBannerResponseDto],
-        isPublic: true,
-    })
+    @ApiGetRegisterBannersEndpoint()
     async getRegisterBanners(): Promise<ApiResponseDto<ProfileBannerResponseDto[]>> {
         const banners = await this.getActiveProfileBannersUseCase.execute('signup');
         return ApiResponseDto.success(banners, '회원가입 페이지 배너가 조회되었습니다.');
     }
 
     @Post('upload-breeder-documents')
-    @ApiConsumes('multipart/form-data')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint({
-        summary: '브리더 인증 서류 업로드',
-        description: `브리더 입점 인증 서류를 업로드합니다. 회원가입 전에 미리 업로드할 수 있습니다.
-
-**회원가입 플로우:**
-1. 이 엔드포인트로 서류 업로드
-2. 응답의 각 항목에서 **filename** 필드를 documentUrls 배열에 포함
-3. url 필드는 미리보기용 Signed URL (1시간 유효)
-
-**⚠️ 중요: 응답 필드 사용법**
-- url: Signed URL (미리보기용, 1시간 유효) - ❌ DB 저장 금지
-- filename: 파일 경로 (DB 저장용) - ✅ 회원가입 시 documentUrls에 사용
-- type: 서류 타입
-- size: 파일 크기
-
-**잘못된 사용 (X):**
-documentUrls에 url 필드 값을 넣는 경우
-
-**올바른 사용 (O):**
-documentUrls에 filename 필드 값을 넣는 경우
-
-**New 레벨 (필수 2개):**
-- idCard: 신분증 사본
-- animalProductionLicense: 동물생산업 등록증
-
-**Elite 레벨 (필수 2개 + 선택 2개):**
-- idCard: 신분증 사본 - 필수
-- animalProductionLicense: 동물생산업 등록증 - 필수
-- adoptionContractSample: 표준 입양계약서 샘플 - 선택 (나중에 제출 가능)
-- breederCertification: 고양이 브리더 인증 서류 - 선택 (나중에 제출 가능)
-- ticaCfaDocument: TICA 또는 CFA 서류 - 선택
-
-**요청 형식:**
-- files: 파일 배열 (New: 2개, Elite: 2~5개)
-- types: 서류 타입 JSON 배열 (예: ["idCard","animalProductionLicense"])
-- level: 브리더 레벨 ("new" 또는 "elite")
-
-**제한사항:**
-- 각 파일 최대 10MB
-- 허용 형식: pdf, jpg, jpeg, png, webp, heic, gif 등
-- 필수 서류(idCard, animalProductionLicense)는 반드시 포함되어야 함
-- Elite 레벨의 나머지 서류는 회원가입 후에도 제출 가능`,
-        responseType: VerificationDocumentsResponseDto,
-        isPublic: true,
-    })
+    @ApiUploadBreederDocumentsEndpoint()
     @UseInterceptors(
         FilesInterceptor('files', 10, {
             limits: {
@@ -619,6 +339,30 @@ documentUrls에 filename 필드 값을 넣는 경우
             : `${dto.level} 레벨 브리더 인증 서류 ${result.count}개가 업로드되었습니다.`;
 
         return ApiResponseDto.success(result.response, message);
+    }
+
+    private redirectToSocialLogin(provider: 'google' | 'naver' | 'kakao', req, res: Response) {
+        const redirectUrl = this.getSocialLoginRedirectUrlUseCase.execute(
+            provider,
+            req.headers.referer,
+            req.headers.origin,
+            req.query.returnUrl as string | undefined,
+        );
+
+        return res.redirect(redirectUrl);
+    }
+
+    private async handleSocialCallback(req, res: Response) {
+        const originUrl = req.user?.originUrl || '';
+        const { redirectUrl, cookies } = await this.processSocialLoginCallbackUseCase.execute(
+            req.user,
+            originUrl,
+            originUrl,
+        );
+
+        this.applySocialLoginCookies(res, cookies);
+
+        return res.redirect(redirectUrl);
     }
 
     private applySocialLoginCookies(

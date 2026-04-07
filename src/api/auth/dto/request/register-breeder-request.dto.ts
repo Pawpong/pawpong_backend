@@ -226,8 +226,9 @@ export class RegisterBreederRequestDto {
      * @example "https://example.com/profile.jpg"
      */
     @ApiProperty({
-        description: '프로필 이미지 URL (선택)',
-        example: 'https://example.com/profile.jpg',
+        description:
+            '프로필 이미지 파일 경로 (선택). 업로드 API 응답의 filename 사용을 권장하며, 기존 호환을 위해 URL도 허용됩니다.',
+        example: 'profiles/uuid.jpg',
         required: false,
     })
     @IsOptional()
@@ -239,11 +240,9 @@ export class RegisterBreederRequestDto {
      * @example ["https://storage.googleapis.com/...", "https://storage.googleapis.com/..."]
      */
     @ApiProperty({
-        description: '업로드된 인증 서류 URL 배열 (선택)',
-        example: [
-            'https://storage.googleapis.com/documents/verification/temp/id_card_123.pdf',
-            'https://storage.googleapis.com/documents/verification/temp/license_456.pdf',
-        ],
+        description:
+            '업로드된 인증 서류 파일 경로 배열 (선택). 업로드 API 응답의 filename 사용을 권장하며, 기존 호환을 위해 URL도 허용됩니다.',
+        example: ['documents/verification/temp/id_card_123.pdf', 'documents/verification/temp/license_456.pdf'],
         required: false,
         type: [String],
     })
