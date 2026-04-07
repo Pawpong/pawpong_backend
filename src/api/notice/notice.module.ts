@@ -4,7 +4,6 @@ import { Notice, NoticeSchema } from '../../schema/notice.schema';
 import { NoticeController } from './notice.controller';
 import { NoticeAdminController } from './admin/notice-admin.controller';
 import { NoticeService } from './notice.service';
-import { NoticeAdminService } from './admin/notice-admin.service';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';
 import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
@@ -26,7 +25,6 @@ import { NOTICE_WRITER } from './admin/application/ports/notice-writer.port';
     controllers: [NoticeController, NoticeAdminController],
     providers: [
         NoticeService,
-        NoticeAdminService,
         CustomLoggerService,
         GetNoticeListUseCase,
         GetNoticeDetailUseCase,
@@ -45,6 +43,6 @@ import { NOTICE_WRITER } from './admin/application/ports/notice-writer.port';
             useExisting: NoticeMongooseWriterAdapter,
         },
     ],
-    exports: [NoticeService, NoticeAdminService],
+    exports: [NoticeService],
 })
 export class NoticeModule {}
