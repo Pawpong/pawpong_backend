@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { BreederPublicHttpController } from './breeder-public.controller';
-import { BreederOptionalAuthHttpController } from './breeder-optional-auth.controller';
-import { BreederService } from './breeder.service';
-import { BreederExploreService } from './breeder-explore.service';
+import { BreederApplicationFormController, BreederProfileController } from './breeder-profile.controller';
+import { BreederDiscoveryController, BreederExploreController } from './breeder-discovery.controller';
+import { BreederPetDetailController, BreederPetsController } from './breeder-pets.controller';
+import { BreederReviewsController } from './breeder-reviews.controller';
 import { SearchBreedersUseCase } from './application/use-cases/search-breeders.use-case';
 import { ExploreBreedersUseCase } from './application/use-cases/explore-breeders.use-case';
 import { GetPopularBreedersUseCase } from './application/use-cases/get-popular-breeders.use-case';
@@ -50,10 +50,16 @@ import { StorageModule } from '../../common/storage/storage.module';
         ]),
         StorageModule,
     ],
-    controllers: [BreederPublicHttpController, BreederOptionalAuthHttpController],
+    controllers: [
+        BreederDiscoveryController,
+        BreederExploreController,
+        BreederProfileController,
+        BreederApplicationFormController,
+        BreederPetsController,
+        BreederPetDetailController,
+        BreederReviewsController,
+    ],
     providers: [
-        BreederService,
-        BreederExploreService,
         SearchBreedersUseCase,
         ExploreBreedersUseCase,
         GetPopularBreedersUseCase,
@@ -86,6 +92,5 @@ import { StorageModule } from '../../common/storage/storage.module';
             useExisting: BreederPublicReaderAdapter,
         },
     ],
-    exports: [BreederService, BreederExploreService],
 })
 export class BreederModule {}
