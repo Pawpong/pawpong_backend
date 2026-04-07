@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { BreederController } from './breeder.controller';
-
+import { BreederPublicHttpController } from './breeder-public.controller';
+import { BreederOptionalAuthHttpController } from './breeder-optional-auth.controller';
 import { BreederService } from './breeder.service';
 import { BreederExploreService } from './breeder-explore.service';
 import { SearchBreedersUseCase } from './application/use-cases/search-breeders.use-case';
@@ -50,7 +50,7 @@ import { StorageModule } from '../../common/storage/storage.module';
         ]),
         StorageModule,
     ],
-    controllers: [BreederController],
+    controllers: [BreederPublicHttpController, BreederOptionalAuthHttpController],
     providers: [
         BreederService,
         BreederExploreService,
