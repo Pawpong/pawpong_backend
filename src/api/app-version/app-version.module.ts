@@ -4,7 +4,6 @@ import { AppVersion, AppVersionSchema } from '../../schema/app-version.schema';
 import { AppVersionController } from './app-version.controller';
 import { AppVersionAdminController } from './admin/app-version-admin.controller';
 import { AppVersionService } from './app-version.service';
-import { AppVersionAdminService } from './admin/app-version-admin.service';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { CheckAppVersionUseCase } from './application/use-cases/check-app-version.use-case';
 import { AppVersionPolicyService } from './domain/services/app-version-policy.service';
@@ -30,7 +29,6 @@ import { AppVersionMongooseWriterAdapter } from './admin/infrastructure/app-vers
     controllers: [AppVersionController, AppVersionAdminController],
     providers: [
         AppVersionService,
-        AppVersionAdminService,
         CustomLoggerService,
         CheckAppVersionUseCase,
         CreateAppVersionUseCase,

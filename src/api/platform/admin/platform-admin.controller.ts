@@ -2,16 +2,15 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 
 import { Roles } from '../../../common/decorator/roles.decorator';
 import { CurrentUser } from '../../../common/decorator/user.decorator';
-import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
 import { RolesGuard } from '../../../common/guard/roles.guard';
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
-
-import { PlatformAdminService } from './platform-admin.service';
-
 import { StatsFilterRequestDto } from './dto/request/stats-filter-request.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { MvpStatsResponseDto } from './dto/response/mvp-stats-response.dto';
 import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
+import { GetPlatformMvpStatsUseCase } from './application/use-cases/get-platform-mvp-stats.use-case';
+import { GetPlatformStatsUseCase } from './application/use-cases/get-platform-stats.use-case';
+import { ApiGetPlatformMvpStatsEndpoint, ApiGetPlatformStatsEndpoint, ApiPlatformAdminController } from './swagger';
 
 /**
  * 플랫폼 Admin 컨트롤러
@@ -20,38 +19,30 @@ import { AdminStatsResponseDto } from './dto/response/admin-stats-response.dto';
  * - 플랫폼 통계 조회
  * - MVP 통계 조회
  */
-@ApiController('플랫폼 관리자')
+@ApiPlatformAdminController()
 @Controller('platform-admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
 export class PlatformAdminController {
-    constructor(private readonly platformAdminService: PlatformAdminService) {}
+    constructor(
+        private readonly getPlatformStatsUseCase: GetPlatformStatsUseCase,
+        private readonly getPlatformMvpStatsUseCase: GetPlatformMvpStatsUseCase,
+    ) {}
 
     @Get('stats')
-    @ApiEndpoint({
-        summary: '플랫폼 통계 조회',
-        description: '플랫폼 전체 통계 정보를 조회합니다.',
-        responseType: AdminStatsResponseDto,
-        isPublic: false,
-    })
+    @ApiGetPlatformStatsEndpoint()
     async getStats(
-        @CurrentUser() user: any,
+        @CurrentUser('userId') userId: string,
         @Query() filter: StatsFilterRequestDto,
     ): Promise<ApiResponseDto<AdminStatsResponseDto>> {
-        const result = await this.platformAdminService.getStats(user.userId, filter);
+        const result = await this.getPlatformStatsUseCase.execute(userId, filter);
         return ApiResponseDto.success(result, '시스템 통계가 조회되었습니다.');
     }
 
     @Get('mvp-stats')
-    @ApiEndpoint({
-        summary: 'MVP 통계 조회',
-        description:
-            'MVP 단계에서 필요한 핵심 통계 정보를 조회합니다 (활성 사용자, 상담/입양 신청, 필터 사용, 브리더 재제출)',
-        responseType: MvpStatsResponseDto,
-        isPublic: false,
-    })
-    async getMvpStats(@CurrentUser() user: any): Promise<ApiResponseDto<MvpStatsResponseDto>> {
-        const result = await this.platformAdminService.getMvpStats(user.userId);
+    @ApiGetPlatformMvpStatsEndpoint()
+    async getMvpStats(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<MvpStatsResponseDto>> {
+        const result = await this.getPlatformMvpStatsUseCase.execute(userId);
         return ApiResponseDto.success(result, 'MVP 통계가 조회되었습니다.');
     }
 }
