@@ -5,6 +5,7 @@ import type { Cache } from 'cache-manager';
 import { StorageService } from '../../../../../common/storage/storage.service';
 import { FeedTagPresentationService } from '../../domain/services/feed-tag-presentation.service';
 import { FeedTagQueryService } from '../../domain/services/feed-tag-query.service';
+import { TagSearchResponseDto } from '../../dto/response/tag-response.dto';
 import { FEED_TAG_READER, type FeedTagReaderPort } from '../ports/feed-tag-reader.port';
 
 @Injectable()
@@ -19,10 +20,10 @@ export class SearchByTagUseCase {
         private readonly cacheManager: Cache,
     ) {}
 
-    async execute(tag: string, page: number = 1, limit: number = 20) {
+    async execute(tag: string, page: number = 1, limit: number = 20): Promise<TagSearchResponseDto> {
         const cleanTag = this.feedTagQueryService.normalizeTag(tag);
         const cacheKey = `video:tag:${cleanTag}:${page}:${limit}`;
-        const cached = await this.cacheManager.get(cacheKey);
+        const cached = await this.cacheManager.get<TagSearchResponseDto>(cacheKey);
         if (cached) {
             return cached;
         }

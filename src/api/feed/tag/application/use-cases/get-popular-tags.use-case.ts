@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
+import { PopularTagItemDto } from '../../dto/response/tag-response.dto';
 import { FEED_TAG_READER, type FeedTagReaderPort } from '../ports/feed-tag-reader.port';
 
 @Injectable()
@@ -13,9 +14,9 @@ export class GetPopularTagsUseCase {
         private readonly cacheManager: Cache,
     ) {}
 
-    async execute(limit: number = 20) {
+    async execute(limit: number = 20): Promise<PopularTagItemDto[]> {
         const cacheKey = `video:popular-tags:${limit}`;
-        const cached = await this.cacheManager.get(cacheKey);
+        const cached = await this.cacheManager.get<PopularTagItemDto[]>(cacheKey);
         if (cached) {
             return cached;
         }
