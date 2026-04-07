@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { EmailTestController } from './test/email-test.controller';
-import { NotificationController } from './notification.controller';
+import { NotificationCommandController } from './notification-command.controller';
+import { NotificationQueryController } from './notification-query.controller';
 import { NotificationService } from './notification.service';
 import { CreateNotificationUseCase } from './application/use-cases/create-notification.use-case';
 import { CreateNotificationFromBuilderUseCase } from './application/use-cases/create-notification-from-builder.use-case';
@@ -33,7 +34,7 @@ import { MailModule } from '../../common/mail/mail.module';
  */
 @Module({
     imports: [MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }]), MailModule],
-    controllers: [NotificationController, EmailTestController],
+    controllers: [NotificationQueryController, NotificationCommandController, EmailTestController],
     providers: [
         NotificationService,
         CreateNotificationUseCase,
