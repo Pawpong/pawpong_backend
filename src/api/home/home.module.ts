@@ -1,11 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { HomeController } from './home.controller';
-import { HomeService } from './home.service';
 import { GetActiveBannersUseCase } from './application/use-cases/get-active-banners.use-case';
 import { GetAvailablePetsUseCase } from './application/use-cases/get-available-pets.use-case';
 import { GetFaqsUseCase } from './application/use-cases/get-faqs.use-case';
+import { HomeAvailablePetsController } from './home-available-pets.controller';
+import { HomeBannersController } from './home-banners.controller';
+import { HomeFaqsController } from './home-faqs.controller';
 import { HomeAvailablePetCatalogService } from './domain/services/home-available-pet-catalog.service';
 import { HomeBannerCatalogService } from './domain/services/home-banner-catalog.service';
 import { HomeFaqCatalogService } from './domain/services/home-faq-catalog.service';
@@ -29,9 +30,8 @@ import { StorageModule } from '../../common/storage/storage.module';
         ]),
         StorageModule,
     ],
-    controllers: [HomeController],
+    controllers: [HomeBannersController, HomeFaqsController, HomeAvailablePetsController],
     providers: [
-        HomeService,
         GetActiveBannersUseCase,
         GetFaqsUseCase,
         GetAvailablePetsUseCase,
@@ -44,6 +44,5 @@ import { StorageModule } from '../../common/storage/storage.module';
             useExisting: HomeMongooseContentReaderAdapter,
         },
     ],
-    exports: [HomeService],
 })
 export class HomeModule {}
