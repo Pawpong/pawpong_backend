@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { UserAdminController } from './user-admin.controller';
+import { UserAdminDeletedUsersController } from './user-admin-deleted-users.controller';
+import { UserAdminPhoneWhitelistController } from './user-admin-phone-whitelist.controller';
+import { UserAdminProfileController } from './user-admin-profile.controller';
+import { UserAdminUsersController } from './user-admin-users.controller';
 import { GetAdminProfileUseCase } from './application/use-cases/get-admin-profile.use-case';
 import { GetUsersUseCase } from './application/use-cases/get-users.use-case';
 import { UpdateUserStatusUseCase } from './application/use-cases/update-user-status.use-case';
@@ -44,7 +47,12 @@ import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whit
             { name: PhoneWhitelist.name, schema: PhoneWhitelistSchema },
         ]),
     ],
-    controllers: [UserAdminController],
+    controllers: [
+        UserAdminProfileController,
+        UserAdminUsersController,
+        UserAdminDeletedUsersController,
+        UserAdminPhoneWhitelistController,
+    ],
     providers: [
         GetAdminProfileUseCase,
         GetUsersUseCase,
