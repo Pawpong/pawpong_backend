@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
@@ -22,6 +22,11 @@ export class SearchByTagUseCase {
 
     async execute(tag: string, page: number = 1, limit: number = 20): Promise<TagSearchResponseDto> {
         const cleanTag = this.feedTagQueryService.normalizeTag(tag);
+
+        if (!cleanTag) {
+            throw new BadRequestException('검색할 태그를 입력해주세요.');
+        }
+
         const cacheKey = `video:tag:${cleanTag}:${page}:${limit}`;
         const cached = await this.cacheManager.get<TagSearchResponseDto>(cacheKey);
         if (cached) {
