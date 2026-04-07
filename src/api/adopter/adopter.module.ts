@@ -1,10 +1,14 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { AdopterController } from './adopter.controller';
+import { AdopterAccountController } from './adopter-account.controller';
 import { AdopterAdminController } from './admin/adopter-admin.controller';
+import { AdopterApplicationController } from './adopter-application.controller';
+import { AdopterFavoriteController } from './adopter-favorite.controller';
+import { AdopterProfileController } from './adopter-profile.controller';
+import { AdopterReportController } from './adopter-report.controller';
+import { AdopterReviewController } from './adopter-review.controller';
 
-import { AdopterService } from './adopter.service';
 import { GetAdopterAdminReviewReportsUseCase } from './admin/application/use-cases/get-adopter-admin-review-reports.use-case';
 import { DeleteAdopterAdminReviewUseCase } from './admin/application/use-cases/delete-adopter-admin-review.use-case';
 import { GetAdopterAdminApplicationListUseCase } from './admin/application/use-cases/get-adopter-admin-application-list.use-case';
@@ -99,9 +103,16 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         NotificationModule,
         DiscordWebhookModule,
     ],
-    controllers: [AdopterController, AdopterAdminController],
+    controllers: [
+        AdopterProfileController,
+        AdopterApplicationController,
+        AdopterReviewController,
+        AdopterFavoriteController,
+        AdopterReportController,
+        AdopterAccountController,
+        AdopterAdminController,
+    ],
     providers: [
-        AdopterService,
         GetAdopterAdminReviewReportsUseCase,
         DeleteAdopterAdminReviewUseCase,
         GetAdopterAdminApplicationListUseCase,
@@ -210,6 +221,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             useExisting: AdopterFileUrlAdapter,
         },
     ],
-    exports: [AdopterService, AdopterRepository],
+    exports: [AdopterRepository],
 })
 export class AdopterModule {}
