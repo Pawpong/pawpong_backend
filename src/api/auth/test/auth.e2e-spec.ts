@@ -3,6 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import request from 'supertest';
 
+import { AlimtalkService } from '../../../common/alimtalk/alimtalk.service';
 import { StorageService } from '../../../common/storage/storage.service';
 import { createTestingApp, getAdopterToken } from '../../../common/test/test-utils';
 
@@ -20,6 +21,7 @@ import { createTestingApp, getAdopterToken } from '../../../common/test/test-uti
 describe('Auth API E2E Tests (Simple)', () => {
     let app: INestApplication;
     const uploadTestFilePath = path.join(__dirname, 'auth-upload-test.jpg');
+    const capturedVerificationCodes = new Map<string, string>();
 
     beforeAll(async () => {
         app = await createTestingApp();
@@ -38,6 +40,15 @@ describe('Auth API E2E Tests (Simple)', () => {
                 fileName,
                 cdnUrl: `https://cdn.test/${fileName}`,
                 storageUrl: `https://cdn.test/${fileName}`,
+            };
+        });
+
+        const alimtalkService = app.get(AlimtalkService);
+        jest.spyOn(alimtalkService, 'sendVerificationCode').mockImplementation(async (phone: string, code: string) => {
+            capturedVerificationCodes.set(phone, code);
+            return {
+                success: true,
+                messageId: `alimtalk-${phone}`,
             };
         });
     });
@@ -140,6 +151,63 @@ describe('Auth API E2E Tests (Simple)', () => {
                 .expect(400);
 
             console.log('✅ 이메일 형식 오류 확인');
+        });
+    });
+
+    /**
+     * 1.5. 전화번호 인증 테스트
+     */
+    describe('전화번호 인증', () => {
+        const createPhoneNumber = () =>
+            `010${Date.now().toString().slice(-4)}${Math.floor(Math.random() * 10000)
+                .toString()
+                .padStart(4, '0')}`;
+
+        it('POST /api/auth/phone/send-code - 인증번호 발송 성공', async () => {
+            const phone = createPhoneNumber();
+
+            const response = await request(app.getHttpServer())
+                .post('/api/auth/phone/send-code')
+                .send({ phone })
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.data.success).toBe(true);
+            expect(response.body.data.message).toBe('인증번호가 발송되었습니다.');
+            expect(capturedVerificationCodes.get(phone)).toMatch(/^[0-9]{6}$/);
+            console.log('✅ 전화번호 인증코드 발송 성공');
+        });
+
+        it('POST /api/auth/phone/verify-code - 인증코드 확인 성공', async () => {
+            const phone = createPhoneNumber();
+
+            await request(app.getHttpServer()).post('/api/auth/phone/send-code').send({ phone }).expect(200);
+
+            const code = capturedVerificationCodes.get(phone);
+            expect(code).toBeDefined();
+
+            const response = await request(app.getHttpServer())
+                .post('/api/auth/phone/verify-code')
+                .send({ phone, code })
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            expect(response.body.data.success).toBe(true);
+            expect(response.body.data.message).toBe('전화번호 인증이 완료되었습니다.');
+            console.log('✅ 전화번호 인증코드 확인 성공');
+        });
+
+        it('POST /api/auth/phone/verify-code - 잘못된 인증코드로 실패', async () => {
+            const phone = createPhoneNumber();
+
+            await request(app.getHttpServer()).post('/api/auth/phone/send-code').send({ phone }).expect(200);
+
+            await request(app.getHttpServer())
+                .post('/api/auth/phone/verify-code')
+                .send({ phone, code: '000000' })
+                .expect(400);
+
+            console.log('✅ 잘못된 전화번호 인증코드 실패 확인');
         });
     });
 
