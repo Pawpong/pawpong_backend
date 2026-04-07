@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { UserAdminController } from './user-admin.controller';
-import { UserAdminService } from './user-admin.service';
 import { GetAdminProfileUseCase } from './application/use-cases/get-admin-profile.use-case';
 import { GetUsersUseCase } from './application/use-cases/get-users.use-case';
 import { UpdateUserStatusUseCase } from './application/use-cases/update-user-status.use-case';
@@ -47,7 +46,6 @@ import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whit
     ],
     controllers: [UserAdminController],
     providers: [
-        UserAdminService,
         GetAdminProfileUseCase,
         GetUsersUseCase,
         UpdateUserStatusUseCase,
@@ -72,6 +70,5 @@ import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whit
             useExisting: UserAdminMongooseRepositoryAdapter,
         },
     ],
-    exports: [UserAdminService],
 })
 export class UserAdminModule {}

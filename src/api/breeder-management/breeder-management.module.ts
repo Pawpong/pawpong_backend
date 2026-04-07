@@ -5,7 +5,6 @@ import { BreederManagementController } from './breeder-management.controller';
 import { BreederManagementAdminController } from './admin/breeder-management-admin.controller';
 
 import { BreederManagementService } from './breeder-management.service';
-import { BreederManagementAdminService } from './admin/breeder-management-admin.service';
 import { GetBreederManagementDashboardUseCase } from './application/use-cases/get-breeder-management-dashboard.use-case';
 import { GetBreederManagementProfileUseCase } from './application/use-cases/get-breeder-management-profile.use-case';
 import { UpdateBreederManagementProfileUseCase } from './application/use-cases/update-breeder-management-profile.use-case';
@@ -130,7 +129,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
     controllers: [BreederManagementController, BreederManagementAdminController],
     providers: [
         BreederManagementService,
-        BreederManagementAdminService,
         BreederRepository,
         ParentPetRepository,
         AdoptionApplicationRepository,
@@ -261,7 +259,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
     ],
     exports: [
         BreederManagementService,
-        BreederManagementAdminService,
+        GetActiveProfileBannersUseCase,
         BreederRepository,
         AvailablePetManagementRepository,
     ],
