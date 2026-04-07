@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { BreedController } from './service/breed.controller';
-import { AdminBreedController } from './admin/admin-breed.controller';
+import { BreedAdminCommandController } from './admin/breed-admin-command.controller';
+import { BreedAdminQueryController } from './admin/breed-admin-query.controller';
 
 import { BreedService } from './service/breed.service';
 import { GetBreedsUseCase } from './application/use-cases/get-breeds.use-case';
@@ -24,7 +25,7 @@ import { Breed, BreedSchema } from '../../schema/breed.schema';
 
 @Module({
     imports: [MongooseModule.forFeature([{ name: Breed.name, schema: BreedSchema }])],
-    controllers: [BreedController, AdminBreedController],
+    controllers: [BreedController, BreedAdminQueryController, BreedAdminCommandController],
     providers: [
         BreedService,
         GetBreedsUseCase,
