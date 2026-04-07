@@ -14,7 +14,8 @@ import { GoogleStrategy } from '../../common/strategy/google.strategy';
 import { AuthBannerController } from './auth-banner.controller';
 import { AuthDuplicateCheckController } from './auth-duplicate-check.controller';
 import { AuthPhoneController } from './auth-phone.controller';
-import { AuthAdminController } from './admin/auth-admin.controller';
+import { AuthAdminLoginController } from './admin/auth-admin-login.controller';
+import { AuthAdminTokenController } from './admin/auth-admin-token.controller';
 import { AuthSessionController } from './auth-session.controller';
 import { AuthSignupController } from './auth-signup.controller';
 import { AuthSocialLoginController } from './auth-social-login.controller';
@@ -131,7 +132,8 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthSignupController,
         AuthBannerController,
         AuthUploadController,
-        AuthAdminController,
+        AuthAdminLoginController,
+        AuthAdminTokenController,
     ],
     providers: [
         CheckSocialUserUseCase,
