@@ -2,7 +2,8 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AdopterAccountController } from './adopter-account.controller';
-import { AdopterAdminController } from './admin/adopter-admin.controller';
+import { AdopterAdminApplicationController } from './admin/adopter-admin-application.controller';
+import { AdopterAdminReviewController } from './admin/adopter-admin-review.controller';
 import { AdopterApplicationController } from './adopter-application.controller';
 import { AdopterFavoriteController } from './adopter-favorite.controller';
 import { AdopterProfileController } from './adopter-profile.controller';
@@ -110,7 +111,8 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AdopterFavoriteController,
         AdopterReportController,
         AdopterAccountController,
-        AdopterAdminController,
+        AdopterAdminReviewController,
+        AdopterAdminApplicationController,
     ],
     providers: [
         GetAdopterAdminReviewReportsUseCase,
