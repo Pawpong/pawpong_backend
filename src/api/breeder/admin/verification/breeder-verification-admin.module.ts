@@ -1,7 +1,9 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { BreederVerificationAdminController } from './breeder-verification-admin.controller';
+import { BreederVerificationAdminCommandController } from './breeder-verification-admin-command.controller';
+import { BreederVerificationAdminDetailController } from './breeder-verification-admin-detail.controller';
+import { BreederVerificationAdminQueryController } from './breeder-verification-admin-query.controller';
 import { GetLevelChangeRequestsUseCase } from './application/use-cases/get-level-change-requests.use-case';
 import { GetPendingBreederVerificationsUseCase } from './application/use-cases/get-pending-breeder-verifications.use-case';
 import { GetBreedersUseCase } from './application/use-cases/get-breeders.use-case';
@@ -46,7 +48,11 @@ import { NotificationModule } from '../../../notification/notification.module';
         NotificationModule, // MailTemplateService도 여기서 제공됨
         StorageModule, // StorageService 제공
     ],
-    controllers: [BreederVerificationAdminController],
+    controllers: [
+        BreederVerificationAdminQueryController,
+        BreederVerificationAdminDetailController,
+        BreederVerificationAdminCommandController,
+    ],
     providers: [
         GetLevelChangeRequestsUseCase,
         GetPendingBreederVerificationsUseCase,
