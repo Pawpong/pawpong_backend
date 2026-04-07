@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Video, VideoSchema } from '../../../schema/video.schema';
 import { VideoComment, VideoCommentSchema } from '../../../schema/video-comment.schema';
-import { FeedCommentService } from './feed-comment.service';
 import { CreateCommentUseCase } from './application/use-cases/create-comment.use-case';
 import { GetCommentsUseCase } from './application/use-cases/get-comments.use-case';
 import { GetRepliesUseCase } from './application/use-cases/get-replies.use-case';
@@ -26,7 +25,6 @@ import { FEED_COMMENT_MANAGER } from './application/ports/feed-comment-manager.p
         ]),
     ],
     providers: [
-        FeedCommentService,
         CreateCommentUseCase,
         GetCommentsUseCase,
         GetRepliesUseCase,
@@ -40,6 +38,6 @@ import { FEED_COMMENT_MANAGER } from './application/ports/feed-comment-manager.p
             useExisting: FeedCommentMongooseManagerAdapter,
         },
     ],
-    exports: [FeedCommentService],
+    exports: [CreateCommentUseCase, GetCommentsUseCase, GetRepliesUseCase, UpdateCommentUseCase, DeleteCommentUseCase],
 })
 export class FeedCommentModule {}

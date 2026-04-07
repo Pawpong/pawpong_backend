@@ -1,7 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Video, VideoSchema } from '../../../schema/video.schema';
-import { FeedTagService } from './feed-tag.service';
 import { StorageModule } from '../../../common/storage/storage.module';
 import { SearchByTagUseCase } from './application/use-cases/search-by-tag.use-case';
 import { GetPopularTagsUseCase } from './application/use-cases/get-popular-tags.use-case';
@@ -20,7 +19,6 @@ import { FEED_TAG_READER } from './application/ports/feed-tag-reader.port';
 @Module({
     imports: [MongooseModule.forFeature([{ name: Video.name, schema: VideoSchema }]), StorageModule],
     providers: [
-        FeedTagService,
         SearchByTagUseCase,
         GetPopularTagsUseCase,
         SuggestTagsUseCase,
@@ -32,6 +30,6 @@ import { FEED_TAG_READER } from './application/ports/feed-tag-reader.port';
             useExisting: FeedTagMongooseReaderAdapter,
         },
     ],
-    exports: [FeedTagService],
+    exports: [SearchByTagUseCase, GetPopularTagsUseCase, SuggestTagsUseCase],
 })
 export class FeedTagModule {}

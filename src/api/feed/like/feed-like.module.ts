@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Video, VideoSchema } from '../../../schema/video.schema';
 import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema';
-import { FeedLikeService } from './feed-like.service';
 import { StorageModule } from '../../../common/storage/storage.module';
 import { ToggleLikeUseCase } from './application/use-cases/toggle-like.use-case';
 import { GetLikeStatusUseCase } from './application/use-cases/get-like-status.use-case';
@@ -27,7 +26,6 @@ import { FEED_LIKE_MANAGER } from './application/ports/feed-like-manager.port';
         StorageModule,
     ],
     providers: [
-        FeedLikeService,
         ToggleLikeUseCase,
         GetLikeStatusUseCase,
         GetMyLikedVideosUseCase,
@@ -39,6 +37,6 @@ import { FEED_LIKE_MANAGER } from './application/ports/feed-like-manager.port';
             useExisting: FeedLikeMongooseManagerAdapter,
         },
     ],
-    exports: [FeedLikeService],
+    exports: [ToggleLikeUseCase, GetLikeStatusUseCase, GetMyLikedVideosUseCase],
 })
 export class FeedLikeModule {}
