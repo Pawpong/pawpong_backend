@@ -15,7 +15,6 @@ import { AuthController } from './auth.controller';
 import { AuthAdminController } from './admin/auth-admin.controller';
 
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
-import { SmsService } from './sms.service';
 import { AuthService } from './auth.service';
 import { LoginAdminUseCase } from './admin/application/use-cases/login-admin.use-case';
 import { RefreshAdminTokenUseCase } from './admin/application/use-cases/refresh-admin-token.use-case';
@@ -55,6 +54,7 @@ import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nic
 import { CheckBreederNameDuplicateUseCase } from './application/use-cases/check-breeder-name-duplicate.use-case';
 import { CompleteSocialRegistrationUseCase } from './application/use-cases/complete-social-registration.use-case';
 import { CompleteLegacySocialRegistrationUseCase } from './application/use-cases/complete-legacy-social-registration.use-case';
+import { GetSocialLoginRedirectUrlUseCase } from './application/use-cases/get-social-login-redirect-url.use-case';
 import { SendPhoneVerificationCodeUseCase } from './application/use-cases/send-phone-verification-code.use-case';
 import { VerifyPhoneVerificationCodeUseCase } from './application/use-cases/verify-phone-verification-code.use-case';
 import { RefreshAuthTokenUseCase } from './application/use-cases/refresh-auth-token.use-case';
@@ -122,6 +122,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         CheckBreederNameDuplicateUseCase,
         CompleteSocialRegistrationUseCase,
         CompleteLegacySocialRegistrationUseCase,
+        GetSocialLoginRedirectUrlUseCase,
         SendPhoneVerificationCodeUseCase,
         VerifyPhoneVerificationCodeUseCase,
         RefreshAuthTokenUseCase,
@@ -136,7 +137,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         LoginAdminUseCase,
         RefreshAdminTokenUseCase,
         AuthTokenService,
-        SmsService,
         AuthAdminAuthenticationService,
         AuthAdminPresentationService,
         AuthAdopterRepository,
@@ -226,6 +226,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         KakaoStrategy,
         CustomLoggerService,
     ],
-    exports: [AuthService, SmsService],
+    exports: [AuthService],
 })
 export class AuthModule {}
