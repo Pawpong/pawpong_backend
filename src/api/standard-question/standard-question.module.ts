@@ -1,7 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { StandardQuestionAdminController } from './admin/standard-question-admin.controller';
+import { StandardQuestionAdminCommandController } from './admin/standard-question-admin-command.controller';
+import { StandardQuestionAdminQueryController } from './admin/standard-question-admin-query.controller';
 
 import { StandardQuestionService } from './standard-question.service';
 import { STANDARD_QUESTION_READER } from './application/ports/standard-question-reader.port';
@@ -22,7 +23,7 @@ import { StandardQuestion, StandardQuestionSchema } from '../../schema/standard-
 
 @Module({
     imports: [MongooseModule.forFeature([{ name: StandardQuestion.name, schema: StandardQuestionSchema }])],
-    controllers: [StandardQuestionAdminController],
+    controllers: [StandardQuestionAdminQueryController, StandardQuestionAdminCommandController],
     providers: [
         StandardQuestionService,
         GetAllActiveStandardQuestionsUseCase,
