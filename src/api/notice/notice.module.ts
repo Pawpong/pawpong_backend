@@ -4,7 +4,6 @@ import { Notice, NoticeSchema } from '../../schema/notice.schema';
 import { NoticeController } from './notice.controller';
 import { NoticeAdminCommandController } from './admin/notice-admin-command.controller';
 import { NoticeAdminQueryController } from './admin/notice-admin-query.controller';
-import { NoticeService } from './notice.service';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';
 import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
@@ -26,7 +25,6 @@ import { NoticeRepository } from './repository/notice.repository';
     imports: [MongooseModule.forFeature([{ name: Notice.name, schema: NoticeSchema }])],
     controllers: [NoticeController, NoticeAdminQueryController, NoticeAdminCommandController],
     providers: [
-        NoticeService,
         CustomLoggerService,
         GetNoticeListUseCase,
         GetNoticeDetailUseCase,
@@ -46,6 +44,5 @@ import { NoticeRepository } from './repository/notice.repository';
             useExisting: NoticeMongooseWriterAdapter,
         },
     ],
-    exports: [NoticeService],
 })
 export class NoticeModule {}
