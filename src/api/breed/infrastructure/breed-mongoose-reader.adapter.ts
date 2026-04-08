@@ -1,16 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { Breed } from '../../../schema/breed.schema';
 import { BreedReaderPort, BreedCategorySnapshot } from '../application/ports/breed-reader.port';
+import { BreedRepository } from '../repository/breed.repository';
 
 @Injectable()
 export class BreedMongooseReaderAdapter implements BreedReaderPort {
-    constructor(@InjectModel(Breed.name) private readonly breedModel: Model<Breed>) {}
+    constructor(private readonly breedRepository: BreedRepository) {}
 
     async readByPetType(petType: string): Promise<BreedCategorySnapshot[]> {
-        const results = await this.breedModel.find({ petType }).exec();
+        const results = await this.breedRepository.findByPetType(petType);
 
         return results.map((result) => ({
             category: result.category,
