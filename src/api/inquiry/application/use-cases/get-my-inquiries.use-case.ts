@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { StorageService } from '../../../../common/storage/storage.service';
 import { InquiryListResponseDto } from '../../dto/response/inquiry-list-response.dto';
 import { InquiryViewService } from '../../domain/services/inquiry-view.service';
+import { INQUIRY_ASSET_URL, type InquiryAssetUrlPort } from '../ports/inquiry-asset-url.port';
 import { INQUIRY_READER, type InquiryAnimalType, type InquiryReaderPort } from '../ports/inquiry-reader.port';
 
 @Injectable()
@@ -11,7 +11,8 @@ export class GetMyInquiriesUseCase {
         @Inject(INQUIRY_READER)
         private readonly inquiryReader: InquiryReaderPort,
         private readonly inquiryViewService: InquiryViewService,
-        private readonly storageService: StorageService,
+        @Inject(INQUIRY_ASSET_URL)
+        private readonly inquiryAssetUrl: InquiryAssetUrlPort,
     ) {}
 
     async execute(
@@ -29,7 +30,7 @@ export class GetMyInquiriesUseCase {
         });
 
         return this.inquiryViewService.buildListResponse(inquiries, limit, (fileName, expirationMinutes) =>
-            this.storageService.generateSignedUrl(fileName, expirationMinutes),
+            this.inquiryAssetUrl.generateSignedUrl(fileName, expirationMinutes),
         );
     }
 }
