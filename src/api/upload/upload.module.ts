@@ -27,6 +27,10 @@ import { UploadAdminStoragePolicyService } from './admin/domain/services/upload-
 import { UploadAdminStoragePresentationService } from './admin/domain/services/upload-admin-storage-presentation.service';
 import { UploadAdminStorageAdapter } from './admin/infrastructure/upload-admin-storage.adapter';
 import { UploadAdminFileReferenceReaderAdapter } from './admin/infrastructure/upload-admin-file-reference-reader.adapter';
+import {
+    DELETE_MULTIPLE_UPLOAD_ADMIN_FILES_COMMAND,
+    LIST_ALL_UPLOAD_ADMIN_FILES_QUERY,
+} from './admin/application/ports/upload-admin-file-orchestration.port';
 import { UPLOAD_FILE_STORE } from './application/ports/upload-file-store.port';
 import { UPLOAD_OWNER_PORT } from './application/ports/upload-owner.port';
 import { UploadRepresentativePhotosUseCase } from './application/use-cases/upload-representative-photos.use-case';
@@ -121,6 +125,14 @@ import { StorageModule } from '../../common/storage/storage.module';
         {
             provide: UPLOAD_ADMIN_REFERENCE_READER,
             useExisting: UploadAdminFileReferenceReaderAdapter,
+        },
+        {
+            provide: LIST_ALL_UPLOAD_ADMIN_FILES_QUERY,
+            useExisting: ListAllFilesUseCase,
+        },
+        {
+            provide: DELETE_MULTIPLE_UPLOAD_ADMIN_FILES_COMMAND,
+            useExisting: DeleteMultipleFilesUseCase,
         },
     ],
 })

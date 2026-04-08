@@ -3,8 +3,11 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { DeleteFilesResponseDto } from '../../dto/response/delete-files-response.dto';
 import { UploadAdminStoragePolicyService } from '../../domain/services/upload-admin-storage-policy.service';
+import {
+    DELETE_MULTIPLE_UPLOAD_ADMIN_FILES_COMMAND,
+    type DeleteMultipleUploadAdminFilesCommandPort,
+} from '../ports/upload-admin-file-orchestration.port';
 import { UPLOAD_ADMIN_STORAGE, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
-import { DeleteMultipleFilesUseCase } from './delete-multiple-files.use-case';
 
 @Injectable()
 export class DeleteFolderUseCase {
@@ -12,7 +15,8 @@ export class DeleteFolderUseCase {
         @Inject(UPLOAD_ADMIN_STORAGE)
         private readonly uploadAdminStorage: UploadAdminStoragePort,
         private readonly uploadAdminStoragePolicyService: UploadAdminStoragePolicyService,
-        private readonly deleteMultipleFilesUseCase: DeleteMultipleFilesUseCase,
+        @Inject(DELETE_MULTIPLE_UPLOAD_ADMIN_FILES_COMMAND)
+        private readonly deleteMultipleFilesUseCase: DeleteMultipleUploadAdminFilesCommandPort,
         private readonly logger: CustomLoggerService,
     ) {}
 
