@@ -5,6 +5,7 @@ import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.de
 import { DeleteUploadedFileRequestDto } from '../dto/request/delete-uploaded-file-request.dto';
 import { UploadFolderRequestDto } from '../dto/request/upload-folder-request.dto';
 import { UploadResponseDto } from '../dto/response/upload-response.dto';
+import { UPLOAD_RESPONSE_MESSAGE_EXAMPLES } from '../domain/services/upload-response-message.service';
 
 const UPLOAD_BAD_REQUEST_RESPONSE = {
     status: 400,
@@ -58,7 +59,7 @@ export function ApiUploadRepresentativePhotosEndpoint() {
             `,
             responseType: [UploadResponseDto],
             successDescription: '대표 사진 업로드 성공',
-            successMessageExample: '대표 사진이 업로드되고 저장되었습니다.',
+            successMessageExample: UPLOAD_RESPONSE_MESSAGE_EXAMPLES.representativePhotosUploaded,
             errorResponses: [UPLOAD_BAD_REQUEST_RESPONSE],
         }),
         ApiBody({
@@ -82,7 +83,7 @@ export function ApiUploadAvailablePetPhotosEndpoint() {
             `,
             responseType: [UploadResponseDto],
             successDescription: '분양 개체 사진 업로드 성공',
-            successMessageExample: '분양 개체 사진이 업로드되고 저장되었습니다.',
+            successMessageExample: UPLOAD_RESPONSE_MESSAGE_EXAMPLES.availablePetPhotosUploaded,
             errorResponses: [UPLOAD_BAD_REQUEST_RESPONSE],
         }),
         ApiParam({
@@ -125,7 +126,7 @@ export function ApiUploadParentPetPhotosEndpoint() {
             `,
             responseType: [UploadResponseDto],
             successDescription: '부모견/묘 사진 업로드 성공',
-            successMessageExample: '부모견/묘 사진이 업로드되고 저장되었습니다.',
+            successMessageExample: UPLOAD_RESPONSE_MESSAGE_EXAMPLES.parentPetPhotosUploaded,
             errorResponses: [UPLOAD_BAD_REQUEST_RESPONSE],
         }),
         ApiParam({
@@ -168,7 +169,7 @@ export function ApiUploadSingleFileEndpoint() {
             responseType: UploadResponseDto,
             isPublic: true,
             successDescription: '단일 파일 업로드 성공',
-            successMessageExample: '파일 업로드 성공',
+            successMessageExample: UPLOAD_RESPONSE_MESSAGE_EXAMPLES.singleFileUploaded,
             errorResponses: [UPLOAD_BAD_REQUEST_RESPONSE],
         }),
         ApiBody({
@@ -202,7 +203,7 @@ export function ApiUploadMultipleFilesEndpoint() {
             responseType: [UploadResponseDto],
             isPublic: true,
             successDescription: '다중 파일 업로드 성공',
-            successMessageExample: '파일 업로드 성공',
+            successMessageExample: UPLOAD_RESPONSE_MESSAGE_EXAMPLES.multipleFilesUploaded,
             errorResponses: [UPLOAD_BAD_REQUEST_RESPONSE],
         }),
         ApiBody({
@@ -234,7 +235,7 @@ export function ApiDeleteUploadedFileEndpoint() {
             isPublic: true,
             nullableData: true,
             successDescription: '파일 삭제 성공',
-            successMessageExample: '파일 삭제 성공',
+            successMessageExample: UPLOAD_RESPONSE_MESSAGE_EXAMPLES.fileDeleted,
             errorResponses: [UPLOAD_BAD_REQUEST_RESPONSE],
         }),
         ApiBody({ type: DeleteUploadedFileRequestDto }),

@@ -5,6 +5,7 @@ import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger
 import { DeleteFilesResponseDto } from '../dto/response/delete-files-response.dto';
 import { FileReferenceResponseDto } from '../dto/response/file-reference-response.dto';
 import { StorageListResponseDto } from '../dto/response/storage-list-response.dto';
+import { UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../domain/services/upload-admin-response-message.service';
 
 const UPLOAD_ADMIN_FORBIDDEN_RESPONSE = {
     status: 403,
@@ -39,7 +40,7 @@ export function ApiListFilesAdminEndpoint() {
             `,
             responseType: StorageListResponseDto,
             successDescription: '파일 목록 조회 성공',
-            successMessageExample: '파일 목록 조회 완료',
+            successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.filesListed,
             errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
         }),
         ApiQuery({
@@ -66,7 +67,7 @@ export function ApiListFilesByFolderAdminEndpoint() {
         `,
         responseType: StorageListResponseDto,
         successDescription: '폴더 파일 목록 조회 성공',
-        successMessageExample: '폴더 파일 목록 조회 완료',
+        successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.folderFilesListed,
         errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -86,7 +87,7 @@ export function ApiDeleteFileAdminEndpoint() {
                 - 관리자(admin) 권한이 필요합니다.
             `,
             successDescription: '파일 삭제 성공',
-            successMessageExample: '파일이 삭제되었습니다.',
+            successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.fileDeleted,
             nullableData: true,
             errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
         }),
@@ -114,7 +115,7 @@ export function ApiDeleteMultipleFilesAdminEndpoint() {
         `,
         responseType: DeleteFilesResponseDto,
         successDescription: '다중 파일 삭제 성공',
-        successMessageExample: '파일 삭제가 완료되었습니다.',
+        successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.filesDeleted,
         errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -136,7 +137,7 @@ export function ApiDeleteFolderAdminEndpoint() {
             `,
             responseType: DeleteFilesResponseDto,
             successDescription: '폴더 삭제 성공',
-            successMessageExample: '폴더가 삭제되었습니다.',
+            successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.folderDeleted,
             errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
         }),
         ApiQuery({
@@ -163,7 +164,7 @@ export function ApiCheckFileReferencesAdminEndpoint() {
         `,
         responseType: FileReferenceResponseDto,
         successDescription: '파일 참조 확인 성공',
-        successMessageExample: 'DB 참조 확인 완료',
+        successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.fileReferencesChecked,
         errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -182,7 +183,7 @@ export function ApiGetAllReferencedFilesAdminEndpoint() {
             - 관리자(admin) 권한이 필요합니다.
         `,
         successDescription: '참조 파일 목록 조회 성공',
-        successMessageExample: 'DB 참조 파일 목록 조회 완료',
+        successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.referencedFilesListed,
         dataSchema: {
             type: 'array',
             items: { type: 'string', example: 'profiles/abc123.jpg' },
