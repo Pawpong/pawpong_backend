@@ -3,28 +3,14 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { VerificationStatus } from '../../../../common/enum/user.enum';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import {
+    AuthBreederDocumentSubmissionResponse,
+    AuthBreederDocumentUrls,
+} from '../ports/auth-breeder-document-submission.port';
+import {
     AUTH_BREEDER_VERIFICATION_COMMAND_PORT,
     AuthBreederVerificationCommandPort,
 } from '../ports/auth-breeder-verification-command.port';
 import { AuthBreederDocumentSubmissionService } from '../../domain/services/auth-breeder-document-submission.service';
-
-export type AuthBreederDocumentUrls = {
-    idCardUrl: string;
-    animalProductionLicenseUrl: string;
-    adoptionContractSampleUrl?: string;
-    recentAssociationDocumentUrl?: string;
-    breederCertificationUrl?: string;
-    ticaCfaDocumentUrl?: string;
-};
-
-export type AuthBreederDocumentSubmissionResponse = {
-    breederId: string;
-    verificationStatus: string;
-    uploadedDocuments: Record<string, string | undefined>;
-    isDocumentsComplete: boolean;
-    submittedAt: Date;
-    estimatedProcessingTime: string;
-};
 
 @Injectable()
 export class SubmitAuthBreederDocumentsUseCase {

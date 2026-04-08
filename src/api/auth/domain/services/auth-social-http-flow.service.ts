@@ -1,16 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import type { Response } from 'express';
 
 import type { AuthSocialCallbackProfile } from '../../application/ports/auth-social-callback.port';
-import { GetSocialLoginRedirectUrlUseCase } from '../../application/use-cases/get-social-login-redirect-url.use-case';
-import { ProcessSocialLoginCallbackUseCase } from '../../application/use-cases/process-social-login-callback.use-case';
+import {
+    GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY,
+    PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW,
+    type GetSocialLoginRedirectUrlQueryPort,
+    type ProcessSocialLoginCallbackFlowPort,
+} from '../../application/ports/auth-social-flow.port';
 import { AuthHttpCookieService } from './auth-http-cookie.service';
 
 @Injectable()
 export class AuthSocialHttpFlowService {
     constructor(
-        private readonly getSocialLoginRedirectUrlUseCase: GetSocialLoginRedirectUrlUseCase,
-        private readonly processSocialLoginCallbackUseCase: ProcessSocialLoginCallbackUseCase,
+        @Inject(GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY)
+        private readonly getSocialLoginRedirectUrlUseCase: GetSocialLoginRedirectUrlQueryPort,
+        @Inject(PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW)
+        private readonly processSocialLoginCallbackUseCase: ProcessSocialLoginCallbackFlowPort,
         private readonly authHttpCookieService: AuthHttpCookieService,
     ) {}
 
