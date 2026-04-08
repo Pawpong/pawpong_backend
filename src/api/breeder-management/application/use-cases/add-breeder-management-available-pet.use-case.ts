@@ -5,6 +5,7 @@ import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-pro
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
+import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
 import { BreederManagementAvailablePetCommandMapperService } from '../../domain/services/breeder-management-available-pet-command-mapper.service';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class AddBreederManagementAvailablePetUseCase {
         @Inject(BREEDER_MANAGEMENT_PET_COMMAND_PORT)
         private readonly breederManagementPetCommandPort: BreederManagementPetCommandPort,
         private readonly breederManagementAvailablePetCommandMapperService: BreederManagementAvailablePetCommandMapperService,
+        private readonly breederManagementCommandResponseFactoryService: BreederManagementCommandResponseFactoryService,
     ) {}
 
     async execute(userId: string, availablePetDto: AvailablePetAddDto): Promise<{ petId: string; message: string }> {
@@ -27,9 +29,6 @@ export class AddBreederManagementAvailablePetUseCase {
             this.breederManagementAvailablePetCommandMapperService.toCreateData(userId, availablePetDto),
         );
 
-        return {
-            petId: String(savedPet._id),
-            message: '분양 가능한 반려동물이 성공적으로 등록되었습니다.',
-        };
+        return this.breederManagementCommandResponseFactoryService.createAvailablePetAdded(String(savedPet._id));
     }
 }

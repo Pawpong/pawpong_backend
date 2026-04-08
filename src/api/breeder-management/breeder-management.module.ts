@@ -63,9 +63,9 @@ import { BreederManagementApplicationFormValidatorService } from './domain/servi
 import { BreederManagementSimpleApplicationFormBuilderService } from './domain/services/breeder-management-simple-application-form-builder.service';
 import { BreederManagementParentPetCommandMapperService } from './domain/services/breeder-management-parent-pet-command-mapper.service';
 import { BreederManagementAvailablePetCommandMapperService } from './domain/services/breeder-management-available-pet-command-mapper.service';
+import { BreederManagementCommandResponseFactoryService } from './domain/services/breeder-management-command-response-factory.service';
 import { BreederManagementReviewReplyResponseFactoryService } from './domain/services/breeder-management-review-reply-response-factory.service';
 import { BreederManagementApplicationDetailAssemblerService } from './domain/services/breeder-management-application-detail-assembler.service';
-import { BreederManagementApplicationStatusResponseFactoryService } from './domain/services/breeder-management-application-status-response-factory.service';
 import { BreederManagementAccountDeleteResponseFactoryService } from './domain/services/breeder-management-account-delete-response-factory.service';
 import { BreederManagementProfileAdapter } from './infrastructure/breeder-management-profile.adapter';
 import { BreederManagementFileUrlAdapter } from './infrastructure/breeder-management-file-url.adapter';
@@ -204,9 +204,9 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederManagementSimpleApplicationFormBuilderService,
         BreederManagementParentPetCommandMapperService,
         BreederManagementAvailablePetCommandMapperService,
+        BreederManagementCommandResponseFactoryService,
         BreederManagementReviewReplyResponseFactoryService,
         BreederManagementApplicationDetailAssemblerService,
-        BreederManagementApplicationStatusResponseFactoryService,
         BreederManagementAccountDeleteResponseFactoryService,
         BreederManagementBannerPresentationService,
         BreederManagementProfileAdapter,
