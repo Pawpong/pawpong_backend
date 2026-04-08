@@ -2,7 +2,14 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { Video, VideoSchema } from '../../../schema/video.schema';
 import { StorageModule } from '../../../common/storage/storage.module';
+import { FeedCacheKeyService } from '../domain/services/feed-cache-key.service';
+import { FeedVideoSummaryPresentationService } from '../domain/services/feed-video-summary-presentation.service';
 import { FEED_TAG_ASSET_URL } from './application/ports/feed-tag-asset-url.port';
+import {
+    GET_POPULAR_FEED_TAGS_USE_CASE,
+    SEARCH_FEED_VIDEOS_BY_TAG_USE_CASE,
+    SUGGEST_FEED_TAGS_USE_CASE,
+} from './application/ports/feed-tag-interaction.port';
 import { SearchByTagUseCase } from './application/use-cases/search-by-tag.use-case';
 import { GetPopularTagsUseCase } from './application/use-cases/get-popular-tags.use-case';
 import { SuggestTagsUseCase } from './application/use-cases/suggest-tags.use-case';
@@ -25,6 +32,8 @@ import { FEED_TAG_READER } from './application/ports/feed-tag-reader.port';
         SearchByTagUseCase,
         GetPopularTagsUseCase,
         SuggestTagsUseCase,
+        FeedCacheKeyService,
+        FeedVideoSummaryPresentationService,
         FeedTagQueryService,
         FeedTagPresentationService,
         FeedTagRepository,
@@ -38,7 +47,19 @@ import { FEED_TAG_READER } from './application/ports/feed-tag-reader.port';
             provide: FEED_TAG_ASSET_URL,
             useExisting: FeedTagStorageAssetUrlAdapter,
         },
+        {
+            provide: SEARCH_FEED_VIDEOS_BY_TAG_USE_CASE,
+            useExisting: SearchByTagUseCase,
+        },
+        {
+            provide: GET_POPULAR_FEED_TAGS_USE_CASE,
+            useExisting: GetPopularTagsUseCase,
+        },
+        {
+            provide: SUGGEST_FEED_TAGS_USE_CASE,
+            useExisting: SuggestTagsUseCase,
+        },
     ],
-    exports: [SearchByTagUseCase, GetPopularTagsUseCase, SuggestTagsUseCase],
+    exports: [SEARCH_FEED_VIDEOS_BY_TAG_USE_CASE, GET_POPULAR_FEED_TAGS_USE_CASE, SUGGEST_FEED_TAGS_USE_CASE],
 })
 export class FeedTagModule {}

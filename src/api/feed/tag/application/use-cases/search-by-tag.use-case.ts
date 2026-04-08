@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
+import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedTagPresentationService } from '../../domain/services/feed-tag-presentation.service';
 import { FeedTagQueryService } from '../../domain/services/feed-tag-query.service';
 import { TagSearchResponseDto } from '../../dto/response/tag-response.dto';
@@ -19,6 +20,7 @@ export class SearchByTagUseCase {
         private readonly feedTagAssetUrl: FeedTagAssetUrlPort,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
+        private readonly feedCacheKeyService: FeedCacheKeyService,
     ) {}
 
     async execute(tag: string, page: number = 1, limit: number = 20): Promise<TagSearchResponseDto> {
@@ -28,7 +30,7 @@ export class SearchByTagUseCase {
             throw new BadRequestException('검색할 태그를 입력해주세요.');
         }
 
-        const cacheKey = `video:tag:${cleanTag}:${page}:${limit}`;
+        const cacheKey = this.feedCacheKeyService.getTagSearchKey(cleanTag, page, limit);
         const cached = await this.cacheManager.get<TagSearchResponseDto>(cacheKey);
         if (cached) {
             return cached;

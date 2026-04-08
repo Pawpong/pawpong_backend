@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
+import { FeedCacheKeyService } from '../../../feed/domain/services/feed-cache-key.service';
 import { StorageService } from '../../../../common/storage/storage.service';
 
 @Injectable()
@@ -10,6 +11,7 @@ export class FeedVideoAssetUrlService {
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
         private readonly storageService: StorageService,
+        private readonly feedCacheKeyService: FeedCacheKeyService,
     ) {}
 
     async getSignedUrlWithCache(fileKey: string, ttlSeconds: number): Promise<string> {
@@ -17,7 +19,7 @@ export class FeedVideoAssetUrlService {
             return '';
         }
 
-        const cacheKey = `signed-url:${fileKey}`;
+        const cacheKey = this.feedCacheKeyService.getSignedUrlKey(fileKey);
         const cached = await this.cacheManager.get<string>(cacheKey);
         if (cached) {
             return cached;

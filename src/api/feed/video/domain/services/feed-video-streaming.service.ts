@@ -21,10 +21,6 @@ export class FeedVideoStreamingService {
     private static readonly DEFAULT_RESOLUTIONS = [360, 480, 720];
     private static readonly SEGMENT_CACHE_TTL_SECONDS = 3600;
 
-    getMetaCacheKey(videoId: string): string {
-        return `video:meta:${videoId}`;
-    }
-
     getProxyTarget(videoId: string, filename: string): FeedVideoProxyTarget {
         const dotIndex = filename.lastIndexOf('.');
         const extension = dotIndex >= 0 ? filename.substring(dotIndex) : '';

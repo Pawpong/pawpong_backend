@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
+import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedLikePresentationService } from '../../domain/services/feed-like-presentation.service';
 import { FeedLikePolicyService } from '../../domain/services/feed-like-policy.service';
 import { FEED_LIKE_MANAGER, type FeedLikeManagerPort } from '../ports/feed-like-manager.port';
@@ -15,6 +16,7 @@ export class ToggleLikeUseCase {
         private readonly feedLikePresentationService: FeedLikePresentationService,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
+        private readonly feedCacheKeyService: FeedCacheKeyService,
     ) {}
 
     async execute(videoId: string, userId: string, userModel: 'Breeder' | 'Adopter') {
@@ -25,7 +27,7 @@ export class ToggleLikeUseCase {
             ? await this.cancelLike(existingLike.id, videoId)
             : await this.addLike(videoId, userId, userModel);
 
-        await this.cacheManager.del(`video:meta:${videoId}`);
+        await this.cacheManager.del(this.feedCacheKeyService.getVideoMetaKey(videoId));
 
         return this.feedLikePresentationService.buildToggleResponse(!existingLike, likeCount);
     }

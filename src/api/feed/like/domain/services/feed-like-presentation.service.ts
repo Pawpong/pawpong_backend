@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
 import { FeedLikeUploaderSnapshot, FeedLikeVideoSnapshot } from '../../application/ports/feed-like-manager.port';
+import { FeedVideoSummaryPresentationService } from '../../../domain/services/feed-video-summary-presentation.service';
 
 type ThumbnailUrlResolver = (fileKey?: string) => string | Promise<string | null> | null;
 
 @Injectable()
 export class FeedLikePresentationService {
+    constructor(private readonly feedVideoSummaryPresentationService: FeedVideoSummaryPresentationService) {}
+
     buildToggleResponse(isLiked: boolean, likeCount: number) {
         return { isLiked, likeCount };
     }
@@ -36,27 +39,11 @@ export class FeedLikePresentationService {
 
         return {
             videos: items,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: totalCount,
-                totalPages: Math.ceil(totalCount / limit),
-                hasNextPage: page < Math.ceil(totalCount / limit),
-                hasPrevPage: page > 1,
-            },
+            pagination: this.feedVideoSummaryPresentationService.toPagination(page, limit, totalCount),
         };
     }
 
     private toUploaderResponse(uploader: FeedLikeUploaderSnapshot | null): any {
-        if (!uploader) {
-            return null;
-        }
-
-        return {
-            _id: uploader.id,
-            name: uploader.name,
-            profileImageFileName: uploader.profileImageFileName,
-            businessName: uploader.businessName,
-        };
+        return this.feedVideoSummaryPresentationService.toUploaderResponse(uploader);
     }
 }

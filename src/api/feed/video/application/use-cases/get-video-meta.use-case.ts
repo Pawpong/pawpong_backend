@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
+import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FEED_VIDEO_READER, type FeedVideoReaderPort } from '../ports/feed-video-reader.port';
 import { FeedVideoPresentationService } from '../../domain/services/feed-video-presentation.service';
 import { FeedVideoAssetUrlService } from '../../infrastructure/feed-video-asset-url.service';
@@ -16,10 +17,11 @@ export class GetVideoMetaUseCase {
         private readonly feedVideoAssetUrlService: FeedVideoAssetUrlService,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
+        private readonly feedCacheKeyService: FeedCacheKeyService,
     ) {}
 
     async execute(videoId: string): Promise<any> {
-        const cacheKey = `video:meta:${videoId}`;
+        const cacheKey = this.feedCacheKeyService.getVideoMetaKey(videoId);
         const cached = await this.cacheManager.get(cacheKey);
         if (cached) {
             return cached;

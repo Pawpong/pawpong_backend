@@ -1,13 +1,19 @@
-import { Get, Query } from '@nestjs/common';
+import { Get, Inject, Query } from '@nestjs/common';
 
-import { SearchByTagUseCase } from '../tag/application/use-cases/search-by-tag.use-case';
+import {
+    SEARCH_FEED_VIDEOS_BY_TAG_USE_CASE,
+    type SearchFeedVideosByTagUseCasePort,
+} from '../tag/application/ports/feed-tag-interaction.port';
 import { TagSearchResponseDto } from '../tag/dto/response/tag-response.dto';
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
 import { ApiSearchFeedVideosByTagEndpoint } from './swagger';
 
 @FeedPublicController()
 export class FeedVideoTagSearchController {
-    constructor(private readonly searchByTagUseCase: SearchByTagUseCase) {}
+    constructor(
+        @Inject(SEARCH_FEED_VIDEOS_BY_TAG_USE_CASE)
+        private readonly searchByTagUseCase: SearchFeedVideosByTagUseCasePort,
+    ) {}
 
     @Get('tag/search')
     @ApiSearchFeedVideosByTagEndpoint()

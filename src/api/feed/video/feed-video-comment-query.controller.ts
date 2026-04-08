@@ -1,8 +1,12 @@
-import { Get, Param, Query } from '@nestjs/common';
+import { Get, Inject, Param, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
-import { GetCommentsUseCase } from '../comment/application/use-cases/get-comments.use-case';
-import { GetRepliesUseCase } from '../comment/application/use-cases/get-replies.use-case';
+import {
+    GET_FEED_VIDEO_COMMENTS_USE_CASE,
+    GET_FEED_VIDEO_REPLIES_USE_CASE,
+    type GetFeedVideoCommentsUseCasePort,
+    type GetFeedVideoRepliesUseCasePort,
+} from '../comment/application/ports/feed-comment-interaction.port';
 import { CommentListResponseDto, ReplyListResponseDto } from '../comment/dto/response/comment-response.dto';
 import { FeedOptionalAuthController } from './decorator/feed-video-controller.decorator';
 import { ApiGetFeedVideoCommentsEndpoint, ApiGetFeedVideoRepliesEndpoint } from './swagger';
@@ -10,8 +14,10 @@ import { ApiGetFeedVideoCommentsEndpoint, ApiGetFeedVideoRepliesEndpoint } from 
 @FeedOptionalAuthController()
 export class FeedVideoCommentQueryController {
     constructor(
-        private readonly getCommentsUseCase: GetCommentsUseCase,
-        private readonly getRepliesUseCase: GetRepliesUseCase,
+        @Inject(GET_FEED_VIDEO_COMMENTS_USE_CASE)
+        private readonly getCommentsUseCase: GetFeedVideoCommentsUseCasePort,
+        @Inject(GET_FEED_VIDEO_REPLIES_USE_CASE)
+        private readonly getRepliesUseCase: GetFeedVideoRepliesUseCasePort,
     ) {}
 
     @Get('comment/:videoId')

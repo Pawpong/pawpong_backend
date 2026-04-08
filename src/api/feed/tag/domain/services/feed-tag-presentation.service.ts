@@ -1,11 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
 import { FeedTagUploaderSnapshot, FeedTagVideoSnapshot } from '../../application/ports/feed-tag-reader.port';
+import { FeedVideoSummaryPresentationService } from '../../../domain/services/feed-video-summary-presentation.service';
 
 type ThumbnailUrlResolver = (fileKey?: string) => string | Promise<string | null> | null;
 
 @Injectable()
 export class FeedTagPresentationService {
+    constructor(private readonly feedVideoSummaryPresentationService: FeedVideoSummaryPresentationService) {}
+
     async buildSearchResponse(
         videos: FeedTagVideoSnapshot[],
         tag: string,
@@ -31,27 +34,11 @@ export class FeedTagPresentationService {
         return {
             videos: items,
             tag,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: totalCount,
-                totalPages: Math.ceil(totalCount / limit),
-                hasNextPage: page < Math.ceil(totalCount / limit),
-                hasPrevPage: page > 1,
-            },
+            pagination: this.feedVideoSummaryPresentationService.toPagination(page, limit, totalCount),
         };
     }
 
     private toUploaderResponse(uploader: FeedTagUploaderSnapshot | null): any {
-        if (!uploader) {
-            return null;
-        }
-
-        return {
-            _id: uploader.id,
-            name: uploader.name,
-            profileImageFileName: uploader.profileImageFileName,
-            businessName: uploader.businessName,
-        };
+        return this.feedVideoSummaryPresentationService.toUploaderResponse(uploader);
     }
 }
