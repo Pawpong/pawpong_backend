@@ -4,7 +4,6 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { StandardQuestionAdminCommandController } from './admin/standard-question-admin-command.controller';
 import { StandardQuestionAdminQueryController } from './admin/standard-question-admin-query.controller';
 
-import { StandardQuestionService } from './standard-question.service';
 import { STANDARD_QUESTION_READER } from './application/ports/standard-question-reader.port';
 import { STANDARD_QUESTION_WRITER } from './admin/application/ports/standard-question-writer.port';
 import { GetAllActiveStandardQuestionsUseCase } from './application/use-cases/get-all-active-standard-questions.use-case';
@@ -26,7 +25,6 @@ import { StandardQuestion, StandardQuestionSchema } from '../../schema/standard-
     imports: [MongooseModule.forFeature([{ name: StandardQuestion.name, schema: StandardQuestionSchema }])],
     controllers: [StandardQuestionAdminQueryController, StandardQuestionAdminCommandController],
     providers: [
-        StandardQuestionService,
         GetAllActiveStandardQuestionsUseCase,
         GetStandardQuestionByIdUseCase,
         GetAllStandardQuestionsUseCase,
@@ -48,6 +46,5 @@ import { StandardQuestion, StandardQuestionSchema } from '../../schema/standard-
             useExisting: StandardQuestionMongooseWriterAdapter,
         },
     ],
-    exports: [StandardQuestionService],
 })
 export class StandardQuestionModule {}
