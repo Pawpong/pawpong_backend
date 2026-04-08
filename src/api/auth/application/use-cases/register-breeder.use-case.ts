@@ -1,13 +1,13 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 
 import { BreederPlan, UserStatus, VerificationStatus } from '../../../../common/enum/user.enum';
-import { AuthTokenService } from '../../services/auth-token.service';
 import { AuthMapper } from '../../mapper/auth.mapper';
 import { RegisterBreederRequestDto } from '../../dto/request/register-breeder-request.dto';
 import { RegisterBreederResponseDto } from '../../dto/response/register-breeder-response.dto';
 import { AuthRegistrationPort } from '../ports/auth-registration.port';
 import { AuthRegistrationNotificationPort } from '../ports/auth-registration-notification.port';
 import { AuthTempUploadPort } from '../ports/auth-temp-upload.port';
+import { AuthTokenPort } from '../ports/auth-token.port';
 import { AuthSocialIdentityService } from '../../domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from '../../domain/services/auth-stored-file-name.service';
 
@@ -19,7 +19,8 @@ export class RegisterBreederUseCase {
         @Inject(AuthRegistrationNotificationPort)
         private readonly authRegistrationNotificationPort: AuthRegistrationNotificationPort,
         private readonly authTempUploadPort: AuthTempUploadPort,
-        private readonly authTokenService: AuthTokenService,
+        @Inject(AuthTokenPort)
+        private readonly authTokenPort: AuthTokenPort,
         private readonly authSocialIdentityService: AuthSocialIdentityService,
         private readonly authStoredFileNameService: AuthStoredFileNameService,
     ) {}
@@ -129,8 +130,8 @@ export class RegisterBreederUseCase {
         });
 
         const userId = savedBreeder._id.toString();
-        const tokens = this.authTokenService.generateTokens(userId, savedBreeder.emailAddress, 'breeder');
-        const hashedRefreshToken = await this.authTokenService.hashRefreshToken(tokens.refreshToken);
+        const tokens = this.authTokenPort.generateTokens(userId, savedBreeder.emailAddress, 'breeder');
+        const hashedRefreshToken = await this.authTokenPort.hashRefreshToken(tokens.refreshToken);
         await this.authRegistrationPort.saveBreederRefreshToken(userId, hashedRefreshToken);
 
         void this.authRegistrationNotificationPort.notifyBreederRegistered({

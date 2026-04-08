@@ -38,7 +38,7 @@ import { AuthAdminJwtAdapter } from './admin/infrastructure/auth-admin-jwt.adapt
 import { AUTH_ADMIN_READER } from './admin/application/ports/auth-admin-reader.port';
 import { AUTH_ADMIN_PASSWORD } from './admin/application/ports/auth-admin-password.port';
 import { AUTH_ADMIN_TOKEN } from './admin/application/ports/auth-admin-token.port';
-import { AuthTokenService } from './services/auth-token.service';
+import { AuthTokenPort } from './application/ports/auth-token.port';
 
 import { AuthAdminRepository } from './repository/auth-admin.repository';
 import { AuthPhoneVerificationRepository } from './repository/auth-phone-verification.repository';
@@ -49,6 +49,7 @@ import { AuthBreederRepository } from './repository/auth-breeder.repository';
 import { AuthSessionAdapter } from './infrastructure/auth-session.adapter';
 import { AuthSocialCallbackAdapter } from './infrastructure/auth-social-callback.adapter';
 import { AuthTempUploadStore } from './infrastructure/auth-temp-upload.store';
+import { AuthJwtTokenAdapter } from './infrastructure/auth-jwt-token.adapter';
 import { AuthUploadFileStoreAdapter } from './infrastructure/auth-upload-file-store.adapter';
 import { AuthProfileImageTargetAdapter } from './infrastructure/auth-profile-image-target.adapter';
 import { AuthRegistrationPort } from './application/ports/auth-registration.port';
@@ -167,7 +168,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         UploadAndSubmitAuthBreederDocumentsUseCase,
         LoginAdminUseCase,
         RefreshAdminTokenUseCase,
-        AuthTokenService,
+        AuthJwtTokenAdapter,
         AuthAdminAuthenticationService,
         AuthAdminPresentationService,
         AuthAdopterRepository,
@@ -234,6 +235,10 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         {
             provide: AuthRegistrationNotificationPort,
             useExisting: AuthRegistrationNotificationAdapter,
+        },
+        {
+            provide: AuthTokenPort,
+            useExisting: AuthJwtTokenAdapter,
         },
         {
             provide: AuthSessionPort,

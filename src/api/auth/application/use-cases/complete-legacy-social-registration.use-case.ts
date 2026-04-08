@@ -2,8 +2,8 @@ import { BadRequestException, ConflictException, Inject, Injectable } from '@nes
 
 import { BreederPlan, UserStatus, VerificationStatus } from '../../../../common/enum/user.enum';
 import { AuthMapper } from '../../mapper/auth.mapper';
-import { AuthTokenService } from '../../services/auth-token.service';
 import { AuthRegistrationPort } from '../ports/auth-registration.port';
+import { AuthTokenPort } from '../ports/auth-token.port';
 import { AuthResponseDto } from '../../dto/response/auth-response.dto';
 
 type LegacySocialProfile = {
@@ -33,7 +33,8 @@ export class CompleteLegacySocialRegistrationUseCase {
     constructor(
         @Inject(AuthRegistrationPort)
         private readonly authRegistrationPort: AuthRegistrationPort,
-        private readonly authTokenService: AuthTokenService,
+        @Inject(AuthTokenPort)
+        private readonly authTokenPort: AuthTokenPort,
     ) {}
 
     async execute(profile: LegacySocialProfile, additionalInfo: LegacySocialAdditionalInfo): Promise<AuthResponseDto> {
@@ -67,8 +68,8 @@ export class CompleteLegacySocialRegistrationUseCase {
             });
 
             const userId = savedAdopter._id.toString();
-            const tokens = this.authTokenService.generateTokens(userId, savedAdopter.emailAddress, 'adopter');
-            const hashedRefreshToken = await this.authTokenService.hashRefreshToken(tokens.refreshToken);
+            const tokens = this.authTokenPort.generateTokens(userId, savedAdopter.emailAddress, 'adopter');
+            const hashedRefreshToken = await this.authTokenPort.hashRefreshToken(tokens.refreshToken);
             await this.authRegistrationPort.saveAdopterRefreshToken(userId, hashedRefreshToken);
 
             return AuthMapper.toSocialRegistrationResponse(savedAdopter, tokens, 'adopter');
@@ -130,8 +131,8 @@ export class CompleteLegacySocialRegistrationUseCase {
         });
 
         const userId = savedBreeder._id.toString();
-        const tokens = this.authTokenService.generateTokens(userId, savedBreeder.emailAddress, 'breeder');
-        const hashedRefreshToken = await this.authTokenService.hashRefreshToken(tokens.refreshToken);
+        const tokens = this.authTokenPort.generateTokens(userId, savedBreeder.emailAddress, 'breeder');
+        const hashedRefreshToken = await this.authTokenPort.hashRefreshToken(tokens.refreshToken);
         await this.authRegistrationPort.saveBreederRefreshToken(userId, hashedRefreshToken);
 
         return AuthMapper.toSocialRegistrationResponse(savedBreeder, tokens, 'breeder');

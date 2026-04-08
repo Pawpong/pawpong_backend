@@ -1,7 +1,7 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { AuthSessionPort, type AuthSessionRole } from '../ports/auth-session.port';
-import { AuthTokenService } from '../../services/auth-token.service';
+import { AuthTokenPort } from '../ports/auth-token.port';
 import { RefreshTokenRequestDto } from '../../dto/request/refresh-token-request.dto';
 import { TokenResponseDto } from '../../dto/response/token-response.dto';
 
@@ -10,12 +10,13 @@ export class RefreshAuthTokenUseCase {
     constructor(
         @Inject(AuthSessionPort)
         private readonly authSessionPort: AuthSessionPort,
-        private readonly authTokenService: AuthTokenService,
+        @Inject(AuthTokenPort)
+        private readonly authTokenPort: AuthTokenPort,
     ) {}
 
     async execute(refreshTokenDto: RefreshTokenRequestDto): Promise<TokenResponseDto> {
         try {
-            const payload = this.authTokenService.verifyRefreshToken(refreshTokenDto.refreshToken);
+            const payload = this.authTokenPort.verifyRefreshToken(refreshTokenDto.refreshToken);
 
             if (payload.role !== 'adopter' && payload.role !== 'breeder') {
                 throw new UnauthorizedException('유효하지 않은 사용자 역할입니다.');
@@ -31,7 +32,7 @@ export class RefreshAuthTokenUseCase {
                 throw new UnauthorizedException('리프레시 토큰이 존재하지 않습니다.');
             }
 
-            const isTokenValid = await this.authTokenService.compareRefreshToken(
+            const isTokenValid = await this.authTokenPort.compareRefreshToken(
                 refreshTokenDto.refreshToken,
                 user.refreshTokenHash,
             );
@@ -40,8 +41,8 @@ export class RefreshAuthTokenUseCase {
                 throw new UnauthorizedException('유효하지 않은 리프레시 토큰입니다.');
             }
 
-            const tokens = this.authTokenService.generateTokens(user.id, user.email, user.role);
-            const hashedRefreshToken = await this.authTokenService.hashRefreshToken(tokens.refreshToken);
+            const tokens = this.authTokenPort.generateTokens(user.id, user.email, user.role);
+            const hashedRefreshToken = await this.authTokenPort.hashRefreshToken(tokens.refreshToken);
 
             await this.authSessionPort.updateRefreshToken(user.id, user.role, hashedRefreshToken);
 
