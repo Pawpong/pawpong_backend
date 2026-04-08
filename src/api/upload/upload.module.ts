@@ -40,6 +40,8 @@ import { UploadStoredFilePathService } from './domain/services/upload-stored-fil
 import { UploadPhotoCollectionService } from './domain/services/upload-photo-collection.service';
 import { UploadStorageAdapter } from './infrastructure/upload-storage.adapter';
 import { UploadMongooseOwnerAdapter } from './infrastructure/upload-mongoose-owner.adapter';
+import { UploadOwnerRepository } from './repository/upload-owner.repository';
+import { UploadAdminFileReferenceRepository } from './admin/repository/upload-admin-file-reference.repository';
 
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 import { ParentPet, ParentPetSchema } from '../../schema/parent-pet.schema';
@@ -98,6 +100,8 @@ import { StorageModule } from '../../common/storage/storage.module';
         UploadPhotoCollectionService,
         UploadAdminStoragePolicyService,
         UploadAdminStoragePresentationService,
+        UploadOwnerRepository,
+        UploadAdminFileReferenceRepository,
         UploadStorageAdapter,
         UploadMongooseOwnerAdapter,
         UploadAdminStorageAdapter,
