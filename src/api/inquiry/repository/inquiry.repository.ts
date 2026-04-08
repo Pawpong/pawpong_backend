@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { Inquiry, InquiryDocument } from '../../schema/inquiry.schema';
-import { Adopter } from '../../schema/adopter.schema';
-import { Breeder } from '../../schema/breeder.schema';
+import { Inquiry, InquiryDocument } from '../../../schema/inquiry.schema';
+import { Adopter } from '../../../schema/adopter.schema';
+import { Breeder } from '../../../schema/breeder.schema';
 
 /**
  * 문의 데이터 접근 계층 Repository

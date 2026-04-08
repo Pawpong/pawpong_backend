@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
-import { InquiryRepository } from '../inquiry.repository';
+import { InquiryRepository } from '../repository/inquiry.repository';
 import {
     InquiryBreederInfoSnapshot,
     InquiryCommandPort,
