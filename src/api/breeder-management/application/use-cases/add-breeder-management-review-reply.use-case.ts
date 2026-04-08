@@ -2,14 +2,14 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { BREEDER_MANAGEMENT_REVIEW_REPLY_PORT } from '../ports/breeder-management-review-reply.port';
 import type { BreederManagementReviewReplyPort } from '../ports/breeder-management-review-reply.port';
-import { BreederManagementReviewReplyResponseFactoryService } from '../../domain/services/breeder-management-review-reply-response-factory.service';
+import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
 
 @Injectable()
 export class AddBreederManagementReviewReplyUseCase {
     constructor(
         @Inject(BREEDER_MANAGEMENT_REVIEW_REPLY_PORT)
         private readonly breederManagementReviewReplyPort: BreederManagementReviewReplyPort,
-        private readonly breederManagementReviewReplyResponseFactoryService: BreederManagementReviewReplyResponseFactoryService,
+        private readonly breederManagementCommandResponseFactoryService: BreederManagementCommandResponseFactoryService,
     ) {}
 
     async execute(
@@ -32,6 +32,6 @@ export class AddBreederManagementReviewReplyUseCase {
             replyWrittenAt: now,
         });
 
-        return this.breederManagementReviewReplyResponseFactoryService.createAdded(reviewId, content, now);
+        return this.breederManagementCommandResponseFactoryService.createReviewReplyAdded(reviewId, content, now);
     }
 }

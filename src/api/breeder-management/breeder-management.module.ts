@@ -64,9 +64,7 @@ import { BreederManagementSimpleApplicationFormBuilderService } from './domain/s
 import { BreederManagementParentPetCommandMapperService } from './domain/services/breeder-management-parent-pet-command-mapper.service';
 import { BreederManagementAvailablePetCommandMapperService } from './domain/services/breeder-management-available-pet-command-mapper.service';
 import { BreederManagementCommandResponseFactoryService } from './domain/services/breeder-management-command-response-factory.service';
-import { BreederManagementReviewReplyResponseFactoryService } from './domain/services/breeder-management-review-reply-response-factory.service';
 import { BreederManagementApplicationDetailAssemblerService } from './domain/services/breeder-management-application-detail-assembler.service';
-import { BreederManagementAccountDeleteResponseFactoryService } from './domain/services/breeder-management-account-delete-response-factory.service';
 import { BreederManagementProfileAdapter } from './infrastructure/breeder-management-profile.adapter';
 import { BreederManagementFileUrlAdapter } from './infrastructure/breeder-management-file-url.adapter';
 import { BreederManagementListReaderAdapter } from './infrastructure/breeder-management-list-reader.adapter';
@@ -205,9 +203,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederManagementParentPetCommandMapperService,
         BreederManagementAvailablePetCommandMapperService,
         BreederManagementCommandResponseFactoryService,
-        BreederManagementReviewReplyResponseFactoryService,
         BreederManagementApplicationDetailAssemblerService,
-        BreederManagementAccountDeleteResponseFactoryService,
         BreederManagementBannerPresentationService,
         BreederManagementProfileAdapter,
         BreederManagementFileUrlAdapter,
