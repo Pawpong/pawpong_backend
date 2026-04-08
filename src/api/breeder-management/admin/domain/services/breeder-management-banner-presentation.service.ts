@@ -20,20 +20,16 @@ export class BreederManagementBannerPresentationService {
 
     toProfileResponseDto(banner: ProfileBannerSnapshot): ProfileBannerResponseDto {
         return {
-            bannerId: banner.bannerId,
-            imageUrl: this.fileUrlPort.generateOne(banner.imageFileName, 60 * 24),
-            imageFileName: banner.imageFileName,
+            ...this.toBannerBase(banner),
             bannerType: banner.bannerType,
-            linkType: banner.linkType,
-            linkUrl: banner.linkUrl,
-            title: banner.title,
-            description: banner.description,
-            order: banner.order,
-            isActive: banner.isActive !== false,
         };
     }
 
     toCounselResponseDto(banner: CounselBannerSnapshot): CounselBannerResponseDto {
+        return this.toBannerBase(banner);
+    }
+
+    private toBannerBase(banner: CounselBannerSnapshot | ProfileBannerSnapshot) {
         return {
             bannerId: banner.bannerId,
             imageUrl: this.fileUrlPort.generateOne(banner.imageFileName, 60 * 24),
