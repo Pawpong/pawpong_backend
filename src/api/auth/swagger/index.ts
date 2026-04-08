@@ -244,7 +244,7 @@ export function ApiCheckEmailDuplicateEndpoint() {
             dataSchema: buildDuplicateCheckSchema(false),
             isPublic: true,
             successDescription: '이메일 중복 체크 성공',
-            successMessageExample: '사용 가능한 이메일입니다.',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.emailAvailable,
         }),
         ApiBody({ type: CheckEmailRequestDto }),
     );
@@ -264,7 +264,7 @@ export function ApiCheckNicknameDuplicateEndpoint() {
             dataSchema: buildDuplicateCheckSchema(false),
             isPublic: true,
             successDescription: '닉네임 중복 체크 성공',
-            successMessageExample: '사용 가능한 닉네임입니다.',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.nicknameAvailable,
         }),
         ApiBody({ type: CheckNicknameRequestDto }),
     );
@@ -284,7 +284,7 @@ export function ApiCheckBreederNameDuplicateEndpoint() {
             dataSchema: buildDuplicateCheckSchema(false),
             isPublic: true,
             successDescription: '브리더 상호명 중복 체크 성공',
-            successMessageExample: '사용 가능한 상호명입니다.',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.breederNameAvailable,
         }),
         ApiBody({ type: CheckBreederNameRequestDto }),
     );
@@ -304,7 +304,7 @@ export function ApiCheckSocialUserEndpoint() {
             responseType: SocialCheckUserResponseDto,
             isPublic: true,
             successDescription: '소셜 사용자 확인 성공',
-            successMessageExample: '미가입 사용자입니다.',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.socialUserNotFound,
         }),
         ApiBody({ type: CheckSocialUserRequestDto }),
     );
@@ -405,7 +405,7 @@ export function ApiGetLoginBannersEndpoint() {
         responseType: [ProfileBannerResponseDto],
         isPublic: true,
         successDescription: '로그인 배너 조회 성공',
-        successMessageExample: '로그인 페이지 배너가 조회되었습니다.',
+        successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.loginBannersListed,
     });
 }
 
@@ -422,7 +422,7 @@ export function ApiGetRegisterBannersEndpoint() {
         responseType: [ProfileBannerResponseDto],
         isPublic: true,
         successDescription: '회원가입 배너 조회 성공',
-        successMessageExample: '회원가입 페이지 배너가 조회되었습니다.',
+        successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.registerBannersListed,
     });
 }
 

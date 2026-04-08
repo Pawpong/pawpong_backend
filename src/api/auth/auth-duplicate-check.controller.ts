@@ -5,6 +5,7 @@ import { CheckBreederNameDuplicateUseCase } from './application/use-cases/check-
 import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
 import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
 import { AuthPublicController } from './decorator/auth-public-controller.decorator';
+import { AuthResponseMessageService } from './domain/services/auth-response-message.service';
 import { CheckBreederNameRequestDto } from './dto/request/check-breeder-name-request.dto';
 import { CheckEmailRequestDto } from './dto/request/check-email-request.dto';
 import { CheckNicknameRequestDto } from './dto/request/check-nickname-request.dto';
@@ -20,6 +21,7 @@ export class AuthDuplicateCheckController {
         private readonly checkEmailDuplicateUseCase: CheckEmailDuplicateUseCase,
         private readonly checkNicknameDuplicateUseCase: CheckNicknameDuplicateUseCase,
         private readonly checkBreederNameDuplicateUseCase: CheckBreederNameDuplicateUseCase,
+        private readonly authResponseMessageService: AuthResponseMessageService,
     ) {}
 
     @Post('check-email')
@@ -27,10 +29,7 @@ export class AuthDuplicateCheckController {
     @ApiCheckEmailDuplicateEndpoint()
     async checkEmailDuplicate(@Body() dto: CheckEmailRequestDto): Promise<ApiResponseDto<{ isDuplicate: boolean }>> {
         const isDuplicate = await this.checkEmailDuplicateUseCase.execute(dto.email);
-        return ApiResponseDto.success(
-            { isDuplicate },
-            isDuplicate ? '이미 가입된 이메일입니다.' : '사용 가능한 이메일입니다.',
-        );
+        return ApiResponseDto.success({ isDuplicate }, this.authResponseMessageService.getDuplicateCheckMessage('email', isDuplicate));
     }
 
     @Post('check-nickname')
@@ -42,7 +41,7 @@ export class AuthDuplicateCheckController {
         const isDuplicate = await this.checkNicknameDuplicateUseCase.execute(dto.nickname);
         return ApiResponseDto.success(
             { isDuplicate },
-            isDuplicate ? '이미 사용 중인 닉네임입니다.' : '사용 가능한 닉네임입니다.',
+            this.authResponseMessageService.getDuplicateCheckMessage('nickname', isDuplicate),
         );
     }
 
@@ -55,7 +54,7 @@ export class AuthDuplicateCheckController {
         const isDuplicate = await this.checkBreederNameDuplicateUseCase.execute(dto.breederName);
         return ApiResponseDto.success(
             { isDuplicate },
-            isDuplicate ? '이미 사용 중인 상호명입니다.' : '사용 가능한 상호명입니다.',
+            this.authResponseMessageService.getDuplicateCheckMessage('breederName', isDuplicate),
         );
     }
 }
