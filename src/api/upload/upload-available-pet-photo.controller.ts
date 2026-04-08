@@ -7,11 +7,15 @@ import { UploadAvailablePetPhotosUseCase } from './application/use-cases/upload-
 import { ProtectedUploadController } from './decorator/upload-controller.decorator';
 import { UploadPhotoReplaceRequestDto } from './dto/request/upload-photo-replace-request.dto';
 import { UploadResponseDto } from './dto/response/upload-response.dto';
+import { UploadResponseMessageService } from './domain/services/upload-response-message.service';
 import { ApiUploadAvailablePetPhotosEndpoint } from './swagger';
 
 @ProtectedUploadController()
 export class UploadAvailablePetPhotoController {
-    constructor(private readonly uploadAvailablePetPhotosUseCase: UploadAvailablePetPhotosUseCase) {}
+    constructor(
+        private readonly uploadAvailablePetPhotosUseCase: UploadAvailablePetPhotosUseCase,
+        private readonly uploadResponseMessageService: UploadResponseMessageService,
+    ) {}
 
     @Post('available-pet-photos/:petId')
     @ApiUploadAvailablePetPhotosEndpoint()
@@ -31,6 +35,6 @@ export class UploadAvailablePetPhotoController {
             role,
         );
 
-        return ApiResponseDto.success(responses, '분양 개체 사진이 업로드되고 저장되었습니다.');
+        return ApiResponseDto.success(responses, this.uploadResponseMessageService.availablePetPhotosUploaded());
     }
 }

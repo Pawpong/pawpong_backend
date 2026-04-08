@@ -7,11 +7,15 @@ import { UploadParentPetPhotosUseCase } from './application/use-cases/upload-par
 import { ProtectedUploadController } from './decorator/upload-controller.decorator';
 import { UploadPhotoReplaceRequestDto } from './dto/request/upload-photo-replace-request.dto';
 import { UploadResponseDto } from './dto/response/upload-response.dto';
+import { UploadResponseMessageService } from './domain/services/upload-response-message.service';
 import { ApiUploadParentPetPhotosEndpoint } from './swagger';
 
 @ProtectedUploadController()
 export class UploadParentPetPhotoController {
-    constructor(private readonly uploadParentPetPhotosUseCase: UploadParentPetPhotosUseCase) {}
+    constructor(
+        private readonly uploadParentPetPhotosUseCase: UploadParentPetPhotosUseCase,
+        private readonly uploadResponseMessageService: UploadResponseMessageService,
+    ) {}
 
     @Post('parent-pet-photos/:petId')
     @ApiUploadParentPetPhotosEndpoint()
@@ -31,6 +35,6 @@ export class UploadParentPetPhotoController {
             role,
         );
 
-        return ApiResponseDto.success(responses, '부모견/묘 사진이 업로드되고 저장되었습니다.');
+        return ApiResponseDto.success(responses, this.uploadResponseMessageService.parentPetPhotosUploaded());
     }
 }

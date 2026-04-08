@@ -24,6 +24,7 @@ import { DeleteFolderUseCase } from './admin/application/use-cases/delete-folder
 import { CheckFileReferencesUseCase } from './admin/application/use-cases/check-file-references.use-case';
 import { GetAllReferencedFilesUseCase } from './admin/application/use-cases/get-all-referenced-files.use-case';
 import { UploadAdminStoragePolicyService } from './admin/domain/services/upload-admin-storage-policy.service';
+import { UploadAdminResponseMessageService } from './admin/domain/services/upload-admin-response-message.service';
 import { UploadAdminStoragePresentationService } from './admin/domain/services/upload-admin-storage-presentation.service';
 import { UploadAdminStorageAdapter } from './admin/infrastructure/upload-admin-storage.adapter';
 import { UploadAdminFileReferenceReaderAdapter } from './admin/infrastructure/upload-admin-file-reference-reader.adapter';
@@ -40,6 +41,7 @@ import { UploadSingleFileUseCase } from './application/use-cases/upload-single-f
 import { UploadMultipleFilesUseCase } from './application/use-cases/upload-multiple-files.use-case';
 import { DeleteUploadedFileUseCase } from './application/use-cases/delete-uploaded-file.use-case';
 import { UploadFilePolicyService } from './domain/services/upload-file-policy.service';
+import { UploadResponseMessageService } from './domain/services/upload-response-message.service';
 import { UploadStoredFilePathService } from './domain/services/upload-stored-file-path.service';
 import { UploadPhotoCollectionService } from './domain/services/upload-photo-collection.service';
 import { UploadStorageAdapter } from './infrastructure/upload-storage.adapter';
@@ -100,9 +102,11 @@ import { StorageModule } from '../../common/storage/storage.module';
         CheckFileReferencesUseCase,
         GetAllReferencedFilesUseCase,
         UploadFilePolicyService,
+        UploadResponseMessageService,
         UploadStoredFilePathService,
         UploadPhotoCollectionService,
         UploadAdminStoragePolicyService,
+        UploadAdminResponseMessageService,
         UploadAdminStoragePresentationService,
         UploadOwnerRepository,
         UploadAdminFileReferenceRepository,

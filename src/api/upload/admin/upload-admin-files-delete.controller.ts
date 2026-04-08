@@ -5,16 +5,20 @@ import { DeleteMultipleFilesUseCase } from './application/use-cases/delete-multi
 import { UploadAdminProtectedController } from './decorator/upload-admin-controller.decorator';
 import { DeleteFilesRequestDto } from './dto/request/delete-files-request.dto';
 import { DeleteFilesResponseDto } from './dto/response/delete-files-response.dto';
+import { UploadAdminResponseMessageService } from './domain/services/upload-admin-response-message.service';
 import { ApiDeleteMultipleFilesAdminEndpoint } from './swagger';
 
 @UploadAdminProtectedController()
 export class UploadAdminFilesDeleteController {
-    constructor(private readonly deleteMultipleFilesUseCase: DeleteMultipleFilesUseCase) {}
+    constructor(
+        private readonly deleteMultipleFilesUseCase: DeleteMultipleFilesUseCase,
+        private readonly uploadAdminResponseMessageService: UploadAdminResponseMessageService,
+    ) {}
 
     @Delete('files')
     @ApiDeleteMultipleFilesAdminEndpoint()
     async deleteMultipleFiles(@Body() data: DeleteFilesRequestDto): Promise<ApiResponseDto<DeleteFilesResponseDto>> {
         const result = await this.deleteMultipleFilesUseCase.execute(data.fileNames);
-        return ApiResponseDto.success(result, '파일 삭제가 완료되었습니다.');
+        return ApiResponseDto.success(result, this.uploadAdminResponseMessageService.filesDeleted());
     }
 }

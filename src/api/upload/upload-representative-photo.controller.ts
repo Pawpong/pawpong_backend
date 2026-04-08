@@ -6,11 +6,15 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { UploadRepresentativePhotosUseCase } from './application/use-cases/upload-representative-photos.use-case';
 import { ProtectedUploadController } from './decorator/upload-controller.decorator';
 import { UploadResponseDto } from './dto/response/upload-response.dto';
+import { UploadResponseMessageService } from './domain/services/upload-response-message.service';
 import { ApiUploadRepresentativePhotosEndpoint } from './swagger';
 
 @ProtectedUploadController()
 export class UploadRepresentativePhotoController {
-    constructor(private readonly uploadRepresentativePhotosUseCase: UploadRepresentativePhotosUseCase) {}
+    constructor(
+        private readonly uploadRepresentativePhotosUseCase: UploadRepresentativePhotosUseCase,
+        private readonly uploadResponseMessageService: UploadResponseMessageService,
+    ) {}
 
     @Post('representative-photos')
     @ApiUploadRepresentativePhotosEndpoint()
@@ -21,6 +25,6 @@ export class UploadRepresentativePhotoController {
         @CurrentUser('role') role: string,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
         const responses = await this.uploadRepresentativePhotosUseCase.execute(files, userId, role);
-        return ApiResponseDto.success(responses, '대표 사진이 업로드되고 저장되었습니다.');
+        return ApiResponseDto.success(responses, this.uploadResponseMessageService.representativePhotosUploaded());
     }
 }
