@@ -1,9 +1,12 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { InquiryAdopterController } from './inquiry-adopter.controller';
-import { InquiryBreederController } from './inquiry-breeder.controller';
-import { InquiryPublicHttpController } from './inquiry-public.controller';
+import { InquiryAdopterCommandController } from './inquiry-adopter-command.controller';
+import { InquiryAdopterQueryController } from './inquiry-adopter-query.controller';
+import { InquiryBreederAnswerController } from './inquiry-breeder-answer.controller';
+import { InquiryBreederQueryController } from './inquiry-breeder-query.controller';
+import { InquiryPublicDetailController } from './inquiry-public-detail.controller';
+import { InquiryPublicListController } from './inquiry-public-list.controller';
 
 import { InquiryRepository } from './inquiry.repository';
 import { CreateInquiryUseCase } from './application/use-cases/create-inquiry.use-case';
@@ -40,7 +43,14 @@ import { StorageModule } from '../../common/storage/storage.module';
         ]),
         StorageModule,
     ],
-    controllers: [InquiryAdopterController, InquiryBreederController, InquiryPublicHttpController],
+    controllers: [
+        InquiryAdopterQueryController,
+        InquiryAdopterCommandController,
+        InquiryBreederQueryController,
+        InquiryBreederAnswerController,
+        InquiryPublicListController,
+        InquiryPublicDetailController,
+    ],
     providers: [
         InquiryRepository,
         GetInquiryListUseCase,
