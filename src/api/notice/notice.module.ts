@@ -16,6 +16,7 @@ import { UpdateNoticeUseCase } from './admin/application/use-cases/update-notice
 import { DeleteNoticeUseCase } from './admin/application/use-cases/delete-notice.use-case';
 import { NoticeMongooseWriterAdapter } from './admin/infrastructure/notice-mongoose-writer.adapter';
 import { NOTICE_WRITER } from './admin/application/ports/notice-writer.port';
+import { NoticeRepository } from './repository/notice.repository';
 
 /**
  * 공지사항 모듈
@@ -30,6 +31,7 @@ import { NOTICE_WRITER } from './admin/application/ports/notice-writer.port';
         GetNoticeListUseCase,
         GetNoticeDetailUseCase,
         NoticePresentationService,
+        NoticeRepository,
         NoticeMongooseReaderAdapter,
         CreateNoticeUseCase,
         UpdateNoticeUseCase,
