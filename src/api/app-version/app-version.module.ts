@@ -20,6 +20,7 @@ import { AppVersionAdminCommandPolicyService } from './admin/domain/services/app
 import { AppVersionAdminPresentationService } from './admin/domain/services/app-version-admin-presentation.service';
 import { AppVersionMongooseAdminReaderAdapter } from './admin/infrastructure/app-version-mongoose-admin-reader.adapter';
 import { AppVersionMongooseWriterAdapter } from './admin/infrastructure/app-version-mongoose-writer.adapter';
+import { AppVersionRepository } from './repository/app-version.repository';
 
 /**
  * 앱 버전 관리 모듈
@@ -39,6 +40,7 @@ import { AppVersionMongooseWriterAdapter } from './admin/infrastructure/app-vers
         AppVersionPolicyService,
         AppVersionAdminCommandPolicyService,
         AppVersionAdminPresentationService,
+        AppVersionRepository,
         AppVersionMongooseReaderAdapter,
         AppVersionMongooseAdminReaderAdapter,
         AppVersionMongooseWriterAdapter,

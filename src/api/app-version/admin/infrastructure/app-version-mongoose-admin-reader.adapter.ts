@@ -1,24 +1,18 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { AppVersion } from '../../../../schema/app-version.schema';
 import { AppVersionAdminPage, AppVersionAdminReaderPort, AppVersionAdminSnapshot } from '../application/ports/app-version-admin-reader.port';
+import { AppVersionRepository } from '../../repository/app-version.repository';
 
 @Injectable()
 export class AppVersionMongooseAdminReaderAdapter implements AppVersionAdminReaderPort {
-    constructor(@InjectModel(AppVersion.name) private readonly appVersionModel: Model<AppVersion>) {}
+    constructor(private readonly appVersionRepository: AppVersionRepository) {}
 
     async readPage(page: number, limit: number): Promise<AppVersionAdminPage> {
         const skip = (page - 1) * limit;
-        const totalItems = await this.appVersionModel.countDocuments();
-        const versions = await this.appVersionModel
-            .find()
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .lean()
-            .exec();
+        const [totalItems, versions] = await Promise.all([
+            this.appVersionRepository.countAll(),
+            this.appVersionRepository.findPage(skip, limit),
+        ]);
 
         return {
             items: versions.map((version) => this.toSnapshot(version)),
