@@ -63,4 +63,5 @@ swagger.json
 package-lock.json
 yarn.lock
 docs/scripts/
+# Local-only operating notes. Never commit this file.
 CLAUDE.md
