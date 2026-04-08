@@ -1,11 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
 
 import { PetStatus } from '../../../common/enum/user.enum';
-import { BreederReview, BreederReviewDocument } from '../../../schema/breeder-review.schema';
 import { AdoptionApplicationRepository } from '../repository/adoption-application.repository';
 import { AvailablePetManagementRepository } from '../repository/available-pet-management.repository';
+import { BreederManagementBreederReviewRepository } from '../repository/breeder-review.repository';
 import { BreederRepository } from '../repository/breeder.repository';
 import type {
     BreederManagementBreederSummary,
@@ -21,7 +19,7 @@ export class BreederManagementListReaderAdapter implements BreederManagementList
         private readonly breederRepository: BreederRepository,
         private readonly adoptionApplicationRepository: AdoptionApplicationRepository,
         private readonly availablePetRepository: AvailablePetManagementRepository,
-        @InjectModel(BreederReview.name) private readonly breederReviewModel: Model<BreederReviewDocument>,
+        private readonly breederManagementBreederReviewRepository: BreederManagementBreederReviewRepository,
     ) {}
 
     async findBreederSummary(userId: string): Promise<BreederManagementBreederSummary | null> {
@@ -99,31 +97,26 @@ export class BreederManagementListReaderAdapter implements BreederManagementList
         visibleCount: number;
         hiddenCount: number;
     }> {
-        const breederId = new Types.ObjectId(userId);
-        const filter: Record<string, unknown> = { breederId };
-
-        if (visibility === 'visible') {
-            filter.isVisible = true;
-        } else if (visibility === 'hidden') {
-            filter.isVisible = false;
-        }
-
         const [totalCount, visibleCount] = await Promise.all([
-            this.breederReviewModel.countDocuments({ breederId }),
-            this.breederReviewModel.countDocuments({ breederId, isVisible: true }),
+            this.breederManagementBreederReviewRepository.countByBreederId(userId),
+            this.breederManagementBreederReviewRepository.countByBreederIdAndVisibility(userId, true),
         ]);
         const hiddenCount = totalCount - visibleCount;
         const skip = (page - 1) * limit;
-        const reviews = await this.breederReviewModel
-            .find(filter)
-            .sort({ writtenAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate('adopterId', 'name nickname')
-            .lean()
-            .exec();
+        const reviews = await this.breederManagementBreederReviewRepository.findByBreederIdAndVisibility(
+            userId,
+            visibility,
+            skip,
+            limit,
+        );
 
-        const filteredTotal = visibility === 'all' ? totalCount : await this.breederReviewModel.countDocuments(filter);
+        const filteredTotal =
+            visibility === 'all'
+                ? totalCount
+                : await this.breederManagementBreederReviewRepository.countByBreederIdAndVisibility(
+                      userId,
+                      visibility === 'visible',
+                  );
 
         return {
             reviews: reviews as unknown as BreederManagementReviewRecord[],

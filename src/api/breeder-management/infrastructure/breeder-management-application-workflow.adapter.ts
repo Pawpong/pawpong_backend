@@ -1,12 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
 import { ApplicationStatus } from '../../../common/enum/user.enum';
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
 import { MailService } from '../../../common/mail/mail.service';
-import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
 import { NotificationType } from '../../../schema/notification.schema';
 import { NotificationService } from '../../notification/notification.service';
 import type {
@@ -15,6 +12,7 @@ import type {
     BreederManagementConsultationCompletedNotificationCommand,
 } from '../application/ports/breeder-management-application-workflow.port';
 import { AdoptionApplicationRepository } from '../repository/adoption-application.repository';
+import { BreederManagementAdopterRepository } from '../repository/breeder-management-adopter.repository';
 import { BreederRepository } from '../repository/breeder.repository';
 
 @Injectable()
@@ -26,7 +24,7 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
         private readonly mailService: MailService,
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
-        @InjectModel(Adopter.name) private readonly adopterModel: Model<AdopterDocument>,
+        private readonly breederManagementAdopterRepository: BreederManagementAdopterRepository,
     ) {}
 
     findApplicationByIdAndBreeder(
@@ -52,7 +50,7 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
     ): Promise<void> {
         try {
             const breeder = await this.breederRepository.findById(command.breederId);
-            const adopter = await this.adopterModel.findById(command.adopterId).lean().exec();
+            const adopter = await this.breederManagementAdopterRepository.findById(command.adopterId);
 
             this.logger.log(
                 `[updateApplicationStatus] 브리더 조회 결과: ${breeder ? `찾음 (name: ${breeder.name})` : '없음'}`,

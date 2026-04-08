@@ -103,11 +103,14 @@ import { DeleteCounselBannerUseCase } from './admin/application/use-cases/delete
 import { BreederManagementBannerPresentationService } from './admin/domain/services/breeder-management-banner-presentation.service';
 import { BreederManagementAdminBannerReaderAdapter } from './admin/infrastructure/breeder-management-admin-banner-reader.adapter';
 import { BreederManagementAdminBannerWriterAdapter } from './admin/infrastructure/breeder-management-admin-banner-writer.adapter';
+import { BreederManagementAdminBannerRepository } from './admin/repository/breeder-management-admin-banner.repository';
 
 import { BreederRepository } from './repository/breeder.repository';
 import { ParentPetRepository } from './repository/parent-pet.repository';
 import { AdoptionApplicationRepository } from './repository/adoption-application.repository';
 import { AvailablePetManagementRepository } from './repository/available-pet-management.repository';
+import { BreederManagementAdopterRepository } from './repository/breeder-management-adopter.repository';
+import { BreederManagementBreederReviewRepository } from './repository/breeder-review.repository';
 
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
@@ -165,6 +168,9 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         ParentPetRepository,
         AdoptionApplicationRepository,
         AvailablePetManagementRepository,
+        BreederManagementAdopterRepository,
+        BreederManagementBreederReviewRepository,
+        BreederManagementAdminBannerRepository,
         GetAllProfileBannersUseCase,
         GetActiveProfileBannersUseCase,
         CreateProfileBannerUseCase,
