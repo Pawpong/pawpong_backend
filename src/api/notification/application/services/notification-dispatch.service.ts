@@ -1,19 +1,27 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { Notification, NotificationType } from '../../../../schema/notification.schema';
 import { NotificationBuilder, NotificationCreateData, EmailData } from '../../builder/notification.builder';
 import { RecipientType } from '../../../../common/enum/user.enum';
-import { CreateNotificationUseCase } from '../use-cases/create-notification.use-case';
-import { CreateNotificationFromBuilderUseCase } from '../use-cases/create-notification-from-builder.use-case';
-import { SendNotificationEmailUseCase } from '../use-cases/send-notification-email.use-case';
 import { NotificationDispatchPort } from '../ports/notification-dispatch.port';
+import {
+    CREATE_NOTIFICATION_DISPATCH_USE_CASE,
+    CREATE_NOTIFICATION_FROM_BUILDER_DISPATCH_USE_CASE,
+    SEND_NOTIFICATION_EMAIL_DISPATCH_USE_CASE,
+    type CreateNotificationDispatchUseCasePort,
+    type CreateNotificationFromBuilderDispatchUseCasePort,
+    type SendNotificationEmailDispatchUseCasePort,
+} from '../ports/notification-dispatch-use-case.port';
 
 @Injectable()
 export class NotificationDispatchService extends NotificationDispatchPort {
     constructor(
-        private readonly createNotificationUseCase: CreateNotificationUseCase,
-        private readonly createNotificationFromBuilderUseCase: CreateNotificationFromBuilderUseCase,
-        private readonly sendNotificationEmailUseCase: SendNotificationEmailUseCase,
+        @Inject(CREATE_NOTIFICATION_DISPATCH_USE_CASE)
+        private readonly createNotificationUseCase: CreateNotificationDispatchUseCasePort,
+        @Inject(CREATE_NOTIFICATION_FROM_BUILDER_DISPATCH_USE_CASE)
+        private readonly createNotificationFromBuilderUseCase: CreateNotificationFromBuilderDispatchUseCasePort,
+        @Inject(SEND_NOTIFICATION_EMAIL_DISPATCH_USE_CASE)
+        private readonly sendNotificationEmailUseCase: SendNotificationEmailDispatchUseCasePort,
     ) {
         super();
     }
