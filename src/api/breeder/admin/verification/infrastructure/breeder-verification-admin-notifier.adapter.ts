@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { NotificationType, RecipientType } from '../../../../../common/enum/user.enum';
 import { MailTemplateService } from '../../../../../common/mail/mail-template.service';
-import { NotificationService } from '../../../../notification/notification.service';
+import { NotificationDispatchPort } from '../../../../notification/application/ports/notification-dispatch.port';
 import type {
     BreederVerificationAdminNotifierPort,
     BreederVerificationAdminNotificationRecipient,
@@ -12,11 +12,12 @@ import type {
 export class BreederVerificationAdminNotifierAdapter implements BreederVerificationAdminNotifierPort {
     constructor(
         private readonly mailTemplateService: MailTemplateService,
-        private readonly notificationService: NotificationService,
+        @Inject(NotificationDispatchPort)
+        private readonly notificationDispatchPort: NotificationDispatchPort,
     ) {}
 
     async sendApproval(recipient: BreederVerificationAdminNotificationRecipient): Promise<void> {
-        const builder = this.notificationService
+        const builder = this.notificationDispatchPort
             .to(recipient.breederId, RecipientType.BREEDER)
             .type(NotificationType.BREEDER_APPROVED)
             .title('🎉 포퐁 브리더 입점이 승인되었습니다!')
@@ -41,7 +42,7 @@ export class BreederVerificationAdminNotifierAdapter implements BreederVerificat
     ): Promise<void> {
         const rejectionReasons = rejectionReason ? rejectionReason.split('\n').filter((reason) => reason.trim()) : [];
 
-        const builder = this.notificationService
+        const builder = this.notificationDispatchPort
             .to(recipient.breederId, RecipientType.BREEDER)
             .type(NotificationType.BREEDER_REJECTED)
             .title('🐾 브리더 입점 심사 결과, 보완이 필요합니다.')
@@ -70,7 +71,7 @@ export class BreederVerificationAdminNotifierAdapter implements BreederVerificat
 
         const emailContent = this.mailTemplateService.getDocumentReminderEmail(recipient.breederName);
 
-        await this.notificationService
+        await this.notificationDispatchPort
             .to(recipient.breederId, RecipientType.BREEDER)
             .type(NotificationType.DOCUMENT_REMINDER)
             .title('🐾 브리더 입점 절차가 아직 완료되지 않았어요!')

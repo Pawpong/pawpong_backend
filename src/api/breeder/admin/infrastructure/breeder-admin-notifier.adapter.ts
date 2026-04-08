@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { RecipientType } from '../../../../common/enum/user.enum';
 import { MailService } from '../../../../common/mail/mail.service';
 import { MailTemplateService } from '../../../../common/mail/mail-template.service';
-import { NotificationService } from '../../../../api/notification/notification.service';
+import { NotificationDispatchPort } from '../../../../api/notification/application/ports/notification-dispatch.port';
 import {
     BreederAdminNotifierPort,
     BreederAdminNotificationRecipient,
@@ -15,7 +15,8 @@ export class BreederAdminNotifierAdapter implements BreederAdminNotifierPort {
     constructor(
         private readonly mailTemplateService: MailTemplateService,
         private readonly mailService: MailService,
-        private readonly notificationService: NotificationService,
+        @Inject(NotificationDispatchPort)
+        private readonly notificationDispatchPort: NotificationDispatchPort,
     ) {}
 
     async sendSuspensionEmail(recipient: BreederAdminNotificationRecipient, reason: string): Promise<void> {
@@ -49,7 +50,7 @@ export class BreederAdminNotifierAdapter implements BreederAdminNotifierPort {
     }
 
     async sendReminder(command: BreederAdminReminderNotificationCommand): Promise<void> {
-        const builder = this.notificationService
+        const builder = this.notificationDispatchPort
             .to(command.recipient.breederId, RecipientType.BREEDER)
             .type(command.notificationType)
             .title(command.title)

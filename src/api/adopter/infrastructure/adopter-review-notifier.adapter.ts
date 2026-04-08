@@ -1,9 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { RecipientType } from '../../../common/enum/user.enum';
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
 import { NotificationType } from '../../../schema/notification.schema';
-import { NotificationService } from '../../notification/notification.service';
+import { NotificationDispatchPort } from '../../notification/application/ports/notification-dispatch.port';
 import { BreederRepository } from '../../breeder-management/repository/breeder.repository';
 import { AdopterReviewNotifierPort } from '../application/ports/adopter-review-notifier.port';
 
@@ -11,7 +11,8 @@ import { AdopterReviewNotifierPort } from '../application/ports/adopter-review-n
 export class AdopterReviewNotifierAdapter extends AdopterReviewNotifierPort {
     constructor(
         private readonly breederRepository: BreederRepository,
-        private readonly notificationService: NotificationService,
+        @Inject(NotificationDispatchPort)
+        private readonly notificationDispatchPort: NotificationDispatchPort,
         private readonly mailTemplateService: MailTemplateService,
     ) {
         super();
@@ -25,7 +26,7 @@ export class AdopterReviewNotifierAdapter extends AdopterReviewNotifierPort {
 
         const emailContent = breeder.emailAddress ? this.mailTemplateService.getNewReviewEmail(breeder.name) : null;
 
-        const builder = this.notificationService
+        const builder = this.notificationDispatchPort
             .to(breederId, RecipientType.BREEDER)
             .type(NotificationType.NEW_REVIEW_REGISTERED)
             .title('⭐ 새로운 후기가 등록되었어요!')

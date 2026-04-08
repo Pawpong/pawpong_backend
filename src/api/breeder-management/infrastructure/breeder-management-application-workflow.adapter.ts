@@ -1,11 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { ApplicationStatus } from '../../../common/enum/user.enum';
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
 import { MailService } from '../../../common/mail/mail.service';
 import { NotificationType } from '../../../schema/notification.schema';
-import { NotificationService } from '../../notification/notification.service';
+import { NotificationDispatchPort } from '../../notification/application/ports/notification-dispatch.port';
 import type {
     BreederManagementApplicationRecord,
     BreederManagementApplicationWorkflowPort,
@@ -20,7 +20,8 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
     constructor(
         private readonly adoptionApplicationRepository: AdoptionApplicationRepository,
         private readonly breederRepository: BreederRepository,
-        private readonly notificationService: NotificationService,
+        @Inject(NotificationDispatchPort)
+        private readonly notificationDispatchPort: NotificationDispatchPort,
         private readonly mailService: MailService,
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
@@ -75,7 +76,7 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
 
             const breederDisplayName = breeder.name || breeder.nickname || '브리더';
 
-            await this.notificationService.createNotification(
+            await this.notificationDispatchPort.createNotification(
                 command.adopterId,
                 'adopter',
                 NotificationType.CONSULT_COMPLETED,
