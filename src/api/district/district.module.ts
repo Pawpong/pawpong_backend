@@ -19,6 +19,7 @@ import { UpdateDistrictUseCase } from './admin/application/use-cases/update-dist
 import { DeleteDistrictUseCase } from './admin/application/use-cases/delete-district.use-case';
 import { DistrictMongooseAdminReaderAdapter } from './admin/infrastructure/district-mongoose-admin-reader.adapter';
 import { DistrictMongooseWriterAdapter } from './admin/infrastructure/district-mongoose-writer.adapter';
+import { DistrictRepository } from './repository/district.repository';
 
 import { District, DistrictSchema } from '../../schema/district.schema';
 
@@ -34,6 +35,7 @@ import { District, DistrictSchema } from '../../schema/district.schema';
         DeleteDistrictUseCase,
         DistrictOrderingService,
         DistrictAdminPresentationService,
+        DistrictRepository,
         DistrictMongooseReaderAdapter,
         DistrictMongooseAdminReaderAdapter,
         DistrictMongooseWriterAdapter,

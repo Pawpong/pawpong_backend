@@ -1,33 +1,24 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { District } from '../../../../schema/district.schema';
 import { DistrictAdminReaderPort, DistrictSnapshot } from '../application/ports/district-admin-reader.port';
+import { DistrictRepository } from '../../repository/district.repository';
 
 @Injectable()
 export class DistrictMongooseAdminReaderAdapter implements DistrictAdminReaderPort {
-    constructor(@InjectModel(District.name) private readonly districtModel: Model<District>) {}
+    constructor(private readonly districtRepository: DistrictRepository) {}
 
     async readAll(): Promise<DistrictSnapshot[]> {
-        const districts = await this.districtModel.find().sort({ city: 1 }).lean().exec();
+        const districts = await this.districtRepository.findAllSorted();
         return districts.map((district) => this.toSnapshot(district));
     }
 
     async findById(id: string): Promise<DistrictSnapshot | null> {
-        const district = await this.districtModel.findById(id).lean().exec();
+        const district = await this.districtRepository.findById(id);
         return district ? this.toSnapshot(district) : null;
     }
 
     async findByCity(city: string, excludeId?: string): Promise<DistrictSnapshot | null> {
-        const district = await this.districtModel
-            .findOne({
-                city,
-                ...(excludeId ? { _id: { $ne: excludeId } } : {}),
-            })
-            .lean()
-            .exec();
-
+        const district = await this.districtRepository.findByCity(city, excludeId);
         return district ? this.toSnapshot(district) : null;
     }
 

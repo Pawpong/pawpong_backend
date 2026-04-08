@@ -1,34 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { District } from '../../../../schema/district.schema';
 import { CreateDistrictRequestDto } from '../../../breeder-management/request/create-district-request.dto';
 import { UpdateDistrictRequestDto } from '../../../breeder-management/request/update-district-request.dto';
 import { DistrictSnapshot } from '../application/ports/district-admin-reader.port';
 import { DistrictWriterPort } from '../application/ports/district-writer.port';
+import { DistrictRepository } from '../../repository/district.repository';
 
 @Injectable()
 export class DistrictMongooseWriterAdapter implements DistrictWriterPort {
-    constructor(@InjectModel(District.name) private readonly districtModel: Model<District>) {}
+    constructor(private readonly districtRepository: DistrictRepository) {}
 
     async create(dto: CreateDistrictRequestDto): Promise<DistrictSnapshot> {
-        const district = new this.districtModel(dto);
-        const saved = await district.save();
+        const saved = await this.districtRepository.create(dto);
         return this.toSnapshot(saved);
     }
 
     async update(id: string, dto: UpdateDistrictRequestDto): Promise<DistrictSnapshot | null> {
-        const updated = await this.districtModel
-            .findByIdAndUpdate(id, { $set: dto }, { new: true, runValidators: false })
-            .exec();
-
+        const updated = await this.districtRepository.update(id, dto);
         return updated ? this.toSnapshot(updated) : null;
     }
 
     async delete(id: string): Promise<boolean> {
-        const deleted = await this.districtModel.findByIdAndDelete(id).exec();
-        return !!deleted;
+        return this.districtRepository.deleteById(id);
     }
 
     private toSnapshot(district: any): DistrictSnapshot {
