@@ -52,6 +52,7 @@ import { AdopterAccountDeleteResponseFactoryService } from './domain/services/ad
 import { AdopterApplicationListAssemblerService } from './domain/services/adopter-application-list-assembler.service';
 import { AdopterApplicationDetailAssemblerService } from './domain/services/adopter-application-detail-assembler.service';
 import { AdopterProfileAdapter } from './infrastructure/adopter-profile.adapter';
+import { AdopterAdminRepository } from './admin/repository/adopter-admin.repository';
 import { AdopterBreederReaderAdapter } from './infrastructure/adopter-breeder-reader.adapter';
 import { AdopterPetReaderAdapter } from './infrastructure/adopter-pet-reader.adapter';
 import { AdopterApplicationCommandAdapter } from './infrastructure/adopter-application-command.adapter';
@@ -126,6 +127,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         GetAdopterAdminApplicationListUseCase,
         GetAdopterAdminApplicationDetailUseCase,
         AdopterRepository,
+        AdopterAdminRepository,
         BreederRepository,
         AvailablePetManagementRepository,
         AdopterAdminPolicyService,
