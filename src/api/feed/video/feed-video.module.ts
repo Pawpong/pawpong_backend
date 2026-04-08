@@ -10,6 +10,7 @@ import { FeedCommentModule } from '../comment/feed-comment.module';
 import { FeedLikeModule } from '../like/feed-like.module';
 import { FeedTagModule } from '../tag/feed-tag.module';
 import { FeedVideoTranscoderPort } from './application/ports/feed-video-transcoder.port';
+import { FEED_VIDEO_FILE_STORAGE } from './application/ports/feed-video-file-storage.port';
 import { GetFeedUseCase } from './application/use-cases/get-feed.use-case';
 import { GetPopularVideosUseCase } from './application/use-cases/get-popular-videos.use-case';
 import { GetVideoMetaUseCase } from './application/use-cases/get-video-meta.use-case';
@@ -31,6 +32,7 @@ import { FeedVideoFfmpegAdapter } from './infrastructure/feed-video-ffmpeg.adapt
 import { FeedVideoMongooseReaderAdapter } from './infrastructure/feed-video-mongoose-reader.adapter';
 import { FeedVideoMongooseCommandAdapter } from './infrastructure/feed-video-mongoose-command.adapter';
 import { FeedVideoPrefetchPresentationService } from './infrastructure/feed-video-prefetch-presentation.service';
+import { FeedVideoStorageAdapter } from './infrastructure/feed-video-storage.adapter';
 import { FeedVideoStorageStreamAdapter } from './infrastructure/feed-video-storage-stream.adapter';
 import { FeedVideoStreamResponseService } from './infrastructure/feed-video-stream-response.service';
 import { FeedVideoRepository } from './repository/feed-video.repository';
@@ -135,6 +137,7 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         FeedVideoMongooseReaderAdapter,
         FeedVideoMongooseCommandAdapter,
         FeedVideoPrefetchPresentationService,
+        FeedVideoStorageAdapter,
         FeedVideoStorageStreamAdapter,
         FeedVideoStreamResponseService,
         {
@@ -152,6 +155,10 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         {
             provide: FeedVideoTranscoderPort,
             useExisting: FeedVideoFfmpegAdapter,
+        },
+        {
+            provide: FEED_VIDEO_FILE_STORAGE,
+            useExisting: FeedVideoStorageAdapter,
         },
     ],
 })

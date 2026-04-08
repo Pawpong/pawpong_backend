@@ -1,16 +1,17 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
-import { StorageService } from '../../../../../common/storage/storage.service';
 import { UploadUrlResponseDto } from '../../dto/response/video-response.dto';
 import { FEED_VIDEO_COMMAND, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
+import { FEED_VIDEO_FILE_STORAGE, type FeedVideoFileStoragePort } from '../ports/feed-video-file-storage.port';
 
 @Injectable()
 export class GetUploadUrlUseCase {
     constructor(
         @Inject(FEED_VIDEO_COMMAND)
         private readonly feedVideoCommand: FeedVideoCommandPort,
-        private readonly storageService: StorageService,
+        @Inject(FEED_VIDEO_FILE_STORAGE)
+        private readonly feedVideoFileStorage: FeedVideoFileStoragePort,
     ) {}
 
     async execute(
@@ -21,7 +22,7 @@ export class GetUploadUrlUseCase {
         tags?: string[],
     ): Promise<UploadUrlResponseDto> {
         const videoKey = `videos/raw/${randomUUID()}.mp4`;
-        const uploadUrl = await this.storageService.generatePresignedUploadUrl(videoKey, 600);
+        const uploadUrl = await this.feedVideoFileStorage.generatePresignedUploadUrl(videoKey, 600);
         const result = await this.feedVideoCommand.createPendingVideo({
             userId,
             uploaderModel,

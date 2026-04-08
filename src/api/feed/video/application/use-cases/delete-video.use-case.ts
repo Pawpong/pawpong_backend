@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
-import { StorageService } from '../../../../../common/storage/storage.service';
 import { FeedVideoCommandPolicyService } from '../../domain/services/feed-video-command-policy.service';
 import { FEED_VIDEO_COMMAND, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
+import { FEED_VIDEO_FILE_STORAGE, type FeedVideoFileStoragePort } from '../ports/feed-video-file-storage.port';
 
 @Injectable()
 export class DeleteVideoUseCase {
@@ -12,7 +12,8 @@ export class DeleteVideoUseCase {
         @Inject(FEED_VIDEO_COMMAND)
         private readonly feedVideoCommand: FeedVideoCommandPort,
         private readonly feedVideoCommandPolicyService: FeedVideoCommandPolicyService,
-        private readonly storageService: StorageService,
+        @Inject(FEED_VIDEO_FILE_STORAGE)
+        private readonly feedVideoFileStorage: FeedVideoFileStoragePort,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
     ) {}
@@ -24,7 +25,7 @@ export class DeleteVideoUseCase {
         await Promise.all(
             this.feedVideoCommandPolicyService
                 .getRemovableFileKeys(video)
-                .map((fileKey) => this.storageService.deleteFile(fileKey).catch(() => {})),
+                .map((fileKey) => this.feedVideoFileStorage.deleteFile(fileKey).catch(() => {})),
         );
 
         await this.feedVideoCommand.deleteById(videoId);
