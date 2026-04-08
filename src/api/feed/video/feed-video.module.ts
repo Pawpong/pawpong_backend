@@ -32,6 +32,7 @@ import { FeedVideoMongooseCommandAdapter } from './infrastructure/feed-video-mon
 import { FeedVideoPrefetchPresentationService } from './infrastructure/feed-video-prefetch-presentation.service';
 import { FeedVideoStorageStreamAdapter } from './infrastructure/feed-video-storage-stream.adapter';
 import { FeedVideoStreamResponseService } from './infrastructure/feed-video-stream-response.service';
+import { FeedVideoRepository } from './repository/feed-video.repository';
 import { FEED_VIDEO_READER } from './application/ports/feed-video-reader.port';
 import { FEED_VIDEO_COMMAND } from './application/ports/feed-video-command.port';
 import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
@@ -129,6 +130,7 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         FeedVideoCommandPolicyService,
         FeedVideoStreamingService,
         FeedVideoAssetUrlService,
+        FeedVideoRepository,
         FeedVideoMongooseReaderAdapter,
         FeedVideoMongooseCommandAdapter,
         FeedVideoPrefetchPresentationService,

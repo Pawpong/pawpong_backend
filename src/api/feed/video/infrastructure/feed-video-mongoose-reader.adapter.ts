@@ -1,46 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { Video, VideoStatus } from '../../../../schema/video.schema';
 import { FeedVideoReaderPort, FeedVideoSnapshot } from '../application/ports/feed-video-reader.port';
+import { FeedVideoRepository } from '../repository/feed-video.repository';
 
 @Injectable()
 export class FeedVideoMongooseReaderAdapter implements FeedVideoReaderPort {
-    constructor(@InjectModel(Video.name) private readonly videoModel: Model<Video>) {}
+    constructor(private readonly feedVideoRepository: FeedVideoRepository) {}
 
     async readPublicFeed(skip: number, limit: number): Promise<FeedVideoSnapshot[]> {
-        const videos = await this.videoModel
-            .find({ status: VideoStatus.READY, isPublic: true })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate('uploadedBy', 'name profileImageFileName businessName')
-            .lean();
+        const videos = await this.feedVideoRepository.findPublicFeed(skip, limit);
 
         return videos.map((video) => this.toSnapshot(video));
     }
 
     countPublicFeed(): Promise<number> {
-        return this.videoModel.countDocuments({ status: VideoStatus.READY, isPublic: true });
+        return this.feedVideoRepository.countPublicFeed();
     }
 
     async readPopular(limit: number): Promise<FeedVideoSnapshot[]> {
-        const videos = await this.videoModel
-            .find({ status: VideoStatus.READY, isPublic: true })
-            .sort({ viewCount: -1 })
-            .limit(limit)
-            .populate('uploadedBy', 'name profileImageFileName businessName')
-            .lean();
+        const videos = await this.feedVideoRepository.findPopular(limit);
 
         return videos.map((video) => this.toSnapshot(video));
     }
 
     async readById(videoId: string): Promise<FeedVideoSnapshot | null> {
-        const video = await this.videoModel
-            .findById(videoId)
-            .populate('uploadedBy', 'name profileImageFileName businessName')
-            .lean();
+        const video = await this.feedVideoRepository.findByIdWithUploader(videoId);
 
         return video ? this.toSnapshot(video) : null;
     }
