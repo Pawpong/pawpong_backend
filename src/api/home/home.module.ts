@@ -12,6 +12,9 @@ import { HomeBannerCatalogService } from './domain/services/home-banner-catalog.
 import { HomeFaqCatalogService } from './domain/services/home-faq-catalog.service';
 import { HOME_CONTENT_READER } from './application/ports/home-content-reader.port';
 import { HomeMongooseContentReaderAdapter } from './infrastructure/home-mongoose-content-reader.adapter';
+import { AvailablePetRepository } from './repository/available-pet.repository';
+import { BannerRepository } from './repository/banner.repository';
+import { FaqRepository } from './repository/faq.repository';
 
 import { Faq, FaqSchema } from '../../schema/faq.schema';
 import { Banner, BannerSchema } from '../../schema/banner.schema';
@@ -38,6 +41,9 @@ import { StorageModule } from '../../common/storage/storage.module';
         HomeBannerCatalogService,
         HomeFaqCatalogService,
         HomeAvailablePetCatalogService,
+        AvailablePetRepository,
+        BannerRepository,
+        FaqRepository,
         HomeMongooseContentReaderAdapter,
         {
             provide: HOME_CONTENT_READER,

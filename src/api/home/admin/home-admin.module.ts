@@ -17,6 +17,8 @@ import { HomeAdminMongooseManagerAdapter } from './infrastructure/home-admin-mon
 import { HOME_ADMIN_MANAGER } from './application/ports/home-admin-manager.port';
 import { HomeBannerCatalogService } from '../domain/services/home-banner-catalog.service';
 import { HomeFaqCatalogService } from '../domain/services/home-faq-catalog.service';
+import { BannerRepository } from '../repository/banner.repository';
+import { FaqRepository } from '../repository/faq.repository';
 
 import { Faq, FaqSchema } from '../../../schema/faq.schema';
 import { Banner, BannerSchema } from '../../../schema/banner.schema';
@@ -48,6 +50,8 @@ import { StorageModule } from '../../../common/storage/storage.module';
         DeleteFaqUseCase,
         HomeBannerCatalogService,
         HomeFaqCatalogService,
+        BannerRepository,
+        FaqRepository,
         HomeAdminMongooseManagerAdapter,
         {
             provide: HOME_ADMIN_MANAGER,
