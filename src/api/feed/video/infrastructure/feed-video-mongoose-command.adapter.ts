@@ -1,17 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-
-import { Video, VideoStatus } from '../../../../schema/video.schema';
 import {
     FeedVideoCommandPort,
     FeedVideoCommandSnapshot,
     FeedVideoEncodingResult,
 } from '../application/ports/feed-video-command.port';
+import { FeedVideoRepository } from '../repository/feed-video.repository';
 
 @Injectable()
 export class FeedVideoMongooseCommandAdapter implements FeedVideoCommandPort {
-    constructor(@InjectModel(Video.name) private readonly videoModel: Model<Video>) {}
+    constructor(private readonly feedVideoRepository: FeedVideoRepository) {}
 
     async createPendingVideo(data: {
         userId: string;
@@ -21,96 +18,46 @@ export class FeedVideoMongooseCommandAdapter implements FeedVideoCommandPort {
         tags: string[];
         originalKey: string;
     }): Promise<{ videoId: string }> {
-        const video = await this.videoModel.create({
-            uploadedBy: new Types.ObjectId(data.userId),
-            uploaderModel: data.uploaderModel,
-            title: data.title,
-            description: data.description,
-            tags: data.tags,
-            status: VideoStatus.PENDING,
-            originalKey: data.originalKey,
-        });
-
-        return { videoId: video.id as string };
+        return this.feedVideoRepository.createPendingVideo(data);
     }
 
     async findById(videoId: string): Promise<FeedVideoCommandSnapshot | null> {
-        const video = await this.videoModel.findById(videoId).lean().exec();
+        const video = await this.feedVideoRepository.findById(videoId);
         return video ? this.toSnapshot(video) : null;
     }
 
     async markAsProcessing(videoId: string): Promise<void> {
-        await this.videoModel.updateOne({ _id: videoId }, { status: VideoStatus.PROCESSING }).exec();
+        await this.feedVideoRepository.markAsProcessing(videoId);
     }
 
     async readMine(userId: string, skip: number, limit: number): Promise<FeedVideoCommandSnapshot[]> {
-        const videos = await this.videoModel
-            .find({ uploadedBy: new Types.ObjectId(userId) })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .lean()
-            .exec();
+        const videos = await this.feedVideoRepository.findMine(userId, skip, limit);
 
         return videos.map((video) => this.toSnapshot(video));
     }
 
     countMine(userId: string): Promise<number> {
-        return this.videoModel.countDocuments({
-            uploadedBy: new Types.ObjectId(userId),
-        });
+        return this.feedVideoRepository.countMine(userId);
     }
 
     async deleteById(videoId: string): Promise<void> {
-        await this.videoModel.deleteOne({ _id: videoId }).exec();
+        await this.feedVideoRepository.deleteById(videoId);
     }
 
     async updateVisibility(videoId: string, isPublic: boolean): Promise<void> {
-        await this.videoModel.updateOne({ _id: videoId }, { isPublic }).exec();
+        await this.feedVideoRepository.updateVisibility(videoId, isPublic);
     }
 
     async incrementViewCount(videoId: string): Promise<void> {
-        if (!Types.ObjectId.isValid(videoId)) {
-            return;
-        }
-
-        await this.videoModel.updateOne({ _id: videoId }, { $inc: { viewCount: 1 } }).exec();
+        await this.feedVideoRepository.incrementViewCount(videoId);
     }
 
     async markEncodingComplete(videoId: string, data: FeedVideoEncodingResult): Promise<void> {
-        if (!Types.ObjectId.isValid(videoId)) {
-            return;
-        }
-
-        await this.videoModel
-            .updateOne(
-                { _id: videoId },
-                {
-                    status: VideoStatus.READY,
-                    hlsManifestKey: data.hlsManifestKey,
-                    thumbnailKey: data.thumbnailKey,
-                    duration: data.duration,
-                    width: data.width,
-                    height: data.height,
-                },
-            )
-            .exec();
+        await this.feedVideoRepository.markEncodingComplete(videoId, data);
     }
 
     async markEncodingFailed(videoId: string, reason: string): Promise<void> {
-        if (!Types.ObjectId.isValid(videoId)) {
-            return;
-        }
-
-        await this.videoModel
-            .updateOne(
-                { _id: videoId },
-                {
-                    status: VideoStatus.FAILED,
-                    failureReason: reason,
-                },
-            )
-            .exec();
+        await this.feedVideoRepository.markEncodingFailed(videoId, reason);
     }
 
     private toSnapshot(video: any): FeedVideoCommandSnapshot {
