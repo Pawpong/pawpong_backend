@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { UploadAdminFileCommandController } from './admin/upload-admin-file-command.controller';
-import { UploadAdminFileQueryController } from './admin/upload-admin-file-query.controller';
-import { UploadAdminReferenceController } from './admin/upload-admin-reference.controller';
+import { UploadAdminCheckFileReferencesController } from './admin/upload-admin-check-file-references.controller';
+import { UploadAdminFileDeleteController } from './admin/upload-admin-file-delete.controller';
+import { UploadAdminFilesDeleteController } from './admin/upload-admin-files-delete.controller';
+import { UploadAdminFilesListController } from './admin/upload-admin-files-list.controller';
+import { UploadAdminFolderDeleteController } from './admin/upload-admin-folder-delete.controller';
+import { UploadAdminFolderFilesController } from './admin/upload-admin-folder-files.controller';
+import { UploadAdminReferencedFilesController } from './admin/upload-admin-referenced-files.controller';
 import { UploadFileDeleteController } from './upload-file-delete.controller';
 import { UploadAvailablePetPhotoController } from './upload-available-pet-photo.controller';
 import { UploadMultipleFilesController } from './upload-multiple-files.controller';
@@ -67,9 +71,13 @@ import { StorageModule } from '../../common/storage/storage.module';
         UploadSingleFileController,
         UploadMultipleFilesController,
         UploadFileDeleteController,
-        UploadAdminFileQueryController,
-        UploadAdminFileCommandController,
-        UploadAdminReferenceController,
+        UploadAdminFilesListController,
+        UploadAdminFolderFilesController,
+        UploadAdminFileDeleteController,
+        UploadAdminFilesDeleteController,
+        UploadAdminFolderDeleteController,
+        UploadAdminCheckFileReferencesController,
+        UploadAdminReferencedFilesController,
     ],
     providers: [
         UploadRepresentativePhotosUseCase,
