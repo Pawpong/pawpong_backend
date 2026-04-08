@@ -39,6 +39,27 @@ export class AvailablePetRepository {
             .exec() as any;
     }
 
+    async findHomeAvailablePets(limit: number): Promise<AvailablePetDocument[]> {
+        const activeBreeders = await this.breederModel
+            .find({ accountStatus: 'active', isTestAccount: { $ne: true } })
+            .select('_id')
+            .lean()
+            .exec();
+
+        const activeBreederIds = activeBreeders.map((breeder) => breeder._id);
+
+        return this.availablePetModel
+            .find({
+                status: 'available',
+                isActive: true,
+                breederId: { $in: activeBreederIds },
+            })
+            .populate('breederId', 'name profile')
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .exec() as any;
+    }
+
     /**
      * ID로 AvailablePet 조회
      * @param id AvailablePet ID
