@@ -9,6 +9,7 @@ import { GetPlatformStatsUseCase } from './application/use-cases/get-platform-st
 import { PlatformAdminPresentationService } from './domain/services/platform-admin-presentation.service';
 import { PlatformAdminQueryPolicyService } from './domain/services/platform-admin-query-policy.service';
 import { PlatformAdminMongooseReaderAdapter } from './infrastructure/platform-admin-mongoose-reader.adapter';
+import { PlatformAdminRepository } from './repository/platform-admin.repository';
 
 import { Admin, AdminSchema } from '../../../schema/admin.schema';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
@@ -39,6 +40,7 @@ import { AdoptionApplication, AdoptionApplicationSchema } from '../../../schema/
         GetPlatformMvpStatsUseCase,
         PlatformAdminPresentationService,
         PlatformAdminQueryPolicyService,
+        PlatformAdminRepository,
         PlatformAdminMongooseReaderAdapter,
         {
             provide: PLATFORM_ADMIN_READER,
