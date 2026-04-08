@@ -1,18 +1,24 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { SocialCompleteRequestDto } from '../../dto/request/social-complete-request.dto';
 import { RegisterAdopterRequestDto } from '../../dto/request/register-adopter-request.dto';
 import { RegisterBreederRequestDto } from '../../dto/request/register-breeder-request.dto';
 import { RegisterAdopterResponseDto } from '../../dto/response/register-adopter-response.dto';
 import { RegisterBreederResponseDto } from '../../dto/response/register-breeder-response.dto';
-import { RegisterAdopterUseCase } from './register-adopter.use-case';
-import { RegisterBreederUseCase } from './register-breeder.use-case';
+import {
+    REGISTER_ADOPTER_AUTH_SIGNUP,
+    REGISTER_BREEDER_AUTH_SIGNUP,
+    type RegisterAdopterAuthSignupPort,
+    type RegisterBreederAuthSignupPort,
+} from '../ports/auth-signup-completion.port';
 
 @Injectable()
 export class CompleteSocialRegistrationUseCase {
     constructor(
-        private readonly registerAdopterUseCase: RegisterAdopterUseCase,
-        private readonly registerBreederUseCase: RegisterBreederUseCase,
+        @Inject(REGISTER_ADOPTER_AUTH_SIGNUP)
+        private readonly registerAdopterUseCase: RegisterAdopterAuthSignupPort,
+        @Inject(REGISTER_BREEDER_AUTH_SIGNUP)
+        private readonly registerBreederUseCase: RegisterBreederAuthSignupPort,
     ) {}
 
     async execute(dto: SocialCompleteRequestDto): Promise<RegisterAdopterResponseDto | RegisterBreederResponseDto> {

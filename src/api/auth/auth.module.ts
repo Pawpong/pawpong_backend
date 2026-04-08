@@ -62,6 +62,15 @@ import { AuthProfileImageTargetPort } from './application/ports/auth-profile-ima
 import { AUTH_PHONE_VERIFICATION_REGISTRY_PORT } from './application/ports/auth-phone-verification-registry.port';
 import { AUTH_PHONE_VERIFICATION_SENDER_PORT } from './application/ports/auth-phone-verification-sender.port';
 import { AUTH_PHONE_VERIFICATION_STORE_PORT } from './application/ports/auth-phone-verification-store.port';
+import {
+    GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY,
+    PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW,
+} from './application/ports/auth-social-flow.port';
+import {
+    REGISTER_ADOPTER_AUTH_SIGNUP,
+    REGISTER_BREEDER_AUTH_SIGNUP,
+} from './application/ports/auth-signup-completion.port';
+import { SUBMIT_AUTH_BREEDER_DOCUMENTS } from './application/ports/auth-breeder-document-submission.port';
 import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
 import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
 import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
@@ -259,6 +268,26 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         {
             provide: AuthProfileImageTargetPort,
             useExisting: AuthProfileImageTargetAdapter,
+        },
+        {
+            provide: GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY,
+            useExisting: GetSocialLoginRedirectUrlUseCase,
+        },
+        {
+            provide: PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW,
+            useExisting: ProcessSocialLoginCallbackUseCase,
+        },
+        {
+            provide: REGISTER_ADOPTER_AUTH_SIGNUP,
+            useExisting: RegisterAdopterUseCase,
+        },
+        {
+            provide: REGISTER_BREEDER_AUTH_SIGNUP,
+            useExisting: RegisterBreederUseCase,
+        },
+        {
+            provide: SUBMIT_AUTH_BREEDER_DOCUMENTS,
+            useExisting: SubmitAuthBreederDocumentsUseCase,
         },
         JwtStrategy,
         GoogleStrategy,
