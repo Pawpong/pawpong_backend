@@ -41,6 +41,7 @@ import { AUTH_ADMIN_TOKEN } from './admin/application/ports/auth-admin-token.por
 import { AuthTokenService } from './services/auth-token.service';
 
 import { AuthAdminRepository } from './repository/auth-admin.repository';
+import { AuthPhoneVerificationRepository } from './repository/auth-phone-verification.repository';
 import { AuthRegistrationAdapter } from './infrastructure/auth-registration.adapter';
 import { AuthRegistrationNotificationAdapter } from './infrastructure/auth-registration-notification.adapter';
 import { AuthAdopterRepository } from './repository/auth-adopter.repository';
@@ -172,6 +173,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthAdopterRepository,
         AuthBreederRepository,
         AuthAdminRepository,
+        AuthPhoneVerificationRepository,
         AuthAdminRepositoryAdapter,
         AuthAdminBcryptAdapter,
         AuthAdminJwtAdapter,
