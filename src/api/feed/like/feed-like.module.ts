@@ -9,6 +9,7 @@ import { GetMyLikedVideosUseCase } from './application/use-cases/get-my-liked-vi
 import { FeedLikePolicyService } from './domain/services/feed-like-policy.service';
 import { FeedLikePresentationService } from './domain/services/feed-like-presentation.service';
 import { FeedLikeMongooseManagerAdapter } from './infrastructure/feed-like-mongoose-manager.adapter';
+import { FeedLikeRepository } from './repository/feed-like.repository';
 import { FEED_LIKE_MANAGER } from './application/ports/feed-like-manager.port';
 
 /**
@@ -31,6 +32,7 @@ import { FEED_LIKE_MANAGER } from './application/ports/feed-like-manager.port';
         GetMyLikedVideosUseCase,
         FeedLikePolicyService,
         FeedLikePresentationService,
+        FeedLikeRepository,
         FeedLikeMongooseManagerAdapter,
         {
             provide: FEED_LIKE_MANAGER,

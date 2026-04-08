@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
-import { Video, VideoStatus } from '../../../../schema/video.schema';
-import { VideoLike } from '../../../../schema/video-like.schema';
+import { FeedLikeRepository } from '../repository/feed-like.repository';
 import {
     FeedLikeManagerPort,
     FeedLikeSnapshot,
@@ -13,18 +11,10 @@ import {
 
 @Injectable()
 export class FeedLikeMongooseManagerAdapter implements FeedLikeManagerPort {
-    constructor(
-        @InjectModel(Video.name) private readonly videoModel: Model<Video>,
-        @InjectModel(VideoLike.name) private readonly videoLikeModel: Model<VideoLike>,
-    ) {}
+    constructor(private readonly feedLikeRepository: FeedLikeRepository) {}
 
     async findVideoCounter(videoId: string): Promise<FeedLikeVideoCounterSnapshot | null> {
-        const objectId = this.toObjectId(videoId);
-        if (!objectId) {
-            return null;
-        }
-
-        const video = await this.videoModel.findById(objectId).lean().exec();
+        const video = await this.feedLikeRepository.findVideoById(videoId);
         if (!video) {
             return null;
         }
@@ -36,20 +26,7 @@ export class FeedLikeMongooseManagerAdapter implements FeedLikeManagerPort {
     }
 
     async findUserLike(videoId: string, userId: string): Promise<FeedLikeSnapshot | null> {
-        const videoObjectId = this.toObjectId(videoId);
-        const userObjectId = this.toObjectId(userId);
-        if (!videoObjectId || !userObjectId) {
-            return null;
-        }
-
-        const like = await this.videoLikeModel
-            .findOne({
-                videoId: videoObjectId,
-                userId: userObjectId,
-            })
-            .lean()
-            .exec();
-
+        const like = await this.feedLikeRepository.findLikeByVideoAndUser(videoId, userId);
         if (!like) {
             return null;
         }
@@ -62,53 +39,28 @@ export class FeedLikeMongooseManagerAdapter implements FeedLikeManagerPort {
     }
 
     async createLike(data: { videoId: string; userId: string; userModel: 'Breeder' | 'Adopter' }): Promise<void> {
-        await this.videoLikeModel.create({
-            videoId: new Types.ObjectId(data.videoId),
-            userId: new Types.ObjectId(data.userId),
-            userModel: data.userModel,
-        });
+        await this.feedLikeRepository.createLike(data);
     }
 
     async deleteLike(likeId: string): Promise<void> {
-        await this.videoLikeModel.deleteOne({ _id: likeId }).exec();
+        await this.feedLikeRepository.deleteLike(likeId);
     }
 
     async updateVideoLikeCount(videoId: string, delta: number): Promise<number> {
-        const video = await this.videoModel
-            .findByIdAndUpdate(videoId, { $inc: { likeCount: delta } }, { new: true })
-            .lean()
-            .exec();
+        const video = await this.feedLikeRepository.updateVideoLikeCount(videoId, delta);
 
         return video?.likeCount || 0;
     }
 
     async readMyLikedVideos(userId: string, skip: number, limit: number): Promise<FeedLikeVideoSnapshot[]> {
-        const userObjectId = this.toObjectId(userId);
-        if (!userObjectId) {
-            return [];
-        }
-
-        const likes = await this.videoLikeModel
-            .find({ userId: userObjectId })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .lean()
-            .exec();
+        const likes = await this.feedLikeRepository.findLikesByUser(userId, skip, limit);
 
         const videoIds = likes.map((like) => like.videoId).filter(Boolean);
         if (videoIds.length === 0) {
             return [];
         }
 
-        const videos = await this.videoModel
-            .find({
-                _id: { $in: videoIds },
-                status: VideoStatus.READY,
-            })
-            .populate('uploadedBy', 'name profileImageFileName businessName')
-            .lean()
-            .exec();
+        const videos = await this.feedLikeRepository.findReadyVideosByIds(videoIds as Types.ObjectId[]);
 
         const videosById = new Map(videos.map((video) => [video._id.toString(), this.toVideoSnapshot(video)]));
         return likes
@@ -117,12 +69,7 @@ export class FeedLikeMongooseManagerAdapter implements FeedLikeManagerPort {
     }
 
     async countMyLikedVideos(userId: string): Promise<number> {
-        const userObjectId = this.toObjectId(userId);
-        if (!userObjectId) {
-            return 0;
-        }
-
-        return this.videoLikeModel.countDocuments({ userId: userObjectId }).exec();
+        return this.feedLikeRepository.countLikesByUser(userId);
     }
 
     private toVideoSnapshot(video: any): FeedLikeVideoSnapshot {
@@ -143,9 +90,5 @@ export class FeedLikeMongooseManagerAdapter implements FeedLikeManagerPort {
                 : null,
             createdAt: video.createdAt,
         };
-    }
-
-    private toObjectId(value: string): Types.ObjectId | null {
-        return Types.ObjectId.isValid(value) ? new Types.ObjectId(value) : null;
     }
 }
