@@ -1,16 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Types } from 'mongoose';
 
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
-import { Admin, AdminDocument } from '../../../../schema/admin.schema';
-import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
-import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
-import { BreederReview, BreederReviewDocument } from '../../../../schema/breeder-review.schema';
-import {
-    AdoptionApplication,
-    AdoptionApplicationDocument,
-} from '../../../../schema/adoption-application.schema';
 import {
     AdopterAdminAdminSnapshot,
     AdopterAdminApplicationDetailSnapshot,
@@ -19,24 +10,14 @@ import {
     AdopterAdminReaderPort,
     AdopterAdminReviewReportPageSnapshot,
 } from '../application/ports/adopter-admin-reader.port';
+import { AdopterAdminRepository } from '../repository/adopter-admin.repository';
 
 @Injectable()
 export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
-    constructor(
-        @InjectModel(Admin.name)
-        private readonly adminModel: Model<AdminDocument>,
-        @InjectModel(Adopter.name)
-        private readonly adopterModel: Model<AdopterDocument>,
-        @InjectModel(Breeder.name)
-        private readonly breederModel: Model<BreederDocument>,
-        @InjectModel(BreederReview.name)
-        private readonly breederReviewModel: Model<BreederReviewDocument>,
-        @InjectModel(AdoptionApplication.name)
-        private readonly adoptionApplicationModel: Model<AdoptionApplicationDocument>,
-    ) {}
+    constructor(private readonly adopterAdminRepository: AdopterAdminRepository) {}
 
     async findAdminById(adminId: string): Promise<AdopterAdminAdminSnapshot | null> {
-        const admin = await this.adminModel.findById(adminId).select('permissions').lean().exec();
+        const admin = await this.adopterAdminRepository.findAdminById(adminId);
 
         if (!admin) {
             return null;
@@ -52,19 +33,7 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
     }
 
     async findReportedReviews(page: number, limit: number): Promise<AdopterAdminReviewReportPageSnapshot> {
-        const skip = (page - 1) * limit;
-        const [reviews, totalCount] = await Promise.all([
-            this.breederReviewModel
-                .find({ isReported: true })
-                .sort({ reportedAt: -1 })
-                .skip(skip)
-                .limit(limit)
-                .populate('breederId', 'name')
-                .populate('adopterId', 'nickname')
-                .lean()
-                .exec(),
-            this.breederReviewModel.countDocuments({ isReported: true }).exec(),
-        ]);
+        const { reviews, totalCount } = await this.adopterAdminRepository.findReportedReviews(page, limit);
 
         const reporterIds = Array.from(
             new Set(
@@ -75,12 +44,8 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
         ).map((value) => new Types.ObjectId(value));
 
         const [reportingAdopters, reportingBreeders] = await Promise.all([
-            reporterIds.length > 0
-                ? this.adopterModel.find({ _id: { $in: reporterIds } }).select('nickname').lean().exec()
-                : Promise.resolve([]),
-            reporterIds.length > 0
-                ? this.breederModel.find({ _id: { $in: reporterIds } }).select('name').lean().exec()
-                : Promise.resolve([]),
+            this.adopterAdminRepository.findAdoptersByIds(reporterIds),
+            this.adopterAdminRepository.findBreedersByIds(reporterIds),
         ]);
 
         const adopterReporterMap = new Map(
@@ -131,11 +96,7 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
         }
 
         if (filter.breederName) {
-            const breeders = await this.breederModel
-                .find({ name: { $regex: filter.breederName, $options: 'i' } })
-                .select('_id')
-                .lean()
-                .exec();
+            const breeders = await this.adopterAdminRepository.findBreedersByName(filter.breederName);
 
             if (breeders.length === 0) {
                 return {
@@ -169,39 +130,12 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
 
         const [totalCount, pendingCount, completedCount, approvedCount, rejectedCount, applications] =
             await Promise.all([
-                this.adoptionApplicationModel.countDocuments(query).exec(),
-                this.adoptionApplicationModel
-                    .countDocuments({
-                        ...query,
-                        status: ApplicationStatus.CONSULTATION_PENDING,
-                    })
-                    .exec(),
-                this.adoptionApplicationModel
-                    .countDocuments({
-                        ...query,
-                        status: ApplicationStatus.CONSULTATION_COMPLETED,
-                    })
-                    .exec(),
-                this.adoptionApplicationModel
-                    .countDocuments({
-                        ...query,
-                        status: ApplicationStatus.ADOPTION_APPROVED,
-                    })
-                    .exec(),
-                this.adoptionApplicationModel
-                    .countDocuments({
-                        ...query,
-                        status: ApplicationStatus.ADOPTION_REJECTED,
-                    })
-                    .exec(),
-                this.adoptionApplicationModel
-                    .find(query)
-                    .sort({ appliedAt: -1 })
-                    .skip((filter.page - 1) * filter.limit)
-                    .limit(filter.limit)
-                    .populate('breederId', 'name')
-                    .lean()
-                    .exec(),
+                this.adopterAdminRepository.countApplications(query),
+                this.adopterAdminRepository.countApplicationsByStatus(query, ApplicationStatus.CONSULTATION_PENDING),
+                this.adopterAdminRepository.countApplicationsByStatus(query, ApplicationStatus.CONSULTATION_COMPLETED),
+                this.adopterAdminRepository.countApplicationsByStatus(query, ApplicationStatus.ADOPTION_APPROVED),
+                this.adopterAdminRepository.countApplicationsByStatus(query, ApplicationStatus.ADOPTION_REJECTED),
+                this.adopterAdminRepository.findApplications(query, filter.page, filter.limit),
             ]);
 
         return {
@@ -232,11 +166,7 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
     }
 
     async findApplicationDetail(applicationId: string): Promise<AdopterAdminApplicationDetailSnapshot | null> {
-        const application = await this.adoptionApplicationModel
-            .findById(applicationId)
-            .populate('breederId', 'name')
-            .lean()
-            .exec();
+        const application = await this.adopterAdminRepository.findApplicationById(applicationId);
 
         if (!application) {
             return null;
