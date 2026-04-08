@@ -1,53 +1,30 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { Notice } from '../../../../schema/notice.schema';
 import { NoticeSnapshot } from '../../application/ports/notice-reader.port';
 import { NoticeCreateRequestDto } from '../../dto/request/notice-create-request.dto';
 import { NoticeUpdateRequestDto } from '../../dto/request/notice-update-request.dto';
 import { NoticeWriterPort } from '../application/ports/notice-writer.port';
+import { NoticeRepository } from '../../repository/notice.repository';
 
 @Injectable()
 export class NoticeMongooseWriterAdapter implements NoticeWriterPort {
-    constructor(@InjectModel(Notice.name) private readonly noticeModel: Model<Notice>) {}
+    constructor(private readonly noticeRepository: NoticeRepository) {}
 
     async create(adminId: string, adminName: string, createData: NoticeCreateRequestDto): Promise<NoticeSnapshot> {
-        const notice = new this.noticeModel({
-            ...createData,
-            authorId: adminId,
-            authorName: adminName,
-            status: createData.status || 'published',
-            isPinned: createData.isPinned || false,
-            viewCount: 0,
-        });
-
-        await notice.save();
-
+        const notice = await this.noticeRepository.create(adminId, adminName, createData);
         return this.toSnapshot(notice);
     }
 
     async update(noticeId: string, updateData: NoticeUpdateRequestDto): Promise<NoticeSnapshot | null> {
-        const notice = await this.noticeModel.findById(noticeId).exec();
-
+        const notice = await this.noticeRepository.update(noticeId, updateData);
         if (!notice) {
             return null;
         }
-
-        if (updateData.title !== undefined) notice.title = updateData.title;
-        if (updateData.content !== undefined) notice.content = updateData.content;
-        if (updateData.status !== undefined) notice.status = updateData.status;
-        if (updateData.isPinned !== undefined) notice.isPinned = updateData.isPinned;
-        if (updateData.publishedAt !== undefined) notice.publishedAt = new Date(updateData.publishedAt);
-        if (updateData.expiredAt !== undefined) notice.expiredAt = new Date(updateData.expiredAt);
-
-        await notice.save();
         return this.toSnapshot(notice);
     }
 
     async delete(noticeId: string): Promise<boolean> {
-        const result = await this.noticeModel.findByIdAndDelete(noticeId).exec();
-        return !!result;
+        return this.noticeRepository.deleteById(noticeId);
     }
 
     private toSnapshot(notice: any): NoticeSnapshot {
