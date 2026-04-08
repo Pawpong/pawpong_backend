@@ -8,7 +8,7 @@ import { InquiryBreederQueryController } from './inquiry-breeder-query.controlle
 import { InquiryPublicDetailController } from './inquiry-public-detail.controller';
 import { InquiryPublicListController } from './inquiry-public-list.controller';
 
-import { InquiryRepository } from './inquiry.repository';
+import { InquiryRepository } from './repository/inquiry.repository';
 import { CreateInquiryUseCase } from './application/use-cases/create-inquiry.use-case';
 import { UpdateInquiryUseCase } from './application/use-cases/update-inquiry.use-case';
 import { DeleteInquiryUseCase } from './application/use-cases/delete-inquiry.use-case';
