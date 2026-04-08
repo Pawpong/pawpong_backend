@@ -10,6 +10,7 @@ import { DeleteCommentUseCase } from './application/use-cases/delete-comment.use
 import { FeedCommentPolicyService } from './domain/services/feed-comment-policy.service';
 import { FeedCommentPresentationService } from './domain/services/feed-comment-presentation.service';
 import { FeedCommentMongooseManagerAdapter } from './infrastructure/feed-comment-mongoose-manager.adapter';
+import { FeedCommentRepository } from './repository/feed-comment.repository';
 import { FEED_COMMENT_MANAGER } from './application/ports/feed-comment-manager.port';
 
 /**
@@ -32,6 +33,7 @@ import { FEED_COMMENT_MANAGER } from './application/ports/feed-comment-manager.p
         DeleteCommentUseCase,
         FeedCommentPolicyService,
         FeedCommentPresentationService,
+        FeedCommentRepository,
         FeedCommentMongooseManagerAdapter,
         {
             provide: FEED_COMMENT_MANAGER,

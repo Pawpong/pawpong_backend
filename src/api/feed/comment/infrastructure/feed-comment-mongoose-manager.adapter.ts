@@ -1,9 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-
-import { Video } from '../../../../schema/video.schema';
-import { VideoComment } from '../../../../schema/video-comment.schema';
+import { FeedCommentRepository } from '../repository/feed-comment.repository';
 import {
     FeedCommentManagerPort,
     FeedCommentReplyCountSnapshot,
@@ -12,33 +8,15 @@ import {
 
 @Injectable()
 export class FeedCommentMongooseManagerAdapter implements FeedCommentManagerPort {
-    constructor(
-        @InjectModel(Video.name) private readonly videoModel: Model<Video>,
-        @InjectModel(VideoComment.name) private readonly videoCommentModel: Model<VideoComment>,
-    ) {}
+    constructor(private readonly feedCommentRepository: FeedCommentRepository) {}
 
     async findVideo(videoId: string): Promise<{ id: string } | null> {
-        const objectId = this.toObjectId(videoId);
-        if (!objectId) {
-            return null;
-        }
-
-        const video = await this.videoModel.findById(objectId).lean().exec();
+        const video = await this.feedCommentRepository.findVideoById(videoId);
         return video ? { id: video._id.toString() } : null;
     }
 
     async findComment(commentId: string): Promise<FeedCommentSnapshot | null> {
-        const objectId = this.toObjectId(commentId);
-        if (!objectId) {
-            return null;
-        }
-
-        const comment = await this.videoCommentModel
-            .findById(objectId)
-            .populate('userId', 'name profileImageFileName businessName')
-            .lean()
-            .exec();
-
+        const comment = await this.feedCommentRepository.findCommentByIdWithAuthor(commentId);
         return comment ? this.toCommentSnapshot(comment) : null;
     }
 
@@ -49,78 +27,27 @@ export class FeedCommentMongooseManagerAdapter implements FeedCommentManagerPort
         content: string;
         parentId?: string;
     }): Promise<FeedCommentSnapshot> {
-        const comment = await this.videoCommentModel.create({
-            videoId: new Types.ObjectId(data.videoId),
-            userId: new Types.ObjectId(data.userId),
-            userModel: data.userModel,
-            content: data.content,
-            parentId: data.parentId ? new Types.ObjectId(data.parentId) : undefined,
-        });
+        const comment = await this.feedCommentRepository.createComment(data);
 
         return this.toCommentSnapshot(comment);
     }
 
     async incrementVideoCommentCount(videoId: string, delta: number): Promise<void> {
-        await this.videoModel.updateOne({ _id: videoId }, { $inc: { commentCount: delta } }).exec();
+        await this.feedCommentRepository.incrementVideoCommentCount(videoId, delta);
     }
 
     async readRootComments(videoId: string, skip: number, limit: number): Promise<FeedCommentSnapshot[]> {
-        const videoObjectId = this.toObjectId(videoId);
-        if (!videoObjectId) {
-            return [];
-        }
-
-        const comments = await this.videoCommentModel
-            .find({
-                videoId: videoObjectId,
-                parentId: { $exists: false },
-                isDeleted: false,
-            })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate('userId', 'name profileImageFileName businessName')
-            .lean()
-            .exec();
+        const comments = await this.feedCommentRepository.findRootCommentsByVideo(videoId, skip, limit);
 
         return comments.map((comment) => this.toCommentSnapshot(comment));
     }
 
     async countRootComments(videoId: string): Promise<number> {
-        const videoObjectId = this.toObjectId(videoId);
-        if (!videoObjectId) {
-            return 0;
-        }
-
-        return this.videoCommentModel
-            .countDocuments({
-                videoId: videoObjectId,
-                parentId: { $exists: false },
-                isDeleted: false,
-            })
-            .exec();
+        return this.feedCommentRepository.countRootCommentsByVideo(videoId);
     }
 
     async readReplyCounts(parentIds: string[]): Promise<FeedCommentReplyCountSnapshot[]> {
-        const parentObjectIds = parentIds.map((parentId) => this.toObjectId(parentId)).filter((id): id is Types.ObjectId => !!id);
-        if (parentObjectIds.length === 0) {
-            return [];
-        }
-
-        const replyCounts = await this.videoCommentModel.aggregate([
-            {
-                $match: {
-                    parentId: { $in: parentObjectIds },
-                    isDeleted: false,
-                },
-            },
-            {
-                $group: {
-                    _id: '$parentId',
-                    count: { $sum: 1 },
-                },
-            },
-        ]);
+        const replyCounts = await this.feedCommentRepository.aggregateReplyCounts(parentIds);
 
         return replyCounts.map((replyCount) => ({
             commentId: replyCount._id.toString(),
@@ -129,66 +56,23 @@ export class FeedCommentMongooseManagerAdapter implements FeedCommentManagerPort
     }
 
     async readReplies(commentId: string, skip: number, limit: number): Promise<FeedCommentSnapshot[]> {
-        const commentObjectId = this.toObjectId(commentId);
-        if (!commentObjectId) {
-            return [];
-        }
-
-        const replies = await this.videoCommentModel
-            .find({
-                parentId: commentObjectId,
-                isDeleted: false,
-            })
-            .sort({ createdAt: 1 })
-            .skip(skip)
-            .limit(limit)
-            .populate('userId', 'name profileImageFileName businessName')
-            .lean()
-            .exec();
+        const replies = await this.feedCommentRepository.findRepliesByParent(commentId, skip, limit);
 
         return replies.map((reply) => this.toCommentSnapshot(reply));
     }
 
     async countReplies(commentId: string): Promise<number> {
-        const commentObjectId = this.toObjectId(commentId);
-        if (!commentObjectId) {
-            return 0;
-        }
-
-        return this.videoCommentModel
-            .countDocuments({
-                parentId: commentObjectId,
-                isDeleted: false,
-            })
-            .exec();
+        return this.feedCommentRepository.countRepliesByParent(commentId);
     }
 
     async updateCommentContent(commentId: string, content: string): Promise<FeedCommentSnapshot | null> {
-        const objectId = this.toObjectId(commentId);
-        if (!objectId) {
-            return null;
-        }
-
-        const comment = await this.videoCommentModel
-            .findByIdAndUpdate(objectId, { content }, { new: true })
-            .populate('userId', 'name profileImageFileName businessName')
-            .lean()
-            .exec();
+        const comment = await this.feedCommentRepository.updateCommentContent(commentId, content);
 
         return comment ? this.toCommentSnapshot(comment) : null;
     }
 
     async markDeleted(commentId: string): Promise<FeedCommentSnapshot | null> {
-        const objectId = this.toObjectId(commentId);
-        if (!objectId) {
-            return null;
-        }
-
-        const comment = await this.videoCommentModel
-            .findByIdAndUpdate(objectId, { isDeleted: true }, { new: true })
-            .populate('userId', 'name profileImageFileName businessName')
-            .lean()
-            .exec();
+        const comment = await this.feedCommentRepository.markDeleted(commentId);
 
         return comment ? this.toCommentSnapshot(comment) : null;
     }
@@ -215,9 +99,5 @@ export class FeedCommentMongooseManagerAdapter implements FeedCommentManagerPort
                   }
                 : null,
         };
-    }
-
-    private toObjectId(value: string): Types.ObjectId | null {
-        return Types.ObjectId.isValid(value) ? new Types.ObjectId(value) : null;
     }
 }
