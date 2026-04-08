@@ -1,18 +1,18 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import type { Response } from 'express';
 
-import { SegmentPrefetchResponseDto } from '../dto/response/video-response.dto';
-import { ProxyHlsFileUseCase } from '../application/use-cases/proxy-hls-file.use-case';
+import type { FeedVideoProxyResponse } from '../application/use-cases/proxy-hls-file.use-case';
 
 @Injectable()
-export class FeedVideoStreamHttpService {
-    constructor(private readonly proxyHlsFileUseCase: ProxyHlsFileUseCase) {}
-
-    async stream(videoId: string, filename: string, res: Response): Promise<void> {
+export class FeedVideoStreamResponseService {
+    async sendProxyResponse(
+        res: Response,
+        execute: () => Promise<FeedVideoProxyResponse>,
+    ): Promise<void> {
         this.applyCorsHeaders(res);
 
         try {
-            const proxyResponse = await this.proxyHlsFileUseCase.execute(videoId, filename);
+            const proxyResponse = await execute();
 
             res.setHeader('Content-Type', proxyResponse.contentType);
             res.setHeader('X-Cache', proxyResponse.cacheStatus);
@@ -25,13 +25,6 @@ export class FeedVideoStreamHttpService {
 
             throw new BadRequestException('파일을 가져올 수 없습니다.');
         }
-    }
-
-    buildPrefetchResponse(requestedCount: number): SegmentPrefetchResponseDto {
-        return {
-            success: true,
-            message: `${requestedCount}개 세그먼트 프리페치 완료`,
-        };
     }
 
     private applyCorsHeaders(res: Response): void {

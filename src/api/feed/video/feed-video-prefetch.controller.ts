@@ -3,14 +3,14 @@ import { Param, Post, Query } from '@nestjs/common';
 import { PrefetchAllQualitySegmentsUseCase } from './application/use-cases/prefetch-all-quality-segments.use-case';
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
 import { SegmentPrefetchResponseDto } from './dto/response/video-response.dto';
-import { FeedVideoStreamHttpService } from './infrastructure/feed-video-stream-http.service';
+import { FeedVideoPrefetchPresentationService } from './infrastructure/feed-video-prefetch-presentation.service';
 import { ApiPrefetchFeedVideoSegmentsEndpoint } from './swagger';
 
 @FeedPublicController()
 export class FeedVideoPrefetchController {
     constructor(
         private readonly prefetchAllQualitySegmentsUseCase: PrefetchAllQualitySegmentsUseCase,
-        private readonly feedVideoStreamHttpService: FeedVideoStreamHttpService,
+        private readonly feedVideoPrefetchPresentationService: FeedVideoPrefetchPresentationService,
     ) {}
 
     @Post('videos/stream/:videoId/prefetch')
@@ -23,6 +23,6 @@ export class FeedVideoPrefetchController {
         const requestedCount = Number(count);
 
         await this.prefetchAllQualitySegmentsUseCase.execute(videoId, Number(segment), requestedCount);
-        return this.feedVideoStreamHttpService.buildPrefetchResponse(requestedCount);
+        return this.feedVideoPrefetchPresentationService.buildResponse(requestedCount);
     }
 }

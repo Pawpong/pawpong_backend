@@ -1,17 +1,23 @@
 import { Get, Param, Res } from '@nestjs/common';
 import type { Response } from 'express';
 
+import { ProxyHlsFileUseCase } from './application/use-cases/proxy-hls-file.use-case';
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
-import { FeedVideoStreamHttpService } from './infrastructure/feed-video-stream-http.service';
+import { FeedVideoStreamResponseService } from './infrastructure/feed-video-stream-response.service';
 import { ApiStreamFeedVideoEndpoint } from './swagger';
 
 @FeedPublicController()
 export class FeedVideoHlsStreamController {
-    constructor(private readonly feedVideoStreamHttpService: FeedVideoStreamHttpService) {}
+    constructor(
+        private readonly proxyHlsFileUseCase: ProxyHlsFileUseCase,
+        private readonly feedVideoStreamResponseService: FeedVideoStreamResponseService,
+    ) {}
 
     @Get('videos/stream/:videoId/:filename')
     @ApiStreamFeedVideoEndpoint()
     async streamHLS(@Param('videoId') videoId: string, @Param('filename') filename: string, @Res() res: Response) {
-        return this.feedVideoStreamHttpService.stream(videoId, filename, res);
+        return this.feedVideoStreamResponseService.sendProxyResponse(res, () =>
+            this.proxyHlsFileUseCase.execute(videoId, filename),
+        );
     }
 }
