@@ -11,6 +11,7 @@ import { BreederReportAdminPolicyService } from './domain/services/breeder-repor
 import { BreederReportAdminActivityLogFactoryService } from './domain/services/breeder-report-admin-activity-log-factory.service';
 import { BreederReportAdminPresentationService } from './domain/services/breeder-report-admin-presentation.service';
 import { BreederReportAdminMongooseRepositoryAdapter } from './infrastructure/breeder-report-admin-mongoose.repository.adapter';
+import { BreederReportAdminRepository } from './repository/breeder-report-admin.repository';
 
 import { Breeder, BreederSchema } from '../../../../schema/breeder.schema';
 import { Admin, AdminSchema } from '../../../../schema/admin.schema';
@@ -36,6 +37,7 @@ import { Admin, AdminSchema } from '../../../../schema/admin.schema';
         BreederReportAdminPolicyService,
         BreederReportAdminActivityLogFactoryService,
         BreederReportAdminPresentationService,
+        BreederReportAdminRepository,
         BreederReportAdminMongooseRepositoryAdapter,
         {
             provide: BREEDER_REPORT_ADMIN_READER,
