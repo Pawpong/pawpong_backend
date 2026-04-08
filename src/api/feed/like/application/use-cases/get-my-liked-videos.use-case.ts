@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { StorageService } from '../../../../../common/storage/storage.service';
 import { FeedLikePresentationService } from '../../domain/services/feed-like-presentation.service';
+import { FEED_LIKE_ASSET_URL, type FeedLikeAssetUrlPort } from '../ports/feed-like-asset-url.port';
 import { FEED_LIKE_MANAGER, type FeedLikeManagerPort } from '../ports/feed-like-manager.port';
 
 @Injectable()
@@ -10,7 +10,8 @@ export class GetMyLikedVideosUseCase {
         @Inject(FEED_LIKE_MANAGER)
         private readonly feedLikeManager: FeedLikeManagerPort,
         private readonly feedLikePresentationService: FeedLikePresentationService,
-        private readonly storageService: StorageService,
+        @Inject(FEED_LIKE_ASSET_URL)
+        private readonly feedLikeAssetUrl: FeedLikeAssetUrlPort,
     ) {}
 
     async execute(userId: string, page: number = 1, limit: number = 20) {
@@ -25,7 +26,7 @@ export class GetMyLikedVideosUseCase {
             page,
             limit,
             totalCount,
-            (fileKey) => (fileKey ? this.storageService.generateSignedUrl(fileKey, 50) : null),
+            (fileKey) => (fileKey ? this.feedLikeAssetUrl.generateSignedUrl(fileKey, 50) : null),
         );
     }
 }
