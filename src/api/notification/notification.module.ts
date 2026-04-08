@@ -2,9 +2,12 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { EmailTestController } from './test/email-test.controller';
-import { NotificationCommandController } from './notification-command.controller';
-import { NotificationQueryController } from './notification-query.controller';
+import { NotificationDeleteController } from './notification-delete.controller';
+import { NotificationListController } from './notification-list.controller';
+import { NotificationMarkAllReadController } from './notification-mark-all-read.controller';
+import { NotificationMarkReadController } from './notification-mark-read.controller';
 import { NotificationService } from './notification.service';
+import { NotificationUnreadCountController } from './notification-unread-count.controller';
 import { CreateNotificationUseCase } from './application/use-cases/create-notification.use-case';
 import { CreateNotificationFromBuilderUseCase } from './application/use-cases/create-notification-from-builder.use-case';
 import { GetNotificationsUseCase } from './application/use-cases/get-notifications.use-case';
@@ -34,7 +37,14 @@ import { MailModule } from '../../common/mail/mail.module';
  */
 @Module({
     imports: [MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }]), MailModule],
-    controllers: [NotificationQueryController, NotificationCommandController, EmailTestController],
+    controllers: [
+        NotificationListController,
+        NotificationUnreadCountController,
+        NotificationMarkReadController,
+        NotificationMarkAllReadController,
+        NotificationDeleteController,
+        EmailTestController,
+    ],
     providers: [
         NotificationService,
         CreateNotificationUseCase,
