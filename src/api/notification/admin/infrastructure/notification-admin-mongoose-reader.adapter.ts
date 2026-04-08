@@ -1,8 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-
-import { Notification } from '../../../../schema/notification.schema';
 import {
     NotificationAdminListFilterSnapshot,
     NotificationAdminPageSnapshot,
@@ -10,27 +6,18 @@ import {
     NotificationAdminRecordSnapshot,
     NotificationAdminStatsSnapshot,
 } from '../application/ports/notification-admin-reader.port';
+import { NotificationAdminRepository } from '../repository/notification-admin.repository';
 
 @Injectable()
 export class NotificationAdminMongooseReaderAdapter implements NotificationAdminReaderPort {
-    constructor(
-        @InjectModel(Notification.name)
-        private readonly notificationModel: Model<Notification>,
-    ) {}
+    constructor(private readonly notificationAdminRepository: NotificationAdminRepository) {}
 
     async findPaged(filter: NotificationAdminListFilterSnapshot): Promise<NotificationAdminPageSnapshot> {
         const query = this.buildQuery(filter);
-        const skip = (filter.page - 1) * filter.limit;
 
         const [notifications, totalItems] = await Promise.all([
-            this.notificationModel
-                .find(query)
-                .sort({ createdAt: -1 })
-                .skip(skip)
-                .limit(filter.limit)
-                .lean()
-                .exec(),
-            this.notificationModel.countDocuments(query).exec(),
+            this.notificationAdminRepository.findPaged(query, filter.page, filter.limit),
+            this.notificationAdminRepository.countDocuments(query),
         ]);
 
         return {
@@ -41,24 +28,10 @@ export class NotificationAdminMongooseReaderAdapter implements NotificationAdmin
 
     async getStats(): Promise<NotificationAdminStatsSnapshot> {
         const [totalNotifications, unreadNotifications, notificationsByType, notificationsByRole] = await Promise.all([
-            this.notificationModel.countDocuments().exec(),
-            this.notificationModel.countDocuments({ isRead: false }).exec(),
-            this.notificationModel.aggregate([
-                {
-                    $group: {
-                        _id: '$type',
-                        count: { $sum: 1 },
-                    },
-                },
-            ]),
-            this.notificationModel.aggregate([
-                {
-                    $group: {
-                        _id: '$userRole',
-                        count: { $sum: 1 },
-                    },
-                },
-            ]),
+            this.notificationAdminRepository.countAll(),
+            this.notificationAdminRepository.countUnread(),
+            this.notificationAdminRepository.aggregateByType(),
+            this.notificationAdminRepository.aggregateByRole(),
         ]);
 
         return {
