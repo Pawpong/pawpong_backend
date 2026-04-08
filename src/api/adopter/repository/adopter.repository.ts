@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -20,6 +20,8 @@ import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
  */
 @Injectable()
 export class AdopterRepository {
+    private readonly logger = new Logger(AdopterRepository.name);
+
     constructor(@InjectModel(Adopter.name) private readonly adopterModel: Model<AdopterDocument>) {}
 
     /**
@@ -241,8 +243,12 @@ export class AdopterRepository {
         try {
             await this.adopterModel.findByIdAndUpdate(adopterId, { $set: { last_activity_at: new Date() } }).exec();
         } catch (error) {
-            // 치명적이지 않은 오류이므로 로깅만 수행
-            console.error(`입양자 활동 시간 업데이트 실패: ${error.message}`);
+            const message = error instanceof Error ? error.message : String(error);
+            const trace = error instanceof Error ? error.stack : undefined;
+            this.logger.warn(`입양자 활동 시간 업데이트 실패: ${message}`);
+            if (trace) {
+                this.logger.debug(trace);
+            }
         }
     }
 
