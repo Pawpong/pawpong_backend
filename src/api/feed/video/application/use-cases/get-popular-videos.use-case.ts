@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
+import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FEED_VIDEO_READER, type FeedVideoReaderPort } from '../ports/feed-video-reader.port';
 import { FeedVideoPresentationService } from '../../domain/services/feed-video-presentation.service';
 import { FeedVideoAssetUrlService } from '../../infrastructure/feed-video-asset-url.service';
@@ -15,10 +16,11 @@ export class GetPopularVideosUseCase {
         private readonly feedVideoAssetUrlService: FeedVideoAssetUrlService,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
+        private readonly feedCacheKeyService: FeedCacheKeyService,
     ) {}
 
     async execute(limit: number = 10): Promise<any[]> {
-        const cacheKey = `video:popular:${limit}`;
+        const cacheKey = this.feedCacheKeyService.getPopularVideosKey(limit);
         const cached = await this.cacheManager.get<any[]>(cacheKey);
         if (cached) {
             return cached;

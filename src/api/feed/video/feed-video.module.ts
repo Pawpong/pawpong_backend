@@ -9,6 +9,8 @@ import { StorageModule } from '../../../common/storage/storage.module';
 import { FeedCommentModule } from '../comment/feed-comment.module';
 import { FeedLikeModule } from '../like/feed-like.module';
 import { FeedTagModule } from '../tag/feed-tag.module';
+import { FeedCacheKeyService } from '../domain/services/feed-cache-key.service';
+import { FeedVideoSummaryPresentationService } from '../domain/services/feed-video-summary-presentation.service';
 import { FeedVideoTranscoderPort } from './application/ports/feed-video-transcoder.port';
 import { FEED_VIDEO_FILE_STORAGE } from './application/ports/feed-video-file-storage.port';
 import { GetFeedUseCase } from './application/use-cases/get-feed.use-case';
@@ -129,6 +131,8 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         UpdateEncodingFailedUseCase,
         ProxyHlsFileUseCase,
         PrefetchAllQualitySegmentsUseCase,
+        FeedCacheKeyService,
+        FeedVideoSummaryPresentationService,
         FeedVideoPresentationService,
         FeedVideoCommandPolicyService,
         FeedVideoStreamingService,

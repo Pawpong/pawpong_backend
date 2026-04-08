@@ -3,11 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { FeedResponseDto } from '../../dto/response/video-response.dto';
 import { FeedVideoCommandSnapshot } from '../../application/ports/feed-video-command.port';
 import { FeedVideoSnapshot, FeedVideoUploaderSnapshot } from '../../application/ports/feed-video-reader.port';
+import { FeedVideoSummaryPresentationService } from '../../../domain/services/feed-video-summary-presentation.service';
 
 type SignedUrlResolver = (fileKey: string) => Promise<string>;
 
 @Injectable()
 export class FeedVideoPresentationService {
+    constructor(private readonly feedVideoSummaryPresentationService: FeedVideoSummaryPresentationService) {}
+
     async buildFeedResponse(
         videos: FeedVideoSnapshot[],
         page: number,
@@ -30,14 +33,7 @@ export class FeedVideoPresentationService {
 
         return {
             items,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: totalCount,
-                totalPages: Math.ceil(totalCount / limit),
-                hasNextPage: page < Math.ceil(totalCount / limit),
-                hasPrevPage: page > 1,
-            },
+            pagination: this.feedVideoSummaryPresentationService.toPagination(page, limit, totalCount),
         };
     }
 
@@ -77,14 +73,7 @@ export class FeedVideoPresentationService {
 
         return {
             items,
-            pagination: {
-                currentPage: page,
-                pageSize: limit,
-                totalItems: totalCount,
-                totalPages: Math.ceil(totalCount / limit),
-                hasNextPage: page < Math.ceil(totalCount / limit),
-                hasPrevPage: page > 1,
-            },
+            pagination: this.feedVideoSummaryPresentationService.toPagination(page, limit, totalCount),
         };
     }
 
@@ -118,15 +107,6 @@ export class FeedVideoPresentationService {
     }
 
     private toUploaderResponse(uploader: FeedVideoUploaderSnapshot | null): any {
-        if (!uploader) {
-            return null;
-        }
-
-        return {
-            _id: uploader.id,
-            name: uploader.name,
-            profileImageFileName: uploader.profileImageFileName,
-            businessName: uploader.businessName,
-        };
+        return this.feedVideoSummaryPresentationService.toUploaderResponse(uploader);
     }
 }

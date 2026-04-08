@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { CreateCommentUseCase } from './create-comment.use-case';
+import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedCommentManagerPort } from '../ports/feed-comment-manager.port';
 import { FeedCommentPolicyService } from '../../domain/services/feed-comment-policy.service';
 import { FeedCommentPresentationService } from '../../domain/services/feed-comment-presentation.service';
@@ -49,6 +50,7 @@ describe('CreateCommentUseCase', () => {
             new FeedCommentPolicyService(),
             new FeedCommentPresentationService(),
             { del: jest.fn() } as any,
+            new FeedCacheKeyService(),
         );
 
         await expect(useCase.execute('video-1', 'user-1', 'Adopter', 'reply', 'parent-1')).rejects.toBeInstanceOf(

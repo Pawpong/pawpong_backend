@@ -1,7 +1,11 @@
-import { Get, Query } from '@nestjs/common';
+import { Get, Inject, Query } from '@nestjs/common';
 
-import { GetPopularTagsUseCase } from '../tag/application/use-cases/get-popular-tags.use-case';
-import { SuggestTagsUseCase } from '../tag/application/use-cases/suggest-tags.use-case';
+import {
+    GET_POPULAR_FEED_TAGS_USE_CASE,
+    SUGGEST_FEED_TAGS_USE_CASE,
+    type GetPopularFeedTagsUseCasePort,
+    type SuggestFeedTagsUseCasePort,
+} from '../tag/application/ports/feed-tag-interaction.port';
 import { PopularTagItemDto, TagSuggestionItemDto } from '../tag/dto/response/tag-response.dto';
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
 import { ApiGetPopularFeedTagsEndpoint, ApiSuggestFeedTagsEndpoint } from './swagger';
@@ -9,8 +13,10 @@ import { ApiGetPopularFeedTagsEndpoint, ApiSuggestFeedTagsEndpoint } from './swa
 @FeedPublicController()
 export class FeedVideoTagCatalogController {
     constructor(
-        private readonly getPopularTagsUseCase: GetPopularTagsUseCase,
-        private readonly suggestTagsUseCase: SuggestTagsUseCase,
+        @Inject(GET_POPULAR_FEED_TAGS_USE_CASE)
+        private readonly getPopularTagsUseCase: GetPopularFeedTagsUseCasePort,
+        @Inject(SUGGEST_FEED_TAGS_USE_CASE)
+        private readonly suggestTagsUseCase: SuggestFeedTagsUseCasePort,
     ) {}
 
     @Get('tag/popular')

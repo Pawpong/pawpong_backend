@@ -1,7 +1,10 @@
-import { Body, Param, Patch } from '@nestjs/common';
+import { Body, Inject, Param, Patch } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
-import { UpdateCommentUseCase } from '../comment/application/use-cases/update-comment.use-case';
+import {
+    UPDATE_FEED_VIDEO_COMMENT_USE_CASE,
+    type UpdateFeedVideoCommentUseCasePort,
+} from '../comment/application/ports/feed-comment-interaction.port';
 import { UpdateCommentRequestDto } from '../comment/dto/request/comment-request.dto';
 import { CommentUpdateResponseDto } from '../comment/dto/response/comment-response.dto';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
@@ -9,7 +12,10 @@ import { ApiUpdateFeedVideoCommentEndpoint } from './swagger';
 
 @FeedProtectedController()
 export class FeedVideoCommentUpdateController {
-    constructor(private readonly updateCommentUseCase: UpdateCommentUseCase) {}
+    constructor(
+        @Inject(UPDATE_FEED_VIDEO_COMMENT_USE_CASE)
+        private readonly updateCommentUseCase: UpdateFeedVideoCommentUseCasePort,
+    ) {}
 
     @Patch('comment/:commentId')
     @ApiUpdateFeedVideoCommentEndpoint()

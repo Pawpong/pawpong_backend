@@ -1,6 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { ToggleLikeUseCase } from './toggle-like.use-case';
+import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
+import { FeedVideoSummaryPresentationService } from '../../../domain/services/feed-video-summary-presentation.service';
 import { FeedLikeManagerPort } from '../ports/feed-like-manager.port';
 import { FeedLikePolicyService } from '../../domain/services/feed-like-policy.service';
 import { FeedLikePresentationService } from '../../domain/services/feed-like-presentation.service';
@@ -25,8 +27,9 @@ describe('ToggleLikeUseCase', () => {
         const useCase = new ToggleLikeUseCase(
             manager,
             new FeedLikePolicyService(),
-            new FeedLikePresentationService(),
+            new FeedLikePresentationService(new FeedVideoSummaryPresentationService()),
             cacheManager as any,
+            new FeedCacheKeyService(),
         );
 
         await expect(useCase.execute('video-1', 'user-1', 'Adopter')).resolves.toEqual({
@@ -48,8 +51,9 @@ describe('ToggleLikeUseCase', () => {
         const useCase = new ToggleLikeUseCase(
             manager,
             new FeedLikePolicyService(),
-            new FeedLikePresentationService(),
+            new FeedLikePresentationService(new FeedVideoSummaryPresentationService()),
             { del: jest.fn() } as any,
+            new FeedCacheKeyService(),
         );
 
         await expect(useCase.execute('video-1', 'user-1', 'Adopter')).rejects.toBeInstanceOf(BadRequestException);

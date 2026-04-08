@@ -3,7 +3,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Video, VideoSchema } from '../../../schema/video.schema';
 import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema';
 import { StorageModule } from '../../../common/storage/storage.module';
+import { FeedCacheKeyService } from '../domain/services/feed-cache-key.service';
+import { FeedVideoSummaryPresentationService } from '../domain/services/feed-video-summary-presentation.service';
 import { FEED_LIKE_ASSET_URL } from './application/ports/feed-like-asset-url.port';
+import {
+    GET_FEED_VIDEO_LIKE_STATUS_USE_CASE,
+    GET_MY_LIKED_FEED_VIDEOS_USE_CASE,
+    TOGGLE_FEED_VIDEO_LIKE_USE_CASE,
+} from './application/ports/feed-like-interaction.port';
 import { ToggleLikeUseCase } from './application/use-cases/toggle-like.use-case';
 import { GetLikeStatusUseCase } from './application/use-cases/get-like-status.use-case';
 import { GetMyLikedVideosUseCase } from './application/use-cases/get-my-liked-videos.use-case';
@@ -32,6 +39,8 @@ import { FEED_LIKE_MANAGER } from './application/ports/feed-like-manager.port';
         ToggleLikeUseCase,
         GetLikeStatusUseCase,
         GetMyLikedVideosUseCase,
+        FeedCacheKeyService,
+        FeedVideoSummaryPresentationService,
         FeedLikePolicyService,
         FeedLikePresentationService,
         FeedLikeRepository,
@@ -45,7 +54,19 @@ import { FEED_LIKE_MANAGER } from './application/ports/feed-like-manager.port';
             provide: FEED_LIKE_ASSET_URL,
             useExisting: FeedLikeStorageAssetUrlAdapter,
         },
+        {
+            provide: TOGGLE_FEED_VIDEO_LIKE_USE_CASE,
+            useExisting: ToggleLikeUseCase,
+        },
+        {
+            provide: GET_FEED_VIDEO_LIKE_STATUS_USE_CASE,
+            useExisting: GetLikeStatusUseCase,
+        },
+        {
+            provide: GET_MY_LIKED_FEED_VIDEOS_USE_CASE,
+            useExisting: GetMyLikedVideosUseCase,
+        },
     ],
-    exports: [ToggleLikeUseCase, GetLikeStatusUseCase, GetMyLikedVideosUseCase],
+    exports: [TOGGLE_FEED_VIDEO_LIKE_USE_CASE, GET_FEED_VIDEO_LIKE_STATUS_USE_CASE, GET_MY_LIKED_FEED_VIDEOS_USE_CASE],
 })
 export class FeedLikeModule {}

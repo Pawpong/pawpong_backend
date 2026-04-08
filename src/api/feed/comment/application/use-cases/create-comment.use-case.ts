@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
+import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedCommentPresentationService } from '../../domain/services/feed-comment-presentation.service';
 import { FeedCommentPolicyService } from '../../domain/services/feed-comment-policy.service';
 import { FEED_COMMENT_MANAGER, type FeedCommentManagerPort } from '../ports/feed-comment-manager.port';
@@ -15,6 +16,7 @@ export class CreateCommentUseCase {
         private readonly feedCommentPresentationService: FeedCommentPresentationService,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
+        private readonly feedCacheKeyService: FeedCacheKeyService,
     ) {}
 
     async execute(
@@ -43,8 +45,8 @@ export class CreateCommentUseCase {
         });
 
         await this.feedCommentManager.incrementVideoCommentCount(videoId, 1);
-        await this.cacheManager.del(`video:meta:${videoId}`);
-        await this.cacheManager.del(`video:comments:${videoId}`);
+        await this.cacheManager.del(this.feedCacheKeyService.getVideoMetaKey(videoId));
+        await this.cacheManager.del(this.feedCacheKeyService.getVideoCommentsKey(videoId));
 
         return this.feedCommentPresentationService.buildCreateResponse(comment);
     }
