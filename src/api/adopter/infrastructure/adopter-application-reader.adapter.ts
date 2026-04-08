@@ -1,33 +1,17 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-
-import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
-import { AdoptionApplication, AdoptionApplicationDocument } from '../../../schema/adoption-application.schema';
 import { type AdopterApplicationReaderPort, type AdopterApplicationRecord } from '../application/ports/adopter-application-reader.port';
+import { AdopterApplicationRepository } from '../repository/adopter-application.repository';
 
 @Injectable()
 export class AdopterApplicationReaderAdapter implements AdopterApplicationReaderPort {
-    constructor(
-        @InjectModel(Breeder.name)
-        private readonly breederModel: Model<BreederDocument>,
-        @InjectModel(AdoptionApplication.name)
-        private readonly adoptionApplicationModel: Model<AdoptionApplicationDocument>,
-    ) {}
+    constructor(private readonly adopterApplicationRepository: AdopterApplicationRepository) {}
 
     async findBreederIdsByAnimalType(animalType: 'cat' | 'dog'): Promise<string[]> {
-        const breeders = await this.breederModel
-            .find({
-                'profile.specialization': animalType,
-            })
-            .select('_id')
-            .exec();
-
-        return breeders.map((breeder: any) => breeder._id.toString());
+        return this.adopterApplicationRepository.findBreederIdsByAnimalType(animalType);
     }
 
     countByAdopterId(adopterId: string, breederIds?: string[]): Promise<number> {
-        return this.adoptionApplicationModel.countDocuments(this.buildQuery(adopterId, breederIds)).exec();
+        return this.adopterApplicationRepository.countByAdopterId(adopterId, breederIds);
     }
 
     findPagedByAdopterId(
@@ -36,26 +20,18 @@ export class AdopterApplicationReaderAdapter implements AdopterApplicationReader
         limit: number,
         breederIds?: string[],
     ): Promise<AdopterApplicationRecord[]> {
-        return this.adoptionApplicationModel
-            .find(this.buildQuery(adopterId, breederIds))
-            .sort({ appliedAt: -1 })
-            .skip((page - 1) * limit)
-            .limit(limit)
-            .exec() as Promise<AdopterApplicationRecord[]>;
+        return this.adopterApplicationRepository.findPagedByAdopterId(
+            adopterId,
+            page,
+            limit,
+            breederIds,
+        ) as Promise<AdopterApplicationRecord[]>;
     }
 
     findByIdForAdopter(adopterId: string, applicationId: string): Promise<AdopterApplicationRecord | null> {
-        return this.adoptionApplicationModel.findOne({
-            _id: applicationId,
+        return this.adopterApplicationRepository.findByIdForAdopter(
             adopterId,
-        }) as Promise<AdopterApplicationRecord | null>;
-    }
-
-    private buildQuery(adopterId: string, breederIds?: string[]): Record<string, any> {
-        const query: Record<string, any> = { adopterId };
-        if (breederIds) {
-            query.breederId = { $in: breederIds };
-        }
-        return query;
+            applicationId,
+        ) as Promise<AdopterApplicationRecord | null>;
     }
 }

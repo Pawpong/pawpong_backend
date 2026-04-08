@@ -1,39 +1,28 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
 import { StorageService } from '../../../common/storage/storage.service';
-import { BreederReview, BreederReviewDocument } from '../../../schema/breeder-review.schema';
 import type {
     AdopterReviewDetailRecord,
     AdopterReviewListRecord,
 } from '../application/ports/adopter-review-reader.port';
 import { AdopterReviewReaderPort } from '../application/ports/adopter-review-reader.port';
+import { AdopterReviewRepository } from '../repository/adopter-review.repository';
 
 @Injectable()
 export class AdopterReviewReaderAdapter extends AdopterReviewReaderPort {
     constructor(
-        @InjectModel(BreederReview.name)
-        private readonly breederReviewModel: Model<BreederReviewDocument>,
+        private readonly adopterReviewRepository: AdopterReviewRepository,
         private readonly storageService: StorageService,
     ) {
         super();
     }
 
     countByAdopterId(adopterId: string): Promise<number> {
-        return this.breederReviewModel.countDocuments({ adopterId }).exec();
+        return this.adopterReviewRepository.countByAdopterId(adopterId);
     }
 
     async findPagedByAdopterId(adopterId: string, page: number, limit: number): Promise<AdopterReviewListRecord[]> {
-        const skip = (page - 1) * limit;
-        const reviews = await this.breederReviewModel
-            .find({ adopterId })
-            .sort({ writtenAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate('breederId', 'nickname profileImageFileName verification.level petType')
-            .lean()
-            .exec();
+        const reviews = await this.adopterReviewRepository.findPagedByAdopterId(adopterId, page, limit);
 
         return reviews.map((review: any) => {
             const breeder = review.breederId;
@@ -55,11 +44,7 @@ export class AdopterReviewReaderAdapter extends AdopterReviewReaderPort {
     }
 
     async findDetailByAdopterId(adopterId: string, reviewId: string): Promise<AdopterReviewDetailRecord | null> {
-        const review = await this.breederReviewModel
-            .findOne({ _id: reviewId, adopterId })
-            .populate('breederId', 'nickname profileImageFileName verification.level petType')
-            .lean()
-            .exec();
+        const review = await this.adopterReviewRepository.findDetailByAdopterId(adopterId, reviewId);
 
         if (!review) {
             return null;
