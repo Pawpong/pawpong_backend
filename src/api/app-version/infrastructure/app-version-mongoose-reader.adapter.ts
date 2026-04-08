@@ -1,20 +1,14 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { AppVersion } from '../../../schema/app-version.schema';
 import { AppVersionReaderPort, ActiveAppVersionSnapshot } from '../application/ports/app-version-reader.port';
+import { AppVersionRepository } from '../repository/app-version.repository';
 
 @Injectable()
 export class AppVersionMongooseReaderAdapter implements AppVersionReaderPort {
-    constructor(@InjectModel(AppVersion.name) private readonly appVersionModel: Model<AppVersion>) {}
+    constructor(private readonly appVersionRepository: AppVersionRepository) {}
 
     async findLatestActiveByPlatform(platform: 'ios' | 'android'): Promise<ActiveAppVersionSnapshot | null> {
-        const versionInfo = await this.appVersionModel
-            .findOne({ platform, isActive: true })
-            .sort({ createdAt: -1 })
-            .lean()
-            .exec();
+        const versionInfo = await this.appVersionRepository.findLatestActiveByPlatform(platform);
 
         if (!versionInfo) {
             return null;
