@@ -6,7 +6,6 @@ import { AnnouncementAdminCommandController } from './admin/announcement-admin-c
 import { AnnouncementAdminQueryController } from './admin/announcement-admin-query.controller';
 
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
-import { AnnouncementService } from './announcement.service';
 import { AnnouncementPublicReaderPort } from './application/ports/announcement-public-reader.port';
 import { GetActiveAnnouncementsUseCase } from './application/use-cases/get-active-announcements.use-case';
 import { GetAnnouncementByIdUseCase } from './application/use-cases/get-announcement-by-id.use-case';
@@ -32,7 +31,6 @@ import { Announcement, AnnouncementSchema } from '../../schema/announcement.sche
     imports: [MongooseModule.forFeature([{ name: Announcement.name, schema: AnnouncementSchema }])],
     controllers: [AnnouncementController, AnnouncementAdminQueryController, AnnouncementAdminCommandController],
     providers: [
-        AnnouncementService,
         GetActiveAnnouncementsUseCase,
         GetAnnouncementByIdUseCase,
         GetAllAnnouncementsUseCase,
@@ -58,6 +56,5 @@ import { Announcement, AnnouncementSchema } from '../../schema/announcement.sche
         },
         CustomLoggerService,
     ],
-    exports: [AnnouncementService],
 })
 export class AnnouncementModule {}
