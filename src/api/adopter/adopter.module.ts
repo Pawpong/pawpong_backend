@@ -237,6 +237,5 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             useExisting: AdopterFileUrlAdapter,
         },
     ],
-    exports: [AdopterRepository],
 })
 export class AdopterModule {}
