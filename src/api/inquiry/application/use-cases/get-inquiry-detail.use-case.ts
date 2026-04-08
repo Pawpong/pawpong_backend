@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { StorageService } from '../../../../common/storage/storage.service';
 import { InquiryDetailResponseDto } from '../../dto/response/inquiry-detail-response.dto';
 import { InquiryViewService } from '../../domain/services/inquiry-view.service';
+import { INQUIRY_ASSET_URL, type InquiryAssetUrlPort } from '../ports/inquiry-asset-url.port';
 import { INQUIRY_READER, type InquiryReaderPort } from '../ports/inquiry-reader.port';
 
 @Injectable()
@@ -11,7 +11,8 @@ export class GetInquiryDetailUseCase {
         @Inject(INQUIRY_READER)
         private readonly inquiryReader: InquiryReaderPort,
         private readonly inquiryViewService: InquiryViewService,
-        private readonly storageService: StorageService,
+        @Inject(INQUIRY_ASSET_URL)
+        private readonly inquiryAssetUrl: InquiryAssetUrlPort,
     ) {}
 
     async execute(inquiryId: string, userId?: string): Promise<InquiryDetailResponseDto> {
@@ -28,7 +29,7 @@ export class GetInquiryDetailUseCase {
         this.inquiryReader.incrementViewCount(inquiryId);
 
         return this.inquiryViewService.buildDetailResponse(inquiry, userId, (fileName, expirationMinutes) =>
-            this.storageService.generateSignedUrl(fileName, expirationMinutes),
+            this.inquiryAssetUrl.generateSignedUrl(fileName, expirationMinutes),
         );
     }
 }
