@@ -1,12 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-
-import { ApplicationStatus, UserStatus, VerificationStatus } from '../../../../common/enum/user.enum';
-import { Admin, AdminDocument } from '../../../../schema/admin.schema';
-import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
-import { AdoptionApplication, AdoptionApplicationDocument } from '../../../../schema/adoption-application.schema';
-import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
+import { ApplicationStatus, VerificationStatus } from '../../../../common/enum/user.enum';
 import {
     PlatformAdminAdminSnapshot,
     PlatformAdminFilterUsageItemSnapshot,
@@ -15,19 +8,14 @@ import {
     PlatformAdminStatsFilterSnapshot,
     PlatformAdminStatsSnapshot,
 } from '../application/ports/platform-admin-reader.port';
+import { PlatformAdminRepository } from '../repository/platform-admin.repository';
 
 @Injectable()
 export class PlatformAdminMongooseReaderAdapter implements PlatformAdminReaderPort {
-    constructor(
-        @InjectModel(Admin.name) private readonly adminModel: Model<AdminDocument>,
-        @InjectModel(Breeder.name) private readonly breederModel: Model<BreederDocument>,
-        @InjectModel(Adopter.name) private readonly adopterModel: Model<AdopterDocument>,
-        @InjectModel(AdoptionApplication.name)
-        private readonly adoptionApplicationModel: Model<AdoptionApplicationDocument>,
-    ) {}
+    constructor(private readonly platformAdminRepository: PlatformAdminRepository) {}
 
     async findAdminById(adminId: string): Promise<PlatformAdminAdminSnapshot | null> {
-        const admin = await this.adminModel.findById(adminId).select('permissions').lean();
+        const admin = await this.platformAdminRepository.findAdminById(adminId);
 
         if (!admin) {
             return null;
@@ -41,21 +29,13 @@ export class PlatformAdminMongooseReaderAdapter implements PlatformAdminReaderPo
 
     async getStats(_filter: PlatformAdminStatsFilterSnapshot): Promise<PlatformAdminStatsSnapshot> {
         const [adoptersTotal, breedersTotal, breedersApproved, breedersPending] = await Promise.all([
-            this.adopterModel.countDocuments({ accountStatus: UserStatus.ACTIVE }),
-            this.breederModel.countDocuments({ accountStatus: UserStatus.ACTIVE }),
-            this.breederModel.countDocuments({ 'verification.status': VerificationStatus.APPROVED }),
-            this.breederModel.countDocuments({ 'verification.status': VerificationStatus.PENDING }),
+            this.platformAdminRepository.countActiveAdopters(),
+            this.platformAdminRepository.countActiveBreeders(),
+            this.platformAdminRepository.countApprovedBreeders(),
+            this.platformAdminRepository.countPendingBreeders(),
         ]);
 
-        const applicationStats = await this.breederModel.aggregate([
-            { $unwind: '$receivedApplications' },
-            {
-                $group: {
-                    _id: '$receivedApplications.status',
-                    count: { $sum: 1 },
-                },
-            },
-        ]);
+        const applicationStats = await this.platformAdminRepository.aggregateApplicationStats();
 
         const totalApplications = applicationStats.reduce((sum: number, stat: any) => sum + stat.count, 0);
         const pendingApplications =
@@ -65,58 +45,13 @@ export class PlatformAdminMongooseReaderAdapter implements PlatformAdminReaderPo
         const rejectedApplications =
             applicationStats.find((item: any) => item._id === ApplicationStatus.ADOPTION_REJECTED)?.count || 0;
 
-        const popularBreeds = await this.breederModel.aggregate([
-            { $unwind: '$availablePets' },
-            {
-                $group: {
-                    _id: { breed: '$availablePets.breed', type: '$availablePets.type' },
-                    applicationCount: { $sum: 1 },
-                    averagePrice: { $avg: '$availablePets.price' },
-                },
-            },
-            { $sort: { applicationCount: -1 } },
-            { $limit: 10 },
-        ]);
+        const popularBreeds = await this.platformAdminRepository.aggregatePopularBreeds(10);
 
-        const regionalStats = await this.breederModel.aggregate([
-            {
-                $group: {
-                    _id: { city: '$profile.location.city', district: '$profile.location.district' },
-                    breederCount: { $sum: 1 },
-                    applicationCount: { $sum: '$stats.totalApplications' },
-                    completedAdoptionCount: { $sum: '$stats.completedAdoptions' },
-                },
-            },
-            { $sort: { breederCount: -1 } },
-            { $limit: 10 },
-        ]);
+        const regionalStats = await this.platformAdminRepository.aggregateRegionalStats(10);
 
-        const breederPerformance = await this.breederModel.aggregate([
-            {
-                $project: {
-                    breederId: '$_id',
-                    breederName: '$name',
-                    city: '$profile.location.city',
-                    applicationCount: '$stats.totalApplications',
-                    completedAdoptionCount: '$stats.completedAdoptions',
-                    averageRating: '$stats.averageRating',
-                    totalReviews: '$stats.totalReviews',
-                    profileViews: '$stats.profileViews',
-                },
-            },
-            { $sort: { applicationCount: -1 } },
-            { $limit: 10 },
-        ]);
+        const breederPerformance = await this.platformAdminRepository.aggregateBreederPerformance(10);
 
-        const reportStats = await this.breederModel.aggregate([
-            { $unwind: '$reports' },
-            {
-                $group: {
-                    _id: '$reports.status',
-                    count: { $sum: 1 },
-                },
-            },
-        ]);
+        const reportStats = await this.platformAdminRepository.aggregateReportStats();
 
         const totalReports = reportStats.reduce((sum: number, stat: any) => sum + stat.count, 0);
         const pendingReports = reportStats.find((item: any) => item._id === 'pending')?.count || 0;
@@ -182,30 +117,12 @@ export class PlatformAdminMongooseReaderAdapter implements PlatformAdminReaderPo
 
         const [adopters7Days, adopters14Days, adopters28Days, breeders7Days, breeders14Days, breeders28Days] =
             await Promise.all([
-                this.adopterModel.countDocuments({
-                    accountStatus: UserStatus.ACTIVE,
-                    lastLoginAt: { $gte: sevenDaysAgo },
-                }),
-                this.adopterModel.countDocuments({
-                    accountStatus: UserStatus.ACTIVE,
-                    lastLoginAt: { $gte: fourteenDaysAgo },
-                }),
-                this.adopterModel.countDocuments({
-                    accountStatus: UserStatus.ACTIVE,
-                    lastLoginAt: { $gte: twentyEightDaysAgo },
-                }),
-                this.breederModel.countDocuments({
-                    accountStatus: UserStatus.ACTIVE,
-                    lastLoginAt: { $gte: sevenDaysAgo },
-                }),
-                this.breederModel.countDocuments({
-                    accountStatus: UserStatus.ACTIVE,
-                    lastLoginAt: { $gte: fourteenDaysAgo },
-                }),
-                this.breederModel.countDocuments({
-                    accountStatus: UserStatus.ACTIVE,
-                    lastLoginAt: { $gte: twentyEightDaysAgo },
-                }),
+                this.platformAdminRepository.countActiveAdoptersSince(sevenDaysAgo),
+                this.platformAdminRepository.countActiveAdoptersSince(fourteenDaysAgo),
+                this.platformAdminRepository.countActiveAdoptersSince(twentyEightDaysAgo),
+                this.platformAdminRepository.countActiveBreedersSince(sevenDaysAgo),
+                this.platformAdminRepository.countActiveBreedersSince(fourteenDaysAgo),
+                this.platformAdminRepository.countActiveBreedersSince(twentyEightDaysAgo),
             ]);
 
         const [
@@ -216,69 +133,22 @@ export class PlatformAdminMongooseReaderAdapter implements PlatformAdminReaderPo
             adoptions14Days,
             adoptions28Days,
         ] = await Promise.all([
-            this.adoptionApplicationModel.countDocuments({
-                appliedAt: { $gte: sevenDaysAgo },
-            }),
-            this.adoptionApplicationModel.countDocuments({
-                appliedAt: { $gte: fourteenDaysAgo },
-            }),
-            this.adoptionApplicationModel.countDocuments({
-                appliedAt: { $gte: twentyEightDaysAgo },
-            }),
-            this.adoptionApplicationModel.countDocuments({
-                status: ApplicationStatus.ADOPTION_APPROVED,
-                processedAt: { $gte: sevenDaysAgo },
-            }),
-            this.adoptionApplicationModel.countDocuments({
-                status: ApplicationStatus.ADOPTION_APPROVED,
-                processedAt: { $gte: fourteenDaysAgo },
-            }),
-            this.adoptionApplicationModel.countDocuments({
-                status: ApplicationStatus.ADOPTION_APPROVED,
-                processedAt: { $gte: twentyEightDaysAgo },
-            }),
+            this.platformAdminRepository.countConsultationsSince(sevenDaysAgo),
+            this.platformAdminRepository.countConsultationsSince(fourteenDaysAgo),
+            this.platformAdminRepository.countConsultationsSince(twentyEightDaysAgo),
+            this.platformAdminRepository.countApprovedAdoptionsSince(sevenDaysAgo),
+            this.platformAdminRepository.countApprovedAdoptionsSince(fourteenDaysAgo),
+            this.platformAdminRepository.countApprovedAdoptionsSince(twentyEightDaysAgo),
         ]);
 
-        const topLocations = await this.breederModel.aggregate([
-            {
-                $match: {
-                    'verification.status': VerificationStatus.APPROVED,
-                },
-            },
-            {
-                $group: {
-                    _id: '$profile.location.city',
-                    count: { $sum: 1 },
-                },
-            },
-            { $sort: { count: -1 } },
-            { $limit: 10 },
-        ]);
+        const topLocations = await this.platformAdminRepository.aggregateTopLocations(10);
 
-        const topBreeds = await this.breederModel.aggregate([
-            { $unwind: '$availablePets' },
-            {
-                $group: {
-                    _id: '$availablePets.breed',
-                    count: { $sum: 1 },
-                },
-            },
-            { $sort: { count: -1 } },
-            { $limit: 10 },
-        ]);
+        const topBreeds = await this.platformAdminRepository.aggregateTopBreeds(10);
 
         const [rejectedBreeders, resubmittedBreeders, resubmittedAndApproved] = await Promise.all([
-            this.breederModel.countDocuments({
-                'verification.status': VerificationStatus.REJECTED,
-            }),
-            this.breederModel.countDocuments({
-                'verification.status': { $in: [VerificationStatus.REVIEWING, VerificationStatus.APPROVED] },
-                'verification.previousStatus': VerificationStatus.REJECTED,
-            }),
-            this.breederModel.countDocuments({
-                'verification.status': VerificationStatus.APPROVED,
-                'verification.previousStatus': VerificationStatus.REJECTED,
-            }),
+            this.platformAdminRepository.countRejectedBreeders(),
+            this.platformAdminRepository.countResubmittedBreeders(),
+            this.platformAdminRepository.countResubmittedAndApprovedBreeders(),
         ]);
 
         const totalRejections = rejectedBreeders + resubmittedBreeders;
