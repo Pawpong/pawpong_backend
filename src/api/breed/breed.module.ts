@@ -5,7 +5,6 @@ import { BreedController } from './service/breed.controller';
 import { BreedAdminCommandController } from './admin/breed-admin-command.controller';
 import { BreedAdminQueryController } from './admin/breed-admin-query.controller';
 
-import { BreedService } from './service/breed.service';
 import { GetBreedsUseCase } from './application/use-cases/get-breeds.use-case';
 import { BreedCatalogService } from './domain/services/breed-catalog.service';
 import { BreedAdminPresentationService } from './domain/services/breed-admin-presentation.service';
@@ -28,7 +27,6 @@ import { Breed, BreedSchema } from '../../schema/breed.schema';
     imports: [MongooseModule.forFeature([{ name: Breed.name, schema: BreedSchema }])],
     controllers: [BreedController, BreedAdminQueryController, BreedAdminCommandController],
     providers: [
-        BreedService,
         GetBreedsUseCase,
         CreateBreedUseCase,
         GetAllBreedsAdminUseCase,
@@ -54,6 +52,5 @@ import { Breed, BreedSchema } from '../../schema/breed.schema';
             useExisting: BreedMongooseWriterAdapter,
         },
     ],
-    exports: [BreedService],
 })
 export class BreedModule {}
