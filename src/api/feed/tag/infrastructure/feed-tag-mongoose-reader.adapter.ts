@@ -1,8 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-
-import { Video, VideoStatus } from '../../../../schema/video.schema';
+import { FeedTagRepository } from '../repository/feed-tag.repository';
 import {
     FeedPopularTagSnapshot,
     FeedTagReaderPort,
@@ -12,65 +9,22 @@ import {
 
 @Injectable()
 export class FeedTagMongooseReaderAdapter implements FeedTagReaderPort {
-    constructor(@InjectModel(Video.name) private readonly videoModel: Model<Video>) {}
+    constructor(private readonly feedTagRepository: FeedTagRepository) {}
 
     async readByTag(tag: string, skip: number, limit: number): Promise<FeedTagVideoSnapshot[]> {
         const exactTagPattern = new RegExp(`^${this.escapeRegex(tag)}$`, 'i');
-        const videos = await this.videoModel
-            .find({
-                tags: { $regex: exactTagPattern },
-                status: VideoStatus.READY,
-                isPublic: true,
-            })
-            .sort({ createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .populate('uploadedBy', 'name profileImageFileName businessName')
-            .lean()
-            .exec();
+        const videos = await this.feedTagRepository.findReadyPublicByExactTag(exactTagPattern, skip, limit);
 
         return videos.map((video) => this.toVideoSnapshot(video));
     }
 
     countByTag(tag: string): Promise<number> {
         const exactTagPattern = new RegExp(`^${this.escapeRegex(tag)}$`, 'i');
-        return this.videoModel
-            .countDocuments({
-                tags: { $regex: exactTagPattern },
-                status: VideoStatus.READY,
-                isPublic: true,
-            })
-            .exec();
+        return this.feedTagRepository.countReadyPublicByExactTag(exactTagPattern);
     }
 
     async readPopularTags(limit: number): Promise<FeedPopularTagSnapshot[]> {
-        const popularTags = await this.videoModel.aggregate([
-            {
-                $match: {
-                    status: VideoStatus.READY,
-                    isPublic: true,
-                    tags: { $exists: true, $ne: [] },
-                },
-            },
-            { $unwind: '$tags' },
-            {
-                $group: {
-                    _id: { $toLower: '$tags' },
-                    count: { $sum: 1 },
-                    totalViews: { $sum: '$viewCount' },
-                },
-            },
-            { $sort: { count: -1, totalViews: -1 } },
-            { $limit: limit },
-            {
-                $project: {
-                    tag: '$_id',
-                    videoCount: '$count',
-                    totalViews: 1,
-                    _id: 0,
-                },
-            },
-        ]);
+        const popularTags = await this.feedTagRepository.aggregatePopularTags(limit);
 
         return popularTags.map((tag) => ({
             tag: tag.tag,
@@ -81,36 +35,7 @@ export class FeedTagMongooseReaderAdapter implements FeedTagReaderPort {
 
     async suggestTags(query: string, limit: number): Promise<FeedTagSuggestionSnapshot[]> {
         const queryPattern = new RegExp(`^${this.escapeRegex(query)}`, 'i');
-        const suggestions = await this.videoModel.aggregate([
-            {
-                $match: {
-                    status: VideoStatus.READY,
-                    isPublic: true,
-                    tags: { $regex: queryPattern },
-                },
-            },
-            { $unwind: '$tags' },
-            {
-                $match: {
-                    tags: { $regex: queryPattern },
-                },
-            },
-            {
-                $group: {
-                    _id: { $toLower: '$tags' },
-                    count: { $sum: 1 },
-                },
-            },
-            { $sort: { count: -1 } },
-            { $limit: limit },
-            {
-                $project: {
-                    tag: '$_id',
-                    videoCount: '$count',
-                    _id: 0,
-                },
-            },
-        ]);
+        const suggestions = await this.feedTagRepository.aggregateTagSuggestions(queryPattern, limit);
 
         return suggestions.map((tag) => ({
             tag: tag.tag,
