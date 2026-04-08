@@ -22,7 +22,7 @@ export class AuthPhoneController {
         @Body() sendCodeDto: SendVerificationCodeRequestDto,
     ): Promise<ApiResponseDto<PhoneVerificationResponseDto>> {
         const result = await this.sendPhoneVerificationCodeUseCase.execute(sendCodeDto.phone);
-        return ApiResponseDto.success(new PhoneVerificationResponseDto(result.success, result.message));
+        return ApiResponseDto.success(result);
     }
 
     @Post('phone/verify-code')
@@ -32,6 +32,6 @@ export class AuthPhoneController {
         @Body() verifyCodeDto: VerifyCodeRequestDto,
     ): Promise<ApiResponseDto<PhoneVerificationResponseDto>> {
         const result = await this.verifyPhoneVerificationCodeUseCase.execute(verifyCodeDto.phone, verifyCodeDto.code);
-        return ApiResponseDto.success(new PhoneVerificationResponseDto(result.success, result.message));
+        return ApiResponseDto.success(result);
     }
 }

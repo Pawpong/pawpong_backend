@@ -97,6 +97,7 @@ import { AuthBreederDocumentFilePolicyService } from './domain/services/auth-bre
 import { AuthBreederDocumentOriginalFileNameService } from './domain/services/auth-breeder-document-original-file-name.service';
 import { AuthBreederDocumentSubmissionService } from './domain/services/auth-breeder-document-submission.service';
 import { AuthPhoneVerificationPolicyService } from './domain/services/auth-phone-verification-policy.service';
+import { AuthCommandResponseFactoryService } from './domain/services/auth-command-response-factory.service';
 import { AuthHttpCookieService } from './domain/services/auth-http-cookie.service';
 import { AuthSocialHttpFlowService } from './domain/services/auth-social-http-flow.service';
 import { AuthUploadPresentationService } from './domain/services/auth-upload-presentation.service';
@@ -202,6 +203,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthBreederDocumentOriginalFileNameService,
         AuthBreederDocumentSubmissionService,
         AuthPhoneVerificationPolicyService,
+        AuthCommandResponseFactoryService,
         AuthHttpCookieService,
         AuthSocialHttpFlowService,
         AuthUploadPresentationService,
