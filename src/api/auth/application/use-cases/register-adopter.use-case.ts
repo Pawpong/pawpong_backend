@@ -1,12 +1,12 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 
 import { UserStatus } from '../../../../common/enum/user.enum';
-import { AuthTokenService } from '../../services/auth-token.service';
 import { AuthMapper } from '../../mapper/auth.mapper';
 import { RegisterAdopterRequestDto } from '../../dto/request/register-adopter-request.dto';
 import { RegisterAdopterResponseDto } from '../../dto/response/register-adopter-response.dto';
 import { AuthRegistrationPort } from '../ports/auth-registration.port';
 import { AuthRegistrationNotificationPort } from '../ports/auth-registration-notification.port';
+import { AuthTokenPort } from '../ports/auth-token.port';
 import { AuthSocialIdentityService } from '../../domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from '../../domain/services/auth-stored-file-name.service';
 
@@ -17,7 +17,8 @@ export class RegisterAdopterUseCase {
         private readonly authRegistrationPort: AuthRegistrationPort,
         @Inject(AuthRegistrationNotificationPort)
         private readonly authRegistrationNotificationPort: AuthRegistrationNotificationPort,
-        private readonly authTokenService: AuthTokenService,
+        @Inject(AuthTokenPort)
+        private readonly authTokenPort: AuthTokenPort,
         private readonly authSocialIdentityService: AuthSocialIdentityService,
         private readonly authStoredFileNameService: AuthStoredFileNameService,
     ) {}
@@ -67,8 +68,8 @@ export class RegisterAdopterUseCase {
         });
 
         const userId = savedAdopter._id.toString();
-        const tokens = this.authTokenService.generateTokens(userId, savedAdopter.emailAddress, 'adopter');
-        const hashedRefreshToken = await this.authTokenService.hashRefreshToken(tokens.refreshToken);
+        const tokens = this.authTokenPort.generateTokens(userId, savedAdopter.emailAddress, 'adopter');
+        const hashedRefreshToken = await this.authTokenPort.hashRefreshToken(tokens.refreshToken);
         await this.authRegistrationPort.saveAdopterRefreshToken(userId, hashedRefreshToken);
 
         void this.authRegistrationNotificationPort.notifyAdopterRegistered({

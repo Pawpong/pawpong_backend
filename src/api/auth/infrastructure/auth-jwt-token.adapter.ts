@@ -3,22 +3,18 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 
+import { AuthTokenPort, type AuthRefreshTokenPayload } from '../application/ports/auth-token.port';
 import { type AuthSessionRole } from '../application/ports/auth-session.port';
 import { TokenResponseDto } from '../dto/response/token-response.dto';
 
-interface RefreshTokenPayload {
-    sub: string;
-    email: string;
-    role: string;
-    type?: string;
-}
-
 @Injectable()
-export class AuthTokenService {
+export class AuthJwtTokenAdapter extends AuthTokenPort {
     constructor(
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
-    ) {}
+    ) {
+        super();
+    }
 
     generateTokens(userId: string, email: string, role: AuthSessionRole): TokenResponseDto {
         const payload = {
@@ -48,8 +44,8 @@ export class AuthTokenService {
         };
     }
 
-    verifyRefreshToken(refreshToken: string): RefreshTokenPayload {
-        return this.jwtService.verify(refreshToken) as RefreshTokenPayload;
+    verifyRefreshToken(refreshToken: string): AuthRefreshTokenPayload {
+        return this.jwtService.verify(refreshToken) as AuthRefreshTokenPayload;
     }
 
     hashRefreshToken(refreshToken: string): Promise<string> {

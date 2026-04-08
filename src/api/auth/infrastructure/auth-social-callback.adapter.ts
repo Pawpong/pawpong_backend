@@ -1,11 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
 
 import { AuthAdopterRepository } from '../repository/auth-adopter.repository';
 import { AuthBreederRepository } from '../repository/auth-breeder.repository';
-import { AuthTokenService } from '../services/auth-token.service';
+import { AuthTokenPort } from '../application/ports/auth-token.port';
 import {
     AuthSocialCallbackPort,
     type AuthSocialAuthenticatedUser,
@@ -20,7 +20,8 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
         private readonly authBreederRepository: AuthBreederRepository,
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
-        private readonly authTokenService: AuthTokenService,
+        @Inject(AuthTokenPort)
+        private readonly authTokenPort: AuthTokenPort,
     ) {}
 
     resolveFrontendUrl(referer?: string, origin?: string): string {
@@ -155,8 +156,8 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
     }
 
     async generateSocialLoginTokens(user: AuthSocialAuthenticatedUser) {
-        const tokens = this.authTokenService.generateTokens(user.userId, user.email, user.role);
-        const hashedRefreshToken = await this.authTokenService.hashRefreshToken(tokens.refreshToken);
+        const tokens = this.authTokenPort.generateTokens(user.userId, user.email, user.role);
+        const hashedRefreshToken = await this.authTokenPort.hashRefreshToken(tokens.refreshToken);
 
         if (user.role === 'adopter') {
             await this.authAdopterRepository.update(user.userId, {
