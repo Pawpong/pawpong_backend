@@ -28,6 +28,6 @@ export class AuthLogoutController {
     ): Promise<ApiResponseDto<LogoutResponseDto>> {
         const response = await this.logoutUseCase.execute(userId, role);
         this.authHttpCookieService.clearAuthCookies(res);
-        return ApiResponseDto.success(response, '로그아웃되었습니다.');
+        return ApiResponseDto.success(response, response.message);
     }
 }

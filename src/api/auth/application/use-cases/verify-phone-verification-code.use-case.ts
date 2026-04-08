@@ -2,6 +2,8 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { AUTH_PHONE_VERIFICATION_STORE_PORT } from '../ports/auth-phone-verification-store.port';
 import type { AuthPhoneVerificationStorePort } from '../ports/auth-phone-verification-store.port';
+import { PhoneVerificationResponseDto } from '../../dto/response/phone-verification-response.dto';
+import { AuthCommandResponseFactoryService } from '../../domain/services/auth-command-response-factory.service';
 import { AuthPhoneVerificationPolicyService } from '../../domain/services/auth-phone-verification-policy.service';
 
 @Injectable()
@@ -10,9 +12,10 @@ export class VerifyPhoneVerificationCodeUseCase {
         @Inject(AUTH_PHONE_VERIFICATION_STORE_PORT)
         private readonly authPhoneVerificationStorePort: AuthPhoneVerificationStorePort,
         private readonly authPhoneVerificationPolicyService: AuthPhoneVerificationPolicyService,
+        private readonly authCommandResponseFactoryService: AuthCommandResponseFactoryService,
     ) {}
 
-    execute(phone: string, code: string): { success: boolean; message: string } {
+    execute(phone: string, code: string): PhoneVerificationResponseDto {
         const normalizedPhone = this.authPhoneVerificationPolicyService.normalizePhoneNumber(phone);
         const verification = this.authPhoneVerificationStorePort.get(normalizedPhone);
 
@@ -46,9 +49,6 @@ export class VerifyPhoneVerificationCodeUseCase {
         verification.verified = true;
         this.authPhoneVerificationStorePort.save(verification);
 
-        return {
-            success: true,
-            message: '전화번호 인증이 완료되었습니다.',
-        };
+        return this.authCommandResponseFactoryService.createPhoneVerificationCompleted();
     }
 }

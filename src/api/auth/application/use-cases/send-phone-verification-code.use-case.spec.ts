@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { SendPhoneVerificationCodeUseCase } from './send-phone-verification-code.use-case';
+import { AuthCommandResponseFactoryService } from '../../domain/services/auth-command-response-factory.service';
 import { AuthPhoneVerificationPolicyService } from '../../domain/services/auth-phone-verification-policy.service';
 
 describe('SendPhoneVerificationCodeUseCase', () => {
@@ -29,6 +30,7 @@ describe('SendPhoneVerificationCodeUseCase', () => {
             authPhoneVerificationStorePort as any,
             authPhoneVerificationSenderPort as any,
             policyService,
+            new AuthCommandResponseFactoryService(),
         );
     });
 

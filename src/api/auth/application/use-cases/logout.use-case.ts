@@ -2,12 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { AuthSessionPort, type AuthSessionRole } from '../ports/auth-session.port';
 import { LogoutResponseDto } from '../../dto/response/logout-response.dto';
+import { AuthCommandResponseFactoryService } from '../../domain/services/auth-command-response-factory.service';
 
 @Injectable()
 export class LogoutUseCase {
     constructor(
         @Inject(AuthSessionPort)
         private readonly authSessionPort: AuthSessionPort,
+        private readonly authCommandResponseFactoryService: AuthCommandResponseFactoryService,
     ) {}
 
     async execute(userId: string, role: string): Promise<LogoutResponseDto> {
@@ -15,10 +17,6 @@ export class LogoutUseCase {
             await this.authSessionPort.updateRefreshToken(userId, role as AuthSessionRole, null);
         }
 
-        return {
-            success: true,
-            loggedOutAt: new Date().toISOString(),
-            message: '로그아웃되었습니다.',
-        };
+        return this.authCommandResponseFactoryService.createLoggedOut(new Date().toISOString());
     }
 }
