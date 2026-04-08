@@ -16,14 +16,16 @@ import { AuthDuplicateCheckController } from './auth-duplicate-check.controller'
 import { AuthPhoneController } from './auth-phone.controller';
 import { AuthAdminLoginController } from './admin/auth-admin-login.controller';
 import { AuthAdminTokenController } from './admin/auth-admin-token.controller';
-import { AuthSessionController } from './auth-session.controller';
+import { AuthRefreshTokenController } from './auth-refresh-token.controller';
 import { AuthSignupController } from './auth-signup.controller';
 import { AuthGoogleLoginController } from './auth-google-login.controller';
 import { AuthKakaoLoginController } from './auth-kakao-login.controller';
 import { AuthNaverLoginController } from './auth-naver-login.controller';
-import { AuthSocialRegistrationController } from './auth-social-registration.controller';
+import { AuthSocialCheckUserController } from './auth-social-check-user.controller';
+import { AuthSocialCompleteRegistrationController } from './auth-social-complete-registration.controller';
 import { AuthProfileUploadController } from './auth-profile-upload.controller';
 import { AuthBreederDocumentsUploadController } from './auth-breeder-documents-upload.controller';
+import { AuthLogoutController } from './auth-logout.controller';
 
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { LoginAdminUseCase } from './admin/application/use-cases/login-admin.use-case';
@@ -127,12 +129,14 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         }),
     ],
     controllers: [
-        AuthSessionController,
+        AuthRefreshTokenController,
+        AuthLogoutController,
         AuthPhoneController,
         AuthGoogleLoginController,
         AuthNaverLoginController,
         AuthKakaoLoginController,
-        AuthSocialRegistrationController,
+        AuthSocialCheckUserController,
+        AuthSocialCompleteRegistrationController,
         AuthDuplicateCheckController,
         AuthSignupController,
         AuthBannerController,
