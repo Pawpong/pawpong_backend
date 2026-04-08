@@ -20,6 +20,7 @@ import { UpdateBreedUseCase } from './admin/application/use-cases/update-breed.u
 import { DeleteBreedUseCase } from './admin/application/use-cases/delete-breed.use-case';
 import { BreedMongooseAdminReaderAdapter } from './admin/infrastructure/breed-mongoose-admin-reader.adapter';
 import { BreedMongooseWriterAdapter } from './admin/infrastructure/breed-mongoose-writer.adapter';
+import { BreedRepository } from './repository/breed.repository';
 
 import { Breed, BreedSchema } from '../../schema/breed.schema';
 
@@ -36,6 +37,7 @@ import { Breed, BreedSchema } from '../../schema/breed.schema';
         DeleteBreedUseCase,
         BreedCatalogService,
         BreedAdminPresentationService,
+        BreedRepository,
         BreedMongooseReaderAdapter,
         BreedMongooseAdminReaderAdapter,
         BreedMongooseWriterAdapter,
