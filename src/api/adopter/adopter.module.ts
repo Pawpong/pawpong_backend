@@ -53,6 +53,9 @@ import { AdopterApplicationListAssemblerService } from './domain/services/adopte
 import { AdopterApplicationDetailAssemblerService } from './domain/services/adopter-application-detail-assembler.service';
 import { AdopterProfileAdapter } from './infrastructure/adopter-profile.adapter';
 import { AdopterAdminRepository } from './admin/repository/adopter-admin.repository';
+import { AdopterApplicationRepository } from './repository/adopter-application.repository';
+import { AdopterBreederFavoriteRepository } from './repository/adopter-breeder-favorite.repository';
+import { AdopterReviewRepository } from './repository/adopter-review.repository';
 import { AdopterBreederReaderAdapter } from './infrastructure/adopter-breeder-reader.adapter';
 import { AdopterPetReaderAdapter } from './infrastructure/adopter-pet-reader.adapter';
 import { AdopterApplicationCommandAdapter } from './infrastructure/adopter-application-command.adapter';
@@ -128,6 +131,9 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         GetAdopterAdminApplicationDetailUseCase,
         AdopterRepository,
         AdopterAdminRepository,
+        AdopterBreederFavoriteRepository,
+        AdopterApplicationRepository,
+        AdopterReviewRepository,
         BreederRepository,
         AvailablePetManagementRepository,
         AdopterAdminPolicyService,
