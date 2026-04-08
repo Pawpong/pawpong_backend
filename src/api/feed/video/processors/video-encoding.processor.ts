@@ -1,12 +1,12 @@
 import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { FfmpegService } from '../services/ffmpeg.service';
 import { StorageService } from '../../../../common/storage/storage.service';
 import { UpdateEncodingCompleteUseCase } from '../application/use-cases/update-encoding-complete.use-case';
 import { UpdateEncodingFailedUseCase } from '../application/use-cases/update-encoding-failed.use-case';
+import { FeedVideoTranscoderPort } from '../application/ports/feed-video-transcoder.port';
 
 /**
  * 동영상 인코딩 Worker
@@ -19,7 +19,8 @@ export class VideoEncodingProcessor extends WorkerHost {
     private readonly logger = new Logger(VideoEncodingProcessor.name);
 
     constructor(
-        private readonly ffmpegService: FfmpegService,
+        @Inject(FeedVideoTranscoderPort)
+        private readonly feedVideoTranscoderPort: FeedVideoTranscoderPort,
         private readonly updateEncodingCompleteUseCase: UpdateEncodingCompleteUseCase,
         private readonly updateEncodingFailedUseCase: UpdateEncodingFailedUseCase,
         private readonly storageService: StorageService,
@@ -51,7 +52,7 @@ export class VideoEncodingProcessor extends WorkerHost {
             this.logger.log(`[${videoId}] 원본 다운로드 완료`);
 
             // 3. 동영상 메타데이터 추출
-            const metadata = await this.ffmpegService.getVideoMetadata(originalFile);
+            const metadata = await this.feedVideoTranscoderPort.getVideoMetadata(originalFile);
             this.logger.log(`[${videoId}] 메타데이터: ${JSON.stringify(metadata)}`);
             await job.updateProgress(20);
 
@@ -63,13 +64,13 @@ export class VideoEncodingProcessor extends WorkerHost {
             const resolutions = this.getResolutionsForVideo(metadata.height);
             this.logger.log(`[${videoId}] HLS 변환 시작 (해상도: ${resolutions.join(', ')}p)`);
 
-            await this.ffmpegService.convertToHLS(originalFile, hlsDir, resolutions);
+            await this.feedVideoTranscoderPort.convertToHLS(originalFile, hlsDir, resolutions);
             await job.updateProgress(70);
             this.logger.log(`[${videoId}] HLS 변환 완료`);
 
             // 5. 썸네일 생성
             const thumbnailFile = path.join(tempDir, 'thumbnail.jpg');
-            await this.ffmpegService.generateThumbnail(originalFile, thumbnailFile);
+            await this.feedVideoTranscoderPort.generateThumbnail(originalFile, thumbnailFile);
             await job.updateProgress(80);
             this.logger.log(`[${videoId}] 썸네일 생성 완료`);
 

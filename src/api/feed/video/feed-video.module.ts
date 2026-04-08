@@ -4,12 +4,12 @@ import { BullModule } from '@nestjs/bullmq';
 import { Video, VideoSchema } from '../../../schema/video.schema';
 import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema';
 import { VideoComment, VideoCommentSchema } from '../../../schema/video-comment.schema';
-import { FfmpegService } from './services/ffmpeg.service';
 import { VideoEncodingProcessor } from './processors/video-encoding.processor';
 import { StorageModule } from '../../../common/storage/storage.module';
 import { FeedCommentModule } from '../comment/feed-comment.module';
 import { FeedLikeModule } from '../like/feed-like.module';
 import { FeedTagModule } from '../tag/feed-tag.module';
+import { FeedVideoTranscoderPort } from './application/ports/feed-video-transcoder.port';
 import { GetFeedUseCase } from './application/use-cases/get-feed.use-case';
 import { GetPopularVideosUseCase } from './application/use-cases/get-popular-videos.use-case';
 import { GetVideoMetaUseCase } from './application/use-cases/get-video-meta.use-case';
@@ -27,6 +27,7 @@ import { FeedVideoPresentationService } from './domain/services/feed-video-prese
 import { FeedVideoCommandPolicyService } from './domain/services/feed-video-command-policy.service';
 import { FeedVideoStreamingService } from './domain/services/feed-video-streaming.service';
 import { FeedVideoAssetUrlService } from './infrastructure/feed-video-asset-url.service';
+import { FeedVideoFfmpegAdapter } from './infrastructure/feed-video-ffmpeg.adapter';
 import { FeedVideoMongooseReaderAdapter } from './infrastructure/feed-video-mongoose-reader.adapter';
 import { FeedVideoMongooseCommandAdapter } from './infrastructure/feed-video-mongoose-command.adapter';
 import { FeedVideoPrefetchPresentationService } from './infrastructure/feed-video-prefetch-presentation.service';
@@ -111,7 +112,7 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         FeedVideoTagCatalogController,
     ],
     providers: [
-        FfmpegService,
+        FeedVideoFfmpegAdapter,
         VideoEncodingProcessor,
         GetFeedUseCase,
         GetPopularVideosUseCase,
@@ -147,6 +148,10 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         {
             provide: FEED_VIDEO_STREAM,
             useExisting: FeedVideoStorageStreamAdapter,
+        },
+        {
+            provide: FeedVideoTranscoderPort,
+            useExisting: FeedVideoFfmpegAdapter,
         },
     ],
 })
