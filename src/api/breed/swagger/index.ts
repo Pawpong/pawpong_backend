@@ -1,7 +1,7 @@
 /**
- * Breed Service 도메인 스웨거 문서
+ * Breed 도메인 스웨거 문서
  */
-export class BreedServiceSwaggerDocs {
+export class BreedSwaggerDocs {
     static readonly getBreeds = {
         summary: '특정 동물 타입의 품종 목록 조회',
         description: `

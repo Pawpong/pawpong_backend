@@ -1,12 +1,12 @@
 import { Controller, Get, Param, BadRequestException } from '@nestjs/common';
 
-import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
+import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
 
-import { GetBreedsUseCase } from '../application/use-cases/get-breeds.use-case';
+import { GetBreedsUseCase } from './application/use-cases/get-breeds.use-case';
 
-import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
-import { GetBreedsResponseDto } from '../dto/response/get-breeds-response.dto';
-import { BreedServiceSwaggerDocs } from './swagger';
+import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
+import { GetBreedsResponseDto } from './dto/response/get-breeds-response.dto';
+import { BreedSwaggerDocs } from './swagger';
 
 @ApiController('품종')
 @Controller('breeds')
@@ -15,7 +15,7 @@ export class BreedController {
 
     @Get(':petType')
     @ApiEndpoint({
-        ...BreedServiceSwaggerDocs.getBreeds,
+        ...BreedSwaggerDocs.getBreeds,
         responseType: GetBreedsResponseDto,
         isPublic: true,
     })

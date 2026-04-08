@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { BreedController } from './service/breed.controller';
+import { BreedController } from './breed.controller';
 import { BreedAdminCommandController } from './admin/breed-admin-command.controller';
 import { BreedAdminQueryController } from './admin/breed-admin-query.controller';
 

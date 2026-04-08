@@ -17,8 +17,9 @@
 ```
 breed/
 ├── breed.controller.ts
-├── breed.service.ts
 ├── breed.module.ts
+├── swagger/
+│   └── index.ts
 └── dto/
     └── response/
         └── get-breeds-response.dto.ts
@@ -84,15 +85,6 @@ Response:
 - 레퍼런싱 사용: Breed는 독립적인 컬렉션으로 관리
 - Breeder 스키마에서는 breeds: string[]로 품종명만 저장
 - 필터링 시 Breed 컬렉션 참조
-
-## 주요 메서드
-
-### BreedService
-
-```typescript
-async getAllBreeds(): Promise<Breed[]>
-async getBreedsByPetType(petType: string): Promise<Breed[]>
-```
 
 ## 인증 및 권한
 
