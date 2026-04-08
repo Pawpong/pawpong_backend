@@ -63,3 +63,4 @@ swagger.json
 package-lock.json
 yarn.lock
 docs/scripts/
+CLAUDE.md
