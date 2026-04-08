@@ -22,6 +22,7 @@ import { BreederVerificationAdminPresentationService } from './domain/services/b
 import { BreederVerificationAdminMongooseRepositoryAdapter } from './infrastructure/breeder-verification-admin-mongoose.repository.adapter';
 import { BreederVerificationAdminNotifierAdapter } from './infrastructure/breeder-verification-admin-notifier.adapter';
 import { BreederVerificationAdminFileUrlAdapter } from './infrastructure/breeder-verification-admin-file-url.adapter';
+import { BreederVerificationAdminRepository } from './repository/breeder-verification-admin.repository';
 
 import { Admin, AdminSchema } from '../../../../schema/admin.schema';
 import { Breeder, BreederSchema } from '../../../../schema/breeder.schema';
@@ -65,6 +66,7 @@ import { NotificationModule } from '../../../notification/notification.module';
         BreederVerificationAdminPolicyService,
         BreederVerificationAdminActivityLogFactoryService,
         BreederVerificationAdminPresentationService,
+        BreederVerificationAdminRepository,
         BreederVerificationAdminMongooseRepositoryAdapter,
         BreederVerificationAdminNotifierAdapter,
         BreederVerificationAdminFileUrlAdapter,
