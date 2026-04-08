@@ -29,8 +29,9 @@ import { FeedVideoStreamingService } from './domain/services/feed-video-streamin
 import { FeedVideoAssetUrlService } from './infrastructure/feed-video-asset-url.service';
 import { FeedVideoMongooseReaderAdapter } from './infrastructure/feed-video-mongoose-reader.adapter';
 import { FeedVideoMongooseCommandAdapter } from './infrastructure/feed-video-mongoose-command.adapter';
+import { FeedVideoPrefetchPresentationService } from './infrastructure/feed-video-prefetch-presentation.service';
 import { FeedVideoStorageStreamAdapter } from './infrastructure/feed-video-storage-stream.adapter';
-import { FeedVideoStreamHttpService } from './infrastructure/feed-video-stream-http.service';
+import { FeedVideoStreamResponseService } from './infrastructure/feed-video-stream-response.service';
 import { FEED_VIDEO_READER } from './application/ports/feed-video-reader.port';
 import { FEED_VIDEO_COMMAND } from './application/ports/feed-video-command.port';
 import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
@@ -130,8 +131,9 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         FeedVideoAssetUrlService,
         FeedVideoMongooseReaderAdapter,
         FeedVideoMongooseCommandAdapter,
+        FeedVideoPrefetchPresentationService,
         FeedVideoStorageStreamAdapter,
-        FeedVideoStreamHttpService,
+        FeedVideoStreamResponseService,
         {
             provide: FEED_VIDEO_READER,
             useExisting: FeedVideoMongooseReaderAdapter,
