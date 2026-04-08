@@ -1,27 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { Announcement } from '../../../../schema/announcement.schema';
 import { AnnouncementPublicListQuery, AnnouncementPublicListResult } from '../../application/ports/announcement-public-reader.port';
 import { AnnouncementAdminReaderPort } from '../application/ports/announcement-admin-reader.port';
+import { AnnouncementRepository } from '../../repository/announcement.repository';
 
 @Injectable()
 export class AnnouncementMongooseAdminReaderAdapter implements AnnouncementAdminReaderPort {
-    constructor(@InjectModel(Announcement.name) private readonly announcementModel: Model<Announcement>) {}
+    constructor(private readonly announcementRepository: AnnouncementRepository) {}
 
     async findAllAnnouncements(query: AnnouncementPublicListQuery): Promise<AnnouncementPublicListResult> {
         const skip = (query.page - 1) * query.limit;
 
         const [announcements, totalCount] = await Promise.all([
-            this.announcementModel
-                .find()
-                .sort({ order: 1, createdAt: -1 })
-                .skip(skip)
-                .limit(query.limit)
-                .lean()
-                .exec(),
-            this.announcementModel.countDocuments().exec(),
+            this.announcementRepository.findAllPage(skip, query.limit),
+            this.announcementRepository.countAll(),
         ]);
 
         return {

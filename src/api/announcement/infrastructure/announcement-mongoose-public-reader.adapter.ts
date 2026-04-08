@@ -1,21 +1,16 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { Announcement, AnnouncementDocument } from '../../../schema/announcement.schema';
 import {
     AnnouncementPublicReaderPort,
     type AnnouncementPublicItem,
     type AnnouncementPublicListQuery,
     type AnnouncementPublicListResult,
 } from '../application/ports/announcement-public-reader.port';
+import { AnnouncementRepository } from '../repository/announcement.repository';
 
 @Injectable()
 export class AnnouncementMongoosePublicReaderAdapter extends AnnouncementPublicReaderPort {
-    constructor(
-        @InjectModel(Announcement.name)
-        private readonly announcementModel: Model<AnnouncementDocument>,
-    ) {
+    constructor(private readonly announcementRepository: AnnouncementRepository) {
         super();
     }
 
@@ -23,14 +18,8 @@ export class AnnouncementMongoosePublicReaderAdapter extends AnnouncementPublicR
         const skip = (query.page - 1) * query.limit;
 
         const [announcements, totalCount] = await Promise.all([
-            this.announcementModel
-                .find({ isActive: true })
-                .sort({ order: 1, createdAt: -1 })
-                .skip(skip)
-                .limit(query.limit)
-                .lean()
-                .exec(),
-            this.announcementModel.countDocuments({ isActive: true }).exec(),
+            this.announcementRepository.findActivePage(skip, query.limit),
+            this.announcementRepository.countActive(),
         ]);
 
         return {
@@ -42,14 +31,7 @@ export class AnnouncementMongoosePublicReaderAdapter extends AnnouncementPublicR
     }
 
     async findActiveAnnouncementById(announcementId: string): Promise<AnnouncementPublicItem | null> {
-        const announcement = await this.announcementModel
-            .findOne({
-                _id: announcementId,
-                isActive: true,
-            })
-            .lean()
-            .exec();
-
+        const announcement = await this.announcementRepository.findActiveById(announcementId);
         return announcement ? this.toItem(announcement) : null;
     }
 

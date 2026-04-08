@@ -20,6 +20,7 @@ import { UpdateAnnouncementUseCase } from './admin/application/use-cases/update-
 import { DeleteAnnouncementUseCase } from './admin/application/use-cases/delete-announcement.use-case';
 import { AnnouncementMongooseAdminReaderAdapter } from './admin/infrastructure/announcement-mongoose-admin-reader.adapter';
 import { AnnouncementMongooseWriterAdapter } from './admin/infrastructure/announcement-mongoose-writer.adapter';
+import { AnnouncementRepository } from './repository/announcement.repository';
 
 import { Announcement, AnnouncementSchema } from '../../schema/announcement.schema';
 
@@ -39,6 +40,7 @@ import { Announcement, AnnouncementSchema } from '../../schema/announcement.sche
         UpdateAnnouncementUseCase,
         DeleteAnnouncementUseCase,
         AnnouncementResponseMapperService,
+        AnnouncementRepository,
         AnnouncementMongoosePublicReaderAdapter,
         AnnouncementMongooseAdminReaderAdapter,
         AnnouncementMongooseWriterAdapter,
