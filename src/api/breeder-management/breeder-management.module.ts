@@ -48,6 +48,7 @@ import { SubmitBreederManagementVerificationDocumentsUseCase } from './applicati
 import { BreederManagementDashboardAssemblerService } from './domain/services/breeder-management-dashboard-assembler.service';
 import { BreederManagementProfileUpdateMapperService } from './domain/services/breeder-management-profile-update-mapper.service';
 import { BreederManagementProfileAssemblerService } from './domain/services/breeder-management-profile-assembler.service';
+import { BreederManagementPaginationAssemblerService } from './domain/services/breeder-management-pagination-assembler.service';
 import { BreederManagementReceivedApplicationMapperService } from './domain/services/breeder-management-received-application-mapper.service';
 import { BreederManagementMyPetMapperService } from './domain/services/breeder-management-my-pet-mapper.service';
 import { BreederManagementMyReviewMapperService } from './domain/services/breeder-management-my-review-mapper.service';
@@ -188,6 +189,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederManagementDashboardAssemblerService,
         BreederManagementProfileUpdateMapperService,
         BreederManagementProfileAssemblerService,
+        BreederManagementPaginationAssemblerService,
         BreederManagementReceivedApplicationMapperService,
         BreederManagementMyPetMapperService,
         BreederManagementMyReviewMapperService,

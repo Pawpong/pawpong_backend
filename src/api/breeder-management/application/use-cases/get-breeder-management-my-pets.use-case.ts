@@ -1,12 +1,12 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../common/dto/pagination/pagination-builder.dto';
 import { MyPetsListResponseDto } from '../../dto/response/my-pets-list-response.dto';
 import {
     BREEDER_MANAGEMENT_LIST_READER_PORT,
     type BreederManagementListReaderPort,
 } from '../ports/breeder-management-list-reader.port';
 import { BreederManagementMyPetMapperService } from '../../domain/services/breeder-management-my-pet-mapper.service';
+import { BreederManagementPaginationAssemblerService } from '../../domain/services/breeder-management-pagination-assembler.service';
 
 @Injectable()
 export class GetBreederManagementMyPetsUseCase {
@@ -14,6 +14,7 @@ export class GetBreederManagementMyPetsUseCase {
         @Inject(BREEDER_MANAGEMENT_LIST_READER_PORT)
         private readonly breederManagementListReaderPort: BreederManagementListReaderPort,
         private readonly breederManagementMyPetMapperService: BreederManagementMyPetMapperService,
+        private readonly breederManagementPaginationAssemblerService: BreederManagementPaginationAssemblerService,
     ) {}
 
     async execute(
@@ -37,19 +38,13 @@ export class GetBreederManagementMyPetsUseCase {
         const items = snapshot.pets.map((pet) =>
             this.breederManagementMyPetMapperService.toItem(pet, snapshot.applicationCountMap),
         );
-        const paginationResponse = new PaginationBuilder<any>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(snapshot.total)
-            .build();
+        const paginationResponse = this.breederManagementPaginationAssemblerService.toPage(items, page, limit, snapshot.total);
 
-        return {
-            ...paginationResponse,
+        return Object.assign(paginationResponse, {
             availableCount: snapshot.availableCount,
             reservedCount: snapshot.reservedCount,
             adoptedCount: snapshot.adoptedCount,
             inactiveCount: snapshot.inactiveCount,
-        } as MyPetsListResponseDto;
+        }) as MyPetsListResponseDto;
     }
 }
