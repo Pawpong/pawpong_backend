@@ -89,6 +89,7 @@ export class AuthMapper {
             refreshTokenExpiresIn: number;
         },
         role: 'adopter' | 'breeder',
+        message: string,
     ): AuthResponseDto {
         return plainToInstance(AuthResponseDto, {
             accessToken: tokens.accessToken,
@@ -103,7 +104,7 @@ export class AuthMapper {
                 accountStatus: savedUser.accountStatus,
                 profileImageFileName: savedUser.profileImageFileName,
             },
-            message: '소셜 회원가입이 완료되었습니다.',
+            message,
         });
     }
 

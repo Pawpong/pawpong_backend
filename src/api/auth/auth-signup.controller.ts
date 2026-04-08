@@ -4,6 +4,7 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
 import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
 import { AuthPublicController } from './decorator/auth-public-controller.decorator';
+import { AuthResponseMessageService } from './domain/services/auth-response-message.service';
 import { RegisterAdopterRequestDto } from './dto/request/register-adopter-request.dto';
 import { RegisterBreederRequestDto } from './dto/request/register-breeder-request.dto';
 import { RegisterAdopterResponseDto } from './dto/response/register-adopter-response.dto';
@@ -15,6 +16,7 @@ export class AuthSignupController {
     constructor(
         private readonly registerAdopterUseCase: RegisterAdopterUseCase,
         private readonly registerBreederUseCase: RegisterBreederUseCase,
+        private readonly authResponseMessageService: AuthResponseMessageService,
     ) {}
 
     @Post('register/adopter')
@@ -22,7 +24,7 @@ export class AuthSignupController {
     @ApiRegisterAdopterEndpoint()
     async registerAdopter(@Body() dto: RegisterAdopterRequestDto): Promise<ApiResponseDto<RegisterAdopterResponseDto>> {
         const result = await this.registerAdopterUseCase.execute(dto);
-        return ApiResponseDto.success(result, '입양자 회원가입이 완료되었습니다.');
+        return ApiResponseDto.success(result, this.authResponseMessageService.getSignupCompleted('adopter'));
     }
 
     @Post('register/breeder')
@@ -30,6 +32,6 @@ export class AuthSignupController {
     @ApiRegisterBreederEndpoint()
     async registerBreeder(@Body() dto: RegisterBreederRequestDto): Promise<ApiResponseDto<RegisterBreederResponseDto>> {
         const result = await this.registerBreederUseCase.execute(dto);
-        return ApiResponseDto.success(result, '브리더 회원가입이 완료되었습니다.');
+        return ApiResponseDto.success(result, this.authResponseMessageService.getSignupCompleted('breeder'));
     }
 }

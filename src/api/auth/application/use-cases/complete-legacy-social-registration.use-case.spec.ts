@@ -1,6 +1,7 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
 import { CompleteLegacySocialRegistrationUseCase } from './complete-legacy-social-registration.use-case';
+import { AuthResponseMessageService } from '../../domain/services/auth-response-message.service';
 
 describe('CompleteLegacySocialRegistrationUseCase', () => {
     const authRegistrationPort = {
@@ -23,6 +24,7 @@ describe('CompleteLegacySocialRegistrationUseCase', () => {
     const useCase = new CompleteLegacySocialRegistrationUseCase(
         authRegistrationPort as any,
         authTokenService as any,
+        new AuthResponseMessageService(),
     );
 
     beforeEach(() => {
@@ -67,6 +69,7 @@ describe('CompleteLegacySocialRegistrationUseCase', () => {
         );
         expect(result).toMatchObject({
             accessToken: 'access-token',
+            message: '소셜 회원가입이 완료되었습니다.',
             userInfo: {
                 userId: 'adopter-1',
                 nickname: '입양자',
@@ -137,6 +140,7 @@ describe('CompleteLegacySocialRegistrationUseCase', () => {
             }),
         );
         expect(result).toMatchObject({
+            message: '소셜 회원가입이 완료되었습니다.',
             userInfo: {
                 userId: 'breeder-1',
                 nickname: '행복브리더',
