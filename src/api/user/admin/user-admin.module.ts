@@ -29,6 +29,7 @@ import { UserAdminCommandPolicyService } from './domain/services/user-admin-comm
 import { UserAdminPresentationService } from './domain/services/user-admin-presentation.service';
 import { UserAdminActivityLogFactoryService } from './domain/services/user-admin-activity-log-factory.service';
 import { UserAdminMongooseRepositoryAdapter } from './infrastructure/user-admin-mongoose.repository.adapter';
+import { UserAdminRepository } from './repository/user-admin.repository';
 
 import { Admin, AdminSchema } from '../../../schema/admin.schema';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
@@ -82,6 +83,7 @@ import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whit
         UserAdminCommandPolicyService,
         UserAdminPresentationService,
         UserAdminActivityLogFactoryService,
+        UserAdminRepository,
         UserAdminMongooseRepositoryAdapter,
         {
             provide: USER_ADMIN_READER,
