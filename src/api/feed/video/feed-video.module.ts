@@ -34,11 +34,13 @@ import { FeedVideoStreamHttpService } from './infrastructure/feed-video-stream-h
 import { FEED_VIDEO_READER } from './application/ports/feed-video-reader.port';
 import { FEED_VIDEO_COMMAND } from './application/ports/feed-video-command.port';
 import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
-import { FeedVideoFeedController } from './feed-video-feed.controller';
-import { FeedVideoMetaController } from './feed-video-meta.controller';
+import { FeedVideoDetailController } from './feed-video-detail.controller';
 import { FeedVideoHlsStreamController } from './feed-video-hls-stream.controller';
+import { FeedVideoListController } from './feed-video-list.controller';
 import { FeedVideoPrefetchController } from './feed-video-prefetch.controller';
+import { FeedVideoPopularController } from './feed-video-popular.controller';
 import { FeedVideoUploadController } from './feed-video-upload.controller';
+import { FeedVideoViewController } from './feed-video-view.controller';
 import { FeedVideoLibraryController } from './feed-video-library.controller';
 import { FeedVideoOwnershipController } from './feed-video-ownership.controller';
 import { FeedVideoLikeCommandController } from './feed-video-like-command.controller';
@@ -87,8 +89,10 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         FeedTagModule,
     ],
     controllers: [
-        FeedVideoFeedController,
-        FeedVideoMetaController,
+        FeedVideoListController,
+        FeedVideoPopularController,
+        FeedVideoDetailController,
+        FeedVideoViewController,
         FeedVideoHlsStreamController,
         FeedVideoPrefetchController,
         FeedVideoUploadController,
