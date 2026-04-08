@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
+import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
 
 /**
  * 입양자 데이터 접근 계층 Repository

@@ -80,7 +80,7 @@ import { AdopterAccountCommandPort } from './application/ports/adopter-account-c
 import { ADOPTER_APPLICATION_READER_PORT } from './application/ports/adopter-application-reader.port';
 import { ADOPTER_FILE_URL_PORT } from './application/ports/adopter-file-url.port';
 
-import { AdopterRepository } from './adopter.repository';
+import { AdopterRepository } from './repository/adopter.repository';
 import { BreederRepository } from '../breeder-management/repository/breeder.repository';
 import { AvailablePetManagementRepository } from '../breeder-management/repository/available-pet-management.repository';
 

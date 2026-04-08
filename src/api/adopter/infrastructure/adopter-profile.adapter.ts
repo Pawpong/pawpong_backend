@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { AdopterRepository } from '../adopter.repository';
+import { AdopterRepository } from '../repository/adopter.repository';
 import { BreederRepository } from '../../breeder-management/repository/breeder.repository';
 import { AdopterProfilePort } from '../application/ports/adopter-profile.port';
 import { AdopterBreederFavoriteRepository } from '../repository/adopter-breeder-favorite.repository';
