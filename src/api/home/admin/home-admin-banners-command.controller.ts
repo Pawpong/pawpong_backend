@@ -1,9 +1,8 @@
-import { Body, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Delete, Param, Post, Put } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { CreateBannerUseCase } from './application/use-cases/create-banner.use-case';
 import { DeleteBannerUseCase } from './application/use-cases/delete-banner.use-case';
-import { GetAllBannersUseCase } from './application/use-cases/get-all-banners.use-case';
 import { UpdateBannerUseCase } from './application/use-cases/update-banner.use-case';
 import { HomeAdminProtectedController } from './decorator/home-admin-controller.decorator';
 import { BannerCreateRequestDto } from './dto/request/banner-create-request.dto';
@@ -12,25 +11,16 @@ import { BannerResponseDto } from '../dto/response/banner-response.dto';
 import {
     ApiCreateBannerAdminEndpoint,
     ApiDeleteBannerAdminEndpoint,
-    ApiGetAllBannersAdminEndpoint,
     ApiUpdateBannerAdminEndpoint,
 } from './swagger';
 
 @HomeAdminProtectedController()
-export class HomeAdminBannersController {
+export class HomeAdminBannersCommandController {
     constructor(
-        private readonly getAllBannersUseCase: GetAllBannersUseCase,
         private readonly createBannerUseCase: CreateBannerUseCase,
         private readonly updateBannerUseCase: UpdateBannerUseCase,
         private readonly deleteBannerUseCase: DeleteBannerUseCase,
     ) {}
-
-    @Get('banners')
-    @ApiGetAllBannersAdminEndpoint()
-    async getAllBanners(): Promise<ApiResponseDto<BannerResponseDto[]>> {
-        const banners = await this.getAllBannersUseCase.execute();
-        return ApiResponseDto.success(banners, '배너 목록이 조회되었습니다.');
-    }
 
     @Post('banner')
     @ApiCreateBannerAdminEndpoint()

@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { HomeAdminBannersController } from './home-admin-banners.controller';
-import { HomeAdminFaqsController } from './home-admin-faqs.controller';
+import { HomeAdminBannersCommandController } from './home-admin-banners-command.controller';
+import { HomeAdminBannersQueryController } from './home-admin-banners-query.controller';
+import { HomeAdminFaqsCommandController } from './home-admin-faqs-command.controller';
+import { HomeAdminFaqsQueryController } from './home-admin-faqs-query.controller';
 import { GetAllBannersUseCase } from './application/use-cases/get-all-banners.use-case';
 import { CreateBannerUseCase } from './application/use-cases/create-banner.use-case';
 import { UpdateBannerUseCase } from './application/use-cases/update-banner.use-case';
@@ -29,7 +31,12 @@ import { StorageModule } from '../../../common/storage/storage.module';
         ]),
         StorageModule,
     ],
-    controllers: [HomeAdminBannersController, HomeAdminFaqsController],
+    controllers: [
+        HomeAdminBannersQueryController,
+        HomeAdminBannersCommandController,
+        HomeAdminFaqsQueryController,
+        HomeAdminFaqsCommandController,
+    ],
     providers: [
         GetAllBannersUseCase,
         CreateBannerUseCase,
