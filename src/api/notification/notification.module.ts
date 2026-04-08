@@ -26,6 +26,11 @@ import { NotificationRepository } from './repository/notification.repository';
 import { NOTIFICATION_INBOX_PORT } from './application/ports/notification-inbox.port';
 import { NOTIFICATION_COMMAND_PORT } from './application/ports/notification-command.port';
 import { NOTIFICATION_EMAIL_PORT } from './application/ports/notification-email.port';
+import {
+    CREATE_NOTIFICATION_DISPATCH_USE_CASE,
+    CREATE_NOTIFICATION_FROM_BUILDER_DISPATCH_USE_CASE,
+    SEND_NOTIFICATION_EMAIL_DISPATCH_USE_CASE,
+} from './application/ports/notification-dispatch-use-case.port';
 
 import { Notification, NotificationSchema } from '../../schema/notification.schema';
 
@@ -73,6 +78,18 @@ import { MailModule } from '../../common/mail/mail.module';
         {
             provide: NOTIFICATION_EMAIL_PORT,
             useExisting: NotificationMailAdapter,
+        },
+        {
+            provide: CREATE_NOTIFICATION_DISPATCH_USE_CASE,
+            useExisting: CreateNotificationUseCase,
+        },
+        {
+            provide: CREATE_NOTIFICATION_FROM_BUILDER_DISPATCH_USE_CASE,
+            useExisting: CreateNotificationFromBuilderUseCase,
+        },
+        {
+            provide: SEND_NOTIFICATION_EMAIL_DISPATCH_USE_CASE,
+            useExisting: SendNotificationEmailUseCase,
         },
         {
             provide: NotificationDispatchPort,
