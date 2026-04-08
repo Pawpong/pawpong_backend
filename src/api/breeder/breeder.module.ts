@@ -28,6 +28,7 @@ import { BreederPublicApplicationFormBuilderService } from './domain/services/br
 import { BreederPublicPetDetailAssemblerService } from './domain/services/breeder-public-pet-detail-assembler.service';
 import { BreederFileUrlAdapter } from './infrastructure/breeder-file-url.adapter';
 import { BreederPublicReaderAdapter } from './infrastructure/breeder-public-reader.adapter';
+import { BreederPublicRepository } from './repository/breeder-public.repository';
 import { BREEDER_FILE_URL_PORT } from './application/ports/breeder-file-url.port';
 import { BREEDER_PUBLIC_READER_PORT } from './application/ports/breeder-public-reader.port';
 
@@ -81,6 +82,7 @@ import { StorageModule } from '../../common/storage/storage.module';
         BreederPublicParentPetListResponseMapperService,
         BreederPublicApplicationFormBuilderService,
         BreederPublicPetDetailAssemblerService,
+        BreederPublicRepository,
         BreederFileUrlAdapter,
         BreederPublicReaderAdapter,
         {
