@@ -23,6 +23,7 @@ import { BreederAdminPresentationService } from './domain/services/breeder-admin
 import { BreederAdminReminderPolicyService } from './domain/services/breeder-admin-reminder-policy.service';
 import { BreederAdminMongooseRepositoryAdapter } from './infrastructure/breeder-admin-mongoose.repository.adapter';
 import { BreederAdminNotifierAdapter } from './infrastructure/breeder-admin-notifier.adapter';
+import { BreederAdminRepository } from './repository/breeder-admin.repository';
 
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 import { Admin, AdminSchema } from '../../../schema/admin.schema';
@@ -64,6 +65,7 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
         BreederAdminActivityLogFactoryService,
         BreederAdminPresentationService,
         BreederAdminReminderPolicyService,
+        BreederAdminRepository,
         BreederAdminMongooseRepositoryAdapter,
         BreederAdminNotifierAdapter,
         {
