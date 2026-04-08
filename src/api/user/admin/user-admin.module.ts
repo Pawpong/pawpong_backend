@@ -1,10 +1,17 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { UserAdminDeletedUsersController } from './user-admin-deleted-users.controller';
-import { UserAdminPhoneWhitelistController } from './user-admin-phone-whitelist.controller';
+import { UserAdminDeletedUsersListController } from './user-admin-deleted-users-list.controller';
+import { UserAdminDeletedUserStatsController } from './user-admin-deleted-user-stats.controller';
+import { UserAdminHardDeleteUserController } from './user-admin-hard-delete-user.controller';
+import { UserAdminPhoneWhitelistCreateController } from './user-admin-phone-whitelist-create.controller';
+import { UserAdminPhoneWhitelistDeleteController } from './user-admin-phone-whitelist-delete.controller';
+import { UserAdminPhoneWhitelistListController } from './user-admin-phone-whitelist-list.controller';
+import { UserAdminPhoneWhitelistUpdateController } from './user-admin-phone-whitelist-update.controller';
 import { UserAdminProfileController } from './user-admin-profile.controller';
-import { UserAdminUsersController } from './user-admin-users.controller';
+import { UserAdminRestoreUserController } from './user-admin-restore-user.controller';
+import { UserAdminUsersListController } from './user-admin-users-list.controller';
+import { UserAdminUserStatusController } from './user-admin-user-status.controller';
 import { GetAdminProfileUseCase } from './application/use-cases/get-admin-profile.use-case';
 import { GetUsersUseCase } from './application/use-cases/get-users.use-case';
 import { UpdateUserStatusUseCase } from './application/use-cases/update-user-status.use-case';
@@ -49,9 +56,16 @@ import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whit
     ],
     controllers: [
         UserAdminProfileController,
-        UserAdminUsersController,
-        UserAdminDeletedUsersController,
-        UserAdminPhoneWhitelistController,
+        UserAdminUsersListController,
+        UserAdminUserStatusController,
+        UserAdminDeletedUsersListController,
+        UserAdminDeletedUserStatsController,
+        UserAdminRestoreUserController,
+        UserAdminHardDeleteUserController,
+        UserAdminPhoneWhitelistListController,
+        UserAdminPhoneWhitelistCreateController,
+        UserAdminPhoneWhitelistUpdateController,
+        UserAdminPhoneWhitelistDeleteController,
     ],
     providers: [
         GetAdminProfileUseCase,
