@@ -45,7 +45,9 @@ import { FeedVideoLikeCommandController } from './feed-video-like-command.contro
 import { FeedVideoLikeStatusController } from './feed-video-like-status.controller';
 import { FeedVideoLikedVideosController } from './feed-video-liked-videos.controller';
 import { FeedVideoCommentQueryController } from './feed-video-comment-query.controller';
-import { FeedVideoCommentCommandController } from './feed-video-comment-command.controller';
+import { FeedVideoCommentCreateController } from './feed-video-comment-create.controller';
+import { FeedVideoCommentUpdateController } from './feed-video-comment-update.controller';
+import { FeedVideoCommentDeleteController } from './feed-video-comment-delete.controller';
 import { FeedVideoTagSearchController } from './feed-video-tag-search.controller';
 import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controller';
 
@@ -96,7 +98,9 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         FeedVideoLikeStatusController,
         FeedVideoLikedVideosController,
         FeedVideoCommentQueryController,
-        FeedVideoCommentCommandController,
+        FeedVideoCommentCreateController,
+        FeedVideoCommentUpdateController,
+        FeedVideoCommentDeleteController,
         FeedVideoTagSearchController,
         FeedVideoTagCatalogController,
     ],
