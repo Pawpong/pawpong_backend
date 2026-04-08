@@ -90,6 +90,10 @@ import { BreederManagementVerificationDraftStorePort } from './application/ports
 import { BreederManagementVerificationNotifierPort } from './application/ports/breeder-management-verification-notifier.port';
 import { BREEDER_MANAGEMENT_ADMIN_BANNER_READER } from './admin/application/ports/breeder-management-admin-banner-reader.port';
 import { BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER } from './admin/application/ports/breeder-management-admin-banner-writer.port';
+import {
+    GET_ACTIVE_COUNSEL_BANNERS_QUERY,
+    GET_ACTIVE_PROFILE_BANNERS_QUERY,
+} from './admin/application/ports/breeder-management-public-banner-query.port';
 import { GetAllProfileBannersUseCase } from './admin/application/use-cases/get-all-profile-banners.use-case';
 import { GetActiveProfileBannersUseCase } from './admin/application/use-cases/get-active-profile-banners.use-case';
 import { CreateProfileBannerUseCase } from './admin/application/use-cases/create-profile-banner.use-case';
@@ -294,9 +298,17 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             provide: BreederManagementVerificationNotifierPort,
             useExisting: BreederManagementVerificationNotifierAdapter,
         },
+        {
+            provide: GET_ACTIVE_PROFILE_BANNERS_QUERY,
+            useExisting: GetActiveProfileBannersUseCase,
+        },
+        {
+            provide: GET_ACTIVE_COUNSEL_BANNERS_QUERY,
+            useExisting: GetActiveCounselBannersUseCase,
+        },
     ],
     exports: [
-        GetActiveProfileBannersUseCase,
+        GET_ACTIVE_PROFILE_BANNERS_QUERY,
         BreederRepository,
         AvailablePetManagementRepository,
     ],

@@ -236,14 +236,7 @@ export class BreederRepository {
 
         return {
             breeders,
-            pagination: {
-                currentPage: page,
-                totalPages: Math.ceil(total / limit),
-                totalItems: total,
-                itemsPerPage: limit,
-                hasNextPage: skip + limit < total,
-                hasPrevPage: page > 1,
-            },
+            pagination: this.buildPagination(page, limit, total),
         };
     }
 
@@ -293,14 +286,20 @@ export class BreederRepository {
 
         return {
             breeders,
-            pagination: {
-                currentPage: page,
-                totalPages: Math.ceil(total / limit),
-                totalItems: total,
-                itemsPerPage: limit,
-                hasNextPage: skip + limit < total,
-                hasPrevPage: page > 1,
-            },
+            pagination: this.buildPagination(page, limit, total),
+        };
+    }
+
+    private buildPagination(page: number, limit: number, totalItems: number) {
+        const totalPages = Math.ceil(totalItems / limit);
+
+        return {
+            currentPage: page,
+            totalPages,
+            totalItems,
+            itemsPerPage: limit,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1,
         };
     }
 
