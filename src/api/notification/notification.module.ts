@@ -6,8 +6,9 @@ import { NotificationDeleteController } from './notification-delete.controller';
 import { NotificationListController } from './notification-list.controller';
 import { NotificationMarkAllReadController } from './notification-mark-all-read.controller';
 import { NotificationMarkReadController } from './notification-mark-read.controller';
-import { NotificationService } from './notification.service';
 import { NotificationUnreadCountController } from './notification-unread-count.controller';
+import { NotificationDispatchPort } from './application/ports/notification-dispatch.port';
+import { NotificationDispatchService } from './application/services/notification-dispatch.service';
 import { CreateNotificationUseCase } from './application/use-cases/create-notification.use-case';
 import { CreateNotificationFromBuilderUseCase } from './application/use-cases/create-notification-from-builder.use-case';
 import { GetNotificationsUseCase } from './application/use-cases/get-notifications.use-case';
@@ -47,8 +48,8 @@ import { MailModule } from '../../common/mail/mail.module';
         EmailTestController,
     ],
     providers: [
-        NotificationService,
         NotificationRepository,
+        NotificationDispatchService,
         CreateNotificationUseCase,
         CreateNotificationFromBuilderUseCase,
         NotificationResponseMapperService,
@@ -74,7 +75,11 @@ import { MailModule } from '../../common/mail/mail.module';
             provide: NOTIFICATION_EMAIL_PORT,
             useExisting: NotificationMailAdapter,
         },
+        {
+            provide: NotificationDispatchPort,
+            useExisting: NotificationDispatchService,
+        },
     ],
-    exports: [NotificationService, MailModule], // MailModule re-export
+    exports: [NotificationDispatchPort, MailModule], // MailModule re-export
 })
 export class NotificationModule {}

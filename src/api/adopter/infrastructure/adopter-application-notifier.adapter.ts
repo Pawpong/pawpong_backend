@@ -1,8 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { RecipientType } from '../../../common/enum/user.enum';
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
-import { NotificationService } from '../../notification/notification.service';
+import { NotificationDispatchPort } from '../../notification/application/ports/notification-dispatch.port';
 import { NotificationType } from '../../../schema/notification.schema';
 import { AdopterApplicationNotifierPort } from '../application/ports/adopter-application-notifier.port';
 import type {
@@ -14,7 +14,8 @@ import type {
 export class AdopterApplicationNotifierAdapter extends AdopterApplicationNotifierPort {
     constructor(
         private readonly mailTemplateService: MailTemplateService,
-        private readonly notificationService: NotificationService,
+        @Inject(NotificationDispatchPort)
+        private readonly notificationDispatchPort: NotificationDispatchPort,
     ) {
         super();
     }
@@ -26,7 +27,7 @@ export class AdopterApplicationNotifierAdapter extends AdopterApplicationNotifie
             ? this.mailTemplateService.getNewApplicationEmail(breederDisplayName)
             : null;
 
-        const builder = this.notificationService
+        const builder = this.notificationDispatchPort
             .to(breederId, RecipientType.BREEDER)
             .type(NotificationType.NEW_CONSULT_REQUEST)
             .title('💬 새로운 입양 상담 신청이 도착했어요!')
@@ -51,7 +52,7 @@ export class AdopterApplicationNotifierAdapter extends AdopterApplicationNotifie
 
         const recipientType = target.applicantRole === 'breeder' ? RecipientType.BREEDER : RecipientType.ADOPTER;
 
-        const builder = this.notificationService
+        const builder = this.notificationDispatchPort
             .to(target.applicantId, recipientType)
             .type(NotificationType.CONSULT_REQUEST_CONFIRMED)
             .title('✅ 상담 신청이 접수되었습니다!')
