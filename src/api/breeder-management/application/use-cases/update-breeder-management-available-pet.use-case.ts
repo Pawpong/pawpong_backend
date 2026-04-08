@@ -3,6 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { AvailablePetAddDto } from '../../dto/request/available-pet-add-request.dto';
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
+import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
 import { BreederManagementAvailablePetCommandMapperService } from '../../domain/services/breeder-management-available-pet-command-mapper.service';
 
 @Injectable()
@@ -11,6 +12,7 @@ export class UpdateBreederManagementAvailablePetUseCase {
         @Inject(BREEDER_MANAGEMENT_PET_COMMAND_PORT)
         private readonly breederManagementPetCommandPort: BreederManagementPetCommandPort,
         private readonly breederManagementAvailablePetCommandMapperService: BreederManagementAvailablePetCommandMapperService,
+        private readonly breederManagementCommandResponseFactoryService: BreederManagementCommandResponseFactoryService,
     ) {}
 
     async execute(
@@ -28,6 +30,6 @@ export class UpdateBreederManagementAvailablePetUseCase {
             this.breederManagementAvailablePetCommandMapperService.toUpdateData(updateData),
         );
 
-        return { message: '분양 개체 정보가 성공적으로 수정되었습니다.' };
+        return this.breederManagementCommandResponseFactoryService.createAvailablePetUpdated();
     }
 }

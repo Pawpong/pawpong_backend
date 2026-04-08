@@ -10,6 +10,7 @@ import type { BreederManagementSettingsPort } from '../ports/breeder-management-
 import { BreederManagementVerificationDraftStorePort } from '../ports/breeder-management-verification-draft-store.port';
 import { BreederManagementVerificationNotifierPort } from '../ports/breeder-management-verification-notifier.port';
 import { SubmitDocumentsRequestDto } from '../../dto/request/submit-documents-request.dto';
+import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
 import { BreederManagementVerificationDocumentPolicyService } from '../../domain/services/breeder-management-verification-document-policy.service';
 import { BreederManagementVerificationNotificationPayloadFactoryService } from '../../domain/services/breeder-management-verification-notification-payload-factory.service';
 
@@ -24,6 +25,7 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
         private readonly breederManagementFileUrlPort: BreederManagementFileUrlPort,
         private readonly breederManagementVerificationDraftStorePort: BreederManagementVerificationDraftStorePort,
         private readonly breederManagementVerificationNotifierPort: BreederManagementVerificationNotifierPort,
+        private readonly breederManagementCommandResponseFactoryService: BreederManagementCommandResponseFactoryService,
         private readonly breederManagementVerificationDocumentPolicyService: BreederManagementVerificationDocumentPolicyService,
         private readonly breederManagementVerificationNotificationPayloadFactoryService: BreederManagementVerificationNotificationPayloadFactoryService,
     ) {}
@@ -68,6 +70,6 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
 
         await this.breederManagementVerificationDraftStorePort.delete(userId);
 
-        return { message: '입점 서류 제출이 완료되었습니다. 관리자 검토 후 결과를 알려드립니다.' };
+        return this.breederManagementCommandResponseFactoryService.createVerificationDocumentsSubmitted();
     }
 }

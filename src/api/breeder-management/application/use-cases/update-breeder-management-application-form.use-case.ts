@@ -5,6 +5,7 @@ import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-pro
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_SETTINGS_PORT } from '../ports/breeder-management-settings.port';
 import type { BreederManagementSettingsPort } from '../ports/breeder-management-settings.port';
+import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
 import { BreederManagementApplicationFormValidatorService } from '../../domain/services/breeder-management-application-form-validator.service';
 
 @Injectable()
@@ -15,6 +16,7 @@ export class UpdateBreederManagementApplicationFormUseCase {
         @Inject(BREEDER_MANAGEMENT_SETTINGS_PORT)
         private readonly breederManagementSettingsPort: BreederManagementSettingsPort,
         private readonly breederManagementApplicationFormValidatorService: BreederManagementApplicationFormValidatorService,
+        private readonly breederManagementCommandResponseFactoryService: BreederManagementCommandResponseFactoryService,
     ) {}
 
     async execute(breederId: string, updateDto: ApplicationFormUpdateRequestDto) {
@@ -42,9 +44,8 @@ export class UpdateBreederManagementApplicationFormUseCase {
         const customQuestions = this.breederManagementApplicationFormValidatorService.toStoredQuestions(updateDto);
         const updatedBreeder = await this.breederManagementSettingsPort.updateApplicationForm(breederId, customQuestions);
 
-        return {
-            message: '입양 신청 폼이 성공적으로 업데이트되었습니다.',
-            customQuestions: updatedBreeder?.applicationForm ?? customQuestions,
-        };
+        return this.breederManagementCommandResponseFactoryService.createApplicationFormUpdated(
+            updatedBreeder?.applicationForm ?? customQuestions,
+        );
     }
 }

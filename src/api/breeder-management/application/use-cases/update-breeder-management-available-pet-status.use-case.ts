@@ -3,12 +3,14 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { PetStatus } from '../../../../common/enum/user.enum';
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
+import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
 
 @Injectable()
 export class UpdateBreederManagementAvailablePetStatusUseCase {
     constructor(
         @Inject(BREEDER_MANAGEMENT_PET_COMMAND_PORT)
         private readonly breederManagementPetCommandPort: BreederManagementPetCommandPort,
+        private readonly breederManagementCommandResponseFactoryService: BreederManagementCommandResponseFactoryService,
     ) {}
 
     async execute(userId: string, petId: string, status: PetStatus): Promise<{ message: string }> {
@@ -19,6 +21,6 @@ export class UpdateBreederManagementAvailablePetStatusUseCase {
 
         await this.breederManagementPetCommandPort.updateAvailablePetStatus(petId, status);
 
-        return { message: '반려동물 상태가 성공적으로 업데이트되었습니다.' };
+        return this.breederManagementCommandResponseFactoryService.createAvailablePetStatusUpdated();
     }
 }

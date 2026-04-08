@@ -11,6 +11,7 @@ import {
     BreederManagementVerificationNotifierPort,
     type BreederManagementVerificationSubmissionNotification,
 } from '../ports/breeder-management-verification-notifier.port';
+import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
 import { BreederManagementVerificationDocumentPolicyService } from '../../domain/services/breeder-management-verification-document-policy.service';
 import { BreederManagementVerificationNotificationPayloadFactoryService } from '../../domain/services/breeder-management-verification-notification-payload-factory.service';
 import { SubmitBreederManagementVerificationDocumentsUseCase } from './submit-breeder-management-verification-documents.use-case';
@@ -101,6 +102,7 @@ describe('SubmitBreederManagementVerificationDocumentsUseCase', () => {
             new StubFileUrlPort() as unknown as BreederManagementFileUrlPort,
             draftStore,
             notifier,
+            new BreederManagementCommandResponseFactoryService(),
             new BreederManagementVerificationDocumentPolicyService(),
             new BreederManagementVerificationNotificationPayloadFactoryService(),
         );

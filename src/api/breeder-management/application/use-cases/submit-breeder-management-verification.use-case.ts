@@ -6,6 +6,7 @@ import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-pro
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_SETTINGS_PORT } from '../ports/breeder-management-settings.port';
 import type { BreederManagementSettingsPort } from '../ports/breeder-management-settings.port';
+import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
 import { BreederManagementVerificationSubmissionMapperService } from '../../domain/services/breeder-management-verification-submission-mapper.service';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class SubmitBreederManagementVerificationUseCase {
         @Inject(BREEDER_MANAGEMENT_SETTINGS_PORT)
         private readonly breederManagementSettingsPort: BreederManagementSettingsPort,
         private readonly breederManagementVerificationSubmissionMapperService: BreederManagementVerificationSubmissionMapperService,
+        private readonly breederManagementCommandResponseFactoryService: BreederManagementCommandResponseFactoryService,
     ) {}
 
     async execute(userId: string, verificationData: VerificationSubmitRequestDto): Promise<{ message: string }> {
@@ -32,6 +34,6 @@ export class SubmitBreederManagementVerificationUseCase {
             this.breederManagementVerificationSubmissionMapperService.toVerificationRecord(verificationData);
         await this.breederManagementSettingsPort.updateVerification(userId, verificationRecord);
 
-        return { message: '브리더 인증 신청이 성공적으로 제출되었습니다. 관리자 검토 후 결과를 알려드립니다.' };
+        return this.breederManagementCommandResponseFactoryService.createVerificationSubmitted();
     }
 }
