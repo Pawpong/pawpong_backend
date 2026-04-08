@@ -13,10 +13,12 @@ import { GetAllFaqsUseCase } from './application/use-cases/get-all-faqs.use-case
 import { CreateFaqUseCase } from './application/use-cases/create-faq.use-case';
 import { UpdateFaqUseCase } from './application/use-cases/update-faq.use-case';
 import { DeleteFaqUseCase } from './application/use-cases/delete-faq.use-case';
+import { HOME_ASSET_URL } from '../application/ports/home-asset-url.port';
 import { HomeAdminMongooseManagerAdapter } from './infrastructure/home-admin-mongoose-manager.adapter';
 import { HOME_ADMIN_MANAGER } from './application/ports/home-admin-manager.port';
 import { HomeBannerCatalogService } from '../domain/services/home-banner-catalog.service';
 import { HomeFaqCatalogService } from '../domain/services/home-faq-catalog.service';
+import { HomeStorageAssetUrlAdapter } from '../infrastructure/home-storage-asset-url.adapter';
 import { BannerRepository } from '../repository/banner.repository';
 import { FaqRepository } from '../repository/faq.repository';
 
@@ -53,9 +55,14 @@ import { StorageModule } from '../../../common/storage/storage.module';
         BannerRepository,
         FaqRepository,
         HomeAdminMongooseManagerAdapter,
+        HomeStorageAssetUrlAdapter,
         {
             provide: HOME_ADMIN_MANAGER,
             useExisting: HomeAdminMongooseManagerAdapter,
+        },
+        {
+            provide: HOME_ASSET_URL,
+            useExisting: HomeStorageAssetUrlAdapter,
         },
     ],
 })
