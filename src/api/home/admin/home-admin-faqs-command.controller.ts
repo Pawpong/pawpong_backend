@@ -1,9 +1,8 @@
-import { Body, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Delete, Param, Post, Put } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { CreateFaqUseCase } from './application/use-cases/create-faq.use-case';
 import { DeleteFaqUseCase } from './application/use-cases/delete-faq.use-case';
-import { GetAllFaqsUseCase } from './application/use-cases/get-all-faqs.use-case';
 import { UpdateFaqUseCase } from './application/use-cases/update-faq.use-case';
 import { HomeAdminProtectedController } from './decorator/home-admin-controller.decorator';
 import { FaqCreateRequestDto } from './dto/request/faq-create-request.dto';
@@ -12,25 +11,16 @@ import { FaqResponseDto } from '../dto/response/faq-response.dto';
 import {
     ApiCreateFaqAdminEndpoint,
     ApiDeleteFaqAdminEndpoint,
-    ApiGetAllFaqsAdminEndpoint,
     ApiUpdateFaqAdminEndpoint,
 } from './swagger';
 
 @HomeAdminProtectedController()
-export class HomeAdminFaqsController {
+export class HomeAdminFaqsCommandController {
     constructor(
-        private readonly getAllFaqsUseCase: GetAllFaqsUseCase,
         private readonly createFaqUseCase: CreateFaqUseCase,
         private readonly updateFaqUseCase: UpdateFaqUseCase,
         private readonly deleteFaqUseCase: DeleteFaqUseCase,
     ) {}
-
-    @Get('faqs')
-    @ApiGetAllFaqsAdminEndpoint()
-    async getAllFaqs(): Promise<ApiResponseDto<FaqResponseDto[]>> {
-        const faqs = await this.getAllFaqsUseCase.execute();
-        return ApiResponseDto.success(faqs, 'FAQ 목록이 조회되었습니다.');
-    }
 
     @Post('faq')
     @ApiCreateFaqAdminEndpoint()
