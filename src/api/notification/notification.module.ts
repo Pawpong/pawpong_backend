@@ -21,6 +21,7 @@ import { NotificationMessageTemplateService } from './domain/services/notificati
 import { NotificationMongooseInboxAdapter } from './infrastructure/notification-mongoose-inbox.adapter';
 import { NotificationMongooseCommandAdapter } from './infrastructure/notification-mongoose-command.adapter';
 import { NotificationMailAdapter } from './infrastructure/notification-mail.adapter';
+import { NotificationRepository } from './repository/notification.repository';
 import { NOTIFICATION_INBOX_PORT } from './application/ports/notification-inbox.port';
 import { NOTIFICATION_COMMAND_PORT } from './application/ports/notification-command.port';
 import { NOTIFICATION_EMAIL_PORT } from './application/ports/notification-email.port';
@@ -47,6 +48,7 @@ import { MailModule } from '../../common/mail/mail.module';
     ],
     providers: [
         NotificationService,
+        NotificationRepository,
         CreateNotificationUseCase,
         CreateNotificationFromBuilderUseCase,
         NotificationResponseMapperService,
