@@ -5,6 +5,7 @@ import { AuthMapper } from '../../mapper/auth.mapper';
 import { AuthRegistrationPort } from '../ports/auth-registration.port';
 import { AuthTokenPort } from '../ports/auth-token.port';
 import { AuthResponseDto } from '../../dto/response/auth-response.dto';
+import { AuthResponseMessageService } from '../../domain/services/auth-response-message.service';
 
 type LegacySocialProfile = {
     provider: string;
@@ -35,6 +36,7 @@ export class CompleteLegacySocialRegistrationUseCase {
         private readonly authRegistrationPort: AuthRegistrationPort,
         @Inject(AuthTokenPort)
         private readonly authTokenPort: AuthTokenPort,
+        private readonly authResponseMessageService: AuthResponseMessageService,
     ) {}
 
     async execute(profile: LegacySocialProfile, additionalInfo: LegacySocialAdditionalInfo): Promise<AuthResponseDto> {
@@ -72,7 +74,12 @@ export class CompleteLegacySocialRegistrationUseCase {
             const hashedRefreshToken = await this.authTokenPort.hashRefreshToken(tokens.refreshToken);
             await this.authRegistrationPort.saveAdopterRefreshToken(userId, hashedRefreshToken);
 
-            return AuthMapper.toSocialRegistrationResponse(savedAdopter, tokens, 'adopter');
+            return AuthMapper.toSocialRegistrationResponse(
+                savedAdopter,
+                tokens,
+                'adopter',
+                this.authResponseMessageService.getSocialRegistrationCompleted(),
+            );
         }
 
         if (!additionalInfo.breederName || !additionalInfo.district) {
@@ -135,6 +142,11 @@ export class CompleteLegacySocialRegistrationUseCase {
         const hashedRefreshToken = await this.authTokenPort.hashRefreshToken(tokens.refreshToken);
         await this.authRegistrationPort.saveBreederRefreshToken(userId, hashedRefreshToken);
 
-        return AuthMapper.toSocialRegistrationResponse(savedBreeder, tokens, 'breeder');
+        return AuthMapper.toSocialRegistrationResponse(
+            savedBreeder,
+            tokens,
+            'breeder',
+            this.authResponseMessageService.getSocialRegistrationCompleted(),
+        );
     }
 }

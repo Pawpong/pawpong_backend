@@ -17,6 +17,7 @@ import { LogoutResponseDto } from '../dto/response/logout-response.dto';
 import { PhoneVerificationResponseDto } from '../dto/response/phone-verification-response.dto';
 import { RegisterAdopterResponseDto } from '../dto/response/register-adopter-response.dto';
 import { RegisterBreederResponseDto } from '../dto/response/register-breeder-response.dto';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../domain/services/auth-response-message.service';
 import { SocialCheckUserResponseDto } from '../dto/response/social-check-user-response.dto';
 import { VerificationDocumentsResponseDto } from '../dto/response/verification-documents-response.dto';
 
@@ -124,7 +125,7 @@ export function ApiLogoutAuthEndpoint() {
         `,
         responseType: LogoutResponseDto,
         successDescription: '로그아웃 성공',
-        successMessageExample: '로그아웃되었습니다.',
+        successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.logoutCompleted,
     });
 }
 
@@ -141,7 +142,7 @@ export function ApiSendPhoneVerificationCodeEndpoint() {
         responseType: PhoneVerificationResponseDto,
         isPublic: true,
         successDescription: '인증번호 발송 성공',
-        successMessageExample: '인증번호가 발송되었습니다.',
+        successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.phoneVerificationCodeSent,
         errorResponses: [AUTH_PHONE_SEND_FAILURE_RESPONSE],
     });
 }
@@ -159,7 +160,7 @@ export function ApiVerifyPhoneVerificationCodeEndpoint() {
         responseType: PhoneVerificationResponseDto,
         isPublic: true,
         successDescription: '전화번호 인증 성공',
-        successMessageExample: '전화번호 인증이 완료되었습니다.',
+        successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.phoneVerificationCompleted,
     });
 }
 
@@ -223,7 +224,7 @@ export function ApiCompleteSocialRegistrationEndpoint() {
             additionalModels: [RegisterAdopterResponseDto, RegisterBreederResponseDto],
             isPublic: true,
             successDescription: '소셜 회원가입 완료',
-            successMessageExample: '입양자 회원가입이 완료되었습니다.',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.adopterSignupCompleted,
         }),
         ApiBody({ type: SocialCompleteRequestDto }),
     );
@@ -324,7 +325,7 @@ export function ApiRegisterAdopterEndpoint() {
             responseType: RegisterAdopterResponseDto,
             isPublic: true,
             successDescription: '입양자 회원가입 성공',
-            successMessageExample: '입양자 회원가입이 완료되었습니다.',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.adopterSignupCompleted,
         }),
         ApiBody({ type: RegisterAdopterRequestDto }),
     );
@@ -345,7 +346,7 @@ export function ApiRegisterBreederEndpoint() {
             responseType: RegisterBreederResponseDto,
             isPublic: true,
             successDescription: '브리더 회원가입 성공',
-            successMessageExample: '브리더 회원가입이 완료되었습니다.',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.breederSignupCompleted,
         }),
         ApiBody({ type: RegisterBreederRequestDto }),
     );
@@ -366,7 +367,7 @@ export function ApiUploadProfileEndpoint() {
             responseType: UploadResponseDto,
             isPublic: true,
             successDescription: '프로필 이미지 업로드 성공',
-            successMessageExample: '프로필 이미지가 업로드되었습니다.',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.profileImageUploaded,
         }),
         ApiConsumes('multipart/form-data'),
         ApiQuery({
@@ -440,7 +441,7 @@ export function ApiUploadBreederDocumentsEndpoint() {
             responseType: VerificationDocumentsResponseDto,
             isPublic: true,
             successDescription: '브리더 인증 서류 업로드 성공',
-            successMessageExample: '브리더 인증 서류가 업로드되었습니다.',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.breederDocumentsUploaded,
         }),
         ApiConsumes('multipart/form-data'),
         ApiQuery({
