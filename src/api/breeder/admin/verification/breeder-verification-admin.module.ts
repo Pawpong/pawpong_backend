@@ -27,6 +27,7 @@ import { BreederVerificationAdminRepository } from './repository/breeder-verific
 import { Admin, AdminSchema } from '../../../../schema/admin.schema';
 import { Breeder, BreederSchema } from '../../../../schema/breeder.schema';
 
+import { MailModule } from '../../../../common/mail/mail.module';
 import { StorageModule } from '../../../../common/storage/storage.module';
 import { NotificationModule } from '../../../notification/notification.module';
 
@@ -38,7 +39,7 @@ import { NotificationModule } from '../../../notification/notification.module';
  * - 브리더 목록 조회
  * - 승인 대기 브리더 목록 조회
  *
- * Note: MailTemplateService는 NotificationModule을 통해 제공받습니다.
+ * Note: NotificationDispatchPort는 NotificationModule, MailTemplateService는 MailModule을 통해 제공받습니다.
  */
 @Module({
     imports: [
@@ -46,7 +47,8 @@ import { NotificationModule } from '../../../notification/notification.module';
             { name: Breeder.name, schema: BreederSchema },
             { name: Admin.name, schema: AdminSchema },
         ]),
-        NotificationModule, // MailTemplateService도 여기서 제공됨
+        MailModule,
+        NotificationModule,
         StorageModule, // StorageService 제공
     ],
     controllers: [
