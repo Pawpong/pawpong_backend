@@ -24,36 +24,14 @@ import {
     VideoMetaResponseDto,
     VideoVisibilityResponseDto,
 } from '../dto/response/video-response.dto';
-
-const FEED_VIDEO_NOT_FOUND_RESPONSE = {
-    status: 400,
-    description: '동영상을 찾을 수 없음',
-    errorExample: '동영상을 찾을 수 없습니다.',
-};
-
-const FEED_VIDEO_ACCESS_DENIED_RESPONSE = {
-    status: 400,
-    description: '동영상을 찾을 수 없거나 권한이 없음',
-    errorExample: '동영상을 찾을 수 없음 또는 권한 없음',
-};
-
-const FEED_COMMENT_NOT_FOUND_RESPONSE = {
-    status: 400,
-    description: '댓글을 찾을 수 없음',
-    errorExample: '댓글을 찾을 수 없습니다.',
-};
-
-const FEED_TAG_REQUIRED_RESPONSE = {
-    status: 400,
-    description: '검색할 태그를 입력해주세요.',
-    errorExample: '검색할 태그를 입력해주세요.',
-};
-
-const FEED_STREAM_FAILURE_RESPONSE = {
-    status: 400,
-    description: 'HLS 파일을 가져올 수 없음',
-    errorExample: '파일을 가져올 수 없습니다.',
-};
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
+import {
+    FEED_COMMENT_NOT_FOUND_RESPONSE,
+    FEED_STREAM_FAILURE_RESPONSE,
+    FEED_TAG_REQUIRED_RESPONSE,
+    FEED_VIDEO_ACCESS_DENIED_RESPONSE,
+    FEED_VIDEO_NOT_FOUND_RESPONSE,
+} from '../constants/feed-video-swagger.constants';
 
 function ApiFeedVideoIdParam() {
     return ApiParam({
@@ -108,7 +86,7 @@ export function ApiGetFeedVideosEndpoint() {
             `,
             responseType: FeedResponseDto,
             isPublic: true,
-            successDescription: '피드 조회 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.feedListed,
         }),
         ApiPageQuery(),
         ApiLimitQuery(20),
@@ -128,7 +106,7 @@ export function ApiGetPopularFeedVideosEndpoint() {
             `,
             responseType: [PopularVideoItemDto],
             isPublic: true,
-            successDescription: '인기 동영상 조회 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.popularVideosListed,
         }),
         ApiLimitQuery(10),
     );
@@ -146,7 +124,7 @@ export function ApiStreamFeedVideoEndpoint() {
                 - 캐시된 파일이 있으면 Redis 캐시를 우선 사용합니다.
             `,
             isPublic: true,
-            successDescription: 'HLS 파일 반환 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.hlsStreamReturned,
             responseSchema: {
                 oneOf: [
                     { type: 'string', description: 'm3u8 manifest 본문' },
@@ -178,7 +156,7 @@ export function ApiPrefetchFeedVideoSegmentsEndpoint() {
             `,
             responseType: SegmentPrefetchResponseDto,
             isPublic: true,
-            successDescription: '세그먼트 프리페치 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.segmentsPrefetched,
             errorResponses: [FEED_VIDEO_NOT_FOUND_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -211,7 +189,7 @@ export function ApiGetFeedVideoMetaEndpoint() {
                 - READY 상태이면 HLS 재생 URL과 썸네일 URL을 함께 반환합니다.
             `,
             isPublic: true,
-            successDescription: '동영상 메타데이터 조회 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoMetaRetrieved,
             responseSchema: {
                 oneOf: [
                     { $ref: getSchemaPath(VideoMetaResponseDto) },
@@ -238,7 +216,7 @@ export function ApiIncrementFeedVideoViewEndpoint() {
             `,
             responseType: VideoActionSuccessResponseDto,
             isPublic: true,
-            successDescription: '조회수 증가 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoViewIncremented,
         }),
         ApiFeedVideoIdParam(),
     );
@@ -256,7 +234,7 @@ export function ApiGetFeedVideoUploadUrlEndpoint() {
                 - 제목, 설명, 태그를 함께 저장해 이후 업로드 완료 시 이어집니다.
             `,
             responseType: UploadUrlResponseDto,
-            successDescription: '업로드 URL 발급 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.uploadUrlIssued,
         }),
         ApiBody({ type: UploadVideoRequestDto }),
     );
@@ -274,7 +252,7 @@ export function ApiCompleteFeedVideoUploadEndpoint() {
                 - BullMQ 인코딩 큐에 작업을 등록합니다.
             `,
             responseType: UploadCompleteResponseDto,
-            successDescription: '인코딩 작업 등록 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.uploadCompleted,
             errorResponses: [FEED_VIDEO_NOT_FOUND_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -293,7 +271,7 @@ export function ApiGetMyFeedVideosEndpoint() {
                 - 페이지네이션 정보와 함께 반환합니다.
             `,
             responseType: MyVideoListResponseDto,
-            successDescription: '내 동영상 목록 조회 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.myVideosListed,
         }),
         ApiPageQuery(),
         ApiLimitQuery(20),
@@ -312,7 +290,7 @@ export function ApiDeleteFeedVideoEndpoint() {
                 - 메타 캐시를 비워 즉시 반영되도록 합니다.
             `,
             responseType: VideoActionSuccessResponseDto,
-            successDescription: '동영상 삭제 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoDeleted,
             errorResponses: [FEED_VIDEO_ACCESS_DENIED_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -331,7 +309,7 @@ export function ApiToggleFeedVideoVisibilityEndpoint() {
                 - 공개 상태가 바뀌면 메타 캐시를 비웁니다.
             `,
             responseType: VideoVisibilityResponseDto,
-            successDescription: '공개 상태 전환 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.visibilityToggled,
             errorResponses: [FEED_VIDEO_ACCESS_DENIED_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -350,7 +328,7 @@ export function ApiToggleFeedVideoLikeEndpoint() {
                 - 최신 좋아요 수를 함께 반환합니다.
             `,
             responseType: LikeToggleResponseDto,
-            successDescription: '좋아요 토글 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.likeToggled,
             errorResponses: [FEED_VIDEO_NOT_FOUND_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -368,7 +346,7 @@ export function ApiGetFeedVideoLikeStatusEndpoint() {
                 - 현재 좋아요 여부와 총 좋아요 수를 함께 반환합니다.
             `,
             responseType: LikeStatusResponseDto,
-            successDescription: '좋아요 상태 조회 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.likeStatusRetrieved,
         }),
         ApiFeedVideoIdParam(),
     );
@@ -386,7 +364,7 @@ export function ApiGetMyLikedFeedVideosEndpoint() {
                 - page와 limit로 스크롤형 목록을 조회합니다.
             `,
             responseType: MyLikedVideosResponseDto,
-            successDescription: '좋아요한 동영상 목록 조회 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.myLikedVideosListed,
         }),
         ApiPageQuery(),
         ApiLimitQuery(20),
@@ -405,7 +383,7 @@ export function ApiCreateFeedVideoCommentEndpoint() {
                 - 동영상 댓글 수를 함께 갱신합니다.
             `,
             responseType: CommentCreateResponseDto,
-            successDescription: '댓글 작성 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentCreated,
             errorResponses: [FEED_COMMENT_NOT_FOUND_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -426,7 +404,7 @@ export function ApiGetFeedVideoCommentsEndpoint() {
             `,
             responseType: CommentListResponseDto,
             isPublic: true,
-            successDescription: '댓글 목록 조회 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentsListed,
         }),
         ApiFeedVideoIdParam(),
         ApiPageQuery(),
@@ -447,7 +425,7 @@ export function ApiGetFeedVideoRepliesEndpoint() {
             `,
             responseType: ReplyListResponseDto,
             isPublic: true,
-            successDescription: '대댓글 조회 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.repliesListed,
         }),
         ApiFeedCommentIdParam(),
         ApiPageQuery(),
@@ -467,7 +445,7 @@ export function ApiUpdateFeedVideoCommentEndpoint() {
                 - 수정된 최신 댓글 내용을 반환합니다.
             `,
             responseType: CommentUpdateResponseDto,
-            successDescription: '댓글 수정 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentUpdated,
             errorResponses: [FEED_COMMENT_NOT_FOUND_RESPONSE],
         }),
         ApiFeedCommentIdParam(),
@@ -487,7 +465,7 @@ export function ApiDeleteFeedVideoCommentEndpoint() {
                 - 동영상 댓글 수와 댓글 캐시를 함께 갱신합니다.
             `,
             responseType: VideoActionSuccessResponseDto,
-            successDescription: '댓글 삭제 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentDeleted,
             errorResponses: [FEED_COMMENT_NOT_FOUND_RESPONSE],
         }),
         ApiFeedCommentIdParam(),
@@ -507,7 +485,7 @@ export function ApiSearchFeedVideosByTagEndpoint() {
             `,
             responseType: TagSearchResponseDto,
             isPublic: true,
-            successDescription: '해시태그 검색 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videosSearchedByTag,
             errorResponses: [FEED_TAG_REQUIRED_RESPONSE],
         }),
         ApiQuery({
@@ -535,7 +513,7 @@ export function ApiGetPopularFeedTagsEndpoint() {
             `,
             responseType: [PopularTagItemDto],
             isPublic: true,
-            successDescription: '인기 해시태그 조회 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.popularTagsListed,
         }),
         ApiLimitQuery(20),
     );
@@ -554,7 +532,7 @@ export function ApiSuggestFeedTagsEndpoint() {
             `,
             responseType: [TagSuggestionItemDto],
             isPublic: true,
-            successDescription: '태그 자동완성 조회 성공',
+            successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.tagSuggestionsListed,
         }),
         ApiQuery({
             name: 'q',
