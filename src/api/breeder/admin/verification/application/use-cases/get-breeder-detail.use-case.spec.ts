@@ -3,7 +3,6 @@ import { ForbiddenException } from '@nestjs/common';
 import { GetBreederDetailUseCase } from './get-breeder-detail.use-case';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
-import { BreederPaginationAssemblerService } from '../../../../domain/services/breeder-pagination-assembler.service';
 
 describe('브리더 상세 조회 유스케이스', () => {
     const reader = {
@@ -12,7 +11,7 @@ describe('브리더 상세 조회 유스케이스', () => {
     };
     const presentationService = new BreederVerificationAdminPresentationService({
         generateOne: jest.fn((fileName: string) => `https://cdn.test/${fileName}`),
-    } as any, new BreederPaginationAssemblerService());
+    } as any);
     const useCase = new GetBreederDetailUseCase(reader as any, new BreederVerificationAdminPolicyService(), presentationService);
 
     beforeEach(() => {

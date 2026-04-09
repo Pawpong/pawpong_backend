@@ -3,8 +3,8 @@ import { Inject, Injectable } from '@nestjs/common';
 import { BreederSearchRequestDto } from '../../dto/request/breeder-search-request.dto';
 import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
+import { BreederVerificationAdminListPresentationService } from '../../domain/services/breeder-verification-admin-list-presentation.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
-import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 
 @Injectable()
 export class GetLevelChangeRequestsUseCase {
@@ -12,7 +12,7 @@ export class GetLevelChangeRequestsUseCase {
         @Inject(BREEDER_VERIFICATION_ADMIN_READER)
         private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
-        private readonly breederVerificationAdminPresentationService: BreederVerificationAdminPresentationService,
+        private readonly breederVerificationAdminListPresentationService: BreederVerificationAdminListPresentationService,
     ) {}
 
     async execute(adminId: string, filter: BreederSearchRequestDto) {
@@ -31,9 +31,9 @@ export class GetLevelChangeRequestsUseCase {
             itemsPerPage,
         });
 
-        return this.breederVerificationAdminPresentationService.toPaginatedResponse(
+        return this.breederVerificationAdminListPresentationService.toPaginatedResponse(
             result.items.map((breeder) =>
-                this.breederVerificationAdminPresentationService.toLevelChangeRequestResponse(breeder),
+                this.breederVerificationAdminListPresentationService.toLevelChangeRequestResponse(breeder),
             ),
             pageNumber,
             itemsPerPage,
