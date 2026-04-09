@@ -7,7 +7,7 @@ import { GetUsersUseCase } from './application/use-cases/get-users.use-case';
 import { UserAdminProtectedController } from './decorator/user-admin-controller.decorator';
 import { UserSearchRequestDto } from './dto/request/user-search-request.dto';
 import { UserManagementResponseDto } from './dto/response/user-management-response.dto';
-import { USER_ADMIN_RESPONSE_MESSAGES } from './domain/services/user-admin-response-message.service';
+import { USER_ADMIN_RESPONSE_MESSAGES } from './constants/user-admin-response-messages';
 import { ApiGetUsersAdminEndpoint } from './swagger';
 
 @UserAdminProtectedController()
