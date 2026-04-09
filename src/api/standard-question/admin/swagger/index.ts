@@ -1,11 +1,7 @@
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
+import { STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../constants/standard-question-admin-response-messages';
+import { STANDARD_QUESTION_ADMIN_NOT_FOUND_RESPONSE } from '../constants/standard-question-admin-swagger.constants';
 import { StandardQuestionResponseDto } from '../dto/response/standard-question-response.dto';
-
-const STANDARD_QUESTION_ADMIN_NOT_FOUND_RESPONSE = {
-    status: 404,
-    description: '표준 질문을 찾을 수 없음',
-    errorExample: '표준 질문을 찾을 수 없습니다.',
-};
 
 export function ApiStandardQuestionAdminController() {
     return ApiController('입양 신청 질문 (Admin)');
@@ -17,11 +13,11 @@ export function ApiGetAllStandardQuestionsAdminEndpoint() {
         description: `
             모든 표준 질문 목록을 조회합니다.
 
-            ## 주요 기능
-            - 비활성화된 질문을 포함한 모든 표준 질문을 반환합니다.
+        ## 주요 기능
+        - 비활성화된 질문을 포함한 모든 표준 질문을 반환합니다.
         `,
         responseType: [StandardQuestionResponseDto],
-        successMessageExample: '표준 질문 목록이 조회되었습니다.',
+        successMessageExample: STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsRetrieved,
     });
 }
 
@@ -39,11 +35,11 @@ export function ApiUpdateStandardQuestionAdminEndpoint() {
             - placeholder: 플레이스홀더
             - description: 추가 설명
 
-            ## 참고
-            - 'id'와 'order' 필드는 수정할 수 없습니다.
+        ## 참고
+        - 'id'와 'order' 필드는 수정할 수 없습니다.
         `,
         responseType: StandardQuestionResponseDto,
-        successMessageExample: '표준 질문이 수정되었습니다.',
+        successMessageExample: STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionUpdated,
         errorResponses: [STANDARD_QUESTION_ADMIN_NOT_FOUND_RESPONSE],
     });
 }
@@ -54,11 +50,11 @@ export function ApiToggleStandardQuestionStatusAdminEndpoint() {
         description: `
             특정 ID를 가진 표준 질문의 활성화 상태를 변경합니다.
 
-            ## 요청 본문
-            - isActive: true면 활성화, false면 비활성화됩니다.
+        ## 요청 본문
+        - isActive: true면 활성화, false면 비활성화됩니다.
         `,
         responseType: StandardQuestionResponseDto,
-        successMessageExample: '표준 질문 상태가 변경되었습니다.',
+        successMessageExample: STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionStatusUpdated,
         errorResponses: [STANDARD_QUESTION_ADMIN_NOT_FOUND_RESPONSE],
     });
 }
@@ -76,7 +72,7 @@ export function ApiReorderStandardQuestionsAdminEndpoint() {
             type: 'boolean',
             example: true,
         },
-        successMessageExample: '표준 질문 순서가 변경되었습니다.',
+        successMessageExample: STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsReordered,
     });
 }
 
@@ -94,6 +90,6 @@ export function ApiReseedStandardQuestionsAdminEndpoint() {
             type: 'boolean',
             example: true,
         },
-        successMessageExample: '표준 질문이 재시딩되었습니다.',
+        successMessageExample: STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsReseeded,
     });
 }
