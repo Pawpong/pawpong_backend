@@ -5,7 +5,7 @@ import { PaginationResponseDto } from '../../common/dto/pagination/pagination-re
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetNotificationsUseCase } from './application/use-cases/get-notifications.use-case';
 import { NotificationProtectedController } from './decorator/notification-controller.decorator';
-import { NotificationResponseMessageService } from './domain/services/notification-response-message.service';
+import { NotificationQueryResponseMessageService } from './domain/services/notification-query-response-message.service';
 import { NotificationListRequestDto } from './dto/request/notification-list-request.dto';
 import { NotificationResponseDto } from './dto/response/notification-response.dto';
 import { ApiGetNotificationsEndpoint } from './swagger';
@@ -14,7 +14,7 @@ import { ApiGetNotificationsEndpoint } from './swagger';
 export class NotificationListController {
     constructor(
         private readonly getNotificationsUseCase: GetNotificationsUseCase,
-        private readonly notificationResponseMessageService: NotificationResponseMessageService,
+        private readonly notificationQueryResponseMessageService: NotificationQueryResponseMessageService,
     ) {}
 
     @Get()
@@ -24,6 +24,6 @@ export class NotificationListController {
         @Query() filter: NotificationListRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<NotificationResponseDto>>> {
         const result = await this.getNotificationsUseCase.execute(userId, filter);
-        return ApiResponseDto.success(result, this.notificationResponseMessageService.notificationsListed());
+        return ApiResponseDto.success(result, this.notificationQueryResponseMessageService.notificationsListed());
     }
 }
