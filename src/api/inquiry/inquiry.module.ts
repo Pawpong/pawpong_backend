@@ -19,8 +19,11 @@ import { GetInquiryListUseCase } from './application/use-cases/get-inquiry-list.
 import { GetMyInquiriesUseCase } from './application/use-cases/get-my-inquiries.use-case';
 import { INQUIRY_ASSET_URL } from './application/ports/inquiry-asset-url.port';
 import { InquiryCommandPolicyService } from './domain/services/inquiry-command-policy.service';
-import { InquiryCommandResponseMessageService } from './domain/services/inquiry-command-response-message.service';
-import { InquiryQueryResponseMessageService } from './domain/services/inquiry-query-response-message.service';
+import { InquiryAdopterCommandResponseMessageService } from './domain/services/inquiry-adopter-command-response-message.service';
+import { InquiryAdopterQueryResponseMessageService } from './domain/services/inquiry-adopter-query-response-message.service';
+import { InquiryBreederAnswerResponseMessageService } from './domain/services/inquiry-breeder-answer-response-message.service';
+import { InquiryBreederQueryResponseMessageService } from './domain/services/inquiry-breeder-query-response-message.service';
+import { InquiryPublicQueryResponseMessageService } from './domain/services/inquiry-public-query-response-message.service';
 import { InquiryViewService } from './domain/services/inquiry-view.service';
 import { INQUIRY_COMMAND } from './application/ports/inquiry-command.port';
 import { InquiryRepositoryCommandAdapter } from './infrastructure/inquiry-repository-command.adapter';
@@ -66,8 +69,11 @@ import { StorageModule } from '../../common/storage/storage.module';
         DeleteInquiryUseCase,
         CreateInquiryAnswerUseCase,
         InquiryCommandPolicyService,
-        InquiryQueryResponseMessageService,
-        InquiryCommandResponseMessageService,
+        InquiryPublicQueryResponseMessageService,
+        InquiryAdopterQueryResponseMessageService,
+        InquiryBreederQueryResponseMessageService,
+        InquiryAdopterCommandResponseMessageService,
+        InquiryBreederAnswerResponseMessageService,
         InquiryViewService,
         InquiryRepositoryReaderAdapter,
         InquiryRepositoryCommandAdapter,

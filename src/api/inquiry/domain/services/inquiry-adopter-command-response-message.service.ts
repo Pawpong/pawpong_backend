@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { INQUIRY_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/inquiry-response-messages';
 
 @Injectable()
-export class InquiryCommandResponseMessageService {
+export class InquiryAdopterCommandResponseMessageService {
     inquiryCreated(): string {
         return INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryCreated;
     }
@@ -14,9 +14,5 @@ export class InquiryCommandResponseMessageService {
 
     inquiryDeleted(): string {
         return INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryDeleted;
-    }
-
-    inquiryAnswerCreated(): string {
-        return INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryAnswerCreated;
     }
 }
