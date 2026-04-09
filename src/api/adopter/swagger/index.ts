@@ -3,6 +3,8 @@ import { ApiBody, ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from '../constants/adopter-response-messages';
+import { ADOPTER_FORBIDDEN_RESPONSE } from '../constants/adopter-swagger.constants';
 import { AccountDeleteRequestDto } from '../dto/request/account-delete-request.dto';
 import { ApplicationCreateRequestDto } from '../dto/request/application-create-request.dto';
 import { FavoriteAddRequestDto } from '../dto/request/favorite-add-request.dto';
@@ -25,13 +27,6 @@ import { MyReviewItemDto } from '../dto/response/my-review-item.dto';
 import { ReportCreateResponseDto } from '../dto/response/report-create-response.dto';
 import { ReviewCreateResponseDto } from '../dto/response/review-create-response.dto';
 import { ReviewReportResponseDto } from '../dto/response/review-report-response.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from '../domain/services/adopter-response-message.service';
-
-const ADOPTER_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '입양자 권한이 필요합니다.',
-};
 
 export function ApiAdopterController() {
     return ApiController('입양자');
