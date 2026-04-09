@@ -3,13 +3,8 @@ import { ApiExtraModels, ApiOperation, ApiQuery, ApiResponse, getSchemaPath } fr
 
 import { ApiController } from '../../../../common/decorator/swagger.decorator';
 import { PageInfoDto } from '../../../../common/dto/pagination/page-info.dto';
+import { ANNOUNCEMENT_ADMIN_ERROR_RESPONSES } from '../constants/announcement-admin-swagger.constants';
 import { AnnouncementResponseDto } from '../../dto/response/announcement-response.dto';
-
-const ANNOUNCEMENT_ADMIN_ERROR_RESPONSES = [
-    { status: 400, description: '잘못된 요청' },
-    { status: 401, description: '인증 실패' },
-    { status: 403, description: '권한 없음 (관리자만 접근 가능)' },
-];
 
 export function ApiAnnouncementAdminController() {
     return ApiController('공지사항 관리');
