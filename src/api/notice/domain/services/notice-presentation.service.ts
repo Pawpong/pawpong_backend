@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../common/dto/pagination/pagination-builder.dto';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { NoticeResponseDto } from '../../dto/response/notice-response.dto';
 import { NoticeSnapshot } from '../../application/ports/notice-reader.port';
+import { NoticePaginationAssemblerService } from './notice-pagination-assembler.service';
 
 @Injectable()
 export class NoticePresentationService {
+    constructor(private readonly noticePaginationAssemblerService: NoticePaginationAssemblerService) {}
+
     buildPage(
         notices: NoticeSnapshot[],
         page: number,
@@ -15,12 +17,7 @@ export class NoticePresentationService {
     ): PaginationResponseDto<NoticeResponseDto> {
         const items = notices.map((notice) => this.toResponseDto(notice));
 
-        return new PaginationBuilder<NoticeResponseDto>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(totalItems)
-            .build();
+        return this.noticePaginationAssemblerService.build(items, page, limit, totalItems);
     }
 
     toResponseDto(notice: NoticeSnapshot): NoticeResponseDto {

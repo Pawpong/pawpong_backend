@@ -7,6 +7,7 @@ import { NoticeAdminQueryController } from './admin/notice-admin-query.controlle
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';
 import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
+import { NoticePaginationAssemblerService } from './domain/services/notice-pagination-assembler.service';
 import { NoticePresentationService } from './domain/services/notice-presentation.service';
 import { NoticeResponseMessageService } from './domain/services/notice-response-message.service';
 import { NoticeMongooseReaderAdapter } from './infrastructure/notice-mongoose-reader.adapter';
@@ -29,6 +30,7 @@ import { NoticeRepository } from './repository/notice.repository';
         CustomLoggerService,
         GetNoticeListUseCase,
         GetNoticeDetailUseCase,
+        NoticePaginationAssemblerService,
         NoticePresentationService,
         NoticeResponseMessageService,
         NoticeRepository,
