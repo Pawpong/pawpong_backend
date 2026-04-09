@@ -4,6 +4,9 @@ import { ApiQuery } from '@nestjs/swagger';
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import {
+    NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES,
+} from '../domain/services/notification-response-message.service';
+import {
     MarkAllAsReadResponseDto,
     MarkAsReadResponseDto,
     NotificationResponseDto,
@@ -34,7 +37,7 @@ export function ApiGetNotificationsEndpoint() {
             responseType: PaginationResponseDto,
             itemType: NotificationResponseDto,
             successDescription: '알림 목록 조회 성공',
-            successMessageExample: '알림 목록이 조회되었습니다.',
+            successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.notificationsListed,
         }),
         ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
         ApiQuery({ name: 'limit', required: false, type: Number, description: '페이지당 항목 수', example: 20 }),
@@ -54,7 +57,7 @@ export function ApiGetUnreadNotificationCountEndpoint() {
         `,
         responseType: UnreadCountResponseDto,
         successDescription: '읽지 않은 알림 수 조회 성공',
-        successMessageExample: '읽지 않은 알림 수가 조회되었습니다.',
+        successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.unreadCountRetrieved,
     });
 }
 
@@ -70,7 +73,7 @@ export function ApiMarkNotificationReadEndpoint() {
         `,
         responseType: MarkAsReadResponseDto,
         successDescription: '알림 읽음 처리 성공',
-        successMessageExample: '알림이 읽음 처리되었습니다.',
+        successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.notificationMarkedRead,
         errorResponses: [NOTIFICATION_NOT_FOUND_RESPONSE],
     });
 }
@@ -87,7 +90,7 @@ export function ApiMarkAllNotificationsReadEndpoint() {
         `,
         responseType: MarkAllAsReadResponseDto,
         successDescription: '모든 알림 읽음 처리 성공',
-        successMessageExample: '모든 알림이 읽음 처리되었습니다.',
+        successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.allNotificationsMarkedRead,
     });
 }
 
@@ -103,7 +106,7 @@ export function ApiDeleteNotificationEndpoint() {
         `,
         nullableData: true,
         successDescription: '알림 삭제 성공',
-        successMessageExample: '알림이 삭제되었습니다.',
+        successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.notificationDeleted,
         errorResponses: [NOTIFICATION_NOT_FOUND_RESPONSE],
     });
 }
