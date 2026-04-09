@@ -2,14 +2,12 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
 
 import { ApiEndpoint, ApiPublicController } from '../../../common/decorator/swagger.decorator';
+import { APP_VERSION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/app-version-response-messages';
+import {
+    APP_VERSION_BAD_REQUEST_RESPONSE,
+    APP_VERSION_PLATFORM_VALUES,
+} from '../constants/app-version-swagger.constants';
 import { AppVersionCheckResponseDto } from '../dto/response/app-version-check-response.dto';
-
-const APP_VERSION_PLATFORM_VALUES = ['ios', 'android'] as const;
-const APP_VERSION_BAD_REQUEST_RESPONSE = {
-    status: 400,
-    description: '잘못된 요청',
-    errorExample: 'platform 또는 currentVersion이 올바르지 않습니다.',
-};
 
 export function ApiAppVersionController() {
     return ApiPublicController('앱 버전');
@@ -30,7 +28,7 @@ export function ApiCheckAppVersionEndpoint() {
             responseType: AppVersionCheckResponseDto,
             isPublic: true,
             successDescription: '버전 체크 성공',
-            successMessageExample: '버전 체크 완료',
+            successMessageExample: APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.versionChecked,
             errorResponses: [APP_VERSION_BAD_REQUEST_RESPONSE],
         }),
         ApiQuery({
