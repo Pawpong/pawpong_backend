@@ -5,14 +5,14 @@ import { CheckFileReferencesUseCase } from './application/use-cases/check-file-r
 import { UploadAdminProtectedController } from './decorator/upload-admin-controller.decorator';
 import { CheckFileReferencesRequestDto } from './dto/request/check-file-references-request.dto';
 import { FileReferenceResponseDto } from './dto/response/file-reference-response.dto';
-import { UploadAdminResponseMessageService } from './domain/services/upload-admin-response-message.service';
+import { UploadAdminQueryResponseMessageService } from './domain/services/upload-admin-query-response-message.service';
 import { ApiCheckFileReferencesAdminEndpoint } from './swagger';
 
 @UploadAdminProtectedController()
 export class UploadAdminCheckFileReferencesController {
     constructor(
         private readonly checkFileReferencesUseCase: CheckFileReferencesUseCase,
-        private readonly uploadAdminResponseMessageService: UploadAdminResponseMessageService,
+        private readonly uploadAdminQueryResponseMessageService: UploadAdminQueryResponseMessageService,
     ) {}
 
     @Post('files/check-references')
@@ -21,6 +21,6 @@ export class UploadAdminCheckFileReferencesController {
         @Body() data: CheckFileReferencesRequestDto,
     ): Promise<ApiResponseDto<FileReferenceResponseDto>> {
         const result = await this.checkFileReferencesUseCase.execute(data.fileKeys);
-        return ApiResponseDto.success(result, this.uploadAdminResponseMessageService.fileReferencesChecked());
+        return ApiResponseDto.success(result, this.uploadAdminQueryResponseMessageService.fileReferencesChecked());
     }
 }
