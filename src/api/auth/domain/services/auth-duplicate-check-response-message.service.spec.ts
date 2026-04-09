@@ -1,8 +1,8 @@
 import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
-import { AuthLookupResponseMessageService } from './auth-lookup-response-message.service';
+import { AuthDuplicateCheckResponseMessageService } from './auth-duplicate-check-response-message.service';
 
-describe('인증 조회 응답 메시지 서비스', () => {
-    const service = new AuthLookupResponseMessageService();
+describe('중복 체크 응답 메시지 서비스', () => {
+    const service = new AuthDuplicateCheckResponseMessageService();
 
     it('중복 체크 메시지를 상황별로 반환한다', () => {
         expect(service.getDuplicateCheckMessage('email', false)).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.emailAvailable);
@@ -19,12 +19,5 @@ describe('인증 조회 응답 메시지 서비스', () => {
         expect(service.getDuplicateCheckMessage('breederName', true)).toBe(
             AUTH_RESPONSE_MESSAGE_EXAMPLES.breederNameDuplicated,
         );
-    });
-
-    it('소셜 유저 조회와 배너 조회 메시지를 반환한다', () => {
-        expect(service.getSocialUserCheckMessage(true)).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.socialUserFound);
-        expect(service.getSocialUserCheckMessage(false)).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.socialUserNotFound);
-        expect(service.getBannerListed('login')).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.loginBannersListed);
-        expect(service.getBannerListed('signup')).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.registerBannersListed);
     });
 });

@@ -3,7 +3,7 @@ import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
 import { AuthPublicController } from './decorator/auth-public-controller.decorator';
-import { AuthLookupResponseMessageService } from './domain/services/auth-lookup-response-message.service';
+import { AuthSocialUserResponseMessageService } from './domain/services/auth-social-user-response-message.service';
 import { CheckSocialUserRequestDto } from './dto/request/check-social-user-request.dto';
 import { SocialCheckUserResponseDto } from './dto/response/social-check-user-response.dto';
 import { ApiCheckSocialUserEndpoint } from './swagger';
@@ -12,7 +12,7 @@ import { ApiCheckSocialUserEndpoint } from './swagger';
 export class AuthSocialCheckUserController {
     constructor(
         private readonly checkSocialUserUseCase: CheckSocialUserUseCase,
-        private readonly authLookupResponseMessageService: AuthLookupResponseMessageService,
+        private readonly authSocialUserResponseMessageService: AuthSocialUserResponseMessageService,
     ) {}
 
     @Post('social/check-user')
@@ -24,7 +24,7 @@ export class AuthSocialCheckUserController {
         const result = await this.checkSocialUserUseCase.execute(dto.provider, dto.providerId, dto.email);
         return ApiResponseDto.success(
             result,
-            this.authLookupResponseMessageService.getSocialUserCheckMessage(result.exists),
+            this.authSocialUserResponseMessageService.getSocialUserCheckMessage(result.exists),
         );
     }
 }
