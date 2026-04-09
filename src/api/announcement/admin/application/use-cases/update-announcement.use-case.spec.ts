@@ -2,6 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 
 import { UpdateAnnouncementUseCase } from './update-announcement.use-case';
 import { AnnouncementWriterPort } from '../ports/announcement-writer.port';
+import { AnnouncementPaginationAssemblerService } from '../../../domain/services/announcement-pagination-assembler.service';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
 
 describe('공지사항 수정 유스케이스', () => {
@@ -27,7 +28,7 @@ describe('공지사항 수정 유스케이스', () => {
         };
         const useCase = new UpdateAnnouncementUseCase(
             announcementWriter,
-            new AnnouncementResponseMapperService(),
+            new AnnouncementResponseMapperService(new AnnouncementPaginationAssemblerService()),
             createLogger() as any,
         );
 
@@ -50,7 +51,7 @@ describe('공지사항 수정 유스케이스', () => {
                 update: jest.fn(),
                 delete: jest.fn(),
             },
-            new AnnouncementResponseMapperService(),
+            new AnnouncementResponseMapperService(new AnnouncementPaginationAssemblerService()),
             createLogger() as any,
         );
 

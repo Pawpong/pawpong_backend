@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { AnnouncementPublicReaderPort, type AnnouncementPublicItem, type AnnouncementPublicListResult } from '../ports/announcement-public-reader.port';
+import { AnnouncementPaginationAssemblerService } from '../../domain/services/announcement-pagination-assembler.service';
 import { AnnouncementResponseMapperService } from '../../domain/services/announcement-response-mapper.service';
 import { GetAnnouncementByIdUseCase } from './get-announcement-by-id.use-case';
 
@@ -35,7 +36,10 @@ describe('공지사항 상세 조회 유스케이스', () => {
 
     beforeEach(() => {
         readerPort = new StubAnnouncementPublicReaderPort();
-        useCase = new GetAnnouncementByIdUseCase(readerPort, new AnnouncementResponseMapperService());
+        useCase = new GetAnnouncementByIdUseCase(
+            readerPort,
+            new AnnouncementResponseMapperService(new AnnouncementPaginationAssemblerService()),
+        );
     });
 
     it('공지사항 상세 응답 계약을 유지한다', async () => {
