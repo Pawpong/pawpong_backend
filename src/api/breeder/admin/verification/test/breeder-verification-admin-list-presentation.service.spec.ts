@@ -1,9 +1,8 @@
 import { BreederVerificationAdminListPresentationService } from '../domain/services/breeder-verification-admin-list-presentation.service';
-import { BreederPaginationAssemblerService } from '../../../domain/services/breeder-pagination-assembler.service';
 
 describe('브리더 인증 관리자 목록 응답 서비스', () => {
     it('레벨 변경 요청 응답 계약을 유지한다', () => {
-        const service = new BreederVerificationAdminListPresentationService(new BreederPaginationAssemblerService());
+        const service = new BreederVerificationAdminListPresentationService();
 
         expect(
             service.toLevelChangeRequestResponse({

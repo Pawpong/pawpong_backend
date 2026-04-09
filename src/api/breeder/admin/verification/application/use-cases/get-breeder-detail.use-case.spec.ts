@@ -1,15 +1,15 @@
 import { ForbiddenException } from '@nestjs/common';
 
 import { GetBreederDetailUseCase } from './get-breeder-detail.use-case';
+import { BreederVerificationAdminDetailPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
-import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 
 describe('브리더 상세 조회 유스케이스', () => {
     const reader = {
         findAdminById: jest.fn(),
         findBreederById: jest.fn(),
     };
-    const presentationService = new BreederVerificationAdminPresentationService({
+    const presentationService = new BreederVerificationAdminDetailPresentationService({
         generateOne: jest.fn((fileName: string) => `https://cdn.test/${fileName}`),
     } as any);
     const useCase = new GetBreederDetailUseCase(reader as any, new BreederVerificationAdminPolicyService(), presentationService);

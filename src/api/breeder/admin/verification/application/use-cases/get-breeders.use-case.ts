@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { BreederSearchRequestDto } from '../../dto/request/breeder-search-request.dto';
 import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
+import { BreederVerificationAdminListPaginationService } from '../../domain/services/breeder-verification-admin-list-pagination.service';
 import { BreederVerificationAdminListPresentationService } from '../../domain/services/breeder-verification-admin-list-presentation.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 
@@ -13,6 +14,7 @@ export class GetBreedersUseCase {
         private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
         private readonly breederVerificationAdminListPresentationService: BreederVerificationAdminListPresentationService,
+        private readonly breederVerificationAdminListPaginationService: BreederVerificationAdminListPaginationService,
     ) {}
 
     async execute(adminId: string, filter: BreederSearchRequestDto) {
@@ -31,7 +33,7 @@ export class GetBreedersUseCase {
             itemsPerPage,
         });
 
-        return this.breederVerificationAdminListPresentationService.toPaginatedResponse(
+        return this.breederVerificationAdminListPaginationService.toPaginatedResponse(
             result.items.map((breeder) => this.breederVerificationAdminListPresentationService.toBreederResponse(breeder)),
             pageNumber,
             itemsPerPage,

@@ -1,8 +1,8 @@
 import { ForbiddenException } from '@nestjs/common';
 
 import { ChangeBreederLevelUseCase } from './change-breeder-level.use-case';
+import { BreederVerificationAdminCommandResponseService } from '../../domain/services/breeder-verification-admin-command-response.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
-import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 
 describe('브리더 레벨 변경 유스케이스', () => {
     const reader = {
@@ -12,24 +12,11 @@ describe('브리더 레벨 변경 유스케이스', () => {
     const writer = {
         updateBreederLevel: jest.fn(),
     };
-    const presentationService = {
-        toLevelChangeResponse: jest.fn(
-            (breeder: any, previousLevel: string, newLevel: string, changedAt: Date, changedBy: string) => ({
-                breederId: breeder.id,
-                breederName: breeder.nickname,
-                previousLevel,
-                newLevel,
-                changedAt,
-                changedBy,
-            }),
-        ),
-    };
-
     const useCase = new ChangeBreederLevelUseCase(
         reader as any,
         writer as any,
         new BreederVerificationAdminPolicyService(),
-        presentationService as any,
+        new BreederVerificationAdminCommandResponseService(),
     );
 
     beforeEach(() => {

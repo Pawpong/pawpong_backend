@@ -1,18 +1,15 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { BreederDetailResponseDto } from '../../dto/response/breeder-detail-response.dto';
-import { BreederLevelChangeResponseDto } from '../../dto/response/breeder-level-change-response.dto';
-import { BreederStatsResponseDto } from '../../dto/response/breeder-stats-response.dto';
 import { BREEDER_VERIFICATION_ADMIN_FILE_URL_PORT } from '../../application/ports/breeder-verification-admin-file-url.port';
 import type { BreederVerificationAdminFileUrlPort } from '../../application/ports/breeder-verification-admin-file-url.port';
 import {
     BreederVerificationAdminBreederSnapshot,
-    BreederVerificationAdminStatsSnapshot,
     BreederVerificationAdminVerificationSnapshot,
 } from '../../application/ports/breeder-verification-admin-reader.port';
 
 @Injectable()
-export class BreederVerificationAdminPresentationService {
+export class BreederVerificationAdminDetailPresentationService {
     constructor(
         @Inject(BREEDER_VERIFICATION_ADMIN_FILE_URL_PORT)
         private readonly fileUrlPort: BreederVerificationAdminFileUrlPort,
@@ -52,38 +49,6 @@ export class BreederVerificationAdminPresentationService {
             },
             createdAt: breeder.createdAt!,
             updatedAt: breeder.updatedAt!,
-        };
-    }
-
-    toBreederStatsResponse(stats: BreederVerificationAdminStatsSnapshot): BreederStatsResponseDto {
-        return {
-            totalApproved: stats.totalApproved,
-            eliteCount: stats.eliteCount,
-            newCount: stats.totalApproved - stats.eliteCount,
-        };
-    }
-
-    toLevelChangeResponse(
-        breeder: BreederVerificationAdminBreederSnapshot,
-        previousLevel: string,
-        newLevel: string,
-        changedAt: Date,
-        changedBy: string,
-    ): BreederLevelChangeResponseDto {
-        return {
-            breederId: breeder.id,
-            breederName: breeder.nickname,
-            previousLevel,
-            newLevel,
-            changedAt,
-            changedBy,
-        };
-    }
-
-    toDocumentReminderResponse(sentCount: number, breederIds: string[]): { sentCount: number; breederIds: string[] } {
-        return {
-            sentCount,
-            breederIds,
         };
     }
 
