@@ -5,7 +5,7 @@ import { CreateFaqUseCase } from './application/use-cases/create-faq.use-case';
 import { DeleteFaqUseCase } from './application/use-cases/delete-faq.use-case';
 import { UpdateFaqUseCase } from './application/use-cases/update-faq.use-case';
 import { HomeAdminProtectedController } from './decorator/home-admin-controller.decorator';
-import { HomeResponseMessageService } from '../domain/services/home-response-message.service';
+import { HomeFaqResponseMessageService } from '../domain/services/home-faq-response-message.service';
 import { FaqCreateRequestDto } from './dto/request/faq-create-request.dto';
 import { FaqUpdateRequestDto } from './dto/request/faq-update-request.dto';
 import { FaqResponseDto } from '../dto/response/faq-response.dto';
@@ -21,14 +21,14 @@ export class HomeAdminFaqsCommandController {
         private readonly createFaqUseCase: CreateFaqUseCase,
         private readonly updateFaqUseCase: UpdateFaqUseCase,
         private readonly deleteFaqUseCase: DeleteFaqUseCase,
-        private readonly homeResponseMessageService: HomeResponseMessageService,
+        private readonly homeFaqResponseMessageService: HomeFaqResponseMessageService,
     ) {}
 
     @Post('faq')
     @ApiCreateFaqAdminEndpoint()
     async createFaq(@Body() data: FaqCreateRequestDto): Promise<ApiResponseDto<FaqResponseDto>> {
         const faq = await this.createFaqUseCase.execute(data);
-        return ApiResponseDto.success(faq, this.homeResponseMessageService.faqCreated());
+        return ApiResponseDto.success(faq, this.homeFaqResponseMessageService.faqCreated());
     }
 
     @Put('faq/:faqId')
@@ -38,13 +38,13 @@ export class HomeAdminFaqsCommandController {
         @Body() data: FaqUpdateRequestDto,
     ): Promise<ApiResponseDto<FaqResponseDto>> {
         const faq = await this.updateFaqUseCase.execute(faqId, data);
-        return ApiResponseDto.success(faq, this.homeResponseMessageService.faqUpdated());
+        return ApiResponseDto.success(faq, this.homeFaqResponseMessageService.faqUpdated());
     }
 
     @Delete('faq/:faqId')
     @ApiDeleteFaqAdminEndpoint()
     async deleteFaq(@Param('faqId') faqId: string): Promise<ApiResponseDto<null>> {
         await this.deleteFaqUseCase.execute(faqId);
-        return ApiResponseDto.success(null, this.homeResponseMessageService.faqDeleted());
+        return ApiResponseDto.success(null, this.homeFaqResponseMessageService.faqDeleted());
     }
 }
