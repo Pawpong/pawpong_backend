@@ -63,8 +63,12 @@ import { BreederManagementApplicationFormValidatorService } from './domain/servi
 import { BreederManagementSimpleApplicationFormBuilderService } from './domain/services/breeder-management-simple-application-form-builder.service';
 import { BreederManagementParentPetCommandMapperService } from './domain/services/breeder-management-parent-pet-command-mapper.service';
 import { BreederManagementAvailablePetCommandMapperService } from './domain/services/breeder-management-available-pet-command-mapper.service';
-import { BreederManagementCommandResponseFactoryService } from './domain/services/breeder-management-command-response-factory.service';
+import { BreederManagementAccountCommandResponseService } from './domain/services/breeder-management-account-command-response.service';
+import { BreederManagementApplicationCommandResponseService } from './domain/services/breeder-management-application-command-response.service';
 import { BreederManagementApplicationDetailAssemblerService } from './domain/services/breeder-management-application-detail-assembler.service';
+import { BreederManagementPetCommandResponseService } from './domain/services/breeder-management-pet-command-response.service';
+import { BreederManagementProfileCommandResponseService } from './domain/services/breeder-management-profile-command-response.service';
+import { BreederManagementReviewReplyResponseService } from './domain/services/breeder-management-review-reply-response.service';
 import { BreederManagementProfileAdapter } from './infrastructure/breeder-management-profile.adapter';
 import { BreederManagementFileUrlAdapter } from './infrastructure/breeder-management-file-url.adapter';
 import { BreederManagementListReaderAdapter } from './infrastructure/breeder-management-list-reader.adapter';
@@ -202,7 +206,11 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederManagementSimpleApplicationFormBuilderService,
         BreederManagementParentPetCommandMapperService,
         BreederManagementAvailablePetCommandMapperService,
-        BreederManagementCommandResponseFactoryService,
+        BreederManagementProfileCommandResponseService,
+        BreederManagementApplicationCommandResponseService,
+        BreederManagementPetCommandResponseService,
+        BreederManagementReviewReplyResponseService,
+        BreederManagementAccountCommandResponseService,
         BreederManagementApplicationDetailAssemblerService,
         BreederManagementBannerPresentationService,
         BreederManagementProfileAdapter,
