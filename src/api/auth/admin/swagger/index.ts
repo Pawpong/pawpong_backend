@@ -2,13 +2,12 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
+import { AUTH_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../constants/auth-admin-response-messages';
+import {
+    AUTH_ADMIN_INVALID_TOKEN_RESPONSE,
+    AUTH_ADMIN_UNAUTHORIZED_RESPONSE,
+} from '../constants/auth-admin-swagger.constants';
 import { AdminLoginResponseDto } from '../../dto/response/admin-login-response.dto';
-
-const AUTH_ADMIN_UNAUTHORIZED_RESPONSE = {
-    status: 401,
-    description: '인증 실패',
-    errorExample: '이메일 또는 비밀번호가 올바르지 않습니다.',
-};
 
 export function ApiAuthAdminController() {
     return applyDecorators(ApiTags('인증 관리 (Admin)'));
@@ -27,7 +26,7 @@ export function ApiAdminLoginEndpoint() {
         responseType: AdminLoginResponseDto,
         isPublic: true,
         successDescription: '관리자 로그인 성공',
-        successMessageExample: '관리자 로그인이 완료되었습니다.',
+        successMessageExample: AUTH_ADMIN_RESPONSE_MESSAGE_EXAMPLES.adminLoginCompleted,
         errorResponses: [AUTH_ADMIN_UNAUTHORIZED_RESPONSE],
     });
 }
@@ -44,7 +43,7 @@ export function ApiRefreshAdminTokenEndpoint() {
         `,
         isPublic: true,
         successDescription: '관리자 토큰 갱신 성공',
-        successMessageExample: '토큰이 갱신되었습니다.',
+        successMessageExample: AUTH_ADMIN_RESPONSE_MESSAGE_EXAMPLES.adminTokenRefreshed,
         dataSchema: {
             type: 'object',
             properties: {
@@ -55,12 +54,6 @@ export function ApiRefreshAdminTokenEndpoint() {
             },
             required: ['accessToken'],
         },
-        errorResponses: [
-            {
-                status: 401,
-                description: '유효하지 않은 토큰',
-                errorExample: '유효하지 않은 토큰입니다.',
-            },
-        ],
+        errorResponses: [AUTH_ADMIN_INVALID_TOKEN_RESPONSE],
     });
 }
