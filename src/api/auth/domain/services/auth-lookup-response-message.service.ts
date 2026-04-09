@@ -3,21 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
 
 @Injectable()
-export class AuthResponseMessageService {
-    getSignupCompleted(role: 'adopter' | 'breeder'): string {
-        return role === 'adopter'
-            ? AUTH_RESPONSE_MESSAGE_EXAMPLES.adopterSignupCompleted
-            : AUTH_RESPONSE_MESSAGE_EXAMPLES.breederSignupCompleted;
-    }
-
-    getSocialRegistrationCompleted(): string {
-        return AUTH_RESPONSE_MESSAGE_EXAMPLES.socialRegistrationCompleted;
-    }
-
-    getTokenRefreshed(): string {
-        return AUTH_RESPONSE_MESSAGE_EXAMPLES.tokenRefreshed;
-    }
-
+export class AuthLookupResponseMessageService {
     getDuplicateCheckMessage(kind: 'email' | 'nickname' | 'breederName', isDuplicate: boolean): string {
         if (kind === 'email') {
             return isDuplicate

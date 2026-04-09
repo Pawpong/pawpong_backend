@@ -1,28 +1,8 @@
-import {
-    AuthResponseMessageService,
-} from './auth-response-message.service';
-import {
-    AUTH_RESPONSE_MESSAGE_EXAMPLES,
-    buildAuthBreederDocumentsUploadMessage,
-} from '../../constants/auth-response-messages';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
+import { AuthLookupResponseMessageService } from './auth-lookup-response-message.service';
 
-describe('인증 응답 메시지 서비스', () => {
-    const service = new AuthResponseMessageService();
-
-    it('역할별 회원가입 메시지를 반환한다', () => {
-        expect(service.getSignupCompleted('adopter')).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.adopterSignupCompleted);
-        expect(service.getSignupCompleted('breeder')).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.breederSignupCompleted);
-    });
-
-    it('소셜 회원가입 완료 메시지를 반환한다', () => {
-        expect(service.getSocialRegistrationCompleted()).toBe(
-            AUTH_RESPONSE_MESSAGE_EXAMPLES.socialRegistrationCompleted,
-        );
-    });
-
-    it('토큰 재발급 메시지를 반환한다', () => {
-        expect(service.getTokenRefreshed()).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.tokenRefreshed);
-    });
+describe('인증 조회 응답 메시지 서비스', () => {
+    const service = new AuthLookupResponseMessageService();
 
     it('중복 체크 메시지를 상황별로 반환한다', () => {
         expect(service.getDuplicateCheckMessage('email', false)).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.emailAvailable);
@@ -46,14 +26,5 @@ describe('인증 응답 메시지 서비스', () => {
         expect(service.getSocialUserCheckMessage(false)).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.socialUserNotFound);
         expect(service.getBannerListed('login')).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.loginBannersListed);
         expect(service.getBannerListed('signup')).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.registerBannersListed);
-    });
-
-    it('브리더 서류 업로드 메시지를 상황별로 만든다', () => {
-        expect(buildAuthBreederDocumentsUploadMessage('new', 2)).toBe(
-            AUTH_RESPONSE_MESSAGE_EXAMPLES.breederDocumentsUploaded,
-        );
-        expect(buildAuthBreederDocumentsUploadMessage('new', 2, 'temp-1')).toBe(
-            AUTH_RESPONSE_MESSAGE_EXAMPLES.breederDocumentsUploadedAndTempStored,
-        );
     });
 });
