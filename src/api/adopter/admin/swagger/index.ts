@@ -3,18 +3,17 @@ import { ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from '../../constants/adopter-response-messages';
+import {
+    ADOPTER_ADMIN_APPLICATION_NOT_FOUND_RESPONSE,
+    ADOPTER_ADMIN_FORBIDDEN_RESPONSE,
+    ADOPTER_ADMIN_REVIEW_NOT_FOUND_RESPONSE,
+} from '../../constants/adopter-swagger.constants';
 import { AdminApplicationDetailResponseDto } from '../dto/response/application-detail-response.dto';
 import { AdminApplicationListResponseDto } from '../dto/response/application-list-response.dto';
 import { ReviewDeleteResponseDto } from '../dto/response/review-delete-response.dto';
 import { ReviewReportItemDto } from '../dto/response/review-report-list.dto';
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
-import { ADOPTER_RESPONSE_MESSAGES } from '../../domain/services/adopter-response-message.service';
-
-const ADOPTER_ADMIN_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '관리자 권한이 필요합니다.',
-};
 
 export function ApiAdopterAdminController() {
     return ApiController('입양자 관리 (Admin)');
@@ -42,11 +41,7 @@ export function ApiDeleteAdopterAdminReviewEndpoint() {
         responseType: ReviewDeleteResponseDto,
         errorResponses: [
             ADOPTER_ADMIN_FORBIDDEN_RESPONSE,
-            {
-                status: 404,
-                description: '후기를 찾을 수 없음',
-                errorExample: '후기를 찾을 수 없습니다.',
-            },
+            ADOPTER_ADMIN_REVIEW_NOT_FOUND_RESPONSE,
         ],
         successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminReviewDeleted,
     });
@@ -82,11 +77,7 @@ export function ApiGetAdopterAdminApplicationDetailEndpoint() {
         responseType: AdminApplicationDetailResponseDto,
         errorResponses: [
             ADOPTER_ADMIN_FORBIDDEN_RESPONSE,
-            {
-                status: 404,
-                description: '입양 신청을 찾을 수 없음',
-                errorExample: '입양 신청을 찾을 수 없습니다.',
-            },
+            ADOPTER_ADMIN_APPLICATION_NOT_FOUND_RESPONSE,
         ],
         successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminApplicationDetailRetrieved,
     });
