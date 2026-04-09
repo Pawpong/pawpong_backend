@@ -5,6 +5,7 @@ import { ApiEndpoint } from '../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { DeleteBreederManagementAccountUseCase } from './application/use-cases/delete-breeder-management-account.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { BreederAccountDeleteRequestDto } from './dto/request/breeder-account-delete-request.dto';
 import { BreederAccountDeleteResponseDto } from './dto/response/breeder-account-delete-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
@@ -20,6 +21,6 @@ export class BreederManagementAccountController {
         @Body() deleteData?: BreederAccountDeleteRequestDto,
     ): Promise<ApiResponseDto<BreederAccountDeleteResponseDto>> {
         const result = await this.deleteBreederManagementAccountUseCase.execute(userId, deleteData);
-        return ApiResponseDto.success(result, '브리더 회원 탈퇴가 성공적으로 처리되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.accountDeleted);
     }
 }

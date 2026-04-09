@@ -5,6 +5,7 @@ import { ApiPaginatedEndpoint } from '../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetBreederManagementMyPetsUseCase } from './application/use-cases/get-breeder-management-my-pets.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { MyPetsQueryRequestDto } from './dto/request/my-pets-query-request.dto';
 import { MyPetsListResponseDto } from './dto/response/my-pets-list-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
@@ -27,6 +28,6 @@ export class BreederManagementMyPetsController {
             query.limit,
         );
 
-        return ApiResponseDto.success(result, '개체 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.myPetsRetrieved);
     }
 }

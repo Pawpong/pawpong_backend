@@ -7,6 +7,7 @@ import { BreederProfileResponseDto } from '../breeder/dto/response/breeder-profi
 import { GetBreederManagementProfileUseCase } from './application/use-cases/get-breeder-management-profile.use-case';
 import { UpdateBreederManagementProfileUseCase } from './application/use-cases/update-breeder-management-profile.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { ProfileUpdateRequestDto } from './dto/request/profile-update-request.dto';
 import { BreederProfileUpdateResponseDto } from './dto/response/profile-update-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
@@ -22,7 +23,7 @@ export class BreederManagementProfileInfoController {
     @ApiEndpoint(BreederManagementSwaggerDocs.profile)
     async getProfile(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<BreederProfileResponseDto>> {
         const result = await this.getBreederManagementProfileUseCase.execute(userId);
-        return ApiResponseDto.success(result, '브리더 프로필이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileRetrieved);
     }
 
     @Patch('profile')
@@ -32,6 +33,6 @@ export class BreederManagementProfileInfoController {
         @Body() updateData: ProfileUpdateRequestDto,
     ): Promise<ApiResponseDto<BreederProfileUpdateResponseDto>> {
         const result = await this.updateBreederManagementProfileUseCase.execute(userId, updateData);
-        return ApiResponseDto.success(result, '프로필이 성공적으로 수정되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileUpdated);
     }
 }

@@ -5,6 +5,7 @@ import { ApiEndpoint } from '../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { UpdateBreederManagementApplicationStatusUseCase } from './application/use-cases/update-breeder-management-application-status.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { ApplicationStatusUpdateRequestDto } from './dto/request/application-status-update-request.dto';
 import { ApplicationStatusUpdateResponseDto } from './dto/response/application-status-update-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
@@ -23,6 +24,6 @@ export class BreederManagementApplicationStatusController {
         @Body() updateData: ApplicationStatusUpdateRequestDto,
     ): Promise<ApiResponseDto<ApplicationStatusUpdateResponseDto>> {
         const result = await this.updateBreederManagementApplicationStatusUseCase.execute(userId, applicationId, updateData);
-        return ApiResponseDto.success(result, '입양 신청 상태가 성공적으로 변경되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationStatusUpdated);
     }
 }

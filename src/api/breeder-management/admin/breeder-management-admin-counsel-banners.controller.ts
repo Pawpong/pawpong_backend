@@ -6,6 +6,7 @@ import { DeleteCounselBannerUseCase } from './application/use-cases/delete-couns
 import { GetAllCounselBannersUseCase } from './application/use-cases/get-all-counsel-banners.use-case';
 import { UpdateCounselBannerUseCase } from './application/use-cases/update-counsel-banner.use-case';
 import { BreederManagementAdminProtectedController } from './decorator/breeder-management-admin-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
 import { CounselBannerCreateRequestDto } from './dto/request/counsel-banner-create-request.dto';
 import { CounselBannerUpdateRequestDto } from './dto/request/counsel-banner-update-request.dto';
 import { CounselBannerResponseDto } from './dto/response/counsel-banner-response.dto';
@@ -29,14 +30,14 @@ export class BreederManagementAdminCounselBannersController {
     @ApiGetAllCounselBannersAdminEndpoint()
     async getAllCounselBanners(): Promise<ApiResponseDto<CounselBannerResponseDto[]>> {
         const banners = await this.getAllCounselBannersUseCase.execute();
-        return ApiResponseDto.success(banners, '상담 배너 목록이 조회되었습니다.');
+        return ApiResponseDto.success(banners, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.counselBannerListRetrieved);
     }
 
     @Post('counsel-banner')
     @ApiCreateCounselBannerAdminEndpoint()
     async createCounselBanner(@Body() data: CounselBannerCreateRequestDto): Promise<ApiResponseDto<CounselBannerResponseDto>> {
         const banner = await this.createCounselBannerUseCase.execute(data);
-        return ApiResponseDto.success(banner, '상담 배너가 생성되었습니다.');
+        return ApiResponseDto.success(banner, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.counselBannerCreated);
     }
 
     @Put('counsel-banner/:bannerId')
@@ -46,13 +47,13 @@ export class BreederManagementAdminCounselBannersController {
         @Body() data: CounselBannerUpdateRequestDto,
     ): Promise<ApiResponseDto<CounselBannerResponseDto>> {
         const banner = await this.updateCounselBannerUseCase.execute(bannerId, data);
-        return ApiResponseDto.success(banner, '상담 배너가 수정되었습니다.');
+        return ApiResponseDto.success(banner, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.counselBannerUpdated);
     }
 
     @Delete('counsel-banner/:bannerId')
     @ApiDeleteCounselBannerAdminEndpoint()
     async deleteCounselBanner(@Param('bannerId') bannerId: string): Promise<ApiResponseDto<null>> {
         await this.deleteCounselBannerUseCase.execute(bannerId);
-        return ApiResponseDto.success(null, '상담 배너가 삭제되었습니다.');
+        return ApiResponseDto.success(null, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.counselBannerDeleted);
     }
 }

@@ -37,6 +37,7 @@ import { ReviewReplyDeleteResponseDto, ReviewReplyResponseDto } from '../dto/res
 import { UploadDocumentsResponseDto } from '../dto/response/upload-documents-response.dto';
 import { VerificationStatusResponseDto } from '../dto/response/verification-status-response.dto';
 import { VerificationSubmitResponseDto } from '../dto/response/verification-submit-response.dto';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
 
 const BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE = {
     status: 400,
@@ -81,7 +82,7 @@ export function ApiUploadBreederManagementVerificationDocumentsEndpoint() {
 - url: 미리보기용 Signed URL (1시간 유효)`,
             responseType: UploadDocumentsResponseDto,
             successDescription: '브리더 인증 서류 업로드 성공',
-            successMessageExample: '브리더 인증 서류가 업로드되었습니다.',
+            successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationDocumentsUploaded,
             errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
         }),
         ApiBody({
@@ -117,6 +118,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '브리더 대시보드 조회',
         description: '브리더의 통계 정보와 최근 활동을 확인합니다.',
         responseType: BreederDashboardResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.dashboardRetrieved,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -124,6 +126,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '브리더 프로필 조회',
         description: '로그인한 브리더의 프로필 정보를 조회합니다.',
         responseType: BreederProfileResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileRetrieved,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -131,6 +134,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '브리더 프로필 수정',
         description: '브리더의 프로필 정보를 업데이트합니다.',
         responseType: BreederProfileUpdateResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileUpdated,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -139,6 +143,7 @@ export const BreederManagementSwaggerDocs = {
         description:
             '로그인한 브리더의 인증 상태 및 관련 정보를 조회합니다. 인증 문서 URL은 1시간 유효한 Signed URL로 제공됩니다.',
         responseType: VerificationStatusResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationStatusRetrieved,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -146,6 +151,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '브리더 인증 신청',
         description: '브리더 인증을 위한 서류를 제출합니다.',
         responseType: VerificationSubmitResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationSubmitted,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -161,6 +167,7 @@ export const BreederManagementSwaggerDocs = {
 - level: 브리더 레벨 ("new" 또는 "elite")
 - documents: 서류 목록 [{ type, fileName }]`,
         responseType: VerificationSubmitResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationDocumentsSubmitted,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -168,6 +175,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '부모견/부모묘 추가',
         description: '새로운 부모 반려동물을 등록합니다.',
         responseType: PetAddResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetAdded,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -175,6 +183,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '부모견/부모묘 정보 수정',
         description: '등록된 부모 반려동물의 정보를 수정합니다.',
         responseType: PetUpdateResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetUpdated,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -182,6 +191,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '부모견/부모묘 삭제',
         description: '등록된 부모 반려동물을 삭제합니다.',
         responseType: PetRemoveResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetRemoved,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -189,6 +199,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '분양 가능한 반려동물 추가',
         description: '새로운 분양 가능한 반려동물을 등록합니다.',
         responseType: PetAddResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetAdded,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -196,6 +207,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '분양 가능한 반려동물 정보 수정',
         description: '등록된 분양 반려동물의 정보를 수정합니다.',
         responseType: PetUpdateResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetUpdated,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -203,6 +215,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '반려동물 상태 변경',
         description: '분양 반려동물의 상태를 변경합니다.',
         responseType: PetStatusUpdateResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.petStatusUpdated,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -210,6 +223,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '분양 가능한 반려동물 삭제',
         description: '등록된 분양 반려동물을 삭제합니다.',
         responseType: PetRemoveResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetRemoved,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -234,6 +248,7 @@ export const BreederManagementSwaggerDocs = {
 **권한:**
 - 본인이 받은 신청만 조회 가능`,
         responseType: BreederManagementApplicationDetailResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationDetailRetrieved,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -241,6 +256,7 @@ export const BreederManagementSwaggerDocs = {
         summary: '입양 신청 상태 업데이트',
         description: '받은 입양 신청의 상태를 변경합니다.',
         responseType: ApplicationStatusUpdateResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationStatusUpdated,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -250,6 +266,7 @@ export const BreederManagementSwaggerDocs = {
             '브리더 자신의 모든 개체 목록을 관리 목적으로 조회합니다. 비활성화된 개체, 상태별 필터링, 입양 신청 수 등 상세 정보가 포함됩니다.',
         responseType: MyPetsListResponseDto,
         itemType: MyPetItemDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.myPetsRetrieved,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -259,6 +276,7 @@ export const BreederManagementSwaggerDocs = {
             '브리더 자신에게 작성된 모든 후기를 관리 목적으로 조회합니다. 공개/비공개 후기 모두 확인 가능하며, 신고된 후기 정보도 포함됩니다.',
         responseType: MyReviewsListResponseDto,
         itemType: MyReviewItemDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.myReviewsRetrieved,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -288,6 +306,7 @@ export const BreederManagementSwaggerDocs = {
 **커스텀 질문:**
 - 브리더가 자유롭게 추가/삭제 가능`,
         responseType: ApplicationFormResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormRetrieved,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -306,6 +325,7 @@ export const BreederManagementSwaggerDocs = {
 - 표준 질문 ID와 중복 불가
 - select/radio/checkbox 타입은 options 필수`,
         responseType: ApplicationFormUpdateResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdated,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -330,6 +350,7 @@ export const BreederManagementSwaggerDocs = {
 - 라디오, 체크박스, 선택형 등 다른 타입 사용 불가
 - 필수 항목 설정 불가 (모두 선택 항목)`,
         responseType: SimpleApplicationFormUpdateResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdated,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -356,6 +377,7 @@ export const BreederManagementSwaggerDocs = {
 - 탈퇴 후에는 계정 복구 불가능
 - 진행 중인 입양 신청이 있는 경우 먼저 처리 필요`,
         responseType: BreederAccountDeleteResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.accountDeleted,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -368,6 +390,7 @@ export const BreederManagementSwaggerDocs = {
 - 후기당 1개의 답글만 작성 가능
 - 답글 내용은 최대 800자`,
         responseType: ReviewReplyResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.reviewReplyAdded,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -379,6 +402,7 @@ export const BreederManagementSwaggerDocs = {
 - 자신이 작성한 답글만 수정 가능
 - 답글 내용은 최대 800자`,
         responseType: ReviewReplyResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.reviewReplyUpdated,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -389,6 +413,7 @@ export const BreederManagementSwaggerDocs = {
 **제한사항:**
 - 자신이 작성한 답글만 삭제 가능`,
         responseType: ReviewReplyDeleteResponseDto,
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.reviewReplyDeleted,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },

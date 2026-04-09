@@ -1,4 +1,5 @@
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../../domain/services/breeder-management-response-message.service';
 import { CounselBannerResponseDto } from '../dto/response/counsel-banner-response.dto';
 import { ProfileBannerResponseDto } from '../dto/response/profile-banner-response.dto';
 
@@ -30,7 +31,7 @@ export function ApiGetAllProfileBannersAdminEndpoint() {
         `,
         responseType: [ProfileBannerResponseDto],
         successDescription: '프로필 배너 목록 조회 성공',
-        successMessageExample: '프로필 배너 목록이 조회되었습니다.',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerListRetrieved,
         errorResponses: [BREEDER_MANAGEMENT_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -48,7 +49,7 @@ export function ApiGetActiveProfileBannersAdminEndpoint() {
         responseType: [ProfileBannerResponseDto],
         isPublic: true,
         successDescription: '활성 프로필 배너 조회 성공',
-        successMessageExample: '활성화된 프로필 배너가 조회되었습니다.',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.activeProfileBannerListRetrieved,
     });
 }
 
@@ -65,7 +66,7 @@ export function ApiCreateProfileBannerAdminEndpoint() {
         responseType: ProfileBannerResponseDto,
         successStatus: 201,
         successDescription: '프로필 배너 생성 성공',
-        successMessageExample: '프로필 배너가 생성되었습니다.',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerCreated,
         errorResponses: [BREEDER_MANAGEMENT_ADMIN_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -82,7 +83,7 @@ export function ApiUpdateProfileBannerAdminEndpoint() {
         `,
         responseType: ProfileBannerResponseDto,
         successDescription: '프로필 배너 수정 성공',
-        successMessageExample: '프로필 배너가 수정되었습니다.',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerUpdated,
         errorResponses: [BREEDER_MANAGEMENT_ADMIN_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -99,7 +100,7 @@ export function ApiDeleteProfileBannerAdminEndpoint() {
         `,
         nullableData: true,
         successDescription: '프로필 배너 삭제 성공',
-        successMessageExample: '프로필 배너가 삭제되었습니다.',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerDeleted,
         errorResponses: [BREEDER_MANAGEMENT_ADMIN_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -116,7 +117,7 @@ export function ApiGetAllCounselBannersAdminEndpoint() {
         `,
         responseType: [CounselBannerResponseDto],
         successDescription: '상담 배너 목록 조회 성공',
-        successMessageExample: '상담 배너 목록이 조회되었습니다.',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.counselBannerListRetrieved,
         errorResponses: [BREEDER_MANAGEMENT_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -134,7 +135,7 @@ export function ApiGetActiveCounselBannersAdminEndpoint() {
         responseType: [CounselBannerResponseDto],
         isPublic: true,
         successDescription: '활성 상담 배너 조회 성공',
-        successMessageExample: '활성화된 상담 배너가 조회되었습니다.',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.activeCounselBannerListRetrieved,
     });
 }
 
@@ -151,7 +152,7 @@ export function ApiCreateCounselBannerAdminEndpoint() {
         responseType: CounselBannerResponseDto,
         successStatus: 201,
         successDescription: '상담 배너 생성 성공',
-        successMessageExample: '상담 배너가 생성되었습니다.',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.counselBannerCreated,
         errorResponses: [BREEDER_MANAGEMENT_ADMIN_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -168,7 +169,7 @@ export function ApiUpdateCounselBannerAdminEndpoint() {
         `,
         responseType: CounselBannerResponseDto,
         successDescription: '상담 배너 수정 성공',
-        successMessageExample: '상담 배너가 수정되었습니다.',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.counselBannerUpdated,
         errorResponses: [BREEDER_MANAGEMENT_ADMIN_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -185,7 +186,7 @@ export function ApiDeleteCounselBannerAdminEndpoint() {
         `,
         nullableData: true,
         successDescription: '상담 배너 삭제 성공',
-        successMessageExample: '상담 배너가 삭제되었습니다.',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.counselBannerDeleted,
         errorResponses: [BREEDER_MANAGEMENT_ADMIN_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_ADMIN_FORBIDDEN_RESPONSE],
     });
 }

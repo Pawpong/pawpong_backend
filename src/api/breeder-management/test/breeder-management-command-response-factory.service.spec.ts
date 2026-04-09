@@ -1,7 +1,5 @@
-import {
-    BREEDER_MANAGEMENT_RESPONSE_MESSAGES,
-    BreederManagementCommandResponseFactoryService,
-} from './breeder-management-command-response-factory.service';
+import { BreederManagementCommandResponseFactoryService } from '../domain/services/breeder-management-command-response-factory.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
 
 describe('BreederManagementCommandResponseFactoryService', () => {
     const service = new BreederManagementCommandResponseFactoryService();
@@ -11,20 +9,28 @@ describe('BreederManagementCommandResponseFactoryService', () => {
             message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileUpdated,
         });
 
+        expect(service.createVerificationSubmitted()).toEqual({
+            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationSubmittedDetailed,
+        });
+
+        expect(service.createVerificationDocumentsSubmitted()).toEqual({
+            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationDocumentsSubmittedDetailed,
+        });
+
         expect(service.createApplicationStatusUpdated()).toEqual({
-            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationStatusUpdated,
+            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationStatusUpdatedDetailed,
         });
     });
 
     it('pet 생성 응답에 petId와 message를 함께 담는다', () => {
         expect(service.createParentPetAdded('parent-pet-id')).toEqual({
             petId: 'parent-pet-id',
-            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetAdded,
+            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetAddedDetailed,
         });
 
         expect(service.createAvailablePetAdded('available-pet-id')).toEqual({
             petId: 'available-pet-id',
-            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetAdded,
+            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetAddedDetailed,
         });
     });
 
@@ -40,12 +46,12 @@ describe('BreederManagementCommandResponseFactoryService', () => {
         ];
 
         expect(service.createApplicationFormUpdated(customQuestions)).toEqual({
-            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdated,
+            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdatedDetailed,
             customQuestions,
         });
 
         expect(service.createSimpleApplicationFormUpdated(customQuestions)).toEqual({
-            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdated,
+            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdatedDetailed,
             customQuestions,
             totalQuestions: 1,
         });

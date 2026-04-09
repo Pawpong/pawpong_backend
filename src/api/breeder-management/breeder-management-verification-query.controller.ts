@@ -5,6 +5,7 @@ import { ApiEndpoint } from '../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetBreederManagementVerificationStatusUseCase } from './application/use-cases/get-breeder-management-verification-status.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { VerificationStatusResponseDto } from './dto/response/verification-status-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
 
@@ -20,6 +21,6 @@ export class BreederManagementVerificationQueryController {
         @CurrentUser('userId') userId: string,
     ): Promise<ApiResponseDto<VerificationStatusResponseDto>> {
         const result = await this.getBreederManagementVerificationStatusUseCase.execute(userId);
-        return ApiResponseDto.success(result, '인증 상태가 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationStatusRetrieved);
     }
 }

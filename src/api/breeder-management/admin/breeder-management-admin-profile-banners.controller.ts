@@ -6,6 +6,7 @@ import { DeleteProfileBannerUseCase } from './application/use-cases/delete-profi
 import { GetAllProfileBannersUseCase } from './application/use-cases/get-all-profile-banners.use-case';
 import { UpdateProfileBannerUseCase } from './application/use-cases/update-profile-banner.use-case';
 import { BreederManagementAdminProtectedController } from './decorator/breeder-management-admin-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
 import { ProfileBannerCreateRequestDto } from './dto/request/profile-banner-create-request.dto';
 import { ProfileBannerUpdateRequestDto } from './dto/request/profile-banner-update-request.dto';
 import { ProfileBannerResponseDto } from './dto/response/profile-banner-response.dto';
@@ -29,14 +30,14 @@ export class BreederManagementAdminProfileBannersController {
     @ApiGetAllProfileBannersAdminEndpoint()
     async getAllProfileBanners(): Promise<ApiResponseDto<ProfileBannerResponseDto[]>> {
         const banners = await this.getAllProfileBannersUseCase.execute();
-        return ApiResponseDto.success(banners, '프로필 배너 목록이 조회되었습니다.');
+        return ApiResponseDto.success(banners, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerListRetrieved);
     }
 
     @Post('profile-banner')
     @ApiCreateProfileBannerAdminEndpoint()
     async createProfileBanner(@Body() data: ProfileBannerCreateRequestDto): Promise<ApiResponseDto<ProfileBannerResponseDto>> {
         const banner = await this.createProfileBannerUseCase.execute(data);
-        return ApiResponseDto.success(banner, '프로필 배너가 생성되었습니다.');
+        return ApiResponseDto.success(banner, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerCreated);
     }
 
     @Put('profile-banner/:bannerId')
@@ -46,13 +47,13 @@ export class BreederManagementAdminProfileBannersController {
         @Body() data: ProfileBannerUpdateRequestDto,
     ): Promise<ApiResponseDto<ProfileBannerResponseDto>> {
         const banner = await this.updateProfileBannerUseCase.execute(bannerId, data);
-        return ApiResponseDto.success(banner, '프로필 배너가 수정되었습니다.');
+        return ApiResponseDto.success(banner, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerUpdated);
     }
 
     @Delete('profile-banner/:bannerId')
     @ApiDeleteProfileBannerAdminEndpoint()
     async deleteProfileBanner(@Param('bannerId') bannerId: string): Promise<ApiResponseDto<null>> {
         await this.deleteProfileBannerUseCase.execute(bannerId);
-        return ApiResponseDto.success(null, '프로필 배너가 삭제되었습니다.');
+        return ApiResponseDto.success(null, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerDeleted);
     }
 }
