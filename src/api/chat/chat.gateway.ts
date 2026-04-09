@@ -60,6 +60,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         try {
             const token =
                 client.handshake.auth?.token ||
+                (client.handshake.query?.token as string) ||
                 client.handshake.headers?.authorization?.replace('Bearer ', '');
 
             if (!token) {
