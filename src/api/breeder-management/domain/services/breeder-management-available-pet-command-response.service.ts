@@ -22,10 +22,4 @@ export class BreederManagementAvailablePetCommandResponseService {
             message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetRemovedDetailed,
         };
     }
-
-    createAvailablePetStatusUpdated() {
-        return {
-            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.petStatusUpdatedDetailed,
-        };
-    }
 }

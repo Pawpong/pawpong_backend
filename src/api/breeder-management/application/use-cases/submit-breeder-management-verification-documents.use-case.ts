@@ -10,7 +10,7 @@ import type { BreederManagementSettingsPort } from '../ports/breeder-management-
 import { BreederManagementVerificationDraftStorePort } from '../ports/breeder-management-verification-draft-store.port';
 import { BreederManagementVerificationNotifierPort } from '../ports/breeder-management-verification-notifier.port';
 import { SubmitDocumentsRequestDto } from '../../dto/request/submit-documents-request.dto';
-import { BreederManagementProfileCommandResponseService } from '../../domain/services/breeder-management-profile-command-response.service';
+import { BreederManagementVerificationCommandResponseService } from '../../domain/services/breeder-management-verification-command-response.service';
 import { BreederManagementVerificationDocumentPolicyService } from '../../domain/services/breeder-management-verification-document-policy.service';
 import { BreederManagementVerificationNotificationPayloadFactoryService } from '../../domain/services/breeder-management-verification-notification-payload-factory.service';
 
@@ -25,7 +25,7 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
         private readonly breederManagementFileUrlPort: BreederManagementFileUrlPort,
         private readonly breederManagementVerificationDraftStorePort: BreederManagementVerificationDraftStorePort,
         private readonly breederManagementVerificationNotifierPort: BreederManagementVerificationNotifierPort,
-        private readonly breederManagementProfileCommandResponseService: BreederManagementProfileCommandResponseService,
+        private readonly breederManagementVerificationCommandResponseService: BreederManagementVerificationCommandResponseService,
         private readonly breederManagementVerificationDocumentPolicyService: BreederManagementVerificationDocumentPolicyService,
         private readonly breederManagementVerificationNotificationPayloadFactoryService: BreederManagementVerificationNotificationPayloadFactoryService,
     ) {}
@@ -70,6 +70,6 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
 
         await this.breederManagementVerificationDraftStorePort.delete(userId);
 
-        return this.breederManagementProfileCommandResponseService.createVerificationDocumentsSubmitted();
+        return this.breederManagementVerificationCommandResponseService.createVerificationDocumentsSubmitted();
     }
 }

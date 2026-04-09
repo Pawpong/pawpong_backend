@@ -65,11 +65,14 @@ import { BreederManagementParentPetCommandMapperService } from './domain/service
 import { BreederManagementAvailablePetCommandMapperService } from './domain/services/breeder-management-available-pet-command-mapper.service';
 import { BreederManagementAccountCommandResponseService } from './domain/services/breeder-management-account-command-response.service';
 import { BreederManagementApplicationCommandResponseService } from './domain/services/breeder-management-application-command-response.service';
+import { BreederManagementApplicationStatusResponseService } from './domain/services/breeder-management-application-status-response.service';
 import { BreederManagementApplicationDetailAssemblerService } from './domain/services/breeder-management-application-detail-assembler.service';
 import { BreederManagementAvailablePetCommandResponseService } from './domain/services/breeder-management-available-pet-command-response.service';
+import { BreederManagementAvailablePetStatusResponseService } from './domain/services/breeder-management-available-pet-status-response.service';
 import { BreederManagementParentPetCommandResponseService } from './domain/services/breeder-management-parent-pet-command-response.service';
 import { BreederManagementProfileCommandResponseService } from './domain/services/breeder-management-profile-command-response.service';
 import { BreederManagementReviewReplyResponseService } from './domain/services/breeder-management-review-reply-response.service';
+import { BreederManagementVerificationCommandResponseService } from './domain/services/breeder-management-verification-command-response.service';
 import { BreederManagementProfileAdapter } from './infrastructure/breeder-management-profile.adapter';
 import { BreederManagementFileUrlAdapter } from './infrastructure/breeder-management-file-url.adapter';
 import { BreederManagementListReaderAdapter } from './infrastructure/breeder-management-list-reader.adapter';
@@ -209,8 +212,11 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederManagementAvailablePetCommandMapperService,
         BreederManagementProfileCommandResponseService,
         BreederManagementApplicationCommandResponseService,
+        BreederManagementApplicationStatusResponseService,
         BreederManagementParentPetCommandResponseService,
         BreederManagementAvailablePetCommandResponseService,
+        BreederManagementAvailablePetStatusResponseService,
+        BreederManagementVerificationCommandResponseService,
         BreederManagementReviewReplyResponseService,
         BreederManagementAccountCommandResponseService,
         BreederManagementApplicationDetailAssemblerService,

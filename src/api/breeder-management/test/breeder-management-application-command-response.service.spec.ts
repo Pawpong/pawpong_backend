@@ -26,10 +26,4 @@ describe('브리더 관리 신청서 명령 응답 서비스', () => {
             totalQuestions: 1,
         });
     });
-
-    it('신청 상태 변경 응답을 만든다', () => {
-        expect(service.createApplicationStatusUpdated()).toEqual({
-            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationStatusUpdatedDetailed,
-        });
-    });
 });

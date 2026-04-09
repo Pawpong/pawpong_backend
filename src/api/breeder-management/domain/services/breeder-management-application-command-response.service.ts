@@ -19,10 +19,4 @@ export class BreederManagementApplicationCommandResponseService {
             totalQuestions: customQuestions.length,
         };
     }
-
-    createApplicationStatusUpdated() {
-        return {
-            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationStatusUpdatedDetailed,
-        };
-    }
 }

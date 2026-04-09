@@ -17,9 +17,5 @@ describe('브리더 관리 분양 개체 응답 서비스', () => {
         expect(service.createAvailablePetRemoved()).toEqual({
             message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetRemovedDetailed,
         });
-
-        expect(service.createAvailablePetStatusUpdated()).toEqual({
-            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.petStatusUpdatedDetailed,
-        });
     });
 });
