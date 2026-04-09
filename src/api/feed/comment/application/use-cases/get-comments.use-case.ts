@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { FeedCommentPresentationService } from '../../domain/services/feed-comment-presentation.service';
+import { FeedCommentListPresentationService } from '../../domain/services/feed-comment-list-presentation.service';
 import { FEED_COMMENT_MANAGER, type FeedCommentManagerPort } from '../ports/feed-comment-manager.port';
 
 @Injectable()
@@ -8,7 +8,7 @@ export class GetCommentsUseCase {
     constructor(
         @Inject(FEED_COMMENT_MANAGER)
         private readonly feedCommentManager: FeedCommentManagerPort,
-        private readonly feedCommentPresentationService: FeedCommentPresentationService,
+        private readonly feedCommentListPresentationService: FeedCommentListPresentationService,
     ) {}
 
     async execute(videoId: string, userId?: string, page: number = 1, limit: number = 20) {
@@ -19,7 +19,7 @@ export class GetCommentsUseCase {
         ]);
 
         const replyCounts = await this.feedCommentManager.readReplyCounts(comments.map((comment) => comment.id));
-        return this.feedCommentPresentationService.buildCommentListResponse(
+        return this.feedCommentListPresentationService.buildCommentListResponse(
             comments,
             totalCount,
             page,
