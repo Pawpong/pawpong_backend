@@ -3,19 +3,12 @@ import { ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
+import { APP_VERSION_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/app-version-response-messages';
+import {
+    APP_VERSION_ADMIN_FORBIDDEN_RESPONSE,
+    APP_VERSION_ADMIN_NOT_FOUND_RESPONSE,
+} from '../../constants/app-version-swagger.constants';
 import { AppVersionResponseDto } from '../../dto/response/app-version-response.dto';
-
-const APP_VERSION_ADMIN_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '관리자 권한이 필요합니다.',
-};
-
-const APP_VERSION_ADMIN_NOT_FOUND_RESPONSE = {
-    status: 404,
-    description: '앱 버전 정보를 찾을 수 없음',
-    errorExample: '앱 버전 정보를 찾을 수 없습니다.',
-};
 
 export function ApiAppVersionAdminController() {
     return ApiController('앱 버전 관리 (관리자)');
@@ -36,7 +29,7 @@ export function ApiCreateAppVersionAdminEndpoint() {
         `,
         responseType: AppVersionResponseDto,
         successDescription: '앱 버전 생성 성공',
-        successMessageExample: '앱 버전이 생성되었습니다.',
+        successMessageExample: APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.appVersionCreated,
         errorResponses: [APP_VERSION_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -58,7 +51,7 @@ export function ApiGetAppVersionListAdminEndpoint() {
             responseType: PaginationResponseDto,
             itemType: AppVersionResponseDto,
             successDescription: '앱 버전 목록 조회 성공',
-            successMessageExample: '앱 버전 목록 조회 성공',
+            successMessageExample: APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.appVersionListRetrieved,
             errorResponses: [APP_VERSION_ADMIN_FORBIDDEN_RESPONSE],
         }),
         ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
@@ -81,7 +74,7 @@ export function ApiUpdateAppVersionAdminEndpoint() {
         `,
         responseType: AppVersionResponseDto,
         successDescription: '앱 버전 수정 성공',
-        successMessageExample: '앱 버전이 수정되었습니다.',
+        successMessageExample: APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.appVersionUpdated,
         errorResponses: [APP_VERSION_ADMIN_FORBIDDEN_RESPONSE, APP_VERSION_ADMIN_NOT_FOUND_RESPONSE],
     });
 }
@@ -100,7 +93,7 @@ export function ApiDeleteAppVersionAdminEndpoint() {
             - 관리자(admin) 권한이 필요합니다.
         `,
         successDescription: '앱 버전 삭제 성공',
-        successMessageExample: '앱 버전이 삭제되었습니다.',
+        successMessageExample: APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.appVersionDeleted,
         nullableData: true,
         errorResponses: [APP_VERSION_ADMIN_FORBIDDEN_RESPONSE, APP_VERSION_ADMIN_NOT_FOUND_RESPONSE],
     });

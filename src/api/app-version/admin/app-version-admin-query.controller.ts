@@ -5,12 +5,16 @@ import { PaginationResponseDto } from '../../../common/dto/pagination/pagination
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { GetAppVersionListUseCase } from './application/use-cases/get-app-version-list.use-case';
 import { AppVersionAdminProtectedController } from './decorator/app-version-admin-controller.decorator';
+import { AppVersionResponseMessageService } from '../domain/services/app-version-response-message.service';
 import { AppVersionResponseDto } from '../dto/response/app-version-response.dto';
 import { ApiGetAppVersionListAdminEndpoint } from './swagger';
 
 @AppVersionAdminProtectedController()
 export class AppVersionAdminQueryController {
-    constructor(private readonly getAppVersionListUseCase: GetAppVersionListUseCase) {}
+    constructor(
+        private readonly getAppVersionListUseCase: GetAppVersionListUseCase,
+        private readonly appVersionResponseMessageService: AppVersionResponseMessageService,
+    ) {}
 
     @Get()
     @ApiGetAppVersionListAdminEndpoint()
@@ -18,6 +22,6 @@ export class AppVersionAdminQueryController {
         @Query() paginationData: PaginationRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<AppVersionResponseDto>>> {
         const result = await this.getAppVersionListUseCase.execute(paginationData);
-        return ApiResponseDto.success(result, '앱 버전 목록 조회 성공');
+        return ApiResponseDto.success(result, this.appVersionResponseMessageService.appVersionListRetrieved());
     }
 }
