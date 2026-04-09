@@ -6,6 +6,7 @@ import { PaginationResponseDto } from '../../common/dto/pagination/pagination-re
 import { NoticeResponseDto } from './dto/response/notice-response.dto';
 import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';
 import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
+import { NoticeResponseMessageService } from './domain/services/notice-response-message.service';
 import { ApiGetNoticeDetailEndpoint, ApiGetNoticeListEndpoint, ApiNoticeController } from './swagger';
 
 /**
@@ -18,6 +19,7 @@ export class NoticeController {
     constructor(
         private readonly getNoticeListUseCase: GetNoticeListUseCase,
         private readonly getNoticeDetailUseCase: GetNoticeDetailUseCase,
+        private readonly noticeResponseMessageService: NoticeResponseMessageService,
     ) {}
 
     /**
@@ -29,7 +31,7 @@ export class NoticeController {
         @Query() paginationData: PaginationRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<NoticeResponseDto>>> {
         const result = await this.getNoticeListUseCase.execute(paginationData, 'published');
-        return ApiResponseDto.success(result, '공지사항 목록 조회 성공');
+        return ApiResponseDto.success(result, this.noticeResponseMessageService.noticeListRetrieved());
     }
 
     /**
@@ -39,6 +41,6 @@ export class NoticeController {
     @ApiGetNoticeDetailEndpoint()
     async getNoticeDetail(@Param('noticeId') noticeId: string): Promise<ApiResponseDto<NoticeResponseDto>> {
         const result = await this.getNoticeDetailUseCase.execute(noticeId, true);
-        return ApiResponseDto.success(result, '공지사항 조회 성공');
+        return ApiResponseDto.success(result, this.noticeResponseMessageService.noticeDetailRetrieved());
     }
 }

@@ -4,6 +4,7 @@ import { ApiQuery } from '@nestjs/swagger';
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { NoticeResponseDto } from '../../dto/response/notice-response.dto';
+import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../../domain/services/notice-response-message.service';
 
 const NOTICE_ADMIN_STATUS_VALUES = ['published', 'draft', 'archived'] as const;
 const NOTICE_ADMIN_FORBIDDEN_RESPONSE = {
@@ -38,7 +39,7 @@ export function ApiCreateNoticeAdminEndpoint() {
             `,
             responseType: NoticeResponseDto,
             successDescription: '공지사항 생성 성공',
-            successMessageExample: '공지사항이 생성되었습니다.',
+            successMessageExample: NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeCreated,
             errorResponses: [NOTICE_ADMIN_FORBIDDEN_RESPONSE],
         }),
     );
@@ -62,7 +63,7 @@ export function ApiGetNoticeListAdminEndpoint() {
             responseType: PaginationResponseDto,
             itemType: NoticeResponseDto,
             successDescription: '공지사항 목록 조회 성공',
-            successMessageExample: '공지사항 목록 조회 성공',
+            successMessageExample: NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeListRetrieved,
             errorResponses: [NOTICE_ADMIN_FORBIDDEN_RESPONSE],
         }),
         ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
@@ -100,7 +101,7 @@ export function ApiGetNoticeDetailAdminEndpoint() {
             `,
             responseType: NoticeResponseDto,
             successDescription: '공지사항 조회 성공',
-            successMessageExample: '공지사항 조회 성공',
+            successMessageExample: NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeDetailRetrieved,
             errorResponses: [NOTICE_ADMIN_FORBIDDEN_RESPONSE, NOTICE_ADMIN_NOT_FOUND_RESPONSE],
         }),
     );
@@ -126,7 +127,7 @@ export function ApiUpdateNoticeAdminEndpoint() {
             `,
             responseType: NoticeResponseDto,
             successDescription: '공지사항 수정 성공',
-            successMessageExample: '공지사항이 수정되었습니다.',
+            successMessageExample: NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeUpdated,
             errorResponses: [NOTICE_ADMIN_FORBIDDEN_RESPONSE, NOTICE_ADMIN_NOT_FOUND_RESPONSE],
         }),
     );
@@ -146,7 +147,7 @@ export function ApiDeleteNoticeAdminEndpoint() {
                 - 관리자(admin) 권한이 필요합니다.
             `,
             successDescription: '공지사항 삭제 성공',
-            successMessageExample: '공지사항이 삭제되었습니다.',
+            successMessageExample: NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeDeleted,
             nullableData: true,
             errorResponses: [NOTICE_ADMIN_FORBIDDEN_RESPONSE, NOTICE_ADMIN_NOT_FOUND_RESPONSE],
         }),
