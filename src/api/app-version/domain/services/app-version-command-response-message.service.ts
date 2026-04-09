@@ -3,15 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { APP_VERSION_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/app-version-response-messages';
 
 @Injectable()
-export class AppVersionResponseMessageService {
-    versionChecked(): string {
-        return APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.versionChecked;
-    }
-
-    appVersionListRetrieved(): string {
-        return APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.appVersionListRetrieved;
-    }
-
+export class AppVersionCommandResponseMessageService {
     appVersionCreated(): string {
         return APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.appVersionCreated;
     }
