@@ -1,5 +1,6 @@
 import { AnnouncementPublicReaderPort, type AnnouncementPublicListResult } from '../ports/announcement-public-reader.port';
 import { PaginationRequestDto } from '../../../../common/dto/pagination/pagination-request.dto';
+import { AnnouncementPaginationAssemblerService } from '../../domain/services/announcement-pagination-assembler.service';
 import { AnnouncementResponseMapperService } from '../../domain/services/announcement-response-mapper.service';
 import { GetActiveAnnouncementsUseCase } from './get-active-announcements.use-case';
 
@@ -34,7 +35,7 @@ describe('활성 공지사항 조회 유스케이스', () => {
     it('공지사항 목록 응답 계약을 유지한다', async () => {
         const useCase = new GetActiveAnnouncementsUseCase(
             new StubAnnouncementPublicReaderPort(),
-            new AnnouncementResponseMapperService(),
+            new AnnouncementResponseMapperService(new AnnouncementPaginationAssemblerService()),
         );
 
         const paginationDto = Object.assign(new PaginationRequestDto(), { page: 1, limit: 10 });

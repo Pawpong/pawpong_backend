@@ -1,22 +1,24 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../common/dto/pagination/pagination-builder.dto';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { AnnouncementResponseDto } from '../../dto/response/announcement-response.dto';
 import {
     type AnnouncementPublicItem,
     type AnnouncementPublicListResult,
 } from '../../application/ports/announcement-public-reader.port';
+import { AnnouncementPaginationAssemblerService } from './announcement-pagination-assembler.service';
 
 @Injectable()
 export class AnnouncementResponseMapperService {
+    constructor(private readonly announcementPaginationAssemblerService: AnnouncementPaginationAssemblerService) {}
+
     toPaginationResponse(result: AnnouncementPublicListResult): PaginationResponseDto<AnnouncementResponseDto> {
-        return new PaginationBuilder<AnnouncementResponseDto>()
-            .setItems(result.items.map((item) => this.toResponse(item)))
-            .setTotalCount(result.totalCount)
-            .setPage(result.page)
-            .setLimit(result.limit)
-            .build();
+        return this.announcementPaginationAssemblerService.build(
+            result.items.map((item) => this.toResponse(item)),
+            result.page,
+            result.limit,
+            result.totalCount,
+        );
     }
 
     toResponse(item: AnnouncementPublicItem): AnnouncementResponseDto {
