@@ -6,7 +6,7 @@ import { CreateNoticeUseCase } from './application/use-cases/create-notice.use-c
 import { DeleteNoticeUseCase } from './application/use-cases/delete-notice.use-case';
 import { UpdateNoticeUseCase } from './application/use-cases/update-notice.use-case';
 import { NoticeAdminProtectedController } from './decorator/notice-admin-controller.decorator';
-import { NoticeResponseMessageService } from '../domain/services/notice-response-message.service';
+import { NoticeCommandResponseMessageService } from '../domain/services/notice-command-response-message.service';
 import { NoticeCreateRequestDto } from '../dto/request/notice-create-request.dto';
 import { NoticeUpdateRequestDto } from '../dto/request/notice-update-request.dto';
 import { NoticeResponseDto } from '../dto/response/notice-response.dto';
@@ -22,7 +22,7 @@ export class NoticeAdminCommandController {
         private readonly createNoticeUseCase: CreateNoticeUseCase,
         private readonly updateNoticeUseCase: UpdateNoticeUseCase,
         private readonly deleteNoticeUseCase: DeleteNoticeUseCase,
-        private readonly noticeResponseMessageService: NoticeResponseMessageService,
+        private readonly noticeCommandResponseMessageService: NoticeCommandResponseMessageService,
     ) {}
 
     @Post()
@@ -32,7 +32,7 @@ export class NoticeAdminCommandController {
         @Body() createData: NoticeCreateRequestDto,
     ): Promise<ApiResponseDto<NoticeResponseDto>> {
         const result = await this.createNoticeUseCase.execute(adminId, '관리자', createData);
-        return ApiResponseDto.success(result, this.noticeResponseMessageService.noticeCreated());
+        return ApiResponseDto.success(result, this.noticeCommandResponseMessageService.noticeCreated());
     }
 
     @Patch(':noticeId')
@@ -43,7 +43,7 @@ export class NoticeAdminCommandController {
         @Body() updateData: NoticeUpdateRequestDto,
     ): Promise<ApiResponseDto<NoticeResponseDto>> {
         const result = await this.updateNoticeUseCase.execute(noticeId, adminId, updateData);
-        return ApiResponseDto.success(result, this.noticeResponseMessageService.noticeUpdated());
+        return ApiResponseDto.success(result, this.noticeCommandResponseMessageService.noticeUpdated());
     }
 
     @Delete(':noticeId')
@@ -53,6 +53,6 @@ export class NoticeAdminCommandController {
         @Param('noticeId') noticeId: string,
     ): Promise<ApiResponseDto<null>> {
         await this.deleteNoticeUseCase.execute(noticeId, adminId);
-        return ApiResponseDto.success(null, this.noticeResponseMessageService.noticeDeleted());
+        return ApiResponseDto.success(null, this.noticeCommandResponseMessageService.noticeDeleted());
     }
 }

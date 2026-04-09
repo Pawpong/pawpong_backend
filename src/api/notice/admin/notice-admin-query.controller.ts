@@ -7,7 +7,7 @@ import { GetNoticeDetailUseCase } from '../application/use-cases/get-notice-deta
 import { GetNoticeListUseCase } from '../application/use-cases/get-notice-list.use-case';
 import { NoticeStatus } from '../application/ports/notice-reader.port';
 import { NoticeAdminProtectedController } from './decorator/notice-admin-controller.decorator';
-import { NoticeResponseMessageService } from '../domain/services/notice-response-message.service';
+import { NoticeQueryResponseMessageService } from '../domain/services/notice-query-response-message.service';
 import { NoticeResponseDto } from '../dto/response/notice-response.dto';
 import {
     ApiGetNoticeDetailAdminEndpoint,
@@ -19,7 +19,7 @@ export class NoticeAdminQueryController {
     constructor(
         private readonly getNoticeListUseCase: GetNoticeListUseCase,
         private readonly getNoticeDetailUseCase: GetNoticeDetailUseCase,
-        private readonly noticeResponseMessageService: NoticeResponseMessageService,
+        private readonly noticeQueryResponseMessageService: NoticeQueryResponseMessageService,
     ) {}
 
     @Get()
@@ -29,13 +29,13 @@ export class NoticeAdminQueryController {
         @Query('status') status?: 'published' | 'draft' | 'archived',
     ): Promise<ApiResponseDto<PaginationResponseDto<NoticeResponseDto>>> {
         const result = await this.getNoticeListUseCase.execute(paginationData, status as NoticeStatus | undefined);
-        return ApiResponseDto.success(result, this.noticeResponseMessageService.noticeListRetrieved());
+        return ApiResponseDto.success(result, this.noticeQueryResponseMessageService.noticeListRetrieved());
     }
 
     @Get(':noticeId')
     @ApiGetNoticeDetailAdminEndpoint()
     async getNoticeDetailAdmin(@Param('noticeId') noticeId: string): Promise<ApiResponseDto<NoticeResponseDto>> {
         const result = await this.getNoticeDetailUseCase.execute(noticeId, false);
-        return ApiResponseDto.success(result, this.noticeResponseMessageService.noticeDetailRetrieved());
+        return ApiResponseDto.success(result, this.noticeQueryResponseMessageService.noticeDetailRetrieved());
     }
 }
