@@ -3,14 +3,10 @@ import { ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { StatsType } from '../../../../common/enum/user.enum';
+import { PLATFORM_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../constants/platform-admin-response-messages';
+import { PLATFORM_ADMIN_FORBIDDEN_RESPONSE } from '../constants/platform-admin-swagger.constants';
 import { AdminStatsResponseDto } from '../dto/response/admin-stats-response.dto';
 import { MvpStatsResponseDto } from '../dto/response/mvp-stats-response.dto';
-
-const PLATFORM_ADMIN_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '통계 조회 권한이 없습니다.',
-};
 
 export function ApiPlatformAdminController() {
     return ApiController('플랫폼 관리자');
@@ -33,7 +29,7 @@ export function ApiGetPlatformStatsEndpoint() {
             `,
             responseType: AdminStatsResponseDto,
             successDescription: '플랫폼 통계 조회 성공',
-            successMessageExample: '시스템 통계가 조회되었습니다.',
+            successMessageExample: PLATFORM_ADMIN_RESPONSE_MESSAGE_EXAMPLES.platformStatsRetrieved,
             errorResponses: [PLATFORM_ADMIN_FORBIDDEN_RESPONSE],
         }),
         ApiQuery({ name: 'statsType', required: false, enum: StatsType, description: '통계 집계 단위', example: StatsType.DAILY }),
@@ -59,7 +55,7 @@ export function ApiGetPlatformMvpStatsEndpoint() {
         `,
         responseType: MvpStatsResponseDto,
         successDescription: 'MVP 통계 조회 성공',
-        successMessageExample: 'MVP 통계가 조회되었습니다.',
+        successMessageExample: PLATFORM_ADMIN_RESPONSE_MESSAGE_EXAMPLES.platformMvpStatsRetrieved,
         errorResponses: [PLATFORM_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
