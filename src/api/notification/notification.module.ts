@@ -17,10 +17,11 @@ import { MarkNotificationReadUseCase } from './application/use-cases/mark-notifi
 import { MarkAllNotificationsReadUseCase } from './application/use-cases/mark-all-notifications-read.use-case';
 import { DeleteNotificationUseCase } from './application/use-cases/delete-notification.use-case';
 import { SendNotificationEmailUseCase } from './application/use-cases/send-notification-email.use-case';
+import { NotificationListPresentationService } from './domain/services/notification-list-presentation.service';
 import { NotificationResponseMessageService } from './domain/services/notification-response-message.service';
 import { NotificationPaginationAssemblerService } from './domain/services/notification-pagination-assembler.service';
-import { NotificationResponseMapperService } from './domain/services/notification-response-mapper.service';
 import { NotificationMessageTemplateService } from './domain/services/notification-message-template.service';
+import { NotificationStateResponseService } from './domain/services/notification-state-response.service';
 import { NotificationMongooseInboxAdapter } from './infrastructure/notification-mongoose-inbox.adapter';
 import { NotificationMongooseCommandAdapter } from './infrastructure/notification-mongoose-command.adapter';
 import { NotificationMailAdapter } from './infrastructure/notification-mail.adapter';
@@ -58,10 +59,11 @@ import { MailModule } from '../../common/mail/mail.module';
         NotificationDispatchService,
         CreateNotificationUseCase,
         CreateNotificationFromBuilderUseCase,
+        NotificationListPresentationService,
         NotificationResponseMessageService,
         NotificationPaginationAssemblerService,
-        NotificationResponseMapperService,
         NotificationMessageTemplateService,
+        NotificationStateResponseService,
         NotificationMongooseInboxAdapter,
         NotificationMongooseCommandAdapter,
         NotificationMailAdapter,

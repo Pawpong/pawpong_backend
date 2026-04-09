@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
-import {
-    MarkAsReadResponseDto,
-    NotificationResponseDto,
-    UnreadCountResponseDto,
-} from '../../dto/response/notification-response.dto';
+import { NotificationResponseDto } from '../../dto/response/notification-response.dto';
 import { NotificationInboxRecord } from '../../application/ports/notification-inbox.port';
 import { NotificationPaginationAssemblerService } from './notification-pagination-assembler.service';
 
@@ -22,7 +18,7 @@ type NotificationReadableRecord = {
 };
 
 @Injectable()
-export class NotificationResponseMapperService {
+export class NotificationListPresentationService {
     constructor(private readonly notificationPaginationAssemblerService: NotificationPaginationAssemblerService) {}
 
     toItem(notification: NotificationReadableRecord): NotificationResponseDto {
@@ -51,17 +47,5 @@ export class NotificationResponseMapperService {
             limit,
             totalItems,
         );
-    }
-
-    toUnreadCount(unreadCount: number): UnreadCountResponseDto {
-        return { unreadCount };
-    }
-
-    toReadResult(notification: NotificationInboxRecord): MarkAsReadResponseDto {
-        return {
-            notificationId: notification._id.toString(),
-            isRead: notification.isRead,
-            readAt: notification.readAt!,
-        };
     }
 }

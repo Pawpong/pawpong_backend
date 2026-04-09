@@ -1,7 +1,7 @@
 import { NotificationType } from '../../../../common/enum/user.enum';
 import { RecipientType } from '../../../../common/enum/user.enum';
+import { NotificationListPresentationService } from '../../domain/services/notification-list-presentation.service';
 import { NotificationPaginationAssemblerService } from '../../domain/services/notification-pagination-assembler.service';
-import { NotificationResponseMapperService } from '../../domain/services/notification-response-mapper.service';
 import { CreateNotificationFromBuilderUseCase } from './create-notification-from-builder.use-case';
 
 describe('알림 from 빌더 생성 유스케이스', () => {
@@ -11,7 +11,7 @@ describe('알림 from 빌더 생성 유스케이스', () => {
 
     const useCase = new CreateNotificationFromBuilderUseCase(
         notificationCommandPort as any,
-        new NotificationResponseMapperService(new NotificationPaginationAssemblerService()),
+        new NotificationListPresentationService(new NotificationPaginationAssemblerService()),
     );
 
     beforeEach(() => {
