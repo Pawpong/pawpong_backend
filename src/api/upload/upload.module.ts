@@ -23,8 +23,10 @@ import { DeleteMultipleFilesUseCase } from './admin/application/use-cases/delete
 import { DeleteFolderUseCase } from './admin/application/use-cases/delete-folder.use-case';
 import { CheckFileReferencesUseCase } from './admin/application/use-cases/check-file-references.use-case';
 import { GetAllReferencedFilesUseCase } from './admin/application/use-cases/get-all-referenced-files.use-case';
-import { UploadAdminCommandResponseMessageService } from './admin/domain/services/upload-admin-command-response-message.service';
-import { UploadAdminQueryResponseMessageService } from './admin/domain/services/upload-admin-query-response-message.service';
+import { UploadAdminFileDeleteResponseMessageService } from './admin/domain/services/upload-admin-file-delete-response-message.service';
+import { UploadAdminFolderDeleteResponseMessageService } from './admin/domain/services/upload-admin-folder-delete-response-message.service';
+import { UploadAdminReferenceQueryResponseMessageService } from './admin/domain/services/upload-admin-reference-query-response-message.service';
+import { UploadAdminStorageQueryResponseMessageService } from './admin/domain/services/upload-admin-storage-query-response-message.service';
 import { UploadAdminStoragePolicyService } from './admin/domain/services/upload-admin-storage-policy.service';
 import { UploadAdminStoragePresentationService } from './admin/domain/services/upload-admin-storage-presentation.service';
 import { UploadAdminStorageAdapter } from './admin/infrastructure/upload-admin-storage.adapter';
@@ -42,8 +44,10 @@ import { UploadSingleFileUseCase } from './application/use-cases/upload-single-f
 import { UploadMultipleFilesUseCase } from './application/use-cases/upload-multiple-files.use-case';
 import { DeleteUploadedFileUseCase } from './application/use-cases/delete-uploaded-file.use-case';
 import { UploadFilePolicyService } from './domain/services/upload-file-policy.service';
-import { UploadFileResponseMessageService } from './domain/services/upload-file-response-message.service';
-import { UploadPhotoResponseMessageService } from './domain/services/upload-photo-response-message.service';
+import { UploadFileDeleteResponseMessageService } from './domain/services/upload-file-delete-response-message.service';
+import { UploadFileUploadResponseMessageService } from './domain/services/upload-file-upload-response-message.service';
+import { UploadPetPhotoResponseMessageService } from './domain/services/upload-pet-photo-response-message.service';
+import { UploadRepresentativePhotoResponseMessageService } from './domain/services/upload-representative-photo-response-message.service';
 import { UploadStoredFilePathService } from './domain/services/upload-stored-file-path.service';
 import { UploadPhotoCollectionService } from './domain/services/upload-photo-collection.service';
 import { UploadStorageAdapter } from './infrastructure/upload-storage.adapter';
@@ -104,13 +108,17 @@ import { StorageModule } from '../../common/storage/storage.module';
         CheckFileReferencesUseCase,
         GetAllReferencedFilesUseCase,
         UploadFilePolicyService,
-        UploadFileResponseMessageService,
-        UploadPhotoResponseMessageService,
+        UploadFileUploadResponseMessageService,
+        UploadFileDeleteResponseMessageService,
+        UploadRepresentativePhotoResponseMessageService,
+        UploadPetPhotoResponseMessageService,
         UploadStoredFilePathService,
         UploadPhotoCollectionService,
         UploadAdminStoragePolicyService,
-        UploadAdminQueryResponseMessageService,
-        UploadAdminCommandResponseMessageService,
+        UploadAdminStorageQueryResponseMessageService,
+        UploadAdminReferenceQueryResponseMessageService,
+        UploadAdminFileDeleteResponseMessageService,
+        UploadAdminFolderDeleteResponseMessageService,
         UploadAdminStoragePresentationService,
         UploadOwnerRepository,
         UploadAdminFileReferenceRepository,

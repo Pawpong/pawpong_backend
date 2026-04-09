@@ -6,14 +6,14 @@ import { UploadSingleFileUseCase } from './application/use-cases/upload-single-f
 import { UploadController } from './decorator/upload-controller.decorator';
 import { UploadFolderRequestDto } from './dto/request/upload-folder-request.dto';
 import { UploadResponseDto } from './dto/response/upload-response.dto';
-import { UploadFileResponseMessageService } from './domain/services/upload-file-response-message.service';
+import { UploadFileUploadResponseMessageService } from './domain/services/upload-file-upload-response-message.service';
 import { ApiUploadSingleFileEndpoint } from './swagger';
 
 @UploadController()
 export class UploadSingleFileController {
     constructor(
         private readonly uploadSingleFileUseCase: UploadSingleFileUseCase,
-        private readonly uploadFileResponseMessageService: UploadFileResponseMessageService,
+        private readonly uploadFileUploadResponseMessageService: UploadFileUploadResponseMessageService,
     ) {}
 
     @Post('single')
@@ -24,6 +24,6 @@ export class UploadSingleFileController {
         @Body() requestDto: UploadFolderRequestDto,
     ): Promise<ApiResponseDto<UploadResponseDto>> {
         const response = await this.uploadSingleFileUseCase.execute(file, requestDto.folder);
-        return ApiResponseDto.success(response, this.uploadFileResponseMessageService.singleFileUploaded());
+        return ApiResponseDto.success(response, this.uploadFileUploadResponseMessageService.singleFileUploaded());
     }
 }

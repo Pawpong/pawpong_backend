@@ -7,14 +7,14 @@ import { UploadAvailablePetPhotosUseCase } from './application/use-cases/upload-
 import { ProtectedUploadController } from './decorator/upload-controller.decorator';
 import { UploadPhotoReplaceRequestDto } from './dto/request/upload-photo-replace-request.dto';
 import { UploadResponseDto } from './dto/response/upload-response.dto';
-import { UploadPhotoResponseMessageService } from './domain/services/upload-photo-response-message.service';
+import { UploadPetPhotoResponseMessageService } from './domain/services/upload-pet-photo-response-message.service';
 import { ApiUploadAvailablePetPhotosEndpoint } from './swagger';
 
 @ProtectedUploadController()
 export class UploadAvailablePetPhotoController {
     constructor(
         private readonly uploadAvailablePetPhotosUseCase: UploadAvailablePetPhotosUseCase,
-        private readonly uploadPhotoResponseMessageService: UploadPhotoResponseMessageService,
+        private readonly uploadPetPhotoResponseMessageService: UploadPetPhotoResponseMessageService,
     ) {}
 
     @Post('available-pet-photos/:petId')
@@ -35,6 +35,6 @@ export class UploadAvailablePetPhotoController {
             role,
         );
 
-        return ApiResponseDto.success(responses, this.uploadPhotoResponseMessageService.availablePetPhotosUploaded());
+        return ApiResponseDto.success(responses, this.uploadPetPhotoResponseMessageService.availablePetPhotosUploaded());
     }
 }

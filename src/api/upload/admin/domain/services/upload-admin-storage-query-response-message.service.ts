@@ -6,20 +6,12 @@ import {
 } from '../../constants/upload-admin-response-messages';
 
 @Injectable()
-export class UploadAdminQueryResponseMessageService {
+export class UploadAdminStorageQueryResponseMessageService {
     filesListed() {
         return UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.filesListed;
     }
 
     folderFilesListed(folder: string) {
         return buildUploadAdminFolderFilesListedMessage(folder);
-    }
-
-    fileReferencesChecked() {
-        return UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.fileReferencesChecked;
-    }
-
-    referencedFilesListed() {
-        return UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.referencedFilesListed;
     }
 }

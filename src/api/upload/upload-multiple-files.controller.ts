@@ -6,14 +6,14 @@ import { UploadMultipleFilesUseCase } from './application/use-cases/upload-multi
 import { UploadController } from './decorator/upload-controller.decorator';
 import { UploadFolderRequestDto } from './dto/request/upload-folder-request.dto';
 import { UploadResponseDto } from './dto/response/upload-response.dto';
-import { UploadFileResponseMessageService } from './domain/services/upload-file-response-message.service';
+import { UploadFileUploadResponseMessageService } from './domain/services/upload-file-upload-response-message.service';
 import { ApiUploadMultipleFilesEndpoint } from './swagger';
 
 @UploadController()
 export class UploadMultipleFilesController {
     constructor(
         private readonly uploadMultipleFilesUseCase: UploadMultipleFilesUseCase,
-        private readonly uploadFileResponseMessageService: UploadFileResponseMessageService,
+        private readonly uploadFileUploadResponseMessageService: UploadFileUploadResponseMessageService,
     ) {}
 
     @Post('multiple')
@@ -24,6 +24,9 @@ export class UploadMultipleFilesController {
         @Body() requestDto: UploadFolderRequestDto,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
         const responses = await this.uploadMultipleFilesUseCase.execute(files, requestDto.folder);
-        return ApiResponseDto.success(responses, this.uploadFileResponseMessageService.multipleFilesUploaded(files.length));
+        return ApiResponseDto.success(
+            responses,
+            this.uploadFileUploadResponseMessageService.multipleFilesUploaded(files.length),
+        );
     }
 }
