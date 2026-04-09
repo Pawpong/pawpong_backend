@@ -1,7 +1,7 @@
 import {
     NoticeResponseMessageService,
-    NOTICE_RESPONSE_MESSAGE_EXAMPLES,
 } from '../domain/services/notice-response-message.service';
+import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../constants/notice-response-messages';
 
 describe('공지사항 응답 메시지 서비스', () => {
     const service = new NoticeResponseMessageService();

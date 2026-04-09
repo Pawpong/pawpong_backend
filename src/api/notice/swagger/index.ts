@@ -3,14 +3,9 @@ import { ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import { ApiEndpoint, ApiPaginatedEndpoint, ApiPublicController } from '../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
+import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../constants/notice-response-messages';
+import { NOTICE_NOT_FOUND_RESPONSE } from '../constants/notice-swagger.constants';
 import { NoticeResponseDto } from '../dto/response/notice-response.dto';
-import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../domain/services/notice-response-message.service';
-
-const NOTICE_NOT_FOUND_RESPONSE = {
-    status: 404,
-    description: '공지사항을 찾을 수 없음',
-    errorExample: '공지사항을 찾을 수 없습니다.',
-};
 
 export function ApiNoticeController() {
     return ApiPublicController('공지사항');
