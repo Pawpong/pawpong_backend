@@ -1,9 +1,8 @@
-import { UserAdminDeletedUserPresentationService } from '../domain/services/user-admin-deleted-user-presentation.service';
-import { UserAdminPaginationAssemblerService } from '../domain/services/user-admin-pagination-assembler.service';
+import { UserAdminDeletedUserStatsPresentationService } from '../domain/services/user-admin-deleted-user-stats-presentation.service';
 
-describe('사용자 관리자 탈퇴 사용자 응답 서비스', () => {
+describe('사용자 관리자 탈퇴 사용자 통계 응답 서비스', () => {
     it('탈퇴 사용자 통계 응답 계약을 유지한다', () => {
-        const service = new UserAdminDeletedUserPresentationService(new UserAdminPaginationAssemblerService());
+        const service = new UserAdminDeletedUserStatsPresentationService();
 
         expect(
             service.toDeletedUserStatsResponse({

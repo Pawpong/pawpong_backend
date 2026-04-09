@@ -6,7 +6,7 @@ import { USER_ADMIN_READER, type UserAdminReaderPort } from '../ports/user-admin
 import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
-import { UserAdminDeletedUserPresentationService } from '../../domain/services/user-admin-deleted-user-presentation.service';
+import { UserAdminDeletedUserStatsPresentationService } from '../../domain/services/user-admin-deleted-user-stats-presentation.service';
 
 @Injectable()
 export class GetDeletedUserStatsUseCase {
@@ -17,7 +17,7 @@ export class GetDeletedUserStatsUseCase {
         private readonly userAdminWriter: UserAdminWriterPort,
         private readonly userAdminCommandPolicyService: UserAdminCommandPolicyService,
         private readonly userAdminActivityLogFactoryService: UserAdminActivityLogFactoryService,
-        private readonly userAdminDeletedUserPresentationService: UserAdminDeletedUserPresentationService,
+        private readonly userAdminDeletedUserStatsPresentationService: UserAdminDeletedUserStatsPresentationService,
     ) {}
 
     async execute(adminId: string): Promise<DeletedUserStatsResponseDto> {
@@ -39,6 +39,6 @@ export class GetDeletedUserStatsUseCase {
             ),
         );
 
-        return this.userAdminDeletedUserPresentationService.toDeletedUserStatsResponse(result);
+        return this.userAdminDeletedUserStatsPresentationService.toDeletedUserStatsResponse(result);
     }
 }
