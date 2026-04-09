@@ -3,7 +3,7 @@ import { Get } from '@nestjs/common';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetAllFilterOptionsUseCase } from './application/use-cases/get-all-filter-options.use-case';
 import { FilterOptionsController } from './decorator/filter-options-controller.decorator';
-import { FilterOptionsResponseMessageService } from './domain/services/filter-options-response-message.service';
+import { FilterOptionsSummaryResponseMessageService } from './domain/services/filter-options-summary-response-message.service';
 import { AllFilterOptionsResponseDto } from './dto/response/filter-options-response.dto';
 import { ApiGetAllFilterOptionsEndpoint } from './swagger';
 
@@ -11,13 +11,13 @@ import { ApiGetAllFilterOptionsEndpoint } from './swagger';
 export class FilterOptionsSummaryController {
     constructor(
         private readonly getAllFilterOptionsUseCase: GetAllFilterOptionsUseCase,
-        private readonly filterOptionsResponseMessageService: FilterOptionsResponseMessageService,
+        private readonly filterOptionsSummaryResponseMessageService: FilterOptionsSummaryResponseMessageService,
     ) {}
 
     @Get()
     @ApiGetAllFilterOptionsEndpoint()
     async getAllFilterOptions(): Promise<ApiResponseDto<AllFilterOptionsResponseDto>> {
         const result = await this.getAllFilterOptionsUseCase.execute();
-        return ApiResponseDto.success(result, this.filterOptionsResponseMessageService.allFilterOptionsRetrieved());
+        return ApiResponseDto.success(result, this.filterOptionsSummaryResponseMessageService.allFilterOptionsRetrieved());
     }
 }

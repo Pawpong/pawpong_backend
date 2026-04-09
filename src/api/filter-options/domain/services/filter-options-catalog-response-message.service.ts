@@ -3,11 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/filter-options-response-messages';
 
 @Injectable()
-export class FilterOptionsResponseMessageService {
-    allFilterOptionsRetrieved(): string {
-        return FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES.allFilterOptionsRetrieved;
-    }
-
+export class FilterOptionsCatalogResponseMessageService {
     breederLevelsRetrieved(): string {
         return FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES.breederLevelsRetrieved;
     }
