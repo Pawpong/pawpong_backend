@@ -1,11 +1,7 @@
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
+import { DISTRICT_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../constants/district-admin-response-messages';
+import { DISTRICT_ADMIN_NOT_FOUND_RESPONSE } from '../constants/district-admin-swagger.constants';
 import { DistrictResponseDto } from '../../dto/response/district-response.dto';
-
-const DISTRICT_ADMIN_NOT_FOUND_RESPONSE = {
-    status: 404,
-    description: '지역을 찾을 수 없음',
-    errorExample: '지역을 찾을 수 없습니다.',
-};
 
 export function ApiDistrictAdminController() {
     return ApiController('지역 관리 (Admin)');
@@ -50,7 +46,7 @@ export function ApiDeleteDistrictAdminEndpoint() {
         summary: '지역 삭제',
         description: '기존 지역을 삭제합니다. (관리자 전용)',
         nullableData: true,
-        successMessageExample: '지역이 삭제되었습니다.',
+        successMessageExample: DISTRICT_ADMIN_RESPONSE_MESSAGE_EXAMPLES.districtDeleted,
         errorResponses: [DISTRICT_ADMIN_NOT_FOUND_RESPONSE],
     });
 }

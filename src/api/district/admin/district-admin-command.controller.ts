@@ -7,6 +7,7 @@ import { CreateDistrictUseCase } from './application/use-cases/create-district.u
 import { DeleteDistrictUseCase } from './application/use-cases/delete-district.use-case';
 import { UpdateDistrictUseCase } from './application/use-cases/update-district.use-case';
 import { DistrictAdminProtectedController } from './decorator/district-admin-controller.decorator';
+import { DistrictAdminResponseMessageService } from './domain/services/district-admin-response-message.service';
 import { DistrictResponseDto } from '../dto/response/district-response.dto';
 import {
     ApiCreateDistrictAdminEndpoint,
@@ -20,6 +21,7 @@ export class DistrictAdminCommandController {
         private readonly createDistrictUseCase: CreateDistrictUseCase,
         private readonly updateDistrictUseCase: UpdateDistrictUseCase,
         private readonly deleteDistrictUseCase: DeleteDistrictUseCase,
+        private readonly districtAdminResponseMessageService: DistrictAdminResponseMessageService,
     ) {}
 
     @Post()
@@ -43,6 +45,6 @@ export class DistrictAdminCommandController {
     @ApiDeleteDistrictAdminEndpoint()
     async deleteDistrict(@Param('id') id: string): Promise<ApiResponseDto<null>> {
         await this.deleteDistrictUseCase.execute(id);
-        return ApiResponseDto.success(null, '지역이 삭제되었습니다.');
+        return ApiResponseDto.success(null, this.districtAdminResponseMessageService.districtDeleted());
     }
 }
