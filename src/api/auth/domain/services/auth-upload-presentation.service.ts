@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import {
     AUTH_RESPONSE_MESSAGE_EXAMPLES,
     buildAuthBreederDocumentsUploadMessage,
-} from './auth-response-message.service';
+} from '../../constants/auth-response-messages';
 
 @Injectable()
 export class AuthUploadPresentationService {

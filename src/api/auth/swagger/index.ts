@@ -4,6 +4,11 @@ import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse, ApiTags, get
 import { ApiEndpoint } from '../../../common/decorator/swagger.decorator';
 import { UploadResponseDto } from '../../upload/dto/response/upload-response.dto';
 import { ProfileBannerResponseDto } from '../../breeder-management/admin/dto/response/profile-banner-response.dto';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../constants/auth-response-messages';
+import {
+    AUTH_PHONE_SEND_FAILURE_RESPONSE,
+    AUTH_REFRESH_UNAUTHORIZED_RESPONSE,
+} from '../constants/auth-swagger.constants';
 import { RefreshTokenRequestDto } from '../dto/request/refresh-token-request.dto';
 import { CheckNicknameRequestDto } from '../dto/request/check-nickname-request.dto';
 import { CheckEmailRequestDto } from '../dto/request/check-email-request.dto';
@@ -17,21 +22,8 @@ import { LogoutResponseDto } from '../dto/response/logout-response.dto';
 import { PhoneVerificationResponseDto } from '../dto/response/phone-verification-response.dto';
 import { RegisterAdopterResponseDto } from '../dto/response/register-adopter-response.dto';
 import { RegisterBreederResponseDto } from '../dto/response/register-breeder-response.dto';
-import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../domain/services/auth-response-message.service';
 import { SocialCheckUserResponseDto } from '../dto/response/social-check-user-response.dto';
 import { VerificationDocumentsResponseDto } from '../dto/response/verification-documents-response.dto';
-
-const AUTH_REFRESH_UNAUTHORIZED_RESPONSE = {
-    status: 401,
-    description: '토큰 인증 실패',
-    errorExample: '유효하지 않은 리프레시 토큰입니다.',
-};
-
-const AUTH_PHONE_SEND_FAILURE_RESPONSE = {
-    status: 500,
-    description: '인증번호 발송 실패',
-    errorExample: '인증번호 발송에 실패했습니다. 잠시 후 다시 시도해주세요.',
-};
 
 function buildDuplicateCheckSchema(example: boolean) {
     return {
@@ -106,7 +98,7 @@ export function ApiRefreshAuthEndpoint() {
             responseType: TokenResponseDto,
             isPublic: true,
             successDescription: '토큰 재발급 성공',
-            successMessageExample: '토큰이 재발급되었습니다.',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.tokenRefreshed,
             errorResponses: [AUTH_REFRESH_UNAUTHORIZED_RESPONSE],
         }),
         ApiBody({ type: RefreshTokenRequestDto }),

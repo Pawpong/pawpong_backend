@@ -1,8 +1,10 @@
 import {
-    AUTH_RESPONSE_MESSAGE_EXAMPLES,
     AuthResponseMessageService,
-    buildAuthBreederDocumentsUploadMessage,
 } from './auth-response-message.service';
+import {
+    AUTH_RESPONSE_MESSAGE_EXAMPLES,
+    buildAuthBreederDocumentsUploadMessage,
+} from '../../constants/auth-response-messages';
 
 describe('인증 응답 메시지 서비스', () => {
     const service = new AuthResponseMessageService();
@@ -16,6 +18,10 @@ describe('인증 응답 메시지 서비스', () => {
         expect(service.getSocialRegistrationCompleted()).toBe(
             AUTH_RESPONSE_MESSAGE_EXAMPLES.socialRegistrationCompleted,
         );
+    });
+
+    it('토큰 재발급 메시지를 반환한다', () => {
+        expect(service.getTokenRefreshed()).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.tokenRefreshed);
     });
 
     it('중복 체크 메시지를 상황별로 반환한다', () => {

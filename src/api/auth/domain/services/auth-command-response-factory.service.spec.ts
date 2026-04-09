@@ -1,5 +1,5 @@
 import { AuthCommandResponseFactoryService } from './auth-command-response-factory.service';
-import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from './auth-response-message.service';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
 
 describe('인증 명령 응답 팩토리 서비스', () => {
     const service = new AuthCommandResponseFactoryService();
