@@ -4,20 +4,18 @@ import { ApiQuery } from '@nestjs/swagger';
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
 import { VerificationStatus } from '../../../../../common/enum/user.enum';
+import {
+    BREEDER_RESPONSE_MESSAGES,
+    buildBreederDocumentReminderMessage,
+} from '../../../constants/breeder-response-messages';
+import {
+    BREEDER_ADMIN_FORBIDDEN_RESPONSE,
+    BREEDER_VERIFICATION_ADMIN_NOT_FOUND_RESPONSE,
+} from '../../constants/breeder-admin-swagger.constants';
 import { BreederDetailResponseDto } from '../dto/response/breeder-detail-response.dto';
 import { BreederLevelChangeResponseDto } from '../dto/response/breeder-level-change-response.dto';
 import { BreederStatsResponseDto } from '../dto/response/breeder-stats-response.dto';
 import { BreederVerificationResponseDto } from '../dto/response/breeder-verification-response.dto';
-import {
-    BREEDER_RESPONSE_MESSAGES,
-    buildBreederDocumentReminderMessage,
-} from '../../../domain/services/breeder-response-message.service';
-
-const BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '관리자 권한이 필요합니다.',
-};
 
 function buildBreederSearchQueries() {
     return [
@@ -45,7 +43,7 @@ export function ApiGetBreedersAdminEndpoint() {
             description: '전체 브리더 목록을 조회합니다. 상태, 도시, 키워드 필터링을 지원합니다.',
             responseType: PaginationResponseDto,
             itemType: BreederVerificationResponseDto,
-            errorResponses: [BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE],
+            errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
             successMessageExample: BREEDER_RESPONSE_MESSAGES.breederListRetrieved,
         }),
         ...buildBreederSearchQueries(),
@@ -59,7 +57,7 @@ export function ApiGetPendingBreederVerificationsAdminEndpoint() {
             description: '인증 승인을 대기중인 브리더 목록을 조회합니다.',
             responseType: PaginationResponseDto,
             itemType: BreederVerificationResponseDto,
-            errorResponses: [BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE],
+            errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
             successMessageExample: BREEDER_RESPONSE_MESSAGES.pendingBreederListRetrieved,
         }),
         ...buildBreederSearchQueries(),
@@ -73,7 +71,7 @@ export function ApiGetLevelChangeRequestsAdminEndpoint() {
             description: '승인된 브리더가 제출한 레벨 변경 신청 목록을 조회합니다 (New ↔ Elite).',
             responseType: PaginationResponseDto,
             itemType: BreederVerificationResponseDto,
-            errorResponses: [BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE],
+            errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
             successMessageExample: BREEDER_RESPONSE_MESSAGES.levelChangeRequestListRetrieved,
         }),
         ...buildBreederSearchQueries(),
@@ -86,12 +84,8 @@ export function ApiGetBreederDetailAdminEndpoint() {
         description: '특정 브리더의 상세 정보를 조회합니다 (서류, 프로필 포함).',
         responseType: BreederDetailResponseDto,
         errorResponses: [
-            BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE,
-            {
-                status: 404,
-                description: '브리더를 찾을 수 없음',
-                errorExample: '브리더를 찾을 수 없습니다.',
-            },
+            BREEDER_ADMIN_FORBIDDEN_RESPONSE,
+            BREEDER_VERIFICATION_ADMIN_NOT_FOUND_RESPONSE,
         ],
         successMessageExample: BREEDER_RESPONSE_MESSAGES.breederDetailRetrieved,
     });
@@ -112,12 +106,8 @@ export function ApiUpdateBreederVerificationAdminEndpoint() {
             required: ['message'],
         },
         errorResponses: [
-            BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE,
-            {
-                status: 404,
-                description: '브리더를 찾을 수 없음',
-                errorExample: '브리더를 찾을 수 없습니다.',
-            },
+            BREEDER_ADMIN_FORBIDDEN_RESPONSE,
+            BREEDER_VERIFICATION_ADMIN_NOT_FOUND_RESPONSE,
         ],
         successMessageExample: BREEDER_RESPONSE_MESSAGES.verificationUpdated,
     });
@@ -128,7 +118,7 @@ export function ApiGetBreederStatsAdminEndpoint() {
         summary: '승인된 브리더 통계 조회',
         description: '전체 승인된 브리더의 레벨별 통계를 조회합니다 (전체/엘리트/뉴).',
         responseType: BreederStatsResponseDto,
-        errorResponses: [BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE],
+        errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
         successMessageExample: BREEDER_RESPONSE_MESSAGES.breederStatsRetrieved,
     });
 }
@@ -151,7 +141,7 @@ export function ApiSendDocumentRemindersAdminEndpoint() {
             required: ['sentCount', 'breederIds'],
         },
         successMessageExample: buildBreederDocumentReminderMessage(3),
-        errorResponses: [BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE],
+        errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
 
@@ -161,12 +151,8 @@ export function ApiChangeBreederLevelAdminEndpoint() {
         description: '승인된 브리더의 레벨을 뉴 ↔ 엘리트로 변경합니다.',
         responseType: BreederLevelChangeResponseDto,
         errorResponses: [
-            BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE,
-            {
-                status: 404,
-                description: '브리더를 찾을 수 없음',
-                errorExample: '브리더를 찾을 수 없습니다.',
-            },
+            BREEDER_ADMIN_FORBIDDEN_RESPONSE,
+            BREEDER_VERIFICATION_ADMIN_NOT_FOUND_RESPONSE,
         ],
         successMessageExample: BREEDER_RESPONSE_MESSAGES.breederLevelChanged,
     });

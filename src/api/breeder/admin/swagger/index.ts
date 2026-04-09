@@ -6,19 +6,11 @@ import {
     BREEDER_RESPONSE_MESSAGES,
     buildBreederDocumentReminderMessage,
     buildBreederTestAccountMessage,
-} from '../../domain/services/breeder-response-message.service';
-
-const BREEDER_ADMIN_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '관리자 권한이 필요합니다.',
-};
-
-const BREEDER_ADMIN_NOT_FOUND_RESPONSE = {
-    status: 404,
-    description: '브리더를 찾을 수 없음',
-    errorExample: '브리더를 찾을 수 없습니다.',
-};
+} from '../../constants/breeder-response-messages';
+import {
+    BREEDER_ADMIN_FORBIDDEN_RESPONSE,
+    BREEDER_ADMIN_NOT_FOUND_RESPONSE,
+} from '../constants/breeder-admin-swagger.constants';
 
 export function ApiBreederAdminController() {
     return ApiController('브리더 관리 (Admin)');
