@@ -9,11 +9,11 @@ import {
     WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { UseGuards } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 
-import { ChatService } from './chat.service';
+import { SendMessageUseCase } from './application/use-cases/send-message.use-case';
+import { GetMessagesUseCase } from './application/use-cases/get-messages.use-case';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { SendMessageRequestDto } from './dto/request/send-message-request.dto';
 import { SenderRole } from '../../schema/chat-message.schema';
@@ -47,7 +47,8 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     private connectedClients = new Map<string, { userId: string; role: SenderRole }>();
 
     constructor(
-        private readonly chatService: ChatService,
+        private readonly sendMessageUseCase: SendMessageUseCase,
+        private readonly getMessagesUseCase: GetMessagesUseCase,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
@@ -122,18 +123,18 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         try {
-            const message = await this.chatService.sendMessage(user.userId, user.role, dto);
+            const message = await this.sendMessageUseCase.execute(user.userId, user.role, dto);
 
             // 채팅방의 모든 참여자에게 새 메시지 브로드캐스트
             this.server.to(dto.roomId).emit('new_message', {
-                messageId: message._id.toString(),
-                roomId: dto.roomId,
-                senderId: user.userId,
-                senderRole: user.role,
-                content: dto.content,
+                messageId: message.id,
+                roomId: message.roomId,
+                senderId: message.senderId,
+                senderRole: message.senderRole,
+                content: message.content,
                 messageType: message.messageType,
-                isRead: false,
-                createdAt: message.createdAt ?? new Date(),
+                isRead: message.isRead,
+                createdAt: message.createdAt,
             });
         } catch (error) {
             client.emit('error', { message: error.message });
@@ -152,7 +153,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         try {
-            await this.chatService.getMessages(user.userId, payload.roomId);
+            await this.getMessagesUseCase.execute(user.userId, payload.roomId);
             this.server.to(payload.roomId).emit('messages_read', {
                 roomId: payload.roomId,
                 readBy: user.userId,
