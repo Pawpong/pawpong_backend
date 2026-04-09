@@ -2,23 +2,12 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
 
 import { ApiEndpoint, ApiPublicController } from '../../../common/decorator/swagger.decorator';
+import { INQUIRY_RESPONSE_MESSAGE_EXAMPLES } from '../constants/inquiry-response-messages';
+import { INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE } from '../constants/inquiry-swagger.constants';
 import { InquiryCreateRequestDto, InquiryAnswerCreateRequestDto, InquiryUpdateRequestDto } from '../dto/request/inquiry-create-request.dto';
 import { InquiryCreateResponseDto } from '../dto/response/inquiry-create-response.dto';
 import { InquiryDetailResponseDto } from '../dto/response/inquiry-detail-response.dto';
 import { InquiryListResponseDto } from '../dto/response/inquiry-list-response.dto';
-import { INQUIRY_RESPONSE_MESSAGE_EXAMPLES } from '../domain/services/inquiry-response-message.service';
-
-const INQUIRY_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '해당 문의에 접근할 권한이 없습니다.',
-};
-
-const INQUIRY_NOT_FOUND_RESPONSE = {
-    status: 404,
-    description: '문의를 찾을 수 없음',
-    errorExample: '문의를 찾을 수 없습니다.',
-};
 
 export function ApiInquiryController() {
     return ApiPublicController('문의');
