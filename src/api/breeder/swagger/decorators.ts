@@ -12,6 +12,7 @@ import { PetsListResponseDto, PetItemDto } from '../dto/response/pets-list-respo
 import { PetDetailResponseDto } from '../dto/response/pet-detail-response.dto';
 import { ParentPetListResponseDto } from '../dto/response/parent-pet-list.dto';
 import { PublicApplicationFormResponseDto } from '../dto/response/public-application-form.dto';
+import { BREEDER_RESPONSE_MESSAGES } from '../domain/services/breeder-response-message.service';
 import { BreederSwaggerDocs } from './index';
 
 function ApiBreederIdParam() {
@@ -59,7 +60,7 @@ export function ApiSearchBreedersEndpoint() {
         ...BreederSwaggerDocs.searchBreeders,
         responseType: BreederSearchResponseDto,
         isPublic: true,
-        successMessageExample: '브리더 검색이 완료되었습니다.',
+        successMessageExample: BREEDER_RESPONSE_MESSAGES.searchCompleted,
     });
 }
 
@@ -69,7 +70,7 @@ export function ApiExploreBreedersEndpoint() {
         responseType: BreederExploreResponseDto,
         itemType: BreederCardResponseDto,
         isPublic: true,
-        successMessageExample: '브리더 목록이 조회되었습니다.',
+        successMessageExample: BREEDER_RESPONSE_MESSAGES.breederListRetrieved,
     });
 }
 
@@ -78,7 +79,7 @@ export function ApiGetPopularBreedersEndpoint() {
         ...BreederSwaggerDocs.getPopularBreeders,
         responseType: [BreederCardResponseDto],
         isPublic: true,
-        successMessageExample: '인기 브리더 목록이 조회되었습니다.',
+        successMessageExample: BREEDER_RESPONSE_MESSAGES.popularListRetrieved,
     });
 }
 
@@ -88,7 +89,7 @@ export function ApiGetBreederProfileEndpoint() {
             ...BreederSwaggerDocs.getBreederProfile,
             responseType: BreederProfileResponseDto,
             isPublic: true,
-            successMessageExample: '브리더 프로필이 조회되었습니다.',
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.profileRetrieved,
         }),
         ApiBreederIdParam(),
     );
@@ -101,7 +102,7 @@ export function ApiGetBreederReviewsEndpoint() {
             responseType: BreederReviewsResponseDto,
             itemType: BreederReviewItemDto,
             isPublic: true,
-            successMessageExample: '후기 목록이 조회되었습니다.',
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.reviewsRetrieved,
         }),
         ApiBreederIdParam(),
         ApiPageQuery(1),
@@ -116,7 +117,7 @@ export function ApiGetBreederPetsEndpoint() {
             responseType: PetsListResponseDto,
             itemType: PetItemDto,
             isPublic: true,
-            successMessageExample: '개체 목록이 조회되었습니다.',
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.petsRetrieved,
         }),
         ApiBreederIdParam(),
         ApiQuery({
@@ -137,7 +138,7 @@ export function ApiGetBreederPetDetailEndpoint() {
             ...BreederSwaggerDocs.getPetDetail,
             responseType: PetDetailResponseDto,
             isPublic: true,
-            successMessageExample: '개체 상세 정보가 조회되었습니다.',
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.petDetailRetrieved,
         }),
         ApiBreederIdParam(),
         ApiBreederPetIdParam(),
@@ -150,7 +151,7 @@ export function ApiGetBreederParentPetsEndpoint() {
             ...BreederSwaggerDocs.getParentPets,
             responseType: ParentPetListResponseDto,
             isPublic: true,
-            successMessageExample: '부모견/부모묘 목록이 조회되었습니다.',
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.parentPetsRetrieved,
         }),
         ApiBreederIdParam(),
         ApiPageQuery(1),
@@ -164,7 +165,7 @@ export function ApiGetBreederApplicationFormEndpoint() {
             ...BreederSwaggerDocs.getApplicationForm,
             responseType: PublicApplicationFormResponseDto,
             isPublic: true,
-            successMessageExample: '입양 신청 폼 구조가 조회되었습니다.',
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.applicationFormRetrieved,
         }),
         ApiBreederIdParam(),
     );

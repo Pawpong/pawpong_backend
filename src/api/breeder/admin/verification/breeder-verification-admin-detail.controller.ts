@@ -7,6 +7,7 @@ import { GetBreederStatsUseCase } from './application/use-cases/get-breeder-stat
 import { BreederVerificationAdminProtectedController } from './decorator/breeder-verification-admin-controller.decorator';
 import { BreederDetailResponseDto } from './dto/response/breeder-detail-response.dto';
 import { BreederStatsResponseDto } from './dto/response/breeder-stats-response.dto';
+import { BREEDER_RESPONSE_MESSAGES } from '../../domain/services/breeder-response-message.service';
 import { ApiGetBreederDetailAdminEndpoint, ApiGetBreederStatsAdminEndpoint } from './swagger';
 
 @BreederVerificationAdminProtectedController()
@@ -23,13 +24,13 @@ export class BreederVerificationAdminDetailController {
         @Param('breederId') breederId: string,
     ): Promise<ApiResponseDto<BreederDetailResponseDto>> {
         const result = await this.getBreederDetailUseCase.execute(adminId, breederId);
-        return ApiResponseDto.success(result, '브리더 상세 정보가 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.breederDetailRetrieved);
     }
 
     @Get('stats')
     @ApiGetBreederStatsAdminEndpoint()
     async getBreederStats(@CurrentUser('userId') adminId: string): Promise<ApiResponseDto<BreederStatsResponseDto>> {
         const result = await this.getBreederStatsUseCase.execute(adminId);
-        return ApiResponseDto.success(result, '브리더 통계가 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.breederStatsRetrieved);
     }
 }

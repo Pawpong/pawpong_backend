@@ -2,6 +2,11 @@ import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger
 import { BreederRemindResponseDto } from '../dto/response/breeder-remind-response.dto';
 import { BreederSuspendResponseDto } from '../dto/response/breeder-suspend-response.dto';
 import { SetTestAccountResponseDto } from '../dto/response/set-test-account-response.dto';
+import {
+    BREEDER_RESPONSE_MESSAGES,
+    buildBreederDocumentReminderMessage,
+    buildBreederTestAccountMessage,
+} from '../../domain/services/breeder-response-message.service';
 
 const BREEDER_ADMIN_FORBIDDEN_RESPONSE = {
     status: 403,
@@ -25,7 +30,7 @@ export function ApiSuspendBreederAdminEndpoint() {
         description: '브리더 계정을 영구정지 처리하고 알림을 발송합니다.',
         responseType: BreederSuspendResponseDto,
         errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE, BREEDER_ADMIN_NOT_FOUND_RESPONSE],
-        successMessageExample: '브리더 계정이 영구정지 처리되었습니다.',
+        successMessageExample: BREEDER_RESPONSE_MESSAGES.accountSuspended,
     });
 }
 
@@ -35,7 +40,7 @@ export function ApiUnsuspendBreederAdminEndpoint() {
         description: '정지된 브리더 계정을 활성화하고 알림을 발송합니다.',
         responseType: BreederSuspendResponseDto,
         errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE, BREEDER_ADMIN_NOT_FOUND_RESPONSE],
-        successMessageExample: '브리더 계정 정지가 해제되었습니다.',
+        successMessageExample: BREEDER_RESPONSE_MESSAGES.accountUnsuspended,
     });
 }
 
@@ -44,6 +49,7 @@ export function ApiSendBreederRemindNotificationsAdminEndpoint() {
         summary: '리마인드 알림 발송',
         description: '서류 미제출 브리더들에게 리마인드 알림을 발송합니다. (서비스 알림 + 이메일 알림)',
         responseType: BreederRemindResponseDto,
+        successMessageExample: buildBreederDocumentReminderMessage(3),
         errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -54,6 +60,7 @@ export function ApiSetBreederTestAccountAdminEndpoint() {
         description:
             '브리더를 테스트 계정으로 설정하거나 해제합니다. 테스트 계정은 탐색 페이지와 홈 화면에 노출되지 않습니다.',
         responseType: SetTestAccountResponseDto,
+        successMessageExample: buildBreederTestAccountMessage(true),
         errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE, BREEDER_ADMIN_NOT_FOUND_RESPONSE],
     });
 }

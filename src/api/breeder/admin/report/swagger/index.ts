@@ -5,6 +5,7 @@ import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../..
 import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
 import { ReportActionResponseDto } from '../dto/response/report-action-response.dto';
 import { ReportListResponseDto } from '../dto/response/report-list-response.dto';
+import { BREEDER_RESPONSE_MESSAGES } from '../../../domain/services/breeder-response-message.service';
 
 const BREEDER_REPORT_ADMIN_FORBIDDEN_RESPONSE = {
     status: 403,
@@ -24,7 +25,7 @@ export function ApiGetBreederReportsAdminEndpoint() {
             responseType: PaginationResponseDto,
             itemType: ReportListResponseDto,
             errorResponses: [BREEDER_REPORT_ADMIN_FORBIDDEN_RESPONSE],
-            successMessageExample: '브리더 신고 목록이 조회되었습니다.',
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.breederReportListRetrieved,
         }),
         ApiQuery({ name: 'status', required: false, type: String, description: '신고 상태 필터' }),
         ApiQuery({ name: 'pageNumber', required: false, type: Number, example: 1, description: '페이지 번호' }),

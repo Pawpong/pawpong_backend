@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../../../common/dto/pagination/pagination-builder.dto';
 import { BreederLevel } from '../../../../../../common/enum/user.enum';
 import { BreederDetailResponseDto } from '../../dto/response/breeder-detail-response.dto';
 import { BreederLevelChangeResponseDto } from '../../dto/response/breeder-level-change-response.dto';
@@ -8,6 +7,7 @@ import { BreederStatsResponseDto } from '../../dto/response/breeder-stats-respon
 import { BreederVerificationResponseDto } from '../../dto/response/breeder-verification-response.dto';
 import { BREEDER_VERIFICATION_ADMIN_FILE_URL_PORT } from '../../application/ports/breeder-verification-admin-file-url.port';
 import type { BreederVerificationAdminFileUrlPort } from '../../application/ports/breeder-verification-admin-file-url.port';
+import { BreederPaginationAssemblerService } from '../../../../domain/services/breeder-pagination-assembler.service';
 import {
     BreederVerificationAdminBreederSnapshot,
     BreederVerificationAdminDocumentSnapshot,
@@ -21,6 +21,7 @@ export class BreederVerificationAdminPresentationService {
     constructor(
         @Inject(BREEDER_VERIFICATION_ADMIN_FILE_URL_PORT)
         private readonly fileUrlPort: BreederVerificationAdminFileUrlPort,
+        private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService,
     ) {}
 
     toLevelChangeRequestResponse(breeder: BreederVerificationAdminBreederSnapshot): BreederVerificationResponseDto {
@@ -87,7 +88,7 @@ export class BreederVerificationAdminPresentationService {
     }
 
     toPaginatedResponse<T>(items: T[], page: number, limit: number, total: number) {
-        return new PaginationBuilder<T>().setItems(items).setPage(page).setLimit(limit).setTotalCount(total).build();
+        return this.breederPaginationAssemblerService.build(items, page, limit, total);
     }
 
     toBreederDetailResponse(breeder: BreederVerificationAdminBreederSnapshot): BreederDetailResponseDto {

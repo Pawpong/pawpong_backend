@@ -9,6 +9,7 @@ import { GetPendingBreederVerificationsUseCase } from './application/use-cases/g
 import { BreederVerificationAdminProtectedController } from './decorator/breeder-verification-admin-controller.decorator';
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
 import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
+import { BREEDER_RESPONSE_MESSAGES } from '../../domain/services/breeder-response-message.service';
 import {
     ApiGetBreedersAdminEndpoint,
     ApiGetLevelChangeRequestsAdminEndpoint,
@@ -30,7 +31,7 @@ export class BreederVerificationAdminQueryController {
         @Query() filter: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
         const result = await this.getBreedersUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, '브리더 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.breederListRetrieved);
     }
 
     @Get('verification/pending')
@@ -40,7 +41,7 @@ export class BreederVerificationAdminQueryController {
         @Query() filter: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
         const result = await this.getPendingBreederVerificationsUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, '승인 대기 브리더 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.pendingBreederListRetrieved);
     }
 
     @Get('verification/level-change-requests')
@@ -50,6 +51,6 @@ export class BreederVerificationAdminQueryController {
         @Query() filter: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
         const result = await this.getLevelChangeRequestsUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, '레벨 변경 신청 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.levelChangeRequestListRetrieved);
     }
 }

@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../common/dto/pagination/pagination-builder.dto';
 import { SearchBreederRequestDto } from '../../dto/request/search-breeder-request.dto';
 import { BreederExploreResponseDto } from '../../dto/response/breeder-explore-response.dto';
 import { BreederCardResponseDto } from '../../dto/response/breeder-card-response.dto';
@@ -11,6 +10,7 @@ import type { BreederPublicReaderPort } from '../ports/breeder-public-reader.por
 import { BreederExploreCriteriaService } from '../../domain/services/breeder-explore-criteria.service';
 import { BreederExploreFavoriteReaderService } from '../../domain/services/breeder-explore-favorite-reader.service';
 import { BreederExploreCardMapperService } from '../../domain/services/breeder-explore-card-mapper.service';
+import { BreederPaginationAssemblerService } from '../../domain/services/breeder-pagination-assembler.service';
 
 @Injectable()
 export class ExploreBreedersUseCase {
@@ -22,6 +22,7 @@ export class ExploreBreedersUseCase {
         private readonly breederExploreCriteriaService: BreederExploreCriteriaService,
         private readonly breederExploreFavoriteReaderService: BreederExploreFavoriteReaderService,
         private readonly breederExploreCardMapperService: BreederExploreCardMapperService,
+        private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService,
     ) {}
 
     async execute(searchDto: SearchBreederRequestDto, userId?: string): Promise<BreederExploreResponseDto> {
@@ -48,11 +49,6 @@ export class ExploreBreedersUseCase {
             ),
         );
 
-        return new PaginationBuilder<BreederCardResponseDto>()
-            .setItems(items)
-            .setTotalCount(total)
-            .setPage(page)
-            .setLimit(limit)
-            .build() as BreederExploreResponseDto;
+        return new BreederExploreResponseDto(this.breederPaginationAssemblerService.createBuilder(items, page, limit, total));
     }
 }

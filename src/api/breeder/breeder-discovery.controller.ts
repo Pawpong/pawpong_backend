@@ -12,6 +12,7 @@ import { SearchBreederRequestDto } from './dto/request/search-breeder-request.dt
 import { BreederCardResponseDto } from './dto/response/breeder-card-response.dto';
 import { BreederExploreResponseDto } from './dto/response/breeder-explore-response.dto';
 import { BreederSearchResponseDto } from './dto/response/breeder-search-response.dto';
+import { BREEDER_RESPONSE_MESSAGES } from './domain/services/breeder-response-message.service';
 import { ApiExploreBreedersEndpoint, ApiGetPopularBreedersEndpoint, ApiSearchBreedersEndpoint } from './swagger/decorators';
 
 @BreederPublicController()
@@ -27,14 +28,14 @@ export class BreederDiscoveryController {
         @Query() searchDto: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<BreederSearchResponseDto>> {
         const result = await this.searchBreedersUseCase.execute(searchDto);
-        return ApiResponseDto.success(result, '브리더 검색이 완료되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.searchCompleted);
     }
 
     @Get('popular')
     @ApiGetPopularBreedersEndpoint()
     async getPopularBreeders(): Promise<ApiResponseDto<BreederCardResponseDto[]>> {
         const result = await this.getPopularBreedersUseCase.execute(10);
-        return ApiResponseDto.success(result, '인기 브리더 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.popularListRetrieved);
     }
 }
 
@@ -49,6 +50,6 @@ export class BreederExploreController {
         @CurrentUser('userId') userId?: string,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederCardResponseDto>>> {
         const result = await this.exploreBreedersUseCase.execute(searchDto, userId);
-        return ApiResponseDto.success(result, '브리더 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.breederListRetrieved);
     }
 }

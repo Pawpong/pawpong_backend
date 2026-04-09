@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../common/dto/pagination/pagination-builder.dto';
 import { BreederSearchRequestDto } from '../../dto/request/breeder-search-request.dto';
 import { BreederSearchResponseDto } from '../../dto/response/breeder-search-response.dto';
 import { BREEDER_FILE_URL_PORT } from '../ports/breeder-file-url.port';
@@ -9,6 +8,7 @@ import type { BreederFileUrlPort } from '../ports/breeder-file-url.port';
 import type { BreederPublicReaderPort } from '../ports/breeder-public-reader.port';
 import { BreederSearchCriteriaService } from '../../domain/services/breeder-search-criteria.service';
 import { BreederSearchResultMapperService } from '../../domain/services/breeder-search-result-mapper.service';
+import { BreederPaginationAssemblerService } from '../../domain/services/breeder-pagination-assembler.service';
 
 @Injectable()
 export class SearchBreedersUseCase {
@@ -19,6 +19,7 @@ export class SearchBreedersUseCase {
         private readonly breederFileUrlPort: BreederFileUrlPort,
         private readonly breederSearchCriteriaService: BreederSearchCriteriaService,
         private readonly breederSearchResultMapperService: BreederSearchResultMapperService,
+        private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService,
     ) {}
 
     async execute(searchDto: BreederSearchRequestDto): Promise<BreederSearchResponseDto> {
@@ -31,11 +32,8 @@ export class SearchBreedersUseCase {
             this.breederSearchResultMapperService.toItem(breeder, this.breederFileUrlPort),
         );
 
-        return new PaginationBuilder<any>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(result.total)
-            .build() as BreederSearchResponseDto;
+        return new BreederSearchResponseDto(
+            this.breederPaginationAssemblerService.createBuilder(items, page, limit, result.total),
+        );
     }
 }

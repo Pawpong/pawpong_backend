@@ -20,6 +20,7 @@ import { BreederExploreCriteriaService } from './domain/services/breeder-explore
 import { BreederExploreFavoriteReaderService } from './domain/services/breeder-explore-favorite-reader.service';
 import { BreederExploreCardMapperService } from './domain/services/breeder-explore-card-mapper.service';
 import { BreederBirthDateFormatterService } from './domain/services/breeder-birth-date-formatter.service';
+import { BreederPaginationAssemblerService } from './domain/services/breeder-pagination-assembler.service';
 import { BreederPublicProfileAssemblerService } from './domain/services/breeder-public-profile-assembler.service';
 import { BreederPublicReviewResponseMapperService } from './domain/services/breeder-public-review-response-mapper.service';
 import { BreederPublicPetListResponseMapperService } from './domain/services/breeder-public-pet-list-response-mapper.service';
@@ -76,6 +77,7 @@ import { StorageModule } from '../../common/storage/storage.module';
         BreederExploreFavoriteReaderService,
         BreederExploreCardMapperService,
         BreederBirthDateFormatterService,
+        BreederPaginationAssemblerService,
         BreederPublicProfileAssemblerService,
         BreederPublicReviewResponseMapperService,
         BreederPublicPetListResponseMapperService,

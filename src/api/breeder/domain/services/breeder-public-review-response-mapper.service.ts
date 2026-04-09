@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../common/dto/pagination/pagination-builder.dto';
+import { BreederPaginationAssemblerService } from './breeder-pagination-assembler.service';
 
 @Injectable()
 export class BreederPublicReviewResponseMapperService {
+    constructor(private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService) {}
+
     toPaginationResponse(reviews: any[], total: number, page: number, limit: number) {
         const formattedReviews = reviews.map((review: any) => ({
             reviewId: review._id.toString(),
@@ -18,11 +20,6 @@ export class BreederPublicReviewResponseMapperService {
             replyUpdatedAt: review.replyUpdatedAt || null,
         }));
 
-        return new PaginationBuilder<any>()
-            .setItems(formattedReviews)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(total)
-            .build();
+        return this.breederPaginationAssemblerService.build(formattedReviews, page, limit, total);
     }
 }

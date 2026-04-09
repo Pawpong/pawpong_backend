@@ -9,6 +9,7 @@ import { BreederOptionalAuthController, BreederPublicController } from './decora
 import { PetDetailResponseDto } from './dto/response/pet-detail-response.dto';
 import { ParentPetListResponseDto } from './dto/response/parent-pet-list.dto';
 import { PetsListResponseDto } from './dto/response/pets-list-response.dto';
+import { BREEDER_RESPONSE_MESSAGES } from './domain/services/breeder-response-message.service';
 import {
     ApiGetBreederParentPetsEndpoint,
     ApiGetBreederPetDetailEndpoint,
@@ -31,7 +32,7 @@ export class BreederPetsController {
         @Query('limit') limit: number = 20,
     ): Promise<ApiResponseDto<PetsListResponseDto>> {
         const result = await this.getBreederPetsUseCase.execute(breederId, status, Number(page), Number(limit));
-        return ApiResponseDto.success(result, '개체 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.petsRetrieved);
     }
 
     @Get(':id/parent-pets')
@@ -42,7 +43,7 @@ export class BreederPetsController {
         @Query('limit') limit?: number,
     ): Promise<ApiResponseDto<ParentPetListResponseDto>> {
         const result = await this.getBreederParentPetsUseCase.execute(breederId, page, limit);
-        return ApiResponseDto.success(result, '부모견/부모묘 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.parentPetsRetrieved);
     }
 }
 
@@ -57,6 +58,6 @@ export class BreederPetDetailController {
         @Param('petId') petId: string,
     ): Promise<ApiResponseDto<PetDetailResponseDto>> {
         const result = await this.getBreederPetDetailUseCase.execute(breederId, petId);
-        return ApiResponseDto.success(result, '개체 상세 정보가 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.petDetailRetrieved);
     }
 }

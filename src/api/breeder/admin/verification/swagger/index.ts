@@ -8,6 +8,10 @@ import { BreederDetailResponseDto } from '../dto/response/breeder-detail-respons
 import { BreederLevelChangeResponseDto } from '../dto/response/breeder-level-change-response.dto';
 import { BreederStatsResponseDto } from '../dto/response/breeder-stats-response.dto';
 import { BreederVerificationResponseDto } from '../dto/response/breeder-verification-response.dto';
+import {
+    BREEDER_RESPONSE_MESSAGES,
+    buildBreederDocumentReminderMessage,
+} from '../../../domain/services/breeder-response-message.service';
 
 const BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE = {
     status: 403,
@@ -42,7 +46,7 @@ export function ApiGetBreedersAdminEndpoint() {
             responseType: PaginationResponseDto,
             itemType: BreederVerificationResponseDto,
             errorResponses: [BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE],
-            successMessageExample: '브리더 목록이 조회되었습니다.',
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.breederListRetrieved,
         }),
         ...buildBreederSearchQueries(),
     );
@@ -56,7 +60,7 @@ export function ApiGetPendingBreederVerificationsAdminEndpoint() {
             responseType: PaginationResponseDto,
             itemType: BreederVerificationResponseDto,
             errorResponses: [BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE],
-            successMessageExample: '승인 대기 브리더 목록이 조회되었습니다.',
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.pendingBreederListRetrieved,
         }),
         ...buildBreederSearchQueries(),
     );
@@ -70,7 +74,7 @@ export function ApiGetLevelChangeRequestsAdminEndpoint() {
             responseType: PaginationResponseDto,
             itemType: BreederVerificationResponseDto,
             errorResponses: [BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE],
-            successMessageExample: '레벨 변경 신청 목록이 조회되었습니다.',
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.levelChangeRequestListRetrieved,
         }),
         ...buildBreederSearchQueries(),
     );
@@ -89,7 +93,7 @@ export function ApiGetBreederDetailAdminEndpoint() {
                 errorExample: '브리더를 찾을 수 없습니다.',
             },
         ],
-        successMessageExample: '브리더 상세 정보가 조회되었습니다.',
+        successMessageExample: BREEDER_RESPONSE_MESSAGES.breederDetailRetrieved,
     });
 }
 
@@ -115,7 +119,7 @@ export function ApiUpdateBreederVerificationAdminEndpoint() {
                 errorExample: '브리더를 찾을 수 없습니다.',
             },
         ],
-        successMessageExample: '브리더 인증 처리가 완료되었습니다.',
+        successMessageExample: BREEDER_RESPONSE_MESSAGES.verificationUpdated,
     });
 }
 
@@ -125,7 +129,7 @@ export function ApiGetBreederStatsAdminEndpoint() {
         description: '전체 승인된 브리더의 레벨별 통계를 조회합니다 (전체/엘리트/뉴).',
         responseType: BreederStatsResponseDto,
         errorResponses: [BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE],
-        successMessageExample: '브리더 통계가 조회되었습니다.',
+        successMessageExample: BREEDER_RESPONSE_MESSAGES.breederStatsRetrieved,
     });
 }
 
@@ -146,6 +150,7 @@ export function ApiSendDocumentRemindersAdminEndpoint() {
             },
             required: ['sentCount', 'breederIds'],
         },
+        successMessageExample: buildBreederDocumentReminderMessage(3),
         errorResponses: [BREEDER_VERIFICATION_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -163,6 +168,6 @@ export function ApiChangeBreederLevelAdminEndpoint() {
                 errorExample: '브리더를 찾을 수 없습니다.',
             },
         ],
-        successMessageExample: '브리더 레벨이 변경되었습니다.',
+        successMessageExample: BREEDER_RESPONSE_MESSAGES.breederLevelChanged,
     });
 }
