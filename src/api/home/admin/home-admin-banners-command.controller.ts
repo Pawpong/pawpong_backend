@@ -5,7 +5,7 @@ import { CreateBannerUseCase } from './application/use-cases/create-banner.use-c
 import { DeleteBannerUseCase } from './application/use-cases/delete-banner.use-case';
 import { UpdateBannerUseCase } from './application/use-cases/update-banner.use-case';
 import { HomeAdminProtectedController } from './decorator/home-admin-controller.decorator';
-import { HomeBannerResponseMessageService } from '../domain/services/home-banner-response-message.service';
+import { HomeBannerCommandResponseMessageService } from '../domain/services/home-banner-command-response-message.service';
 import { BannerCreateRequestDto } from './dto/request/banner-create-request.dto';
 import { BannerUpdateRequestDto } from './dto/request/banner-update-request.dto';
 import { BannerResponseDto } from '../dto/response/banner-response.dto';
@@ -21,14 +21,14 @@ export class HomeAdminBannersCommandController {
         private readonly createBannerUseCase: CreateBannerUseCase,
         private readonly updateBannerUseCase: UpdateBannerUseCase,
         private readonly deleteBannerUseCase: DeleteBannerUseCase,
-        private readonly homeBannerResponseMessageService: HomeBannerResponseMessageService,
+        private readonly homeBannerCommandResponseMessageService: HomeBannerCommandResponseMessageService,
     ) {}
 
     @Post('banner')
     @ApiCreateBannerAdminEndpoint()
     async createBanner(@Body() data: BannerCreateRequestDto): Promise<ApiResponseDto<BannerResponseDto>> {
         const banner = await this.createBannerUseCase.execute(data);
-        return ApiResponseDto.success(banner, this.homeBannerResponseMessageService.bannerCreated());
+        return ApiResponseDto.success(banner, this.homeBannerCommandResponseMessageService.bannerCreated());
     }
 
     @Put('banner/:bannerId')
@@ -38,13 +38,13 @@ export class HomeAdminBannersCommandController {
         @Body() data: BannerUpdateRequestDto,
     ): Promise<ApiResponseDto<BannerResponseDto>> {
         const banner = await this.updateBannerUseCase.execute(bannerId, data);
-        return ApiResponseDto.success(banner, this.homeBannerResponseMessageService.bannerUpdated());
+        return ApiResponseDto.success(banner, this.homeBannerCommandResponseMessageService.bannerUpdated());
     }
 
     @Delete('banner/:bannerId')
     @ApiDeleteBannerAdminEndpoint()
     async deleteBanner(@Param('bannerId') bannerId: string): Promise<ApiResponseDto<null>> {
         await this.deleteBannerUseCase.execute(bannerId);
-        return ApiResponseDto.success(null, this.homeBannerResponseMessageService.bannerDeleted());
+        return ApiResponseDto.success(null, this.homeBannerCommandResponseMessageService.bannerDeleted());
     }
 }
