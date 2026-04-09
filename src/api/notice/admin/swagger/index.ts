@@ -3,20 +3,13 @@ import { ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
+import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/notice-response-messages';
+import {
+    NOTICE_ADMIN_FORBIDDEN_RESPONSE,
+    NOTICE_ADMIN_NOT_FOUND_RESPONSE,
+    NOTICE_ADMIN_STATUS_VALUES,
+} from '../../constants/notice-swagger.constants';
 import { NoticeResponseDto } from '../../dto/response/notice-response.dto';
-import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../../domain/services/notice-response-message.service';
-
-const NOTICE_ADMIN_STATUS_VALUES = ['published', 'draft', 'archived'] as const;
-const NOTICE_ADMIN_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '관리자 권한이 필요합니다.',
-};
-const NOTICE_ADMIN_NOT_FOUND_RESPONSE = {
-    status: 404,
-    description: '공지사항을 찾을 수 없음',
-    errorExample: '공지사항을 찾을 수 없습니다.',
-};
 
 export function ApiNoticeAdminController() {
     return ApiController('공지사항 관리 (관리자)');
