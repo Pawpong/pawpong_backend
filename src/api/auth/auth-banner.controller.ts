@@ -2,7 +2,7 @@ import { Get, HttpCode, HttpStatus, Inject } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { AuthPublicController } from './decorator/auth-public-controller.decorator';
-import { AuthResponseMessageService } from './domain/services/auth-response-message.service';
+import { AuthLookupResponseMessageService } from './domain/services/auth-lookup-response-message.service';
 import { ProfileBannerResponseDto } from '../breeder-management/admin/dto/response/profile-banner-response.dto';
 import {
     GET_ACTIVE_PROFILE_BANNERS_QUERY,
@@ -15,7 +15,7 @@ export class AuthBannerController {
     constructor(
         @Inject(GET_ACTIVE_PROFILE_BANNERS_QUERY)
         private readonly getActiveProfileBannersQuery: GetActiveProfileBannersQueryPort,
-        private readonly authResponseMessageService: AuthResponseMessageService,
+        private readonly authLookupResponseMessageService: AuthLookupResponseMessageService,
     ) {}
 
     @Get('login-banners')
@@ -23,7 +23,7 @@ export class AuthBannerController {
     @ApiGetLoginBannersEndpoint()
     async getLoginBanners(): Promise<ApiResponseDto<ProfileBannerResponseDto[]>> {
         const banners = await this.getActiveProfileBannersQuery.execute('login');
-        return ApiResponseDto.success(banners, this.authResponseMessageService.getBannerListed('login'));
+        return ApiResponseDto.success(banners, this.authLookupResponseMessageService.getBannerListed('login'));
     }
 
     @Get('register-banners')
@@ -31,6 +31,6 @@ export class AuthBannerController {
     @ApiGetRegisterBannersEndpoint()
     async getRegisterBanners(): Promise<ApiResponseDto<ProfileBannerResponseDto[]>> {
         const banners = await this.getActiveProfileBannersQuery.execute('signup');
-        return ApiResponseDto.success(banners, this.authResponseMessageService.getBannerListed('signup'));
+        return ApiResponseDto.success(banners, this.authLookupResponseMessageService.getBannerListed('signup'));
     }
 }

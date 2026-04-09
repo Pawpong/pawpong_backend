@@ -5,7 +5,7 @@ import { AuthMapper } from '../../mapper/auth.mapper';
 import { AuthRegistrationPort } from '../ports/auth-registration.port';
 import { AuthTokenPort } from '../ports/auth-token.port';
 import { AuthResponseDto } from '../../dto/response/auth-response.dto';
-import { AuthResponseMessageService } from '../../domain/services/auth-response-message.service';
+import { AuthRegistrationResponseMessageService } from '../../domain/services/auth-registration-response-message.service';
 
 type LegacySocialProfile = {
     provider: string;
@@ -36,7 +36,7 @@ export class CompleteLegacySocialRegistrationUseCase {
         private readonly authRegistrationPort: AuthRegistrationPort,
         @Inject(AuthTokenPort)
         private readonly authTokenPort: AuthTokenPort,
-        private readonly authResponseMessageService: AuthResponseMessageService,
+        private readonly authRegistrationResponseMessageService: AuthRegistrationResponseMessageService,
     ) {}
 
     async execute(profile: LegacySocialProfile, additionalInfo: LegacySocialAdditionalInfo): Promise<AuthResponseDto> {
@@ -78,7 +78,7 @@ export class CompleteLegacySocialRegistrationUseCase {
                 savedAdopter,
                 tokens,
                 'adopter',
-                this.authResponseMessageService.getSocialRegistrationCompleted(),
+                this.authRegistrationResponseMessageService.getSocialRegistrationCompleted(),
             );
         }
 
@@ -146,7 +146,7 @@ export class CompleteLegacySocialRegistrationUseCase {
             savedBreeder,
             tokens,
             'breeder',
-            this.authResponseMessageService.getSocialRegistrationCompleted(),
+            this.authRegistrationResponseMessageService.getSocialRegistrationCompleted(),
         );
     }
 }
