@@ -6,6 +6,7 @@ import { InquiryCreateRequestDto, InquiryAnswerCreateRequestDto, InquiryUpdateRe
 import { InquiryCreateResponseDto } from '../dto/response/inquiry-create-response.dto';
 import { InquiryDetailResponseDto } from '../dto/response/inquiry-detail-response.dto';
 import { InquiryListResponseDto } from '../dto/response/inquiry-list-response.dto';
+import { INQUIRY_RESPONSE_MESSAGE_EXAMPLES } from '../domain/services/inquiry-response-message.service';
 
 const INQUIRY_FORBIDDEN_RESPONSE = {
     status: 403,
@@ -37,7 +38,7 @@ export function ApiGetMyInquiriesEndpoint() {
             `,
             responseType: InquiryListResponseDto,
             successDescription: '내 문의 목록 조회 성공',
-            successMessageExample: '내 질문 목록이 조회되었습니다.',
+            successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.myInquiriesRetrieved,
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE],
         }),
         ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
@@ -66,7 +67,7 @@ export function ApiGetBreederInquiriesEndpoint() {
             `,
             responseType: InquiryListResponseDto,
             successDescription: '브리더 문의 목록 조회 성공',
-            successMessageExample: '브리더 문의 목록이 조회되었습니다.',
+            successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.breederInquiriesRetrieved,
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE],
         }),
         ApiQuery({
@@ -97,7 +98,7 @@ export function ApiGetInquiryListEndpoint() {
             responseType: InquiryListResponseDto,
             isPublic: true,
             successDescription: '문의 목록 조회 성공',
-            successMessageExample: '문의 목록이 조회되었습니다.',
+            successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryListRetrieved,
         }),
         ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
         ApiQuery({ name: 'limit', required: false, type: Number, description: '페이지 크기', example: 15 }),
@@ -133,7 +134,7 @@ export function ApiGetInquiryDetailEndpoint() {
             responseType: InquiryDetailResponseDto,
             isPublic: true,
             successDescription: '문의 상세 조회 성공',
-            successMessageExample: '문의 상세가 조회되었습니다.',
+            successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryDetailRetrieved,
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE],
         }),
     );
@@ -153,7 +154,7 @@ export function ApiCreateInquiryEndpoint() {
             `,
             responseType: InquiryCreateResponseDto,
             successDescription: '문의 작성 성공',
-            successMessageExample: '문의가 작성되었습니다.',
+            successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryCreated,
             additionalModels: [InquiryCreateRequestDto],
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE],
         }),
@@ -172,7 +173,7 @@ export function ApiUpdateInquiryEndpoint() {
                 - 제목, 내용, 첨부 이미지 목록을 수정할 수 있습니다.
             `,
             successDescription: '문의 수정 성공',
-            successMessageExample: '문의가 수정되었습니다.',
+            successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryUpdated,
             nullableData: true,
             additionalModels: [InquiryUpdateRequestDto],
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE],
@@ -192,7 +193,7 @@ export function ApiDeleteInquiryEndpoint() {
                 - 삭제 후 응답 데이터는 null로 반환됩니다.
             `,
             successDescription: '문의 삭제 성공',
-            successMessageExample: '문의가 삭제되었습니다.',
+            successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryDeleted,
             nullableData: true,
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE],
         }),
@@ -212,7 +213,7 @@ export function ApiCreateInquiryAnswerEndpoint() {
                 - 성공 시 응답 데이터는 null로 반환됩니다.
             `,
             successDescription: '답변 작성 성공',
-            successMessageExample: '답변이 작성되었습니다.',
+            successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryAnswerCreated,
             nullableData: true,
             additionalModels: [InquiryAnswerCreateRequestDto],
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE],

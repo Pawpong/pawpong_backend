@@ -4,13 +4,17 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetMyInquiriesUseCase } from './application/use-cases/get-my-inquiries.use-case';
 import { InquiryProtectedController } from './decorator/inquiry-controller.decorator';
+import { InquiryResponseMessageService } from './domain/services/inquiry-response-message.service';
 import { MyInquiryListQueryRequestDto } from './dto/request/inquiry-query-request.dto';
 import { InquiryListResponseDto } from './dto/response/inquiry-list-response.dto';
 import { ApiGetMyInquiriesEndpoint } from './swagger';
 
 @InquiryProtectedController('adopter')
 export class InquiryAdopterQueryController {
-    constructor(private readonly getMyInquiriesUseCase: GetMyInquiriesUseCase) {}
+    constructor(
+        private readonly getMyInquiriesUseCase: GetMyInquiriesUseCase,
+        private readonly inquiryResponseMessageService: InquiryResponseMessageService,
+    ) {}
 
     @Get('my')
     @ApiGetMyInquiriesEndpoint()
@@ -19,6 +23,6 @@ export class InquiryAdopterQueryController {
         @Query() query: MyInquiryListQueryRequestDto,
     ): Promise<ApiResponseDto<InquiryListResponseDto>> {
         const result = await this.getMyInquiriesUseCase.execute(userId, query.page, query.limit, query.animalType);
-        return ApiResponseDto.success(result, '내 질문 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, this.inquiryResponseMessageService.myInquiriesRetrieved());
     }
 }
