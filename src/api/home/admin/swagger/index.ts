@@ -1,31 +1,14 @@
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
+import { HOME_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/home-response-messages';
+import {
+    HOME_ADMIN_BAD_REQUEST_RESPONSE,
+    HOME_ADMIN_BANNER_NOT_FOUND_RESPONSE,
+    HOME_ADMIN_FAQ_NOT_FOUND_RESPONSE,
+    HOME_ADMIN_FORBIDDEN_RESPONSE,
+} from '../../constants/home-swagger.constants';
 
 import { BannerResponseDto } from '../../dto/response/banner-response.dto';
 import { FaqResponseDto } from '../../dto/response/faq-response.dto';
-
-const HOME_ADMIN_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '관리자 권한이 필요합니다.',
-};
-
-const HOME_ADMIN_BAD_REQUEST_RESPONSE = {
-    status: 400,
-    description: '잘못된 요청',
-    errorExample: '요청값이 올바르지 않습니다.',
-};
-
-const HOME_ADMIN_BANNER_NOT_FOUND_RESPONSE = {
-    status: 400,
-    description: '배너를 찾을 수 없음',
-    errorExample: '배너를 찾을 수 없습니다.',
-};
-
-const HOME_ADMIN_FAQ_NOT_FOUND_RESPONSE = {
-    status: 400,
-    description: 'FAQ를 찾을 수 없음',
-    errorExample: 'FAQ를 찾을 수 없습니다.',
-};
 
 export function ApiHomeAdminController() {
     return ApiController('홈페이지 관리 (관리자)');
@@ -46,7 +29,7 @@ export function ApiGetAllBannersAdminEndpoint() {
         `,
         responseType: [BannerResponseDto],
         successDescription: '배너 목록 조회 성공',
-        successMessageExample: '배너 목록이 조회되었습니다.',
+        successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.bannersRetrieved,
         errorResponses: [HOME_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -66,7 +49,7 @@ export function ApiCreateBannerAdminEndpoint() {
         `,
         responseType: BannerResponseDto,
         successDescription: '배너 생성 성공',
-        successMessageExample: '배너가 생성되었습니다.',
+        successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.bannerCreated,
         errorResponses: [HOME_ADMIN_BAD_REQUEST_RESPONSE, HOME_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -86,7 +69,7 @@ export function ApiUpdateBannerAdminEndpoint() {
         `,
         responseType: BannerResponseDto,
         successDescription: '배너 수정 성공',
-        successMessageExample: '배너가 수정되었습니다.',
+        successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.bannerUpdated,
         errorResponses: [HOME_ADMIN_FORBIDDEN_RESPONSE, HOME_ADMIN_BANNER_NOT_FOUND_RESPONSE],
     });
 }
@@ -105,7 +88,7 @@ export function ApiDeleteBannerAdminEndpoint() {
             - 관리자(admin) 권한이 필요합니다.
         `,
         successDescription: '배너 삭제 성공',
-        successMessageExample: '배너가 삭제되었습니다.',
+        successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.bannerDeleted,
         nullableData: true,
         errorResponses: [HOME_ADMIN_FORBIDDEN_RESPONSE, HOME_ADMIN_BANNER_NOT_FOUND_RESPONSE],
     });
@@ -126,7 +109,7 @@ export function ApiGetAllFaqsAdminEndpoint() {
         `,
         responseType: [FaqResponseDto],
         successDescription: 'FAQ 목록 조회 성공',
-        successMessageExample: 'FAQ 목록이 조회되었습니다.',
+        successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.faqsRetrieved,
         errorResponses: [HOME_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -146,7 +129,7 @@ export function ApiCreateFaqAdminEndpoint() {
         `,
         responseType: FaqResponseDto,
         successDescription: 'FAQ 생성 성공',
-        successMessageExample: 'FAQ가 생성되었습니다.',
+        successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.faqCreated,
         errorResponses: [HOME_ADMIN_BAD_REQUEST_RESPONSE, HOME_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -166,7 +149,7 @@ export function ApiUpdateFaqAdminEndpoint() {
         `,
         responseType: FaqResponseDto,
         successDescription: 'FAQ 수정 성공',
-        successMessageExample: 'FAQ가 수정되었습니다.',
+        successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.faqUpdated,
         errorResponses: [HOME_ADMIN_FORBIDDEN_RESPONSE, HOME_ADMIN_FAQ_NOT_FOUND_RESPONSE],
     });
 }
@@ -185,7 +168,7 @@ export function ApiDeleteFaqAdminEndpoint() {
             - 관리자(admin) 권한이 필요합니다.
         `,
         successDescription: 'FAQ 삭제 성공',
-        successMessageExample: 'FAQ가 삭제되었습니다.',
+        successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.faqDeleted,
         nullableData: true,
         errorResponses: [HOME_ADMIN_FORBIDDEN_RESPONSE, HOME_ADMIN_FAQ_NOT_FOUND_RESPONSE],
     });

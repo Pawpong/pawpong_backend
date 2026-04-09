@@ -5,6 +5,7 @@ import { CreateFaqUseCase } from './application/use-cases/create-faq.use-case';
 import { DeleteFaqUseCase } from './application/use-cases/delete-faq.use-case';
 import { UpdateFaqUseCase } from './application/use-cases/update-faq.use-case';
 import { HomeAdminProtectedController } from './decorator/home-admin-controller.decorator';
+import { HomeResponseMessageService } from '../domain/services/home-response-message.service';
 import { FaqCreateRequestDto } from './dto/request/faq-create-request.dto';
 import { FaqUpdateRequestDto } from './dto/request/faq-update-request.dto';
 import { FaqResponseDto } from '../dto/response/faq-response.dto';
@@ -20,13 +21,14 @@ export class HomeAdminFaqsCommandController {
         private readonly createFaqUseCase: CreateFaqUseCase,
         private readonly updateFaqUseCase: UpdateFaqUseCase,
         private readonly deleteFaqUseCase: DeleteFaqUseCase,
+        private readonly homeResponseMessageService: HomeResponseMessageService,
     ) {}
 
     @Post('faq')
     @ApiCreateFaqAdminEndpoint()
     async createFaq(@Body() data: FaqCreateRequestDto): Promise<ApiResponseDto<FaqResponseDto>> {
         const faq = await this.createFaqUseCase.execute(data);
-        return ApiResponseDto.success(faq, 'FAQ가 생성되었습니다.');
+        return ApiResponseDto.success(faq, this.homeResponseMessageService.faqCreated());
     }
 
     @Put('faq/:faqId')
@@ -36,13 +38,13 @@ export class HomeAdminFaqsCommandController {
         @Body() data: FaqUpdateRequestDto,
     ): Promise<ApiResponseDto<FaqResponseDto>> {
         const faq = await this.updateFaqUseCase.execute(faqId, data);
-        return ApiResponseDto.success(faq, 'FAQ가 수정되었습니다.');
+        return ApiResponseDto.success(faq, this.homeResponseMessageService.faqUpdated());
     }
 
     @Delete('faq/:faqId')
     @ApiDeleteFaqAdminEndpoint()
     async deleteFaq(@Param('faqId') faqId: string): Promise<ApiResponseDto<null>> {
         await this.deleteFaqUseCase.execute(faqId);
-        return ApiResponseDto.success(null, 'FAQ가 삭제되었습니다.');
+        return ApiResponseDto.success(null, this.homeResponseMessageService.faqDeleted());
     }
 }
