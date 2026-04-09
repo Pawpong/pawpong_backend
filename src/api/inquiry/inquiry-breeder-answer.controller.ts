@@ -4,12 +4,16 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { CreateInquiryAnswerUseCase } from './application/use-cases/create-inquiry-answer.use-case';
 import { InquiryProtectedController } from './decorator/inquiry-controller.decorator';
+import { InquiryResponseMessageService } from './domain/services/inquiry-response-message.service';
 import { InquiryAnswerCreateRequestDto } from './dto/request/inquiry-create-request.dto';
 import { ApiCreateInquiryAnswerEndpoint } from './swagger';
 
 @InquiryProtectedController('breeder')
 export class InquiryBreederAnswerController {
-    constructor(private readonly createInquiryAnswerUseCase: CreateInquiryAnswerUseCase) {}
+    constructor(
+        private readonly createInquiryAnswerUseCase: CreateInquiryAnswerUseCase,
+        private readonly inquiryResponseMessageService: InquiryResponseMessageService,
+    ) {}
 
     @Post(':inquiryId/answer')
     @ApiCreateInquiryAnswerEndpoint()
@@ -19,6 +23,6 @@ export class InquiryBreederAnswerController {
         @Body() dto: InquiryAnswerCreateRequestDto,
     ): Promise<ApiResponseDto<null>> {
         await this.createInquiryAnswerUseCase.execute(inquiryId, userId, dto);
-        return ApiResponseDto.success(null, '답변이 작성되었습니다.');
+        return ApiResponseDto.success(null, this.inquiryResponseMessageService.inquiryAnswerCreated());
     }
 }
