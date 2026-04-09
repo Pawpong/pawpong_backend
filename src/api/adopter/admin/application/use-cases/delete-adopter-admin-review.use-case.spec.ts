@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { AdopterAdminActivityLogFactoryService } from '../../domain/services/adopter-admin-activity-log-factory.service';
+import { AdopterAdminApplicationListAssemblerService } from '../../domain/services/adopter-admin-application-list-assembler.service';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminPresentationService } from '../../domain/services/adopter-admin-presentation.service';
 import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
@@ -34,7 +35,10 @@ describe('입양자 관리자 후기 삭제 유스케이스', () => {
             writer,
             new AdopterAdminPolicyService(),
             new AdopterAdminActivityLogFactoryService(),
-            new AdopterAdminPresentationService(new AdopterPaginationAssemblerService()),
+            new AdopterAdminPresentationService(
+                new AdopterPaginationAssemblerService(),
+                new AdopterAdminApplicationListAssemblerService(),
+            ),
         );
 
         await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).resolves.toEqual({
@@ -63,7 +67,10 @@ describe('입양자 관리자 후기 삭제 유스케이스', () => {
             },
             new AdopterAdminPolicyService(),
             new AdopterAdminActivityLogFactoryService(),
-            new AdopterAdminPresentationService(new AdopterPaginationAssemblerService()),
+            new AdopterAdminPresentationService(
+                new AdopterPaginationAssemblerService(),
+                new AdopterAdminApplicationListAssemblerService(),
+            ),
         );
 
         await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).rejects.toBeInstanceOf(

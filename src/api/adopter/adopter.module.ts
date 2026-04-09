@@ -18,6 +18,7 @@ import { DeleteAdopterAdminReviewUseCase } from './admin/application/use-cases/d
 import { GetAdopterAdminApplicationListUseCase } from './admin/application/use-cases/get-adopter-admin-application-list.use-case';
 import { GetAdopterAdminApplicationDetailUseCase } from './admin/application/use-cases/get-adopter-admin-application-detail.use-case';
 import { AdopterAdminPolicyService } from './admin/domain/services/adopter-admin-policy.service';
+import { AdopterAdminApplicationListAssemblerService } from './admin/domain/services/adopter-admin-application-list-assembler.service';
 import { AdopterAdminPresentationService } from './admin/domain/services/adopter-admin-presentation.service';
 import { AdopterAdminActivityLogFactoryService } from './admin/domain/services/adopter-admin-activity-log-factory.service';
 import { ADOPTER_ADMIN_READER } from './admin/application/ports/adopter-admin-reader.port';
@@ -138,6 +139,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederRepository,
         AvailablePetManagementRepository,
         AdopterAdminPolicyService,
+        AdopterAdminApplicationListAssemblerService,
         AdopterAdminPresentationService,
         AdopterAdminActivityLogFactoryService,
         AdopterFavoritePolicyService,
