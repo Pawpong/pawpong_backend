@@ -6,7 +6,7 @@ import {
     NotificationUserRole,
 } from '../ports/notification-command.port';
 import type { NotificationCommandPort } from '../ports/notification-command.port';
-import { NotificationResponseMapperService } from '../../domain/services/notification-response-mapper.service';
+import { NotificationListPresentationService } from '../../domain/services/notification-list-presentation.service';
 import { NotificationCreateData } from '../../builder/notification.builder';
 import { NotificationResponseDto } from '../../dto/response/notification-response.dto';
 
@@ -15,7 +15,7 @@ export class CreateNotificationFromBuilderUseCase {
     constructor(
         @Inject(NOTIFICATION_COMMAND_PORT)
         private readonly notificationCommandPort: NotificationCommandPort,
-        private readonly notificationResponseMapperService: NotificationResponseMapperService,
+        private readonly notificationListPresentationService: NotificationListPresentationService,
     ) {}
 
     async execute(data: NotificationCreateData): Promise<NotificationResponseDto> {
@@ -33,6 +33,6 @@ export class CreateNotificationFromBuilderUseCase {
             isRead: false,
         });
 
-        return this.notificationResponseMapperService.toItem(notification);
+        return this.notificationListPresentationService.toItem(notification);
     }
 }
