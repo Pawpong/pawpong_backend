@@ -1,25 +1,23 @@
 import { Controller, Get } from '@nestjs/common';
 
-import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
-
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { HealthCheckResponseDto } from './dto/response/health-check-response.dto';
 import { GetHealthUseCase } from './application/use-cases/get-health.use-case';
+import { HealthResponseMessageService } from './domain/services/health-response-message.service';
+import { ApiGetHealthEndpoint, ApiHealthController } from './swagger';
 
-@ApiController('시스템')
+@ApiHealthController()
 @Controller('health')
 export class HealthController {
-    constructor(private readonly getHealthUseCase: GetHealthUseCase) {}
+    constructor(
+        private readonly getHealthUseCase: GetHealthUseCase,
+        private readonly healthResponseMessageService: HealthResponseMessageService,
+    ) {}
 
     @Get()
-    @ApiEndpoint({
-        summary: '헬스체크',
-        description: '시스템 상태를 확인합니다.',
-        responseType: HealthCheckResponseDto,
-        isPublic: true,
-    })
+    @ApiGetHealthEndpoint()
     getHealth(): ApiResponseDto<HealthCheckResponseDto> {
         const healthData = this.getHealthUseCase.execute();
-        return ApiResponseDto.success(healthData, '시스템이 정상 작동 중입니다.');
+        return ApiResponseDto.success(healthData, this.healthResponseMessageService.healthChecked());
     }
 }
