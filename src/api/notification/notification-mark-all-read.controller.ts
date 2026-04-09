@@ -4,7 +4,7 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { MarkAllNotificationsReadUseCase } from './application/use-cases/mark-all-notifications-read.use-case';
 import { NotificationProtectedController } from './decorator/notification-controller.decorator';
-import { NotificationResponseMessageService } from './domain/services/notification-response-message.service';
+import { NotificationCommandResponseMessageService } from './domain/services/notification-command-response-message.service';
 import { MarkAllAsReadResponseDto } from './dto/response/notification-response.dto';
 import { ApiMarkAllNotificationsReadEndpoint } from './swagger';
 
@@ -12,7 +12,7 @@ import { ApiMarkAllNotificationsReadEndpoint } from './swagger';
 export class NotificationMarkAllReadController {
     constructor(
         private readonly markAllNotificationsReadUseCase: MarkAllNotificationsReadUseCase,
-        private readonly notificationResponseMessageService: NotificationResponseMessageService,
+        private readonly notificationCommandResponseMessageService: NotificationCommandResponseMessageService,
     ) {}
 
     @Patch('read-all')
@@ -21,7 +21,7 @@ export class NotificationMarkAllReadController {
         const result = await this.markAllNotificationsReadUseCase.execute(userId);
         return ApiResponseDto.success(
             result,
-            this.notificationResponseMessageService.allNotificationsMarkedRead(result.updatedCount),
+            this.notificationCommandResponseMessageService.allNotificationsMarkedRead(result.updatedCount),
         );
     }
 }
