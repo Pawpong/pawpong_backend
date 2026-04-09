@@ -6,6 +6,7 @@ import { CreateAdopterReportUseCase } from './application/use-cases/create-adopt
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
 import { ReportCreateRequestDto } from './dto/request/report-create-request.dto';
 import { ReportCreateResponseDto } from './dto/response/report-create-response.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
 import { ApiCreateAdopterReportEndpoint } from './swagger';
 
 @AdopterProtectedController()
@@ -19,6 +20,6 @@ export class AdopterReportController {
         @Body() createReportDto: ReportCreateRequestDto,
     ): Promise<ApiResponseDto<ReportCreateResponseDto>> {
         const result = await this.createAdopterReportUseCase.execute(userId, createReportDto);
-        return ApiResponseDto.success(result, '신고가 성공적으로 제출되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.reportSubmitted);
     }
 }

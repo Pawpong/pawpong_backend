@@ -3,6 +3,7 @@ import { BadRequestException } from '@nestjs/common';
 import { ApplicationStatus } from '../../../../../common/enum/user.enum';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminPresentationService } from '../../domain/services/adopter-admin-presentation.service';
+import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
 import { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { GetAdopterAdminApplicationDetailUseCase } from './get-adopter-admin-application-detail.use-case';
 
@@ -36,7 +37,7 @@ describe('GetAdopterAdminApplicationDetailUseCase', () => {
                 }),
             } as AdopterAdminReaderPort,
             new AdopterAdminPolicyService(),
-            new AdopterAdminPresentationService(),
+            new AdopterAdminPresentationService(new AdopterPaginationAssemblerService()),
         );
 
         await expect(useCase.execute('admin-1', '507f1f77bcf86cd799439011')).resolves.toMatchObject({
@@ -63,7 +64,7 @@ describe('GetAdopterAdminApplicationDetailUseCase', () => {
                 findApplicationDetail: jest.fn(),
             } as AdopterAdminReaderPort,
             new AdopterAdminPolicyService(),
-            new AdopterAdminPresentationService(),
+            new AdopterAdminPresentationService(new AdopterPaginationAssemblerService()),
         );
 
         await expect(useCase.execute('admin-1', 'invalid-id')).rejects.toBeInstanceOf(BadRequestException);

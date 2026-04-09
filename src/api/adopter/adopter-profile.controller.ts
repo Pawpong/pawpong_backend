@@ -8,6 +8,7 @@ import { AdopterProtectedController } from './decorator/adopter-protected-contro
 import { ProfileUpdateRequestDto } from './dto/request/profile-update-request.dto';
 import { AdopterProfileResponseDto } from './dto/response/adopter-profile-response.dto';
 import { AdopterProfileUpdateResponseDto } from './dto/response/profile-update-response.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
 import { ApiGetAdopterProfileEndpoint, ApiUpdateAdopterProfileEndpoint } from './swagger';
 
 @AdopterProtectedController()
@@ -21,7 +22,7 @@ export class AdopterProfileController {
     @ApiGetAdopterProfileEndpoint()
     async getProfile(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<AdopterProfileResponseDto>> {
         const result = await this.getAdopterProfileUseCase.execute(userId);
-        return ApiResponseDto.success(result, '입양자 프로필이 조회되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.profileRetrieved);
     }
 
     @Patch('profile')
@@ -31,6 +32,6 @@ export class AdopterProfileController {
         @Body() updateData: ProfileUpdateRequestDto,
     ): Promise<ApiResponseDto<AdopterProfileUpdateResponseDto>> {
         const result = await this.updateAdopterProfileUseCase.execute(userId, updateData);
-        return ApiResponseDto.success(result, '프로필이 성공적으로 수정되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.profileUpdated);
     }
 }

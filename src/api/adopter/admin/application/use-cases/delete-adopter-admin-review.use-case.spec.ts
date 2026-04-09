@@ -3,6 +3,7 @@ import { BadRequestException } from '@nestjs/common';
 import { AdopterAdminActivityLogFactoryService } from '../../domain/services/adopter-admin-activity-log-factory.service';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminPresentationService } from '../../domain/services/adopter-admin-presentation.service';
+import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
 import { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { AdopterAdminWriterPort } from '../ports/adopter-admin-writer.port';
 import { DeleteAdopterAdminReviewUseCase } from './delete-adopter-admin-review.use-case';
@@ -33,7 +34,7 @@ describe('DeleteAdopterAdminReviewUseCase', () => {
             writer,
             new AdopterAdminPolicyService(),
             new AdopterAdminActivityLogFactoryService(),
-            new AdopterAdminPresentationService(),
+            new AdopterAdminPresentationService(new AdopterPaginationAssemblerService()),
         );
 
         await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).resolves.toEqual({
@@ -62,7 +63,7 @@ describe('DeleteAdopterAdminReviewUseCase', () => {
             },
             new AdopterAdminPolicyService(),
             new AdopterAdminActivityLogFactoryService(),
-            new AdopterAdminPresentationService(),
+            new AdopterAdminPresentationService(new AdopterPaginationAssemblerService()),
         );
 
         await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).rejects.toBeInstanceOf(

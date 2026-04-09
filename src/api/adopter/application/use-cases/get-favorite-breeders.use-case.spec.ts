@@ -1,4 +1,5 @@
 import { GetFavoriteBreedersUseCase } from './get-favorite-breeders.use-case';
+import { AdopterPaginationAssemblerService } from '../../domain/services/adopter-pagination-assembler.service';
 
 describe('GetFavoriteBreedersUseCase', () => {
     const adopterProfilePort = {
@@ -20,6 +21,7 @@ describe('GetFavoriteBreedersUseCase', () => {
         adopterProfilePort as any,
         breederReaderPort as any,
         fileUrlPort as any,
+        new AdopterPaginationAssemblerService(),
     );
 
     beforeEach(() => {

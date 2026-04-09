@@ -1,6 +1,7 @@
 import { ApplicationStatus } from '../../../../../common/enum/user.enum';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminPresentationService } from '../../domain/services/adopter-admin-presentation.service';
+import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
 import { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { GetAdopterAdminApplicationListUseCase } from './get-adopter-admin-application-list.use-case';
 
@@ -42,7 +43,7 @@ describe('GetAdopterAdminApplicationListUseCase', () => {
                 findApplicationDetail: jest.fn(),
             } as AdopterAdminReaderPort,
             new AdopterAdminPolicyService(),
-            new AdopterAdminPresentationService(),
+            new AdopterAdminPresentationService(new AdopterPaginationAssemblerService()),
         );
 
         await expect(useCase.execute('admin-1', { page: 1, limit: 10 })).resolves.toMatchObject({

@@ -7,6 +7,7 @@ import { GetAdopterApplicationsUseCase } from './application/use-cases/get-adopt
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
 import { ApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
 import { ApplicationListResponseDto } from './dto/response/application-list-response.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
 import { ApiGetAdopterApplicationDetailEndpoint, ApiGetAdopterApplicationsEndpoint } from './swagger';
 
 @AdopterProtectedController()
@@ -25,7 +26,7 @@ export class AdopterApplicationQueryController {
         @Query('animalType') animalType?: 'cat' | 'dog',
     ): Promise<ApiResponseDto<ApplicationListResponseDto>> {
         const result = await this.getAdopterApplicationsUseCase.execute(userId, Number(page), Number(limit), animalType);
-        return ApiResponseDto.success(result, '입양 신청 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.applicationListRetrieved);
     }
 
     @Get('applications/:id')
@@ -35,6 +36,6 @@ export class AdopterApplicationQueryController {
         @Param('id') applicationId: string,
     ): Promise<ApiResponseDto<ApplicationDetailResponseDto>> {
         const result = await this.getAdopterApplicationDetailUseCase.execute(userId, applicationId);
-        return ApiResponseDto.success(result, '입양 신청 상세 정보가 조회되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.applicationDetailRetrieved);
     }
 }

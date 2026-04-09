@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../common/dto/pagination/pagination-builder.dto';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import type { AdopterReviewListRecord } from '../../application/ports/adopter-review-reader.port';
 import { MyReviewItemDto } from '../../dto/response/my-review-item.dto';
+import { AdopterPaginationAssemblerService } from './adopter-pagination-assembler.service';
 
 @Injectable()
 export class AdopterReviewListResponseFactoryService {
+    constructor(private readonly adopterPaginationAssemblerService: AdopterPaginationAssemblerService) {}
+
     create(
         reviews: AdopterReviewListRecord[],
         page: number,
@@ -15,12 +17,7 @@ export class AdopterReviewListResponseFactoryService {
     ): PaginationResponseDto<MyReviewItemDto> {
         const items = reviews.map((review) => this.toItem(review));
 
-        return new PaginationBuilder<MyReviewItemDto>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(total)
-            .build();
+        return this.adopterPaginationAssemblerService.build(items, page, limit, total);
     }
 
     private toItem(review: AdopterReviewListRecord): MyReviewItemDto {

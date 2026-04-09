@@ -9,6 +9,7 @@ import { ReviewCreateRequestDto } from './dto/request/review-create-request.dto'
 import { ReviewReportRequestDto } from './dto/request/review-report-request.dto';
 import { ReviewCreateResponseDto } from './dto/response/review-create-response.dto';
 import { ReviewReportResponseDto } from './dto/response/review-report-response.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
 import { ApiCreateAdopterReviewEndpoint, ApiReportAdopterReviewEndpoint } from './swagger';
 
 @AdopterProtectedController()
@@ -25,7 +26,7 @@ export class AdopterReviewCommandController {
         @Body() createReviewDto: ReviewCreateRequestDto,
     ): Promise<ApiResponseDto<ReviewCreateResponseDto>> {
         const result = await this.createAdopterReviewUseCase.execute(userId, createReviewDto);
-        return ApiResponseDto.success(result, '후기가 성공적으로 작성되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.reviewCreated);
     }
 
     @Post('report/review')
@@ -35,6 +36,6 @@ export class AdopterReviewCommandController {
         @Body() reportDto: ReviewReportRequestDto,
     ): Promise<ApiResponseDto<ReviewReportResponseDto>> {
         const result = await this.reportAdopterReviewUseCase.execute(userId, reportDto);
-        return ApiResponseDto.success(result, '후기가 신고되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.reviewReported);
     }
 }
