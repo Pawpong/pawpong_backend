@@ -4,12 +4,16 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetAvailablePetsUseCase } from './application/use-cases/get-available-pets.use-case';
 import { HomeOptionalAuthController } from './decorator/home-controller.decorator';
+import { HomeResponseMessageService } from './domain/services/home-response-message.service';
 import { AvailablePetResponseDto } from './dto/response/available-pet-response.dto';
 import { ApiGetHomeAvailablePetsEndpoint } from './swagger';
 
 @HomeOptionalAuthController()
 export class HomeAvailablePetsController {
-    constructor(private readonly getAvailablePetsUseCase: GetAvailablePetsUseCase) {}
+    constructor(
+        private readonly getAvailablePetsUseCase: GetAvailablePetsUseCase,
+        private readonly homeResponseMessageService: HomeResponseMessageService,
+    ) {}
 
     @Get('available-pets')
     @ApiGetHomeAvailablePetsEndpoint()
@@ -19,6 +23,6 @@ export class HomeAvailablePetsController {
     ): Promise<ApiResponseDto<AvailablePetResponseDto[]>> {
         const isAuthenticated = !!user?.userId;
         const pets = await this.getAvailablePetsUseCase.execute(limit, isAuthenticated);
-        return ApiResponseDto.success(pets, '분양중인 아이들이 조회되었습니다.');
+        return ApiResponseDto.success(pets, this.homeResponseMessageService.availablePetsRetrieved());
     }
 }

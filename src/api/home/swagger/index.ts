@@ -2,11 +2,11 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
 
 import { ApiEndpoint, ApiPublicController } from '../../../common/decorator/swagger.decorator';
+import { HOME_RESPONSE_MESSAGE_EXAMPLES } from '../constants/home-response-messages';
+import { HOME_FAQ_USER_TYPES } from '../constants/home-swagger.constants';
 import { AvailablePetResponseDto } from '../dto/response/available-pet-response.dto';
 import { BannerResponseDto } from '../dto/response/banner-response.dto';
 import { FaqResponseDto } from '../dto/response/faq-response.dto';
-
-const HOME_FAQ_USER_TYPES = ['adopter', 'breeder'] as const;
 
 export function ApiHomeController() {
     return ApiPublicController('홈페이지');
@@ -25,7 +25,7 @@ export function ApiGetHomeBannersEndpoint() {
         responseType: [BannerResponseDto],
         isPublic: true,
         successDescription: '배너 목록 조회 성공',
-        successMessageExample: '배너 목록이 조회되었습니다.',
+        successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.bannersRetrieved,
     });
 }
 
@@ -43,7 +43,7 @@ export function ApiGetHomeFaqsEndpoint() {
             responseType: [FaqResponseDto],
             isPublic: true,
             successDescription: 'FAQ 목록 조회 성공',
-            successMessageExample: 'FAQ 목록이 조회되었습니다.',
+            successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.faqsRetrieved,
         }),
         ApiQuery({
             name: 'userType',
@@ -70,7 +70,7 @@ export function ApiGetHomeAvailablePetsEndpoint() {
             responseType: [AvailablePetResponseDto],
             isPublic: true,
             successDescription: '분양 가능한 반려동물 목록 조회 성공',
-            successMessageExample: '분양중인 아이들이 조회되었습니다.',
+            successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.availablePetsRetrieved,
         }),
         ApiQuery({
             name: 'limit',

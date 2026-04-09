@@ -10,6 +10,7 @@ import { HomeFaqsController } from './home-faqs.controller';
 import { HomeAvailablePetCatalogService } from './domain/services/home-available-pet-catalog.service';
 import { HomeBannerCatalogService } from './domain/services/home-banner-catalog.service';
 import { HomeFaqCatalogService } from './domain/services/home-faq-catalog.service';
+import { HomeResponseMessageService } from './domain/services/home-response-message.service';
 import { HOME_ASSET_URL } from './application/ports/home-asset-url.port';
 import { HOME_CONTENT_READER } from './application/ports/home-content-reader.port';
 import { HomeMongooseContentReaderAdapter } from './infrastructure/home-mongoose-content-reader.adapter';
@@ -43,6 +44,7 @@ import { StorageModule } from '../../common/storage/storage.module';
         HomeBannerCatalogService,
         HomeFaqCatalogService,
         HomeAvailablePetCatalogService,
+        HomeResponseMessageService,
         AvailablePetRepository,
         BannerRepository,
         FaqRepository,
