@@ -65,3 +65,6 @@ yarn.lock
 docs/scripts/
 # Local-only operating notes. Never commit this file.
 CLAUDE.md
+AGENTS.md
+docs/harness/
+scripts/harness/
