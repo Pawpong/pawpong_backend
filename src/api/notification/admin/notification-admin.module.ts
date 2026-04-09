@@ -9,6 +9,7 @@ import { NOTIFICATION_ADMIN_READER } from './application/ports/notification-admi
 import { GetAdminNotificationsUseCase } from './application/use-cases/get-admin-notifications.use-case';
 import { GetNotificationAdminStatsUseCase } from './application/use-cases/get-notification-admin-stats.use-case';
 import { NotificationAdminPresentationService } from './domain/services/notification-admin-presentation.service';
+import { NotificationResponseMessageService } from '../domain/services/notification-response-message.service';
 import { NotificationAdminMongooseReaderAdapter } from './infrastructure/notification-admin-mongoose-reader.adapter';
 import { NotificationAdminRepository } from './repository/notification-admin.repository';
 
@@ -26,6 +27,7 @@ import { Notification, NotificationSchema } from '../../../schema/notification.s
         GetAdminNotificationsUseCase,
         GetNotificationAdminStatsUseCase,
         NotificationAdminPresentationService,
+        NotificationResponseMessageService,
         NotificationAdminRepository,
         NotificationAdminMongooseReaderAdapter,
         {

@@ -5,13 +5,17 @@ import { PaginationResponseDto } from '../../common/dto/pagination/pagination-re
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetNotificationsUseCase } from './application/use-cases/get-notifications.use-case';
 import { NotificationProtectedController } from './decorator/notification-controller.decorator';
+import { NotificationResponseMessageService } from './domain/services/notification-response-message.service';
 import { NotificationListRequestDto } from './dto/request/notification-list-request.dto';
 import { NotificationResponseDto } from './dto/response/notification-response.dto';
 import { ApiGetNotificationsEndpoint } from './swagger';
 
 @NotificationProtectedController()
 export class NotificationListController {
-    constructor(private readonly getNotificationsUseCase: GetNotificationsUseCase) {}
+    constructor(
+        private readonly getNotificationsUseCase: GetNotificationsUseCase,
+        private readonly notificationResponseMessageService: NotificationResponseMessageService,
+    ) {}
 
     @Get()
     @ApiGetNotificationsEndpoint()
@@ -20,6 +24,6 @@ export class NotificationListController {
         @Query() filter: NotificationListRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<NotificationResponseDto>>> {
         const result = await this.getNotificationsUseCase.execute(userId, filter);
-        return ApiResponseDto.success(result, '알림 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, this.notificationResponseMessageService.notificationsListed());
     }
 }

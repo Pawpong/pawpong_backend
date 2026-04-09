@@ -17,6 +17,7 @@ import { MarkNotificationReadUseCase } from './application/use-cases/mark-notifi
 import { MarkAllNotificationsReadUseCase } from './application/use-cases/mark-all-notifications-read.use-case';
 import { DeleteNotificationUseCase } from './application/use-cases/delete-notification.use-case';
 import { SendNotificationEmailUseCase } from './application/use-cases/send-notification-email.use-case';
+import { NotificationResponseMessageService } from './domain/services/notification-response-message.service';
 import { NotificationResponseMapperService } from './domain/services/notification-response-mapper.service';
 import { NotificationMessageTemplateService } from './domain/services/notification-message-template.service';
 import { NotificationMongooseInboxAdapter } from './infrastructure/notification-mongoose-inbox.adapter';
@@ -56,6 +57,7 @@ import { MailModule } from '../../common/mail/mail.module';
         NotificationDispatchService,
         CreateNotificationUseCase,
         CreateNotificationFromBuilderUseCase,
+        NotificationResponseMessageService,
         NotificationResponseMapperService,
         NotificationMessageTemplateService,
         NotificationMongooseInboxAdapter,

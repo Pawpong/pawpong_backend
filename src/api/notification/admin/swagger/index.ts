@@ -3,6 +3,7 @@ import { ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
+import { NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES } from '../../domain/services/notification-response-message.service';
 import {
     NotificationAdminResponseDto,
     NotificationStatsResponseDto,
@@ -35,7 +36,7 @@ export function ApiGetAdminNotificationsEndpoint() {
             responseType: PaginationResponseDto,
             itemType: NotificationAdminResponseDto,
             successDescription: '알림 목록 조회 성공',
-            successMessageExample: '알림 목록이 조회되었습니다.',
+            successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.notificationsListed,
             errorResponses: [NOTIFICATION_ADMIN_FORBIDDEN_RESPONSE],
         }),
         ApiQuery({ name: 'userId', required: false, type: String, description: '사용자 ID 필터', example: '507f1f77bcf86cd799439011' }),
@@ -62,7 +63,7 @@ export function ApiGetNotificationAdminStatsEndpoint() {
         `,
         responseType: NotificationStatsResponseDto,
         successDescription: '알림 통계 조회 성공',
-        successMessageExample: '알림 통계가 조회되었습니다.',
+        successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.notificationStatsRetrieved,
         errorResponses: [NOTIFICATION_ADMIN_FORBIDDEN_RESPONSE],
     });
 }

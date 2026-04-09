@@ -4,6 +4,7 @@ import { CurrentUser } from '../../../common/decorator/user.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { GetAdminNotificationsUseCase } from './application/use-cases/get-admin-notifications.use-case';
+import { NotificationResponseMessageService } from '../domain/services/notification-response-message.service';
 import { NotificationAdminListRequestDto } from './dto/request/notification-admin-list-request.dto';
 import { NotificationAdminResponseDto } from './dto/response/notification-admin-response.dto';
 import { NotificationAdminProtectedController } from './decorator/notification-admin-controller.decorator';
@@ -11,7 +12,10 @@ import { ApiGetAdminNotificationsEndpoint } from './swagger';
 
 @NotificationAdminProtectedController()
 export class NotificationAdminQueryController {
-    constructor(private readonly getAdminNotificationsUseCase: GetAdminNotificationsUseCase) {}
+    constructor(
+        private readonly getAdminNotificationsUseCase: GetAdminNotificationsUseCase,
+        private readonly notificationResponseMessageService: NotificationResponseMessageService,
+    ) {}
 
     @Get('notifications')
     @ApiGetAdminNotificationsEndpoint()
@@ -20,6 +24,6 @@ export class NotificationAdminQueryController {
         @Query() filter: NotificationAdminListRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<NotificationAdminResponseDto>>> {
         const result = await this.getAdminNotificationsUseCase.execute(userId, filter);
-        return ApiResponseDto.success(result, '알림 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, this.notificationResponseMessageService.notificationsListed());
     }
 }
