@@ -7,7 +7,8 @@ import { AppVersionAdminQueryController } from './admin/app-version-admin-query.
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { CheckAppVersionUseCase } from './application/use-cases/check-app-version.use-case';
 import { AppVersionPolicyService } from './domain/services/app-version-policy.service';
-import { AppVersionResponseMessageService } from './domain/services/app-version-response-message.service';
+import { AppVersionCommandResponseMessageService } from './domain/services/app-version-command-response-message.service';
+import { AppVersionQueryResponseMessageService } from './domain/services/app-version-query-response-message.service';
 import { AppVersionMongooseReaderAdapter } from './infrastructure/app-version-mongoose-reader.adapter';
 import { APP_VERSION_READER } from './application/ports/app-version-reader.port';
 import { APP_VERSION_ADMIN_READER } from './admin/application/ports/app-version-admin-reader.port';
@@ -38,7 +39,8 @@ import { AppVersionRepository } from './repository/app-version.repository';
         UpdateAppVersionUseCase,
         DeleteAppVersionUseCase,
         AppVersionPolicyService,
-        AppVersionResponseMessageService,
+        AppVersionQueryResponseMessageService,
+        AppVersionCommandResponseMessageService,
         AppVersionAdminCommandPolicyService,
         AppVersionAdminPaginationAssemblerService,
         AppVersionAdminPresentationService,
