@@ -16,9 +16,11 @@ import { DeleteFaqUseCase } from './application/use-cases/delete-faq.use-case';
 import { HOME_ASSET_URL } from '../application/ports/home-asset-url.port';
 import { HomeAdminMongooseManagerAdapter } from './infrastructure/home-admin-mongoose-manager.adapter';
 import { HOME_ADMIN_MANAGER } from './application/ports/home-admin-manager.port';
-import { HomeBannerResponseMessageService } from '../domain/services/home-banner-response-message.service';
+import { HomeBannerCommandResponseMessageService } from '../domain/services/home-banner-command-response-message.service';
 import { HomeBannerCatalogService } from '../domain/services/home-banner-catalog.service';
-import { HomeFaqResponseMessageService } from '../domain/services/home-faq-response-message.service';
+import { HomeBannerQueryResponseMessageService } from '../domain/services/home-banner-query-response-message.service';
+import { HomeFaqCommandResponseMessageService } from '../domain/services/home-faq-command-response-message.service';
+import { HomeFaqQueryResponseMessageService } from '../domain/services/home-faq-query-response-message.service';
 import { HomeFaqCatalogService } from '../domain/services/home-faq-catalog.service';
 import { HomeStorageAssetUrlAdapter } from '../infrastructure/home-storage-asset-url.adapter';
 import { BannerRepository } from '../repository/banner.repository';
@@ -54,8 +56,10 @@ import { StorageModule } from '../../../common/storage/storage.module';
         DeleteFaqUseCase,
         HomeBannerCatalogService,
         HomeFaqCatalogService,
-        HomeBannerResponseMessageService,
-        HomeFaqResponseMessageService,
+        HomeBannerQueryResponseMessageService,
+        HomeBannerCommandResponseMessageService,
+        HomeFaqQueryResponseMessageService,
+        HomeFaqCommandResponseMessageService,
         BannerRepository,
         FaqRepository,
         HomeAdminMongooseManagerAdapter,
