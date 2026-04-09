@@ -1,4 +1,5 @@
 import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
+import { FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES } from '../constants/filter-options-response-messages';
 
 import {
     AdoptionStatusOptionDto,
@@ -19,6 +20,7 @@ export function ApiGetAllFilterOptionsEndpoint() {
         description: '브리더 검색에 사용되는 모든 필터 옵션을 한번에 조회합니다.',
         responseType: AllFilterOptionsResponseDto,
         isPublic: true,
+        successMessageExample: FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES.allFilterOptionsRetrieved,
     });
 }
 
@@ -28,6 +30,7 @@ export function ApiGetBreederLevelsEndpoint() {
         description: '브리더 레벨 필터 옵션 목록을 조회합니다.',
         responseType: [BreederLevelOptionDto],
         isPublic: true,
+        successMessageExample: FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES.breederLevelsRetrieved,
     });
 }
 
@@ -37,6 +40,7 @@ export function ApiGetSortOptionsEndpoint() {
         description: '브리더 목록 정렬 옵션을 조회합니다.',
         responseType: [SortOptionDto],
         isPublic: true,
+        successMessageExample: FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES.sortOptionsRetrieved,
     });
 }
 
@@ -46,6 +50,7 @@ export function ApiGetDogSizesEndpoint() {
         description: '강아지 크기 필터 옵션을 조회합니다.',
         responseType: [DogSizeOptionDto],
         isPublic: true,
+        successMessageExample: FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES.dogSizesRetrieved,
     });
 }
 
@@ -55,6 +60,7 @@ export function ApiGetCatFurLengthsEndpoint() {
         description: '고양이 털 길이 필터 옵션을 조회합니다.',
         responseType: [CatFurLengthOptionDto],
         isPublic: true,
+        successMessageExample: FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES.catFurLengthsRetrieved,
     });
 }
 
@@ -64,5 +70,6 @@ export function ApiGetAdoptionStatusEndpoint() {
         description: '입양 가능 여부 필터 옵션을 조회합니다.',
         responseType: [AdoptionStatusOptionDto],
         isPublic: true,
+        successMessageExample: FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES.adoptionStatusRetrieved,
     });
 }

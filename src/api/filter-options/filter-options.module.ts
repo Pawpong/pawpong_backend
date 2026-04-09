@@ -13,6 +13,7 @@ import { FilterOptionsDogSizesController } from './filter-options-dog-sizes.cont
 import { FilterOptionsSortOptionsController } from './filter-options-sort-options.controller';
 import { FilterOptionsSummaryController } from './filter-options-summary.controller';
 import { FilterOptionsCatalogService } from './domain/services/filter-options-catalog.service';
+import { FilterOptionsResponseMessageService } from './domain/services/filter-options-response-message.service';
 
 @Module({
     controllers: [
@@ -25,6 +26,7 @@ import { FilterOptionsCatalogService } from './domain/services/filter-options-ca
     ],
     providers: [
         FilterOptionsCatalogService,
+        FilterOptionsResponseMessageService,
         GetAllFilterOptionsUseCase,
         GetBreederLevelsUseCase,
         GetSortOptionsUseCase,
