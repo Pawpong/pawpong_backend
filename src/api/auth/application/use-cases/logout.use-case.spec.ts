@@ -1,5 +1,5 @@
 import { LogoutUseCase } from './logout.use-case';
-import { AuthCommandResponseFactoryService } from '../../domain/services/auth-command-response-factory.service';
+import { AuthLogoutResponseFactoryService } from '../../domain/services/auth-logout-response-factory.service';
 
 describe('로그아웃 유스케이스', () => {
     const authSessionPort = {
@@ -10,7 +10,7 @@ describe('로그아웃 유스케이스', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        useCase = new LogoutUseCase(authSessionPort as any, new AuthCommandResponseFactoryService());
+        useCase = new LogoutUseCase(authSessionPort as any, new AuthLogoutResponseFactoryService());
     });
 
     it('입양자/브리더는 refresh token을 제거하고 응답을 반환한다', async () => {

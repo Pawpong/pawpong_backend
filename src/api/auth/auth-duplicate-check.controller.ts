@@ -5,7 +5,7 @@ import { CheckBreederNameDuplicateUseCase } from './application/use-cases/check-
 import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
 import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
 import { AuthPublicController } from './decorator/auth-public-controller.decorator';
-import { AuthLookupResponseMessageService } from './domain/services/auth-lookup-response-message.service';
+import { AuthDuplicateCheckResponseMessageService } from './domain/services/auth-duplicate-check-response-message.service';
 import { CheckBreederNameRequestDto } from './dto/request/check-breeder-name-request.dto';
 import { CheckEmailRequestDto } from './dto/request/check-email-request.dto';
 import { CheckNicknameRequestDto } from './dto/request/check-nickname-request.dto';
@@ -21,7 +21,7 @@ export class AuthDuplicateCheckController {
         private readonly checkEmailDuplicateUseCase: CheckEmailDuplicateUseCase,
         private readonly checkNicknameDuplicateUseCase: CheckNicknameDuplicateUseCase,
         private readonly checkBreederNameDuplicateUseCase: CheckBreederNameDuplicateUseCase,
-        private readonly authLookupResponseMessageService: AuthLookupResponseMessageService,
+        private readonly authDuplicateCheckResponseMessageService: AuthDuplicateCheckResponseMessageService,
     ) {}
 
     @Post('check-email')
@@ -31,7 +31,7 @@ export class AuthDuplicateCheckController {
         const isDuplicate = await this.checkEmailDuplicateUseCase.execute(dto.email);
         return ApiResponseDto.success(
             { isDuplicate },
-            this.authLookupResponseMessageService.getDuplicateCheckMessage('email', isDuplicate),
+            this.authDuplicateCheckResponseMessageService.getDuplicateCheckMessage('email', isDuplicate),
         );
     }
 
@@ -44,7 +44,7 @@ export class AuthDuplicateCheckController {
         const isDuplicate = await this.checkNicknameDuplicateUseCase.execute(dto.nickname);
         return ApiResponseDto.success(
             { isDuplicate },
-            this.authLookupResponseMessageService.getDuplicateCheckMessage('nickname', isDuplicate),
+            this.authDuplicateCheckResponseMessageService.getDuplicateCheckMessage('nickname', isDuplicate),
         );
     }
 
@@ -57,7 +57,7 @@ export class AuthDuplicateCheckController {
         const isDuplicate = await this.checkBreederNameDuplicateUseCase.execute(dto.breederName);
         return ApiResponseDto.success(
             { isDuplicate },
-            this.authLookupResponseMessageService.getDuplicateCheckMessage('breederName', isDuplicate),
+            this.authDuplicateCheckResponseMessageService.getDuplicateCheckMessage('breederName', isDuplicate),
         );
     }
 }

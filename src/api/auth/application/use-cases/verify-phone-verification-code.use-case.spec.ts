@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { VerifyPhoneVerificationCodeUseCase } from './verify-phone-verification-code.use-case';
-import { AuthCommandResponseFactoryService } from '../../domain/services/auth-command-response-factory.service';
+import { AuthPhoneVerificationResponseFactoryService } from '../../domain/services/auth-phone-verification-response-factory.service';
 import { AuthPhoneVerificationPolicyService } from '../../domain/services/auth-phone-verification-policy.service';
 
 describe('전화번호 인증 코드 검증 유스케이스', () => {
@@ -19,7 +19,7 @@ describe('전화번호 인증 코드 검증 유스케이스', () => {
         useCase = new VerifyPhoneVerificationCodeUseCase(
             authPhoneVerificationStorePort as any,
             new AuthPhoneVerificationPolicyService(),
-            new AuthCommandResponseFactoryService(),
+            new AuthPhoneVerificationResponseFactoryService(),
         );
     });
 
