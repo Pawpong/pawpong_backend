@@ -18,9 +18,12 @@ import { DeleteAdopterAdminReviewUseCase } from './admin/application/use-cases/d
 import { GetAdopterAdminApplicationListUseCase } from './admin/application/use-cases/get-adopter-admin-application-list.use-case';
 import { GetAdopterAdminApplicationDetailUseCase } from './admin/application/use-cases/get-adopter-admin-application-detail.use-case';
 import { AdopterAdminPolicyService } from './admin/domain/services/adopter-admin-policy.service';
+import { AdopterAdminApplicationDetailPresentationService } from './admin/domain/services/adopter-admin-application-detail-presentation.service';
 import { AdopterAdminApplicationListAssemblerService } from './admin/domain/services/adopter-admin-application-list-assembler.service';
 import { AdopterAdminPresentationService } from './admin/domain/services/adopter-admin-presentation.service';
 import { AdopterAdminActivityLogFactoryService } from './admin/domain/services/adopter-admin-activity-log-factory.service';
+import { AdopterAdminReviewReportPresentationService } from './admin/domain/services/adopter-admin-review-report-presentation.service';
+import { AdopterAdminReviewResponseService } from './admin/domain/services/adopter-admin-review-response.service';
 import { ADOPTER_ADMIN_READER } from './admin/application/ports/adopter-admin-reader.port';
 import { ADOPTER_ADMIN_WRITER } from './admin/application/ports/adopter-admin-writer.port';
 import { AdopterAdminReaderAdapter } from './admin/infrastructure/adopter-admin-reader.adapter';
@@ -139,9 +142,12 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederRepository,
         AvailablePetManagementRepository,
         AdopterAdminPolicyService,
+        AdopterAdminApplicationDetailPresentationService,
         AdopterAdminApplicationListAssemblerService,
         AdopterAdminPresentationService,
         AdopterAdminActivityLogFactoryService,
+        AdopterAdminReviewReportPresentationService,
+        AdopterAdminReviewResponseService,
         AdopterFavoritePolicyService,
         AdopterPaginationAssemblerService,
         AdopterApplicationCustomResponseBuilderService,

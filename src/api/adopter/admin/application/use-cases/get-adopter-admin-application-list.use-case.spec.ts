@@ -2,7 +2,6 @@ import { ApplicationStatus } from '../../../../../common/enum/user.enum';
 import { AdopterAdminApplicationListAssemblerService } from '../../domain/services/adopter-admin-application-list-assembler.service';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminPresentationService } from '../../domain/services/adopter-admin-presentation.service';
-import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
 import { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { GetAdopterAdminApplicationListUseCase } from './get-adopter-admin-application-list.use-case';
 
@@ -44,10 +43,7 @@ describe('입양자 관리자 입양 신청 목록 조회 유스케이스', () =
                 findApplicationDetail: jest.fn(),
             } as AdopterAdminReaderPort,
             new AdopterAdminPolicyService(),
-            new AdopterAdminPresentationService(
-                new AdopterPaginationAssemblerService(),
-                new AdopterAdminApplicationListAssemblerService(),
-            ),
+            new AdopterAdminPresentationService(new AdopterAdminApplicationListAssemblerService()),
         );
 
         await expect(useCase.execute('admin-1', { page: 1, limit: 10 })).resolves.toMatchObject({

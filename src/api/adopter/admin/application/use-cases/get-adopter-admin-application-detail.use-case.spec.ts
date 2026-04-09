@@ -1,10 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { ApplicationStatus } from '../../../../../common/enum/user.enum';
-import { AdopterAdminApplicationListAssemblerService } from '../../domain/services/adopter-admin-application-list-assembler.service';
+import { AdopterAdminApplicationDetailPresentationService } from '../../domain/services/adopter-admin-application-detail-presentation.service';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
-import { AdopterAdminPresentationService } from '../../domain/services/adopter-admin-presentation.service';
-import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
 import { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { GetAdopterAdminApplicationDetailUseCase } from './get-adopter-admin-application-detail.use-case';
 
@@ -38,10 +36,7 @@ describe('입양자 관리자 입양 신청 상세 조회 유스케이스', () =
                 }),
             } as AdopterAdminReaderPort,
             new AdopterAdminPolicyService(),
-            new AdopterAdminPresentationService(
-                new AdopterPaginationAssemblerService(),
-                new AdopterAdminApplicationListAssemblerService(),
-            ),
+            new AdopterAdminApplicationDetailPresentationService(),
         );
 
         await expect(useCase.execute('admin-1', '507f1f77bcf86cd799439011')).resolves.toMatchObject({
@@ -68,10 +63,7 @@ describe('입양자 관리자 입양 신청 상세 조회 유스케이스', () =
                 findApplicationDetail: jest.fn(),
             } as AdopterAdminReaderPort,
             new AdopterAdminPolicyService(),
-            new AdopterAdminPresentationService(
-                new AdopterPaginationAssemblerService(),
-                new AdopterAdminApplicationListAssemblerService(),
-            ),
+            new AdopterAdminApplicationDetailPresentationService(),
         );
 
         await expect(useCase.execute('admin-1', 'invalid-id')).rejects.toBeInstanceOf(BadRequestException);
