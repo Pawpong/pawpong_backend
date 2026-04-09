@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
 import { ReviewReportItemDto } from '../../dto/response/review-report-list.dto';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
-import { AdopterAdminPresentationService } from '../../domain/services/adopter-admin-presentation.service';
+import { AdopterAdminReviewReportPresentationService } from '../../domain/services/adopter-admin-review-report-presentation.service';
 import { ADOPTER_ADMIN_READER } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 
@@ -13,7 +13,7 @@ export class GetAdopterAdminReviewReportsUseCase {
         @Inject(ADOPTER_ADMIN_READER)
         private readonly adopterAdminReader: AdopterAdminReaderPort,
         private readonly adopterAdminPolicyService: AdopterAdminPolicyService,
-        private readonly adopterAdminPresentationService: AdopterAdminPresentationService,
+        private readonly adopterAdminReviewReportPresentationService: AdopterAdminReviewReportPresentationService,
     ) {}
 
     async execute(
@@ -28,6 +28,6 @@ export class GetAdopterAdminReviewReportsUseCase {
         const limit = parseInt(limitStr, 10) || 10;
         const snapshot = await this.adopterAdminReader.findReportedReviews(page, limit);
 
-        return this.adopterAdminPresentationService.toReviewReportsPage(snapshot);
+        return this.adopterAdminReviewReportPresentationService.toReviewReportsPage(snapshot);
     }
 }
