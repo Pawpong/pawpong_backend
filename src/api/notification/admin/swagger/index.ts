@@ -3,17 +3,12 @@ import { ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
-import { NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES } from '../../domain/services/notification-response-message.service';
+import { NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/notification-response-messages';
+import { NOTIFICATION_ADMIN_FORBIDDEN_RESPONSE } from '../../constants/notification-swagger.constants';
 import {
     NotificationAdminResponseDto,
     NotificationStatsResponseDto,
 } from '../dto/response/notification-admin-response.dto';
-
-const NOTIFICATION_ADMIN_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '관리자 권한이 필요합니다.',
-};
 
 export function ApiNotificationAdminController() {
     return ApiController('관리자 알림 관리');
