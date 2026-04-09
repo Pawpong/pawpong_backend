@@ -17,6 +17,7 @@ import { GetAllBreedsAdminUseCase } from './admin/application/use-cases/get-all-
 import { GetBreedByIdUseCase } from './admin/application/use-cases/get-breed-by-id.use-case';
 import { UpdateBreedUseCase } from './admin/application/use-cases/update-breed.use-case';
 import { DeleteBreedUseCase } from './admin/application/use-cases/delete-breed.use-case';
+import { BreedAdminResponseMessageService } from './admin/domain/services/breed-admin-response-message.service';
 import { BreedMongooseAdminReaderAdapter } from './admin/infrastructure/breed-mongoose-admin-reader.adapter';
 import { BreedMongooseWriterAdapter } from './admin/infrastructure/breed-mongoose-writer.adapter';
 import { BreedRepository } from './repository/breed.repository';
@@ -33,6 +34,7 @@ import { Breed, BreedSchema } from '../../schema/breed.schema';
         GetBreedByIdUseCase,
         UpdateBreedUseCase,
         DeleteBreedUseCase,
+        BreedAdminResponseMessageService,
         BreedCatalogService,
         BreedAdminPresentationService,
         BreedRepository,

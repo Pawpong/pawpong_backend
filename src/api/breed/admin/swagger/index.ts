@@ -1,11 +1,7 @@
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { BreedResponseDto } from '../../dto/response/breed-response.dto';
-
-const BREED_ADMIN_NOT_FOUND_RESPONSE = {
-    status: 404,
-    description: '품종을 찾을 수 없음',
-    errorExample: '품종을 찾을 수 없습니다.',
-};
+import { BREED_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../constants/breed-admin-response-messages';
+import { BREED_ADMIN_NOT_FOUND_RESPONSE } from '../constants/breed-admin-swagger.constants';
 
 export function ApiBreedAdminController() {
     return ApiController('품종 관리 (Admin)');
@@ -77,7 +73,7 @@ export function ApiDeleteBreedAdminEndpoint() {
             - 이 작업은 되돌릴 수 없습니다.
             - 해당 품종과 연결된 데이터가 있을 경우 문제가 발생할 수 있습니다.
         `,
-        successMessageExample: '품종 카테고리가 삭제되었습니다.',
+        successMessageExample: BREED_ADMIN_RESPONSE_MESSAGE_EXAMPLES.breedDeleted,
         nullableData: true,
         errorResponses: [BREED_ADMIN_NOT_FOUND_RESPONSE],
     });
