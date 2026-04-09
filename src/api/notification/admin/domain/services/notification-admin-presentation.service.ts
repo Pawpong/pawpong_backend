@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../../common/dto/pagination/pagination-builder.dto';
 import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
 import {
     NotificationAdminResponseDto,
@@ -11,9 +10,14 @@ import {
     NotificationAdminRecordSnapshot,
     NotificationAdminStatsSnapshot,
 } from '../../application/ports/notification-admin-reader.port';
+import { NotificationAdminPaginationAssemblerService } from './notification-admin-pagination-assembler.service';
 
 @Injectable()
 export class NotificationAdminPresentationService {
+    constructor(
+        private readonly notificationAdminPaginationAssemblerService: NotificationAdminPaginationAssemblerService,
+    ) {}
+
     toItem(record: NotificationAdminRecordSnapshot): NotificationAdminResponseDto {
         return {
             notificationId: record.notificationId,
@@ -36,12 +40,12 @@ export class NotificationAdminPresentationService {
         page: number,
         limit: number,
     ): PaginationResponseDto<NotificationAdminResponseDto> {
-        return new PaginationBuilder<NotificationAdminResponseDto>()
-            .setItems(pageSnapshot.items.map((item) => this.toItem(item)))
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(pageSnapshot.totalItems)
-            .build();
+        return this.notificationAdminPaginationAssemblerService.build(
+            pageSnapshot.items.map((item) => this.toItem(item)),
+            page,
+            limit,
+            pageSnapshot.totalItems,
+        );
     }
 
     toStats(snapshot: NotificationAdminStatsSnapshot): NotificationStatsResponseDto {
