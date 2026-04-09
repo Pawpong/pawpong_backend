@@ -8,6 +8,7 @@ import { GetAdopterAdminReviewReportsUseCase } from './application/use-cases/get
 import { AdopterAdminProtectedController } from './decorator/adopter-admin-controller.decorator';
 import { ReviewDeleteResponseDto } from './dto/response/review-delete-response.dto';
 import { ReviewReportItemDto } from './dto/response/review-report-list.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from '../domain/services/adopter-response-message.service';
 import { ApiDeleteAdopterAdminReviewEndpoint, ApiGetAdopterAdminReviewReportsEndpoint } from './swagger';
 
 @AdopterAdminProtectedController()
@@ -25,7 +26,7 @@ export class AdopterAdminReviewController {
         @Query('limit') limit: string = '10',
     ): Promise<ApiResponseDto<PaginationResponseDto<ReviewReportItemDto>>> {
         const result = await this.getAdopterAdminReviewReportsUseCase.execute(adminId, page, limit);
-        return ApiResponseDto.success(result, '후기 신고 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.adminReviewReportListRetrieved);
     }
 
     @Delete('reviews/:breederId/:reviewId')
@@ -36,6 +37,6 @@ export class AdopterAdminReviewController {
         @Param('reviewId') reviewId: string,
     ): Promise<ApiResponseDto<ReviewDeleteResponseDto>> {
         const result = await this.deleteAdopterAdminReviewUseCase.execute(adminId, breederId, reviewId);
-        return ApiResponseDto.success(result, '부적절한 후기가 삭제되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.adminReviewDeleted);
     }
 }

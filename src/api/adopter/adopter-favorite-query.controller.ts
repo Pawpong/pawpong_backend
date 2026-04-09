@@ -5,6 +5,7 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetFavoriteBreedersUseCase } from './application/use-cases/get-favorite-breeders.use-case';
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
 import { FavoriteListResponseDto } from './dto/response/favorite-list-response.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
 import { ApiGetAdopterFavoritesEndpoint } from './swagger';
 
 @AdopterProtectedController()
@@ -19,6 +20,6 @@ export class AdopterFavoriteQueryController {
         @Query('limit') limit: number = 10,
     ): Promise<ApiResponseDto<FavoriteListResponseDto>> {
         const result = await this.getFavoriteBreedersUseCase.execute(userId, Number(page), Number(limit));
-        return ApiResponseDto.success(result, '즐겨찾기 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.favoriteListRetrieved);
     }
 }

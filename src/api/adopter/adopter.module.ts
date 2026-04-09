@@ -39,6 +39,7 @@ import { GetAdopterReviewsUseCase } from './application/use-cases/get-adopter-re
 import { GetAdopterReviewDetailUseCase } from './application/use-cases/get-adopter-review-detail.use-case';
 import { DeleteAdopterAccountUseCase } from './application/use-cases/delete-adopter-account.use-case';
 import { AdopterFavoritePolicyService } from './domain/services/adopter-favorite-policy.service';
+import { AdopterPaginationAssemblerService } from './domain/services/adopter-pagination-assembler.service';
 import { AdopterApplicationCustomResponseBuilderService } from './domain/services/adopter-application-custom-response-builder.service';
 import { AdopterApplicationStandardResponseBuilderService } from './domain/services/adopter-application-standard-response-builder.service';
 import { AdopterApplicationCreateResponseFactoryService } from './domain/services/adopter-application-create-response-factory.service';
@@ -140,6 +141,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AdopterAdminPresentationService,
         AdopterAdminActivityLogFactoryService,
         AdopterFavoritePolicyService,
+        AdopterPaginationAssemblerService,
         AdopterApplicationCustomResponseBuilderService,
         AdopterApplicationStandardResponseBuilderService,
         AdopterApplicationCreateResponseFactoryService,

@@ -8,6 +8,7 @@ import { GetAdopterReviewsUseCase } from './application/use-cases/get-adopter-re
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
 import { MyReviewDetailDto } from './dto/response/my-review-detail.dto';
 import { MyReviewItemDto } from './dto/response/my-review-item.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
 import { ApiGetAdopterReviewDetailEndpoint, ApiGetAdopterReviewsEndpoint } from './swagger';
 
 @AdopterProtectedController()
@@ -25,7 +26,7 @@ export class AdopterReviewQueryController {
         @Query('limit') limit: number = 10,
     ): Promise<ApiResponseDto<PaginationResponseDto<MyReviewItemDto>>> {
         const result = await this.getAdopterReviewsUseCase.execute(userId, Number(page), Number(limit));
-        return ApiResponseDto.success(result, '내가 작성한 후기 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.reviewListRetrieved);
     }
 
     @Get('reviews/:id')
@@ -35,6 +36,6 @@ export class AdopterReviewQueryController {
         @Param('id') reviewId: string,
     ): Promise<ApiResponseDto<MyReviewDetailDto>> {
         const result = await this.getAdopterReviewDetailUseCase.execute(userId, reviewId);
-        return ApiResponseDto.success(result, '후기 세부 정보가 조회되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.reviewDetailRetrieved);
     }
 }

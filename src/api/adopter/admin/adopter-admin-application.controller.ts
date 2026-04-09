@@ -8,6 +8,7 @@ import { AdopterAdminProtectedController } from './decorator/adopter-admin-contr
 import { ApplicationListRequestDto } from './dto/request/application-list-request.dto';
 import { AdminApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
 import { AdminApplicationListResponseDto } from './dto/response/application-list-response.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from '../domain/services/adopter-response-message.service';
 import { ApiGetAdopterAdminApplicationDetailEndpoint, ApiGetAdopterAdminApplicationListEndpoint } from './swagger';
 
 @AdopterAdminProtectedController()
@@ -24,7 +25,7 @@ export class AdopterAdminApplicationController {
         @Query() filters: ApplicationListRequestDto,
     ): Promise<ApiResponseDto<AdminApplicationListResponseDto>> {
         const result = await this.getAdopterAdminApplicationListUseCase.execute(adminId, filters);
-        return ApiResponseDto.success(result, '입양 신청 리스트가 조회되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.adminApplicationListRetrieved);
     }
 
     @Get('applications/:applicationId')
@@ -34,6 +35,6 @@ export class AdopterAdminApplicationController {
         @Param('applicationId') applicationId: string,
     ): Promise<ApiResponseDto<AdminApplicationDetailResponseDto>> {
         const result = await this.getAdopterAdminApplicationDetailUseCase.execute(adminId, applicationId);
-        return ApiResponseDto.success(result, '입양 신청 상세 정보가 조회되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.adminApplicationDetailRetrieved);
     }
 }

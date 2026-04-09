@@ -2,6 +2,7 @@ import { ForbiddenException } from '@nestjs/common';
 
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminPresentationService } from '../../domain/services/adopter-admin-presentation.service';
+import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
 import { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { GetAdopterAdminReviewReportsUseCase } from './get-adopter-admin-review-reports.use-case';
 
@@ -43,7 +44,7 @@ describe('GetAdopterAdminReviewReportsUseCase', () => {
         const useCase = new GetAdopterAdminReviewReportsUseCase(
             reader,
             new AdopterAdminPolicyService(),
-            new AdopterAdminPresentationService(),
+            new AdopterAdminPresentationService(new AdopterPaginationAssemblerService()),
         );
 
         await expect(useCase.execute('admin-1')).resolves.toMatchObject({
@@ -72,7 +73,7 @@ describe('GetAdopterAdminReviewReportsUseCase', () => {
                 findApplicationDetail: jest.fn(),
             },
             new AdopterAdminPolicyService(),
-            new AdopterAdminPresentationService(),
+            new AdopterAdminPresentationService(new AdopterPaginationAssemblerService()),
         );
 
         await expect(useCase.execute('admin-1')).rejects.toBeInstanceOf(ForbiddenException);

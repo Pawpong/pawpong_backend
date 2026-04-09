@@ -8,6 +8,7 @@ import { AdopterProtectedController } from './decorator/adopter-protected-contro
 import { FavoriteAddRequestDto } from './dto/request/favorite-add-request.dto';
 import { FavoriteAddResponseDto } from './dto/response/favorite-add-response.dto';
 import { FavoriteRemoveResponseDto } from './dto/response/favorite-remove-response.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
 import { ApiAddAdopterFavoriteEndpoint, ApiRemoveAdopterFavoriteEndpoint } from './swagger';
 
 @AdopterProtectedController()
@@ -24,7 +25,7 @@ export class AdopterFavoriteCommandController {
         @Body() addFavoriteDto: FavoriteAddRequestDto,
     ): Promise<ApiResponseDto<FavoriteAddResponseDto>> {
         const result = await this.addFavoriteBreederUseCase.execute(userId, addFavoriteDto);
-        return ApiResponseDto.success(result, '즐겨찾기에 성공적으로 추가되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.favoriteAdded);
     }
 
     @Delete('favorite/:breederId')
@@ -34,6 +35,6 @@ export class AdopterFavoriteCommandController {
         @Param('breederId') breederId: string,
     ): Promise<ApiResponseDto<FavoriteRemoveResponseDto>> {
         const result = await this.removeFavoriteBreederUseCase.execute(userId, breederId);
-        return ApiResponseDto.success(result, '즐겨찾기에서 성공적으로 삭제되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.favoriteRemoved);
     }
 }

@@ -25,6 +25,7 @@ import { MyReviewItemDto } from '../dto/response/my-review-item.dto';
 import { ReportCreateResponseDto } from '../dto/response/report-create-response.dto';
 import { ReviewCreateResponseDto } from '../dto/response/review-create-response.dto';
 import { ReviewReportResponseDto } from '../dto/response/review-report-response.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from '../domain/services/adopter-response-message.service';
 
 const ADOPTER_FORBIDDEN_RESPONSE = {
     status: 403,
@@ -55,7 +56,7 @@ export function ApiCreateAdopterApplicationEndpoint() {
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
             successStatus: 201,
             successDescription: '입양 신청 생성 성공',
-            successMessageExample: '입양 신청이 성공적으로 제출되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.applicationCreated,
         }),
         ApiBody({ type: ApplicationCreateRequestDto }),
     );
@@ -69,7 +70,7 @@ export function ApiGetAdopterApplicationsEndpoint() {
             responseType: ApplicationListResponseDto,
             itemType: ApplicationListItemResponseDto,
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-            successMessageExample: '입양 신청 목록이 조회되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.applicationListRetrieved,
         }),
         ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: '페이지 번호' }),
         ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: '페이지당 항목 수' }),
@@ -88,7 +89,7 @@ export function ApiGetAdopterApplicationDetailEndpoint() {
         description: '입양자가 제출한 특정 입양 신청의 상세 정보를 조회합니다.',
         responseType: ApplicationDetailResponseDto,
         errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-        successMessageExample: '입양 신청 상세 정보가 조회되었습니다.',
+        successMessageExample: ADOPTER_RESPONSE_MESSAGES.applicationDetailRetrieved,
     });
 }
 
@@ -106,7 +107,7 @@ export function ApiCreateAdopterReviewEndpoint() {
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
             successStatus: 201,
             successDescription: '후기 작성 성공',
-            successMessageExample: '후기가 성공적으로 작성되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.reviewCreated,
         }),
         ApiBody({ type: ReviewCreateRequestDto }),
     );
@@ -119,7 +120,7 @@ export function ApiReportAdopterReviewEndpoint() {
             description: '부적절한 내용이 포함된 후기를 신고합니다. 관리자가 검토 후 조치합니다.',
             responseType: ReviewReportResponseDto,
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-            successMessageExample: '후기가 신고되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.reviewReported,
         }),
         ApiBody({ type: ReviewReportRequestDto }),
     );
@@ -133,7 +134,7 @@ export function ApiGetAdopterReviewsEndpoint() {
             responseType: PaginationResponseDto,
             itemType: MyReviewItemDto,
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-            successMessageExample: '내가 작성한 후기 목록이 조회되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.reviewListRetrieved,
         }),
         ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: '페이지 번호' }),
         ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: '페이지당 항목 수' }),
@@ -146,7 +147,7 @@ export function ApiGetAdopterReviewDetailEndpoint() {
         description: '후기 ID로 특정 후기의 세부 정보를 조회합니다.',
         responseType: MyReviewDetailDto,
         errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-        successMessageExample: '후기 세부 정보가 조회되었습니다.',
+        successMessageExample: ADOPTER_RESPONSE_MESSAGES.reviewDetailRetrieved,
     });
 }
 
@@ -157,7 +158,7 @@ export function ApiAddAdopterFavoriteEndpoint() {
             description: '관심 있는 브리더를 즐겨찾기에 추가합니다.',
             responseType: FavoriteAddResponseDto,
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-            successMessageExample: '즐겨찾기에 성공적으로 추가되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.favoriteAdded,
         }),
         ApiBody({ type: FavoriteAddRequestDto }),
     );
@@ -169,7 +170,7 @@ export function ApiRemoveAdopterFavoriteEndpoint() {
         description: '즐겨찾기에서 브리더를 삭제합니다.',
         responseType: FavoriteRemoveResponseDto,
         errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-        successMessageExample: '즐겨찾기에서 성공적으로 삭제되었습니다.',
+        successMessageExample: ADOPTER_RESPONSE_MESSAGES.favoriteRemoved,
     });
 }
 
@@ -181,7 +182,7 @@ export function ApiGetAdopterFavoritesEndpoint() {
             responseType: FavoriteListResponseDto,
             itemType: FavoriteBreederDataDto,
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-            successMessageExample: '즐겨찾기 목록이 조회되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.favoriteListRetrieved,
         }),
         ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: '페이지 번호' }),
         ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: '페이지당 항목 수' }),
@@ -195,7 +196,7 @@ export function ApiCreateAdopterReportEndpoint() {
             description: '부적절한 사용자나 브리더를 신고합니다.',
             responseType: ReportCreateResponseDto,
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-            successMessageExample: '신고가 성공적으로 제출되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.reportSubmitted,
         }),
         ApiBody({ type: ReportCreateRequestDto }),
     );
@@ -207,7 +208,7 @@ export function ApiGetAdopterProfileEndpoint() {
         description: '로그인한 입양자의 프로필 정보를 조회합니다.',
         responseType: AdopterProfileResponseDto,
         errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-        successMessageExample: '입양자 프로필이 조회되었습니다.',
+        successMessageExample: ADOPTER_RESPONSE_MESSAGES.profileRetrieved,
     });
 }
 
@@ -218,7 +219,7 @@ export function ApiUpdateAdopterProfileEndpoint() {
             description: '입양자의 프로필 정보를 수정합니다.',
             responseType: AdopterProfileUpdateResponseDto,
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-            successMessageExample: '프로필이 성공적으로 수정되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.profileUpdated,
         }),
         ApiBody({ type: ProfileUpdateRequestDto }),
     );
@@ -236,7 +237,7 @@ export function ApiDeleteAdopterAccountEndpoint() {
 - 관련 활동 데이터는 통계 목적상 보존됩니다.`,
             responseType: AccountDeleteResponseDto,
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-            successMessageExample: '회원 탈퇴가 완료되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.accountDeleted,
         }),
         ApiBody({ type: AccountDeleteRequestDto }),
     );

@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../../common/dto/pagination/pagination-builder.dto';
 import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
 import {
     AdminApplicationDetailResponseDto,
@@ -17,34 +16,35 @@ import {
     AdopterAdminApplicationListSnapshot,
     AdopterAdminReviewReportPageSnapshot,
 } from '../../application/ports/adopter-admin-reader.port';
+import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
 
 @Injectable()
 export class AdopterAdminPresentationService {
+    constructor(private readonly adopterPaginationAssemblerService: AdopterPaginationAssemblerService) {}
+
     toReviewReportsPage(
         snapshot: AdopterAdminReviewReportPageSnapshot,
     ): PaginationResponseDto<ReviewReportItemDto> {
-        return new PaginationBuilder<ReviewReportItemDto>()
-            .setItems(
-                snapshot.items.map((item) => ({
-                    reviewId: item.reviewId,
-                    breederId: item.breederId,
-                    breederName: item.breederName,
-                    authorId: item.authorId,
-                    authorName: item.authorName,
-                    reportedBy: item.reportedBy as string,
-                    reporterName: item.reporterName,
-                    reportReason: item.reportReason as string,
-                    reportDescription: item.reportDescription as string,
-                    reportedAt: item.reportedAt as Date,
-                    content: item.content,
-                    writtenAt: item.writtenAt,
-                    isVisible: item.isVisible,
-                })),
-            )
-            .setPage(snapshot.page)
-            .setLimit(snapshot.limit)
-            .setTotalCount(snapshot.totalCount)
-            .build();
+        return this.adopterPaginationAssemblerService.build(
+            snapshot.items.map((item) => ({
+                reviewId: item.reviewId,
+                breederId: item.breederId,
+                breederName: item.breederName,
+                authorId: item.authorId,
+                authorName: item.authorName,
+                reportedBy: item.reportedBy as string,
+                reporterName: item.reporterName,
+                reportReason: item.reportReason as string,
+                reportDescription: item.reportDescription as string,
+                reportedAt: item.reportedAt as Date,
+                content: item.content,
+                writtenAt: item.writtenAt,
+                isVisible: item.isVisible,
+            })),
+            snapshot.page,
+            snapshot.limit,
+            snapshot.totalCount,
+        );
     }
 
     toDeleteReviewResponse(): { message: string } {

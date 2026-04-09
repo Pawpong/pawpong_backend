@@ -1,21 +1,17 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../common/dto/pagination/pagination-builder.dto';
 import type { AdopterFileUrlPort } from '../../application/ports/adopter-file-url.port';
 import type { AdopterApplicationRecord } from '../../application/ports/adopter-application-reader.port';
 import { ApplicationListItemResponseDto } from '../../dto/response/application-list-item-response.dto';
 import { ApplicationListResponseDto } from '../../dto/response/application-list-response.dto';
+import { AdopterPaginationAssemblerService } from './adopter-pagination-assembler.service';
 
 @Injectable()
 export class AdopterApplicationListAssemblerService {
-    toEmptyResponse(page: number, limit: number): ApplicationListResponseDto {
-        const builder = new PaginationBuilder<ApplicationListItemResponseDto>()
-            .setItems([])
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(0);
+    constructor(private readonly adopterPaginationAssemblerService: AdopterPaginationAssemblerService) {}
 
-        return new ApplicationListResponseDto(builder);
+    toEmptyResponse(page: number, limit: number): ApplicationListResponseDto {
+        return new ApplicationListResponseDto(this.adopterPaginationAssemblerService.createBuilder([], page, limit, 0));
     }
 
     toItem(
@@ -49,13 +45,9 @@ export class AdopterApplicationListAssemblerService {
         limit: number,
         totalItems: number,
     ): ApplicationListResponseDto {
-        const builder = new PaginationBuilder<ApplicationListItemResponseDto>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(totalItems);
-
-        return new ApplicationListResponseDto(builder);
+        return new ApplicationListResponseDto(
+            this.adopterPaginationAssemblerService.createBuilder(items, page, limit, totalItems),
+        );
     }
 
     private formatDate(date: Date): string {

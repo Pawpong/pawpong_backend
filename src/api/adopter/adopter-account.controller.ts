@@ -6,6 +6,7 @@ import { DeleteAdopterAccountUseCase } from './application/use-cases/delete-adop
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
 import { AccountDeleteRequestDto } from './dto/request/account-delete-request.dto';
 import { AccountDeleteResponseDto } from './dto/response/account-delete-response.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
 import { ApiDeleteAdopterAccountEndpoint } from './swagger';
 
 @AdopterProtectedController()
@@ -19,6 +20,6 @@ export class AdopterAccountController {
         @Body() deleteData: AccountDeleteRequestDto,
     ): Promise<ApiResponseDto<AccountDeleteResponseDto>> {
         const result = await this.deleteAdopterAccountUseCase.execute(userId, deleteData);
-        return ApiResponseDto.success(result, '회원 탈퇴가 완료되었습니다.');
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.accountDeleted);
     }
 }

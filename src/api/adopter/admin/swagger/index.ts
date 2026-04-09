@@ -8,6 +8,7 @@ import { AdminApplicationListResponseDto } from '../dto/response/application-lis
 import { ReviewDeleteResponseDto } from '../dto/response/review-delete-response.dto';
 import { ReviewReportItemDto } from '../dto/response/review-report-list.dto';
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
+import { ADOPTER_RESPONSE_MESSAGES } from '../../domain/services/adopter-response-message.service';
 
 const ADOPTER_ADMIN_FORBIDDEN_RESPONSE = {
     status: 403,
@@ -27,7 +28,7 @@ export function ApiGetAdopterAdminReviewReportsEndpoint() {
             responseType: PaginationResponseDto,
             itemType: ReviewReportItemDto,
             errorResponses: [ADOPTER_ADMIN_FORBIDDEN_RESPONSE],
-            successMessageExample: '후기 신고 목록이 조회되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminReviewReportListRetrieved,
         }),
         ApiQuery({ name: 'page', required: false, type: String, example: '1', description: '페이지 번호' }),
         ApiQuery({ name: 'limit', required: false, type: String, example: '10', description: '페이지당 항목 수' }),
@@ -47,7 +48,7 @@ export function ApiDeleteAdopterAdminReviewEndpoint() {
                 errorExample: '후기를 찾을 수 없습니다.',
             },
         ],
-        successMessageExample: '부적절한 후기가 삭제되었습니다.',
+        successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminReviewDeleted,
     });
 }
 
@@ -58,7 +59,7 @@ export function ApiGetAdopterAdminApplicationListEndpoint() {
             description: '전체 입양 신청 내역을 조회합니다. 페이지네이션, 필터링, 통계 정보를 함께 제공합니다.',
             responseType: AdminApplicationListResponseDto,
             errorResponses: [ADOPTER_ADMIN_FORBIDDEN_RESPONSE],
-            successMessageExample: '입양 신청 리스트가 조회되었습니다.',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminApplicationListRetrieved,
         }),
         ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: '페이지 번호' }),
         ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: '페이지당 항목 수' }),
@@ -87,6 +88,6 @@ export function ApiGetAdopterAdminApplicationDetailEndpoint() {
                 errorExample: '입양 신청을 찾을 수 없습니다.',
             },
         ],
-        successMessageExample: '입양 신청 상세 정보가 조회되었습니다.',
+        successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminApplicationDetailRetrieved,
     });
 }
