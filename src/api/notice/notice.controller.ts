@@ -6,7 +6,7 @@ import { PaginationResponseDto } from '../../common/dto/pagination/pagination-re
 import { NoticeResponseDto } from './dto/response/notice-response.dto';
 import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';
 import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
-import { NoticeResponseMessageService } from './domain/services/notice-response-message.service';
+import { NoticeQueryResponseMessageService } from './domain/services/notice-query-response-message.service';
 import { ApiGetNoticeDetailEndpoint, ApiGetNoticeListEndpoint, ApiNoticeController } from './swagger';
 
 /**
@@ -19,7 +19,7 @@ export class NoticeController {
     constructor(
         private readonly getNoticeListUseCase: GetNoticeListUseCase,
         private readonly getNoticeDetailUseCase: GetNoticeDetailUseCase,
-        private readonly noticeResponseMessageService: NoticeResponseMessageService,
+        private readonly noticeQueryResponseMessageService: NoticeQueryResponseMessageService,
     ) {}
 
     /**
@@ -31,7 +31,7 @@ export class NoticeController {
         @Query() paginationData: PaginationRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<NoticeResponseDto>>> {
         const result = await this.getNoticeListUseCase.execute(paginationData, 'published');
-        return ApiResponseDto.success(result, this.noticeResponseMessageService.noticeListRetrieved());
+        return ApiResponseDto.success(result, this.noticeQueryResponseMessageService.noticeListRetrieved());
     }
 
     /**
@@ -41,6 +41,6 @@ export class NoticeController {
     @ApiGetNoticeDetailEndpoint()
     async getNoticeDetail(@Param('noticeId') noticeId: string): Promise<ApiResponseDto<NoticeResponseDto>> {
         const result = await this.getNoticeDetailUseCase.execute(noticeId, true);
-        return ApiResponseDto.success(result, this.noticeResponseMessageService.noticeDetailRetrieved());
+        return ApiResponseDto.success(result, this.noticeQueryResponseMessageService.noticeDetailRetrieved());
     }
 }
