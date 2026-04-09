@@ -87,7 +87,7 @@ async function createUploadTestingApp(): Promise<INestApplication> {
     return app;
 }
 
-describe('Upload API E2E Tests (Simple)', () => {
+describe('업로드 종단간 테스트', () => {
     let app: INestApplication;
     let breederToken: string;
     let breederId: string;
@@ -183,7 +183,7 @@ describe('Upload API E2E Tests (Simple)', () => {
     });
 
     describe('브리더 대표 사진 업로드', () => {
-        it('POST /api/upload/representative-photos - 대표 사진 업로드 성공', async () => {
+        it('대표 사진 업로드 성공', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/representative-photos')
                 .set('Authorization', `Bearer ${breederToken}`)
@@ -199,32 +199,32 @@ describe('Upload API E2E Tests (Simple)', () => {
                 expect(item).toHaveProperty('url');
                 uploadedFileNames.push(item.filename);
             });
-            console.log('✅ 브리더 대표 사진 업로드 성공');
+            console.log('브리더 대표 사진 업로드 성공');
         });
 
-        it('POST /api/upload/representative-photos - 인증 없이 접근 실패', async () => {
+        it('인증 없이 접근 실패', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/representative-photos')
                 .attach('files', testImageBuffer, 'representative.jpg');
 
             expect(response.status).toBe(401);
-            console.log('✅ 인증 없이 접근 거부 확인');
+            console.log('인증 없이 접근 거부 확인');
         });
 
-        it('POST /api/upload/representative-photos - 파일 없이 요청 실패', async () => {
+        it('파일 없이 요청 실패', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/representative-photos')
                 .set('Authorization', `Bearer ${breederToken}`);
 
             expect([400, 401]).toContain(response.status);
-            console.log('✅ 파일 없이 요청 거부 확인');
+            console.log('파일 없이 요청 거부 확인');
         });
     });
 
     describe('분양 개체 사진 업로드', () => {
-        it('POST /api/upload/available-pet-photos/:petId - 분양 개체 사진 업로드 성공', async () => {
+        it('분양 개체 사진 업로드 성공', async () => {
             if (!availablePetId) {
-                console.log('⚠️  분양 개체 ID가 없어서 테스트 스킵');
+                console.log('주의: 분양 개체 ID가 없어서 테스트 스킵');
                 return;
             }
 
@@ -238,12 +238,12 @@ describe('Upload API E2E Tests (Simple)', () => {
             expect(response.body.data).toHaveLength(1);
             expect(response.body.data[0]).toHaveProperty('filename');
             uploadedFileNames.push(response.body.data[0].filename);
-            console.log('✅ 분양 개체 사진 업로드 성공');
+            console.log('분양 개체 사진 업로드 성공');
         });
 
-        it('POST /api/upload/available-pet-photos/:petId - 인증 없이 접근 실패', async () => {
+        it('인증 없이 접근 실패', async () => {
             if (!availablePetId) {
-                console.log('⚠️  분양 개체 ID가 없어서 테스트 스킵');
+                console.log('주의: 분양 개체 ID가 없어서 테스트 스킵');
                 return;
             }
 
@@ -252,24 +252,24 @@ describe('Upload API E2E Tests (Simple)', () => {
                 .attach('files', testImageBuffer, 'available-pet.jpg');
 
             expect(response.status).toBe(401);
-            console.log('✅ 인증 없이 접근 거부 확인');
+            console.log('인증 없이 접근 거부 확인');
         });
 
-        it('POST /api/upload/available-pet-photos/:petId - 잘못된 petId로 요청 실패', async () => {
+        it('잘못된 개체 ID로 요청 실패', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/available-pet-photos/invalid_pet_id')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .attach('files', testImageBuffer, 'available-pet.jpg');
 
             expect(response.status).toBe(400);
-            console.log('✅ 잘못된 petId로 요청 거부 확인');
+            console.log('잘못된 개체 ID로 요청 거부 확인');
         });
     });
 
     describe('부모견/묘 사진 업로드', () => {
-        it('POST /api/upload/parent-pet-photos/:petId - 부모견/묘 사진 업로드 성공', async () => {
+        it('부모견/묘 사진 업로드 성공', async () => {
             if (!parentPetId) {
-                console.log('⚠️  부모견/묘 ID가 없어서 테스트 스킵');
+                console.log('주의: 부모견/묘 ID가 없어서 테스트 스킵');
                 return;
             }
 
@@ -283,12 +283,12 @@ describe('Upload API E2E Tests (Simple)', () => {
             expect(response.body.data).toHaveLength(1);
             expect(response.body.data[0]).toHaveProperty('filename');
             uploadedFileNames.push(response.body.data[0].filename);
-            console.log('✅ 부모견/묘 사진 업로드 성공');
+            console.log('부모견/묘 사진 업로드 성공');
         });
 
-        it('POST /api/upload/parent-pet-photos/:petId - 인증 없이 접근 실패', async () => {
+        it('인증 없이 접근 실패', async () => {
             if (!parentPetId) {
-                console.log('⚠️  부모견/묘 ID가 없어서 테스트 스킵');
+                console.log('주의: 부모견/묘 ID가 없어서 테스트 스킵');
                 return;
             }
 
@@ -297,12 +297,12 @@ describe('Upload API E2E Tests (Simple)', () => {
                 .attach('files', testImageBuffer, 'parent-pet.jpg');
 
             expect(response.status).toBe(401);
-            console.log('✅ 인증 없이 접근 거부 확인');
+            console.log('인증 없이 접근 거부 확인');
         });
     });
 
-    describe('단일 파일 업로드 (공개 API)', () => {
-        it('POST /api/upload/single - 단일 파일 업로드 성공', async () => {
+    describe('단일 파일 업로드 (공개 경로)', () => {
+        it('단일 파일 업로드 성공', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/single')
                 .attach('file', testImageBuffer, 'single-upload.jpg')
@@ -315,23 +315,23 @@ describe('Upload API E2E Tests (Simple)', () => {
                 expect(response.body.data).toHaveProperty('filename');
                 expect(response.body.data).toHaveProperty('url');
                 uploadedFileNames.push(response.body.data.filename);
-                console.log('✅ 단일 파일 업로드 성공');
+                console.log('단일 파일 업로드 성공');
             } else {
-                console.log('⚠️  단일 파일 업로드 실패 (GCP 설정 필요)');
+                console.log('주의: 단일 파일 업로드 실패 (GCP 설정 필요)');
             }
         });
 
-        it('POST /api/upload/single - 파일 없이 요청 실패', async () => {
+        it('파일 없이 요청 실패', async () => {
             const response = await request(app.getHttpServer()).post('/api/upload/single');
 
             expect(response.status).toBe(400);
             expect(response.body.message).toContain('파일이 없습니다');
-            console.log('✅ 파일 없이 요청 거부 확인');
+            console.log('파일 없이 요청 거부 확인');
         });
     });
 
-    describe('다중 파일 업로드 (공개 API)', () => {
-        it('POST /api/upload/multiple - 다중 파일 업로드 성공', async () => {
+    describe('다중 파일 업로드 (공개 경로)', () => {
+        it('다중 파일 업로드 성공', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/upload/multiple')
                 .attach('files', testImageBuffer, 'multiple-1.jpg')
@@ -346,23 +346,23 @@ describe('Upload API E2E Tests (Simple)', () => {
                 response.body.data.forEach((item: any) => {
                     uploadedFileNames.push(item.filename);
                 });
-                console.log('✅ 다중 파일 업로드 성공');
+                console.log('다중 파일 업로드 성공');
             } else {
-                console.log('⚠️  다중 파일 업로드 실패 (GCP 설정 필요)');
+                console.log('주의: 다중 파일 업로드 실패 (GCP 설정 필요)');
             }
         });
 
-        it('POST /api/upload/multiple - 파일 없이 요청 실패', async () => {
+        it('파일 없이 요청 실패', async () => {
             const response = await request(app.getHttpServer()).post('/api/upload/multiple');
 
             expect(response.status).toBe(400);
             expect(response.body.message).toContain('파일이 없습니다');
-            console.log('✅ 파일 없이 요청 거부 확인');
+            console.log('파일 없이 요청 거부 확인');
         });
     });
 
     describe('파일 삭제', () => {
-        it('DELETE /api/upload - 파일 삭제 성공', async () => {
+        it('파일 삭제 성공', async () => {
             const response = await request(app.getHttpServer())
                 .delete('/api/upload')
                 .send({ fileName: 'test/fake-file.jpg' });
@@ -370,18 +370,18 @@ describe('Upload API E2E Tests (Simple)', () => {
             expect([200, 400, 404, 500]).toContain(response.status);
 
             if (response.status === 200) {
-                console.log('✅ 파일 삭제 성공');
+                console.log('파일 삭제 성공');
             } else {
-                console.log('⚠️  파일 삭제 실패 (GCP 설정 필요 또는 파일 없음)');
+                console.log('주의: 파일 삭제 실패 (GCP 설정 필요 또는 파일 없음)');
             }
         });
 
-        it('DELETE /api/upload - 파일명 없이 요청 실패', async () => {
+        it('파일명 없이 요청 실패', async () => {
             const response = await request(app.getHttpServer()).delete('/api/upload').send({});
 
             expect(response.status).toBe(400);
             expect(response.body.message).toContain('파일명이 없습니다');
-            console.log('✅ 파일명 없이 요청 거부 확인');
+            console.log('파일명 없이 요청 거부 확인');
         });
     });
 
@@ -401,7 +401,7 @@ describe('Upload API E2E Tests (Simple)', () => {
                 expect(response.body.data).toHaveProperty('size');
             }
 
-            console.log('✅ 응답 형식 검증 완료');
+            console.log('응답 형식 검증 완료');
         });
     });
 });

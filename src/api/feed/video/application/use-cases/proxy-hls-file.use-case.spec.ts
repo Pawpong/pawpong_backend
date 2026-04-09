@@ -4,7 +4,7 @@ import { ProxyHlsFileUseCase } from './proxy-hls-file.use-case';
 import { FeedVideoStreamPort } from '../ports/feed-video-stream.port';
 import { FeedVideoStreamingService } from '../../domain/services/feed-video-streaming.service';
 
-describe('ProxyHlsFileUseCase', () => {
+describe('스트리밍 파일 프록시 유스케이스', () => {
     const createStreamPort = (): jest.Mocked<FeedVideoStreamPort> => ({
         readFile: jest.fn(),
         getTextCache: jest.fn(),

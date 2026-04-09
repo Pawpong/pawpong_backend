@@ -4,7 +4,7 @@ import { UpdateBreederVerificationUseCase } from './update-breeder-verification.
 import { BreederVerificationAdminActivityLogFactoryService } from '../../domain/services/breeder-verification-admin-activity-log-factory.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 
-describe('UpdateBreederVerificationUseCase', () => {
+describe('브리더 인증 수정 유스케이스', () => {
     const reader = {
         findAdminById: jest.fn(),
         findBreederById: jest.fn(),

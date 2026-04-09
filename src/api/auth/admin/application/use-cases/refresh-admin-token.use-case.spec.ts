@@ -11,7 +11,7 @@ import {
 } from '../ports/auth-admin-token.port';
 import { RefreshAdminTokenUseCase } from './refresh-admin-token.use-case';
 
-describe('RefreshAdminTokenUseCase', () => {
+describe('관리자 token 재발급 유스케이스', () => {
     const adminSnapshot: AuthAdminSnapshot = {
         adminId: 'admin-1',
         email: 'admin@test.com',
@@ -88,7 +88,7 @@ describe('RefreshAdminTokenUseCase', () => {
         await expect(useCase.execute('bad-token')).rejects.toBeInstanceOf(UnauthorizedException);
     });
 
-    it('관리자 role이 아니면 UnauthorizedException을 던진다', async () => {
+    it('관리자 역할이 아니면 UnauthorizedException을 던진다', async () => {
         const useCase = new RefreshAdminTokenUseCase(
             {
                 findActiveByEmail: jest.fn().mockResolvedValue(adminSnapshot),

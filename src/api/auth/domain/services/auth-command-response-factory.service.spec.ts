@@ -1,7 +1,7 @@
 import { AuthCommandResponseFactoryService } from './auth-command-response-factory.service';
 import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from './auth-response-message.service';
 
-describe('AuthCommandResponseFactoryService', () => {
+describe('인증 명령 응답 팩토리 서비스', () => {
     const service = new AuthCommandResponseFactoryService();
 
     it('전화번호 인증코드 발송 응답을 만든다', () => {

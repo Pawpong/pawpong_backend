@@ -4,14 +4,14 @@ import { CreateAnnouncementUseCase } from './create-announcement.use-case';
 import { AnnouncementWriterPort } from '../ports/announcement-writer.port';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
 
-describe('CreateAnnouncementUseCase', () => {
+describe('공지사항 생성 유스케이스', () => {
     const createLogger = () => ({
         logStart: jest.fn(),
         logSuccess: jest.fn(),
         logError: jest.fn(),
     });
 
-    it('생성된 공지사항을 응답 DTO로 반환한다', async () => {
+    it('생성된 공지사항을 응답 객체로 반환한다', async () => {
         const announcementWriter: AnnouncementWriterPort = {
             create: jest.fn().mockResolvedValue({
                 announcementId: 'announcement-1',
@@ -45,7 +45,7 @@ describe('CreateAnnouncementUseCase', () => {
         });
     });
 
-    it('저장 중 에러가 나면 BadRequestException을 던진다', async () => {
+    it('저장 중 에러가 나면 예외을 던진다', async () => {
         const announcementWriter: AnnouncementWriterPort = {
             create: jest.fn().mockRejectedValue(new Error('db failure')),
             update: jest.fn(),

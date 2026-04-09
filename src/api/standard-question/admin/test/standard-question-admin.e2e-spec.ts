@@ -4,16 +4,16 @@ import request from 'supertest';
 import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../common/test/test-utils';
 
 /**
- * Standard Question Admin 도메인 E2E 테스트
+ * 기본 질문 관리자 종단간 테스트
  *
- * 테스트 대상 API:
+ * 테스트 대상 경로:
  * 1. 표준 질문 목록 조회
  * 2. 표준 질문 수정
  * 3. 표준 질문 활성화/비활성화
  * 4. 표준 질문 순서 변경
  * 5. 표준 질문 재시딩
  */
-describe('Standard Question Admin API E2E Tests', () => {
+describe('기본 질문 관리자 종단간 테스트', () => {
     let app: INestApplication;
     let adminToken: string;
     let questionId: string;
@@ -32,7 +32,7 @@ describe('Standard Question Admin API E2E Tests', () => {
         if (loginResponse.status === 200 && loginResponse.body.data?.accessToken) {
             adminToken = loginResponse.body.data.accessToken;
         } else {
-            console.log('⚠️  관리자 로그인 실패, 일부 테스트 스킵될 수 있음');
+            console.log('주의: 관리자 로그인 실패, 일부 테스트 스킵될 수 있음');
         }
     }, 30000);
 
@@ -44,10 +44,10 @@ describe('Standard Question Admin API E2E Tests', () => {
     /**
      * 1. 표준 질문 목록 조회 테스트
      */
-    describe('GET /api/standard-question-admin', () => {
+    describe('GET /api/standard-question-관리자', () => {
         it('모든 표준 질문 조회 성공', async () => {
             if (!adminToken) {
-                console.log('⚠️  관리자 토큰이 없어서 테스트 스킵');
+                console.log('주의: 관리자 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -64,23 +64,23 @@ describe('Standard Question Admin API E2E Tests', () => {
                 questionId = response.body.data[0].id;
             }
 
-            console.log('✅ 모든 표준 질문 조회 성공');
+            console.log('모든 표준 질문 조회 성공');
         });
 
         it('인증 없이 접근 시 401 에러', async () => {
             await request(app.getHttpServer()).get('/api/standard-question-admin').expect(401);
 
-            console.log('✅ 인증 없이 접근 실패 확인');
+            console.log('인증 없이 접근 실패 확인');
         });
     });
 
     /**
      * 2. 표준 질문 수정 테스트
      */
-    describe('PATCH /api/standard-question-admin/:id', () => {
+    describe('PATCH /api/standard-question-관리자/:id', () => {
         it('질문 수정 성공', async () => {
             if (!adminToken || !questionId) {
-                console.log('⚠️  관리자 토큰 또는 질문 ID가 없어서 테스트 스킵');
+                console.log('주의: 관리자 토큰 또는 질문 ID가 없어서 테스트 스킵');
                 return;
             }
 
@@ -91,7 +91,7 @@ describe('Standard Question Admin API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ 질문 수정 성공');
+            console.log('질문 수정 성공');
         });
 
         it('인증 없이 접근 시 401 에러', async () => {
@@ -100,17 +100,17 @@ describe('Standard Question Admin API E2E Tests', () => {
                 .send({ title: '수정 시도' })
                 .expect(401);
 
-            console.log('✅ 인증 없이 접근 실패 확인');
+            console.log('인증 없이 접근 실패 확인');
         });
     });
 
     /**
      * 3. 표준 질문 활성화/비활성화 테스트
      */
-    describe('PATCH /api/standard-question-admin/:id/status', () => {
+    describe('PATCH /api/standard-question-관리자/:id/status', () => {
         it('질문 비활성화 성공', async () => {
             if (!adminToken || !questionId) {
-                console.log('⚠️  관리자 토큰 또는 질문 ID가 없어서 테스트 스킵');
+                console.log('주의: 관리자 토큰 또는 질문 ID가 없어서 테스트 스킵');
                 return;
             }
 
@@ -121,7 +121,7 @@ describe('Standard Question Admin API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ 질문 비활성화 성공');
+            console.log('질문 비활성화 성공');
         });
 
         it('인증 없이 접근 시 401 에러', async () => {
@@ -130,17 +130,17 @@ describe('Standard Question Admin API E2E Tests', () => {
                 .send({ isActive: false })
                 .expect(401);
 
-            console.log('✅ 인증 없이 접근 실패 확인');
+            console.log('인증 없이 접근 실패 확인');
         });
     });
 
     /**
      * 4. 표준 질문 재시딩 테스트
      */
-    describe('POST /api/standard-question-admin/reseed', () => {
+    describe('POST /api/standard-question-관리자/reseed', () => {
         it('표준 질문 재시딩 성공', async () => {
             if (!adminToken) {
-                console.log('⚠️  관리자 토큰이 없어서 테스트 스킵');
+                console.log('주의: 관리자 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -151,13 +151,13 @@ describe('Standard Question Admin API E2E Tests', () => {
             expect([200, 201]).toContain(response.status);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ 표준 질문 재시딩 성공');
+            console.log('표준 질문 재시딩 성공');
         });
 
         it('인증 없이 접근 시 401 에러', async () => {
             await request(app.getHttpServer()).post('/api/standard-question-admin/reseed').expect(401);
 
-            console.log('✅ 인증 없이 접근 실패 확인');
+            console.log('인증 없이 접근 실패 확인');
         });
     });
 
@@ -186,7 +186,7 @@ describe('Standard Question Admin API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(403);
 
-            console.log('✅ 일반 사용자의 표준 질문 관리 API 접근 거부 확인');
+            console.log('일반 사용자의 표준 질문 관리 경로 접근 거부 확인');
         });
     });
 });

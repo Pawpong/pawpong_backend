@@ -4,7 +4,7 @@ import { ChangeBreederLevelUseCase } from './change-breeder-level.use-case';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 
-describe('ChangeBreederLevelUseCase', () => {
+describe('브리더 레벨 변경 유스케이스', () => {
     const reader = {
         findAdminById: jest.fn(),
         findBreederById: jest.fn(),

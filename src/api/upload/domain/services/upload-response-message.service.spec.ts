@@ -1,6 +1,6 @@
 import { UploadResponseMessageService } from './upload-response-message.service';
 
-describe('UploadResponseMessageService', () => {
+describe('응답 메시지 업로드 서비스', () => {
     const service = new UploadResponseMessageService();
 
     it('공개 업로드 성공 메시지를 일관되게 만든다', () => {

@@ -84,7 +84,7 @@ class StubNotifier extends BreederManagementVerificationNotifierPort {
     }
 }
 
-describe('SubmitBreederManagementVerificationDocumentsUseCase', () => {
+describe('브리더 관리 인증 문서 제출 유스케이스', () => {
     let profilePort: StubProfilePort;
     let settingsPort: StubSettingsPort;
     let draftStore: StubDraftStore;
@@ -108,7 +108,7 @@ describe('SubmitBreederManagementVerificationDocumentsUseCase', () => {
         );
     });
 
-    it('신규 제출 시 검증 문서를 저장하고 알림 payload를 만든다', async () => {
+    it('신규 제출 시 검증 문서를 저장하고 알림 알림 데이터를 만든다', async () => {
         draftStore.documents = [
             {
                 type: 'idCard',

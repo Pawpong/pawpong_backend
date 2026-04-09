@@ -5,14 +5,14 @@ import { UploadAdminStoragePolicyService } from '../../domain/services/upload-ad
 import { UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
 import { DeleteMultipleFilesUseCase } from './delete-multiple-files.use-case';
 
-describe('DeleteMultipleFilesUseCase', () => {
+describe('다중 파일 삭제 유스케이스', () => {
     const logger = {
         logStart: jest.fn(),
         logSuccess: jest.fn(),
         logWarning: jest.fn(),
     } as unknown as CustomLoggerService;
 
-    it('실패한 파일만 failedFiles에 모은다', async () => {
+    it('실패한 파일만 실패 파일 목록에 모은다', async () => {
         const uploadAdminStorage: UploadAdminStoragePort = {
             list: jest.fn(),
             delete: jest

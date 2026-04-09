@@ -3,7 +3,7 @@ import { BadRequestException } from '@nestjs/common';
 import { SubmitAuthBreederDocumentsUseCase } from './submit-auth-breeder-documents.use-case';
 import { AuthBreederDocumentSubmissionService } from '../../domain/services/auth-breeder-document-submission.service';
 
-describe('SubmitAuthBreederDocumentsUseCase', () => {
+describe('브리더 인증 문서 제출 유스케이스', () => {
     const commandPort = {
         findBreederById: jest.fn(),
         updateVerificationDocuments: jest.fn(),
@@ -24,7 +24,7 @@ describe('SubmitAuthBreederDocumentsUseCase', () => {
         jest.clearAllMocks();
     });
 
-    it('브리더 서류를 reviewing 상태로 저장한다', async () => {
+    it('브리더 서류를 검토 중 상태로 저장한다', async () => {
         commandPort.findBreederById.mockResolvedValue({
             _id: { toString: () => 'breeder-1' },
         });

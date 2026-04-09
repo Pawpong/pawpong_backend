@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 
 import { UploadAndSubmitAuthBreederDocumentsUseCase } from './upload-and-submit-auth-breeder-documents.use-case';
 
-describe('UploadAndSubmitAuthBreederDocumentsUseCase', () => {
+describe('브리더 인증 문서 업로드 및 제출 유스케이스', () => {
     const authUploadFileStorePort = {
         upload: jest.fn(),
     };

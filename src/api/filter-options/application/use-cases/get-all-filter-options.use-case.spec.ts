@@ -1,7 +1,7 @@
 import { GetAllFilterOptionsUseCase } from './get-all-filter-options.use-case';
 import { FilterOptionsCatalogService } from '../../domain/services/filter-options-catalog.service';
 
-describe('GetAllFilterOptionsUseCase', () => {
+describe('전체 필터 옵션 조회 유스케이스', () => {
     let useCase: GetAllFilterOptionsUseCase;
 
     beforeEach(() => {

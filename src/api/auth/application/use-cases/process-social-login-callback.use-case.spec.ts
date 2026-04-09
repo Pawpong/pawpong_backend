@@ -56,7 +56,7 @@ class StubAuthSocialCallbackPort extends AuthSocialCallbackPort {
     }
 }
 
-describe('ProcessSocialLoginCallbackUseCase', () => {
+describe('소셜 로그인 콜백 처리 유스케이스', () => {
     const logger = {
         log: jest.fn(),
         logError: jest.fn(),
@@ -91,7 +91,7 @@ describe('ProcessSocialLoginCallbackUseCase', () => {
         expect(result.redirectUrl).toContain('needsEmail=true');
     });
 
-    it('로컬 프론트엔드는 토큰을 URL 파라미터로 전달한다', async () => {
+    it('로컬 프론트엔드는 토큰을 주소 파라미터로 전달한다', async () => {
         port.profileResult = {
             needsAdditionalInfo: false,
             user: {

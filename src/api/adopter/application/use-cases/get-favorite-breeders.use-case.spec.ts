@@ -1,7 +1,7 @@
 import { GetFavoriteBreedersUseCase } from './get-favorite-breeders.use-case';
 import { AdopterPaginationAssemblerService } from '../../domain/services/adopter-pagination-assembler.service';
 
-describe('GetFavoriteBreedersUseCase', () => {
+describe('브리더 즐겨찾기 목록 조회 유스케이스', () => {
     const adopterProfilePort = {
         findById: jest.fn(),
         updateProfile: jest.fn(),
@@ -28,7 +28,7 @@ describe('GetFavoriteBreedersUseCase', () => {
         jest.clearAllMocks();
     });
 
-    it('브리더 역할이면 breeder 즐겨찾기 목록을 그대로 조회한다', async () => {
+    it('브리더 역할이면 브리더 즐겨찾기 목록을 그대로 조회한다', async () => {
         adopterProfilePort.findById.mockResolvedValue({
             favoriteBreederList: [{ favoriteBreederId: 'breeder-1', breederName: '행복브리더', addedAt: new Date() }],
         });

@@ -7,7 +7,7 @@ import { AdopterPaginationAssemblerService } from '../../../domain/services/adop
 import { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { GetAdopterAdminApplicationDetailUseCase } from './get-adopter-admin-application-detail.use-case';
 
-describe('GetAdopterAdminApplicationDetailUseCase', () => {
+describe('입양자 관리자 입양 신청 상세 조회 유스케이스', () => {
     it('입양 신청 상세 응답 계약을 유지한다', async () => {
         const useCase = new GetAdopterAdminApplicationDetailUseCase(
             {
@@ -49,7 +49,7 @@ describe('GetAdopterAdminApplicationDetailUseCase', () => {
         });
     });
 
-    it('잘못된 ID 형식은 BadRequestException을 던진다', async () => {
+    it('잘못된 ID 형식은 예외을 던진다', async () => {
         const useCase = new GetAdopterAdminApplicationDetailUseCase(
             {
                 findAdminById: jest.fn().mockResolvedValue({

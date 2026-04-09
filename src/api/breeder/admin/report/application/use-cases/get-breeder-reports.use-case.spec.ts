@@ -5,7 +5,7 @@ import { BreederReportAdminPolicyService } from '../../domain/services/breeder-r
 import { BreederReportAdminPresentationService } from '../../domain/services/breeder-report-admin-presentation.service';
 import { BreederPaginationAssemblerService } from '../../../../domain/services/breeder-pagination-assembler.service';
 
-describe('GetBreederReportsUseCase', () => {
+describe('브리더 신고 목록 조회 유스케이스', () => {
     const reader = {
         findAdminById: jest.fn(),
         getReports: jest.fn(),

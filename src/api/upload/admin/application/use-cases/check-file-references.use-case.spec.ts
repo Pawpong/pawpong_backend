@@ -2,7 +2,7 @@ import { CustomLoggerService } from '../../../../../common/logger/custom-logger.
 import { UploadAdminReferenceReaderPort } from '../ports/upload-admin-reference-reader.port';
 import { CheckFileReferencesUseCase } from './check-file-references.use-case';
 
-describe('CheckFileReferencesUseCase', () => {
+describe('파일 참조 확인 유스케이스', () => {
     const logger = {
         logStart: jest.fn(),
         logSuccess: jest.fn(),

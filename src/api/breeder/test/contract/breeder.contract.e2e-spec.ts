@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { cleanupDatabase, createTestingApp } from '../../../../common/test/test-utils';
 
-describe('Breeder Contract E2E', () => {
+describe('브리더 응답 계약 종단간 테스트', () => {
     let app: INestApplication;
     let breederId: string;
     let breederName: string;
@@ -44,7 +44,7 @@ describe('Breeder Contract E2E', () => {
         await app.close();
     });
 
-    it('GET /api/breeder/search keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
             .get('/api/breeder/search')
             .query({
@@ -93,7 +93,7 @@ describe('Breeder Contract E2E', () => {
         }
     });
 
-    it('GET /api/breeder/popular keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer()).get('/api/breeder/popular').expect(200);
 
         expect(response.body).toEqual(
@@ -105,7 +105,7 @@ describe('Breeder Contract E2E', () => {
         );
     });
 
-    it('GET /api/breeder/:id keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer()).get(`/api/breeder/${breederId}`).expect(200);
 
         expect(response.body).toEqual(

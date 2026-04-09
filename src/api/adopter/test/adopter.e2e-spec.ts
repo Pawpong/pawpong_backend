@@ -3,15 +3,15 @@ import request from 'supertest';
 import { createTestingApp } from '../../../common/test/test-utils';
 
 /**
- * Adopter 도메인 E2E 테스트 (간소화 버전)
+ * 입양자 종단간 테스트
  *
- * 테스트 대상 핵심 API:
+ * 테스트 대상 핵심 경로:
  * 1. 프로필 조회/수정
  * 2. 입양 신청
  * 3. 후기 작성
  * 4. 즐겨찾기
  */
-describe('Adopter API E2E Tests (Simple)', () => {
+describe('입양자 종단간 테스트', () => {
     let app: INestApplication;
     let adopterToken: string;
     let adopterUserId: string;
@@ -45,7 +45,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
         adopterToken = adopterResponse.body.data.accessToken;
         adopterUserId = adopterResponse.body.data.adopterId || adopterResponse.body.data.userId;
 
-        console.log('✅ 입양자 생성 완료:', { adopterUserId, nickname: adopterNickname });
+        console.log('입양자 생성 완료:', { adopterUserId, nickname: adopterNickname });
 
         // 2. 브리더 회원가입
         const breederTimestamp = Date.now();
@@ -75,7 +75,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
         breederUserId = breederResponse.body.data.breederId || breederResponse.body.data.userId;
         breederId = breederUserId;
 
-        console.log('✅ 브리더 생성 완료:', { breederId });
+        console.log('브리더 생성 완료:', { breederId });
     });
 
     afterAll(async () => {
@@ -86,7 +86,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
      * 1. 프로필 관리 테스트
      */
     describe('프로필 관리', () => {
-        it('GET /api/adopter/profile - 프로필 조회 성공', async () => {
+        it('프로필 조회 성공', async () => {
             const response = await request(app.getHttpServer())
                 .get('/api/adopter/profile')
                 .set('Authorization', `Bearer ${adopterToken}`)
@@ -96,10 +96,10 @@ describe('Adopter API E2E Tests (Simple)', () => {
             expect(response.body.data).toBeDefined();
             expect(response.body.data.adopterId).toBe(adopterUserId);
             expect(response.body.data.nickname).toBe(adopterNickname);
-            console.log('✅ 프로필 조회 성공');
+            console.log('프로필 조회 성공');
         });
 
-        it('PATCH /api/adopter/profile - 프로필 수정 성공', async () => {
+        it('프로필 수정 성공', async () => {
             const updateData = {
                 name: '수정된입양자',
                 phone: '010-9999-8888',
@@ -113,7 +113,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
 
             expect(response.body.success).toBe(true);
             expect(response.body.message).toBe('프로필이 성공적으로 수정되었습니다.');
-            console.log('✅ 프로필 수정 성공');
+            console.log('프로필 수정 성공');
         });
     });
 
@@ -123,7 +123,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
     describe('입양 신청', () => {
         let applicationId: string;
 
-        it('POST /api/adopter/application - 입양 신청 성공', async () => {
+        it('입양 신청 성공', async () => {
             const applicationData = {
                 name: '테스트신청자',
                 phone: '010-1234-5678',
@@ -157,10 +157,10 @@ describe('Adopter API E2E Tests (Simple)', () => {
             expect(response.body.data.status).toBe('consultation_pending');
 
             applicationId = response.body.data.applicationId;
-            console.log('✅ 입양 신청 성공:', applicationId);
+            console.log('입양 신청 성공:', applicationId);
         });
 
-        it('GET /api/adopter/applications - 입양 신청 목록 조회', async () => {
+        it('입양 신청 목록 조회', async () => {
             const response = await request(app.getHttpServer())
                 .get('/api/adopter/applications')
                 .set('Authorization', `Bearer ${adopterToken}`)
@@ -171,12 +171,12 @@ describe('Adopter API E2E Tests (Simple)', () => {
             expect(response.body.data.items).toBeDefined();
             expect(Array.isArray(response.body.data.items)).toBe(true);
             expect(response.body.data.pagination).toBeDefined();
-            console.log('✅ 입양 신청 목록 조회 성공');
+            console.log('입양 신청 목록 조회 성공');
         });
 
-        it('GET /api/adopter/applications/:id - 입양 신청 상세 조회', async () => {
+        it('입양 신청 상세 조회', async () => {
             if (!applicationId) {
-                console.log('⚠️  applicationId가 없어서 테스트 스킵');
+                console.log('주의: applicationId가 없어서 테스트 스킵');
                 return;
             }
 
@@ -187,7 +187,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
 
             expect(response.body.success).toBe(true);
             expect(response.body.data.applicationId).toBe(applicationId);
-            console.log('✅ 입양 신청 상세 조회 성공');
+            console.log('입양 신청 상세 조회 성공');
         });
     });
 
@@ -197,7 +197,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
     describe('후기 작성', () => {
         let reviewId: string;
 
-        it('POST /api/adopter/review - 후기 작성 시도 (applicationId 필요)', async () => {
+        it('후기 작성 시도 (applicationId 필요)', async () => {
             // 후기는 applicationId가 필요하므로 applicationId 없이는 400이 예상됨
             // 실제 후기 작성을 위해서는 입양신청이 먼저 완료 상태여야 함
             const reviewData = {
@@ -217,13 +217,13 @@ describe('Adopter API E2E Tests (Simple)', () => {
 
             if (response.status === 201 && response.body.data?.reviewId) {
                 reviewId = response.body.data.reviewId;
-                console.log('✅ 후기 작성 성공:', reviewId);
+                console.log('후기 작성 성공:', reviewId);
             } else {
-                console.log('⚠️  후기 작성 실패 (applicationId 상태 불일치 또는 없음):', response.status);
+                console.log('주의: 후기 작성 실패 (applicationId 상태 불일치 또는 없음):', response.status);
             }
         });
 
-        it('GET /api/adopter/reviews - 내가 작성한 후기 목록 조회', async () => {
+        it('내가 작성한 후기 목록 조회', async () => {
             const response = await request(app.getHttpServer())
                 .get('/api/adopter/reviews')
                 .set('Authorization', `Bearer ${adopterToken}`)
@@ -233,12 +233,12 @@ describe('Adopter API E2E Tests (Simple)', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.data.items).toBeDefined();
             expect(Array.isArray(response.body.data.items)).toBe(true);
-            console.log('✅ 후기 목록 조회 성공');
+            console.log('후기 목록 조회 성공');
         });
 
-        it('GET /api/adopter/reviews/:id - 내가 작성한 후기 상세 조회', async () => {
+        it('내가 작성한 후기 상세 조회', async () => {
             if (!reviewId) {
-                console.log('⚠️  reviewId가 없어서 테스트 스킵');
+                console.log('주의: reviewId가 없어서 테스트 스킵');
                 return;
             }
 
@@ -249,7 +249,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
 
             expect(response.body.success).toBe(true);
             expect(response.body.data.reviewId).toBe(reviewId);
-            console.log('✅ 후기 상세 조회 성공');
+            console.log('후기 상세 조회 성공');
         });
     });
 
@@ -257,7 +257,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
      * 4. 즐겨찾기 테스트
      */
     describe('즐겨찾기', () => {
-        it('POST /api/adopter/favorite - 즐겨찾기 추가 성공', async () => {
+        it('즐겨찾기 추가 성공', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/adopter/favorite')
                 .set('Authorization', `Bearer ${adopterToken}`)
@@ -266,10 +266,10 @@ describe('Adopter API E2E Tests (Simple)', () => {
 
             expect(response.body.success).toBe(true);
             expect(response.body.message).toContain('즐겨찾기');
-            console.log('✅ 즐겨찾기 추가 성공');
+            console.log('즐겨찾기 추가 성공');
         });
 
-        it('GET /api/adopter/favorites - 즐겨찾기 목록 조회', async () => {
+        it('즐겨찾기 목록 조회', async () => {
             const response = await request(app.getHttpServer())
                 .get('/api/adopter/favorites')
                 .set('Authorization', `Bearer ${adopterToken}`)
@@ -279,10 +279,10 @@ describe('Adopter API E2E Tests (Simple)', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.data.items).toBeDefined();
             expect(Array.isArray(response.body.data.items)).toBe(true);
-            console.log('✅ 즐겨찾기 목록 조회 성공');
+            console.log('즐겨찾기 목록 조회 성공');
         });
 
-        it('DELETE /api/adopter/favorite/:breederId - 즐겨찾기 삭제 성공', async () => {
+        it('즐겨찾기 삭제 성공', async () => {
             const response = await request(app.getHttpServer())
                 .delete(`/api/adopter/favorite/${breederId}`)
                 .set('Authorization', `Bearer ${adopterToken}`)
@@ -290,7 +290,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
 
             expect(response.body.success).toBe(true);
             expect(response.body.message).toContain('삭제');
-            console.log('✅ 즐겨찾기 삭제 성공');
+            console.log('즐겨찾기 삭제 성공');
         });
     });
 
@@ -298,7 +298,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
      * 5. 신고 테스트
      */
     describe('신고', () => {
-        it('POST /api/adopter/report - 브리더 신고 성공', async () => {
+        it('브리더 신고 성공', async () => {
             const reportData = {
                 type: 'breeder', // 'breeder', 'adopter', 'content' 중 하나
                 breederId: breederId,
@@ -314,12 +314,12 @@ describe('Adopter API E2E Tests (Simple)', () => {
 
             expect(response.body.success).toBe(true);
             expect(response.body.message).toContain('신고');
-            console.log('✅ 브리더 신고 성공');
+            console.log('브리더 신고 성공');
         });
     });
 
     describe('회원 탈퇴', () => {
-        it('DELETE /api/adopter/account - 회원 탈퇴 성공', async () => {
+        it('회원 탈퇴 성공', async () => {
             const response = await request(app.getHttpServer())
                 .delete('/api/adopter/account')
                 .set('Authorization', `Bearer ${adopterToken}`)
@@ -332,7 +332,7 @@ describe('Adopter API E2E Tests (Simple)', () => {
             expect(response.body.message).toBe('회원 탈퇴가 완료되었습니다.');
             expect(response.body.data.adopterId).toBe(adopterUserId);
             expect(response.body.data.message).toBe('회원 탈퇴가 성공적으로 처리되었습니다.');
-            console.log('✅ 회원 탈퇴 성공');
+            console.log('회원 탈퇴 성공');
         });
     });
 });

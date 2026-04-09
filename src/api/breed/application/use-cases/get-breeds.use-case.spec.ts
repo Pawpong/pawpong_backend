@@ -2,8 +2,8 @@ import { GetBreedsUseCase } from './get-breeds.use-case';
 import { BreedCatalogService } from '../../domain/services/breed-catalog.service';
 import { BreedReaderPort } from '../ports/breed-reader.port';
 
-describe('GetBreedsUseCase', () => {
-    it('품종 조회 결과를 응답 DTO로 조립한다', async () => {
+describe('품종 조회 유스케이스', () => {
+    it('품종 조회 결과를 응답 객체로 조립한다', async () => {
         const breedReader: BreedReaderPort = {
             readByPetType: jest.fn().mockResolvedValue([
                 {

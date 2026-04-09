@@ -29,7 +29,7 @@ class StubAnnouncementPublicReaderPort extends AnnouncementPublicReaderPort {
     }
 }
 
-describe('GetAnnouncementByIdUseCase', () => {
+describe('공지사항 상세 조회 유스케이스', () => {
     let readerPort: StubAnnouncementPublicReaderPort;
     let useCase: GetAnnouncementByIdUseCase;
 

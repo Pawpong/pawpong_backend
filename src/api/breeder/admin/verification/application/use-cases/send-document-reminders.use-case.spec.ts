@@ -5,7 +5,7 @@ import { BreederVerificationAdminActivityLogFactoryService } from '../../domain/
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 
-describe('SendDocumentRemindersUseCase', () => {
+describe('문서 리마인드 발송 유스케이스', () => {
     const reader = {
         findAdminById: jest.fn(),
         findApprovedBreedersMissingDocuments: jest.fn(),

@@ -1,8 +1,8 @@
 import { AuthHttpCookieService } from './auth-http-cookie.service';
 import { AuthSocialHttpFlowService } from './auth-social-http-flow.service';
 
-describe('AuthSocialHttpFlowService', () => {
-    it('리다이렉트 URL 조회를 포트에 위임한다', () => {
+describe('인증 소셜 HTTP 흐름 서비스', () => {
+    it('리다이렉트 주소 조회를 포트에 위임한다', () => {
         const getRedirectUrlQuery = {
             execute: jest.fn().mockReturnValue('https://accounts.example.com/oauth'),
         };

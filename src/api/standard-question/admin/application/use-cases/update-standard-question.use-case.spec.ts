@@ -4,7 +4,7 @@ import { UpdateStandardQuestionUseCase } from './update-standard-question.use-ca
 import { StandardQuestionPresentationService } from '../../../domain/services/standard-question-presentation.service';
 import { StandardQuestionWriterPort } from '../ports/standard-question-writer.port';
 
-describe('UpdateStandardQuestionUseCase', () => {
+describe('기본 질문 수정 유스케이스', () => {
     it('질문이 있으면 수정된 응답을 반환한다', async () => {
         const standardQuestionWriter: StandardQuestionWriterPort = {
             update: jest.fn().mockResolvedValue({

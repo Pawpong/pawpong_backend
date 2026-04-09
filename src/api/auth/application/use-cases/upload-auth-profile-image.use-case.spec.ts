@@ -51,7 +51,7 @@ class StubAuthTempUploadPort extends AuthTempUploadPort {
     }
 }
 
-describe('UploadAuthProfileImageUseCase', () => {
+describe('인증 프로필 이미지 업로드 유스케이스', () => {
     let targetPort: StubAuthProfileImageTargetPort;
     let tempUploadPort: StubAuthTempUploadPort;
     let useCase: UploadAuthProfileImageUseCase;
@@ -67,7 +67,7 @@ describe('UploadAuthProfileImageUseCase', () => {
         );
     });
 
-    it('로그인 사용자와 tempId가 함께 있으면 저장 계약을 모두 유지한다', async () => {
+    it('로그인 사용자와 임시 ID가 함께 있으면 저장 계약을 모두 유지한다', async () => {
         const file = {
             originalname: 'profile.jpg',
             size: 1024,

@@ -7,7 +7,7 @@ import { FeedLikeManagerPort } from '../ports/feed-like-manager.port';
 import { FeedLikePolicyService } from '../../domain/services/feed-like-policy.service';
 import { FeedLikePresentationService } from '../../domain/services/feed-like-presentation.service';
 
-describe('ToggleLikeUseCase', () => {
+describe('좋아요 전환 유스케이스', () => {
     const createManager = (): FeedLikeManagerPort => ({
         findVideoCounter: jest.fn().mockResolvedValue({
             id: 'video-1',

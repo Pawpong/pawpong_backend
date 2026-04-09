@@ -4,14 +4,14 @@ import request from 'supertest';
 import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../common/test/test-utils';
 
 /**
- * User Admin 도메인 E2E 테스트
+ * 사용자 관리자 종단간 테스트
  *
- * 테스트 대상 API:
+ * 테스트 대상 경로:
  * 1. 관리자 프로필 조회
  * 2. 통합 사용자 목록 조회
  * 3. 사용자 상태 변경
  */
-describe('User Admin API E2E Tests', () => {
+describe('사용자 관리자 종단간 테스트', () => {
     let app: INestApplication;
     let adminToken: string;
     let adminId: string;
@@ -44,7 +44,7 @@ describe('User Admin API E2E Tests', () => {
     /**
      * 1. 관리자 프로필 조회 테스트
      */
-    describe('GET /api/user-admin/profile', () => {
+    describe('GET /api/user-관리자/profile', () => {
         it('관리자 프로필 조회 성공', async () => {
             const response = await request(app.getHttpServer())
                 .get('/api/user-admin/profile')
@@ -58,20 +58,20 @@ describe('User Admin API E2E Tests', () => {
             expect(response.body.data.permissions).toBeDefined();
             expect(response.body.message).toContain('관리자 프로필');
 
-            console.log('✅ 관리자 프로필 조회 성공');
+            console.log('관리자 프로필 조회 성공');
         });
 
         it('인증 없이 접근 시 401 에러', async () => {
             const response = await request(app.getHttpServer()).get('/api/user-admin/profile').expect(401);
 
-            console.log('✅ 인증 없이 접근 실패 확인');
+            console.log('인증 없이 접근 실패 확인');
         });
     });
 
     /**
      * 2. 통합 사용자 목록 조회 테스트
      */
-    describe('GET /api/user-admin/users', () => {
+    describe('GET /api/user-관리자/users', () => {
         let adopterId: string;
         let breederId: string;
 
@@ -130,7 +130,7 @@ describe('User Admin API E2E Tests', () => {
             const users = response.body.data.users || response.body.data.items || response.body.data;
             expect(users).toBeDefined();
 
-            console.log('✅ 모든 사용자 목록 조회 성공');
+            console.log('모든 사용자 목록 조회 성공');
         });
 
         it('입양자만 필터링하여 조회 성공', async () => {
@@ -145,7 +145,7 @@ describe('User Admin API E2E Tests', () => {
                 expect(adopters.every((u: any) => u.userRole === 'adopter' || u.role === 'adopter')).toBe(true);
             }
 
-            console.log('✅ 입양자만 필터링하여 조회 성공');
+            console.log('입양자만 필터링하여 조회 성공');
         });
 
         it('브리더만 필터링하여 조회 성공', async () => {
@@ -160,7 +160,7 @@ describe('User Admin API E2E Tests', () => {
                 expect(breeders.every((u: any) => u.userRole === 'breeder' || u.role === 'breeder')).toBe(true);
             }
 
-            console.log('✅ 브리더만 필터링하여 조회 성공');
+            console.log('브리더만 필터링하여 조회 성공');
         });
 
         it('검색 키워드로 조회 성공', async () => {
@@ -171,20 +171,20 @@ describe('User Admin API E2E Tests', () => {
 
             expect(response.body.success).toBe(true);
 
-            console.log('✅ 검색 키워드로 조회 성공');
+            console.log('검색 키워드로 조회 성공');
         });
 
         it('인증 없이 접근 시 401 에러', async () => {
             const response = await request(app.getHttpServer()).get('/api/user-admin/users').expect(401);
 
-            console.log('✅ 인증 없이 접근 실패 확인');
+            console.log('인증 없이 접근 실패 확인');
         });
     });
 
     /**
      * 3. 사용자 상태 변경 테스트
      */
-    describe('PUT /api/user-admin/users/:userId/status', () => {
+    describe('PUT /api/user-관리자/users/:사용자 ID/status', () => {
         let testAdopterId: string;
 
         beforeAll(async () => {
@@ -219,7 +219,7 @@ describe('User Admin API E2E Tests', () => {
             expect(response.body.data.message).toContain('status updated');
             expect(response.body.message).toContain('상태가 변경');
 
-            console.log('✅ 입양자 계정 정지 성공');
+            console.log('입양자 계정 정지 성공');
         });
 
         it('입양자 계정 활성화 성공', async () => {
@@ -234,7 +234,7 @@ describe('User Admin API E2E Tests', () => {
 
             expect(response.body.success).toBe(true);
 
-            console.log('✅ 입양자 계정 활성화 성공');
+            console.log('입양자 계정 활성화 성공');
         });
 
         it('사유 없이 상태 변경 시 검증', async () => {
@@ -247,7 +247,7 @@ describe('User Admin API E2E Tests', () => {
                 });
 
             expect([200, 400]).toContain(response.status);
-            console.log('✅ 사유 없이 상태 변경 검증 완료');
+            console.log('사유 없이 상태 변경 검증 완료');
         });
 
         it('인증 없이 접근 시 401 에러', async () => {
@@ -259,7 +259,7 @@ describe('User Admin API E2E Tests', () => {
                 })
                 .expect(401);
 
-            console.log('✅ 인증 없이 접근 실패 확인');
+            console.log('인증 없이 접근 실패 확인');
         });
     });
 
@@ -290,7 +290,7 @@ describe('User Admin API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(403);
 
-            console.log('✅ 일반 사용자의 관리자 API 접근 거부 확인');
+            console.log('일반 사용자의 관리자 경로 접근 거부 확인');
         });
     });
 });

@@ -5,7 +5,7 @@ import { CreateBreedUseCase } from './create-breed.use-case';
 import { BreedAdminReaderPort } from '../ports/breed-admin-reader.port';
 import { BreedWriterPort } from '../ports/breed-writer.port';
 
-describe('CreateBreedUseCase', () => {
+describe('품종 생성 유스케이스', () => {
     it('중복 카테고리가 없으면 품종 카테고리를 생성한다', async () => {
         const breedAdminReader: BreedAdminReaderPort = {
             readAll: jest.fn(),
@@ -44,7 +44,7 @@ describe('CreateBreedUseCase', () => {
         });
     });
 
-    it('중복 카테고리가 있으면 ConflictException을 던진다', async () => {
+    it('중복 카테고리가 있으면 예외을 던진다', async () => {
         const useCase = new CreateBreedUseCase(
             {
                 readAll: jest.fn(),

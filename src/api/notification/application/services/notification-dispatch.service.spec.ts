@@ -1,7 +1,7 @@
 import { NotificationType, RecipientType } from '../../../../common/enum/user.enum';
 import { NotificationDispatchService } from './notification-dispatch.service';
 
-describe('NotificationDispatchService', () => {
+describe('알림 발송 서비스', () => {
     it('포트로 알림 생성을 위임한다', async () => {
         const createNotificationUseCase = {
             execute: jest.fn().mockResolvedValue({ _id: 'notification-1' }),

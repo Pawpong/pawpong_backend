@@ -6,12 +6,12 @@ import request from 'supertest';
 import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../common/test/test-utils';
 
 /**
- * Platform Admin 도메인 E2E 테스트
+ * 플랫폼 관리자 종단간 테스트
  *
- * 테스트 대상 API:
+ * 테스트 대상 경로:
  * 1. 플랫폼 통계 조회
  */
-describe('Platform Admin API E2E Tests', () => {
+describe('플랫폼 관리자 종단간 테스트', () => {
     let app: INestApplication;
     let adminToken: string;
     let adminId: string;
@@ -88,14 +88,14 @@ describe('Platform Admin API E2E Tests', () => {
                     .expect(200);
             }
 
-            console.log('✅ 테스트용 사용자 생성 완료');
+            console.log('테스트용 사용자 생성 완료');
         });
     });
 
     /**
      * 1. 플랫폼 통계 조회 테스트
      */
-    describe('GET /api/platform-admin/stats', () => {
+    describe('GET /api/platform-관리자/stats', () => {
         it('기본 통계 조회 성공', async () => {
             const response = await request(app.getHttpServer())
                 .get('/api/platform-admin/stats')
@@ -110,7 +110,7 @@ describe('Platform Admin API E2E Tests', () => {
             expect(response.body.data.breederPerformanceRanking).toBeDefined();
             expect(response.body.data.reportStatistics).toBeDefined();
 
-            console.log('✅ 기본 통계 조회 성공');
+            console.log('기본 통계 조회 성공');
         });
 
         it('사용자 통계가 올바르게 조회됨', async () => {
@@ -125,7 +125,7 @@ describe('Platform Admin API E2E Tests', () => {
             expect(userStatistics.newAdopterCount).toBeGreaterThanOrEqual(0);
             expect(userStatistics.newBreederCount).toBeGreaterThanOrEqual(0);
 
-            console.log('✅ 사용자 통계가 올바르게 조회됨');
+            console.log('사용자 통계가 올바르게 조회됨');
         });
 
         it('일간 통계 조회 성공', async () => {
@@ -136,7 +136,7 @@ describe('Platform Admin API E2E Tests', () => {
 
             expect(response.body.success).toBe(true);
 
-            console.log('✅ 일간 통계 조회 성공');
+            console.log('일간 통계 조회 성공');
         });
 
         it('주간 통계 조회 성공', async () => {
@@ -147,7 +147,7 @@ describe('Platform Admin API E2E Tests', () => {
 
             expect(response.body.success).toBe(true);
 
-            console.log('✅ 주간 통계 조회 성공');
+            console.log('주간 통계 조회 성공');
         });
 
         it('월간 통계 조회 성공', async () => {
@@ -158,7 +158,7 @@ describe('Platform Admin API E2E Tests', () => {
 
             expect(response.body.success).toBe(true);
 
-            console.log('✅ 월간 통계 조회 성공');
+            console.log('월간 통계 조회 성공');
         });
 
         it('날짜 범위로 통계 조회 성공', async () => {
@@ -169,7 +169,7 @@ describe('Platform Admin API E2E Tests', () => {
 
             expect(response.body.success).toBe(true);
 
-            console.log('✅ 날짜 범위로 통계 조회 성공');
+            console.log('날짜 범위로 통계 조회 성공');
         });
 
         it('페이지네이션과 함께 통계 조회 성공', async () => {
@@ -183,13 +183,13 @@ describe('Platform Admin API E2E Tests', () => {
             expect(response.body.data.regionalStatistics.length).toBeLessThanOrEqual(5);
             expect(response.body.data.breederPerformanceRanking.length).toBeLessThanOrEqual(5);
 
-            console.log('✅ 페이지네이션과 함께 통계 조회 성공');
+            console.log('페이지네이션과 함께 통계 조회 성공');
         });
 
         it('인증 없이 접근 시 401 에러', async () => {
             const response = await request(app.getHttpServer()).get('/api/platform-admin/stats').expect(401);
 
-            console.log('✅ 인증 없이 접근 실패 확인');
+            console.log('인증 없이 접근 실패 확인');
         });
 
         it('잘못된 통계 타입으로 조회 시 400 에러', async () => {
@@ -198,7 +198,7 @@ describe('Platform Admin API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adminToken}`)
                 .expect(400);
 
-            console.log('✅ 잘못된 통계 타입으로 조회 시 400 에러 확인');
+            console.log('잘못된 통계 타입으로 조회 시 400 에러 확인');
         });
 
         it('잘못된 날짜 형식으로 조회 시 400 에러', async () => {
@@ -207,7 +207,7 @@ describe('Platform Admin API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adminToken}`)
                 .expect(400);
 
-            console.log('✅ 잘못된 날짜 형식으로 조회 시 400 에러 확인');
+            console.log('잘못된 날짜 형식으로 조회 시 400 에러 확인');
         });
     });
 
@@ -238,7 +238,7 @@ describe('Platform Admin API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(403);
 
-            console.log('✅ 일반 사용자의 통계 조회 거부 확인');
+            console.log('일반 사용자의 통계 조회 거부 확인');
         });
 
         it('브리더 토큰으로 접근 시 403 에러', async () => {
@@ -274,7 +274,7 @@ describe('Platform Admin API E2E Tests', () => {
                 .set('Authorization', `Bearer ${breederToken}`)
                 .expect(403);
 
-            console.log('✅ 브리더의 통계 조회 거부 확인');
+            console.log('브리더의 통계 조회 거부 확인');
         });
     });
 });

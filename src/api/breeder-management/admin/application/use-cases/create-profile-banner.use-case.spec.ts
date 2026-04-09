@@ -3,8 +3,8 @@ import { CreateProfileBannerUseCase } from './create-profile-banner.use-case';
 import { BreederManagementAdminBannerWriterPort } from '../ports/breeder-management-admin-banner-writer.port';
 import { BreederManagementFileUrlPort } from '../../../application/ports/breeder-management-file-url.port';
 
-describe('CreateProfileBannerUseCase', () => {
-    it('프로필 배너를 생성하고 응답 DTO로 변환한다', async () => {
+describe('프로필 배너 생성 유스케이스', () => {
+    it('프로필 배너를 생성하고 응답 객체로 변환한다', async () => {
         const bannerWriter: BreederManagementAdminBannerWriterPort = {
             createProfile: jest.fn().mockResolvedValue({
                 bannerId: 'banner-1',

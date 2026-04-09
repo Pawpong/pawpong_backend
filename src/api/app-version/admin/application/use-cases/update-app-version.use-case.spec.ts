@@ -6,7 +6,7 @@ import { AppVersionAdminPresentationService } from '../../domain/services/app-ve
 import { UpdateAppVersionUseCase } from './update-app-version.use-case';
 import { AppVersionWriterPort } from '../ports/app-version-writer.port';
 
-describe('UpdateAppVersionUseCase', () => {
+describe('앱 버전 수정 유스케이스', () => {
     const logger = {
         logStart: jest.fn(),
         logSuccess: jest.fn(),
@@ -48,7 +48,7 @@ describe('UpdateAppVersionUseCase', () => {
         });
     });
 
-    it('앱 버전이 없으면 NotFoundException을 던진다', async () => {
+    it('앱 버전이 없으면 예외을 던진다', async () => {
         const useCase = new UpdateAppVersionUseCase(
             {
                 create: jest.fn(),
@@ -63,7 +63,7 @@ describe('UpdateAppVersionUseCase', () => {
         await expect(useCase.execute('missing', 'admin-1', {})).rejects.toBeInstanceOf(NotFoundException);
     });
 
-    it('관리자 정보가 없으면 BadRequestException을 던진다', async () => {
+    it('관리자 정보가 없으면 예외을 던진다', async () => {
         const useCase = new UpdateAppVersionUseCase(
             {
                 create: jest.fn(),

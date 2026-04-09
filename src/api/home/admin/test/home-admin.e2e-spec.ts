@@ -3,10 +3,10 @@ import request from 'supertest';
 import { createTestingApp, cleanupDatabase, getAdminToken } from '../../../../common/test/test-utils';
 
 /**
- * Home Admin API E2E 테스트
- * 배너 + FAQ CRUD (관리자 전용)
+ * 홈 관리자 종단간 테스트
+ * 배너 + 자주 묻는 질문 CRUD (관리자 전용)
  */
-describe('Home Admin API E2E Tests', () => {
+describe('홈 관리자 종단간 테스트', () => {
     let app: INestApplication;
     let adminToken: string;
     let createdBannerId: string;
@@ -15,7 +15,7 @@ describe('Home Admin API E2E Tests', () => {
     beforeAll(async () => {
         app = await createTestingApp();
         adminToken = await getAdminToken(app) || '';
-        if (!adminToken) console.log('⚠️  관리자 토큰 획득 실패');
+        if (!adminToken) console.log('주의: 관리자 토큰 획득 실패');
     }, 30000);
 
     afterAll(async () => {
@@ -27,8 +27,8 @@ describe('Home Admin API E2E Tests', () => {
      * 배너 CRUD
      */
     describe('배너 관리', () => {
-        it('GET /api/home-admin/banners - 배너 목록 조회', async () => {
-            if (!adminToken) { console.log('⚠️  스킵'); return; }
+        it('배너 목록 조회', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .get('/api/home-admin/banners')
@@ -36,11 +36,11 @@ describe('Home Admin API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ 배너 목록 조회 성공');
+            console.log('배너 목록 조회 성공');
         });
 
-        it('POST /api/home-admin/banner - 배너 생성', async () => {
-            if (!adminToken) { console.log('⚠️  스킵'); return; }
+        it('배너 생성', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .post('/api/home-admin/banner')
@@ -57,11 +57,11 @@ describe('Home Admin API E2E Tests', () => {
             if (response.status === 200 && response.body.data?.id) {
                 createdBannerId = response.body.data.id;
             }
-            console.log('✅ 배너 생성 검증 완료');
+            console.log('배너 생성 검증 완료');
         });
 
-        it('DELETE /api/home-admin/banner/:id - 배너 삭제', async () => {
-            if (!adminToken || !createdBannerId) { console.log('⚠️  스킵'); return; }
+        it('배너 삭제', async () => {
+            if (!adminToken || !createdBannerId) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .delete(`/api/home-admin/banner/${createdBannerId}`)
@@ -69,23 +69,23 @@ describe('Home Admin API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ 배너 삭제 성공');
+            console.log('배너 삭제 성공');
         });
 
         it('인증 없이 접근 시 401', async () => {
             await request(app.getHttpServer())
                 .get('/api/home-admin/banners')
                 .expect(401);
-            console.log('✅ 인증 없이 접근 401 확인');
+            console.log('인증 없이 접근 401 확인');
         });
     });
 
     /**
-     * FAQ CRUD
+     * 자주 묻는 질문 CRUD
      */
-    describe('FAQ 관리', () => {
-        it('GET /api/home-admin/faqs - FAQ 목록 조회', async () => {
-            if (!adminToken) { console.log('⚠️  스킵'); return; }
+    describe('자주 묻는 질문 관리', () => {
+        it('자주 묻는 질문 목록 조회', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .get('/api/home-admin/faqs')
@@ -93,11 +93,11 @@ describe('Home Admin API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ FAQ 목록 조회 성공');
+            console.log('자주 묻는 질문 목록 조회 성공');
         });
 
-        it('POST /api/home-admin/faq - FAQ 생성', async () => {
-            if (!adminToken) { console.log('⚠️  스킵'); return; }
+        it('자주 묻는 질문 생성', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .post('/api/home-admin/faq')
@@ -114,11 +114,11 @@ describe('Home Admin API E2E Tests', () => {
             if (response.status === 200 && response.body.data?.id) {
                 createdFaqId = response.body.data.id;
             }
-            console.log('✅ FAQ 생성 검증 완료');
+            console.log('자주 묻는 질문 생성 검증 완료');
         });
 
-        it('DELETE /api/home-admin/faq/:id - FAQ 삭제', async () => {
-            if (!adminToken || !createdFaqId) { console.log('⚠️  스킵'); return; }
+        it('자주 묻는 질문 삭제', async () => {
+            if (!adminToken || !createdFaqId) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .delete(`/api/home-admin/faq/${createdFaqId}`)
@@ -126,7 +126,7 @@ describe('Home Admin API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ FAQ 삭제 성공');
+            console.log('자주 묻는 질문 삭제 성공');
         });
     });
 });

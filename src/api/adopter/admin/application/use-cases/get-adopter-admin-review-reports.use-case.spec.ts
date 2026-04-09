@@ -6,7 +6,7 @@ import { AdopterPaginationAssemblerService } from '../../../domain/services/adop
 import { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { GetAdopterAdminReviewReportsUseCase } from './get-adopter-admin-review-reports.use-case';
 
-describe('GetAdopterAdminReviewReportsUseCase', () => {
+describe('입양자 관리자 후기 신고 목록 조회 유스케이스', () => {
     it('후기 신고 목록 응답 계약을 유지한다', async () => {
         const reader: AdopterAdminReaderPort = {
             findAdminById: jest.fn().mockResolvedValue({
@@ -64,7 +64,7 @@ describe('GetAdopterAdminReviewReportsUseCase', () => {
         });
     });
 
-    it('권한이 없으면 ForbiddenException을 던진다', async () => {
+    it('권한이 없으면 예외을 던진다', async () => {
         const useCase = new GetAdopterAdminReviewReportsUseCase(
             {
                 findAdminById: jest.fn().mockResolvedValue(null),

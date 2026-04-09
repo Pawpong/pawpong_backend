@@ -6,7 +6,7 @@ import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-
 import { UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { UserAdminWriterPort } from '../ports/user-admin-writer.port';
 
-describe('UpdateUserStatusUseCase', () => {
+describe('사용자 상태 수정 유스케이스', () => {
     it('상태를 변경하고 관리자 로그를 기록한다', async () => {
         const reader: UserAdminReaderPort = {
             findAdminById: jest.fn().mockResolvedValue({

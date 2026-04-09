@@ -5,7 +5,7 @@ import { DistrictAdminPresentationService } from '../../../domain/services/distr
 import { DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
 import { DistrictWriterPort } from '../ports/district-writer.port';
 
-describe('CreateDistrictUseCase', () => {
+describe('지역 생성 유스케이스', () => {
     it('중복 city가 없으면 지역을 생성한다', async () => {
         const districtAdminReader: DistrictAdminReaderPort = {
             readAll: jest.fn(),
@@ -35,7 +35,7 @@ describe('CreateDistrictUseCase', () => {
         });
     });
 
-    it('중복 city가 있으면 ConflictException을 던진다', async () => {
+    it('중복 city가 있으면 예외을 던진다', async () => {
         const useCase = new CreateDistrictUseCase(
             {
                 readAll: jest.fn(),

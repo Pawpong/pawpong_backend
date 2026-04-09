@@ -1,6 +1,6 @@
 import { AdopterPaginationAssemblerService } from '../domain/services/adopter-pagination-assembler.service';
 
-describe('AdopterPaginationAssemblerService', () => {
+describe('입양자 페이지네이션 조립 서비스', () => {
     const service = new AdopterPaginationAssemblerService();
 
     it('PaginationBuilder를 같은 기준으로 생성한다', () => {
@@ -12,7 +12,7 @@ describe('AdopterPaginationAssemblerService', () => {
         expect(builder._totalCount).toBe(3);
     });
 
-    it('페이지네이션 응답 DTO를 조립한다', () => {
+    it('페이지네이션 응답 객체를 조립한다', () => {
         const response = service.build([{ id: 'favorite-1' }], 2, 5, 11);
 
         expect(response.items).toEqual([{ id: 'favorite-1' }]);

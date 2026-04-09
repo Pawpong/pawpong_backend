@@ -4,7 +4,7 @@ import { CheckAppVersionUseCase } from './check-app-version.use-case';
 import { AppVersionReaderPort } from '../ports/app-version-reader.port';
 import { AppVersionPolicyService } from '../../domain/services/app-version-policy.service';
 
-describe('CheckAppVersionUseCase', () => {
+describe('앱 버전 확인 유스케이스', () => {
     const logger = {
         logStart: jest.fn(),
         logSuccess: jest.fn(),

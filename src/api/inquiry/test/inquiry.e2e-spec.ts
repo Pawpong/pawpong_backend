@@ -8,10 +8,10 @@ import {
 } from '../../../common/test/test-utils';
 
 /**
- * Inquiry (문의하기) API E2E 테스트
- * Public + Adopter + Breeder 역할별 테스트
+ * 문의 종단간 테스트
+ * 공개 + 입양자 + 브리더 역할별 테스트
  */
-describe('Inquiry API E2E Tests', () => {
+describe('문의 종단간 테스트', () => {
     let app: INestApplication;
     let adopterToken: string;
     let adopterId: string;
@@ -40,7 +40,7 @@ describe('Inquiry API E2E Tests', () => {
         await app.close();
     });
 
-    describe('GET /api/inquiry (Public)', () => {
+    describe('GET /api/inquiry (공개)', () => {
         it('공개 문의 목록 조회 성공', async () => {
             const response = await request(app.getHttpServer())
                 .get('/api/inquiry')
@@ -48,14 +48,14 @@ describe('Inquiry API E2E Tests', () => {
 
             expect(response.body.success).toBe(true);
             expect(response.body.data).toBeDefined();
-            console.log('✅ 공개 문의 목록 조회 성공');
+            console.log('공개 문의 목록 조회 성공');
         });
     });
 
-    describe('POST /api/inquiry (Adopter)', () => {
+    describe('POST /api/inquiry (입양자)', () => {
         it('입양자 문의 생성 성공', async () => {
             if (!adopterToken) {
-                console.log('⚠️  입양자 토큰이 없어서 테스트 스킵');
+                console.log('주의: 입양자 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -76,7 +76,7 @@ describe('Inquiry API E2E Tests', () => {
                     createdInquiryId = response.body.data.inquiryId;
                 }
             }
-            console.log('✅ 입양자 문의 생성 검증 완료');
+            console.log('입양자 문의 생성 검증 완료');
         });
 
         it('인증 없이 문의 생성 시 401', async () => {
@@ -85,14 +85,14 @@ describe('Inquiry API E2E Tests', () => {
                 .send({ title: '테스트', content: '내용' })
                 .expect(401);
 
-            console.log('✅ 인증 없이 문의 생성 401 확인');
+            console.log('인증 없이 문의 생성 401 확인');
         });
     });
 
-    describe('GET /api/inquiry/my (Adopter)', () => {
+    describe('GET /api/inquiry/my (입양자)', () => {
         it('내 문의 목록 조회 성공', async () => {
             if (!adopterToken) {
-                console.log('⚠️  입양자 토큰이 없어서 테스트 스킵');
+                console.log('주의: 입양자 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -102,14 +102,14 @@ describe('Inquiry API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ 내 문의 목록 조회 성공');
+            console.log('내 문의 목록 조회 성공');
         });
     });
 
-    describe('GET /api/inquiry/breeder (Breeder)', () => {
+    describe('GET /api/inquiry/breeder (브리더)', () => {
         it('브리더 문의 목록 조회 성공', async () => {
             if (!breederToken) {
-                console.log('⚠️  브리더 토큰이 없어서 테스트 스킵');
+                console.log('주의: 브리더 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -119,14 +119,14 @@ describe('Inquiry API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ 브리더 문의 목록 조회 성공');
+            console.log('브리더 문의 목록 조회 성공');
         });
     });
 
-    describe('PATCH /api/inquiry/:inquiryId (Adopter)', () => {
+    describe('PATCH /api/inquiry/:inquiryId (입양자)', () => {
         it('문의 수정 - 존재하지 않는 ID 시 에러', async () => {
             if (!adopterToken) {
-                console.log('⚠️  입양자 토큰이 없어서 테스트 스킵');
+                console.log('주의: 입양자 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -136,14 +136,14 @@ describe('Inquiry API E2E Tests', () => {
                 .send({ title: '수정된 제목' });
 
             expect([400, 403, 404]).toContain(response.status);
-            console.log('✅ 존재하지 않는 문의 수정 시 에러 확인');
+            console.log('존재하지 않는 문의 수정 시 에러 확인');
         });
     });
 
-    describe('DELETE /api/inquiry/:inquiryId (Adopter)', () => {
+    describe('DELETE /api/inquiry/:inquiryId (입양자)', () => {
         it('문의 삭제 - 존재하지 않는 ID 시 에러', async () => {
             if (!adopterToken) {
-                console.log('⚠️  입양자 토큰이 없어서 테스트 스킵');
+                console.log('주의: 입양자 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -152,7 +152,7 @@ describe('Inquiry API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`);
 
             expect([400, 403, 404]).toContain(response.status);
-            console.log('✅ 존재하지 않는 문의 삭제 시 에러 확인');
+            console.log('존재하지 않는 문의 삭제 시 에러 확인');
         });
     });
 });

@@ -8,7 +8,7 @@ import { AuthAdminReaderPort, AuthAdminSnapshot } from '../ports/auth-admin-read
 import { AuthAdminTokenPort } from '../ports/auth-admin-token.port';
 import { LoginAdminUseCase } from './login-admin.use-case';
 
-describe('LoginAdminUseCase', () => {
+describe('관리자 로그인 유스케이스', () => {
     const adminSnapshot: AuthAdminSnapshot = {
         adminId: 'admin-1',
         email: 'admin@test.com',

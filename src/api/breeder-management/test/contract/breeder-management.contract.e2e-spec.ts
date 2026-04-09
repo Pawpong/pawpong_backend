@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { cleanupDatabase, createTestingApp } from '../../../../common/test/test-utils';
 
-describe('Breeder Management Contract E2E', () => {
+describe('브리더 관리 응답 계약 종단간 테스트', () => {
     let app: INestApplication;
     let breederToken: string;
     let breederId: string;
@@ -46,7 +46,7 @@ describe('Breeder Management Contract E2E', () => {
         await app.close();
     });
 
-    it('GET /api/breeder-management/dashboard keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
             .get('/api/breeder-management/dashboard')
             .set('Authorization', `Bearer ${breederToken}`)
@@ -81,7 +81,7 @@ describe('Breeder Management Contract E2E', () => {
         );
     });
 
-    it('GET /api/breeder-management/profile keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
             .get('/api/breeder-management/profile')
             .set('Authorization', `Bearer ${breederToken}`)
@@ -112,7 +112,7 @@ describe('Breeder Management Contract E2E', () => {
         );
     });
 
-    it('GET /api/breeder-management/verification keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
             .get('/api/breeder-management/verification')
             .set('Authorization', `Bearer ${breederToken}`)

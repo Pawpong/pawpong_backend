@@ -7,10 +7,10 @@ import request from 'supertest';
 import { createTestingApp } from '../../../common/test/test-utils';
 
 /**
- * Announcement (공지사항 팝업/배너) API E2E 테스트
- * 모든 엔드포인트가 Public
+ * 공지사항 종단간 테스트
+ * 모든 엔드포인트가 공개
  */
-describe('Announcement API E2E Tests', () => {
+describe('공지사항 종단간 테스트', () => {
     let app: INestApplication;
     let activeAnnouncementId: string;
 
@@ -71,7 +71,7 @@ describe('Announcement API E2E Tests', () => {
                 totalItems: 1,
                 totalPages: 1,
             });
-            console.log('✅ 공지사항 목록 조회 성공');
+            console.log('공지사항 목록 조회 성공');
         });
     });
 
@@ -88,7 +88,7 @@ describe('Announcement API E2E Tests', () => {
                 isActive: true,
                 order: 1,
             });
-            console.log('✅ 활성 공지 상세 조회 성공');
+            console.log('활성 공지 상세 조회 성공');
         });
 
         it('존재하지 않는 공지 조회 시 에러', async () => {
@@ -96,7 +96,7 @@ describe('Announcement API E2E Tests', () => {
                 .get('/api/announcement/000000000000000000000000');
 
             expect([400, 404, 500]).toContain(response.status);
-            console.log('✅ 존재하지 않는 공지 조회 시 에러 확인');
+            console.log('존재하지 않는 공지 조회 시 에러 확인');
         });
     });
 });

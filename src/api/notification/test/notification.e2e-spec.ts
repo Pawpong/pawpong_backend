@@ -3,10 +3,10 @@ import request from 'supertest';
 import { createTestingApp, cleanupDatabase, getAdopterToken } from '../../../common/test/test-utils';
 
 /**
- * Notification API E2E 테스트
- * 모든 엔드포인트 JWT 인증 필요
+ * 알림 종단간 테스트
+ * 모든 엔드포인트에 토큰 인증이 필요하다
  */
-describe('Notification API E2E Tests', () => {
+describe('알림 종단간 테스트', () => {
     let app: INestApplication;
     let adopterToken: string;
 
@@ -27,7 +27,7 @@ describe('Notification API E2E Tests', () => {
     describe('GET /api/notification', () => {
         it('알림 목록 조회 성공', async () => {
             if (!adopterToken) {
-                console.log('⚠️  토큰이 없어서 테스트 스킵');
+                console.log('주의: 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -38,7 +38,7 @@ describe('Notification API E2E Tests', () => {
 
             expect(response.body.success).toBe(true);
             expect(response.body.data).toBeDefined();
-            console.log('✅ 알림 목록 조회 성공');
+            console.log('알림 목록 조회 성공');
         });
 
         it('인증 없이 접근 시 401', async () => {
@@ -46,14 +46,14 @@ describe('Notification API E2E Tests', () => {
                 .get('/api/notification')
                 .expect(401);
 
-            console.log('✅ 인증 없이 접근 401 확인');
+            console.log('인증 없이 접근 401 확인');
         });
     });
 
     describe('GET /api/notification/unread-count', () => {
         it('읽지 않은 알림 수 조회 성공', async () => {
             if (!adopterToken) {
-                console.log('⚠️  토큰이 없어서 테스트 스킵');
+                console.log('주의: 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -64,14 +64,14 @@ describe('Notification API E2E Tests', () => {
 
             expect(response.body.success).toBe(true);
             expect(response.body.data).toBeDefined();
-            console.log('✅ 읽지 않은 알림 수 조회 성공');
+            console.log('읽지 않은 알림 수 조회 성공');
         });
     });
 
     describe('PATCH /api/notification/read-all', () => {
         it('전체 읽음 처리 성공', async () => {
             if (!adopterToken) {
-                console.log('⚠️  토큰이 없어서 테스트 스킵');
+                console.log('주의: 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -81,14 +81,14 @@ describe('Notification API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ 전체 읽음 처리 성공');
+            console.log('전체 읽음 처리 성공');
         });
     });
 
     describe('DELETE /api/notification/:id', () => {
         it('존재하지 않는 알림 삭제 시 에러', async () => {
             if (!adopterToken) {
-                console.log('⚠️  토큰이 없어서 테스트 스킵');
+                console.log('주의: 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -97,7 +97,7 @@ describe('Notification API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`);
 
             expect([400, 404]).toContain(response.status);
-            console.log('✅ 존재하지 않는 알림 삭제 시 에러 확인');
+            console.log('존재하지 않는 알림 삭제 시 에러 확인');
         });
     });
 });

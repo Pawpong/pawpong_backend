@@ -8,7 +8,7 @@ import { UserAdminPresentationService } from '../../domain/services/user-admin-p
 import { UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { UserAdminWriterPort } from '../ports/user-admin-writer.port';
 
-describe('GetDeletedUserStatsUseCase', () => {
+describe('탈퇴 사용자 통계 조회 유스케이스', () => {
     it('탈퇴 통계를 응답 형태로 매핑한다', async () => {
         const reader: UserAdminReaderPort = {
             findAdminById: jest.fn().mockResolvedValue({

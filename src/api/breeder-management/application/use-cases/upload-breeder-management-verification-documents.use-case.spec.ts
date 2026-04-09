@@ -43,7 +43,7 @@ class StubDraftStore extends BreederManagementVerificationDraftStorePort {
     }
 }
 
-describe('UploadBreederManagementVerificationDocumentsUseCase', () => {
+describe('브리더 관리 인증 문서 업로드 유스케이스', () => {
     let useCase: UploadBreederManagementVerificationDocumentsUseCase;
     let draftStore: StubDraftStore;
 
@@ -58,7 +58,7 @@ describe('UploadBreederManagementVerificationDocumentsUseCase', () => {
         );
     });
 
-    it('업로드 응답 계약을 유지하고 draft 문서를 저장한다', async () => {
+    it('업로드 응답 계약을 유지하고 임시 문서를 저장한다', async () => {
         const files = [
             { originalname: '신분증.pdf', size: 1234 } as Express.Multer.File,
             { originalname: '등록증.pdf', size: 5678 } as Express.Multer.File,
