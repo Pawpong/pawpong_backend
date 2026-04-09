@@ -6,15 +6,7 @@ import {
 } from '../../constants/upload-admin-response-messages';
 
 @Injectable()
-export class UploadAdminCommandResponseMessageService {
-    fileDeleted() {
-        return UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.fileDeleted;
-    }
-
-    filesDeleted() {
-        return UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.filesDeleted;
-    }
-
+export class UploadAdminFolderDeleteResponseMessageService {
     folderDeleted(folder: string) {
         return buildUploadAdminFolderDeletedMessage(folder);
     }
