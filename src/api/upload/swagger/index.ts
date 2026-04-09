@@ -2,16 +2,11 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiConsumes, ApiParam } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
+import { UPLOAD_RESPONSE_MESSAGE_EXAMPLES } from '../constants/upload-response-messages';
+import { UPLOAD_BAD_REQUEST_RESPONSE } from '../constants/upload-swagger.constants';
 import { DeleteUploadedFileRequestDto } from '../dto/request/delete-uploaded-file-request.dto';
 import { UploadFolderRequestDto } from '../dto/request/upload-folder-request.dto';
 import { UploadResponseDto } from '../dto/response/upload-response.dto';
-import { UPLOAD_RESPONSE_MESSAGE_EXAMPLES } from '../domain/services/upload-response-message.service';
-
-const UPLOAD_BAD_REQUEST_RESPONSE = {
-    status: 400,
-    description: '잘못된 요청',
-    errorExample: '요청값이 올바르지 않습니다.',
-};
 
 function buildMultipartFileBodySchema(
     fileFieldName: 'file' | 'files',

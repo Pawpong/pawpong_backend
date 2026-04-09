@@ -2,22 +2,14 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
+import { UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../constants/upload-admin-response-messages';
+import {
+    UPLOAD_ADMIN_BAD_REQUEST_RESPONSE,
+    UPLOAD_ADMIN_FORBIDDEN_RESPONSE,
+} from '../constants/upload-admin-swagger.constants';
 import { DeleteFilesResponseDto } from '../dto/response/delete-files-response.dto';
 import { FileReferenceResponseDto } from '../dto/response/file-reference-response.dto';
 import { StorageListResponseDto } from '../dto/response/storage-list-response.dto';
-import { UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../domain/services/upload-admin-response-message.service';
-
-const UPLOAD_ADMIN_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '관리자 권한이 필요합니다.',
-};
-
-const UPLOAD_ADMIN_BAD_REQUEST_RESPONSE = {
-    status: 400,
-    description: '잘못된 요청',
-    errorExample: '요청값이 올바르지 않습니다.',
-};
 
 export function ApiUploadAdminController() {
     return ApiController('스토리지 관리 (Admin)');
