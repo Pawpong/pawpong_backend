@@ -3,13 +3,8 @@ import { ApiParam, ApiQuery, getSchemaPath } from '@nestjs/swagger';
 
 import { ApiPublicController, ApiRawEndpoint } from '../../../common/decorator/swagger.decorator';
 import { PageInfoDto } from '../../../common/dto/pagination/page-info.dto';
+import { ANNOUNCEMENT_NOT_FOUND_RESPONSE } from '../constants/announcement-swagger.constants';
 import { AnnouncementResponseDto } from '../dto/response/announcement-response.dto';
-
-const ANNOUNCEMENT_NOT_FOUND_RESPONSE = {
-    status: 404,
-    description: '공지사항을 찾을 수 없음',
-    errorExample: '공지사항을 찾을 수 없습니다.',
-};
 
 export function ApiAnnouncementController() {
     return ApiPublicController('공지사항');
