@@ -27,7 +27,16 @@ export class ChatController {
         @Body() dto: CreateRoomRequestDto,
     ) {
         const room = await this.chatService.createOrGetRoom(user.userId, dto);
-        return { roomId: room._id.toString(), ...room };
+        return {
+            roomId: room._id.toString(),
+            adopterId: room.adopterId,
+            breederId: room.breederId,
+            applicationId: room.applicationId,
+            status: room.status,
+            lastMessage: room.lastMessage,
+            lastMessageAt: room.lastMessageAt,
+            createdAt: (room as any).createdAt,
+        };
     }
 
     /**
