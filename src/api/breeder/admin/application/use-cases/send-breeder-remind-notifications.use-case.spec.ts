@@ -7,7 +7,7 @@ import { BreederAdminPolicyService } from '../../domain/services/breeder-admin-p
 import { BreederAdminPresentationService } from '../../domain/services/breeder-admin-presentation.service';
 import { BreederAdminReminderPolicyService } from '../../domain/services/breeder-admin-reminder-policy.service';
 
-describe('SendBreederRemindNotificationsUseCase', () => {
+describe('브리더 리마인드 알림 발송 유스케이스', () => {
     const breederAdminReader = {
         findAdminById: jest.fn(),
         findBreederById: jest.fn(),

@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 
 import { CompleteSocialRegistrationUseCase } from './complete-social-registration.use-case';
 
-describe('CompleteSocialRegistrationUseCase', () => {
+describe('소셜 가입 완료 유스케이스', () => {
     const registerAdopter = {
         execute: jest.fn(),
     };

@@ -4,7 +4,7 @@ import { NotificationType } from '../../../../schema/notification.schema';
 import { NotificationMessageTemplateService } from '../../domain/services/notification-message-template.service';
 import { CreateNotificationUseCase } from './create-notification.use-case';
 
-describe('CreateNotificationUseCase', () => {
+describe('알림 생성 유스케이스', () => {
     const notificationCommandPort = {
         create: jest.fn(),
     };

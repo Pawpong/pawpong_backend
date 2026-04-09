@@ -8,9 +8,9 @@ import { StorageService } from '../../../common/storage/storage.service';
 import { createTestingApp, getAdopterToken } from '../../../common/test/test-utils';
 
 /**
- * Auth 도메인 E2E 테스트 (간소화 버전)
+ * 인증 종단간 테스트
  *
- * 테스트 대상 핵심 API:
+ * 테스트 대상 핵심 경로:
  * 1. 입양자 회원가입
  * 2. 브리더 회원가입
  * 3. 토큰 재발급
@@ -18,7 +18,7 @@ import { createTestingApp, getAdopterToken } from '../../../common/test/test-uti
  * 5. 중복 체크 (이메일, 닉네임)
  * 6. 소셜 로그인 사용자 체크
  */
-describe('Auth API E2E Tests (Simple)', () => {
+describe('인증 종단간 테스트', () => {
     let app: INestApplication;
     const uploadTestFilePath = path.join(__dirname, 'auth-upload-test.jpg');
     const capturedVerificationCodes = new Map<string, string>();
@@ -64,7 +64,7 @@ describe('Auth API E2E Tests (Simple)', () => {
      * 1. 입양자 회원가입 테스트
      */
     describe('입양자 회원가입', () => {
-        it('POST /api/auth/register/adopter - 회원가입 성공', async () => {
+        it('회원가입 성공', async () => {
             const timestamp = Date.now();
             const providerId = Math.random().toString().substr(2, 10);
             const registerData = {
@@ -86,10 +86,10 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.data.adopterId).toBeDefined();
             expect(response.body.data.userRole).toBe('adopter');
             expect(response.body.message).toBe('입양자 회원가입이 완료되었습니다.');
-            console.log('✅ 입양자 회원가입 성공');
+            console.log('입양자 회원가입 성공');
         });
 
-        it('POST /api/auth/register/adopter - 중복 이메일로 실패', async () => {
+        it('중복 이메일로 실패', async () => {
             const timestamp = Date.now();
             const providerId = Math.random().toString().substr(2, 10);
             const email = `duplicate_${timestamp}@test.com`;
@@ -119,10 +119,10 @@ describe('Auth API E2E Tests (Simple)', () => {
 
             // API가 중복 이메일을 허용하거나 에러를 반환할 수 있음
             expect([200, 400, 500]).toContain(response.status);
-            console.log('✅ 중복 이메일 회원가입 처리 확인');
+            console.log('중복 이메일 회원가입 처리 확인');
         });
 
-        it('POST /api/auth/register/adopter - 필수 필드 누락으로 실패 (tempId)', async () => {
+        it('필수 필드 누락으로 실패 (임시 ID)', async () => {
             const timestamp = Date.now();
             await request(app.getHttpServer())
                 .post('/api/auth/register/adopter')
@@ -134,10 +134,10 @@ describe('Auth API E2E Tests (Simple)', () => {
                 })
                 .expect(400);
 
-            console.log('✅ 필수 필드 누락 실패 확인');
+            console.log('필수 필드 누락 실패 확인');
         });
 
-        it('POST /api/auth/register/adopter - 잘못된 이메일 형식으로 실패', async () => {
+        it('잘못된 이메일 형식으로 실패', async () => {
             const timestamp = Date.now();
             const providerId = Math.random().toString().substr(2, 10);
             await request(app.getHttpServer())
@@ -150,7 +150,7 @@ describe('Auth API E2E Tests (Simple)', () => {
                 })
                 .expect(400);
 
-            console.log('✅ 이메일 형식 오류 확인');
+            console.log('이메일 형식 오류 확인');
         });
     });
 
@@ -163,7 +163,7 @@ describe('Auth API E2E Tests (Simple)', () => {
                 .toString()
                 .padStart(4, '0')}`;
 
-        it('POST /api/auth/phone/send-code - 인증번호 발송 성공', async () => {
+        it('인증번호 발송 성공', async () => {
             const phone = createPhoneNumber();
 
             const response = await request(app.getHttpServer())
@@ -175,10 +175,10 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.data.success).toBe(true);
             expect(response.body.data.message).toBe('인증번호가 발송되었습니다.');
             expect(capturedVerificationCodes.get(phone)).toMatch(/^[0-9]{6}$/);
-            console.log('✅ 전화번호 인증코드 발송 성공');
+            console.log('전화번호 인증코드 발송 성공');
         });
 
-        it('POST /api/auth/phone/verify-code - 인증코드 확인 성공', async () => {
+        it('인증코드 확인 성공', async () => {
             const phone = createPhoneNumber();
 
             await request(app.getHttpServer()).post('/api/auth/phone/send-code').send({ phone }).expect(200);
@@ -194,10 +194,10 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.data.success).toBe(true);
             expect(response.body.data.message).toBe('전화번호 인증이 완료되었습니다.');
-            console.log('✅ 전화번호 인증코드 확인 성공');
+            console.log('전화번호 인증코드 확인 성공');
         });
 
-        it('POST /api/auth/phone/verify-code - 잘못된 인증코드로 실패', async () => {
+        it('잘못된 인증코드로 실패', async () => {
             const phone = createPhoneNumber();
 
             await request(app.getHttpServer()).post('/api/auth/phone/send-code').send({ phone }).expect(200);
@@ -207,7 +207,7 @@ describe('Auth API E2E Tests (Simple)', () => {
                 .send({ phone, code: '000000' })
                 .expect(400);
 
-            console.log('✅ 잘못된 전화번호 인증코드 실패 확인');
+            console.log('잘못된 전화번호 인증코드 실패 확인');
         });
     });
 
@@ -215,7 +215,7 @@ describe('Auth API E2E Tests (Simple)', () => {
      * 2. 브리더 회원가입 테스트
      */
     describe('브리더 회원가입', () => {
-        it('POST /api/auth/register/breeder - 기본 플랜 회원가입 성공', async () => {
+        it('기본 플랜 회원가입 성공', async () => {
             const timestamp = Date.now();
             const registerData = {
                 email: `breeder_basic_${timestamp}@test.com`,
@@ -247,10 +247,10 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.data.breederId).toBeDefined();
             expect(response.body.data.breederName).toBe('테스트 브리더');
             expect(response.body.message).toBe('브리더 회원가입이 완료되었습니다.');
-            console.log('✅ 브리더 기본 플랜 회원가입 성공');
+            console.log('브리더 기본 플랜 회원가입 성공');
         });
 
-        it('POST /api/auth/register/breeder - 프로 플랜 회원가입 성공', async () => {
+        it('프로 플랜 회원가입 성공', async () => {
             const timestamp = Date.now();
             const registerData = {
                 email: `breeder_pro_${timestamp}@test.com`,
@@ -279,10 +279,10 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.data.breederId).toBeDefined();
             expect(response.body.data.breederName).toBe('프로 브리더');
-            console.log('✅ 브리더 프로 플랜 회원가입 성공');
+            console.log('브리더 프로 플랜 회원가입 성공');
         });
 
-        it('POST /api/auth/register/breeder - 약관 동의 없이 실패', async () => {
+        it('약관 동의 없이 실패', async () => {
             const timestamp = Date.now();
             await request(app.getHttpServer())
                 .post('/api/auth/register/breeder')
@@ -302,10 +302,10 @@ describe('Auth API E2E Tests (Simple)', () => {
                 })
                 .expect(400);
 
-            console.log('✅ 약관 동의 없이 실패 확인');
+            console.log('약관 동의 없이 실패 확인');
         });
 
-        it('POST /api/auth/register/breeder - 필수 필드 누락으로 실패 (breederName)', async () => {
+        it('필수 필드 누락으로 실패 (breederName)', async () => {
             const timestamp = Date.now();
             await request(app.getHttpServer())
                 .post('/api/auth/register/breeder')
@@ -329,7 +329,7 @@ describe('Auth API E2E Tests (Simple)', () => {
                 })
                 .expect(400);
 
-            console.log('✅ 필수 필드 누락 실패 확인');
+            console.log('필수 필드 누락 실패 확인');
         });
     });
 
@@ -356,7 +356,7 @@ describe('Auth API E2E Tests (Simple)', () => {
             refreshToken = response.body.data.refreshToken;
         });
 
-        it('POST /api/auth/refresh - 유효한 refresh 토큰으로 재발급 성공', async () => {
+        it('유효한 refresh 토큰으로 재발급 성공', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/auth/refresh')
                 .send({ refreshToken })
@@ -366,23 +366,23 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.data.accessToken).toBeDefined();
             expect(response.body.data.refreshToken).toBeDefined();
             expect(response.body.message).toBe('토큰이 재발급되었습니다.');
-            console.log('✅ 토큰 재발급 성공');
+            console.log('토큰 재발급 성공');
         });
 
-        it('POST /api/auth/refresh - 유효하지 않은 refresh 토큰으로 실패', async () => {
+        it('유효하지 않은 refresh 토큰으로 실패', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/auth/refresh')
                 .send({ refreshToken: 'invalid-token' });
 
             // 401 또는 400 에러 허용
             expect([400, 401]).toContain(response.status);
-            console.log('✅ 유효하지 않은 토큰으로 재발급 실패 확인');
+            console.log('유효하지 않은 토큰으로 재발급 실패 확인');
         });
 
-        it('POST /api/auth/refresh - refresh 토큰 누락으로 실패', async () => {
+        it('refresh 토큰 누락으로 실패', async () => {
             await request(app.getHttpServer()).post('/api/auth/refresh').send({}).expect(400);
 
-            console.log('✅ 토큰 누락으로 실패 확인');
+            console.log('토큰 누락으로 실패 확인');
         });
     });
 
@@ -409,7 +409,7 @@ describe('Auth API E2E Tests (Simple)', () => {
             accessToken = response.body.data.accessToken;
         });
 
-        it('POST /api/auth/logout - 유효한 토큰으로 로그아웃 성공', async () => {
+        it('유효한 토큰으로 로그아웃 성공', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/auth/logout')
                 .set('Authorization', `Bearer ${accessToken}`)
@@ -419,23 +419,23 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.data.success).toBe(true);
             expect(response.body.data.loggedOutAt).toBeDefined();
             expect(response.body.message).toBe('로그아웃되었습니다.');
-            console.log('✅ 로그아웃 성공');
+            console.log('로그아웃 성공');
         });
 
-        it('POST /api/auth/logout - 토큰 없이 실패', async () => {
+        it('토큰 없이 실패', async () => {
             const response = await request(app.getHttpServer()).post('/api/auth/logout').expect(401);
 
             // 401 에러는 Nest의 AuthGuard가 처리하므로 success 필드가 없을 수 있음
-            console.log('✅ 토큰 없이 로그아웃 실패 확인');
+            console.log('토큰 없이 로그아웃 실패 확인');
         });
 
-        it('POST /api/auth/logout - 유효하지 않은 토큰으로 실패', async () => {
+        it('유효하지 않은 토큰으로 실패', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/auth/logout')
                 .set('Authorization', 'Bearer invalid-token')
                 .expect(401);
 
-            console.log('✅ 유효하지 않은 토큰으로 로그아웃 실패 확인');
+            console.log('유효하지 않은 토큰으로 로그아웃 실패 확인');
         });
     });
 
@@ -462,7 +462,7 @@ describe('Auth API E2E Tests (Simple)', () => {
                 .expect(200);
         });
 
-        it('POST /api/auth/check-email - 기존 이메일 중복 확인', async () => {
+        it('기존 이메일 중복 확인', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/auth/check-email')
                 .send({ email: existingEmail })
@@ -471,10 +471,10 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.data.isDuplicate).toBe(true);
             expect(response.body.message).toContain('이미 가입된 이메일');
-            console.log('✅ 기존 이메일 중복 확인');
+            console.log('기존 이메일 중복 확인');
         });
 
-        it('POST /api/auth/check-email - 사용 가능한 이메일 확인', async () => {
+        it('사용 가능한 이메일 확인', async () => {
             const timestamp = Date.now();
             const response = await request(app.getHttpServer())
                 .post('/api/auth/check-email')
@@ -484,7 +484,7 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.data.isDuplicate).toBe(false);
             expect(response.body.message).toContain('사용 가능한 이메일');
-            console.log('✅ 사용 가능한 이메일 확인');
+            console.log('사용 가능한 이메일 확인');
         });
     });
 
@@ -511,7 +511,7 @@ describe('Auth API E2E Tests (Simple)', () => {
                 .expect(200);
         });
 
-        it('POST /api/auth/check-nickname - 기존 닉네임 중복 확인', async () => {
+        it('기존 닉네임 중복 확인', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/auth/check-nickname')
                 .send({ nickname: existingNickname });
@@ -522,10 +522,10 @@ describe('Auth API E2E Tests (Simple)', () => {
                 expect(response.body.data.isDuplicate).toBe(true);
                 expect(response.body.message).toContain('이미 사용 중인 닉네임');
             }
-            console.log('✅ 기존 닉네임 중복 확인');
+            console.log('기존 닉네임 중복 확인');
         });
 
-        it('POST /api/auth/check-nickname - 사용 가능한 닉네임 확인', async () => {
+        it('사용 가능한 닉네임 확인', async () => {
             const timestamp = Date.now();
             const response = await request(app.getHttpServer())
                 .post('/api/auth/check-nickname')
@@ -537,7 +537,7 @@ describe('Auth API E2E Tests (Simple)', () => {
                 expect(response.body.data.isDuplicate).toBe(false);
                 expect(response.body.message).toContain('사용 가능한 닉네임');
             }
-            console.log('✅ 사용 가능한 닉네임 확인');
+            console.log('사용 가능한 닉네임 확인');
         });
     });
 
@@ -545,7 +545,7 @@ describe('Auth API E2E Tests (Simple)', () => {
      * 7. 소셜 로그인 사용자 체크 테스트
      */
     describe('소셜 로그인 사용자 체크', () => {
-        it('POST /api/auth/social/check-user - 미가입 사용자 확인', async () => {
+        it('미가입 사용자 확인', async () => {
             const timestamp = Date.now();
             const response = await request(app.getHttpServer())
                 .post('/api/auth/social/check-user')
@@ -560,10 +560,10 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.data.exists).toBe(false);
             // tempUserId는 응답에 없을 수 있음 (별도 플로우)
             expect(response.body.message).toContain('미가입 사용자');
-            console.log('✅ 미가입 사용자 확인');
+            console.log('미가입 사용자 확인');
         });
 
-        it('POST /api/auth/social/check-user - 기가입 사용자 확인', async () => {
+        it('기가입 사용자 확인', async () => {
             // 먼저 사용자 생성 (고유한 이메일과 닉네임 사용)
             const timestamp = Date.now();
             const randomSuffix = Math.random().toString().substr(2, 6);
@@ -592,12 +592,12 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.data.exists).toBe(true);
             expect(response.body.message).toContain('가입된 사용자');
-            console.log('✅ 기가입 사용자 확인');
+            console.log('기가입 사용자 확인');
         });
     });
 
     describe('회원가입 전 업로드', () => {
-        it('POST /api/auth/upload-breeder-profile - tempId 업로드 응답 계약 유지', async () => {
+        it('임시 ID 업로드 응답 계약 유지', async () => {
             const response = await request(app.getHttpServer())
                 .post(`/api/auth/upload-breeder-profile?tempId=temp-upload-${Date.now()}`)
                 .attach('file', uploadTestFilePath)
@@ -614,10 +614,10 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.message).toBe(
                 '프로필 이미지가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.',
             );
-            console.log('✅ 프로필 이미지 temp 업로드 응답 계약 유지');
+            console.log('프로필 이미지 temp 업로드 응답 계약 유지');
         });
 
-        it('POST /api/auth/upload-breeder-profile - 로그인 사용자 업로드 응답 계약 유지', async () => {
+        it('로그인 사용자 업로드 응답 계약 유지', async () => {
             const adopter = await getAdopterToken(app);
             expect(adopter).not.toBeNull();
 
@@ -635,10 +635,10 @@ describe('Auth API E2E Tests (Simple)', () => {
                 fileName: expect.stringMatching(/^profiles\//),
             });
             expect(response.body.message).toBe('프로필 이미지가 업로드되고 저장되었습니다.');
-            console.log('✅ 로그인 사용자 프로필 업로드 응답 계약 유지');
+            console.log('로그인 사용자 프로필 업로드 응답 계약 유지');
         });
 
-        it('POST /api/auth/upload-breeder-documents - tempId 업로드 응답 계약 유지', async () => {
+        it('임시 ID 업로드 응답 계약 유지', async () => {
             const response = await request(app.getHttpServer())
                 .post(`/api/auth/upload-breeder-documents?tempId=temp-docs-${Date.now()}`)
                 .field('types', JSON.stringify(['idCard', 'animalProductionLicense']))
@@ -665,7 +665,7 @@ describe('Auth API E2E Tests (Simple)', () => {
             expect(response.body.message).toBe(
                 'new 레벨 브리더 인증 서류 2개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.',
             );
-            console.log('✅ 브리더 인증 서류 업로드 응답 계약 유지');
+            console.log('브리더 인증 서류 업로드 응답 계약 유지');
         });
     });
 });

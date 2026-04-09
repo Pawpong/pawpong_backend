@@ -5,7 +5,7 @@ import { UpdateProfileBannerUseCase } from './update-profile-banner.use-case';
 import { BreederManagementAdminBannerWriterPort } from '../ports/breeder-management-admin-banner-writer.port';
 import { BreederManagementFileUrlPort } from '../../../application/ports/breeder-management-file-url.port';
 
-describe('UpdateProfileBannerUseCase', () => {
+describe('프로필 배너 수정 유스케이스', () => {
     const fileUrlPort: BreederManagementFileUrlPort = {
         generateOne: jest.fn().mockReturnValue('https://signed.example.com/profile-banners/banner-1.png'),
         generateOneSafe: jest.fn(),
@@ -42,7 +42,7 @@ describe('UpdateProfileBannerUseCase', () => {
         });
     });
 
-    it('프로필 배너가 없으면 BadRequestException을 던진다', async () => {
+    it('프로필 배너가 없으면 예외을 던진다', async () => {
         const useCase = new UpdateProfileBannerUseCase(
             {
                 createProfile: jest.fn(),

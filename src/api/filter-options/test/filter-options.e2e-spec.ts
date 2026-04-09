@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { createTestingApp } from '../../../common/test/test-utils';
 
-describe('Filter Options API E2E Tests', () => {
+describe('필터 옵션 종단간 테스트', () => {
     let app: INestApplication;
 
     beforeAll(async () => {

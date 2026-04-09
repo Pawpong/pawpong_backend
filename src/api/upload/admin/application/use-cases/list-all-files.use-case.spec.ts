@@ -3,14 +3,14 @@ import { UploadAdminStoragePresentationService } from '../../domain/services/upl
 import { UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
 import { ListAllFilesUseCase } from './list-all-files.use-case';
 
-describe('ListAllFilesUseCase', () => {
+describe('전체 파일 목록 조회 유스케이스', () => {
     const logger = {
         logStart: jest.fn(),
         logSuccess: jest.fn(),
         logError: jest.fn(),
     } as unknown as CustomLoggerService;
 
-    it('스토리지 목록을 응답 DTO와 폴더 통계로 변환한다', async () => {
+    it('스토리지 목록을 응답 객체와 폴더 통계로 변환한다', async () => {
         const uploadAdminStorage: UploadAdminStoragePort = {
             list: jest.fn().mockResolvedValue({
                 files: [

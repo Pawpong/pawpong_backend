@@ -2,7 +2,7 @@ import { ReseedStandardQuestionsUseCase } from './reseed-standard-questions.use-
 import { StandardQuestionWriterPort } from '../ports/standard-question-writer.port';
 import { StandardQuestionSeedCatalogService } from '../../../domain/services/standard-question-seed-catalog.service';
 
-describe('ReseedStandardQuestionsUseCase', () => {
+describe('기본 질문 재구성 유스케이스', () => {
     it('카탈로그 질문들로 전체 재시딩한다', async () => {
         const standardQuestionWriter: StandardQuestionWriterPort = {
             update: jest.fn(),

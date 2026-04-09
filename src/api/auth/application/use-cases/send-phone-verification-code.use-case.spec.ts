@@ -4,7 +4,7 @@ import { SendPhoneVerificationCodeUseCase } from './send-phone-verification-code
 import { AuthCommandResponseFactoryService } from '../../domain/services/auth-command-response-factory.service';
 import { AuthPhoneVerificationPolicyService } from '../../domain/services/auth-phone-verification-policy.service';
 
-describe('SendPhoneVerificationCodeUseCase', () => {
+describe('전화번호 인증 코드 발송 유스케이스', () => {
     const authPhoneVerificationRegistryPort = {
         isPhoneWhitelisted: jest.fn(),
         hasRegisteredPhone: jest.fn(),

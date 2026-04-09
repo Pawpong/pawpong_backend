@@ -5,8 +5,8 @@ import { PlatformAdminPresentationService } from '../../domain/services/platform
 import { PlatformAdminQueryPolicyService } from '../../domain/services/platform-admin-query-policy.service';
 import { PlatformAdminReaderPort } from '../ports/platform-admin-reader.port';
 
-describe('GetPlatformMvpStatsUseCase', () => {
-    it('권한이 있으면 MVP 통계를 반환한다', async () => {
+describe('플랫폼 초기 버전 통계 조회 유스케이스', () => {
+    it('권한이 있으면 초기 버전 통계를 반환한다', async () => {
         const reader: PlatformAdminReaderPort = {
             findAdminById: jest.fn().mockResolvedValue({
                 id: 'admin-1',

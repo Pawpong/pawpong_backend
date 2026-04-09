@@ -5,7 +5,7 @@ import { BreederVerificationAdminPolicyService } from '../../domain/services/bre
 import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 import { BreederPaginationAssemblerService } from '../../../../domain/services/breeder-pagination-assembler.service';
 
-describe('GetBreederDetailUseCase', () => {
+describe('브리더 상세 조회 유스케이스', () => {
     const reader = {
         findAdminById: jest.fn(),
         findBreederById: jest.fn(),
@@ -19,7 +19,7 @@ describe('GetBreederDetailUseCase', () => {
         jest.clearAllMocks();
     });
 
-    it('submittedAt fallback과 파일 URL을 포함해 상세 응답을 만든다', async () => {
+    it('대체 제출 시각과 파일 주소를 포함해 상세 응답을 만든다', async () => {
         reader.findAdminById.mockResolvedValue({
             id: 'admin-1',
             name: '관리자',

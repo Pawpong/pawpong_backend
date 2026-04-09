@@ -6,7 +6,7 @@ import { FeedCommentManagerPort } from '../ports/feed-comment-manager.port';
 import { FeedCommentPolicyService } from '../../domain/services/feed-comment-policy.service';
 import { FeedCommentPresentationService } from '../../domain/services/feed-comment-presentation.service';
 
-describe('CreateCommentUseCase', () => {
+describe('댓글 생성 유스케이스', () => {
     const createManager = (): FeedCommentManagerPort => ({
         findVideo: jest.fn().mockResolvedValue({ id: 'video-1' }),
         findComment: jest.fn().mockResolvedValue(null),

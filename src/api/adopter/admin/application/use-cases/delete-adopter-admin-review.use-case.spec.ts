@@ -8,7 +8,7 @@ import { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { AdopterAdminWriterPort } from '../ports/adopter-admin-writer.port';
 import { DeleteAdopterAdminReviewUseCase } from './delete-adopter-admin-review.use-case';
 
-describe('DeleteAdopterAdminReviewUseCase', () => {
+describe('입양자 관리자 후기 삭제 유스케이스', () => {
     it('리뷰 숨김과 관리자 로그 기록을 수행한다', async () => {
         const writer: AdopterAdminWriterPort = {
             hideReview: jest.fn().mockResolvedValue({
@@ -43,7 +43,7 @@ describe('DeleteAdopterAdminReviewUseCase', () => {
         expect(writer.appendAdminActivity).toHaveBeenCalled();
     });
 
-    it('대상이 없으면 BadRequestException을 던진다', async () => {
+    it('대상이 없으면 예외을 던진다', async () => {
         const useCase = new DeleteAdopterAdminReviewUseCase(
             {
                 findAdminById: jest.fn().mockResolvedValue({

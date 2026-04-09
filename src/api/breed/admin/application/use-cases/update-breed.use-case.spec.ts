@@ -5,7 +5,7 @@ import { UpdateBreedUseCase } from './update-breed.use-case';
 import { BreedAdminReaderPort } from '../ports/breed-admin-reader.port';
 import { BreedWriterPort } from '../ports/breed-writer.port';
 
-describe('UpdateBreedUseCase', () => {
+describe('품종 수정 유스케이스', () => {
     const existingBreed = {
         id: 'breed-1',
         petType: 'dog',
@@ -42,7 +42,7 @@ describe('UpdateBreedUseCase', () => {
         });
     });
 
-    it('대상이 없으면 BadRequestException을 던진다', async () => {
+    it('대상이 없으면 예외을 던진다', async () => {
         const useCase = new UpdateBreedUseCase(
             {
                 readAll: jest.fn(),
@@ -60,7 +60,7 @@ describe('UpdateBreedUseCase', () => {
         await expect(useCase.execute('missing', { category: '중형견' })).rejects.toBeInstanceOf(BadRequestException);
     });
 
-    it('중복 카테고리면 ConflictException을 던진다', async () => {
+    it('중복 카테고리면 예외을 던진다', async () => {
         const useCase = new UpdateBreedUseCase(
             {
                 readAll: jest.fn(),

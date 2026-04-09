@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 
 import { DeleteFolderUseCase } from './delete-folder.use-case';
 
-describe('DeleteFolderUseCase', () => {
+describe('폴더 삭제 유스케이스', () => {
     const uploadAdminStorage = {
         list: jest.fn(),
     };

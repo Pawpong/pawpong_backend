@@ -5,7 +5,7 @@ import { FeedVideoCommandPort } from '../ports/feed-video-command.port';
 import { FeedVideoCommandPolicyService } from '../../domain/services/feed-video-command-policy.service';
 import { VideoStatus } from '../../../../../schema/video.schema';
 
-describe('CompleteUploadUseCase', () => {
+describe('업로드 완료 유스케이스', () => {
     const createCommand = (status: VideoStatus = VideoStatus.PENDING): FeedVideoCommandPort => ({
         createPendingVideo: jest.fn(),
         findById: jest.fn().mockResolvedValue({
@@ -30,7 +30,7 @@ describe('CompleteUploadUseCase', () => {
         markEncodingFailed: jest.fn(),
     });
 
-    it('pending 영상이면 processing으로 전환하고 인코딩 큐에 넣는다', async () => {
+    it('대기 영상이면 처리 중으로 전환하고 인코딩 큐에 넣는다', async () => {
         const feedVideoCommand = createCommand();
         const videoQueue = {
             add: jest.fn().mockResolvedValue(undefined),
@@ -57,7 +57,7 @@ describe('CompleteUploadUseCase', () => {
         );
     });
 
-    it('pending 상태가 아니면 예외를 던진다', async () => {
+    it('대기 상태가 아니면 예외를 던진다', async () => {
         const feedVideoCommand = createCommand(VideoStatus.READY);
         const useCase = new CompleteUploadUseCase(
             feedVideoCommand,

@@ -3,7 +3,7 @@ import { RecipientType } from '../../../../common/enum/user.enum';
 import { NotificationResponseMapperService } from '../../domain/services/notification-response-mapper.service';
 import { CreateNotificationFromBuilderUseCase } from './create-notification-from-builder.use-case';
 
-describe('CreateNotificationFromBuilderUseCase', () => {
+describe('알림 from 빌더 생성 유스케이스', () => {
     const notificationCommandPort = {
         create: jest.fn(),
     };
@@ -17,7 +17,7 @@ describe('CreateNotificationFromBuilderUseCase', () => {
         jest.clearAllMocks();
     });
 
-    it('builder 데이터를 브리더 알림으로 저장하고 DTO로 반환한다', async () => {
+    it('builder 데이터를 브리더 알림으로 저장하고 응답 객체로 반환한다', async () => {
         notificationCommandPort.create.mockResolvedValue({
             _id: { toString: () => 'notification-1' },
             type: NotificationType.NEW_REVIEW_REGISTERED,

@@ -6,7 +6,7 @@ import { NotificationAdminPresentationService } from '../../domain/services/noti
 import { NotificationAdminReaderPort } from '../ports/notification-admin-reader.port';
 import { GetAdminNotificationsUseCase } from './get-admin-notifications.use-case';
 
-describe('GetAdminNotificationsUseCase', () => {
+describe('관리자 알림 목록 조회 유스케이스', () => {
     const logger = {
         logStart: jest.fn(),
         logSuccess: jest.fn(),
@@ -63,7 +63,7 @@ describe('GetAdminNotificationsUseCase', () => {
         });
     });
 
-    it('조회 실패 시 BadRequestException으로 감싼다', async () => {
+    it('조회 실패 시 예외으로 감싼다', async () => {
         const useCase = new GetAdminNotificationsUseCase(
             {
                 findPaged: jest.fn().mockRejectedValue(new Error('boom')),

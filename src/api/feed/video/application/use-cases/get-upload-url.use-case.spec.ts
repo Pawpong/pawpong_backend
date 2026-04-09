@@ -2,8 +2,8 @@ import { GetUploadUrlUseCase } from './get-upload-url.use-case';
 import { FeedVideoCommandPort } from '../ports/feed-video-command.port';
 import { FeedVideoFileStoragePort } from '../ports/feed-video-file-storage.port';
 
-describe('GetUploadUrlUseCase', () => {
-    it('업로드 URL과 pending 비디오 레코드를 함께 생성한다', async () => {
+describe('업로드 주소 조회 유스케이스', () => {
+    it('업로드 주소과 대기 비디오 레코드를 함께 생성한다', async () => {
         const feedVideoCommand: FeedVideoCommandPort = {
             createPendingVideo: jest.fn().mockResolvedValue({ videoId: 'video-1' }),
             findById: jest.fn(),

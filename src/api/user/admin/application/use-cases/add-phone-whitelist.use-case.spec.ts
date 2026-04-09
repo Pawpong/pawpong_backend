@@ -7,7 +7,7 @@ import { UserAdminPresentationService } from '../../domain/services/user-admin-p
 import { UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { UserAdminWriterPort } from '../ports/user-admin-writer.port';
 
-describe('AddPhoneWhitelistUseCase', () => {
+describe('전화번호 화이트리스트 추가 유스케이스', () => {
     it('중복이 아니면 화이트리스트를 생성한다', async () => {
         const reader: UserAdminReaderPort = {
             findAdminById: jest.fn(),

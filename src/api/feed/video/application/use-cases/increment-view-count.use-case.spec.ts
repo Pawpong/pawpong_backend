@@ -2,7 +2,7 @@ import { IncrementViewCountUseCase } from './increment-view-count.use-case';
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedVideoCommandPort } from '../ports/feed-video-command.port';
 
-describe('IncrementViewCountUseCase', () => {
+describe('조회수 증가 유스케이스', () => {
     it('조회수를 비동기로 증가시키고 메타 캐시를 무효화한다', async () => {
         const feedVideoCommand: FeedVideoCommandPort = {
             createPendingVideo: jest.fn(),

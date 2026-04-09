@@ -4,7 +4,7 @@ import { UpdateAnnouncementUseCase } from './update-announcement.use-case';
 import { AnnouncementWriterPort } from '../ports/announcement-writer.port';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
 
-describe('UpdateAnnouncementUseCase', () => {
+describe('공지사항 수정 유스케이스', () => {
     const createLogger = () => ({
         logStart: jest.fn(),
         logSuccess: jest.fn(),
@@ -43,7 +43,7 @@ describe('UpdateAnnouncementUseCase', () => {
         });
     });
 
-    it('잘못된 ID면 BadRequestException을 던진다', async () => {
+    it('잘못된 ID면 예외을 던진다', async () => {
         const useCase = new UpdateAnnouncementUseCase(
             {
                 create: jest.fn(),

@@ -3,10 +3,10 @@ import request from 'supertest';
 import { createTestingApp, cleanupDatabase, getAdminToken } from '../../../../common/test/test-utils';
 
 /**
- * Announcement Admin API E2E 테스트
+ * 공지사항 관리자 종단간 테스트
  * 공지사항(팝업/배너) 관리 (관리자 전용)
  */
-describe('Announcement Admin API E2E Tests', () => {
+describe('공지사항 관리자 종단간 테스트', () => {
     let app: INestApplication;
     let adminToken: string;
     let createdAnnouncementId: string;
@@ -14,7 +14,7 @@ describe('Announcement Admin API E2E Tests', () => {
     beforeAll(async () => {
         app = await createTestingApp();
         adminToken = await getAdminToken(app) || '';
-        if (!adminToken) console.log('⚠️  관리자 토큰 획득 실패');
+        if (!adminToken) console.log('주의: 관리자 토큰 획득 실패');
     }, 30000);
 
     afterAll(async () => {
@@ -22,9 +22,9 @@ describe('Announcement Admin API E2E Tests', () => {
         await app.close();
     });
 
-    describe('POST /api/announcement-admin/announcement', () => {
+    describe('POST /api/announcement-관리자/announcement', () => {
         it('공지사항(팝업) 생성 성공', async () => {
-            if (!adminToken) { console.log('⚠️  스킵'); return; }
+            if (!adminToken) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .post('/api/announcement-admin/announcement')
@@ -42,7 +42,7 @@ describe('Announcement Admin API E2E Tests', () => {
             if (response.status === 200 && response.body.data?.id) {
                 createdAnnouncementId = response.body.data.id;
             }
-            console.log('✅ 공지사항(팝업) 생성 검증 완료');
+            console.log('공지사항(팝업) 생성 검증 완료');
         });
 
         it('인증 없이 접근 시 401', async () => {
@@ -50,13 +50,13 @@ describe('Announcement Admin API E2E Tests', () => {
                 .post('/api/announcement-admin/announcement')
                 .send({ title: '테스트' })
                 .expect(401);
-            console.log('✅ 인증 없이 접근 401 확인');
+            console.log('인증 없이 접근 401 확인');
         });
     });
 
-    describe('GET /api/announcement-admin/announcements', () => {
+    describe('GET /api/announcement-관리자/announcements', () => {
         it('공지사항 목록 조회 성공', async () => {
-            if (!adminToken) { console.log('⚠️  스킵'); return; }
+            if (!adminToken) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .get('/api/announcement-admin/announcements')
@@ -64,13 +64,13 @@ describe('Announcement Admin API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body).toBeDefined();
-            console.log('✅ 공지사항 목록 조회 성공');
+            console.log('공지사항 목록 조회 성공');
         });
     });
 
-    describe('DELETE /api/announcement-admin/announcement/:id', () => {
+    describe('DELETE /api/announcement-관리자/announcement/:id', () => {
         it('공지사항 삭제 성공', async () => {
-            if (!adminToken || !createdAnnouncementId) { console.log('⚠️  스킵'); return; }
+            if (!adminToken || !createdAnnouncementId) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .delete(`/api/announcement-admin/announcement/${createdAnnouncementId}`)
@@ -78,7 +78,7 @@ describe('Announcement Admin API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body).toBeDefined();
-            console.log('✅ 공지사항 삭제 성공');
+            console.log('공지사항 삭제 성공');
         });
     });
 });

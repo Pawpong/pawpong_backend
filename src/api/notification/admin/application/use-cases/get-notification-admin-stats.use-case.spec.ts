@@ -5,7 +5,7 @@ import { NotificationAdminPresentationService } from '../../domain/services/noti
 import { NotificationAdminReaderPort } from '../ports/notification-admin-reader.port';
 import { GetNotificationAdminStatsUseCase } from './get-notification-admin-stats.use-case';
 
-describe('GetNotificationAdminStatsUseCase', () => {
+describe('관리자 알림 통계 조회 유스케이스', () => {
     const logger = {
         logStart: jest.fn(),
         logSuccess: jest.fn(),
@@ -46,7 +46,7 @@ describe('GetNotificationAdminStatsUseCase', () => {
         });
     });
 
-    it('통계 조회 실패 시 BadRequestException으로 감싼다', async () => {
+    it('통계 조회 실패 시 예외으로 감싼다', async () => {
         const useCase = new GetNotificationAdminStatsUseCase(
             {
                 findPaged: jest.fn(),

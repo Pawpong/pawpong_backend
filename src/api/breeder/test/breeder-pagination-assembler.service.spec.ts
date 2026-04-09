@@ -1,6 +1,6 @@
 import { BreederPaginationAssemblerService } from '../domain/services/breeder-pagination-assembler.service';
 
-describe('BreederPaginationAssemblerService', () => {
+describe('브리더 페이지네이션 조립 서비스', () => {
     const service = new BreederPaginationAssemblerService();
 
     it('PaginationBuilder를 같은 기준으로 생성한다', () => {
@@ -12,7 +12,7 @@ describe('BreederPaginationAssemblerService', () => {
         expect(builder._totalCount).toBe(8);
     });
 
-    it('페이지네이션 응답 DTO를 같은 계약으로 조립한다', () => {
+    it('페이지네이션 응답 객체를 같은 계약으로 조립한다', () => {
         const response = service.build([{ id: 'pet-1' }, { id: 'pet-2' }], 2, 2, 5);
 
         expect(response.items).toEqual([{ id: 'pet-1' }, { id: 'pet-2' }]);

@@ -43,7 +43,7 @@ class StubAuthTempUploadPort extends AuthTempUploadPort {
     }
 }
 
-describe('UploadAuthBreederDocumentsUseCase', () => {
+describe('브리더 인증 문서 업로드 유스케이스', () => {
     let tempUploadPort: StubAuthTempUploadPort;
     let useCase: UploadAuthBreederDocumentsUseCase;
 

@@ -1,7 +1,7 @@
 import { GetAdopterProfileUseCase } from './get-adopter-profile.use-case';
 
-describe('GetAdopterProfileUseCase', () => {
-    it('입양자 프로필을 조회하고 프로필 이미지를 signed url로 변환한다', async () => {
+describe('입양자 프로필 조회 유스케이스', () => {
+    it('입양자 프로필을 조회하고 프로필 이미지를 signed 주소로 변환한다', async () => {
         const useCase = new GetAdopterProfileUseCase(
             {
                 findById: jest.fn().mockResolvedValue({

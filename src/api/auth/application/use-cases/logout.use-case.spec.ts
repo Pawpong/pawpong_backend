@@ -1,7 +1,7 @@
 import { LogoutUseCase } from './logout.use-case';
 import { AuthCommandResponseFactoryService } from '../../domain/services/auth-command-response-factory.service';
 
-describe('LogoutUseCase', () => {
+describe('로그아웃 유스케이스', () => {
     const authSessionPort = {
         updateRefreshToken: jest.fn(),
     };

@@ -3,10 +3,10 @@ import request from 'supertest';
 import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../common/test/test-utils';
 
 /**
- * Auth Admin API E2E 테스트
+ * 인증 관리자 종단간 테스트
  * 관리자 로그인 및 토큰 갱신
  */
-describe('Auth Admin API E2E Tests', () => {
+describe('인증 관리자 종단간 테스트', () => {
     let app: INestApplication;
     const adminPassword = 'admin1234';
     let adminEmail: string;
@@ -23,7 +23,7 @@ describe('Auth Admin API E2E Tests', () => {
         await app.close();
     });
 
-    describe('POST /api/auth-admin/login', () => {
+    describe('POST /api/auth-관리자/login', () => {
         it('관리자 로그인 성공', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/auth-admin/login')
@@ -35,7 +35,7 @@ describe('Auth Admin API E2E Tests', () => {
             expect(response.body.data.refreshToken).toBeDefined();
 
             refreshToken = response.body.data.refreshToken;
-            console.log('✅ 관리자 로그인 성공');
+            console.log('관리자 로그인 성공');
         });
 
         it('잘못된 비밀번호로 로그인 실패', async () => {
@@ -44,7 +44,7 @@ describe('Auth Admin API E2E Tests', () => {
                 .send({ email: adminEmail, password: 'wrong_password' });
 
             expect([400, 401]).toContain(response.status);
-            console.log('✅ 잘못된 비밀번호로 로그인 실패 확인');
+            console.log('잘못된 비밀번호로 로그인 실패 확인');
         });
 
         it('존재하지 않는 이메일로 로그인 실패', async () => {
@@ -53,14 +53,14 @@ describe('Auth Admin API E2E Tests', () => {
                 .send({ email: 'nonexistent@test.com', password: adminPassword });
 
             expect([400, 401]).toContain(response.status);
-            console.log('✅ 존재하지 않는 이메일로 로그인 실패 확인');
+            console.log('존재하지 않는 이메일로 로그인 실패 확인');
         });
     });
 
-    describe('POST /api/auth-admin/refresh', () => {
+    describe('POST /api/auth-관리자/refresh', () => {
         it('토큰 갱신 성공', async () => {
             if (!refreshToken) {
-                console.log('⚠️  refreshToken이 없어서 테스트 스킵');
+                console.log('주의: 재발급 토큰이 없어서 테스트 스킵');
                 return;
             }
 
@@ -73,16 +73,16 @@ describe('Auth Admin API E2E Tests', () => {
             if (response.status === 200) {
                 expect(response.body.data.accessToken).toBeDefined();
             }
-            console.log('✅ 토큰 갱신 검증 완료');
+            console.log('토큰 갱신 검증 완료');
         });
 
-        it('잘못된 refreshToken으로 갱신 실패', async () => {
+        it('잘못된 재발급 토큰으로 갱신 실패', async () => {
             const response = await request(app.getHttpServer())
                 .post('/api/auth-admin/refresh')
                 .send({ refreshToken: 'invalid-refresh-token' });
 
             expect([400, 401]).toContain(response.status);
-            console.log('✅ 잘못된 refreshToken으로 갱신 실패 확인');
+            console.log('잘못된 재발급 토큰으로 갱신 실패 확인');
         });
     });
 });

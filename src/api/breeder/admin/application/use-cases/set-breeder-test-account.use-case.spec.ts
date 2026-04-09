@@ -5,7 +5,7 @@ import { BreederAdminActivityLogFactoryService } from '../../domain/services/bre
 import { BreederAdminPolicyService } from '../../domain/services/breeder-admin-policy.service';
 import { BreederAdminPresentationService } from '../../domain/services/breeder-admin-presentation.service';
 
-describe('SetBreederTestAccountUseCase', () => {
+describe('브리더 테스트 계정 설정 유스케이스', () => {
     const breederAdminReader = {
         findAdminById: jest.fn(),
         findBreederById: jest.fn(),

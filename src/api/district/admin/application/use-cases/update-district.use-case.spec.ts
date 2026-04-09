@@ -5,7 +5,7 @@ import { DistrictAdminPresentationService } from '../../../domain/services/distr
 import { DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
 import { DistrictWriterPort } from '../ports/district-writer.port';
 
-describe('UpdateDistrictUseCase', () => {
+describe('지역 수정 유스케이스', () => {
     it('지역이 있으면 수정된 응답을 반환한다', async () => {
         const districtAdminReader: DistrictAdminReaderPort = {
             readAll: jest.fn(),
@@ -41,7 +41,7 @@ describe('UpdateDistrictUseCase', () => {
         });
     });
 
-    it('지역이 없으면 BadRequestException을 던진다', async () => {
+    it('지역이 없으면 예외을 던진다', async () => {
         const useCase = new UpdateDistrictUseCase(
             {
                 readAll: jest.fn(),
@@ -59,7 +59,7 @@ describe('UpdateDistrictUseCase', () => {
         await expect(useCase.execute('missing', { districts: ['구'] })).rejects.toBeInstanceOf(BadRequestException);
     });
 
-    it('변경하려는 city가 중복이면 ConflictException을 던진다', async () => {
+    it('변경하려는 city가 중복이면 예외을 던진다', async () => {
         const districtAdminReader: DistrictAdminReaderPort = {
             readAll: jest.fn(),
             findById: jest.fn().mockResolvedValue({

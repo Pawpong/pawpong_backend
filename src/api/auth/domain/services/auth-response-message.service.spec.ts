@@ -4,7 +4,7 @@ import {
     buildAuthBreederDocumentsUploadMessage,
 } from './auth-response-message.service';
 
-describe('AuthResponseMessageService', () => {
+describe('인증 응답 메시지 서비스', () => {
     const service = new AuthResponseMessageService();
 
     it('역할별 회원가입 메시지를 반환한다', () => {

@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { cleanupDatabase, createTestingApp, seedAdmin } from '../../../../../common/test/test-utils';
 
-describe('User Admin Contract E2E', () => {
+describe('사용자 관리자 응답 계약 종단간 테스트', () => {
     let app: INestApplication;
     let adminToken: string;
     let adminId: string;
@@ -47,7 +47,7 @@ describe('User Admin Contract E2E', () => {
         await app.close();
     });
 
-    it('GET /api/user-admin/profile keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
             .get('/api/user-admin/profile')
             .set('Authorization', `Bearer ${adminToken}`)
@@ -80,7 +80,7 @@ describe('User Admin Contract E2E', () => {
         );
     });
 
-    it('GET /api/user-admin/users keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
             .get('/api/user-admin/users')
             .set('Authorization', `Bearer ${adminToken}`)
@@ -122,7 +122,7 @@ describe('User Admin Contract E2E', () => {
         );
     });
 
-    it('PATCH /api/user-admin/users/:userId/status keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
             .patch(`/api/user-admin/users/${adopterId}/status?role=adopter`)
             .set('Authorization', `Bearer ${adminToken}`)

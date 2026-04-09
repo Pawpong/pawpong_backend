@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { cleanupDatabase, createTestingApp } from '../../../../common/test/test-utils';
 
-describe('Adopter Contract E2E', () => {
+describe('입양자 응답 계약 종단간 테스트', () => {
     let app: INestApplication;
     let adopterToken: string;
     let adopterId: string;
@@ -63,7 +63,7 @@ describe('Adopter Contract E2E', () => {
         await app.close();
     });
 
-    it('GET /api/adopter/profile keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
             .get('/api/adopter/profile')
             .set('Authorization', `Bearer ${adopterToken}`)
@@ -95,7 +95,7 @@ describe('Adopter Contract E2E', () => {
         );
     });
 
-    it('POST /api/adopter/application keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
             .post('/api/adopter/application')
             .set('Authorization', `Bearer ${adopterToken}`)
@@ -139,7 +139,7 @@ describe('Adopter Contract E2E', () => {
         );
     });
 
-    it('GET /api/adopter/applications keeps the response contract', async () => {
+    it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
             .get('/api/adopter/applications')
             .set('Authorization', `Bearer ${adopterToken}`)

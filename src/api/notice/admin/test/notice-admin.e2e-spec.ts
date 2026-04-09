@@ -3,10 +3,10 @@ import request from 'supertest';
 import { createTestingApp, cleanupDatabase, getAdminToken } from '../../../../common/test/test-utils';
 
 /**
- * Notice Admin API E2E 테스트
+ * 공지 관리자 종단간 테스트
  * 공지 게시판 관리 (관리자 전용)
  */
-describe('Notice Admin API E2E Tests', () => {
+describe('공지 관리자 종단간 테스트', () => {
     let app: INestApplication;
     let adminToken: string;
     let createdNoticeId: string;
@@ -14,7 +14,7 @@ describe('Notice Admin API E2E Tests', () => {
     beforeAll(async () => {
         app = await createTestingApp();
         adminToken = await getAdminToken(app) || '';
-        if (!adminToken) console.log('⚠️  관리자 토큰 획득 실패');
+        if (!adminToken) console.log('주의: 관리자 토큰 획득 실패');
     }, 30000);
 
     afterAll(async () => {
@@ -22,9 +22,9 @@ describe('Notice Admin API E2E Tests', () => {
         await app.close();
     });
 
-    describe('POST /api/notice-admin', () => {
+    describe('POST /api/notice-관리자', () => {
         it('공지 생성 성공', async () => {
-            if (!adminToken) { console.log('⚠️  스킵'); return; }
+            if (!adminToken) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .post('/api/notice-admin')
@@ -40,7 +40,7 @@ describe('Notice Admin API E2E Tests', () => {
                 const id = response.body.data?.id || response.body.data?._id;
                 if (id) createdNoticeId = id;
             }
-            console.log('✅ 공지 생성 검증 완료');
+            console.log('공지 생성 검증 완료');
         });
 
         it('인증 없이 접근 시 401', async () => {
@@ -48,13 +48,13 @@ describe('Notice Admin API E2E Tests', () => {
                 .post('/api/notice-admin')
                 .send({ title: '테스트', content: '내용' })
                 .expect(401);
-            console.log('✅ 인증 없이 접근 401 확인');
+            console.log('인증 없이 접근 401 확인');
         });
     });
 
-    describe('GET /api/notice-admin', () => {
+    describe('GET /api/notice-관리자', () => {
         it('공지 목록 조회 성공', async () => {
-            if (!adminToken) { console.log('⚠️  스킵'); return; }
+            if (!adminToken) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .get('/api/notice-admin')
@@ -62,13 +62,13 @@ describe('Notice Admin API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ 공지 목록 조회 성공');
+            console.log('공지 목록 조회 성공');
         });
     });
 
-    describe('PATCH /api/notice-admin/:noticeId', () => {
+    describe('PATCH /api/notice-관리자/:noticeId', () => {
         it('공지 수정 성공', async () => {
-            if (!adminToken || !createdNoticeId) { console.log('⚠️  스킵'); return; }
+            if (!adminToken || !createdNoticeId) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .patch(`/api/notice-admin/${createdNoticeId}`)
@@ -77,13 +77,13 @@ describe('Notice Admin API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ 공지 수정 성공');
+            console.log('공지 수정 성공');
         });
     });
 
-    describe('DELETE /api/notice-admin/:noticeId', () => {
+    describe('DELETE /api/notice-관리자/:noticeId', () => {
         it('공지 삭제 성공', async () => {
-            if (!adminToken || !createdNoticeId) { console.log('⚠️  스킵'); return; }
+            if (!adminToken || !createdNoticeId) { console.log('주의: 스킵'); return; }
 
             const response = await request(app.getHttpServer())
                 .delete(`/api/notice-admin/${createdNoticeId}`)
@@ -91,7 +91,7 @@ describe('Notice Admin API E2E Tests', () => {
                 .expect(200);
 
             expect(response.body.success).toBe(true);
-            console.log('✅ 공지 삭제 성공');
+            console.log('공지 삭제 성공');
         });
     });
 });

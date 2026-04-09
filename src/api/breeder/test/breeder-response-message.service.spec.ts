@@ -4,7 +4,7 @@ import {
     buildBreederTestAccountMessage,
 } from '../domain/services/breeder-response-message.service';
 
-describe('BREEDER_RESPONSE_MESSAGES', () => {
+describe('브리더 응답 메시지 서비스', () => {
     it('공개 조회와 관리자 응답 메시지 계약을 유지한다', () => {
         expect(BREEDER_RESPONSE_MESSAGES.searchCompleted).toBe('브리더 검색이 완료되었습니다.');
         expect(BREEDER_RESPONSE_MESSAGES.profileRetrieved).toBe('브리더 프로필이 조회되었습니다.');

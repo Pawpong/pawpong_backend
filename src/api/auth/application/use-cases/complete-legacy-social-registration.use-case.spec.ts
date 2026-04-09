@@ -3,7 +3,7 @@ import { BadRequestException, ConflictException } from '@nestjs/common';
 import { CompleteLegacySocialRegistrationUseCase } from './complete-legacy-social-registration.use-case';
 import { AuthResponseMessageService } from '../../domain/services/auth-response-message.service';
 
-describe('CompleteLegacySocialRegistrationUseCase', () => {
+describe('레거시 소셜 가입 완료 유스케이스', () => {
     const authRegistrationPort = {
         findAdopterByEmail: jest.fn(),
         findAdopterByNickname: jest.fn(),

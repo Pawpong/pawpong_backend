@@ -30,7 +30,7 @@ class StubAnnouncementPublicReaderPort extends AnnouncementPublicReaderPort {
     }
 }
 
-describe('GetActiveAnnouncementsUseCase', () => {
+describe('활성 공지사항 조회 유스케이스', () => {
     it('공지사항 목록 응답 계약을 유지한다', async () => {
         const useCase = new GetActiveAnnouncementsUseCase(
             new StubAnnouncementPublicReaderPort(),

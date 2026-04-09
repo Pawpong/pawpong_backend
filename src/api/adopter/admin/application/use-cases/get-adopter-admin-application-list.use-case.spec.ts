@@ -5,7 +5,7 @@ import { AdopterPaginationAssemblerService } from '../../../domain/services/adop
 import { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { GetAdopterAdminApplicationListUseCase } from './get-adopter-admin-application-list.use-case';
 
-describe('GetAdopterAdminApplicationListUseCase', () => {
+describe('입양자 관리자 입양 신청 목록 조회 유스케이스', () => {
     it('입양 신청 목록 응답 계약을 유지한다', async () => {
         const useCase = new GetAdopterAdminApplicationListUseCase(
             {

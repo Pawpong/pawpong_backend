@@ -1,7 +1,7 @@
 import { BreederManagementCommandResponseFactoryService } from '../domain/services/breeder-management-command-response-factory.service';
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
 
-describe('BreederManagementCommandResponseFactoryService', () => {
+describe('브리더 관리 명령 응답 팩토리 서비스', () => {
     const service = new BreederManagementCommandResponseFactoryService();
 
     it('message-only 응답을 일관된 형태로 만든다', () => {
@@ -22,7 +22,7 @@ describe('BreederManagementCommandResponseFactoryService', () => {
         });
     });
 
-    it('pet 생성 응답에 petId와 message를 함께 담는다', () => {
+    it('pet 생성 응답에 개체 ID와 message를 함께 담는다', () => {
         expect(service.createParentPetAdded('parent-pet-id')).toEqual({
             petId: 'parent-pet-id',
             message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetAddedDetailed,
