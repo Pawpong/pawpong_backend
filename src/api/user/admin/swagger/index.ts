@@ -6,7 +6,7 @@ import { PaginationResponseDto } from '../../../../common/dto/pagination/paginat
 import { UserStatus } from '../../../../common/enum/user.enum';
 import {
     USER_ADMIN_FORBIDDEN_RESPONSE,
-    USER_ADMIN_MANAGED_ROLE_VALUES,
+    USER_ADMIN_MANAGED_ROLE_QUERY_OPTIONS,
     USER_ADMIN_SUPER_ADMIN_RESPONSE,
 } from '../constants/user-admin-swagger.constants';
 import { USER_ADMIN_RESPONSE_MESSAGES } from '../constants/user-admin-response-messages';
@@ -16,14 +16,6 @@ import { DeletedUserStatsResponseDto } from '../dto/response/deleted-user-stats-
 import { PhoneWhitelistListResponseDto, PhoneWhitelistResponseDto } from '../dto/response/phone-whitelist-response.dto';
 import { UserManagementResponseDto } from '../dto/response/user-management-response.dto';
 import { UserStatusUpdateResponseDto } from '../dto/response/user-status-update-response.dto';
-
-const MANAGED_USER_ROLE_QUERY = ApiQuery({
-    name: 'role',
-    required: true,
-    enum: USER_ADMIN_MANAGED_ROLE_VALUES,
-    description: '대상 사용자 역할',
-    example: 'breeder',
-});
 
 export function ApiUserAdminController() {
     return ApiController('사용자 관리 관리자');
@@ -93,7 +85,7 @@ export function ApiUpdateUserStatusAdminEndpoint() {
             successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.userStatusUpdated,
             errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
         }),
-        MANAGED_USER_ROLE_QUERY,
+        ApiQuery(USER_ADMIN_MANAGED_ROLE_QUERY_OPTIONS),
     );
 }
 
@@ -154,7 +146,7 @@ export function ApiRestoreDeletedUserAdminEndpoint() {
             successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.deletedUserRestored,
             errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
         }),
-        MANAGED_USER_ROLE_QUERY,
+        ApiQuery(USER_ADMIN_MANAGED_ROLE_QUERY_OPTIONS),
     );
 }
 
@@ -185,7 +177,7 @@ export function ApiHardDeleteUserAdminEndpoint() {
             successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.userHardDeleted,
             errorResponses: [USER_ADMIN_SUPER_ADMIN_RESPONSE],
         }),
-        MANAGED_USER_ROLE_QUERY,
+        ApiQuery(USER_ADMIN_MANAGED_ROLE_QUERY_OPTIONS),
     );
 }
 

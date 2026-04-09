@@ -11,3 +11,11 @@ export const USER_ADMIN_SUPER_ADMIN_RESPONSE = {
 } as const;
 
 export const USER_ADMIN_MANAGED_ROLE_VALUES = ['adopter', 'breeder'] as const;
+
+export const USER_ADMIN_MANAGED_ROLE_QUERY_OPTIONS = {
+    name: 'role',
+    required: true,
+    enum: USER_ADMIN_MANAGED_ROLE_VALUES,
+    description: '대상 사용자 역할',
+    example: 'breeder',
+} as const;
