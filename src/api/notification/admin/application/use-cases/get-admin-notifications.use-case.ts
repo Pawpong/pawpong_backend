@@ -6,14 +6,14 @@ import { NotificationAdminListRequestDto } from '../../dto/request/notification-
 import { NotificationAdminResponseDto } from '../../dto/response/notification-admin-response.dto';
 import { NOTIFICATION_ADMIN_READER } from '../ports/notification-admin-reader.port';
 import type { NotificationAdminReaderPort } from '../ports/notification-admin-reader.port';
-import { NotificationAdminPresentationService } from '../../domain/services/notification-admin-presentation.service';
+import { NotificationAdminListPresentationService } from '../../domain/services/notification-admin-list-presentation.service';
 
 @Injectable()
 export class GetAdminNotificationsUseCase {
     constructor(
         @Inject(NOTIFICATION_ADMIN_READER)
         private readonly notificationAdminReader: NotificationAdminReaderPort,
-        private readonly notificationAdminPresentationService: NotificationAdminPresentationService,
+        private readonly notificationAdminListPresentationService: NotificationAdminListPresentationService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -39,7 +39,7 @@ export class GetAdminNotificationsUseCase {
                 limit,
             });
 
-            const response = this.notificationAdminPresentationService.toPage(result, page, limit);
+            const response = this.notificationAdminListPresentationService.toPage(result, page, limit);
 
             this.logger.logSuccess('getNotifications', '관리자 알림 목록 조회 완료', {
                 totalItems: result.totalItems,

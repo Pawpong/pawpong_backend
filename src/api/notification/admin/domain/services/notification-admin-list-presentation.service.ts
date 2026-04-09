@@ -1,19 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
 import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import {
-    NotificationAdminResponseDto,
-    NotificationStatsResponseDto,
-} from '../../dto/response/notification-admin-response.dto';
+import { NotificationAdminResponseDto } from '../../dto/response/notification-admin-response.dto';
 import {
     NotificationAdminPageSnapshot,
     NotificationAdminRecordSnapshot,
-    NotificationAdminStatsSnapshot,
 } from '../../application/ports/notification-admin-reader.port';
 import { NotificationAdminPaginationAssemblerService } from './notification-admin-pagination-assembler.service';
 
 @Injectable()
-export class NotificationAdminPresentationService {
+export class NotificationAdminListPresentationService {
     constructor(
         private readonly notificationAdminPaginationAssemblerService: NotificationAdminPaginationAssemblerService,
     ) {}
@@ -46,14 +42,5 @@ export class NotificationAdminPresentationService {
             limit,
             pageSnapshot.totalItems,
         );
-    }
-
-    toStats(snapshot: NotificationAdminStatsSnapshot): NotificationStatsResponseDto {
-        return {
-            totalNotifications: snapshot.totalNotifications,
-            unreadNotifications: snapshot.unreadNotifications,
-            notificationsByType: snapshot.notificationsByType,
-            notificationsByRole: snapshot.notificationsByRole,
-        };
     }
 }

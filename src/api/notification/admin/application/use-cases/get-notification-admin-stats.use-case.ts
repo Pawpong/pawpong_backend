@@ -4,14 +4,14 @@ import { CustomLoggerService } from '../../../../../common/logger/custom-logger.
 import { NotificationStatsResponseDto } from '../../dto/response/notification-admin-response.dto';
 import { NOTIFICATION_ADMIN_READER } from '../ports/notification-admin-reader.port';
 import type { NotificationAdminReaderPort } from '../ports/notification-admin-reader.port';
-import { NotificationAdminPresentationService } from '../../domain/services/notification-admin-presentation.service';
+import { NotificationAdminStatsPresentationService } from '../../domain/services/notification-admin-stats-presentation.service';
 
 @Injectable()
 export class GetNotificationAdminStatsUseCase {
     constructor(
         @Inject(NOTIFICATION_ADMIN_READER)
         private readonly notificationAdminReader: NotificationAdminReaderPort,
-        private readonly notificationAdminPresentationService: NotificationAdminPresentationService,
+        private readonly notificationAdminStatsPresentationService: NotificationAdminStatsPresentationService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -20,7 +20,7 @@ export class GetNotificationAdminStatsUseCase {
 
         try {
             const result = await this.notificationAdminReader.getStats();
-            const response = this.notificationAdminPresentationService.toStats(result);
+            const response = this.notificationAdminStatsPresentationService.toStats(result);
 
             this.logger.logSuccess('getStats', '관리자 알림 통계 조회 완료', response);
 
