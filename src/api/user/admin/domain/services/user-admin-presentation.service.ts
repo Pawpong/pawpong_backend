@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../../common/dto/pagination/pagination-builder.dto';
 import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
 import { DeletedUserResponseDto } from '../../dto/response/deleted-user-response.dto';
 import { DeletedUserStatsResponseDto } from '../../dto/response/deleted-user-stats-response.dto';
@@ -15,9 +14,12 @@ import {
     UserAdminPhoneWhitelistSnapshot,
     UserAdminUserListResultSnapshot,
 } from '../../application/ports/user-admin-reader.port';
+import { UserAdminPaginationAssemblerService } from './user-admin-pagination-assembler.service';
 
 @Injectable()
 export class UserAdminPresentationService {
+    constructor(private readonly userAdminPaginationAssemblerService: UserAdminPaginationAssemblerService) {}
+
     private readonly adopterReasonLabels: Record<string, string> = {
         already_adopted: '이미 입양을 마쳤어요',
         no_suitable_pet: '마음에 드는 아이가 없어요',
@@ -68,12 +70,7 @@ export class UserAdminPresentationService {
             }),
         );
 
-        return new PaginationBuilder<UserManagementResponseDto>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(result.total)
-            .build();
+        return this.userAdminPaginationAssemblerService.build(items, page, limit, result.total);
     }
 
     toDeletedUsersPaginationResponse(
@@ -95,12 +92,7 @@ export class UserAdminPresentationService {
             }),
         );
 
-        return new PaginationBuilder<DeletedUserResponseDto>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(result.total)
-            .build();
+        return this.userAdminPaginationAssemblerService.build(items, page, limit, result.total);
     }
 
     toDeletedUserStatsResponse(snapshot: UserAdminDeletedUserStatsSnapshot): DeletedUserStatsResponseDto {

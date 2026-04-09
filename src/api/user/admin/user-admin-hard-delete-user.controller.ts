@@ -5,6 +5,7 @@ import { Roles } from '../../../common/decorator/roles.decorator';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { HardDeleteUserUseCase } from './application/use-cases/hard-delete-user.use-case';
 import { UserAdminProtectedController } from './decorator/user-admin-controller.decorator';
+import { USER_ADMIN_RESPONSE_MESSAGES } from './domain/services/user-admin-response-message.service';
 import { ApiHardDeleteUserAdminEndpoint } from './swagger';
 
 @UserAdminProtectedController()
@@ -20,6 +21,6 @@ export class UserAdminHardDeleteUserController {
         @Query('role') role: 'adopter' | 'breeder',
     ): Promise<ApiResponseDto<any>> {
         const result = await this.hardDeleteUserUseCase.execute(adminId, userId, role);
-        return ApiResponseDto.success(result, '사용자가 영구적으로 삭제되었습니다.');
+        return ApiResponseDto.success(result, USER_ADMIN_RESPONSE_MESSAGES.userHardDeleted);
     }
 }

@@ -5,6 +5,7 @@ import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { UserAdminProtectedController } from './decorator/user-admin-controller.decorator';
 import { GetAdminProfileUseCase } from './application/use-cases/get-admin-profile.use-case';
 import { AdminProfileResponseDto } from './dto/response/admin-profile-response.dto';
+import { USER_ADMIN_RESPONSE_MESSAGES } from './domain/services/user-admin-response-message.service';
 import { ApiGetUserAdminProfileEndpoint } from './swagger';
 
 @UserAdminProtectedController()
@@ -15,6 +16,6 @@ export class UserAdminProfileController {
     @ApiGetUserAdminProfileEndpoint()
     async getProfile(@CurrentUser('userId') adminId: string): Promise<ApiResponseDto<AdminProfileResponseDto>> {
         const result = await this.getAdminProfileUseCase.execute(adminId);
-        return ApiResponseDto.success(result, '관리자 프로필이 조회되었습니다.');
+        return ApiResponseDto.success(result, USER_ADMIN_RESPONSE_MESSAGES.profileRetrieved);
     }
 }
