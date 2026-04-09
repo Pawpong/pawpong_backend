@@ -19,7 +19,8 @@ import { GetInquiryListUseCase } from './application/use-cases/get-inquiry-list.
 import { GetMyInquiriesUseCase } from './application/use-cases/get-my-inquiries.use-case';
 import { INQUIRY_ASSET_URL } from './application/ports/inquiry-asset-url.port';
 import { InquiryCommandPolicyService } from './domain/services/inquiry-command-policy.service';
-import { InquiryResponseMessageService } from './domain/services/inquiry-response-message.service';
+import { InquiryCommandResponseMessageService } from './domain/services/inquiry-command-response-message.service';
+import { InquiryQueryResponseMessageService } from './domain/services/inquiry-query-response-message.service';
 import { InquiryViewService } from './domain/services/inquiry-view.service';
 import { INQUIRY_COMMAND } from './application/ports/inquiry-command.port';
 import { InquiryRepositoryCommandAdapter } from './infrastructure/inquiry-repository-command.adapter';
@@ -65,7 +66,8 @@ import { StorageModule } from '../../common/storage/storage.module';
         DeleteInquiryUseCase,
         CreateInquiryAnswerUseCase,
         InquiryCommandPolicyService,
-        InquiryResponseMessageService,
+        InquiryQueryResponseMessageService,
+        InquiryCommandResponseMessageService,
         InquiryViewService,
         InquiryRepositoryReaderAdapter,
         InquiryRepositoryCommandAdapter,
