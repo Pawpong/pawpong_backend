@@ -2,6 +2,11 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiConsumes } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
+import {
+    BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE,
+    BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE,
+} from '../constants/breeder-management-swagger.constants';
 import { BreederDashboardResponseDto } from '../../breeder/dto/response/breeder-dashboard-response.dto';
 import { BreederProfileResponseDto } from '../../breeder/dto/response/breeder-profile-response.dto';
 import { ReceivedApplicationListResponseDto } from '../../breeder/dto/response/received-application-list-response.dto';
@@ -37,19 +42,6 @@ import { ReviewReplyDeleteResponseDto, ReviewReplyResponseDto } from '../dto/res
 import { UploadDocumentsResponseDto } from '../dto/response/upload-documents-response.dto';
 import { VerificationStatusResponseDto } from '../dto/response/verification-status-response.dto';
 import { VerificationSubmitResponseDto } from '../dto/response/verification-submit-response.dto';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
-
-const BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE = {
-    status: 400,
-    description: '잘못된 요청',
-    errorExample: '요청값이 올바르지 않습니다.',
-};
-
-const BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '브리더 권한이 필요합니다.',
-};
 
 export function ApiBreederManagementController() {
     return ApiController('브리더 관리');
