@@ -4,30 +4,23 @@ import { ApiQuery } from '@nestjs/swagger';
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { UserStatus } from '../../../../common/enum/user.enum';
+import {
+    USER_ADMIN_FORBIDDEN_RESPONSE,
+    USER_ADMIN_MANAGED_ROLE_VALUES,
+    USER_ADMIN_SUPER_ADMIN_RESPONSE,
+} from '../constants/user-admin-swagger.constants';
+import { USER_ADMIN_RESPONSE_MESSAGES } from '../constants/user-admin-response-messages';
 import { AdminProfileResponseDto } from '../dto/response/admin-profile-response.dto';
 import { DeletedUserResponseDto } from '../dto/response/deleted-user-response.dto';
 import { DeletedUserStatsResponseDto } from '../dto/response/deleted-user-stats-response.dto';
 import { PhoneWhitelistListResponseDto, PhoneWhitelistResponseDto } from '../dto/response/phone-whitelist-response.dto';
 import { UserManagementResponseDto } from '../dto/response/user-management-response.dto';
 import { UserStatusUpdateResponseDto } from '../dto/response/user-status-update-response.dto';
-import { USER_ADMIN_RESPONSE_MESSAGES } from '../domain/services/user-admin-response-message.service';
-
-const USER_ADMIN_FORBIDDEN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: '관리자 권한이 필요합니다.',
-};
-
-const USER_ADMIN_SUPER_ADMIN_RESPONSE = {
-    status: 403,
-    description: '권한 없음',
-    errorExample: 'super_admin 권한이 필요합니다.',
-};
 
 const MANAGED_USER_ROLE_QUERY = ApiQuery({
     name: 'role',
     required: true,
-    enum: ['adopter', 'breeder'],
+    enum: USER_ADMIN_MANAGED_ROLE_VALUES,
     description: '대상 사용자 역할',
     example: 'breeder',
 });

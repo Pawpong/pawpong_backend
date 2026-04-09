@@ -5,7 +5,7 @@ import { UpdatePhoneWhitelistUseCase } from './application/use-cases/update-phon
 import { UserAdminProtectedController } from './decorator/user-admin-controller.decorator';
 import { UpdatePhoneWhitelistRequestDto } from './dto/request/phone-whitelist-request.dto';
 import { PhoneWhitelistResponseDto } from './dto/response/phone-whitelist-response.dto';
-import { USER_ADMIN_RESPONSE_MESSAGES } from './domain/services/user-admin-response-message.service';
+import { USER_ADMIN_RESPONSE_MESSAGES } from './constants/user-admin-response-messages';
 import { ApiUpdatePhoneWhitelistAdminEndpoint } from './swagger';
 
 @UserAdminProtectedController()

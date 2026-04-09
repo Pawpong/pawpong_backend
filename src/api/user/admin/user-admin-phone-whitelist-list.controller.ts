@@ -4,7 +4,7 @@ import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { GetPhoneWhitelistUseCase } from './application/use-cases/get-phone-whitelist.use-case';
 import { UserAdminProtectedController } from './decorator/user-admin-controller.decorator';
 import { PhoneWhitelistListResponseDto } from './dto/response/phone-whitelist-response.dto';
-import { USER_ADMIN_RESPONSE_MESSAGES } from './domain/services/user-admin-response-message.service';
+import { USER_ADMIN_RESPONSE_MESSAGES } from './constants/user-admin-response-messages';
 import { ApiGetPhoneWhitelistAdminEndpoint } from './swagger';
 
 @UserAdminProtectedController()

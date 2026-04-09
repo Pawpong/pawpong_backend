@@ -1,4 +1,4 @@
-import { USER_ADMIN_RESPONSE_MESSAGES } from '../domain/services/user-admin-response-message.service';
+import { USER_ADMIN_RESPONSE_MESSAGES } from '../constants/user-admin-response-messages';
 
 describe('사용자 관리자 응답 메시지 서비스', () => {
     it('관리자 응답 메시지 계약을 유지한다', () => {

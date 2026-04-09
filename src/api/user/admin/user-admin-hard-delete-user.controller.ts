@@ -5,7 +5,7 @@ import { Roles } from '../../../common/decorator/roles.decorator';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { HardDeleteUserUseCase } from './application/use-cases/hard-delete-user.use-case';
 import { UserAdminProtectedController } from './decorator/user-admin-controller.decorator';
-import { USER_ADMIN_RESPONSE_MESSAGES } from './domain/services/user-admin-response-message.service';
+import { USER_ADMIN_RESPONSE_MESSAGES } from './constants/user-admin-response-messages';
 import { ApiHardDeleteUserAdminEndpoint } from './swagger';
 
 @UserAdminProtectedController()

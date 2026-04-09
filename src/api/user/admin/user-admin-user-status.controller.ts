@@ -5,7 +5,7 @@ import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { UpdateUserStatusUseCase } from './application/use-cases/update-user-status.use-case';
 import { UserAdminProtectedController } from './decorator/user-admin-controller.decorator';
 import { UserManagementRequestDto } from './dto/request/user-management-request.dto';
-import { USER_ADMIN_RESPONSE_MESSAGES } from './domain/services/user-admin-response-message.service';
+import { USER_ADMIN_RESPONSE_MESSAGES } from './constants/user-admin-response-messages';
 import { ApiUpdateUserStatusAdminEndpoint } from './swagger';
 
 @UserAdminProtectedController()
