@@ -3,7 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ParentPetUpdateDto } from '../../dto/request/parent-pet-update-request.dto';
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
-import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
+import { BreederManagementPetCommandResponseService } from '../../domain/services/breeder-management-pet-command-response.service';
 import { BreederManagementParentPetCommandMapperService } from '../../domain/services/breeder-management-parent-pet-command-mapper.service';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class UpdateBreederManagementParentPetUseCase {
         @Inject(BREEDER_MANAGEMENT_PET_COMMAND_PORT)
         private readonly breederManagementPetCommandPort: BreederManagementPetCommandPort,
         private readonly breederManagementParentPetCommandMapperService: BreederManagementParentPetCommandMapperService,
-        private readonly breederManagementCommandResponseFactoryService: BreederManagementCommandResponseFactoryService,
+        private readonly breederManagementPetCommandResponseService: BreederManagementPetCommandResponseService,
     ) {}
 
     async execute(userId: string, petId: string, updateData: ParentPetUpdateDto): Promise<{ message: string }> {
@@ -26,6 +26,6 @@ export class UpdateBreederManagementParentPetUseCase {
             this.breederManagementParentPetCommandMapperService.toUpdateData(updateData),
         );
 
-        return this.breederManagementCommandResponseFactoryService.createParentPetUpdated();
+        return this.breederManagementPetCommandResponseService.createParentPetUpdated();
     }
 }

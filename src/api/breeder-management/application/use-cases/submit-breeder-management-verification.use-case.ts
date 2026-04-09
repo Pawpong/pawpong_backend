@@ -6,7 +6,7 @@ import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-pro
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_SETTINGS_PORT } from '../ports/breeder-management-settings.port';
 import type { BreederManagementSettingsPort } from '../ports/breeder-management-settings.port';
-import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
+import { BreederManagementProfileCommandResponseService } from '../../domain/services/breeder-management-profile-command-response.service';
 import { BreederManagementVerificationSubmissionMapperService } from '../../domain/services/breeder-management-verification-submission-mapper.service';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class SubmitBreederManagementVerificationUseCase {
         @Inject(BREEDER_MANAGEMENT_SETTINGS_PORT)
         private readonly breederManagementSettingsPort: BreederManagementSettingsPort,
         private readonly breederManagementVerificationSubmissionMapperService: BreederManagementVerificationSubmissionMapperService,
-        private readonly breederManagementCommandResponseFactoryService: BreederManagementCommandResponseFactoryService,
+        private readonly breederManagementProfileCommandResponseService: BreederManagementProfileCommandResponseService,
     ) {}
 
     async execute(userId: string, verificationData: VerificationSubmitRequestDto): Promise<{ message: string }> {
@@ -34,6 +34,6 @@ export class SubmitBreederManagementVerificationUseCase {
             this.breederManagementVerificationSubmissionMapperService.toVerificationRecord(verificationData);
         await this.breederManagementSettingsPort.updateVerification(userId, verificationRecord);
 
-        return this.breederManagementCommandResponseFactoryService.createVerificationSubmitted();
+        return this.breederManagementProfileCommandResponseService.createVerificationSubmitted();
     }
 }

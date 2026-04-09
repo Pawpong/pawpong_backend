@@ -5,7 +5,7 @@ import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-pro
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
-import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
+import { BreederManagementPetCommandResponseService } from '../../domain/services/breeder-management-pet-command-response.service';
 import { BreederManagementAvailablePetCommandMapperService } from '../../domain/services/breeder-management-available-pet-command-mapper.service';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class AddBreederManagementAvailablePetUseCase {
         @Inject(BREEDER_MANAGEMENT_PET_COMMAND_PORT)
         private readonly breederManagementPetCommandPort: BreederManagementPetCommandPort,
         private readonly breederManagementAvailablePetCommandMapperService: BreederManagementAvailablePetCommandMapperService,
-        private readonly breederManagementCommandResponseFactoryService: BreederManagementCommandResponseFactoryService,
+        private readonly breederManagementPetCommandResponseService: BreederManagementPetCommandResponseService,
     ) {}
 
     async execute(userId: string, availablePetDto: AvailablePetAddDto): Promise<{ petId: string; message: string }> {
@@ -29,6 +29,6 @@ export class AddBreederManagementAvailablePetUseCase {
             this.breederManagementAvailablePetCommandMapperService.toCreateData(userId, availablePetDto),
         );
 
-        return this.breederManagementCommandResponseFactoryService.createAvailablePetAdded(String(savedPet._id));
+        return this.breederManagementPetCommandResponseService.createAvailablePetAdded(String(savedPet._id));
     }
 }

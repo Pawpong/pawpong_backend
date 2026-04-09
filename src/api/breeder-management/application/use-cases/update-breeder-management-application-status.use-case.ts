@@ -5,14 +5,14 @@ import { CustomLoggerService } from '../../../../common/logger/custom-logger.ser
 import { ApplicationStatusUpdateRequestDto } from '../../dto/request/application-status-update-request.dto';
 import { BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT } from '../ports/breeder-management-application-workflow.port';
 import type { BreederManagementApplicationWorkflowPort } from '../ports/breeder-management-application-workflow.port';
-import { BreederManagementCommandResponseFactoryService } from '../../domain/services/breeder-management-command-response-factory.service';
+import { BreederManagementApplicationCommandResponseService } from '../../domain/services/breeder-management-application-command-response.service';
 
 @Injectable()
 export class UpdateBreederManagementApplicationStatusUseCase {
     constructor(
         @Inject(BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT)
         private readonly breederManagementApplicationWorkflowPort: BreederManagementApplicationWorkflowPort,
-        private readonly breederManagementCommandResponseFactoryService: BreederManagementCommandResponseFactoryService,
+        private readonly breederManagementApplicationCommandResponseService: BreederManagementApplicationCommandResponseService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -55,6 +55,6 @@ export class UpdateBreederManagementApplicationStatusUseCase {
             });
         }
 
-        return this.breederManagementCommandResponseFactoryService.createApplicationStatusUpdated();
+        return this.breederManagementApplicationCommandResponseService.createApplicationStatusUpdated();
     }
 }
