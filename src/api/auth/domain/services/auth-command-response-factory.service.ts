@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { LogoutResponseDto } from '../../dto/response/logout-response.dto';
 import { PhoneVerificationResponseDto } from '../../dto/response/phone-verification-response.dto';
-import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from './auth-response-message.service';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
 
 @Injectable()
 export class AuthCommandResponseFactoryService {
