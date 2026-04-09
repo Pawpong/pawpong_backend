@@ -10,6 +10,10 @@ import { BreederLevelChangeRequestDto } from './dto/request/breeder-level-change
 import { BreederVerificationRequestDto } from './dto/request/breeder-verification-request.dto';
 import { BreederLevelChangeResponseDto } from './dto/response/breeder-level-change-response.dto';
 import {
+    BREEDER_RESPONSE_MESSAGES,
+    buildBreederDocumentReminderMessage,
+} from '../../domain/services/breeder-response-message.service';
+import {
     ApiChangeBreederLevelAdminEndpoint,
     ApiSendDocumentRemindersAdminEndpoint,
     ApiUpdateBreederVerificationAdminEndpoint,
@@ -31,7 +35,7 @@ export class BreederVerificationAdminCommandController {
         @Body() verificationData: BreederVerificationRequestDto,
     ): Promise<ApiResponseDto<{ message: string }>> {
         const result = await this.updateBreederVerificationUseCase.execute(adminId, breederId, verificationData);
-        return ApiResponseDto.success(result, '브리더 인증 처리가 완료되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.verificationUpdated);
     }
 
     @Post('document-reminders/send')
@@ -40,7 +44,7 @@ export class BreederVerificationAdminCommandController {
         @CurrentUser('userId') adminId: string,
     ): Promise<ApiResponseDto<{ sentCount: number; breederIds: string[] }>> {
         const result = await this.sendDocumentRemindersUseCase.execute(adminId);
-        return ApiResponseDto.success(result, `${result.sentCount}명의 브리더에게 서류 독촉 이메일이 발송되었습니다.`);
+        return ApiResponseDto.success(result, buildBreederDocumentReminderMessage(result.sentCount));
     }
 
     @Patch('level/:breederId')
@@ -51,6 +55,6 @@ export class BreederVerificationAdminCommandController {
         @Body() levelData: BreederLevelChangeRequestDto,
     ): Promise<ApiResponseDto<BreederLevelChangeResponseDto>> {
         const result = await this.changeBreederLevelUseCase.execute(adminId, breederId, levelData);
-        return ApiResponseDto.success(result, '브리더 레벨이 변경되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.breederLevelChanged);
     }
 }

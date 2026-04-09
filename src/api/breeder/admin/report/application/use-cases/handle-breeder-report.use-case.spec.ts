@@ -4,6 +4,7 @@ import { HandleBreederReportUseCase } from './handle-breeder-report.use-case';
 import { BreederReportAdminActivityLogFactoryService } from '../../domain/services/breeder-report-admin-activity-log-factory.service';
 import { BreederReportAdminPolicyService } from '../../domain/services/breeder-report-admin-policy.service';
 import { BreederReportAdminPresentationService } from '../../domain/services/breeder-report-admin-presentation.service';
+import { BreederPaginationAssemblerService } from '../../../../domain/services/breeder-pagination-assembler.service';
 
 describe('HandleBreederReportUseCase', () => {
     const reader = {
@@ -21,7 +22,7 @@ describe('HandleBreederReportUseCase', () => {
         writer as any,
         new BreederReportAdminPolicyService(),
         new BreederReportAdminActivityLogFactoryService(),
-        new BreederReportAdminPresentationService(),
+        new BreederReportAdminPresentationService(new BreederPaginationAssemblerService()),
     );
 
     beforeEach(() => {

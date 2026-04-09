@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../common/dto/pagination/pagination-builder.dto';
 import type { BreederFileUrlPort } from '../../application/ports/breeder-file-url.port';
 import { PetsListResponseDto } from '../../dto/response/pets-list-response.dto';
 import { BreederBirthDateFormatterService } from './breeder-birth-date-formatter.service';
+import { BreederPaginationAssemblerService } from './breeder-pagination-assembler.service';
 
 @Injectable()
 export class BreederPublicPetListResponseMapperService {
-    constructor(private readonly breederBirthDateFormatterService: BreederBirthDateFormatterService) {}
+    constructor(
+        private readonly breederBirthDateFormatterService: BreederBirthDateFormatterService,
+        private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService,
+    ) {}
 
     toPaginationResponse(pets: any[], status: string | undefined, page: number, limit: number, fileUrlPort: BreederFileUrlPort) {
         const availableCount = pets.filter((pet) => pet.status === 'available').length;
@@ -73,11 +76,12 @@ export class BreederPublicPetListResponseMapperService {
             };
         });
 
-        const paginationBuilder = new PaginationBuilder<any>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(filteredPets.length);
+        const paginationBuilder = this.breederPaginationAssemblerService.createBuilder(
+            items,
+            page,
+            limit,
+            filteredPets.length,
+        );
 
         return Object.assign(new PetsListResponseDto(paginationBuilder), {
             availableCount,

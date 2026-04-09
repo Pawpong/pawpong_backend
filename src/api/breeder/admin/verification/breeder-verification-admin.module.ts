@@ -23,6 +23,7 @@ import { BreederVerificationAdminMongooseRepositoryAdapter } from './infrastruct
 import { BreederVerificationAdminNotifierAdapter } from './infrastructure/breeder-verification-admin-notifier.adapter';
 import { BreederVerificationAdminFileUrlAdapter } from './infrastructure/breeder-verification-admin-file-url.adapter';
 import { BreederVerificationAdminRepository } from './repository/breeder-verification-admin.repository';
+import { BreederPaginationAssemblerService } from '../../domain/services/breeder-pagination-assembler.service';
 
 import { Admin, AdminSchema } from '../../../../schema/admin.schema';
 import { Breeder, BreederSchema } from '../../../../schema/breeder.schema';
@@ -67,6 +68,7 @@ import { NotificationModule } from '../../../notification/notification.module';
         ChangeBreederLevelUseCase,
         BreederVerificationAdminPolicyService,
         BreederVerificationAdminActivityLogFactoryService,
+        BreederPaginationAssemblerService,
         BreederVerificationAdminPresentationService,
         BreederVerificationAdminRepository,
         BreederVerificationAdminMongooseRepositoryAdapter,

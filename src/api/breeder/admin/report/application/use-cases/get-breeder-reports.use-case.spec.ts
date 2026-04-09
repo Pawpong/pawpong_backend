@@ -3,6 +3,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { GetBreederReportsUseCase } from './get-breeder-reports.use-case';
 import { BreederReportAdminPolicyService } from '../../domain/services/breeder-report-admin-policy.service';
 import { BreederReportAdminPresentationService } from '../../domain/services/breeder-report-admin-presentation.service';
+import { BreederPaginationAssemblerService } from '../../../../domain/services/breeder-pagination-assembler.service';
 
 describe('GetBreederReportsUseCase', () => {
     const reader = {
@@ -14,7 +15,7 @@ describe('GetBreederReportsUseCase', () => {
     const useCase = new GetBreederReportsUseCase(
         reader as any,
         new BreederReportAdminPolicyService(),
-        new BreederReportAdminPresentationService(),
+        new BreederReportAdminPresentationService(new BreederPaginationAssemblerService()),
     );
 
     beforeEach(() => {

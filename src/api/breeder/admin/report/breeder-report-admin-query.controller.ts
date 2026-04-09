@@ -7,6 +7,7 @@ import { GetBreederReportsUseCase } from './application/use-cases/get-breeder-re
 import { BreederReportAdminProtectedController } from './decorator/breeder-report-admin-controller.decorator';
 import { ReportListRequestDto } from './dto/request/report-list-request.dto';
 import { ReportListResponseDto } from './dto/response/report-list-response.dto';
+import { BREEDER_RESPONSE_MESSAGES } from '../../domain/services/breeder-response-message.service';
 import { ApiGetBreederReportsAdminEndpoint } from './swagger';
 
 @BreederReportAdminProtectedController()
@@ -20,6 +21,6 @@ export class BreederReportAdminQueryController {
         @Query() filter: ReportListRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<ReportListResponseDto>>> {
         const result = await this.getBreederReportsUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, '브리더 신고 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.breederReportListRetrieved);
     }
 }

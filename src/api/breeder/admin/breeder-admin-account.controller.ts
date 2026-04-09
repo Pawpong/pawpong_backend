@@ -10,6 +10,7 @@ import { BreederSuspendRequestDto } from './dto/request/breeder-suspend-request.
 import { SetTestAccountRequestDto } from './dto/request/set-test-account-request.dto';
 import { BreederSuspendResponseDto } from './dto/response/breeder-suspend-response.dto';
 import { SetTestAccountResponseDto } from './dto/response/set-test-account-response.dto';
+import { BREEDER_RESPONSE_MESSAGES, buildBreederTestAccountMessage } from '../domain/services/breeder-response-message.service';
 import {
     ApiSetBreederTestAccountAdminEndpoint,
     ApiSuspendBreederAdminEndpoint,
@@ -32,7 +33,7 @@ export class BreederAdminAccountController {
         @Body() suspendData: BreederSuspendRequestDto,
     ): Promise<ApiResponseDto<BreederSuspendResponseDto>> {
         const result = await this.suspendBreederUseCase.execute(adminId, breederId, suspendData);
-        return ApiResponseDto.success(result, '브리더 계정이 영구정지 처리되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.accountSuspended);
     }
 
     @Post('unsuspend/:breederId')
@@ -42,7 +43,7 @@ export class BreederAdminAccountController {
         @Param('breederId') breederId: string,
     ): Promise<ApiResponseDto<BreederSuspendResponseDto>> {
         const result = await this.unsuspendBreederUseCase.execute(adminId, breederId);
-        return ApiResponseDto.success(result, '브리더 계정 정지가 해제되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.accountUnsuspended);
     }
 
     @Patch('test-account/:breederId')
@@ -53,7 +54,7 @@ export class BreederAdminAccountController {
         @Body() dto: SetTestAccountRequestDto,
     ): Promise<ApiResponseDto<SetTestAccountResponseDto>> {
         const result = await this.setBreederTestAccountUseCase.execute(adminId, breederId, dto.isTestAccount);
-        const message = dto.isTestAccount ? '테스트 계정으로 설정되었습니다.' : '테스트 계정이 해제되었습니다.';
+        const message = buildBreederTestAccountMessage(dto.isTestAccount);
         return ApiResponseDto.success(result, message);
     }
 }

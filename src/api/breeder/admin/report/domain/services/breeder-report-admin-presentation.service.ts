@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../../../common/dto/pagination/pagination-builder.dto';
 import { ReportActionResponseDto } from '../../dto/response/report-action-response.dto';
 import { ReportListResponseDto } from '../../dto/response/report-list-response.dto';
+import { BreederPaginationAssemblerService } from '../../../../domain/services/breeder-pagination-assembler.service';
 import {
     BreederReportAdminReportListItemSnapshot,
     BreederReportAdminReportListResult,
@@ -10,17 +10,19 @@ import {
 
 @Injectable()
 export class BreederReportAdminPresentationService {
+    constructor(private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService) {}
+
     createReportListResponse(
         result: BreederReportAdminReportListResult,
         pageNumber: number,
         itemsPerPage: number,
     ): any {
-        return new PaginationBuilder<ReportListResponseDto>()
-            .setItems(result.items.map((item) => this.toReportListItem(item)))
-            .setPage(pageNumber)
-            .setLimit(itemsPerPage)
-            .setTotalCount(result.totalCount)
-            .build();
+        return this.breederPaginationAssemblerService.build(
+            result.items.map((item) => this.toReportListItem(item)),
+            pageNumber,
+            itemsPerPage,
+            result.totalCount,
+        );
     }
 
     createReportActionResponse(
