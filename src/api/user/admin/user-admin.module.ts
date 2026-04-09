@@ -26,7 +26,9 @@ import { DeletePhoneWhitelistUseCase } from './application/use-cases/delete-phon
 import { USER_ADMIN_READER } from './application/ports/user-admin-reader.port';
 import { USER_ADMIN_WRITER } from './application/ports/user-admin-writer.port';
 import { UserAdminCommandPolicyService } from './domain/services/user-admin-command-policy.service';
-import { UserAdminDeletedUserPresentationService } from './domain/services/user-admin-deleted-user-presentation.service';
+import { UserAdminDeletedUserCommandResponseService } from './domain/services/user-admin-deleted-user-command-response.service';
+import { UserAdminDeletedUserListPresentationService } from './domain/services/user-admin-deleted-user-list-presentation.service';
+import { UserAdminDeletedUserStatsPresentationService } from './domain/services/user-admin-deleted-user-stats-presentation.service';
 import { UserAdminPaginationAssemblerService } from './domain/services/user-admin-pagination-assembler.service';
 import { UserAdminPhoneWhitelistPresentationService } from './domain/services/user-admin-phone-whitelist-presentation.service';
 import { UserAdminPresentationService } from './domain/services/user-admin-presentation.service';
@@ -84,7 +86,9 @@ import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whit
         UpdatePhoneWhitelistUseCase,
         DeletePhoneWhitelistUseCase,
         UserAdminCommandPolicyService,
-        UserAdminDeletedUserPresentationService,
+        UserAdminDeletedUserListPresentationService,
+        UserAdminDeletedUserStatsPresentationService,
+        UserAdminDeletedUserCommandResponseService,
         UserAdminPaginationAssemblerService,
         UserAdminPhoneWhitelistPresentationService,
         UserAdminPresentationService,

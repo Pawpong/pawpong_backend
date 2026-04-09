@@ -3,8 +3,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { GetDeletedUserStatsUseCase } from './get-deleted-user-stats.use-case';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
-import { UserAdminDeletedUserPresentationService } from '../../domain/services/user-admin-deleted-user-presentation.service';
-import { UserAdminPaginationAssemblerService } from '../../domain/services/user-admin-pagination-assembler.service';
+import { UserAdminDeletedUserStatsPresentationService } from '../../domain/services/user-admin-deleted-user-stats-presentation.service';
 import { UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { UserAdminWriterPort } from '../ports/user-admin-writer.port';
 
@@ -48,7 +47,7 @@ describe('탈퇴 사용자 통계 조회 유스케이스', () => {
             writer,
             new UserAdminCommandPolicyService(),
             new UserAdminActivityLogFactoryService(),
-            new UserAdminDeletedUserPresentationService(new UserAdminPaginationAssemblerService()),
+            new UserAdminDeletedUserStatsPresentationService(),
         );
 
         await expect(useCase.execute('admin-1')).resolves.toMatchObject({
@@ -100,7 +99,7 @@ describe('탈퇴 사용자 통계 조회 유스케이스', () => {
             },
             new UserAdminCommandPolicyService(),
             new UserAdminActivityLogFactoryService(),
-            new UserAdminDeletedUserPresentationService(new UserAdminPaginationAssemblerService()),
+            new UserAdminDeletedUserStatsPresentationService(),
         );
 
         await expect(useCase.execute('admin-1')).rejects.toBeInstanceOf(ForbiddenException);

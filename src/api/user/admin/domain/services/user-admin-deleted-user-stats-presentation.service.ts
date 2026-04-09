@@ -1,20 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import { DeletedUserResponseDto } from '../../dto/response/deleted-user-response.dto';
 import { DeletedUserStatsResponseDto } from '../../dto/response/deleted-user-stats-response.dto';
-import {
-    UserAdminDeletedReasonStatSnapshot,
-    UserAdminDeletedUserListResultSnapshot,
-    UserAdminDeletedUserStatsSnapshot,
-    UserAdminManagedUserRole,
-} from '../../application/ports/user-admin-reader.port';
-import { UserAdminPaginationAssemblerService } from './user-admin-pagination-assembler.service';
+import { UserAdminDeletedReasonStatSnapshot, UserAdminDeletedUserStatsSnapshot } from '../../application/ports/user-admin-reader.port';
 
 @Injectable()
-export class UserAdminDeletedUserPresentationService {
-    constructor(private readonly userAdminPaginationAssemblerService: UserAdminPaginationAssemblerService) {}
-
+export class UserAdminDeletedUserStatsPresentationService {
     private readonly adopterReasonLabels: Record<string, string> = {
         already_adopted: '이미 입양을 마쳤어요',
         no_suitable_pet: '마음에 드는 아이가 없어요',
@@ -32,28 +22,6 @@ export class UserAdminDeletedUserPresentationService {
         uncomfortable_ui: '사용하기 불편했어요 (UI/기능 등)',
         other: '기타',
     };
-
-    toDeletedUsersPaginationResponse(
-        result: UserAdminDeletedUserListResultSnapshot,
-        page: number,
-        limit: number,
-    ): PaginationResponseDto<DeletedUserResponseDto> {
-        const items = result.items.map(
-            (user): DeletedUserResponseDto => ({
-                userId: user.id,
-                email: user.emailAddress,
-                nickname: user.nickname || '',
-                userRole: user.userRole,
-                deleteReason: user.deleteReason || '',
-                deleteReasonDetail: user.deleteReasonDetail,
-                deletedAt: user.deletedAt ? new Date(user.deletedAt).toISOString() : '',
-                createdAt: user.createdAt ? new Date(user.createdAt).toISOString() : '',
-                phone: user.phoneNumber,
-            }),
-        );
-
-        return this.userAdminPaginationAssemblerService.build(items, page, limit, result.total);
-    }
 
     toDeletedUserStatsResponse(snapshot: UserAdminDeletedUserStatsSnapshot): DeletedUserStatsResponseDto {
         const totalDeletedUsers = snapshot.totalDeletedAdopters + snapshot.totalDeletedBreeders;
@@ -77,38 +45,6 @@ export class UserAdminDeletedUserPresentationService {
             ),
             last7DaysCount: snapshot.last7DaysCount,
             last30DaysCount: snapshot.last30DaysCount,
-        };
-    }
-
-    toRestoreDeletedUserResponse(
-        userId: string,
-        role: UserAdminManagedUserRole,
-        previousStatus: string,
-        updatedAt: Date,
-    ) {
-        return {
-            userId,
-            role,
-            previousStatus,
-            newStatus: 'active',
-            updatedAt: updatedAt.toISOString(),
-            message: `${role === 'adopter' ? '입양자' : '브리더'} 계정이 복구되었습니다.`,
-        };
-    }
-
-    toHardDeleteUserResponse(
-        userId: string,
-        role: UserAdminManagedUserRole,
-        userName: string,
-        userEmail: string,
-    ) {
-        return {
-            userId,
-            role,
-            userName,
-            userEmail,
-            deletedAt: new Date().toISOString(),
-            message: `${role === 'adopter' ? '입양자' : '브리더'} 데이터가 영구적으로 삭제되었습니다.`,
         };
     }
 
