@@ -26,7 +26,9 @@ import { DeletePhoneWhitelistUseCase } from './application/use-cases/delete-phon
 import { USER_ADMIN_READER } from './application/ports/user-admin-reader.port';
 import { USER_ADMIN_WRITER } from './application/ports/user-admin-writer.port';
 import { UserAdminCommandPolicyService } from './domain/services/user-admin-command-policy.service';
+import { UserAdminDeletedUserPresentationService } from './domain/services/user-admin-deleted-user-presentation.service';
 import { UserAdminPaginationAssemblerService } from './domain/services/user-admin-pagination-assembler.service';
+import { UserAdminPhoneWhitelistPresentationService } from './domain/services/user-admin-phone-whitelist-presentation.service';
 import { UserAdminPresentationService } from './domain/services/user-admin-presentation.service';
 import { UserAdminActivityLogFactoryService } from './domain/services/user-admin-activity-log-factory.service';
 import { UserAdminMongooseRepositoryAdapter } from './infrastructure/user-admin-mongoose.repository.adapter';
@@ -82,7 +84,9 @@ import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whit
         UpdatePhoneWhitelistUseCase,
         DeletePhoneWhitelistUseCase,
         UserAdminCommandPolicyService,
+        UserAdminDeletedUserPresentationService,
         UserAdminPaginationAssemblerService,
+        UserAdminPhoneWhitelistPresentationService,
         UserAdminPresentationService,
         UserAdminActivityLogFactoryService,
         UserAdminRepository,

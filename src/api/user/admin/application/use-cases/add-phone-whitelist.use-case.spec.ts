@@ -2,8 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 
 import { AddPhoneWhitelistUseCase } from './add-phone-whitelist.use-case';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
-import { UserAdminPaginationAssemblerService } from '../../domain/services/user-admin-pagination-assembler.service';
-import { UserAdminPresentationService } from '../../domain/services/user-admin-presentation.service';
+import { UserAdminPhoneWhitelistPresentationService } from '../../domain/services/user-admin-phone-whitelist-presentation.service';
 import { UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { UserAdminWriterPort } from '../ports/user-admin-writer.port';
 
@@ -37,7 +36,7 @@ describe('전화번호 화이트리스트 추가 유스케이스', () => {
             reader,
             writer,
             new UserAdminCommandPolicyService(),
-            new UserAdminPresentationService(new UserAdminPaginationAssemblerService()),
+            new UserAdminPhoneWhitelistPresentationService(),
         );
 
         await expect(
@@ -78,7 +77,7 @@ describe('전화번호 화이트리스트 추가 유스케이스', () => {
                 deletePhoneWhitelist: jest.fn(),
             },
             new UserAdminCommandPolicyService(),
-            new UserAdminPresentationService(new UserAdminPaginationAssemblerService()),
+            new UserAdminPhoneWhitelistPresentationService(),
         );
 
         await expect(
