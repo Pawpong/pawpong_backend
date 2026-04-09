@@ -5,7 +5,7 @@ import { PhoneWhitelistResponseDto } from '../../dto/response/phone-whitelist-re
 import { USER_ADMIN_READER, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
-import { UserAdminPresentationService } from '../../domain/services/user-admin-presentation.service';
+import { UserAdminPhoneWhitelistPresentationService } from '../../domain/services/user-admin-phone-whitelist-presentation.service';
 
 @Injectable()
 export class UpdatePhoneWhitelistUseCase {
@@ -15,7 +15,7 @@ export class UpdatePhoneWhitelistUseCase {
         @Inject(USER_ADMIN_WRITER)
         private readonly userAdminWriter: UserAdminWriterPort,
         private readonly userAdminCommandPolicyService: UserAdminCommandPolicyService,
-        private readonly userAdminPresentationService: UserAdminPresentationService,
+        private readonly userAdminPhoneWhitelistPresentationService: UserAdminPhoneWhitelistPresentationService,
     ) {}
 
     async execute(id: string, dto: UpdatePhoneWhitelistRequestDto): Promise<PhoneWhitelistResponseDto> {
@@ -28,6 +28,6 @@ export class UpdatePhoneWhitelistUseCase {
             }),
         );
 
-        return this.userAdminPresentationService.toPhoneWhitelistResponse(item);
+        return this.userAdminPhoneWhitelistPresentationService.toPhoneWhitelistResponse(item);
     }
 }

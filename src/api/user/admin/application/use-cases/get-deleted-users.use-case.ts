@@ -8,7 +8,7 @@ import { USER_ADMIN_READER, type UserAdminReaderPort } from '../ports/user-admin
 import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
-import { UserAdminPresentationService } from '../../domain/services/user-admin-presentation.service';
+import { UserAdminDeletedUserPresentationService } from '../../domain/services/user-admin-deleted-user-presentation.service';
 
 @Injectable()
 export class GetDeletedUsersUseCase {
@@ -19,7 +19,7 @@ export class GetDeletedUsersUseCase {
         private readonly userAdminWriter: UserAdminWriterPort,
         private readonly userAdminCommandPolicyService: UserAdminCommandPolicyService,
         private readonly userAdminActivityLogFactoryService: UserAdminActivityLogFactoryService,
-        private readonly userAdminPresentationService: UserAdminPresentationService,
+        private readonly userAdminDeletedUserPresentationService: UserAdminDeletedUserPresentationService,
     ) {}
 
     async execute(
@@ -53,6 +53,6 @@ export class GetDeletedUsersUseCase {
             ),
         );
 
-        return this.userAdminPresentationService.toDeletedUsersPaginationResponse(result, page, limit);
+        return this.userAdminDeletedUserPresentationService.toDeletedUsersPaginationResponse(result, page, limit);
     }
 }

@@ -6,7 +6,7 @@ import { USER_ADMIN_READER, type UserAdminManagedUserRole, type UserAdminReaderP
 import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
-import { UserAdminPresentationService } from '../../domain/services/user-admin-presentation.service';
+import { UserAdminDeletedUserPresentationService } from '../../domain/services/user-admin-deleted-user-presentation.service';
 
 @Injectable()
 export class RestoreDeletedUserUseCase {
@@ -17,7 +17,7 @@ export class RestoreDeletedUserUseCase {
         private readonly userAdminWriter: UserAdminWriterPort,
         private readonly userAdminCommandPolicyService: UserAdminCommandPolicyService,
         private readonly userAdminActivityLogFactoryService: UserAdminActivityLogFactoryService,
-        private readonly userAdminPresentationService: UserAdminPresentationService,
+        private readonly userAdminDeletedUserPresentationService: UserAdminDeletedUserPresentationService,
     ) {}
 
     async execute(adminId: string, userId: string, role: UserAdminManagedUserRole): Promise<UserStatusUpdateResponseDto> {
@@ -54,6 +54,11 @@ export class RestoreDeletedUserUseCase {
             ),
         );
 
-        return this.userAdminPresentationService.toRestoreDeletedUserResponse(userId, role, previousStatus, updatedAt);
+        return this.userAdminDeletedUserPresentationService.toRestoreDeletedUserResponse(
+            userId,
+            role,
+            previousStatus,
+            updatedAt,
+        );
     }
 }
