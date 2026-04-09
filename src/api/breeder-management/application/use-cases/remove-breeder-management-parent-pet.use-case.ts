@@ -2,14 +2,14 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
-import { BreederManagementPetCommandResponseService } from '../../domain/services/breeder-management-pet-command-response.service';
+import { BreederManagementParentPetCommandResponseService } from '../../domain/services/breeder-management-parent-pet-command-response.service';
 
 @Injectable()
 export class RemoveBreederManagementParentPetUseCase {
     constructor(
         @Inject(BREEDER_MANAGEMENT_PET_COMMAND_PORT)
         private readonly breederManagementPetCommandPort: BreederManagementPetCommandPort,
-        private readonly breederManagementPetCommandResponseService: BreederManagementPetCommandResponseService,
+        private readonly breederManagementParentPetCommandResponseService: BreederManagementParentPetCommandResponseService,
     ) {}
 
     async execute(userId: string, petId: string): Promise<{ message: string }> {
@@ -20,6 +20,6 @@ export class RemoveBreederManagementParentPetUseCase {
 
         await this.breederManagementPetCommandPort.deleteParentPet(petId);
 
-        return this.breederManagementPetCommandResponseService.createParentPetRemoved();
+        return this.breederManagementParentPetCommandResponseService.createParentPetRemoved();
     }
 }
