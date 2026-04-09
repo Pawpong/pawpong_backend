@@ -5,6 +5,7 @@ import { ApiPaginatedEndpoint } from '../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetBreederManagementMyReviewsUseCase } from './application/use-cases/get-breeder-management-my-reviews.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { MyReviewsListResponseDto } from './dto/response/my-reviews-list-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
 
@@ -26,6 +27,6 @@ export class BreederManagementReviewsQueryController {
             Number(page),
             Number(limit),
         );
-        return ApiResponseDto.success(result, '후기 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.myReviewsRetrieved);
     }
 }

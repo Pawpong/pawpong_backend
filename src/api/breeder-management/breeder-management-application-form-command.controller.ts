@@ -6,6 +6,7 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { UpdateBreederManagementApplicationFormUseCase } from './application/use-cases/update-breeder-management-application-form.use-case';
 import { UpdateBreederManagementSimpleApplicationFormUseCase } from './application/use-cases/update-breeder-management-simple-application-form.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { ApplicationFormUpdateRequestDto } from './dto/request/application-form-update-request.dto';
 import { SimpleApplicationFormUpdateRequestDto } from './dto/request/simple-application-form-update-request.dto';
 import {
@@ -28,7 +29,7 @@ export class BreederManagementApplicationFormCommandController {
         @Body() updateDto: ApplicationFormUpdateRequestDto,
     ): Promise<ApiResponseDto<ApplicationFormUpdateResponseDto>> {
         const result = await this.updateBreederManagementApplicationFormUseCase.execute(userId, updateDto);
-        return ApiResponseDto.success(result, '입양 신청 폼이 업데이트되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdated);
     }
 
     @Patch('application-form/simple')
@@ -38,6 +39,6 @@ export class BreederManagementApplicationFormCommandController {
         @Body() updateDto: SimpleApplicationFormUpdateRequestDto,
     ): Promise<ApiResponseDto<SimpleApplicationFormUpdateResponseDto>> {
         const result = await this.updateBreederManagementSimpleApplicationFormUseCase.execute(userId, updateDto.questions);
-        return ApiResponseDto.success(result, '입양 신청 폼이 업데이트되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdated);
     }
 }

@@ -1,23 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import type { BreederManagementApplicationFormRecord } from '../../application/ports/breeder-management-profile.port';
-
-export const BREEDER_MANAGEMENT_RESPONSE_MESSAGES = {
-    profileUpdated: '프로필이 성공적으로 수정되었습니다.',
-    verificationSubmitted: '브리더 인증 신청이 성공적으로 제출되었습니다. 관리자 검토 후 결과를 알려드립니다.',
-    verificationDocumentsSubmitted: '입점 서류 제출이 완료되었습니다. 관리자 검토 후 결과를 알려드립니다.',
-    applicationFormUpdated: '입양 신청 폼이 성공적으로 업데이트되었습니다.',
-    parentPetAdded: '부모견/부모묘가 성공적으로 등록되었습니다.',
-    parentPetUpdated: '부모견/부모묘 정보가 성공적으로 수정되었습니다.',
-    parentPetRemoved: '부모견/부모묘가 성공적으로 삭제되었습니다.',
-    availablePetAdded: '분양 가능한 반려동물이 성공적으로 등록되었습니다.',
-    availablePetUpdated: '분양 개체 정보가 성공적으로 수정되었습니다.',
-    availablePetRemoved: '분양 개체가 성공적으로 삭제되었습니다.',
-    availablePetStatusUpdated: '반려동물 상태가 성공적으로 업데이트되었습니다.',
-    applicationStatusUpdated: '입양 신청 상태가 성공적으로 업데이트되었습니다.',
-    reviewReplyDeleted: '답글이 삭제되었습니다.',
-    accountDeleted: '브리더 회원 탈퇴가 성공적으로 처리되었습니다.',
-} as const;
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './breeder-management-response-message.service';
 
 @Injectable()
 export class BreederManagementCommandResponseFactoryService {
@@ -26,23 +10,23 @@ export class BreederManagementCommandResponseFactoryService {
     }
 
     createVerificationSubmitted() {
-        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationSubmitted);
+        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationSubmittedDetailed);
     }
 
     createVerificationDocumentsSubmitted() {
-        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationDocumentsSubmitted);
+        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationDocumentsSubmittedDetailed);
     }
 
     createApplicationFormUpdated(customQuestions: BreederManagementApplicationFormRecord[]) {
         return {
-            ...this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdated),
+            ...this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdatedDetailed),
             customQuestions,
         };
     }
 
     createSimpleApplicationFormUpdated(customQuestions: BreederManagementApplicationFormRecord[]) {
         return {
-            ...this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdated),
+            ...this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdatedDetailed),
             customQuestions,
             totalQuestions: customQuestions.length,
         };
@@ -50,40 +34,40 @@ export class BreederManagementCommandResponseFactoryService {
 
     createParentPetAdded(petId: string) {
         return {
-            ...this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetAdded),
+            ...this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetAddedDetailed),
             petId,
         };
     }
 
     createParentPetUpdated() {
-        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetUpdated);
+        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetUpdatedDetailed);
     }
 
     createParentPetRemoved() {
-        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetRemoved);
+        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetRemovedDetailed);
     }
 
     createAvailablePetAdded(petId: string) {
         return {
-            ...this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetAdded),
+            ...this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetAddedDetailed),
             petId,
         };
     }
 
     createAvailablePetUpdated() {
-        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetUpdated);
+        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetUpdatedDetailed);
     }
 
     createAvailablePetRemoved() {
-        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetRemoved);
+        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetRemovedDetailed);
     }
 
     createAvailablePetStatusUpdated() {
-        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetStatusUpdated);
+        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.petStatusUpdatedDetailed);
     }
 
     createApplicationStatusUpdated() {
-        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationStatusUpdated);
+        return this.createMessageResponse(BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationStatusUpdatedDetailed);
     }
 
     createReviewReplyAdded(reviewId: string, replyContent: string, replyWrittenAt: Date) {

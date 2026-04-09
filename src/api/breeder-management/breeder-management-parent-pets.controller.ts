@@ -7,6 +7,7 @@ import { AddBreederManagementParentPetUseCase } from './application/use-cases/ad
 import { RemoveBreederManagementParentPetUseCase } from './application/use-cases/remove-breeder-management-parent-pet.use-case';
 import { UpdateBreederManagementParentPetUseCase } from './application/use-cases/update-breeder-management-parent-pet.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { ParentPetAddDto } from './dto/request/parent-pet-add-request.dto';
 import { ParentPetUpdateDto } from './dto/request/parent-pet-update-request.dto';
 import { PetAddResponseDto } from './dto/response/pet-add-response.dto';
@@ -29,7 +30,7 @@ export class BreederManagementParentPetsController {
         @Body() parentPetDto: ParentPetAddDto,
     ): Promise<ApiResponseDto<PetAddResponseDto>> {
         const result = await this.addBreederManagementParentPetUseCase.execute(userId, parentPetDto);
-        return ApiResponseDto.success(result, '부모 반려동물이 성공적으로 등록되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetAdded);
     }
 
     @Patch('parent-pets/:petId')
@@ -40,7 +41,7 @@ export class BreederManagementParentPetsController {
         @Body() updateData: ParentPetUpdateDto,
     ): Promise<ApiResponseDto<PetUpdateResponseDto>> {
         const result = await this.updateBreederManagementParentPetUseCase.execute(userId, petId, updateData);
-        return ApiResponseDto.success(result, '부모 반려동물 정보가 성공적으로 수정되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetUpdated);
     }
 
     @Delete('parent-pets/:petId')
@@ -50,6 +51,6 @@ export class BreederManagementParentPetsController {
         @Param('petId') petId: string,
     ): Promise<ApiResponseDto<PetRemoveResponseDto>> {
         const result = await this.removeBreederManagementParentPetUseCase.execute(userId, petId);
-        return ApiResponseDto.success(result, '부모 반려동물이 성공적으로 삭제되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.parentPetRemoved);
     }
 }

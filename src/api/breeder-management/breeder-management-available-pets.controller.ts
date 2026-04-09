@@ -8,6 +8,7 @@ import { RemoveBreederManagementAvailablePetUseCase } from './application/use-ca
 import { UpdateBreederManagementAvailablePetStatusUseCase } from './application/use-cases/update-breeder-management-available-pet-status.use-case';
 import { UpdateBreederManagementAvailablePetUseCase } from './application/use-cases/update-breeder-management-available-pet.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { AvailablePetAddDto } from './dto/request/available-pet-add-request.dto';
 import { PetStatusUpdateRequestDto } from './dto/request/pet-status-update-request.dto';
 import { PetAddResponseDto } from './dto/response/pet-add-response.dto';
@@ -32,7 +33,7 @@ export class BreederManagementAvailablePetsController {
         @Body() availablePetDto: AvailablePetAddDto,
     ): Promise<ApiResponseDto<PetAddResponseDto>> {
         const result = await this.addBreederManagementAvailablePetUseCase.execute(userId, availablePetDto);
-        return ApiResponseDto.success(result, '분양 반려동물이 성공적으로 등록되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetAdded);
     }
 
     @Patch('available-pets/:petId')
@@ -43,7 +44,7 @@ export class BreederManagementAvailablePetsController {
         @Body() updateData: Partial<AvailablePetAddDto>,
     ): Promise<ApiResponseDto<PetUpdateResponseDto>> {
         const result = await this.updateBreederManagementAvailablePetUseCase.execute(userId, petId, updateData);
-        return ApiResponseDto.success(result, '분양 반려동물 정보가 성공적으로 수정되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetUpdated);
     }
 
     @Patch('available-pets/:petId/status')
@@ -59,7 +60,7 @@ export class BreederManagementAvailablePetsController {
             statusData.petStatus,
         );
 
-        return ApiResponseDto.success(result, '반려동물 상태가 성공적으로 변경되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.petStatusUpdated);
     }
 
     @Delete('available-pets/:petId')
@@ -69,6 +70,6 @@ export class BreederManagementAvailablePetsController {
         @Param('petId') petId: string,
     ): Promise<ApiResponseDto<PetRemoveResponseDto>> {
         const result = await this.removeBreederManagementAvailablePetUseCase.execute(userId, petId);
-        return ApiResponseDto.success(result, '분양 반려동물이 성공적으로 삭제되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetRemoved);
     }
 }

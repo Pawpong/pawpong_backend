@@ -7,6 +7,7 @@ import { AddBreederManagementReviewReplyUseCase } from './application/use-cases/
 import { RemoveBreederManagementReviewReplyUseCase } from './application/use-cases/remove-breeder-management-review-reply.use-case';
 import { UpdateBreederManagementReviewReplyUseCase } from './application/use-cases/update-breeder-management-review-reply.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { ReviewReplyRequestDto } from './dto/request/review-reply-request.dto';
 import { ReviewReplyDeleteResponseDto, ReviewReplyResponseDto } from './dto/response/review-reply-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
@@ -27,7 +28,7 @@ export class BreederManagementReviewReplyController {
         @Body() dto: ReviewReplyRequestDto,
     ): Promise<ApiResponseDto<ReviewReplyResponseDto>> {
         const result = await this.addBreederManagementReviewReplyUseCase.execute(userId, reviewId, dto.content);
-        return ApiResponseDto.success(result, '답글이 등록되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.reviewReplyAdded);
     }
 
     @Patch('reviews/:reviewId/reply')
@@ -38,7 +39,7 @@ export class BreederManagementReviewReplyController {
         @Body() dto: ReviewReplyRequestDto,
     ): Promise<ApiResponseDto<ReviewReplyResponseDto>> {
         const result = await this.updateBreederManagementReviewReplyUseCase.execute(userId, reviewId, dto.content);
-        return ApiResponseDto.success(result, '답글이 수정되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.reviewReplyUpdated);
     }
 
     @Delete('reviews/:reviewId/reply')
@@ -48,6 +49,6 @@ export class BreederManagementReviewReplyController {
         @Param('reviewId') reviewId: string,
     ): Promise<ApiResponseDto<ReviewReplyDeleteResponseDto>> {
         const result = await this.removeBreederManagementReviewReplyUseCase.execute(userId, reviewId);
-        return ApiResponseDto.success(result, '답글이 삭제되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.reviewReplyDeleted);
     }
 }

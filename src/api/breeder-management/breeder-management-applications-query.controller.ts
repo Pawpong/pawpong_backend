@@ -7,6 +7,7 @@ import { ReceivedApplicationListResponseDto } from '../breeder/dto/response/rece
 import { GetBreederManagementApplicationDetailUseCase } from './application/use-cases/get-breeder-management-application-detail.use-case';
 import { GetBreederManagementReceivedApplicationsUseCase } from './application/use-cases/get-breeder-management-received-applications.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { ApplicationsGetRequestDto } from './dto/request/applications-fetch-request.dto';
 import { BreederManagementApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
@@ -29,7 +30,7 @@ export class BreederManagementApplicationsQueryController {
             queryParams.page || 1,
             queryParams.limit || 10,
         );
-        return ApiResponseDto.success(result, '입양 신청 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationListRetrieved);
     }
 
     @Get('applications/:applicationId')
@@ -39,6 +40,6 @@ export class BreederManagementApplicationsQueryController {
         @Param('applicationId') applicationId: string,
     ): Promise<ApiResponseDto<BreederManagementApplicationDetailResponseDto>> {
         const result = await this.getBreederManagementApplicationDetailUseCase.execute(userId, applicationId);
-        return ApiResponseDto.success(result, '입양 신청 상세 정보가 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationDetailRetrieved);
     }
 }

@@ -5,6 +5,7 @@ import { ApiEndpoint } from '../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetBreederManagementApplicationFormUseCase } from './application/use-cases/get-breeder-management-application-form.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { ApplicationFormResponseDto } from './dto/response/application-form-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
 
@@ -18,6 +19,6 @@ export class BreederManagementApplicationFormQueryController {
     @ApiEndpoint(BreederManagementSwaggerDocs.applicationForm)
     async getApplicationForm(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<ApplicationFormResponseDto>> {
         const result = await this.getBreederManagementApplicationFormUseCase.execute(userId);
-        return ApiResponseDto.success(result, '입양 신청 폼이 조회되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormRetrieved);
     }
 }

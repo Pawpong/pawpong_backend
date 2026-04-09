@@ -6,6 +6,7 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { SubmitBreederManagementVerificationDocumentsUseCase } from './application/use-cases/submit-breeder-management-verification-documents.use-case';
 import { SubmitBreederManagementVerificationUseCase } from './application/use-cases/submit-breeder-management-verification.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { SubmitDocumentsRequestDto } from './dto/request/submit-documents-request.dto';
 import { VerificationSubmitRequestDto } from './dto/request/verification-submit-request.dto';
 import { VerificationSubmitResponseDto } from './dto/response/verification-submit-response.dto';
@@ -25,7 +26,7 @@ export class BreederManagementVerificationCommandController {
         @Body() verificationData: VerificationSubmitRequestDto,
     ): Promise<ApiResponseDto<VerificationSubmitResponseDto>> {
         const result = await this.submitBreederManagementVerificationUseCase.execute(userId, verificationData);
-        return ApiResponseDto.success(result, '인증 신청이 성공적으로 제출되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationSubmitted);
     }
 
     @Post('verification/submit')
@@ -36,6 +37,6 @@ export class BreederManagementVerificationCommandController {
         @Body() dto: SubmitDocumentsRequestDto,
     ): Promise<ApiResponseDto<VerificationSubmitResponseDto>> {
         const result = await this.submitBreederManagementVerificationDocumentsUseCase.execute(userId, dto);
-        return ApiResponseDto.success(result, '입점 서류 제출이 완료되었습니다.');
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationDocumentsSubmitted);
     }
 }
