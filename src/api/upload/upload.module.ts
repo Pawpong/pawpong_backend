@@ -23,8 +23,9 @@ import { DeleteMultipleFilesUseCase } from './admin/application/use-cases/delete
 import { DeleteFolderUseCase } from './admin/application/use-cases/delete-folder.use-case';
 import { CheckFileReferencesUseCase } from './admin/application/use-cases/check-file-references.use-case';
 import { GetAllReferencedFilesUseCase } from './admin/application/use-cases/get-all-referenced-files.use-case';
+import { UploadAdminCommandResponseMessageService } from './admin/domain/services/upload-admin-command-response-message.service';
+import { UploadAdminQueryResponseMessageService } from './admin/domain/services/upload-admin-query-response-message.service';
 import { UploadAdminStoragePolicyService } from './admin/domain/services/upload-admin-storage-policy.service';
-import { UploadAdminResponseMessageService } from './admin/domain/services/upload-admin-response-message.service';
 import { UploadAdminStoragePresentationService } from './admin/domain/services/upload-admin-storage-presentation.service';
 import { UploadAdminStorageAdapter } from './admin/infrastructure/upload-admin-storage.adapter';
 import { UploadAdminFileReferenceReaderAdapter } from './admin/infrastructure/upload-admin-file-reference-reader.adapter';
@@ -106,7 +107,8 @@ import { StorageModule } from '../../common/storage/storage.module';
         UploadStoredFilePathService,
         UploadPhotoCollectionService,
         UploadAdminStoragePolicyService,
-        UploadAdminResponseMessageService,
+        UploadAdminQueryResponseMessageService,
+        UploadAdminCommandResponseMessageService,
         UploadAdminStoragePresentationService,
         UploadOwnerRepository,
         UploadAdminFileReferenceRepository,
