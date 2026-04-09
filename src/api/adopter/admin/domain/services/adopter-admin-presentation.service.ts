@@ -7,7 +7,6 @@ import {
     AdminStandardResponsesDto,
 } from '../../dto/response/application-detail-response.dto';
 import {
-    AdminApplicationListItemDto,
     AdminApplicationListResponseDto,
 } from '../../dto/response/application-list-response.dto';
 import { ReviewReportItemDto } from '../../dto/response/review-report-list.dto';
@@ -16,11 +15,16 @@ import {
     AdopterAdminApplicationListSnapshot,
     AdopterAdminReviewReportPageSnapshot,
 } from '../../application/ports/adopter-admin-reader.port';
+import { ADOPTER_ADMIN_RESPONSE_PAYLOADS } from '../../constants/adopter-admin-response-payloads';
 import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
+import { AdopterAdminApplicationListAssemblerService } from './adopter-admin-application-list-assembler.service';
 
 @Injectable()
 export class AdopterAdminPresentationService {
-    constructor(private readonly adopterPaginationAssemblerService: AdopterPaginationAssemblerService) {}
+    constructor(
+        private readonly adopterPaginationAssemblerService: AdopterPaginationAssemblerService,
+        private readonly adopterAdminApplicationListAssemblerService: AdopterAdminApplicationListAssemblerService,
+    ) {}
 
     toReviewReportsPage(
         snapshot: AdopterAdminReviewReportPageSnapshot,
@@ -49,35 +53,12 @@ export class AdopterAdminPresentationService {
 
     toDeleteReviewResponse(): { message: string } {
         return {
-            message: 'Review deleted successfully',
+            message: ADOPTER_ADMIN_RESPONSE_PAYLOADS.reviewDeleted,
         };
     }
 
     toApplicationList(snapshot: AdopterAdminApplicationListSnapshot): AdminApplicationListResponseDto {
-        return {
-            applications: snapshot.items.map(
-                (item): AdminApplicationListItemDto => ({
-                    applicationId: item.applicationId,
-                    adopterName: item.adopterName,
-                    adopterEmail: item.adopterEmail,
-                    adopterPhone: item.adopterPhone,
-                    breederId: item.breederId,
-                    breederName: item.breederName,
-                    petName: item.petName,
-                    status: item.status,
-                    appliedAt: item.appliedAt,
-                    processedAt: item.processedAt,
-                }),
-            ),
-            totalCount: snapshot.totalCount,
-            pendingCount: snapshot.pendingCount,
-            completedCount: snapshot.completedCount,
-            approvedCount: snapshot.approvedCount,
-            rejectedCount: snapshot.rejectedCount,
-            currentPage: snapshot.page,
-            pageSize: snapshot.limit,
-            totalPages: Math.ceil(snapshot.totalCount / snapshot.limit),
-        };
+        return this.adopterAdminApplicationListAssemblerService.toResponse(snapshot);
     }
 
     toApplicationDetail(snapshot: AdopterAdminApplicationDetailSnapshot): AdminApplicationDetailResponseDto {
