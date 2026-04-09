@@ -5,7 +5,7 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetInquiryDetailUseCase } from './application/use-cases/get-inquiry-detail.use-case';
 import { InquiryPublicController } from './decorator/inquiry-controller.decorator';
-import { InquiryQueryResponseMessageService } from './domain/services/inquiry-query-response-message.service';
+import { InquiryPublicQueryResponseMessageService } from './domain/services/inquiry-public-query-response-message.service';
 import { InquiryDetailResponseDto } from './dto/response/inquiry-detail-response.dto';
 import { ApiGetInquiryDetailEndpoint } from './swagger';
 
@@ -13,7 +13,7 @@ import { ApiGetInquiryDetailEndpoint } from './swagger';
 export class InquiryPublicDetailController {
     constructor(
         private readonly getInquiryDetailUseCase: GetInquiryDetailUseCase,
-        private readonly inquiryQueryResponseMessageService: InquiryQueryResponseMessageService,
+        private readonly inquiryPublicQueryResponseMessageService: InquiryPublicQueryResponseMessageService,
     ) {}
 
     @Public()
@@ -24,6 +24,6 @@ export class InquiryPublicDetailController {
         @CurrentUser('userId') userId?: string,
     ): Promise<ApiResponseDto<InquiryDetailResponseDto>> {
         const result = await this.getInquiryDetailUseCase.execute(inquiryId, userId);
-        return ApiResponseDto.success(result, this.inquiryQueryResponseMessageService.inquiryDetailRetrieved());
+        return ApiResponseDto.success(result, this.inquiryPublicQueryResponseMessageService.inquiryDetailRetrieved());
     }
 }

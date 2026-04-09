@@ -4,7 +4,7 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetMyInquiriesUseCase } from './application/use-cases/get-my-inquiries.use-case';
 import { InquiryProtectedController } from './decorator/inquiry-controller.decorator';
-import { InquiryQueryResponseMessageService } from './domain/services/inquiry-query-response-message.service';
+import { InquiryAdopterQueryResponseMessageService } from './domain/services/inquiry-adopter-query-response-message.service';
 import { MyInquiryListQueryRequestDto } from './dto/request/inquiry-query-request.dto';
 import { InquiryListResponseDto } from './dto/response/inquiry-list-response.dto';
 import { ApiGetMyInquiriesEndpoint } from './swagger';
@@ -13,7 +13,7 @@ import { ApiGetMyInquiriesEndpoint } from './swagger';
 export class InquiryAdopterQueryController {
     constructor(
         private readonly getMyInquiriesUseCase: GetMyInquiriesUseCase,
-        private readonly inquiryQueryResponseMessageService: InquiryQueryResponseMessageService,
+        private readonly inquiryAdopterQueryResponseMessageService: InquiryAdopterQueryResponseMessageService,
     ) {}
 
     @Get('my')
@@ -23,6 +23,6 @@ export class InquiryAdopterQueryController {
         @Query() query: MyInquiryListQueryRequestDto,
     ): Promise<ApiResponseDto<InquiryListResponseDto>> {
         const result = await this.getMyInquiriesUseCase.execute(userId, query.page, query.limit, query.animalType);
-        return ApiResponseDto.success(result, this.inquiryQueryResponseMessageService.myInquiriesRetrieved());
+        return ApiResponseDto.success(result, this.inquiryAdopterQueryResponseMessageService.myInquiriesRetrieved());
     }
 }
