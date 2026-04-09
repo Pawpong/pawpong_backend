@@ -2,8 +2,8 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
+import { BreederVerificationAdminDetailPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
-import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 
 @Injectable()
 export class GetBreederDetailUseCase {
@@ -11,7 +11,7 @@ export class GetBreederDetailUseCase {
         @Inject(BREEDER_VERIFICATION_ADMIN_READER)
         private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
-        private readonly breederVerificationAdminPresentationService: BreederVerificationAdminPresentationService,
+        private readonly breederVerificationAdminDetailPresentationService: BreederVerificationAdminDetailPresentationService,
     ) {}
 
     async execute(adminId: string, breederId: string) {
@@ -24,6 +24,6 @@ export class GetBreederDetailUseCase {
             await this.breederVerificationAdminReader.findBreederById(breederId),
         );
 
-        return this.breederVerificationAdminPresentationService.toBreederDetailResponse(breeder);
+        return this.breederVerificationAdminDetailPresentationService.toBreederDetailResponse(breeder);
     }
 }

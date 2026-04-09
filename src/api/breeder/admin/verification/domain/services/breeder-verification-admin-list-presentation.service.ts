@@ -5,12 +5,9 @@ import {
     BreederVerificationAdminBreederSnapshot,
     BreederVerificationAdminVerificationSnapshot,
 } from '../../application/ports/breeder-verification-admin-reader.port';
-import { BreederPaginationAssemblerService } from '../../../../domain/services/breeder-pagination-assembler.service';
 
 @Injectable()
 export class BreederVerificationAdminListPresentationService {
-    constructor(private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService) {}
-
     toLevelChangeRequestResponse(breeder: BreederVerificationAdminBreederSnapshot): BreederVerificationResponseDto {
         const levelChangeRequest = breeder.verification?.levelChangeRequest;
 
@@ -72,10 +69,6 @@ export class BreederVerificationAdminListPresentationService {
             profileInfo: breeder.profile,
             createdAt: breeder.createdAt!,
         };
-    }
-
-    toPaginatedResponse<T>(items: T[], page: number, limit: number, total: number) {
-        return this.breederPaginationAssemblerService.build(items, page, limit, total);
     }
 
     private resolveSubmittedAt(verification?: BreederVerificationAdminVerificationSnapshot): Date | undefined {

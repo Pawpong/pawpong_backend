@@ -8,8 +8,8 @@ import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verifi
 import type { BreederVerificationAdminWriterPort } from '../ports/breeder-verification-admin-writer.port';
 import type { BreederVerificationAdminNotifierPort } from '../ports/breeder-verification-admin-notifier.port';
 import { BreederVerificationAdminActivityLogFactoryService } from '../../domain/services/breeder-verification-admin-activity-log-factory.service';
+import { BreederVerificationAdminCommandResponseService } from '../../domain/services/breeder-verification-admin-command-response.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
-import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 
 @Injectable()
 export class SendDocumentRemindersUseCase {
@@ -24,7 +24,7 @@ export class SendDocumentRemindersUseCase {
         private readonly breederVerificationAdminNotifier: BreederVerificationAdminNotifierPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
         private readonly breederVerificationAdminActivityLogFactoryService: BreederVerificationAdminActivityLogFactoryService,
-        private readonly breederVerificationAdminPresentationService: BreederVerificationAdminPresentationService,
+        private readonly breederVerificationAdminCommandResponseService: BreederVerificationAdminCommandResponseService,
     ) {}
 
     async execute(adminId: string): Promise<{ sentCount: number; breederIds: string[] }> {
@@ -70,6 +70,6 @@ export class SendDocumentRemindersUseCase {
             }
         }
 
-        return this.breederVerificationAdminPresentationService.toDocumentReminderResponse(sentCount, breederIds);
+        return this.breederVerificationAdminCommandResponseService.toDocumentReminderResponse(sentCount, breederIds);
     }
 }

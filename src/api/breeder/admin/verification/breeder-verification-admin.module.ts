@@ -18,8 +18,11 @@ import { BREEDER_VERIFICATION_ADMIN_NOTIFIER } from './application/ports/breeder
 import { BREEDER_VERIFICATION_ADMIN_FILE_URL_PORT } from './application/ports/breeder-verification-admin-file-url.port';
 import { BreederVerificationAdminPolicyService } from './domain/services/breeder-verification-admin-policy.service';
 import { BreederVerificationAdminActivityLogFactoryService } from './domain/services/breeder-verification-admin-activity-log-factory.service';
+import { BreederVerificationAdminCommandResponseService } from './domain/services/breeder-verification-admin-command-response.service';
+import { BreederVerificationAdminListPaginationService } from './domain/services/breeder-verification-admin-list-pagination.service';
 import { BreederVerificationAdminListPresentationService } from './domain/services/breeder-verification-admin-list-presentation.service';
-import { BreederVerificationAdminPresentationService } from './domain/services/breeder-verification-admin-presentation.service';
+import { BreederVerificationAdminDetailPresentationService } from './domain/services/breeder-verification-admin-presentation.service';
+import { BreederVerificationAdminStatsPresentationService } from './domain/services/breeder-verification-admin-stats-presentation.service';
 import { BreederVerificationAdminMongooseRepositoryAdapter } from './infrastructure/breeder-verification-admin-mongoose.repository.adapter';
 import { BreederVerificationAdminNotifierAdapter } from './infrastructure/breeder-verification-admin-notifier.adapter';
 import { BreederVerificationAdminFileUrlAdapter } from './infrastructure/breeder-verification-admin-file-url.adapter';
@@ -70,8 +73,11 @@ import { NotificationModule } from '../../../notification/notification.module';
         BreederVerificationAdminPolicyService,
         BreederVerificationAdminActivityLogFactoryService,
         BreederPaginationAssemblerService,
+        BreederVerificationAdminCommandResponseService,
+        BreederVerificationAdminListPaginationService,
         BreederVerificationAdminListPresentationService,
-        BreederVerificationAdminPresentationService,
+        BreederVerificationAdminDetailPresentationService,
+        BreederVerificationAdminStatsPresentationService,
         BreederVerificationAdminRepository,
         BreederVerificationAdminMongooseRepositoryAdapter,
         BreederVerificationAdminNotifierAdapter,

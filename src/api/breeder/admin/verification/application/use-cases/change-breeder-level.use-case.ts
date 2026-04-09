@@ -6,8 +6,8 @@ import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification
 import { BREEDER_VERIFICATION_ADMIN_WRITER } from '../ports/breeder-verification-admin-writer.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminWriterPort } from '../ports/breeder-verification-admin-writer.port';
+import { BreederVerificationAdminCommandResponseService } from '../../domain/services/breeder-verification-admin-command-response.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
-import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 
 @Injectable()
 export class ChangeBreederLevelUseCase {
@@ -17,7 +17,7 @@ export class ChangeBreederLevelUseCase {
         @Inject(BREEDER_VERIFICATION_ADMIN_WRITER)
         private readonly breederVerificationAdminWriter: BreederVerificationAdminWriterPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
-        private readonly breederVerificationAdminPresentationService: BreederVerificationAdminPresentationService,
+        private readonly breederVerificationAdminCommandResponseService: BreederVerificationAdminCommandResponseService,
     ) {}
 
     async execute(adminId: string, breederId: string, levelData: BreederLevelChangeRequestDto) {
@@ -35,7 +35,7 @@ export class ChangeBreederLevelUseCase {
 
         await this.breederVerificationAdminWriter.updateBreederLevel(breederId, levelData.newLevel);
 
-        return this.breederVerificationAdminPresentationService.toLevelChangeResponse(
+        return this.breederVerificationAdminCommandResponseService.toLevelChangeResponse(
             breeder,
             previousLevel,
             levelData.newLevel,

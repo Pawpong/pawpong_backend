@@ -2,8 +2,8 @@ import { ForbiddenException } from '@nestjs/common';
 
 import { SendDocumentRemindersUseCase } from './send-document-reminders.use-case';
 import { BreederVerificationAdminActivityLogFactoryService } from '../../domain/services/breeder-verification-admin-activity-log-factory.service';
+import { BreederVerificationAdminCommandResponseService } from '../../domain/services/breeder-verification-admin-command-response.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
-import { BreederVerificationAdminPresentationService } from '../../domain/services/breeder-verification-admin-presentation.service';
 
 describe('문서 리마인드 발송 유스케이스', () => {
     const reader = {
@@ -16,20 +16,13 @@ describe('문서 리마인드 발송 유스케이스', () => {
     const notifier = {
         sendDocumentReminder: jest.fn(),
     };
-    const presentationService = {
-        toDocumentReminderResponse: jest.fn((sentCount: number, breederIds: string[]) => ({
-            sentCount,
-            breederIds,
-        })),
-    };
-
     const useCase = new SendDocumentRemindersUseCase(
         reader as any,
         writer as any,
         notifier as any,
         new BreederVerificationAdminPolicyService(),
         new BreederVerificationAdminActivityLogFactoryService(),
-        presentationService as any,
+        new BreederVerificationAdminCommandResponseService(),
     );
 
     beforeEach(() => {
