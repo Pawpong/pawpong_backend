@@ -5,6 +5,7 @@ import { UpdatePhoneWhitelistUseCase } from './application/use-cases/update-phon
 import { UserAdminProtectedController } from './decorator/user-admin-controller.decorator';
 import { UpdatePhoneWhitelistRequestDto } from './dto/request/phone-whitelist-request.dto';
 import { PhoneWhitelistResponseDto } from './dto/response/phone-whitelist-response.dto';
+import { USER_ADMIN_RESPONSE_MESSAGES } from './domain/services/user-admin-response-message.service';
 import { ApiUpdatePhoneWhitelistAdminEndpoint } from './swagger';
 
 @UserAdminProtectedController()
@@ -18,6 +19,6 @@ export class UserAdminPhoneWhitelistUpdateController {
         @Body() dto: UpdatePhoneWhitelistRequestDto,
     ): Promise<ApiResponseDto<PhoneWhitelistResponseDto>> {
         const result = await this.updatePhoneWhitelistUseCase.execute(id, dto);
-        return ApiResponseDto.success(result, '화이트리스트가 수정되었습니다.');
+        return ApiResponseDto.success(result, USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistUpdated);
     }
 }

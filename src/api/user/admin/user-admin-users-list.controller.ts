@@ -7,6 +7,7 @@ import { GetUsersUseCase } from './application/use-cases/get-users.use-case';
 import { UserAdminProtectedController } from './decorator/user-admin-controller.decorator';
 import { UserSearchRequestDto } from './dto/request/user-search-request.dto';
 import { UserManagementResponseDto } from './dto/response/user-management-response.dto';
+import { USER_ADMIN_RESPONSE_MESSAGES } from './domain/services/user-admin-response-message.service';
 import { ApiGetUsersAdminEndpoint } from './swagger';
 
 @UserAdminProtectedController()
@@ -20,6 +21,6 @@ export class UserAdminUsersListController {
         @Query() filter: UserSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<UserManagementResponseDto>>> {
         const result = await this.getUsersUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, '사용자 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, USER_ADMIN_RESPONSE_MESSAGES.usersRetrieved);
     }
 }

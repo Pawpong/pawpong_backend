@@ -10,6 +10,7 @@ import { DeletedUserStatsResponseDto } from '../dto/response/deleted-user-stats-
 import { PhoneWhitelistListResponseDto, PhoneWhitelistResponseDto } from '../dto/response/phone-whitelist-response.dto';
 import { UserManagementResponseDto } from '../dto/response/user-management-response.dto';
 import { UserStatusUpdateResponseDto } from '../dto/response/user-status-update-response.dto';
+import { USER_ADMIN_RESPONSE_MESSAGES } from '../domain/services/user-admin-response-message.service';
 
 const USER_ADMIN_FORBIDDEN_RESPONSE = {
     status: 403,
@@ -47,7 +48,7 @@ export function ApiGetUserAdminProfileEndpoint() {
         `,
         responseType: AdminProfileResponseDto,
         successDescription: '관리자 프로필 조회 성공',
-        successMessageExample: '관리자 프로필이 조회되었습니다.',
+        successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.profileRetrieved,
         errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -66,7 +67,7 @@ export function ApiGetUsersAdminEndpoint() {
             responseType: PaginationResponseDto,
             itemType: UserManagementResponseDto,
             successDescription: '사용자 목록 조회 성공',
-            successMessageExample: '사용자 목록이 조회되었습니다.',
+            successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.usersRetrieved,
             errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
         }),
         ApiQuery({ name: 'userRole', required: false, enum: ['adopter', 'breeder'], description: '사용자 역할 필터', example: 'adopter' }),
@@ -96,7 +97,7 @@ export function ApiUpdateUserStatusAdminEndpoint() {
                 required: ['message'],
             },
             successDescription: '사용자 상태 변경 성공',
-            successMessageExample: '사용자 상태가 변경되었습니다.',
+            successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.userStatusUpdated,
             errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
         }),
         MANAGED_USER_ROLE_QUERY,
@@ -117,7 +118,7 @@ export function ApiGetDeletedUsersAdminEndpoint() {
             responseType: PaginationResponseDto,
             itemType: DeletedUserResponseDto,
             successDescription: '탈퇴 사용자 목록 조회 성공',
-            successMessageExample: '탈퇴 사용자 목록이 조회되었습니다.',
+            successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.deletedUsersRetrieved,
             errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
         }),
         ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
@@ -139,7 +140,7 @@ export function ApiGetDeletedUserStatsAdminEndpoint() {
         `,
         responseType: DeletedUserStatsResponseDto,
         successDescription: '탈퇴 사용자 통계 조회 성공',
-        successMessageExample: '탈퇴 사용자 통계가 조회되었습니다.',
+        successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.deletedUserStatsRetrieved,
         errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -157,7 +158,7 @@ export function ApiRestoreDeletedUserAdminEndpoint() {
             `,
             responseType: UserStatusUpdateResponseDto,
             successDescription: '탈퇴 사용자 복구 성공',
-            successMessageExample: '탈퇴 사용자가 복구되었습니다.',
+            successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.deletedUserRestored,
             errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
         }),
         MANAGED_USER_ROLE_QUERY,
@@ -188,7 +189,7 @@ export function ApiHardDeleteUserAdminEndpoint() {
                 required: ['userId', 'role', 'userName', 'userEmail', 'deletedAt', 'message'],
             },
             successDescription: '사용자 영구 삭제 성공',
-            successMessageExample: '사용자가 영구적으로 삭제되었습니다.',
+            successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.userHardDeleted,
             errorResponses: [USER_ADMIN_SUPER_ADMIN_RESPONSE],
         }),
         MANAGED_USER_ROLE_QUERY,
@@ -207,7 +208,7 @@ export function ApiGetPhoneWhitelistAdminEndpoint() {
         `,
         responseType: PhoneWhitelistListResponseDto,
         successDescription: '화이트리스트 목록 조회 성공',
-        successMessageExample: '화이트리스트가 조회되었습니다.',
+        successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistRetrieved,
         errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -225,7 +226,7 @@ export function ApiAddPhoneWhitelistAdminEndpoint() {
         responseType: PhoneWhitelistResponseDto,
         successStatus: 201,
         successDescription: '화이트리스트 추가 성공',
-        successMessageExample: '화이트리스트에 추가되었습니다.',
+        successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistCreated,
         errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -242,7 +243,7 @@ export function ApiUpdatePhoneWhitelistAdminEndpoint() {
         `,
         responseType: PhoneWhitelistResponseDto,
         successDescription: '화이트리스트 수정 성공',
-        successMessageExample: '화이트리스트가 수정되었습니다.',
+        successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistUpdated,
         errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
     });
 }
@@ -265,7 +266,7 @@ export function ApiDeletePhoneWhitelistAdminEndpoint() {
             required: ['message'],
         },
         successDescription: '화이트리스트 삭제 성공',
-        successMessageExample: '화이트리스트가 삭제되었습니다.',
+        successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistDeleted,
         errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
     });
 }

@@ -7,6 +7,7 @@ import { GetDeletedUsersUseCase } from './application/use-cases/get-deleted-user
 import { UserAdminProtectedController } from './decorator/user-admin-controller.decorator';
 import { DeletedUserSearchRequestDto } from './dto/request/deleted-user-search-request.dto';
 import { DeletedUserResponseDto } from './dto/response/deleted-user-response.dto';
+import { USER_ADMIN_RESPONSE_MESSAGES } from './domain/services/user-admin-response-message.service';
 import { ApiGetDeletedUsersAdminEndpoint } from './swagger';
 
 @UserAdminProtectedController()
@@ -20,6 +21,6 @@ export class UserAdminDeletedUsersListController {
         @Query() filter: DeletedUserSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<DeletedUserResponseDto>>> {
         const result = await this.getDeletedUsersUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, '탈퇴 사용자 목록이 조회되었습니다.');
+        return ApiResponseDto.success(result, USER_ADMIN_RESPONSE_MESSAGES.deletedUsersRetrieved);
     }
 }

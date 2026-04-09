@@ -3,6 +3,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { GetDeletedUserStatsUseCase } from './get-deleted-user-stats.use-case';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
+import { UserAdminPaginationAssemblerService } from '../../domain/services/user-admin-pagination-assembler.service';
 import { UserAdminPresentationService } from '../../domain/services/user-admin-presentation.service';
 import { UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { UserAdminWriterPort } from '../ports/user-admin-writer.port';
@@ -47,7 +48,7 @@ describe('GetDeletedUserStatsUseCase', () => {
             writer,
             new UserAdminCommandPolicyService(),
             new UserAdminActivityLogFactoryService(),
-            new UserAdminPresentationService(),
+            new UserAdminPresentationService(new UserAdminPaginationAssemblerService()),
         );
 
         await expect(useCase.execute('admin-1')).resolves.toMatchObject({
@@ -99,7 +100,7 @@ describe('GetDeletedUserStatsUseCase', () => {
             },
             new UserAdminCommandPolicyService(),
             new UserAdminActivityLogFactoryService(),
-            new UserAdminPresentationService(),
+            new UserAdminPresentationService(new UserAdminPaginationAssemblerService()),
         );
 
         await expect(useCase.execute('admin-1')).rejects.toBeInstanceOf(ForbiddenException);

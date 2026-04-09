@@ -6,6 +6,7 @@ import { AddPhoneWhitelistUseCase } from './application/use-cases/add-phone-whit
 import { UserAdminProtectedController } from './decorator/user-admin-controller.decorator';
 import { AddPhoneWhitelistRequestDto } from './dto/request/phone-whitelist-request.dto';
 import { PhoneWhitelistResponseDto } from './dto/response/phone-whitelist-response.dto';
+import { USER_ADMIN_RESPONSE_MESSAGES } from './domain/services/user-admin-response-message.service';
 import { ApiAddPhoneWhitelistAdminEndpoint } from './swagger';
 
 @UserAdminProtectedController()
@@ -19,6 +20,6 @@ export class UserAdminPhoneWhitelistCreateController {
         @Body() dto: AddPhoneWhitelistRequestDto,
     ): Promise<ApiResponseDto<PhoneWhitelistResponseDto>> {
         const result = await this.addPhoneWhitelistUseCase.execute(adminId, dto);
-        return ApiResponseDto.success(result, '화이트리스트에 추가되었습니다.');
+        return ApiResponseDto.success(result, USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistCreated);
     }
 }
