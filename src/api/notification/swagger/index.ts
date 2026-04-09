@@ -3,21 +3,14 @@ import { ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
-import {
-    NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES,
-} from '../domain/services/notification-response-message.service';
+import { NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/notification-response-messages';
+import { NOTIFICATION_NOT_FOUND_RESPONSE } from '../constants/notification-swagger.constants';
 import {
     MarkAllAsReadResponseDto,
     MarkAsReadResponseDto,
     NotificationResponseDto,
     UnreadCountResponseDto,
 } from '../dto/response/notification-response.dto';
-
-const NOTIFICATION_NOT_FOUND_RESPONSE = {
-    status: 404,
-    description: '알림을 찾을 수 없음',
-    errorExample: '알림을 찾을 수 없습니다.',
-};
 
 export function ApiNotificationController() {
     return ApiController('알림');
