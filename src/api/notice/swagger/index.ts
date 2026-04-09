@@ -4,6 +4,7 @@ import { ApiParam, ApiQuery } from '@nestjs/swagger';
 import { ApiEndpoint, ApiPaginatedEndpoint, ApiPublicController } from '../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { NoticeResponseDto } from '../dto/response/notice-response.dto';
+import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../domain/services/notice-response-message.service';
 
 const NOTICE_NOT_FOUND_RESPONSE = {
     status: 404,
@@ -30,7 +31,7 @@ export function ApiGetNoticeListEndpoint() {
             itemType: NoticeResponseDto,
             isPublic: true,
             successDescription: '공지사항 목록 조회 성공',
-            successMessageExample: '공지사항 목록 조회 성공',
+            successMessageExample: NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeListRetrieved,
         }),
         ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
         ApiQuery({ name: 'pageSize', required: false, type: Number, description: '페이지 크기', example: 10 }),
@@ -51,7 +52,7 @@ export function ApiGetNoticeDetailEndpoint() {
             responseType: NoticeResponseDto,
             isPublic: true,
             successDescription: '공지사항 조회 성공',
-            successMessageExample: '공지사항 조회 성공',
+            successMessageExample: NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeDetailRetrieved,
             errorResponses: [NOTICE_NOT_FOUND_RESPONSE],
         }),
         ApiParam({
