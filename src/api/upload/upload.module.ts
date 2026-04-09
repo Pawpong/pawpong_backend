@@ -42,7 +42,8 @@ import { UploadSingleFileUseCase } from './application/use-cases/upload-single-f
 import { UploadMultipleFilesUseCase } from './application/use-cases/upload-multiple-files.use-case';
 import { DeleteUploadedFileUseCase } from './application/use-cases/delete-uploaded-file.use-case';
 import { UploadFilePolicyService } from './domain/services/upload-file-policy.service';
-import { UploadResponseMessageService } from './domain/services/upload-response-message.service';
+import { UploadFileResponseMessageService } from './domain/services/upload-file-response-message.service';
+import { UploadPhotoResponseMessageService } from './domain/services/upload-photo-response-message.service';
 import { UploadStoredFilePathService } from './domain/services/upload-stored-file-path.service';
 import { UploadPhotoCollectionService } from './domain/services/upload-photo-collection.service';
 import { UploadStorageAdapter } from './infrastructure/upload-storage.adapter';
@@ -103,7 +104,8 @@ import { StorageModule } from '../../common/storage/storage.module';
         CheckFileReferencesUseCase,
         GetAllReferencedFilesUseCase,
         UploadFilePolicyService,
-        UploadResponseMessageService,
+        UploadFileResponseMessageService,
+        UploadPhotoResponseMessageService,
         UploadStoredFilePathService,
         UploadPhotoCollectionService,
         UploadAdminStoragePolicyService,

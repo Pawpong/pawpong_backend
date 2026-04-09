@@ -6,14 +6,14 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { UploadRepresentativePhotosUseCase } from './application/use-cases/upload-representative-photos.use-case';
 import { ProtectedUploadController } from './decorator/upload-controller.decorator';
 import { UploadResponseDto } from './dto/response/upload-response.dto';
-import { UploadResponseMessageService } from './domain/services/upload-response-message.service';
+import { UploadPhotoResponseMessageService } from './domain/services/upload-photo-response-message.service';
 import { ApiUploadRepresentativePhotosEndpoint } from './swagger';
 
 @ProtectedUploadController()
 export class UploadRepresentativePhotoController {
     constructor(
         private readonly uploadRepresentativePhotosUseCase: UploadRepresentativePhotosUseCase,
-        private readonly uploadResponseMessageService: UploadResponseMessageService,
+        private readonly uploadPhotoResponseMessageService: UploadPhotoResponseMessageService,
     ) {}
 
     @Post('representative-photos')
@@ -25,6 +25,6 @@ export class UploadRepresentativePhotoController {
         @CurrentUser('role') role: string,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
         const responses = await this.uploadRepresentativePhotosUseCase.execute(files, userId, role);
-        return ApiResponseDto.success(responses, this.uploadResponseMessageService.representativePhotosUploaded());
+        return ApiResponseDto.success(responses, this.uploadPhotoResponseMessageService.representativePhotosUploaded());
     }
 }
