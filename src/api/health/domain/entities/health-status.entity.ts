@@ -1,5 +1,5 @@
-import { HealthCheckResponseDto } from '../../dto/response/health-check-response.dto';
 import { type SystemRuntimeSnapshot } from '../../application/ports/system-runtime-reader.port';
+import type { HealthResult } from '../../application/types/health-result.type';
 
 const SERVICE_NAME = 'Pawpong Backend';
 const SERVICE_VERSION = '1.0.0-MVP';
@@ -21,7 +21,7 @@ export class HealthStatus {
         );
     }
 
-    toResponse(): HealthCheckResponseDto {
+    toResult(): HealthResult {
         return {
             status: this.status,
             timestamp: this.timestamp,
