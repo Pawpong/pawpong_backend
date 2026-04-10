@@ -1,13 +1,13 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { VerificationStatus } from '../../../../common/enum/user.enum';
-import { VerificationSubmitRequestDto } from '../../dto/request/verification-submit-request.dto';
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-profile.port';
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_SETTINGS_PORT } from '../ports/breeder-management-settings.port';
 import type { BreederManagementSettingsPort } from '../ports/breeder-management-settings.port';
 import { BreederManagementVerificationCommandResponseService } from '../../domain/services/breeder-management-verification-command-response.service';
 import { BreederManagementVerificationSubmissionMapperService } from '../../domain/services/breeder-management-verification-submission-mapper.service';
+import type { BreederManagementVerificationSubmitCommand } from '../types/breeder-management-verification-command.type';
 
 @Injectable()
 export class SubmitBreederManagementVerificationUseCase {
@@ -20,7 +20,7 @@ export class SubmitBreederManagementVerificationUseCase {
         private readonly breederManagementVerificationCommandResponseService: BreederManagementVerificationCommandResponseService,
     ) {}
 
-    async execute(userId: string, verificationData: VerificationSubmitRequestDto): Promise<{ message: string }> {
+    async execute(userId: string, verificationData: BreederManagementVerificationSubmitCommand): Promise<{ message: string }> {
         const breeder = await this.breederManagementProfilePort.findById(userId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');

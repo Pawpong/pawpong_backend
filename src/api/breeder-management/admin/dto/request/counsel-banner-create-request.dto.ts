@@ -29,7 +29,7 @@ export class CounselBannerCreateRequestDto {
     })
     @IsOptional()
     @IsEnum(['internal', 'external'])
-    linkType?: string;
+    linkType?: 'internal' | 'external';
 
     /**
      * 링크 URL

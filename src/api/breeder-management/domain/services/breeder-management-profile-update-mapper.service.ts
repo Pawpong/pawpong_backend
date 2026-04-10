@@ -1,13 +1,13 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
-import { ProfileUpdateRequestDto } from '../../dto/request/profile-update-request.dto';
 import type { BreederManagementBreederRecord } from '../../application/ports/breeder-management-profile.port';
+import type { BreederManagementProfileUpdateCommand } from '../../application/types/breeder-management-profile-command.type';
 
 @Injectable()
 export class BreederManagementProfileUpdateMapperService {
     toUpdateData(
         breeder: BreederManagementBreederRecord,
-        updateData: ProfileUpdateRequestDto,
+        updateData: BreederManagementProfileUpdateCommand,
     ): Record<string, unknown> {
         const profileUpdateData: Record<string, unknown> = {};
 

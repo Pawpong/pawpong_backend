@@ -1,15 +1,21 @@
 import { Injectable } from '@nestjs/common';
 
 import { PetStatus } from '../../../../common/enum/user.enum';
-import { AvailablePetAddDto } from '../../dto/request/available-pet-add-request.dto';
 import type {
     BreederManagementAvailablePetCreateData,
     BreederManagementAvailablePetUpdateData,
 } from '../../application/ports/breeder-management-pet-command.port';
+import type {
+    BreederManagementAvailablePetCreateCommand,
+    BreederManagementAvailablePetUpdateCommand,
+} from '../../application/types/breeder-management-pet-command.type';
 
 @Injectable()
 export class BreederManagementAvailablePetCommandMapperService {
-    toCreateData(userId: string, availablePetDto: AvailablePetAddDto): BreederManagementAvailablePetCreateData {
+    toCreateData(
+        userId: string,
+        availablePetDto: BreederManagementAvailablePetCreateCommand,
+    ): BreederManagementAvailablePetCreateData {
         return {
             breederId: userId,
             name: availablePetDto.name,
@@ -29,7 +35,7 @@ export class BreederManagementAvailablePetCommandMapperService {
         };
     }
 
-    toUpdateData(updateData: Partial<AvailablePetAddDto>): BreederManagementAvailablePetUpdateData {
+    toUpdateData(updateData: BreederManagementAvailablePetUpdateCommand): BreederManagementAvailablePetUpdateData {
         const updateFields: BreederManagementAvailablePetUpdateData = {};
 
         if (updateData.name) updateFields.name = updateData.name;

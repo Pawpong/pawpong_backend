@@ -1,11 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
-import { ApplicationFormUpdateRequestDto } from '../../dto/request/application-form-update-request.dto';
 import type { BreederManagementApplicationFormRecord } from '../../application/ports/breeder-management-profile.port';
+import type { BreederManagementApplicationFormUpdateCommand } from '../../application/types/breeder-management-application-command.type';
 
 @Injectable()
 export class BreederManagementApplicationFormValidatorService {
-    validateCustomQuestions(updateDto: ApplicationFormUpdateRequestDto, standardQuestionIds: string[]): void {
+    validateCustomQuestions(updateDto: BreederManagementApplicationFormUpdateCommand, standardQuestionIds: string[]): void {
         const ids = updateDto.customQuestions.map((question) => question.id);
         const uniqueIds = new Set(ids);
 
@@ -19,7 +19,7 @@ export class BreederManagementApplicationFormValidatorService {
         }
     }
 
-    toStoredQuestions(updateDto: ApplicationFormUpdateRequestDto): BreederManagementApplicationFormRecord[] {
+    toStoredQuestions(updateDto: BreederManagementApplicationFormUpdateCommand): BreederManagementApplicationFormRecord[] {
         return updateDto.customQuestions.map((question) => ({
             id: question.id,
             type: question.type,

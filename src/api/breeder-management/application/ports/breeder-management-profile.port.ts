@@ -1,4 +1,4 @@
-import { ProfileUpdateRequestDto } from '../../dto/request/profile-update-request.dto';
+import type { BreederManagementProfileUpdateCommand } from '../types/breeder-management-profile-command.type';
 
 export const BREEDER_MANAGEMENT_PROFILE_PORT = 'BREEDER_MANAGEMENT_PROFILE_PORT';
 
@@ -107,6 +107,6 @@ export interface BreederManagementProfilePort {
 export interface BreederManagementProfileUpdateMapper {
     toUpdateData(
         breeder: BreederManagementBreederRecord,
-        updateData: ProfileUpdateRequestDto,
+        updateData: BreederManagementProfileUpdateCommand,
     ): Record<string, unknown>;
 }

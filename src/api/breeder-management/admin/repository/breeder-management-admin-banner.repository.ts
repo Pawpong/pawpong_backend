@@ -4,10 +4,12 @@ import { Model } from 'mongoose';
 
 import { AuthBanner, AuthBannerDocument } from '../../../../schema/auth-banner.schema';
 import { CounselBanner, CounselBannerDocument } from '../../../../schema/counsel-banner.schema';
-import { CounselBannerCreateRequestDto } from '../dto/request/counsel-banner-create-request.dto';
-import { CounselBannerUpdateRequestDto } from '../dto/request/counsel-banner-update-request.dto';
-import { ProfileBannerCreateRequestDto } from '../dto/request/profile-banner-create-request.dto';
-import { ProfileBannerUpdateRequestDto } from '../dto/request/profile-banner-update-request.dto';
+import type {
+    BreederManagementCounselBannerCreateCommand,
+    BreederManagementCounselBannerUpdateCommand,
+    BreederManagementProfileBannerCreateCommand,
+    BreederManagementProfileBannerUpdateCommand,
+} from '../application/types/breeder-management-admin-banner-command.type';
 
 @Injectable()
 export class BreederManagementAdminBannerRepository {
@@ -37,11 +39,11 @@ export class BreederManagementAdminBannerRepository {
         return this.counselBannerModel.find({ isActive: true }).sort({ order: 1 }).lean().exec();
     }
 
-    createProfile(data: ProfileBannerCreateRequestDto) {
+    createProfile(data: BreederManagementProfileBannerCreateCommand) {
         return this.authBannerModel.create(data);
     }
 
-    updateProfile(bannerId: string, data: ProfileBannerUpdateRequestDto) {
+    updateProfile(bannerId: string, data: BreederManagementProfileBannerUpdateCommand) {
         return this.authBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
     }
 
@@ -50,11 +52,11 @@ export class BreederManagementAdminBannerRepository {
         return !!deleted;
     }
 
-    createCounsel(data: CounselBannerCreateRequestDto) {
+    createCounsel(data: BreederManagementCounselBannerCreateCommand) {
         return this.counselBannerModel.create(data);
     }
 
-    updateCounsel(bannerId: string, data: CounselBannerUpdateRequestDto) {
+    updateCounsel(bannerId: string, data: BreederManagementCounselBannerUpdateCommand) {
         return this.counselBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
     }
 

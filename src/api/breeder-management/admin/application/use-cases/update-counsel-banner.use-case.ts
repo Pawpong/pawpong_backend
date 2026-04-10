@@ -1,12 +1,12 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { CounselBannerUpdateRequestDto } from '../../dto/request/counsel-banner-update-request.dto';
 import { CounselBannerResponseDto } from '../../dto/response/counsel-banner-response.dto';
 import { BreederManagementBannerPresentationService } from '../../domain/services/breeder-management-banner-presentation.service';
 import {
     BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER,
     type BreederManagementAdminBannerWriterPort,
 } from '../ports/breeder-management-admin-banner-writer.port';
+import type { BreederManagementCounselBannerUpdateCommand } from '../types/breeder-management-admin-banner-command.type';
 
 @Injectable()
 export class UpdateCounselBannerUseCase {
@@ -16,7 +16,10 @@ export class UpdateCounselBannerUseCase {
         private readonly breederManagementBannerPresentationService: BreederManagementBannerPresentationService,
     ) {}
 
-    async execute(bannerId: string, data: CounselBannerUpdateRequestDto): Promise<CounselBannerResponseDto> {
+    async execute(
+        bannerId: string,
+        data: BreederManagementCounselBannerUpdateCommand,
+    ): Promise<CounselBannerResponseDto> {
         const banner = await this.bannerWriter.updateCounsel(bannerId, data);
 
         if (!banner) {
