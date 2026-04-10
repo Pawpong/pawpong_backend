@@ -1,16 +1,14 @@
 import { Transform } from 'class-transformer';
 import { Allow } from 'class-validator';
 
-function toNumberWithDefault(defaultValue: number) {
-    return Transform(({ value }) => (value === undefined ? defaultValue : Number(value)));
-}
+import { parseIntegerWithFallback, parseNonNegativeInteger } from './feed-query-number.parser';
 
 export class FeedPrefetchQueryDto {
     @Allow()
-    @Transform(({ value }) => Number(value))
+    @Transform(({ value }) => parseNonNegativeInteger(value, 0))
     segment: number;
 
     @Allow()
-    @toNumberWithDefault(5)
+    @Transform(({ value }) => parseIntegerWithFallback(value, 5))
     count: number = 5;
 }
