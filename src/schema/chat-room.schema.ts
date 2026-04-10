@@ -48,7 +48,11 @@ export class ChatRoom {
 
 export const ChatRoomSchema = SchemaFactory.createForClass(ChatRoom);
 
-// 복합 인덱스: 동일 adopter-breeder 쌍 중복 방지
-ChatRoomSchema.index({ adopterId: 1, breederId: 1 }, { unique: true });
+// 복합 인덱스: ACTIVE 상태인 방에 한해 동일 adopter-breeder 쌍 중복 방지
+// CLOSED 방은 중복 허용 → 재채팅 시 새 방 생성 가능
+ChatRoomSchema.index(
+    { adopterId: 1, breederId: 1 },
+    { unique: true, partialFilterExpression: { status: ChatRoomStatus.ACTIVE } },
+);
 ChatRoomSchema.index({ adopterId: 1, status: 1 });
 ChatRoomSchema.index({ breederId: 1, status: 1 });

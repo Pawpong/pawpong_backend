@@ -1,5 +1,6 @@
 import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import express from 'express';
@@ -164,6 +165,27 @@ async function bootstrap(): Promise<void> {
     // ConfigService 주입
     const configService: ConfigService = app.get(ConfigService);
 
+    // Kafka Consumer 마이크로서비스 연결 (채팅 메시지 broadcast용)
+    // Kafka가 없어도 앱은 정상 동작 (startAllMicroservices는 별도 try-catch)
+    const kafkaBroker = configService.get<string>('KAFKA_BROKER', 'kafka:29092');
+    app.connectMicroservice<MicroserviceOptions>({
+        transport: Transport.KAFKA,
+        options: {
+            client: {
+                clientId: 'pawpong-chat-consumer',
+                brokers: [kafkaBroker],
+                retry: {
+                    initialRetryTime: 300,
+                    retries: 10,
+                },
+            },
+            consumer: {
+                groupId: 'pawpong-chat-consumer-group',
+                allowAutoTopicCreation: true,
+            },
+        },
+    });
+
     // 프로덕션 환경 체크
     const isProduction = process.env.NODE_ENV === 'production';
 
@@ -187,6 +209,14 @@ async function bootstrap(): Promise<void> {
     app.enableShutdownHooks();
 
     let isShuttingDown = false;
+
+    // Kafka Consumer 시작 (실패해도 HTTP 서버는 계속 동작)
+    try {
+        await app.startAllMicroservices();
+        logger.log('[bootstrap] Kafka chat consumer started');
+    } catch {
+        logger.warn('[bootstrap] Kafka consumer failed to start - messages will be skipped until Kafka is available');
+    }
 
     // 서버 시작
     const server = await app.listen(port);

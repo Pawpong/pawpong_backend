@@ -19,7 +19,10 @@ export class ChatRepository {
     }
 
     async findRoomByParticipants(adopterId: string, breederId: string): Promise<ChatRoomDocument | null> {
-        return this.chatRoomModel.findOne({ adopterId, breederId }).lean().exec() as Promise<ChatRoomDocument | null>;
+        return this.chatRoomModel
+            .findOne({ adopterId, breederId, status: ChatRoomStatus.ACTIVE })
+            .lean()
+            .exec() as Promise<ChatRoomDocument | null>;
     }
 
     async findRoomsByAdopterId(adopterId: string): Promise<ChatRoomDocument[]> {

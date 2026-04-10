@@ -9,6 +9,7 @@ import { ChatMessage, ChatMessageSchema } from '../../schema/chat-message.schema
 import { ChatRoomCommandController } from './chat-room-command.controller';
 import { ChatRoomQueryController } from './chat-room-query.controller';
 import { ChatGateway } from './chat.gateway';
+import { ChatKafkaConsumer } from './chat-kafka.consumer';
 
 import { ChatRepository } from './repository/chat.repository';
 import { ChatMongooseManagerAdapter } from './infrastructure/chat-mongoose-manager.adapter';
@@ -43,7 +44,7 @@ import {
             inject: [ConfigService],
         }),
     ],
-    controllers: [ChatRoomCommandController, ChatRoomQueryController],
+    controllers: [ChatRoomCommandController, ChatRoomQueryController, ChatKafkaConsumer],
     providers: [
         ChatGateway,
         ChatRepository,

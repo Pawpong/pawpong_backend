@@ -50,7 +50,8 @@ export class SendMessageUseCase {
             receiverId,
             content: dto.content,
             messageType,
-            timestamp: new Date(),
+            isRead: message.isRead,
+            createdAt: message.createdAt,
         });
 
         return message;
