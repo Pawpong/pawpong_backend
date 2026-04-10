@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { DeletedUserStatsResponseDto } from '../../dto/response/deleted-user-stats-response.dto';
 import { UserAdminDeletedReasonStatSnapshot, UserAdminDeletedUserStatsSnapshot } from '../../application/ports/user-admin-reader.port';
+import type { UserAdminDeletedUserStatsResult } from '../../application/types/user-admin-result.type';
 
 @Injectable()
 export class UserAdminDeletedUserStatsPresentationService {
@@ -23,7 +23,7 @@ export class UserAdminDeletedUserStatsPresentationService {
         other: '기타',
     };
 
-    toDeletedUserStatsResponse(snapshot: UserAdminDeletedUserStatsSnapshot): DeletedUserStatsResponseDto {
+    toDeletedUserStatsResponse(snapshot: UserAdminDeletedUserStatsSnapshot): UserAdminDeletedUserStatsResult {
         const totalDeletedUsers = snapshot.totalDeletedAdopters + snapshot.totalDeletedBreeders;
 
         return {

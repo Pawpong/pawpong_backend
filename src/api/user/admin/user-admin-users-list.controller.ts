@@ -21,6 +21,9 @@ export class UserAdminUsersListController {
         @Query() filter: UserSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<UserManagementResponseDto>>> {
         const result = await this.getUsersUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, USER_ADMIN_RESPONSE_MESSAGES.usersRetrieved);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            USER_ADMIN_RESPONSE_MESSAGES.usersRetrieved,
+        );
     }
 }

@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import { UserManagementResponseDto } from '../../dto/response/user-management-response.dto';
 import {
     UserAdminAdminSnapshot,
     UserAdminUserListResultSnapshot,
 } from '../../application/ports/user-admin-reader.port';
 import { UserAdminPaginationAssemblerService } from './user-admin-pagination-assembler.service';
+import type {
+    UserAdminUserManagementItemResult,
+    UserAdminUserManagementPageResult,
+} from '../../application/types/user-admin-result.type';
 
 @Injectable()
 export class UserAdminPresentationService {
@@ -30,9 +32,9 @@ export class UserAdminPresentationService {
         result: UserAdminUserListResultSnapshot,
         page: number,
         limit: number,
-    ): PaginationResponseDto<UserManagementResponseDto> {
+    ): UserAdminUserManagementPageResult {
         const items = result.items.map(
-            (user): UserManagementResponseDto => ({
+            (user): UserAdminUserManagementItemResult => ({
                 userId: user.id,
                 userName: user.nickname || user.name || '',
                 emailAddress: user.emailAddress,

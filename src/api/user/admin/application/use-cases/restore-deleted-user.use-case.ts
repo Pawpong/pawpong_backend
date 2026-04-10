@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminAction, UserStatus } from '../../../../../common/enum/user.enum';
-import { UserStatusUpdateResponseDto } from '../../dto/response/user-status-update-response.dto';
 import { USER_ADMIN_READER, type UserAdminManagedUserRole, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
 import { UserAdminDeletedUserCommandResponseService } from '../../domain/services/user-admin-deleted-user-command-response.service';
+import type { UserAdminStatusUpdateResult } from '../types/user-admin-result.type';
 
 @Injectable()
 export class RestoreDeletedUserUseCase {
@@ -20,7 +20,7 @@ export class RestoreDeletedUserUseCase {
         private readonly userAdminDeletedUserCommandResponseService: UserAdminDeletedUserCommandResponseService,
     ) {}
 
-    async execute(adminId: string, userId: string, role: UserAdminManagedUserRole): Promise<UserStatusUpdateResponseDto> {
+    async execute(adminId: string, userId: string, role: UserAdminManagedUserRole): Promise<UserAdminStatusUpdateResult> {
         this.userAdminCommandPolicyService.assertCanManageUsers(
             await this.userAdminReader.findAdminById(adminId),
             '사용자 관리 권한이 없습니다.',

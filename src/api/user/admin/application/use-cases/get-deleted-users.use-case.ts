@@ -1,14 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminAction, AdminTargetType } from '../../../../../common/enum/user.enum';
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import { DeletedUserResponseDto } from '../../dto/response/deleted-user-response.dto';
 import { USER_ADMIN_READER, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
 import { UserAdminDeletedUserListPresentationService } from '../../domain/services/user-admin-deleted-user-list-presentation.service';
 import type { UserAdminDeletedUserSearchQuery } from '../types/user-admin-command.type';
+import type { UserAdminDeletedUserPageResult } from '../types/user-admin-result.type';
 
 @Injectable()
 export class GetDeletedUsersUseCase {
@@ -25,7 +24,7 @@ export class GetDeletedUsersUseCase {
     async execute(
         adminId: string,
         filter: UserAdminDeletedUserSearchQuery,
-    ): Promise<PaginationResponseDto<DeletedUserResponseDto>> {
+    ): Promise<UserAdminDeletedUserPageResult> {
         this.userAdminCommandPolicyService.assertCanManageUsers(
             await this.userAdminReader.findAdminById(adminId),
             '사용자 관리 권한이 없습니다.',
