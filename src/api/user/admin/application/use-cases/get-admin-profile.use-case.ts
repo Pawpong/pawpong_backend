@@ -3,6 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { USER_ADMIN_READER, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
 import { UserAdminPresentationService } from '../../domain/services/user-admin-presentation.service';
+import type { UserAdminAdminProfileResult } from '../types/user-admin-result.type';
 
 @Injectable()
 export class GetAdminProfileUseCase {
@@ -13,7 +14,7 @@ export class GetAdminProfileUseCase {
         private readonly userAdminPresentationService: UserAdminPresentationService,
     ) {}
 
-    async execute(adminId: string): Promise<any> {
+    async execute(adminId: string): Promise<UserAdminAdminProfileResult> {
         const admin = this.userAdminCommandPolicyService.assertAdminExists(await this.userAdminReader.findAdminById(adminId));
         return this.userAdminPresentationService.toAdminProfileResponse(admin);
     }

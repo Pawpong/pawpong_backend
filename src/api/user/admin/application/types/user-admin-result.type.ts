@@ -1,14 +1,33 @@
 import type { PageResult } from '../../../../../common/types/page-result.type';
+import type {
+    UserAdminActivityLogSnapshot,
+    UserAdminAdminPermissionsSnapshot,
+    UserAdminManagedUserRole,
+    UserAdminManagedUserStatisticsSnapshot,
+} from '../ports/user-admin-reader.port';
+
+export type UserAdminAdminProfileResult = {
+    id: string;
+    name: string;
+    email: string;
+    profileImage?: string;
+    status: string;
+    adminLevel: string;
+    permissions?: UserAdminAdminPermissionsSnapshot;
+    activityLogs: UserAdminActivityLogSnapshot[];
+    createdAt: Date;
+    lastLoginAt?: Date;
+};
 
 export type UserAdminUserManagementItemResult = {
     userId: string;
     userName: string;
     emailAddress: string;
-    userRole: string;
+    userRole: UserAdminManagedUserRole;
     accountStatus: string;
     lastLoginAt: Date;
     createdAt: Date;
-    statisticsInfo?: any;
+    statisticsInfo?: UserAdminManagedUserStatisticsSnapshot;
 };
 
 export type UserAdminUserManagementPageResult = PageResult<UserAdminUserManagementItemResult>;

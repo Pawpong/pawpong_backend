@@ -20,6 +20,12 @@ import {
     UserAdminWriterPort,
 } from '../application/ports/user-admin-writer.port';
 import { UserAdminRepository } from '../repository/user-admin.repository';
+import type {
+    UserAdminAdminDocumentRecord,
+    UserAdminDeletedReasonAggregateRecord,
+    UserAdminManagedUserDocumentRecord,
+    UserAdminPhoneWhitelistDocumentRecord,
+} from '../types/user-admin-record.type';
 
 @Injectable()
 export class UserAdminMongooseRepositoryAdapter implements UserAdminReaderPort, UserAdminWriterPort {
@@ -65,18 +71,18 @@ export class UserAdminMongooseRepositoryAdapter implements UserAdminReaderPort, 
         return {
             totalDeletedAdopters: stats.totalDeletedAdopters,
             totalDeletedBreeders: stats.totalDeletedBreeders,
-            adopterReasonStats: stats.adopterReasonStats.map((item: any) => this.toDeletedReasonStat(item)),
-            breederReasonStats: stats.breederReasonStats.map((item: any) => this.toDeletedReasonStat(item)),
+            adopterReasonStats: stats.adopterReasonStats.map((item) => this.toDeletedReasonStat(item)),
+            breederReasonStats: stats.breederReasonStats.map((item) => this.toDeletedReasonStat(item)),
             otherReasonDetails: [
-                ...stats.adopterOtherReasons.map((item: any) => ({
+                ...stats.adopterOtherReasons.map((item) => ({
                     userType: 'adopter' as const,
-                    reason: item.deleteReasonDetail,
-                    deletedAt: item.deletedAt.toISOString(),
+                    reason: item.deleteReasonDetail || '',
+                    deletedAt: item.deletedAt?.toISOString() || '',
                 })),
-                ...stats.breederOtherReasons.map((item: any) => ({
+                ...stats.breederOtherReasons.map((item) => ({
                     userType: 'breeder' as const,
-                    reason: item.deleteReasonDetail,
-                    deletedAt: item.deletedAt.toISOString(),
+                    reason: item.deleteReasonDetail || '',
+                    deletedAt: item.deletedAt?.toISOString() || '',
                 })),
             ],
             last7DaysCount: stats.last7DaysCount,
@@ -138,7 +144,7 @@ export class UserAdminMongooseRepositoryAdapter implements UserAdminReaderPort, 
         return this.userAdminRepository.deletePhoneWhitelist(id);
     }
 
-    private toAdminSnapshot(admin: any): UserAdminAdminSnapshot {
+    private toAdminSnapshot(admin: UserAdminAdminDocumentRecord): UserAdminAdminSnapshot {
         return {
             id: admin._id.toString(),
             name: admin.name,
@@ -148,11 +154,12 @@ export class UserAdminMongooseRepositoryAdapter implements UserAdminReaderPort, 
             adminLevel: admin.adminLevel,
             permissions: admin.permissions,
             activityLogs: admin.activityLogs || [],
+            lastLoginAt: admin.lastLoginAt,
             createdAt: admin.createdAt,
         };
     }
 
-    private toManagedUserSnapshot(user: any): UserAdminManagedUserSnapshot {
+    private toManagedUserSnapshot(user: UserAdminManagedUserDocumentRecord): UserAdminManagedUserSnapshot {
         return {
             id: user._id.toString(),
             nickname: user.nickname,
@@ -170,14 +177,14 @@ export class UserAdminMongooseRepositoryAdapter implements UserAdminReaderPort, 
         };
     }
 
-    private toDeletedReasonStat(item: any): UserAdminDeletedReasonStatSnapshot {
+    private toDeletedReasonStat(item: UserAdminDeletedReasonAggregateRecord): UserAdminDeletedReasonStatSnapshot {
         return {
             reason: item._id,
             count: item.count,
         };
     }
 
-    private toPhoneWhitelistSnapshot(item: any): UserAdminPhoneWhitelistSnapshot {
+    private toPhoneWhitelistSnapshot(item: UserAdminPhoneWhitelistDocumentRecord): UserAdminPhoneWhitelistSnapshot {
         return {
             id: item._id.toString(),
             phoneNumber: item.phoneNumber,
