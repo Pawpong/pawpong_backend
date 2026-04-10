@@ -26,6 +26,25 @@ export const AUTH_RESPONSE_MESSAGE_EXAMPLES = {
         'new 레벨 브리더 인증 서류 2개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.',
 } as const;
 
+export function buildAuthDuplicateCheckMessage(
+    kind: 'email' | 'nickname' | 'breederName',
+    isDuplicate: boolean,
+): string {
+    if (kind === 'email') {
+        return isDuplicate ? AUTH_RESPONSE_MESSAGE_EXAMPLES.emailDuplicated : AUTH_RESPONSE_MESSAGE_EXAMPLES.emailAvailable;
+    }
+
+    if (kind === 'nickname') {
+        return isDuplicate
+            ? AUTH_RESPONSE_MESSAGE_EXAMPLES.nicknameDuplicated
+            : AUTH_RESPONSE_MESSAGE_EXAMPLES.nicknameAvailable;
+    }
+
+    return isDuplicate
+        ? AUTH_RESPONSE_MESSAGE_EXAMPLES.breederNameDuplicated
+        : AUTH_RESPONSE_MESSAGE_EXAMPLES.breederNameAvailable;
+}
+
 export function buildAuthBreederDocumentsUploadMessage(level: string, count: number, tempId?: string): string {
     if (tempId) {
         return `${level} 레벨 브리더 인증 서류 ${count}개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.`;
