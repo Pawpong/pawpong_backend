@@ -1,7 +1,6 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
-import { ReviewCreateResponseDto } from '../../dto/response/review-create-response.dto';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
@@ -10,6 +9,7 @@ import { AdopterReviewCommandPort } from '../ports/adopter-review-command.port';
 import { AdopterReviewNotifierPort } from '../ports/adopter-review-notifier.port';
 import { AdopterReviewCreateResponseFactoryService } from '../../domain/services/adopter-review-create-response-factory.service';
 import type { AdopterReviewCreateCommand } from '../types/adopter-review-command.type';
+import type { AdopterReviewCreateResult } from '../types/adopter-result.type';
 
 @Injectable()
 export class CreateAdopterReviewUseCase {
@@ -23,7 +23,7 @@ export class CreateAdopterReviewUseCase {
         private readonly adopterReviewCreateResponseFactoryService: AdopterReviewCreateResponseFactoryService,
     ) {}
 
-    async execute(userId: string, dto: AdopterReviewCreateCommand): Promise<ReviewCreateResponseDto> {
+    async execute(userId: string, dto: AdopterReviewCreateCommand): Promise<AdopterReviewCreateResult> {
         const adopter = await this.adopterProfilePort.findById(userId);
         if (!adopter) {
             throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');

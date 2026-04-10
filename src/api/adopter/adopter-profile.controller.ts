@@ -4,6 +4,7 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetAdopterProfileUseCase } from './application/use-cases/get-adopter-profile.use-case';
 import { UpdateAdopterProfileUseCase } from './application/use-cases/update-adopter-profile.use-case';
+import type { AdopterProfileResult } from './application/types/adopter-result.type';
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
 import { ProfileUpdateRequestDto } from './dto/request/profile-update-request.dto';
 import { AdopterProfileResponseDto } from './dto/response/adopter-profile-response.dto';
@@ -22,7 +23,10 @@ export class AdopterProfileController {
     @ApiGetAdopterProfileEndpoint()
     async getProfile(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<AdopterProfileResponseDto>> {
         const result = await this.getAdopterProfileUseCase.execute(userId);
-        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.profileRetrieved);
+        return ApiResponseDto.success(
+            result as AdopterProfileResponseDto & AdopterProfileResult,
+            ADOPTER_RESPONSE_MESSAGES.profileRetrieved,
+        );
     }
 
     @Patch('profile')

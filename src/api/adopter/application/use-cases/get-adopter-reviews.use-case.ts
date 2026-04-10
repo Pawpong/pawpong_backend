@@ -4,8 +4,7 @@ import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import { AdopterReviewReaderPort } from '../ports/adopter-review-reader.port';
 import { AdopterReviewListResponseFactoryService } from '../../domain/services/adopter-review-list-response-factory.service';
-import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
-import { MyReviewItemDto } from '../../dto/response/my-review-item.dto';
+import type { AdopterReviewPageResult } from '../types/adopter-result.type';
 
 @Injectable()
 export class GetAdopterReviewsUseCase {
@@ -16,7 +15,7 @@ export class GetAdopterReviewsUseCase {
         private readonly adopterReviewListResponseFactoryService: AdopterReviewListResponseFactoryService,
     ) {}
 
-    async execute(userId: string, page: number = 1, limit: number = 10): Promise<PaginationResponseDto<MyReviewItemDto>> {
+    async execute(userId: string, page: number = 1, limit: number = 10): Promise<AdopterReviewPageResult> {
         const adopter = await this.adopterProfilePort.findById(userId);
         if (!adopter) {
             throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');

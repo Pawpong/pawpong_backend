@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
-import { AccountDeleteResponseDto } from '../../dto/response/account-delete-response.dto';
+import type { AdopterAccountDeleteResult } from '../../application/types/adopter-result.type';
 
 @Injectable()
 export class AdopterAccountDeleteResponseFactoryService {
-    create(userId: string, deletedAt: Date): AccountDeleteResponseDto {
+    create(userId: string, deletedAt: Date): AdopterAccountDeleteResult {
         return {
             adopterId: userId,
             deletedAt: deletedAt.toISOString(),

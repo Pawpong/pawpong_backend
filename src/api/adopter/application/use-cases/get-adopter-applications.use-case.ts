@@ -9,7 +9,7 @@ import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.p
 import type { AdopterFileUrlPort } from '../ports/adopter-file-url.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import { AdopterApplicationListAssemblerService } from '../../domain/services/adopter-application-list-assembler.service';
-import { ApplicationListResponseDto } from '../../dto/response/application-list-response.dto';
+import type { AdopterApplicationPageResult } from '../types/adopter-result.type';
 
 @Injectable()
 export class GetAdopterApplicationsUseCase {
@@ -30,7 +30,7 @@ export class GetAdopterApplicationsUseCase {
         page: number = 1,
         limit: number = 10,
         animalType?: 'cat' | 'dog',
-    ): Promise<ApplicationListResponseDto> {
+    ): Promise<AdopterApplicationPageResult> {
         const adopter = await this.adopterProfilePort.findById(userId);
         if (!adopter) {
             throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
