@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { NoticeResponseDto } from '../../../dto/response/notice-response.dto';
 import { NoticePresentationService } from '../../../domain/services/notice-presentation.service';
 import { NOTICE_WRITER, type NoticeWriterPort } from '../ports/notice-writer.port';
 import type { NoticeCreateCommand } from '../types/notice-command.type';
+import type { NoticeItemResult } from '../../../application/types/notice-result.type';
 
 @Injectable()
 export class CreateNoticeUseCase {
@@ -15,7 +15,7 @@ export class CreateNoticeUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(adminId: string, adminName: string, createData: NoticeCreateCommand): Promise<NoticeResponseDto> {
+    async execute(adminId: string, adminName: string, createData: NoticeCreateCommand): Promise<NoticeItemResult> {
         this.logger.logStart('createNotice', '공지사항 생성 시작', { adminId, createData });
 
         if (!adminId) {
@@ -29,7 +29,7 @@ export class CreateNoticeUseCase {
                 noticeId: notice.id,
             });
 
-            return this.noticePresentationService.toResponseDto(notice);
+            return this.noticePresentationService.toItem(notice);
         } catch (error) {
             this.logger.logError('createNotice', '공지사항 생성', error);
             throw new BadRequestException('공지사항 생성에 실패했습니다.');

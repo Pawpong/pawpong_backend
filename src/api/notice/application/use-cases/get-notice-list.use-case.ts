@@ -1,11 +1,10 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { PaginationRequestDto } from '../../../../common/dto/pagination/pagination-request.dto';
-import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
-import { NoticeResponseDto } from '../../dto/response/notice-response.dto';
 import { NoticePresentationService } from '../../domain/services/notice-presentation.service';
 import { NOTICE_READER, type NoticeReaderPort, type NoticeStatus } from '../ports/notice-reader.port';
+import type { NoticePageResult } from '../types/notice-result.type';
 
 @Injectable()
 export class GetNoticeListUseCase {
@@ -19,7 +18,7 @@ export class GetNoticeListUseCase {
     async execute(
         paginationData: PaginationRequestDto,
         status?: NoticeStatus,
-    ): Promise<PaginationResponseDto<NoticeResponseDto>> {
+    ): Promise<NoticePageResult> {
         this.logger.logStart('getNoticeList', '공지사항 목록 조회 시작', {
             ...paginationData,
             status,

@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
-import { NoticeResponseDto } from '../../dto/response/notice-response.dto';
 import { NoticeSnapshot } from '../../application/ports/notice-reader.port';
 import { NoticePaginationAssemblerService } from './notice-pagination-assembler.service';
+import type { NoticeItemResult, NoticePageResult } from '../../application/types/notice-result.type';
 
 @Injectable()
 export class NoticePresentationService {
@@ -14,13 +13,13 @@ export class NoticePresentationService {
         page: number,
         limit: number,
         totalItems: number,
-    ): PaginationResponseDto<NoticeResponseDto> {
-        const items = notices.map((notice) => this.toResponseDto(notice));
+    ): NoticePageResult {
+        const items = notices.map((notice) => this.toItem(notice));
 
         return this.noticePaginationAssemblerService.build(items, page, limit, totalItems);
     }
 
-    toResponseDto(notice: NoticeSnapshot): NoticeResponseDto {
+    toItem(notice: NoticeSnapshot): NoticeItemResult {
         return {
             noticeId: notice.id,
             title: notice.title,
