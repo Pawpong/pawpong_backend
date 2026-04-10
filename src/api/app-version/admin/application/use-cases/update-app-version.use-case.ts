@@ -4,7 +4,7 @@ import { CustomLoggerService } from '../../../../../common/logger/custom-logger.
 import { AppVersionUpdateRequestDto } from '../../../dto/request/app-version-update-request.dto';
 import { AppVersionResponseDto } from '../../../dto/response/app-version-response.dto';
 import { AppVersionAdminCommandPolicyService } from '../../domain/services/app-version-admin-command-policy.service';
-import { AppVersionAdminPresentationService } from '../../domain/services/app-version-admin-presentation.service';
+import { AppVersionAdminItemPresentationService } from '../../domain/services/app-version-admin-item-presentation.service';
 import { APP_VERSION_WRITER, type AppVersionWriterPort } from '../ports/app-version-writer.port';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class UpdateAppVersionUseCase {
     constructor(
         @Inject(APP_VERSION_WRITER)
         private readonly appVersionWriter: AppVersionWriterPort,
-        private readonly appVersionAdminPresentationService: AppVersionAdminPresentationService,
+        private readonly appVersionAdminItemPresentationService: AppVersionAdminItemPresentationService,
         private readonly appVersionAdminCommandPolicyService: AppVersionAdminCommandPolicyService,
         private readonly logger: CustomLoggerService,
     ) {}
@@ -35,7 +35,7 @@ export class UpdateAppVersionUseCase {
             }
 
             this.logger.logSuccess('updateAppVersion', '앱 버전 수정 완료', { appVersionId });
-            return this.appVersionAdminPresentationService.toResponseDto(updated);
+            return this.appVersionAdminItemPresentationService.toResponseDto(updated);
         } catch (error) {
             if (error instanceof NotFoundException) {
                 throw error;
