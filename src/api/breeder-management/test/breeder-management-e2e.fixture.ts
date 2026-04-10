@@ -1,3 +1,4 @@
+import { jest } from '@jest/globals';
 import { INestApplication } from '@nestjs/common';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { ObjectId } from 'mongodb';
@@ -33,7 +34,7 @@ export async function createBreederManagementE2eContext(): Promise<BreederManage
     const verificationUploadTestFileName = 'verification-upload-test.jpg';
 
     const storageService = app.get(StorageService);
-    jest.spyOn(storageService, 'uploadFile').mockImplementation(async (file: Express.Multer.File, folder?: string) => {
+    jest.spyOn(storageService, 'uploadFile').mockImplementation(async (file, folder?: string) => {
         const fileName = `${folder}/${Date.now()}-${file.originalname}`;
         return {
             fileName,
