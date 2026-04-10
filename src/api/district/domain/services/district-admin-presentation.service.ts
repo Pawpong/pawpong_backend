@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { DistrictResponseDto } from '../../dto/response/district-response.dto';
 import { DistrictSnapshot } from '../../admin/application/ports/district-admin-reader.port';
+import type { DistrictAdminResult } from '../../application/types/district-result.type';
 
 @Injectable()
 export class DistrictAdminPresentationService {
-    toResponseDto(district: DistrictSnapshot): DistrictResponseDto {
+    toResponseDto(district: DistrictSnapshot): DistrictAdminResult {
         return {
             id: district.id,
             city: district.city,

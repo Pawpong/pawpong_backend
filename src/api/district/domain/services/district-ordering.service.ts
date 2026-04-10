@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { GetDistrictsResponseDto } from '../../dto/response/get-districts-response.dto';
+import type { DistrictPublicResult } from '../../application/types/district-result.type';
 
 const CITY_ORDER = [
     '서울특별시',
@@ -24,7 +24,7 @@ const CITY_ORDER = [
 
 @Injectable()
 export class DistrictOrderingService {
-    sortByStandardCityOrder(districts: GetDistrictsResponseDto[]): GetDistrictsResponseDto[] {
+    sortByStandardCityOrder(districts: DistrictPublicResult[]): DistrictPublicResult[] {
         return [...districts].sort((left, right) => {
             const leftIndex = CITY_ORDER.indexOf(left.city);
             const rightIndex = CITY_ORDER.indexOf(right.city);

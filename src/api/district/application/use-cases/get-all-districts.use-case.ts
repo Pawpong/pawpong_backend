@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { DISTRICT_READER, type DistrictReaderPort } from '../ports/district-reader.port';
 import { DistrictOrderingService } from '../../domain/services/district-ordering.service';
-import { GetDistrictsResponseDto } from '../../dto/response/get-districts-response.dto';
+import type { DistrictPublicResult } from '../types/district-result.type';
 
 @Injectable()
 export class GetAllDistrictsUseCase {
@@ -12,7 +12,7 @@ export class GetAllDistrictsUseCase {
         private readonly districtOrderingService: DistrictOrderingService,
     ) {}
 
-    async execute(): Promise<GetDistrictsResponseDto[]> {
+    async execute(): Promise<DistrictPublicResult[]> {
         const districts = await this.districtReader.readAll();
         return this.districtOrderingService.sortByStandardCityOrder(districts);
     }

@@ -6,6 +6,7 @@ import { UpdateDistrictRequestDto } from '../../breeder-management/request/updat
 import { CreateDistrictUseCase } from './application/use-cases/create-district.use-case';
 import { DeleteDistrictUseCase } from './application/use-cases/delete-district.use-case';
 import { UpdateDistrictUseCase } from './application/use-cases/update-district.use-case';
+import type { DistrictAdminResult } from '../application/types/district-result.type';
 import { DistrictAdminProtectedController } from './decorator/district-admin-controller.decorator';
 import { DistrictAdminResponseMessageService } from './domain/services/district-admin-response-message.service';
 import { DistrictResponseDto } from '../dto/response/district-response.dto';
@@ -28,7 +29,7 @@ export class DistrictAdminCommandController {
     @ApiCreateDistrictAdminEndpoint()
     async createDistrict(@Body() dto: CreateDistrictRequestDto): Promise<ApiResponseDto<DistrictResponseDto>> {
         const result = await this.createDistrictUseCase.execute(dto);
-        return ApiResponseDto.success(result);
+        return ApiResponseDto.success(result as DistrictResponseDto & DistrictAdminResult);
     }
 
     @Patch(':id')
@@ -38,7 +39,7 @@ export class DistrictAdminCommandController {
         @Body() dto: UpdateDistrictRequestDto,
     ): Promise<ApiResponseDto<DistrictResponseDto>> {
         const result = await this.updateDistrictUseCase.execute(id, dto);
-        return ApiResponseDto.success(result);
+        return ApiResponseDto.success(result as DistrictResponseDto & DistrictAdminResult);
     }
 
     @Delete(':id')
