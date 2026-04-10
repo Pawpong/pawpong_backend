@@ -1,14 +1,14 @@
 import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
-import { CreateDistrictRequestDto } from '../../breeder-management/request/create-district-request.dto';
-import { UpdateDistrictRequestDto } from '../../breeder-management/request/update-district-request.dto';
 import { CreateDistrictUseCase } from './application/use-cases/create-district.use-case';
 import { DeleteDistrictUseCase } from './application/use-cases/delete-district.use-case';
 import { UpdateDistrictUseCase } from './application/use-cases/update-district.use-case';
 import type { DistrictAdminResult } from '../application/types/district-result.type';
 import { DistrictAdminProtectedController } from './decorator/district-admin-controller.decorator';
 import { DistrictAdminResponseMessageService } from './domain/services/district-admin-response-message.service';
+import { CreateDistrictRequestDto } from './dto/request/create-district-request.dto';
+import { UpdateDistrictRequestDto } from './dto/request/update-district-request.dto';
 import { DistrictResponseDto } from '../dto/response/district-response.dto';
 import {
     ApiCreateDistrictAdminEndpoint,

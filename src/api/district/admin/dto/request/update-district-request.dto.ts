@@ -1,21 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsArray, ArrayNotEmpty } from 'class-validator';
+import { ArrayNotEmpty, IsArray, IsOptional, IsString } from 'class-validator';
 
-export class CreateDistrictRequestDto {
+export class UpdateDistrictRequestDto {
     @ApiProperty({
         description: '도/특별시/광역시',
         example: '경기도',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    city: string;
+    city?: string;
 
     @ApiProperty({
-        description: '시/군 목록',
+        description: '시/군/구 목록',
         type: [String],
         example: ['수원시', '성남시', '고양시'],
+        required: false,
     })
+    @IsOptional()
     @IsArray()
     @ArrayNotEmpty({ message: '최소 1개 이상의 시/군이 필요합니다.' })
     @IsString({ each: true })
-    districts: string[];
+    districts?: string[];
 }

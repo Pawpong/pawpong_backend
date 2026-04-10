@@ -1,10 +1,10 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
 
-import { CreateDistrictRequestDto } from '../../../../breeder-management/request/create-district-request.dto';
 import type { DistrictAdminResult } from '../../../application/types/district-result.type';
 import { DistrictAdminPresentationService } from '../../../domain/services/district-admin-presentation.service';
 import { DISTRICT_ADMIN_READER, type DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
 import { DISTRICT_WRITER, type DistrictWriterPort } from '../ports/district-writer.port';
+import { CreateDistrictCommand } from '../types/district-command.type';
 
 @Injectable()
 export class CreateDistrictUseCase {
@@ -16,7 +16,7 @@ export class CreateDistrictUseCase {
         private readonly districtAdminPresentationService: DistrictAdminPresentationService,
     ) {}
 
-    async execute(dto: CreateDistrictRequestDto): Promise<DistrictAdminResult> {
+    async execute(dto: CreateDistrictCommand): Promise<DistrictAdminResult> {
         const existing = await this.districtAdminReader.findByCity(dto.city);
 
         if (existing) {

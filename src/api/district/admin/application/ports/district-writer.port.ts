@@ -1,11 +1,10 @@
-import { CreateDistrictRequestDto } from '../../../../breeder-management/request/create-district-request.dto';
-import { UpdateDistrictRequestDto } from '../../../../breeder-management/request/update-district-request.dto';
 import { DistrictSnapshot } from './district-admin-reader.port';
+import { CreateDistrictCommand, UpdateDistrictCommand } from '../types/district-command.type';
 
 export const DISTRICT_WRITER = Symbol('DISTRICT_WRITER');
 
 export interface DistrictWriterPort {
-    create(dto: CreateDistrictRequestDto): Promise<DistrictSnapshot>;
-    update(id: string, dto: UpdateDistrictRequestDto): Promise<DistrictSnapshot | null>;
+    create(dto: CreateDistrictCommand): Promise<DistrictSnapshot>;
+    update(id: string, dto: UpdateDistrictCommand): Promise<DistrictSnapshot | null>;
     delete(id: string): Promise<boolean>;
 }
