@@ -1,11 +1,14 @@
-import { BreederVerificationAdminListPresentationService } from '../domain/services/breeder-verification-admin-list-presentation.service';
+import { BreederVerificationAdminLevelChangeListPresentationService } from '../domain/services/breeder-verification-admin-level-change-list-presentation.service';
+import { BreederVerificationAdminListItemPresentationService } from '../domain/services/breeder-verification-admin-list-item-presentation.service';
 
-describe('브리더 인증 관리자 목록 응답 서비스', () => {
+describe('브리더 인증 관리자 레벨 변경 목록 응답 서비스', () => {
     it('레벨 변경 요청 응답 계약을 유지한다', () => {
-        const service = new BreederVerificationAdminListPresentationService();
+        const service = new BreederVerificationAdminLevelChangeListPresentationService(
+            new BreederVerificationAdminListItemPresentationService(),
+        );
 
         expect(
-            service.toLevelChangeRequestResponse({
+            service.toResponse({
                 id: 'breeder-1',
                 nickname: '행복브리더',
                 emailAddress: 'breeder@test.com',

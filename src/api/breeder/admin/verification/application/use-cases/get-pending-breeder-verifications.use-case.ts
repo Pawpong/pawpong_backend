@@ -4,7 +4,7 @@ import { BreederSearchRequestDto } from '../../dto/request/breeder-search-reques
 import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import { BreederVerificationAdminListPaginationService } from '../../domain/services/breeder-verification-admin-list-pagination.service';
-import { BreederVerificationAdminListPresentationService } from '../../domain/services/breeder-verification-admin-list-presentation.service';
+import { BreederVerificationAdminPendingBreederListPresentationService } from '../../domain/services/breeder-verification-admin-pending-breeder-list-presentation.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class GetPendingBreederVerificationsUseCase {
         @Inject(BREEDER_VERIFICATION_ADMIN_READER)
         private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
-        private readonly breederVerificationAdminListPresentationService: BreederVerificationAdminListPresentationService,
+        private readonly breederVerificationAdminPendingBreederListPresentationService: BreederVerificationAdminPendingBreederListPresentationService,
         private readonly breederVerificationAdminListPaginationService: BreederVerificationAdminListPaginationService,
     ) {}
 
@@ -35,7 +35,7 @@ export class GetPendingBreederVerificationsUseCase {
 
         return this.breederVerificationAdminListPaginationService.toPaginatedResponse(
             result.items.map((breeder) =>
-                this.breederVerificationAdminListPresentationService.toPendingBreederResponse(breeder),
+                this.breederVerificationAdminPendingBreederListPresentationService.toResponse(breeder),
             ),
             pageNumber,
             itemsPerPage,
