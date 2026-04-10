@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { StorageListResponseDto } from '../../dto/response/storage-list-response.dto';
 import { UploadAdminStoragePolicyService } from '../../domain/services/upload-admin-storage-policy.service';
 import {
     LIST_ALL_UPLOAD_ADMIN_FILES_QUERY,
     type ListAllUploadAdminFilesQueryPort,
 } from '../ports/upload-admin-file-orchestration.port';
+import type { UploadAdminStorageListResult } from '../types/upload-admin-result.type';
 
 @Injectable()
 export class ListFilesByFolderUseCase {
@@ -15,7 +15,7 @@ export class ListFilesByFolderUseCase {
         private readonly listAllFilesUseCase: ListAllUploadAdminFilesQueryPort,
     ) {}
 
-    async execute(folder: string): Promise<StorageListResponseDto> {
+    async execute(folder: string): Promise<UploadAdminStorageListResult> {
         const prefix = this.uploadAdminStoragePolicyService.normalizeFolderPrefix(folder);
         return this.listAllFilesUseCase.execute(prefix);
     }

@@ -1,13 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
-import { StorageFileResponseDto } from '../../dto/response/storage-file-response.dto';
-import { StorageListResponseDto } from '../../dto/response/storage-list-response.dto';
 import { UploadAdminStoredObjectSnapshot } from '../../application/ports/upload-admin-storage.port';
+import type { UploadAdminStorageFileResult, UploadAdminStorageListResult } from '../../application/types/upload-admin-result.type';
 
 @Injectable()
 export class UploadAdminStoragePresentationService {
-    toListResponseDto(files: UploadAdminStoredObjectSnapshot[], isTruncated: boolean): StorageListResponseDto {
-        const items = files.map((file) => this.toFileResponseDto(file));
+    toListResult(files: UploadAdminStoredObjectSnapshot[], isTruncated: boolean): UploadAdminStorageListResult {
+        const items = files.map((file) => this.toFileResult(file));
 
         return {
             files: items,
@@ -17,7 +16,7 @@ export class UploadAdminStoragePresentationService {
         };
     }
 
-    private toFileResponseDto(file: UploadAdminStoredObjectSnapshot): StorageFileResponseDto {
+    private toFileResult(file: UploadAdminStoredObjectSnapshot): UploadAdminStorageFileResult {
         return {
             key: file.key,
             size: file.size,
@@ -33,7 +32,7 @@ export class UploadAdminStoragePresentationService {
     }
 
     private calculateFolderStats(
-        files: StorageFileResponseDto[],
+        files: UploadAdminStorageFileResult[],
     ): Record<string, { count: number; totalSize: number }> {
         const stats: Record<string, { count: number; totalSize: number }> = {};
 

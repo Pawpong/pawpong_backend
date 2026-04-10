@@ -1,6 +1,5 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 
-import { UploadResponseDto } from '../../dto/response/upload-response.dto';
 import { UPLOAD_FILE_STORE } from '../ports/upload-file-store.port';
 import { UPLOAD_OWNER_PORT } from '../ports/upload-owner.port';
 import type { UploadFileStorePort } from '../ports/upload-file-store.port';
@@ -9,6 +8,7 @@ import { UploadResponseMapper } from '../mappers/upload-response.mapper';
 import { UploadFilePolicyService } from '../../domain/services/upload-file-policy.service';
 import { UploadStoredFilePathService } from '../../domain/services/upload-stored-file-path.service';
 import { UploadPhotoCollectionService } from '../../domain/services/upload-photo-collection.service';
+import type { UploadFileResult } from '../types/upload-result.type';
 
 @Injectable()
 export class UploadAvailablePetPhotosUseCase {
@@ -26,7 +26,7 @@ export class UploadAvailablePetPhotosUseCase {
         existingPhotos: string[],
         userId: string,
         role: string,
-    ): Promise<UploadResponseDto[]> {
+    ): Promise<UploadFileResult[]> {
         if (role !== 'breeder') {
             throw new ForbiddenException('브리더만 분양 개체 사진을 업로드할 수 있습니다.');
         }
@@ -60,6 +60,6 @@ export class UploadAvailablePetPhotosUseCase {
 
         await this.uploadOwner.replaceAvailablePetPhotos(petId, userId, allPhotoPaths);
 
-        return UploadResponseMapper.toDtos(uploadedResources, files || []);
+        return UploadResponseMapper.toResults(uploadedResources, files || []);
     }
 }

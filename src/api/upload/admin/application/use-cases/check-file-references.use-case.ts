@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { FileReferenceDto, FileReferenceResponseDto } from '../../dto/response/file-reference-response.dto';
 import {
     UPLOAD_ADMIN_REFERENCE_READER,
     type UploadAdminReferenceReaderPort,
 } from '../ports/upload-admin-reference-reader.port';
+import type { UploadAdminFileReferenceItemResult, UploadAdminFileReferenceResult } from '../types/upload-admin-result.type';
 
 @Injectable()
 export class CheckFileReferencesUseCase {
@@ -15,10 +15,10 @@ export class CheckFileReferencesUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(fileKeys: string[]): Promise<FileReferenceResponseDto> {
+    async execute(fileKeys: string[]): Promise<UploadAdminFileReferenceResult> {
         this.logger.logStart('checkFileReferences', 'DB 참조 확인 시작', { count: fileKeys.length });
 
-        const files: FileReferenceDto[] = [];
+        const files: UploadAdminFileReferenceItemResult[] = [];
         let referencedCount = 0;
         let orphanedCount = 0;
 
