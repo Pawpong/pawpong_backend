@@ -6,16 +6,13 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { OptionalJwtAuthGuard } from '../../common/guard/optional-jwt-auth.guard';
 import { UploadResponseDto } from '../upload/dto/response/upload-response.dto';
 import { UploadAuthProfileImageUseCase } from './application/use-cases/upload-auth-profile-image.use-case';
+import { buildAuthProfileUploadMessage } from './constants/auth-response-messages';
 import { AuthPublicController } from './decorator/auth-public-controller.decorator';
-import { AuthUploadPresentationService } from './domain/services/auth-upload-presentation.service';
 import { ApiUploadProfileEndpoint } from './swagger';
 
 @AuthPublicController()
 export class AuthProfileUploadController {
-    constructor(
-        private readonly uploadAuthProfileImageUseCase: UploadAuthProfileImageUseCase,
-        private readonly authUploadPresentationService: AuthUploadPresentationService,
-    ) {}
+    constructor(private readonly uploadAuthProfileImageUseCase: UploadAuthProfileImageUseCase) {}
 
     @Post('upload-breeder-profile')
     @UseGuards(OptionalJwtAuthGuard)
@@ -34,7 +31,7 @@ export class AuthProfileUploadController {
             tempId,
         );
         const response = new UploadResponseDto(result.cdnUrl, result.fileName, result.size);
-        const message = this.authUploadPresentationService.getProfileUploadMessage(Boolean(userId && role), tempId);
+        const message = buildAuthProfileUploadMessage(Boolean(userId && role), tempId);
         return ApiResponseDto.success(response, message);
     }
 }

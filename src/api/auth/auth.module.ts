@@ -105,7 +105,6 @@ import { AuthPhoneVerificationResponseFactoryService } from './domain/services/a
 import { AuthLogoutResponseFactoryService } from './domain/services/auth-logout-response-factory.service';
 import { AuthHttpCookieService } from './domain/services/auth-http-cookie.service';
 import { AuthSocialHttpFlowService } from './domain/services/auth-social-http-flow.service';
-import { AuthUploadPresentationService } from './domain/services/auth-upload-presentation.service';
 import { AuthBreederVerificationCommandAdapter } from './infrastructure/auth-breeder-verification-command.adapter';
 import { AuthPhoneVerificationMemoryStore } from './infrastructure/auth-phone-verification-memory.store';
 import { AuthPhoneVerificationMongooseRegistryAdapter } from './infrastructure/auth-phone-verification-mongoose-registry.adapter';
@@ -214,7 +213,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthLogoutResponseFactoryService,
         AuthHttpCookieService,
         AuthSocialHttpFlowService,
-        AuthUploadPresentationService,
         AuthBreederVerificationCommandAdapter,
         AuthPhoneVerificationMemoryStore,
         AuthPhoneVerificationMongooseRegistryAdapter,

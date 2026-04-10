@@ -45,6 +45,18 @@ export function buildAuthDuplicateCheckMessage(
         : AUTH_RESPONSE_MESSAGE_EXAMPLES.breederNameAvailable;
 }
 
+export function buildAuthProfileUploadMessage(hasAuthenticatedUser: boolean, tempId?: string): string {
+    if (hasAuthenticatedUser) {
+        return AUTH_RESPONSE_MESSAGE_EXAMPLES.profileImageUploadedAndSaved;
+    }
+
+    if (tempId) {
+        return AUTH_RESPONSE_MESSAGE_EXAMPLES.profileImageUploadedAndTempStored;
+    }
+
+    return AUTH_RESPONSE_MESSAGE_EXAMPLES.profileImageUploaded;
+}
+
 export function buildAuthBreederDocumentsUploadMessage(level: string, count: number, tempId?: string): string {
     if (tempId) {
         return `${level} 레벨 브리더 인증 서류 ${count}개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.`;
