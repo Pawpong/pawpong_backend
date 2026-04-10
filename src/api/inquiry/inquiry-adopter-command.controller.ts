@@ -6,7 +6,8 @@ import { CreateInquiryUseCase } from './application/use-cases/create-inquiry.use
 import { DeleteInquiryUseCase } from './application/use-cases/delete-inquiry.use-case';
 import { UpdateInquiryUseCase } from './application/use-cases/update-inquiry.use-case';
 import { InquiryProtectedController } from './decorator/inquiry-controller.decorator';
-import { InquiryAdopterCommandResponseMessageService } from './domain/services/inquiry-adopter-command-response-message.service';
+import { InquiryAdopterDeleteResponseMessageService } from './domain/services/inquiry-adopter-delete-response-message.service';
+import { InquiryAdopterWriteResponseMessageService } from './domain/services/inquiry-adopter-write-response-message.service';
 import {
     InquiryCreateRequestDto,
     InquiryUpdateRequestDto,
@@ -24,7 +25,8 @@ export class InquiryAdopterCommandController {
         private readonly createInquiryUseCase: CreateInquiryUseCase,
         private readonly updateInquiryUseCase: UpdateInquiryUseCase,
         private readonly deleteInquiryUseCase: DeleteInquiryUseCase,
-        private readonly inquiryAdopterCommandResponseMessageService: InquiryAdopterCommandResponseMessageService,
+        private readonly inquiryAdopterWriteResponseMessageService: InquiryAdopterWriteResponseMessageService,
+        private readonly inquiryAdopterDeleteResponseMessageService: InquiryAdopterDeleteResponseMessageService,
     ) {}
 
     @Post()
@@ -34,7 +36,7 @@ export class InquiryAdopterCommandController {
         @Body() dto: InquiryCreateRequestDto,
     ): Promise<ApiResponseDto<InquiryCreateResponseDto>> {
         const result = await this.createInquiryUseCase.execute(userId, dto);
-        return ApiResponseDto.success(result, this.inquiryAdopterCommandResponseMessageService.inquiryCreated());
+        return ApiResponseDto.success(result, this.inquiryAdopterWriteResponseMessageService.inquiryCreated());
     }
 
     @Patch(':inquiryId')
@@ -45,7 +47,7 @@ export class InquiryAdopterCommandController {
         @Body() dto: InquiryUpdateRequestDto,
     ): Promise<ApiResponseDto<null>> {
         await this.updateInquiryUseCase.execute(inquiryId, userId, dto);
-        return ApiResponseDto.success(null, this.inquiryAdopterCommandResponseMessageService.inquiryUpdated());
+        return ApiResponseDto.success(null, this.inquiryAdopterWriteResponseMessageService.inquiryUpdated());
     }
 
     @Delete(':inquiryId')
@@ -55,6 +57,6 @@ export class InquiryAdopterCommandController {
         @CurrentUser('userId') userId: string,
     ): Promise<ApiResponseDto<null>> {
         await this.deleteInquiryUseCase.execute(inquiryId, userId);
-        return ApiResponseDto.success(null, this.inquiryAdopterCommandResponseMessageService.inquiryDeleted());
+        return ApiResponseDto.success(null, this.inquiryAdopterDeleteResponseMessageService.inquiryDeleted());
     }
 }
