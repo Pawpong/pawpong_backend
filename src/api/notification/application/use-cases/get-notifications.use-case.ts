@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
-import { NotificationListRequestDto } from '../../dto/request/notification-list-request.dto';
 import { NotificationResponseDto } from '../../dto/response/notification-response.dto';
 import { NOTIFICATION_INBOX_PORT } from '../ports/notification-inbox.port';
 import type { NotificationInboxPort } from '../ports/notification-inbox.port';
 import { NotificationListPresentationService } from '../../domain/services/notification-list-presentation.service';
+import type { NotificationListQuery } from '../types/notification-query.type';
 
 @Injectable()
 export class GetNotificationsUseCase {
@@ -17,7 +17,7 @@ export class GetNotificationsUseCase {
 
     async execute(
         userId: string,
-        filter: NotificationListRequestDto,
+        filter: NotificationListQuery,
     ): Promise<PaginationResponseDto<NotificationResponseDto>> {
         const page = filter.pageNumber || 1;
         const limit = filter.itemsPerPage || 20;

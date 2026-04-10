@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { AnnouncementCreateRequestDto } from '../../../dto/request/announcement-create-request.dto';
 import { AnnouncementResponseDto } from '../../../dto/response/announcement-response.dto';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
 import { ANNOUNCEMENT_WRITER, type AnnouncementWriterPort } from '../ports/announcement-writer.port';
+import type { AnnouncementCreateCommand } from '../types/announcement-command.type';
 
 @Injectable()
 export class CreateAnnouncementUseCase {
@@ -15,7 +15,7 @@ export class CreateAnnouncementUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(createDto: AnnouncementCreateRequestDto): Promise<AnnouncementResponseDto> {
+    async execute(createDto: AnnouncementCreateCommand): Promise<AnnouncementResponseDto> {
         this.logger.logStart('createAnnouncement', '공지사항 생성', createDto);
 
         try {

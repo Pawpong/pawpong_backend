@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { UpdateStandardQuestionDto } from '../../dto/request/update-standard-question.dto';
 import { StandardQuestionResponseDto } from '../../dto/response/standard-question-response.dto';
 import { StandardQuestionPresentationService } from '../../../domain/services/standard-question-presentation.service';
 import { STANDARD_QUESTION_WRITER, type StandardQuestionWriterPort } from '../ports/standard-question-writer.port';
+import type { StandardQuestionUpdateCommand } from '../types/standard-question-command.type';
 
 @Injectable()
 export class UpdateStandardQuestionUseCase {
@@ -13,7 +13,7 @@ export class UpdateStandardQuestionUseCase {
         private readonly standardQuestionPresentationService: StandardQuestionPresentationService,
     ) {}
 
-    async execute(id: string, updateData: UpdateStandardQuestionDto): Promise<StandardQuestionResponseDto> {
+    async execute(id: string, updateData: StandardQuestionUpdateCommand): Promise<StandardQuestionResponseDto> {
         const question = await this.standardQuestionWriter.update(id, updateData);
 
         if (!question) {

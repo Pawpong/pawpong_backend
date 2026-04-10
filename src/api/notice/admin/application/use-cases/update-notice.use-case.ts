@@ -2,9 +2,9 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { NoticeResponseDto } from '../../../dto/response/notice-response.dto';
-import { NoticeUpdateRequestDto } from '../../../dto/request/notice-update-request.dto';
 import { NoticePresentationService } from '../../../domain/services/notice-presentation.service';
 import { NOTICE_WRITER, type NoticeWriterPort } from '../ports/notice-writer.port';
+import type { NoticeUpdateCommand } from '../types/notice-command.type';
 
 @Injectable()
 export class UpdateNoticeUseCase {
@@ -15,7 +15,7 @@ export class UpdateNoticeUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(noticeId: string, adminId: string, updateData: NoticeUpdateRequestDto): Promise<NoticeResponseDto> {
+    async execute(noticeId: string, adminId: string, updateData: NoticeUpdateCommand): Promise<NoticeResponseDto> {
         this.logger.logStart('updateNotice', '공지사항 수정 시작', { noticeId, adminId });
 
         if (!noticeId) {

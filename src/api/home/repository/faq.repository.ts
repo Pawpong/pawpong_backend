@@ -3,8 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Faq, FaqDocument } from '../../../schema/faq.schema';
-import { FaqCreateRequestDto } from '../admin/dto/request/faq-create-request.dto';
-import { FaqUpdateRequestDto } from '../admin/dto/request/faq-update-request.dto';
+import type { HomeFaqCommand, HomeFaqUpdateCommand } from '../admin/application/types/home-admin-command.type';
 
 @Injectable()
 export class FaqRepository {
@@ -24,11 +23,11 @@ export class FaqRepository {
         return this.faqModel.find().sort({ order: 1 }).exec();
     }
 
-    create(data: FaqCreateRequestDto): Promise<FaqDocument> {
+    create(data: HomeFaqCommand): Promise<FaqDocument> {
         return this.faqModel.create(data);
     }
 
-    update(faqId: string, data: FaqUpdateRequestDto): Promise<FaqDocument | null> {
+    update(faqId: string, data: HomeFaqUpdateCommand): Promise<FaqDocument | null> {
         return this.faqModel.findByIdAndUpdate(faqId, data, { new: true }).exec();
     }
 

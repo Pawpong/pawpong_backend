@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AddPhoneWhitelistRequestDto } from '../../dto/request/phone-whitelist-request.dto';
 import { PhoneWhitelistResponseDto } from '../../dto/response/phone-whitelist-response.dto';
 import { USER_ADMIN_READER, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
 import { UserAdminPhoneWhitelistPresentationService } from '../../domain/services/user-admin-phone-whitelist-presentation.service';
+import type { UserAdminPhoneWhitelistCreateCommand } from '../types/user-admin-command.type';
 
 @Injectable()
 export class AddPhoneWhitelistUseCase {
@@ -18,7 +18,7 @@ export class AddPhoneWhitelistUseCase {
         private readonly userAdminPhoneWhitelistPresentationService: UserAdminPhoneWhitelistPresentationService,
     ) {}
 
-    async execute(adminId: string, dto: AddPhoneWhitelistRequestDto): Promise<PhoneWhitelistResponseDto> {
+    async execute(adminId: string, dto: UserAdminPhoneWhitelistCreateCommand): Promise<PhoneWhitelistResponseDto> {
         this.userAdminCommandPolicyService.assertPhoneWhitelistDoesNotExist(
             await this.userAdminReader.findPhoneWhitelistByPhoneNumber(dto.phoneNumber),
         );

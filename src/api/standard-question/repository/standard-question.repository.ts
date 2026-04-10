@@ -4,8 +4,8 @@ import { Model } from 'mongoose';
 
 import { StandardQuestion, StandardQuestionDocument } from '../../../schema/standard-question.schema';
 import { StandardQuestionSnapshot } from '../application/ports/standard-question-reader.port';
-import { UpdateStandardQuestionDto } from '../admin/dto/request/update-standard-question.dto';
 import { StandardQuestionReorderCommand } from '../admin/application/ports/standard-question-writer.port';
+import type { StandardQuestionUpdateCommand } from '../admin/application/types/standard-question-command.type';
 
 @Injectable()
 export class StandardQuestionRepository {
@@ -26,7 +26,7 @@ export class StandardQuestionRepository {
         return this.standardQuestionModel.findOne({ id }).exec();
     }
 
-    update(id: string, updateData: UpdateStandardQuestionDto): Promise<StandardQuestionDocument | null> {
+    update(id: string, updateData: StandardQuestionUpdateCommand): Promise<StandardQuestionDocument | null> {
         return this.standardQuestionModel
             .findOneAndUpdate({ id }, { $set: updateData }, { new: true, runValidators: false })
             .exec();

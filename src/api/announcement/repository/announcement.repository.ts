@@ -3,8 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { Announcement, AnnouncementDocument } from '../../../schema/announcement.schema';
-import { AnnouncementCreateRequestDto } from '../dto/request/announcement-create-request.dto';
-import { AnnouncementUpdateRequestDto } from '../dto/request/announcement-update-request.dto';
+import type {
+    AnnouncementCreateCommand,
+    AnnouncementUpdateCommand,
+} from '../admin/application/types/announcement-command.type';
 
 @Injectable()
 export class AnnouncementRepository {
@@ -42,7 +44,7 @@ export class AnnouncementRepository {
         return this.announcementModel.findOne({ _id: announcementId, isActive: true }).exec();
     }
 
-    async create(createData: AnnouncementCreateRequestDto): Promise<AnnouncementDocument> {
+    async create(createData: AnnouncementCreateCommand): Promise<AnnouncementDocument> {
         const announcement = new this.announcementModel({
             title: createData.title,
             content: createData.content,
@@ -53,10 +55,7 @@ export class AnnouncementRepository {
         return announcement.save();
     }
 
-    async update(
-        announcementId: string,
-        updateData: AnnouncementUpdateRequestDto,
-    ): Promise<AnnouncementDocument | null> {
+    async update(announcementId: string, updateData: AnnouncementUpdateCommand): Promise<AnnouncementDocument | null> {
         if (!Types.ObjectId.isValid(announcementId)) {
             return null;
         }
