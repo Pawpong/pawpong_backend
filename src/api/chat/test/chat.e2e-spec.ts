@@ -359,7 +359,7 @@ describe('Chat API E2E Tests', () => {
                 .expect(200);
 
             const messages = response.body as Array<{
-                messageId: string;
+                id: string;
                 roomId: string;
                 senderId: string;
                 senderRole: string;
@@ -373,7 +373,7 @@ describe('Chat API E2E Tests', () => {
             expect(messages.length).toBe(3);
 
             const first = messages[0];
-            expect(first.messageId).toBeDefined();
+            expect(first.id).toBeDefined();
             expect(first.roomId).toBe(roomId);
             expect(first.senderId).toBeDefined();
             expect(first.senderRole).toMatch(/adopter|breeder/);
