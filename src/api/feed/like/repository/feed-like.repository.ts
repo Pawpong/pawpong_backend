@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 
 import { Video, VideoDocument, VideoStatus } from '../../../../schema/video.schema';
 import { VideoLike } from '../../../../schema/video-like.schema';
+import type { FeedObjectIdLike, FeedVideoDocumentRecord } from '../../types/feed-document.type';
 
 @Injectable()
 export class FeedLikeRepository {
@@ -80,7 +81,7 @@ export class FeedLikeRepository {
         return this.videoLikeModel.countDocuments({ userId: userObjectId }).exec();
     }
 
-    findReadyVideosByIds(videoIds: Types.ObjectId[]) {
+    findReadyVideosByIds(videoIds: Types.ObjectId[]): Promise<FeedVideoDocumentRecord[]> {
         return this.videoModel
             .find({
                 _id: { $in: videoIds },
@@ -88,7 +89,7 @@ export class FeedLikeRepository {
             })
             .populate('uploadedBy', 'name profileImageFileName businessName')
             .lean()
-            .exec();
+            .exec() as Promise<FeedVideoDocumentRecord[]>;
     }
 
     private toObjectId(value: string): Types.ObjectId | null {

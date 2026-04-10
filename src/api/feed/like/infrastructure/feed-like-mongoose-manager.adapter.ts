@@ -8,6 +8,7 @@ import {
     FeedLikeVideoCounterSnapshot,
     FeedLikeVideoSnapshot,
 } from '../application/ports/feed-like-manager.port';
+import type { FeedUploaderDocumentRecord, FeedVideoDocumentRecord } from '../../types/feed-document.type';
 
 @Injectable()
 export class FeedLikeMongooseManagerAdapter implements FeedLikeManagerPort {
@@ -72,7 +73,12 @@ export class FeedLikeMongooseManagerAdapter implements FeedLikeManagerPort {
         return this.feedLikeRepository.countLikesByUser(userId);
     }
 
-    private toVideoSnapshot(video: any): FeedLikeVideoSnapshot {
+    private toVideoSnapshot(video: FeedVideoDocumentRecord): FeedLikeVideoSnapshot {
+        const uploader =
+            video.uploadedBy && typeof video.uploadedBy === 'object' && '_id' in video.uploadedBy
+                ? (video.uploadedBy as FeedUploaderDocumentRecord)
+                : null;
+
         return {
             id: video._id.toString(),
             title: video.title,
@@ -80,12 +86,12 @@ export class FeedLikeMongooseManagerAdapter implements FeedLikeManagerPort {
             duration: video.duration,
             viewCount: video.viewCount,
             likeCount: video.likeCount,
-            uploadedBy: video.uploadedBy
+            uploadedBy: uploader
                 ? {
-                      id: video.uploadedBy._id.toString(),
-                      name: video.uploadedBy.name,
-                      profileImageFileName: video.uploadedBy.profileImageFileName,
-                      businessName: video.uploadedBy.businessName,
+                      id: uploader._id.toString(),
+                      name: uploader.name,
+                      profileImageFileName: uploader.profileImageFileName,
+                      businessName: uploader.businessName,
                   }
                 : null,
             createdAt: video.createdAt,

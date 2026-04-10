@@ -3,12 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Video, VideoDocument, VideoStatus } from '../../../../schema/video.schema';
+import type { FeedVideoDocumentRecord } from '../../types/feed-document.type';
 
 @Injectable()
 export class FeedTagRepository {
     constructor(@InjectModel(Video.name) private readonly videoModel: Model<VideoDocument>) {}
 
-    findReadyPublicByExactTag(tagPattern: RegExp, skip: number, limit: number) {
+    findReadyPublicByExactTag(tagPattern: RegExp, skip: number, limit: number): Promise<FeedVideoDocumentRecord[]> {
         return this.videoModel
             .find({
                 tags: { $regex: tagPattern },
@@ -20,7 +21,7 @@ export class FeedTagRepository {
             .limit(limit)
             .populate('uploadedBy', 'name profileImageFileName businessName')
             .lean()
-            .exec();
+            .exec() as Promise<FeedVideoDocumentRecord[]>;
     }
 
     countReadyPublicByExactTag(tagPattern: RegExp): Promise<number> {
