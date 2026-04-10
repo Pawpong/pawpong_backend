@@ -3,6 +3,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
+import { MongoObjectIdPipe } from '../../common/pipe/mongo-object-id.pipe';
 import { UploadParentPetPhotosUseCase } from './application/use-cases/upload-parent-pet-photos.use-case';
 import { ProtectedUploadController } from './decorator/upload-controller.decorator';
 import { UploadPhotoReplaceRequestDto } from './dto/request/upload-photo-replace-request.dto';
@@ -21,7 +22,7 @@ export class UploadParentPetPhotoController {
     @ApiUploadParentPetPhotosEndpoint()
     @UseInterceptors(FilesInterceptor('files', 5))
     async uploadParentPetPhotos(
-        @Param('petId') petId: string,
+        @Param('petId', new MongoObjectIdPipe('개체', '올바르지 않은 개체 ID 형식입니다.')) petId: string,
         @UploadedFiles() files: Express.Multer.File[],
         @Body() requestDto: UploadPhotoReplaceRequestDto,
         @CurrentUser('userId') userId: string,
