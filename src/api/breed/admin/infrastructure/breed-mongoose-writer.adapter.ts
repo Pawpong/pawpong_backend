@@ -1,21 +1,20 @@
 import { Injectable } from '@nestjs/common';
 
-import { CreateBreedRequestDto } from '../dto/request/create-breed-request.dto';
-import { UpdateBreedRequestDto } from '../dto/request/update-breed-request.dto';
 import { BreedAdminSnapshot } from '../application/ports/breed-admin-reader.port';
 import { BreedWriterPort } from '../application/ports/breed-writer.port';
+import { type CreateBreedCommand, type UpdateBreedCommand } from '../application/types/breed-command.type';
 import { BreedRepository } from '../../repository/breed.repository';
 
 @Injectable()
 export class BreedMongooseWriterAdapter implements BreedWriterPort {
     constructor(private readonly breedRepository: BreedRepository) {}
 
-    async create(dto: CreateBreedRequestDto): Promise<BreedAdminSnapshot> {
+    async create(dto: CreateBreedCommand): Promise<BreedAdminSnapshot> {
         const saved = await this.breedRepository.create(dto);
         return this.toSnapshot(saved);
     }
 
-    async update(id: string, dto: UpdateBreedRequestDto): Promise<BreedAdminSnapshot | null> {
+    async update(id: string, dto: UpdateBreedCommand): Promise<BreedAdminSnapshot | null> {
         const updated = await this.breedRepository.update(id, dto);
         return updated ? this.toSnapshot(updated) : null;
     }

@@ -2,9 +2,9 @@ import { BadRequestException, ConflictException, Inject, Injectable } from '@nes
 
 import { BreedResponseDto } from '../../../dto/response/breed-response.dto';
 import { BreedAdminPresentationService } from '../../../domain/services/breed-admin-presentation.service';
-import { UpdateBreedRequestDto } from '../../dto/request/update-breed-request.dto';
 import { BREED_ADMIN_READER, type BreedAdminReaderPort } from '../ports/breed-admin-reader.port';
 import { BREED_WRITER, type BreedWriterPort } from '../ports/breed-writer.port';
+import { type UpdateBreedCommand } from '../types/breed-command.type';
 
 @Injectable()
 export class UpdateBreedUseCase {
@@ -16,7 +16,7 @@ export class UpdateBreedUseCase {
         private readonly breedAdminPresentationService: BreedAdminPresentationService,
     ) {}
 
-    async execute(id: string, dto: UpdateBreedRequestDto): Promise<BreedResponseDto> {
+    async execute(id: string, dto: UpdateBreedCommand): Promise<BreedResponseDto> {
         const breed = await this.breedAdminReader.findById(id);
 
         if (!breed) {
