@@ -16,12 +16,14 @@ import { DeleteFaqUseCase } from './application/use-cases/delete-faq.use-case';
 import { HOME_ASSET_URL } from '../application/ports/home-asset-url.port';
 import { HomeAdminMongooseManagerAdapter } from './infrastructure/home-admin-mongoose-manager.adapter';
 import { HOME_ADMIN_MANAGER } from './application/ports/home-admin-manager.port';
-import { HomeBannerCommandResponseMessageService } from '../domain/services/home-banner-command-response-message.service';
+import { HomeBannerDeleteResponseMessageService } from '../domain/services/home-banner-delete-response-message.service';
 import { HomeBannerCatalogService } from '../domain/services/home-banner-catalog.service';
 import { HomeBannerQueryResponseMessageService } from '../domain/services/home-banner-query-response-message.service';
-import { HomeFaqCommandResponseMessageService } from '../domain/services/home-faq-command-response-message.service';
+import { HomeBannerWriteResponseMessageService } from '../domain/services/home-banner-write-response-message.service';
+import { HomeFaqDeleteResponseMessageService } from '../domain/services/home-faq-delete-response-message.service';
 import { HomeFaqQueryResponseMessageService } from '../domain/services/home-faq-query-response-message.service';
 import { HomeFaqCatalogService } from '../domain/services/home-faq-catalog.service';
+import { HomeFaqWriteResponseMessageService } from '../domain/services/home-faq-write-response-message.service';
 import { HomeStorageAssetUrlAdapter } from '../infrastructure/home-storage-asset-url.adapter';
 import { BannerRepository } from '../repository/banner.repository';
 import { FaqRepository } from '../repository/faq.repository';
@@ -57,9 +59,11 @@ import { StorageModule } from '../../../common/storage/storage.module';
         HomeBannerCatalogService,
         HomeFaqCatalogService,
         HomeBannerQueryResponseMessageService,
-        HomeBannerCommandResponseMessageService,
+        HomeBannerWriteResponseMessageService,
+        HomeBannerDeleteResponseMessageService,
         HomeFaqQueryResponseMessageService,
-        HomeFaqCommandResponseMessageService,
+        HomeFaqWriteResponseMessageService,
+        HomeFaqDeleteResponseMessageService,
         BannerRepository,
         FaqRepository,
         HomeAdminMongooseManagerAdapter,
