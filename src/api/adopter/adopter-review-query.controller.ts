@@ -7,6 +7,7 @@ import { GetAdopterReviewDetailUseCase } from './application/use-cases/get-adopt
 import { GetAdopterReviewsUseCase } from './application/use-cases/get-adopter-reviews.use-case';
 import type { AdopterReviewDetailResult } from './application/types/adopter-result.type';
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
+import { AdopterPaginationQueryRequestDto } from './dto/request/adopter-pagination-query-request.dto';
 import { MyReviewDetailDto } from './dto/response/my-review-detail.dto';
 import { MyReviewItemDto } from './dto/response/my-review-item.dto';
 import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
@@ -23,10 +24,9 @@ export class AdopterReviewQueryController {
     @ApiGetAdopterReviewsEndpoint()
     async getMyReviews(
         @CurrentUser('userId') userId: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 10,
+        @Query() query: AdopterPaginationQueryRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<MyReviewItemDto>>> {
-        const result = await this.getAdopterReviewsUseCase.execute(userId, Number(page), Number(limit));
+        const result = await this.getAdopterReviewsUseCase.execute(userId, query.page, query.limit);
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result),
             ADOPTER_RESPONSE_MESSAGES.reviewListRetrieved,

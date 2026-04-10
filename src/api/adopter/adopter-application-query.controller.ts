@@ -7,6 +7,7 @@ import { GetAdopterApplicationDetailUseCase } from './application/use-cases/get-
 import { GetAdopterApplicationsUseCase } from './application/use-cases/get-adopter-applications.use-case';
 import type { AdopterApplicationDetailResult } from './application/types/adopter-result.type';
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
+import { AdopterApplicationsQueryRequestDto } from './dto/request/adopter-pagination-query-request.dto';
 import { ApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
 import { ApplicationListResponseDto } from './dto/response/application-list-response.dto';
 import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
@@ -23,11 +24,14 @@ export class AdopterApplicationQueryController {
     @ApiGetAdopterApplicationsEndpoint()
     async getMyApplications(
         @CurrentUser('userId') userId: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 10,
-        @Query('animalType') animalType?: 'cat' | 'dog',
+        @Query() query: AdopterApplicationsQueryRequestDto,
     ): Promise<ApiResponseDto<ApplicationListResponseDto>> {
-        const result = await this.getAdopterApplicationsUseCase.execute(userId, Number(page), Number(limit), animalType);
+        const result = await this.getAdopterApplicationsUseCase.execute(
+            userId,
+            query.page,
+            query.limit,
+            query.animalType,
+        );
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result) as ApplicationListResponseDto,
             ADOPTER_RESPONSE_MESSAGES.applicationListRetrieved,

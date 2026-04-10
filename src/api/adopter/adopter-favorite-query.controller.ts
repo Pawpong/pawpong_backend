@@ -5,6 +5,7 @@ import { PaginationResponseDto } from '../../common/dto/pagination/pagination-re
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetFavoriteBreedersUseCase } from './application/use-cases/get-favorite-breeders.use-case';
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
+import { AdopterPaginationQueryRequestDto } from './dto/request/adopter-pagination-query-request.dto';
 import { FavoriteListResponseDto } from './dto/response/favorite-list-response.dto';
 import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
 import { ApiGetAdopterFavoritesEndpoint } from './swagger';
@@ -17,10 +18,9 @@ export class AdopterFavoriteQueryController {
     @ApiGetAdopterFavoritesEndpoint()
     async getFavorites(
         @CurrentUser('userId') userId: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 10,
+        @Query() query: AdopterPaginationQueryRequestDto,
     ): Promise<ApiResponseDto<FavoriteListResponseDto>> {
-        const result = await this.getFavoriteBreedersUseCase.execute(userId, Number(page), Number(limit));
+        const result = await this.getFavoriteBreedersUseCase.execute(userId, query.page, query.limit);
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result) as FavoriteListResponseDto,
             ADOPTER_RESPONSE_MESSAGES.favoriteListRetrieved,

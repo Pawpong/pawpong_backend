@@ -6,6 +6,7 @@ import { GetBreederPetDetailUseCase } from './application/use-cases/get-breeder-
 import { GetBreederPetsUseCase } from './application/use-cases/get-breeder-pets.use-case';
 import type { BreederPetsPageResult } from './application/types/breeder-result.type';
 import { BreederOptionalAuthController, BreederPublicController } from './decorator/breeder-public-controller.decorator';
+import { BreederParentPetsQueryRequestDto, BreederPetsQueryRequestDto } from './dto/request/breeder-pets-query-request.dto';
 import { PetDetailResponseDto } from './dto/response/pet-detail-response.dto';
 import { ParentPetListResponseDto } from './dto/response/parent-pet-list.dto';
 import { BREEDER_RESPONSE_MESSAGES } from './domain/services/breeder-response-message.service';
@@ -26,11 +27,9 @@ export class BreederPetsController {
     @ApiGetBreederPetsEndpoint()
     async getBreederPets(
         @Param('id') breederId: string,
-        @Query('status') status?: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 20,
+        @Query() query: BreederPetsQueryRequestDto,
     ): Promise<ApiResponseDto<BreederPetsPageResult>> {
-        const result = await this.getBreederPetsUseCase.execute(breederId, status, Number(page), Number(limit));
+        const result = await this.getBreederPetsUseCase.execute(breederId, query.status, query.page, query.limit);
         return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.petsRetrieved);
     }
 
@@ -38,10 +37,9 @@ export class BreederPetsController {
     @ApiGetBreederParentPetsEndpoint()
     async getParentPets(
         @Param('id') breederId: string,
-        @Query('page') page?: number,
-        @Query('limit') limit?: number,
+        @Query() query: BreederParentPetsQueryRequestDto,
     ): Promise<ApiResponseDto<ParentPetListResponseDto>> {
-        const result = await this.getBreederParentPetsUseCase.execute(breederId, page, limit);
+        const result = await this.getBreederParentPetsUseCase.execute(breederId, query.page, query.limit);
         return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.parentPetsRetrieved);
     }
 }

@@ -4,6 +4,7 @@ import { PaginationResponseDto } from '../../common/dto/pagination/pagination-re
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetBreederReviewsUseCase } from './application/use-cases/get-breeder-reviews.use-case';
 import { BreederOptionalAuthController } from './decorator/breeder-public-controller.decorator';
+import { BreederReviewsQueryRequestDto } from './dto/request/breeder-reviews-query-request.dto';
 import { BreederReviewItemDto } from './dto/response/breeder-reviews-response.dto';
 import { BREEDER_RESPONSE_MESSAGES } from './domain/services/breeder-response-message.service';
 import { ApiGetBreederReviewsEndpoint } from './swagger/decorators';
@@ -16,10 +17,9 @@ export class BreederReviewsController {
     @ApiGetBreederReviewsEndpoint()
     async getBreederReviews(
         @Param('id') breederId: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 10,
+        @Query() query: BreederReviewsQueryRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederReviewItemDto>>> {
-        const result = await this.getBreederReviewsUseCase.execute(breederId, Number(page), Number(limit));
+        const result = await this.getBreederReviewsUseCase.execute(breederId, query.page, query.limit);
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result),
             BREEDER_RESPONSE_MESSAGES.reviewsRetrieved,
