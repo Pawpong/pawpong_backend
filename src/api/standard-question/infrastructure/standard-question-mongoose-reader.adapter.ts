@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { StandardQuestionDocument } from '../../../schema/standard-question.schema';
 import { StandardQuestionReaderPort, StandardQuestionSnapshot } from '../application/ports/standard-question-reader.port';
 import { StandardQuestionRepository } from '../repository/standard-question.repository';
 
@@ -22,7 +23,7 @@ export class StandardQuestionMongooseReaderAdapter implements StandardQuestionRe
         return question ? this.toSnapshot(question) : null;
     }
 
-    private toSnapshot(question: any): StandardQuestionSnapshot {
+    private toSnapshot(question: StandardQuestionDocument): StandardQuestionSnapshot {
         return {
             id: question.id,
             type: question.type,
