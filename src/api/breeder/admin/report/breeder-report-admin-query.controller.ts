@@ -7,7 +7,7 @@ import { GetBreederReportsUseCase } from './application/use-cases/get-breeder-re
 import { BreederReportAdminProtectedController } from './decorator/breeder-report-admin-controller.decorator';
 import { ReportListRequestDto } from './dto/request/report-list-request.dto';
 import { ReportListResponseDto } from './dto/response/report-list-response.dto';
-import { BREEDER_RESPONSE_MESSAGES } from '../../domain/services/breeder-response-message.service';
+import { BREEDER_RESPONSE_MESSAGES } from '../../constants/breeder-response-messages';
 import { ApiGetBreederReportsAdminEndpoint } from './swagger';
 
 @BreederReportAdminProtectedController()

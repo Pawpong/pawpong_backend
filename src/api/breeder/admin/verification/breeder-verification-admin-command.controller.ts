@@ -12,7 +12,7 @@ import { BreederLevelChangeResponseDto } from './dto/response/breeder-level-chan
 import {
     BREEDER_RESPONSE_MESSAGES,
     buildBreederDocumentReminderMessage,
-} from '../../domain/services/breeder-response-message.service';
+} from '../../constants/breeder-response-messages';
 import {
     ApiChangeBreederLevelAdminEndpoint,
     ApiSendDocumentRemindersAdminEndpoint,

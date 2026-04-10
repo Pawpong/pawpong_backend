@@ -9,7 +9,7 @@ import { GetPendingBreederVerificationsUseCase } from './application/use-cases/g
 import { BreederVerificationAdminProtectedController } from './decorator/breeder-verification-admin-controller.decorator';
 import { BreederSearchRequestDto } from './dto/request/breeder-search-request.dto';
 import { BreederVerificationResponseDto } from './dto/response/breeder-verification-response.dto';
-import { BREEDER_RESPONSE_MESSAGES } from '../../domain/services/breeder-response-message.service';
+import { BREEDER_RESPONSE_MESSAGES } from '../../constants/breeder-response-messages';
 import {
     ApiGetBreedersAdminEndpoint,
     ApiGetLevelChangeRequestsAdminEndpoint,
