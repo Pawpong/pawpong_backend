@@ -1,5 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
+import { getConnectionToken } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 import { createTestingApp, cleanupDatabase, getAdopterToken, getBreederToken } from '../../../common/test/test-utils';
 
 /**
@@ -47,6 +49,7 @@ describe('Chat API E2E Tests', () => {
     afterAll(async () => {
         await cleanupDatabase(app);
         await app.close();
+        await new Promise((resolve) => setTimeout(resolve, 500));
     });
 
     /**
@@ -284,6 +287,124 @@ describe('Chat API E2E Tests', () => {
     });
 
     /**
+     * 3-1. 메시지 내용 조회 및 before 페이지네이션
+     */
+    describe('GET /api/chat/rooms/:roomId/messages - 메시지 내용 및 페이지네이션', () => {
+        let roomId: string;
+
+        const MSG_TIME_1 = new Date('2026-01-01T00:00:01Z');
+        const MSG_TIME_2 = new Date('2026-01-01T00:00:02Z');
+        const MSG_TIME_3 = new Date('2026-01-01T00:00:03Z');
+
+        beforeAll(async () => {
+            // 전용 브리더 생성 (다른 describe와 방 충돌 방지)
+            const freshBreeder = await getBreederToken(app);
+            expect(freshBreeder).not.toBeNull();
+
+            const response = await request(app.getHttpServer())
+                .post('/api/chat/rooms')
+                .set('Authorization', `Bearer ${adopterToken}`)
+                .send({ breederId: freshBreeder!.breederId })
+                .expect(200);
+
+            roomId = response.body.id;
+
+            // 메시지 3개 직접 삽입
+            const connection = app.get<Connection>(getConnectionToken());
+            const messagesCollection = connection.collection('chat_messages');
+
+            await messagesCollection.insertMany([
+                {
+                    roomId,
+                    senderId: adopterId,
+                    senderRole: 'adopter',
+                    receiverId: freshBreeder!.breederId,
+                    content: '안녕하세요!',
+                    messageType: 'text',
+                    isRead: false,
+                    createdAt: MSG_TIME_1,
+                    updatedAt: MSG_TIME_1,
+                },
+                {
+                    roomId,
+                    senderId: freshBreeder!.breederId,
+                    senderRole: 'breeder',
+                    receiverId: adopterId,
+                    content: '반갑습니다!',
+                    messageType: 'text',
+                    isRead: false,
+                    createdAt: MSG_TIME_2,
+                    updatedAt: MSG_TIME_2,
+                },
+                {
+                    roomId,
+                    senderId: adopterId,
+                    senderRole: 'adopter',
+                    receiverId: freshBreeder!.breederId,
+                    content: '강아지 분양 문의드립니다',
+                    messageType: 'text',
+                    isRead: false,
+                    createdAt: MSG_TIME_3,
+                    updatedAt: MSG_TIME_3,
+                },
+            ]);
+
+            console.log('✅ 테스트 메시지 3개 삽입 완료');
+        });
+
+        it('메시지 목록 조회 시 내용과 구조 검증', async () => {
+            const response = await request(app.getHttpServer())
+                .get(`/api/chat/rooms/${roomId}/messages`)
+                .set('Authorization', `Bearer ${adopterToken}`)
+                .expect(200);
+
+            const messages = response.body as Array<{
+                messageId: string;
+                roomId: string;
+                senderId: string;
+                senderRole: string;
+                content: string;
+                messageType: string;
+                isRead: boolean;
+                createdAt: string;
+            }>;
+
+            expect(Array.isArray(messages)).toBe(true);
+            expect(messages.length).toBe(3);
+
+            const first = messages[0];
+            expect(first.messageId).toBeDefined();
+            expect(first.roomId).toBe(roomId);
+            expect(first.senderId).toBeDefined();
+            expect(first.senderRole).toMatch(/adopter|breeder/);
+            expect(first.content).toBeDefined();
+            expect(first.messageType).toBe('text');
+            expect(typeof first.isRead).toBe('boolean');
+            expect(first.createdAt).toBeDefined();
+
+            console.log('✅ 메시지 내용 및 구조 검증 성공');
+        });
+
+        it('before 파라미터로 특정 시점 이전 메시지만 조회', async () => {
+            // MSG_TIME_2 이전 → 메시지 1개만 반환
+            const before = MSG_TIME_2.toISOString();
+
+            const response = await request(app.getHttpServer())
+                .get(`/api/chat/rooms/${roomId}/messages?before=${before}`)
+                .set('Authorization', `Bearer ${adopterToken}`)
+                .expect(200);
+
+            const messages = response.body as Array<{ content: string }>;
+
+            expect(Array.isArray(messages)).toBe(true);
+            expect(messages.length).toBe(1);
+            expect(messages[0].content).toBe('안녕하세요!');
+
+            console.log('✅ before 페이지네이션 검증 성공');
+        });
+    });
+
+    /**
      * 4. 채팅방 닫기
      */
     describe('DELETE /api/chat/rooms/:roomId - 채팅방 닫기', () => {
@@ -308,8 +429,27 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
-            expect(response.body.success).toBe(true);
+            expect((response.body as { success: boolean }).success).toBe(true);
             console.log('✅ 입양자 채팅방 닫기 성공:', roomId);
+        });
+
+        it('브리더가 채팅방 닫기 성공', async () => {
+            // breederId(전역 브리더)가 참가한 채팅방 생성
+            const createRes = await request(app.getHttpServer())
+                .post('/api/chat/rooms')
+                .set('Authorization', `Bearer ${adopterToken}`)
+                .send({ breederId })
+                .expect(200);
+
+            const targetRoomId = (createRes.body as { id: string }).id;
+
+            const response = await request(app.getHttpServer())
+                .delete(`/api/chat/rooms/${targetRoomId}`)
+                .set('Authorization', `Bearer ${breederToken}`)
+                .expect(200);
+
+            expect((response.body as { success: boolean }).success).toBe(true);
+            console.log('✅ 브리더 채팅방 닫기 성공:', targetRoomId);
         });
 
         it('참가자가 아닌 사용자가 채팅방 닫기 시도 시 403 반환', async () => {
