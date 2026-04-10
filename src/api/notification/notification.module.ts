@@ -20,7 +20,6 @@ import { SendNotificationEmailUseCase } from './application/use-cases/send-notif
 import { NotificationListPresentationService } from './domain/services/notification-list-presentation.service';
 import { NotificationPaginationAssemblerService } from './domain/services/notification-pagination-assembler.service';
 import { NotificationMessageTemplateService } from './domain/services/notification-message-template.service';
-import { NotificationReadResponseMessageService } from './domain/services/notification-read-response-message.service';
 import { NotificationStateResponseService } from './domain/services/notification-state-response.service';
 import { NotificationMongooseInboxAdapter } from './infrastructure/notification-mongoose-inbox.adapter';
 import { NotificationMongooseCommandAdapter } from './infrastructure/notification-mongoose-command.adapter';
@@ -60,7 +59,6 @@ import { MailModule } from '../../common/mail/mail.module';
         CreateNotificationUseCase,
         CreateNotificationFromBuilderUseCase,
         NotificationListPresentationService,
-        NotificationReadResponseMessageService,
         NotificationPaginationAssemblerService,
         NotificationMessageTemplateService,
         NotificationStateResponseService,

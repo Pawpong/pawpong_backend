@@ -4,17 +4,14 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { UploadRepresentativePhotosUseCase } from './application/use-cases/upload-representative-photos.use-case';
+import { UPLOAD_RESPONSE_MESSAGE_EXAMPLES } from './constants/upload-response-messages';
 import { ProtectedUploadController } from './decorator/upload-controller.decorator';
 import { UploadResponseDto } from './dto/response/upload-response.dto';
-import { UploadRepresentativePhotoResponseMessageService } from './domain/services/upload-representative-photo-response-message.service';
 import { ApiUploadRepresentativePhotosEndpoint } from './swagger';
 
 @ProtectedUploadController()
 export class UploadRepresentativePhotoController {
-    constructor(
-        private readonly uploadRepresentativePhotosUseCase: UploadRepresentativePhotosUseCase,
-        private readonly uploadRepresentativePhotoResponseMessageService: UploadRepresentativePhotoResponseMessageService,
-    ) {}
+    constructor(private readonly uploadRepresentativePhotosUseCase: UploadRepresentativePhotosUseCase) {}
 
     @Post('representative-photos')
     @ApiUploadRepresentativePhotosEndpoint()
@@ -25,9 +22,6 @@ export class UploadRepresentativePhotoController {
         @CurrentUser('role') role: string,
     ): Promise<ApiResponseDto<UploadResponseDto[]>> {
         const responses = await this.uploadRepresentativePhotosUseCase.execute(files, userId, role);
-        return ApiResponseDto.success(
-            responses,
-            this.uploadRepresentativePhotoResponseMessageService.representativePhotosUploaded(),
-        );
+        return ApiResponseDto.success(responses, UPLOAD_RESPONSE_MESSAGE_EXAMPLES.representativePhotosUploaded);
     }
 }
