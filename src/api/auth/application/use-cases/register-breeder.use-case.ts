@@ -2,12 +2,11 @@ import { BadRequestException, ConflictException, Inject, Injectable } from '@nes
 
 import { BreederPlan, UserStatus, VerificationStatus } from '../../../../common/enum/user.enum';
 import { AuthMapper } from '../../mapper/auth.mapper';
-import { RegisterBreederRequestDto } from '../../dto/request/register-breeder-request.dto';
-import { RegisterBreederResponseDto } from '../../dto/response/register-breeder-response.dto';
 import { AuthRegistrationPort } from '../ports/auth-registration.port';
 import { AuthRegistrationNotificationPort } from '../ports/auth-registration-notification.port';
 import { AuthTempUploadPort } from '../ports/auth-temp-upload.port';
 import { AuthTokenPort } from '../ports/auth-token.port';
+import { type RegisterBreederAuthSignupCommand, type RegisterBreederAuthSignupResult } from '../types/auth-signup.type';
 import { AuthSocialIdentityService } from '../../domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from '../../domain/services/auth-stored-file-name.service';
 
@@ -25,7 +24,7 @@ export class RegisterBreederUseCase {
         private readonly authStoredFileNameService: AuthStoredFileNameService,
     ) {}
 
-    async execute(dto: RegisterBreederRequestDto): Promise<RegisterBreederResponseDto> {
+    async execute(dto: RegisterBreederAuthSignupCommand): Promise<RegisterBreederAuthSignupResult> {
         if (!dto.agreements?.termsOfService || !dto.agreements?.privacyPolicy) {
             throw new BadRequestException('필수 약관에 동의해야 합니다.');
         }

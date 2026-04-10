@@ -19,7 +19,7 @@ export class AuthRefreshTokenController {
     @HttpCode(HttpStatus.OK)
     @ApiRefreshAuthEndpoint()
     async refreshToken(@Body() refreshTokenDto: RefreshTokenRequestDto): Promise<ApiResponseDto<TokenResponseDto>> {
-        const result = await this.refreshAuthTokenUseCase.execute(refreshTokenDto);
+        const result = await this.refreshAuthTokenUseCase.execute(refreshTokenDto.refreshToken);
         return ApiResponseDto.success(result, this.authSessionResponseMessageService.getTokenRefreshed());
     }
 }

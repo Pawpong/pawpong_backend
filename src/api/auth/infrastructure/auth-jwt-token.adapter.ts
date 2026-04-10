@@ -5,7 +5,7 @@ import * as bcrypt from 'bcryptjs';
 
 import { AuthTokenPort, type AuthRefreshTokenPayload } from '../application/ports/auth-token.port';
 import { type AuthSessionRole } from '../application/ports/auth-session.port';
-import { TokenResponseDto } from '../dto/response/token-response.dto';
+import { type AuthTokenSet } from '../application/types/auth-token-set.type';
 
 @Injectable()
 export class AuthJwtTokenAdapter extends AuthTokenPort {
@@ -16,7 +16,7 @@ export class AuthJwtTokenAdapter extends AuthTokenPort {
         super();
     }
 
-    generateTokens(userId: string, email: string, role: AuthSessionRole): TokenResponseDto {
+    generateTokens(userId: string, email: string, role: AuthSessionRole): AuthTokenSet {
         const payload = {
             sub: userId,
             email,

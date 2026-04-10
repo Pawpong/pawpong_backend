@@ -1,16 +1,18 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { SocialCompleteRequestDto } from '../../dto/request/social-complete-request.dto';
-import { RegisterAdopterRequestDto } from '../../dto/request/register-adopter-request.dto';
-import { RegisterBreederRequestDto } from '../../dto/request/register-breeder-request.dto';
-import { RegisterAdopterResponseDto } from '../../dto/response/register-adopter-response.dto';
-import { RegisterBreederResponseDto } from '../../dto/response/register-breeder-response.dto';
 import {
     REGISTER_ADOPTER_AUTH_SIGNUP,
     REGISTER_BREEDER_AUTH_SIGNUP,
     type RegisterAdopterAuthSignupPort,
     type RegisterBreederAuthSignupPort,
 } from '../ports/auth-signup-completion.port';
+import {
+    type CompleteSocialRegistrationCommand,
+    type RegisterAdopterAuthSignupCommand,
+    type RegisterAdopterAuthSignupResult,
+    type RegisterBreederAuthSignupCommand,
+    type RegisterBreederAuthSignupResult,
+} from '../types/auth-signup.type';
 
 @Injectable()
 export class CompleteSocialRegistrationUseCase {
@@ -21,13 +23,15 @@ export class CompleteSocialRegistrationUseCase {
         private readonly registerBreederUseCase: RegisterBreederAuthSignupPort,
     ) {}
 
-    async execute(dto: SocialCompleteRequestDto): Promise<RegisterAdopterResponseDto | RegisterBreederResponseDto> {
+    async execute(
+        dto: CompleteSocialRegistrationCommand,
+    ): Promise<RegisterAdopterAuthSignupResult | RegisterBreederAuthSignupResult> {
         if (dto.role === 'adopter') {
             if (!dto.nickname) {
                 throw new BadRequestException('입양자 회원가입 시 닉네임은 필수입니다.');
             }
 
-            const adopterDto: RegisterAdopterRequestDto = {
+            const adopterDto: RegisterAdopterAuthSignupCommand = {
                 tempId: dto.tempId,
                 email: dto.email,
                 nickname: dto.nickname,
@@ -61,7 +65,7 @@ export class CompleteSocialRegistrationUseCase {
                 throw new BadRequestException('브리더 회원가입 시 레벨은 필수입니다.');
             }
 
-            const breederDto: RegisterBreederRequestDto = {
+            const breederDto: RegisterBreederAuthSignupCommand = {
                 tempId: dto.tempId,
                 provider: dto.provider,
                 email: dto.email,

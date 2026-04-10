@@ -2,11 +2,10 @@ import { BadRequestException, ConflictException, Inject, Injectable } from '@nes
 
 import { UserStatus } from '../../../../common/enum/user.enum';
 import { AuthMapper } from '../../mapper/auth.mapper';
-import { RegisterAdopterRequestDto } from '../../dto/request/register-adopter-request.dto';
-import { RegisterAdopterResponseDto } from '../../dto/response/register-adopter-response.dto';
 import { AuthRegistrationPort } from '../ports/auth-registration.port';
 import { AuthRegistrationNotificationPort } from '../ports/auth-registration-notification.port';
 import { AuthTokenPort } from '../ports/auth-token.port';
+import { type RegisterAdopterAuthSignupCommand, type RegisterAdopterAuthSignupResult } from '../types/auth-signup.type';
 import { AuthSocialIdentityService } from '../../domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from '../../domain/services/auth-stored-file-name.service';
 
@@ -23,7 +22,7 @@ export class RegisterAdopterUseCase {
         private readonly authStoredFileNameService: AuthStoredFileNameService,
     ) {}
 
-    async execute(dto: RegisterAdopterRequestDto): Promise<RegisterAdopterResponseDto> {
+    async execute(dto: RegisterAdopterAuthSignupCommand): Promise<RegisterAdopterAuthSignupResult> {
         const { provider, providerId } = this.authSocialIdentityService.parseRequiredTempId(dto.tempId);
 
         const existingAdopter = await this.authRegistrationPort.findAdopterBySocialAuth(provider, providerId);

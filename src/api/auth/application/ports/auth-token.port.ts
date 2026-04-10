@@ -1,5 +1,5 @@
-import { TokenResponseDto } from '../../dto/response/token-response.dto';
 import { type AuthSessionRole } from './auth-session.port';
+import { type AuthTokenSet } from '../types/auth-token-set.type';
 
 export type AuthRefreshTokenPayload = {
     sub: string;
@@ -9,7 +9,7 @@ export type AuthRefreshTokenPayload = {
 };
 
 export abstract class AuthTokenPort {
-    abstract generateTokens(userId: string, email: string, role: AuthSessionRole): TokenResponseDto;
+    abstract generateTokens(userId: string, email: string, role: AuthSessionRole): AuthTokenSet;
 
     abstract verifyRefreshToken(refreshToken: string): AuthRefreshTokenPayload;
 
