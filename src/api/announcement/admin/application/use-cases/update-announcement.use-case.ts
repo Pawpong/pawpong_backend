@@ -2,10 +2,10 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { AnnouncementResponseDto } from '../../../dto/response/announcement-response.dto';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
 import { ANNOUNCEMENT_WRITER, type AnnouncementWriterPort } from '../ports/announcement-writer.port';
 import type { AnnouncementUpdateCommand } from '../types/announcement-command.type';
+import type { AnnouncementResult } from '../../../application/types/announcement-result.type';
 
 @Injectable()
 export class UpdateAnnouncementUseCase {
@@ -19,7 +19,7 @@ export class UpdateAnnouncementUseCase {
     async execute(
         announcementId: string,
         updateDto: AnnouncementUpdateCommand,
-    ): Promise<AnnouncementResponseDto> {
+    ): Promise<AnnouncementResult> {
         this.logger.logStart('updateAnnouncement', '공지사항 수정', {
             announcementId,
             ...updateDto,
