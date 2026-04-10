@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
-import { BannerCreateRequestDto } from '../dto/request/banner-create-request.dto';
-import { BannerUpdateRequestDto } from '../dto/request/banner-update-request.dto';
-import { FaqCreateRequestDto } from '../dto/request/faq-create-request.dto';
-import { FaqUpdateRequestDto } from '../dto/request/faq-update-request.dto';
 import { HomeAdminManagerPort } from '../application/ports/home-admin-manager.port';
 import { HomeBannerSnapshot, HomeFaqSnapshot } from '../../application/ports/home-content-reader.port';
 import { BannerRepository } from '../../repository/banner.repository';
 import { FaqRepository } from '../../repository/faq.repository';
+import type {
+    HomeBannerCommand,
+    HomeBannerUpdateCommand,
+    HomeFaqCommand,
+    HomeFaqUpdateCommand,
+} from '../application/types/home-admin-command.type';
 
 @Injectable()
 export class HomeAdminMongooseManagerAdapter implements HomeAdminManagerPort {
@@ -21,12 +23,12 @@ export class HomeAdminMongooseManagerAdapter implements HomeAdminManagerPort {
         return banners.map((banner) => this.toBannerSnapshot(banner));
     }
 
-    async createBanner(data: BannerCreateRequestDto): Promise<HomeBannerSnapshot> {
+    async createBanner(data: HomeBannerCommand): Promise<HomeBannerSnapshot> {
         const banner = await this.bannerRepository.create(data);
         return this.toBannerSnapshot(banner);
     }
 
-    async updateBanner(bannerId: string, data: BannerUpdateRequestDto): Promise<HomeBannerSnapshot | null> {
+    async updateBanner(bannerId: string, data: HomeBannerUpdateCommand): Promise<HomeBannerSnapshot | null> {
         const banner = await this.bannerRepository.update(bannerId, data);
         return banner ? this.toBannerSnapshot(banner) : null;
     }
@@ -47,7 +49,7 @@ export class HomeAdminMongooseManagerAdapter implements HomeAdminManagerPort {
         }));
     }
 
-    async createFaq(data: FaqCreateRequestDto): Promise<HomeFaqSnapshot> {
+    async createFaq(data: HomeFaqCommand): Promise<HomeFaqSnapshot> {
         const faq = await this.faqRepository.create(data);
         return {
             id: faq._id.toString(),
@@ -59,7 +61,7 @@ export class HomeAdminMongooseManagerAdapter implements HomeAdminManagerPort {
         };
     }
 
-    async updateFaq(faqId: string, data: FaqUpdateRequestDto): Promise<HomeFaqSnapshot | null> {
+    async updateFaq(faqId: string, data: HomeFaqUpdateCommand): Promise<HomeFaqSnapshot | null> {
         const faq = await this.faqRepository.update(faqId, data);
         if (!faq) {
             return null;
