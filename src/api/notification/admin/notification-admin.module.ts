@@ -11,8 +11,6 @@ import { GetNotificationAdminStatsUseCase } from './application/use-cases/get-no
 import { NotificationAdminListPresentationService } from './domain/services/notification-admin-list-presentation.service';
 import { NotificationAdminPaginationAssemblerService } from './domain/services/notification-admin-pagination-assembler.service';
 import { NotificationAdminStatsPresentationService } from './domain/services/notification-admin-stats-presentation.service';
-import { NotificationListResponseMessageService } from '../domain/services/notification-list-response-message.service';
-import { NotificationStatsResponseMessageService } from '../domain/services/notification-stats-response-message.service';
 import { NotificationAdminMongooseReaderAdapter } from './infrastructure/notification-admin-mongoose-reader.adapter';
 import { NotificationAdminRepository } from './repository/notification-admin.repository';
 
@@ -32,8 +30,6 @@ import { Notification, NotificationSchema } from '../../../schema/notification.s
         NotificationAdminPaginationAssemblerService,
         NotificationAdminListPresentationService,
         NotificationAdminStatsPresentationService,
-        NotificationListResponseMessageService,
-        NotificationStatsResponseMessageService,
         NotificationAdminRepository,
         NotificationAdminMongooseReaderAdapter,
         {
