@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { NotificationStatsResponseDto } from '../../dto/response/notification-admin-response.dto';
 import { NOTIFICATION_ADMIN_READER } from '../ports/notification-admin-reader.port';
 import type { NotificationAdminReaderPort } from '../ports/notification-admin-reader.port';
 import { NotificationAdminStatsPresentationService } from '../../domain/services/notification-admin-stats-presentation.service';
+import type { NotificationAdminStatsResult } from '../types/notification-admin-result.type';
 
 @Injectable()
 export class GetNotificationAdminStatsUseCase {
@@ -15,7 +15,7 @@ export class GetNotificationAdminStatsUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(adminUserId: string): Promise<NotificationStatsResponseDto> {
+    async execute(adminUserId: string): Promise<NotificationAdminStatsResult> {
         this.logger.logStart('getStats', '관리자 알림 통계 조회 시작', { adminUserId });
 
         try {

@@ -24,6 +24,9 @@ export class NotificationListController {
         @Query() filter: NotificationListRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<NotificationResponseDto>>> {
         const result = await this.getNotificationsUseCase.execute(userId, filter);
-        return ApiResponseDto.success(result, this.notificationListResponseMessageService.notificationsListed());
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            this.notificationListResponseMessageService.notificationsListed(),
+        );
     }
 }

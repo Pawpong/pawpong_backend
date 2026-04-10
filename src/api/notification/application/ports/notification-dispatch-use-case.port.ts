@@ -1,7 +1,7 @@
 import { NotificationCreateData, EmailData } from '../../builder/notification.builder';
-import { NotificationResponseDto } from '../../dto/response/notification-response.dto';
 import { Notification, NotificationType } from '../../../../schema/notification.schema';
 import { NotificationUserRole } from './notification-command.port';
+import type { NotificationItemResult } from '../types/notification-result.type';
 
 export const CREATE_NOTIFICATION_DISPATCH_USE_CASE = Symbol('CREATE_NOTIFICATION_DISPATCH_USE_CASE');
 export const CREATE_NOTIFICATION_FROM_BUILDER_DISPATCH_USE_CASE = Symbol(
@@ -20,7 +20,7 @@ export interface CreateNotificationDispatchUseCasePort {
 }
 
 export interface CreateNotificationFromBuilderDispatchUseCasePort {
-    execute(data: NotificationCreateData): Promise<NotificationResponseDto>;
+    execute(data: NotificationCreateData): Promise<NotificationItemResult>;
 }
 
 export interface SendNotificationEmailDispatchUseCasePort {
