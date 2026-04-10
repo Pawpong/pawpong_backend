@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { AUTH_PHONE_VERIFICATION_STORE_PORT } from '../ports/auth-phone-verification-store.port';
 import type { AuthPhoneVerificationStorePort } from '../ports/auth-phone-verification-store.port';
-import { PhoneVerificationResponseDto } from '../../dto/response/phone-verification-response.dto';
+import { type PhoneVerificationResult } from '../types/auth-response.type';
 import { AuthPhoneVerificationResponseFactoryService } from '../../domain/services/auth-phone-verification-response-factory.service';
 import { AuthPhoneVerificationPolicyService } from '../../domain/services/auth-phone-verification-policy.service';
 
@@ -15,7 +15,7 @@ export class VerifyPhoneVerificationCodeUseCase {
         private readonly authPhoneVerificationResponseFactoryService: AuthPhoneVerificationResponseFactoryService,
     ) {}
 
-    execute(phone: string, code: string): PhoneVerificationResponseDto {
+    execute(phone: string, code: string): PhoneVerificationResult {
         const normalizedPhone = this.authPhoneVerificationPolicyService.normalizePhoneNumber(phone);
         const verification = this.authPhoneVerificationStorePort.get(normalizedPhone);
 

@@ -4,7 +4,7 @@ import { BreederPlan, UserStatus, VerificationStatus } from '../../../../common/
 import { AuthMapper } from '../../mapper/auth.mapper';
 import { AuthRegistrationPort } from '../ports/auth-registration.port';
 import { AuthTokenPort } from '../ports/auth-token.port';
-import { AuthResponseDto } from '../../dto/response/auth-response.dto';
+import { type AuthResult } from '../types/auth-response.type';
 import { AuthRegistrationResponseMessageService } from '../../domain/services/auth-registration-response-message.service';
 
 type LegacySocialProfile = {
@@ -39,7 +39,7 @@ export class CompleteLegacySocialRegistrationUseCase {
         private readonly authRegistrationResponseMessageService: AuthRegistrationResponseMessageService,
     ) {}
 
-    async execute(profile: LegacySocialProfile, additionalInfo: LegacySocialAdditionalInfo): Promise<AuthResponseDto> {
+    async execute(profile: LegacySocialProfile, additionalInfo: LegacySocialAdditionalInfo): Promise<AuthResult> {
         if (additionalInfo.role === 'adopter') {
             const existingNickname = await this.authRegistrationPort.findAdopterByNickname(additionalInfo.nickname!);
             if (existingNickname) {
