@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { InquiryListResponseDto } from '../../dto/response/inquiry-list-response.dto';
 import { InquiryViewService } from '../../domain/services/inquiry-view.service';
 import { INQUIRY_ASSET_URL, type InquiryAssetUrlPort } from '../ports/inquiry-asset-url.port';
 import { INQUIRY_READER, type InquiryAnimalType, type InquiryReaderPort } from '../ports/inquiry-reader.port';
+import type { InquiryListResult } from '../types/inquiry-result.type';
 
 @Injectable()
 export class GetInquiryListUseCase {
@@ -20,7 +20,7 @@ export class GetInquiryListUseCase {
         limit: number = 15,
         animalType?: InquiryAnimalType,
         sort: string = 'latest_answer',
-    ): Promise<InquiryListResponseDto> {
+    ): Promise<InquiryListResult> {
         const skip = (page - 1) * limit;
         const inquiries = await this.inquiryReader.readPublicList({
             animalType,

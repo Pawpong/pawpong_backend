@@ -1,11 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
-import {
-    InquiryListResponseDto,
-    InquiryListItemDto,
-    LatestAnswerDto,
-} from '../../dto/response/inquiry-list-response.dto';
-import { InquiryAnswerDto, InquiryDetailResponseDto } from '../../dto/response/inquiry-detail-response.dto';
+import type {
+    InquiryAnswerResult,
+    InquiryDetailResult,
+    InquiryLatestAnswerResult,
+    InquiryListItemResult,
+    InquiryListResult,
+} from '../../application/types/inquiry-result.type';
 import { InquiryListSnapshot } from '../../application/ports/inquiry-reader.port';
 
 type SignedUrlGenerator = (fileName: string, expirationMinutes?: number) => string;
@@ -16,7 +17,7 @@ export class InquiryViewService {
         inquiries: InquiryListSnapshot[],
         limit: number,
         generateSignedUrl: SignedUrlGenerator,
-    ): InquiryListResponseDto {
+    ): InquiryListResult {
         const hasMore = inquiries.length > limit;
         const pagedItems = hasMore ? inquiries.slice(0, limit) : inquiries;
         const data = pagedItems.map((inquiry) => this.toListItem(inquiry, generateSignedUrl));
@@ -28,8 +29,8 @@ export class InquiryViewService {
         inquiry: InquiryListSnapshot,
         userId: string | undefined,
         generateSignedUrl: SignedUrlGenerator,
-    ): InquiryDetailResponseDto {
-        const answers: InquiryAnswerDto[] = inquiry.answers.map((answer) => ({
+    ): InquiryDetailResult {
+        const answers: InquiryAnswerResult[] = inquiry.answers.map((answer) => ({
             id: answer.id,
             breederName: answer.breederName,
             answeredAt: this.formatDetailDate(answer.answeredAt),
@@ -77,8 +78,8 @@ export class InquiryViewService {
         }
     }
 
-    private toListItem(inquiry: InquiryListSnapshot, generateSignedUrl: SignedUrlGenerator): InquiryListItemDto {
-        let latestAnswer: LatestAnswerDto | undefined;
+    private toListItem(inquiry: InquiryListSnapshot, generateSignedUrl: SignedUrlGenerator): InquiryListItemResult {
+        let latestAnswer: InquiryLatestAnswerResult | undefined;
 
         if (inquiry.answers.length > 0) {
             const latest = inquiry.answers[inquiry.answers.length - 1];
