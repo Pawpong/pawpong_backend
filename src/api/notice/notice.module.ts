@@ -9,10 +9,11 @@ import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.us
 import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
 import { NoticePaginationAssemblerService } from './domain/services/notice-pagination-assembler.service';
 import { NoticePresentationService } from './domain/services/notice-presentation.service';
-import { NoticeCommandResponseMessageService } from './domain/services/notice-command-response-message.service';
+import { NoticeDeleteResponseMessageService } from './domain/services/notice-delete-response-message.service';
 import { NoticeMongooseReaderAdapter } from './infrastructure/notice-mongoose-reader.adapter';
 import { NOTICE_READER } from './application/ports/notice-reader.port';
 import { NoticeQueryResponseMessageService } from './domain/services/notice-query-response-message.service';
+import { NoticeWriteResponseMessageService } from './domain/services/notice-write-response-message.service';
 import { CreateNoticeUseCase } from './admin/application/use-cases/create-notice.use-case';
 import { UpdateNoticeUseCase } from './admin/application/use-cases/update-notice.use-case';
 import { DeleteNoticeUseCase } from './admin/application/use-cases/delete-notice.use-case';
@@ -34,7 +35,8 @@ import { NoticeRepository } from './repository/notice.repository';
         NoticePaginationAssemblerService,
         NoticePresentationService,
         NoticeQueryResponseMessageService,
-        NoticeCommandResponseMessageService,
+        NoticeWriteResponseMessageService,
+        NoticeDeleteResponseMessageService,
         NoticeRepository,
         NoticeMongooseReaderAdapter,
         CreateNoticeUseCase,
