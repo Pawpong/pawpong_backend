@@ -1,5 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
-
 import { ApplicationStatus } from '../../../../../common/enum/user.enum';
 import { AdopterAdminApplicationDetailPresentationService } from '../../domain/services/adopter-admin-application-detail-presentation.service';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
@@ -48,7 +46,7 @@ describe('입양자 관리자 입양 신청 상세 조회 유스케이스', () =
         });
     });
 
-    it('잘못된 ID 형식은 예외을 던진다', async () => {
+    it('존재하지 않는 신청은 예외를 던진다', async () => {
         const useCase = new GetAdopterAdminApplicationDetailUseCase(
             {
                 findAdminById: jest.fn().mockResolvedValue({
@@ -66,6 +64,8 @@ describe('입양자 관리자 입양 신청 상세 조회 유스케이스', () =
             new AdopterAdminApplicationDetailPresentationService(),
         );
 
-        await expect(useCase.execute('admin-1', 'invalid-id')).rejects.toBeInstanceOf(BadRequestException);
+        await expect(useCase.execute('admin-1', '507f1f77bcf86cd799439011')).rejects.toThrow(
+            '해당 입양 신청을 찾을 수 없습니다.',
+        );
     });
 });

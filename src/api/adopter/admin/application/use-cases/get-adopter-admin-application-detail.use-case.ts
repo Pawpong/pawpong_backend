@@ -18,7 +18,6 @@ export class GetAdopterAdminApplicationDetailUseCase {
     async execute(adminId: string, applicationId: string): Promise<AdopterAdminApplicationDetailResult> {
         const admin = await this.adopterAdminReader.findAdminById(adminId);
         this.adopterAdminPolicyService.assertCanViewStatistics(admin);
-        this.adopterAdminPolicyService.assertApplicationIdFormat(applicationId);
 
         const application = await this.adopterAdminReader.findApplicationDetail(applicationId);
         const snapshot = this.adopterAdminPolicyService.assertApplicationExists(application);
