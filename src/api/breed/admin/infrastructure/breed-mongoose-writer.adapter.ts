@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { Breed } from '../../../../schema/breed.schema';
 import { BreedAdminSnapshot } from '../application/ports/breed-admin-reader.port';
 import { BreedWriterPort } from '../application/ports/breed-writer.port';
 import { type CreateBreedCommand, type UpdateBreedCommand } from '../application/types/breed-command.type';
@@ -23,7 +24,7 @@ export class BreedMongooseWriterAdapter implements BreedWriterPort {
         return this.breedRepository.deleteById(id);
     }
 
-    private toSnapshot(breed: any): BreedAdminSnapshot {
+    private toSnapshot(breed: Breed): BreedAdminSnapshot {
         return {
             id: breed._id.toString(),
             petType: breed.petType,
