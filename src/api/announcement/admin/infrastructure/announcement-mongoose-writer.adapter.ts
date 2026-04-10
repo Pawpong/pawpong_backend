@@ -2,23 +2,22 @@ import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
 import { AnnouncementPublicItem } from '../../application/ports/announcement-public-reader.port';
-import { AnnouncementCreateRequestDto } from '../../dto/request/announcement-create-request.dto';
-import { AnnouncementUpdateRequestDto } from '../../dto/request/announcement-update-request.dto';
 import { AnnouncementWriterPort } from '../application/ports/announcement-writer.port';
 import { AnnouncementRepository } from '../../repository/announcement.repository';
+import type { AnnouncementCreateCommand, AnnouncementUpdateCommand } from '../application/types/announcement-command.type';
 
 @Injectable()
 export class AnnouncementMongooseWriterAdapter implements AnnouncementWriterPort {
     constructor(private readonly announcementRepository: AnnouncementRepository) {}
 
-    async create(createData: AnnouncementCreateRequestDto): Promise<AnnouncementPublicItem> {
+    async create(createData: AnnouncementCreateCommand): Promise<AnnouncementPublicItem> {
         const announcement = await this.announcementRepository.create(createData);
         return this.toItem(announcement);
     }
 
     async update(
         announcementId: string,
-        updateData: AnnouncementUpdateRequestDto,
+        updateData: AnnouncementUpdateCommand,
     ): Promise<AnnouncementPublicItem | null> {
         if (!Types.ObjectId.isValid(announcementId)) {
             return null;
