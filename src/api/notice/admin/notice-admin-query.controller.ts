@@ -8,7 +8,7 @@ import { GetNoticeDetailUseCase } from '../application/use-cases/get-notice-deta
 import { GetNoticeListUseCase } from '../application/use-cases/get-notice-list.use-case';
 import { NoticeStatus } from '../application/ports/notice-reader.port';
 import { NoticeAdminProtectedController } from './decorator/notice-admin-controller.decorator';
-import { NoticeQueryResponseMessageService } from '../domain/services/notice-query-response-message.service';
+import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../constants/notice-response-messages';
 import { NoticeResponseDto } from '../dto/response/notice-response.dto';
 import {
     ApiGetNoticeDetailAdminEndpoint,
@@ -20,7 +20,6 @@ export class NoticeAdminQueryController {
     constructor(
         private readonly getNoticeListUseCase: GetNoticeListUseCase,
         private readonly getNoticeDetailUseCase: GetNoticeDetailUseCase,
-        private readonly noticeQueryResponseMessageService: NoticeQueryResponseMessageService,
     ) {}
 
     @Get()
@@ -32,7 +31,7 @@ export class NoticeAdminQueryController {
         const result = await this.getNoticeListUseCase.execute(paginationData, status as NoticeStatus | undefined);
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result),
-            this.noticeQueryResponseMessageService.noticeListRetrieved(),
+            NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeListRetrieved,
         );
     }
 
@@ -42,6 +41,6 @@ export class NoticeAdminQueryController {
         @Param('noticeId', new MongoObjectIdPipe('공지', '올바르지 않은 공지 ID 형식입니다.')) noticeId: string,
     ): Promise<ApiResponseDto<NoticeResponseDto>> {
         const result = await this.getNoticeDetailUseCase.execute(noticeId, false);
-        return ApiResponseDto.success(result, this.noticeQueryResponseMessageService.noticeDetailRetrieved());
+        return ApiResponseDto.success(result, NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeDetailRetrieved);
     }
 }

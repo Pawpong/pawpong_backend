@@ -7,7 +7,7 @@ import { MongoObjectIdPipe } from '../../common/pipe/mongo-object-id.pipe';
 import { NoticeResponseDto } from './dto/response/notice-response.dto';
 import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';
 import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
-import { NoticeQueryResponseMessageService } from './domain/services/notice-query-response-message.service';
+import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from './constants/notice-response-messages';
 import { ApiGetNoticeDetailEndpoint, ApiGetNoticeListEndpoint, ApiNoticeController } from './swagger';
 
 /**
@@ -20,7 +20,6 @@ export class NoticeController {
     constructor(
         private readonly getNoticeListUseCase: GetNoticeListUseCase,
         private readonly getNoticeDetailUseCase: GetNoticeDetailUseCase,
-        private readonly noticeQueryResponseMessageService: NoticeQueryResponseMessageService,
     ) {}
 
     /**
@@ -34,7 +33,7 @@ export class NoticeController {
         const result = await this.getNoticeListUseCase.execute(paginationData, 'published');
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result),
-            this.noticeQueryResponseMessageService.noticeListRetrieved(),
+            NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeListRetrieved,
         );
     }
 
@@ -47,6 +46,6 @@ export class NoticeController {
         @Param('noticeId', new MongoObjectIdPipe('공지사항')) noticeId: string,
     ): Promise<ApiResponseDto<NoticeResponseDto>> {
         const result = await this.getNoticeDetailUseCase.execute(noticeId, true);
-        return ApiResponseDto.success(result, this.noticeQueryResponseMessageService.noticeDetailRetrieved());
+        return ApiResponseDto.success(result, NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeDetailRetrieved);
     }
 }
