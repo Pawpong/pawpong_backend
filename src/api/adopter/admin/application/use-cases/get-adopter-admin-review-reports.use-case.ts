@@ -17,14 +17,12 @@ export class GetAdopterAdminReviewReportsUseCase {
 
     async execute(
         adminId: string,
-        pageStr: string = '1',
-        limitStr: string = '10',
+        page: number = 1,
+        limit: number = 10,
     ): Promise<AdopterAdminReviewReportPageResult> {
         const admin = await this.adopterAdminReader.findAdminById(adminId);
         this.adopterAdminPolicyService.assertCanManageReports(admin);
 
-        const page = parseInt(pageStr, 10) || 1;
-        const limit = parseInt(limitStr, 10) || 10;
         const snapshot = await this.adopterAdminReader.findReportedReviews(page, limit);
 
         return this.adopterAdminReviewReportPresentationService.toReviewReportsPage(snapshot);
