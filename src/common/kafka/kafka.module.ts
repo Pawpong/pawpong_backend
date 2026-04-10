@@ -22,6 +22,7 @@ import { KafkaService } from './kafka.service';
                             clientId: 'pawpong-backend',
                             brokers: [configService.get<string>('KAFKA_BROKER', 'kafka:29092')],
                             connectionTimeout: 10000,
+                            requestTimeout: 30000,
                             retry: {
                                 initialRetryTime: 100,
                                 retries: 8,
