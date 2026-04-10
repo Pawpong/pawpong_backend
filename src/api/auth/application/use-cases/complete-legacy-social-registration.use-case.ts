@@ -1,11 +1,11 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 
 import { BreederPlan, UserStatus, VerificationStatus } from '../../../../common/enum/user.enum';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
 import { AuthMapper } from '../../mapper/auth.mapper';
 import { AuthRegistrationPort } from '../ports/auth-registration.port';
 import { AuthTokenPort } from '../ports/auth-token.port';
 import { type AuthResult } from '../types/auth-response.type';
-import { AuthRegistrationResponseMessageService } from '../../domain/services/auth-registration-response-message.service';
 
 type LegacySocialProfile = {
     provider: string;
@@ -36,7 +36,6 @@ export class CompleteLegacySocialRegistrationUseCase {
         private readonly authRegistrationPort: AuthRegistrationPort,
         @Inject(AuthTokenPort)
         private readonly authTokenPort: AuthTokenPort,
-        private readonly authRegistrationResponseMessageService: AuthRegistrationResponseMessageService,
     ) {}
 
     async execute(profile: LegacySocialProfile, additionalInfo: LegacySocialAdditionalInfo): Promise<AuthResult> {
@@ -78,7 +77,7 @@ export class CompleteLegacySocialRegistrationUseCase {
                 savedAdopter,
                 tokens,
                 'adopter',
-                this.authRegistrationResponseMessageService.getSocialRegistrationCompleted(),
+                AUTH_RESPONSE_MESSAGE_EXAMPLES.socialRegistrationCompleted,
             );
         }
 
@@ -146,7 +145,7 @@ export class CompleteLegacySocialRegistrationUseCase {
             savedBreeder,
             tokens,
             'breeder',
-            this.authRegistrationResponseMessageService.getSocialRegistrationCompleted(),
+            AUTH_RESPONSE_MESSAGE_EXAMPLES.socialRegistrationCompleted,
         );
     }
 }

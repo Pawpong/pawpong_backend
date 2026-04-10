@@ -1,7 +1,6 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
 import { CompleteLegacySocialRegistrationUseCase } from './complete-legacy-social-registration.use-case';
-import { AuthRegistrationResponseMessageService } from '../../domain/services/auth-registration-response-message.service';
 
 describe('레거시 소셜 가입 완료 유스케이스', () => {
     const authRegistrationPort = {
@@ -24,7 +23,6 @@ describe('레거시 소셜 가입 완료 유스케이스', () => {
     const useCase = new CompleteLegacySocialRegistrationUseCase(
         authRegistrationPort as any,
         authTokenService as any,
-        new AuthRegistrationResponseMessageService(),
     );
 
     beforeEach(() => {

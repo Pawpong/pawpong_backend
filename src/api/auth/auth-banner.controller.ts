@@ -1,8 +1,8 @@
 import { Get, HttpCode, HttpStatus, Inject } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from './constants/auth-response-messages';
 import { AuthPublicController } from './decorator/auth-public-controller.decorator';
-import { AuthBannerResponseMessageService } from './domain/services/auth-banner-response-message.service';
 import { ProfileBannerResponseDto } from '../breeder-management/admin/dto/response/profile-banner-response.dto';
 import {
     GET_ACTIVE_PROFILE_BANNERS_QUERY,
@@ -15,7 +15,6 @@ export class AuthBannerController {
     constructor(
         @Inject(GET_ACTIVE_PROFILE_BANNERS_QUERY)
         private readonly getActiveProfileBannersQuery: GetActiveProfileBannersQueryPort,
-        private readonly authBannerResponseMessageService: AuthBannerResponseMessageService,
     ) {}
 
     @Get('login-banners')
@@ -23,7 +22,7 @@ export class AuthBannerController {
     @ApiGetLoginBannersEndpoint()
     async getLoginBanners(): Promise<ApiResponseDto<ProfileBannerResponseDto[]>> {
         const banners = await this.getActiveProfileBannersQuery.execute('login');
-        return ApiResponseDto.success(banners, this.authBannerResponseMessageService.getBannerListed('login'));
+        return ApiResponseDto.success(banners, AUTH_RESPONSE_MESSAGE_EXAMPLES.loginBannersListed);
     }
 
     @Get('register-banners')
@@ -31,6 +30,6 @@ export class AuthBannerController {
     @ApiGetRegisterBannersEndpoint()
     async getRegisterBanners(): Promise<ApiResponseDto<ProfileBannerResponseDto[]>> {
         const banners = await this.getActiveProfileBannersQuery.execute('signup');
-        return ApiResponseDto.success(banners, this.authBannerResponseMessageService.getBannerListed('signup'));
+        return ApiResponseDto.success(banners, AUTH_RESPONSE_MESSAGE_EXAMPLES.registerBannersListed);
     }
 }

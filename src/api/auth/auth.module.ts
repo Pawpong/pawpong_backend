@@ -105,10 +105,6 @@ import { AuthPhoneVerificationPolicyService } from './domain/services/auth-phone
 import { AuthPhoneVerificationResponseFactoryService } from './domain/services/auth-phone-verification-response-factory.service';
 import { AuthLogoutResponseFactoryService } from './domain/services/auth-logout-response-factory.service';
 import { AuthDuplicateCheckResponseMessageService } from './domain/services/auth-duplicate-check-response-message.service';
-import { AuthSocialUserResponseMessageService } from './domain/services/auth-social-user-response-message.service';
-import { AuthBannerResponseMessageService } from './domain/services/auth-banner-response-message.service';
-import { AuthRegistrationResponseMessageService } from './domain/services/auth-registration-response-message.service';
-import { AuthSessionResponseMessageService } from './domain/services/auth-session-response-message.service';
 import { AuthHttpCookieService } from './domain/services/auth-http-cookie.service';
 import { AuthSocialHttpFlowService } from './domain/services/auth-social-http-flow.service';
 import { AuthUploadPresentationService } from './domain/services/auth-upload-presentation.service';
@@ -220,10 +216,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthPhoneVerificationResponseFactoryService,
         AuthLogoutResponseFactoryService,
         AuthDuplicateCheckResponseMessageService,
-        AuthSocialUserResponseMessageService,
-        AuthBannerResponseMessageService,
-        AuthRegistrationResponseMessageService,
-        AuthSessionResponseMessageService,
         AuthHttpCookieService,
         AuthSocialHttpFlowService,
         AuthUploadPresentationService,
