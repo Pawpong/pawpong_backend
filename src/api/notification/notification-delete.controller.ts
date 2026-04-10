@@ -4,14 +4,14 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { DeleteNotificationUseCase } from './application/use-cases/delete-notification.use-case';
 import { NotificationProtectedController } from './decorator/notification-controller.decorator';
-import { NotificationCommandResponseMessageService } from './domain/services/notification-command-response-message.service';
+import { NotificationDeleteResponseMessageService } from './domain/services/notification-delete-response-message.service';
 import { ApiDeleteNotificationEndpoint } from './swagger';
 
 @NotificationProtectedController()
 export class NotificationDeleteController {
     constructor(
         private readonly deleteNotificationUseCase: DeleteNotificationUseCase,
-        private readonly notificationCommandResponseMessageService: NotificationCommandResponseMessageService,
+        private readonly notificationDeleteResponseMessageService: NotificationDeleteResponseMessageService,
     ) {}
 
     @Delete(':id')
@@ -21,6 +21,6 @@ export class NotificationDeleteController {
         @CurrentUser('userId') userId: string,
     ): Promise<ApiResponseDto<null>> {
         await this.deleteNotificationUseCase.execute(userId, notificationId);
-        return ApiResponseDto.success(null, this.notificationCommandResponseMessageService.notificationDeleted());
+        return ApiResponseDto.success(null, this.notificationDeleteResponseMessageService.notificationDeleted());
     }
 }
