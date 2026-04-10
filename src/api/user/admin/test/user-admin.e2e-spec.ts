@@ -250,6 +250,34 @@ describe('사용자 관리자 종단간 테스트', () => {
             console.log('사유 없이 상태 변경 검증 완료');
         });
 
+        it('잘못된 사용자 ID 형식이면 400 에러', async () => {
+            const response = await request(app.getHttpServer())
+                .patch('/api/user-admin/users/not-a-mongo-id/status?role=adopter')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    accountStatus: 'suspended',
+                    actionReason: '형식 검증 테스트',
+                })
+                .expect(400);
+
+            expect(response.body.message || response.body.error).toContain('올바르지 않은 사용자 ID 형식');
+            console.log('잘못된 사용자 ID 형식 400 확인');
+        });
+
+        it('잘못된 role이면 400 에러', async () => {
+            const response = await request(app.getHttpServer())
+                .patch(`/api/user-admin/users/${testAdopterId}/status?role=invalid`)
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({
+                    accountStatus: 'suspended',
+                    actionReason: '형식 검증 테스트',
+                })
+                .expect(400);
+
+            expect(response.body.message || response.body.error).toBeDefined();
+            console.log('잘못된 role 400 확인');
+        });
+
         it('인증 없이 접근 시 401 에러', async () => {
             const response = await request(app.getHttpServer())
                 .patch(`/api/user-admin/users/${testAdopterId}/status?role=adopter`)
