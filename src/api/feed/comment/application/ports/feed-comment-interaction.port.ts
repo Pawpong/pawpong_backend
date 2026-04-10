@@ -1,4 +1,9 @@
-import { CommentCreateResponseDto, CommentListResponseDto, CommentUpdateResponseDto, ReplyListResponseDto } from '../../dto/response/comment-response.dto';
+import type {
+    FeedCommentCreateResult,
+    FeedCommentListResult,
+    FeedCommentUpdateResult,
+    FeedReplyListResult,
+} from '../types/feed-comment-result.type';
 
 export const CREATE_FEED_VIDEO_COMMENT_USE_CASE = Symbol('CREATE_FEED_VIDEO_COMMENT_USE_CASE');
 export const GET_FEED_VIDEO_COMMENTS_USE_CASE = Symbol('GET_FEED_VIDEO_COMMENTS_USE_CASE');
@@ -13,19 +18,19 @@ export interface CreateFeedVideoCommentUseCasePort {
         userModel: 'Breeder' | 'Adopter',
         content: string,
         parentId?: string,
-    ): Promise<CommentCreateResponseDto>;
+    ): Promise<FeedCommentCreateResult>;
 }
 
 export interface GetFeedVideoCommentsUseCasePort {
-    execute(videoId: string, userId?: string, page?: number, limit?: number): Promise<CommentListResponseDto>;
+    execute(videoId: string, userId?: string, page?: number, limit?: number): Promise<FeedCommentListResult>;
 }
 
 export interface GetFeedVideoRepliesUseCasePort {
-    execute(commentId: string, userId?: string, page?: number, limit?: number): Promise<ReplyListResponseDto>;
+    execute(commentId: string, userId?: string, page?: number, limit?: number): Promise<FeedReplyListResult>;
 }
 
 export interface UpdateFeedVideoCommentUseCasePort {
-    execute(commentId: string, userId: string, content: string): Promise<CommentUpdateResponseDto>;
+    execute(commentId: string, userId: string, content: string): Promise<FeedCommentUpdateResult>;
 }
 
 export interface DeleteFeedVideoCommentUseCasePort {

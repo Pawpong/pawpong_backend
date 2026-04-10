@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
-import { UploadUrlResponseDto } from '../../dto/response/video-response.dto';
 import { FEED_VIDEO_COMMAND, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
 import { FEED_VIDEO_FILE_STORAGE, type FeedVideoFileStoragePort } from '../ports/feed-video-file-storage.port';
+import type { FeedVideoUploadUrlResult } from '../types/feed-video-result.type';
 
 @Injectable()
 export class GetUploadUrlUseCase {
@@ -20,7 +20,7 @@ export class GetUploadUrlUseCase {
         title: string,
         description?: string,
         tags?: string[],
-    ): Promise<UploadUrlResponseDto> {
+    ): Promise<FeedVideoUploadUrlResult> {
         const videoKey = `videos/raw/${randomUUID()}.mp4`;
         const uploadUrl = await this.feedVideoFileStorage.generatePresignedUploadUrl(videoKey, 600);
         const result = await this.feedVideoCommand.createPendingVideo({

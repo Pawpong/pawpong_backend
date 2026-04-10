@@ -4,6 +4,7 @@ import { CurrentActorType, type ActorType } from '../../../common/decorator/curr
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { CompleteUploadUseCase } from './application/use-cases/complete-upload.use-case';
 import { GetUploadUrlUseCase } from './application/use-cases/get-upload-url.use-case';
+import type { FeedVideoUploadUrlResult } from './application/types/feed-video-result.type';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
 import { UploadVideoRequestDto } from './dto/request/upload-video-request.dto';
 import { UploadCompleteResponseDto, UploadUrlResponseDto } from './dto/response/video-response.dto';
@@ -23,7 +24,13 @@ export class FeedVideoUploadController {
         @CurrentActorType() actorType: ActorType,
         @Body() dto: UploadVideoRequestDto,
     ): Promise<UploadUrlResponseDto> {
-        return this.getUploadUrlUseCase.execute(userId, actorType, dto.title, dto.description, dto.tags);
+        return (await this.getUploadUrlUseCase.execute(
+            userId,
+            actorType,
+            dto.title,
+            dto.description,
+            dto.tags,
+        )) as UploadUrlResponseDto & FeedVideoUploadUrlResult;
     }
 
     @Post('videos/:videoId/upload-complete')

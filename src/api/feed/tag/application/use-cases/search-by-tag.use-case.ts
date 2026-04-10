@@ -5,9 +5,9 @@ import type { Cache } from 'cache-manager';
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedTagPresentationService } from '../../domain/services/feed-tag-presentation.service';
 import { FeedTagQueryService } from '../../domain/services/feed-tag-query.service';
-import { TagSearchResponseDto } from '../../dto/response/tag-response.dto';
 import { FEED_TAG_ASSET_URL, type FeedTagAssetUrlPort } from '../ports/feed-tag-asset-url.port';
 import { FEED_TAG_READER, type FeedTagReaderPort } from '../ports/feed-tag-reader.port';
+import type { FeedTagSearchResult } from '../types/feed-tag-result.type';
 
 @Injectable()
 export class SearchByTagUseCase {
@@ -23,7 +23,7 @@ export class SearchByTagUseCase {
         private readonly feedCacheKeyService: FeedCacheKeyService,
     ) {}
 
-    async execute(tag: string, page: number = 1, limit: number = 20): Promise<TagSearchResponseDto> {
+    async execute(tag: string, page: number = 1, limit: number = 20): Promise<FeedTagSearchResult> {
         const cleanTag = this.feedTagQueryService.normalizeTag(tag);
 
         if (!cleanTag) {
@@ -31,7 +31,7 @@ export class SearchByTagUseCase {
         }
 
         const cacheKey = this.feedCacheKeyService.getTagSearchKey(cleanTag, page, limit);
-        const cached = await this.cacheManager.get<TagSearchResponseDto>(cacheKey);
+        const cached = await this.cacheManager.get<FeedTagSearchResult>(cacheKey);
         if (cached) {
             return cached;
         }

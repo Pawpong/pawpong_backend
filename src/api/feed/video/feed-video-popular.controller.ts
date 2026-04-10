@@ -1,6 +1,7 @@
 import { Get, Query } from '@nestjs/common';
 
 import { GetPopularVideosUseCase } from './application/use-cases/get-popular-videos.use-case';
+import type { FeedPopularVideoItemResult } from './application/types/feed-video-result.type';
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
 import { PopularVideoItemDto } from './dto/response/video-response.dto';
 import { ApiGetPopularFeedVideosEndpoint } from './swagger';
@@ -12,6 +13,8 @@ export class FeedVideoPopularController {
     @Get('videos/popular')
     @ApiGetPopularFeedVideosEndpoint()
     async getPopularVideos(@Query('limit') limit: number = 10): Promise<PopularVideoItemDto[]> {
-        return this.getPopularVideosUseCase.execute(Number(limit));
+        return (await this.getPopularVideosUseCase.execute(Number(limit))) as Array<
+            PopularVideoItemDto & FeedPopularVideoItemResult
+        >;
     }
 }

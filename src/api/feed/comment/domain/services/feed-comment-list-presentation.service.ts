@@ -5,6 +5,11 @@ import {
     FeedCommentReplyCountSnapshot,
     FeedCommentSnapshot,
 } from '../../application/ports/feed-comment-manager.port';
+import type {
+    FeedCommentAuthorResult,
+    FeedCommentListResult,
+    FeedReplyListResult,
+} from '../../application/types/feed-comment-result.type';
 
 @Injectable()
 export class FeedCommentListPresentationService {
@@ -15,7 +20,7 @@ export class FeedCommentListPresentationService {
         limit: number,
         replyCounts: FeedCommentReplyCountSnapshot[],
         userId?: string,
-    ) {
+    ): FeedCommentListResult {
         const replyCountMap = new Map(replyCounts.map((replyCount) => [replyCount.commentId, replyCount.count]));
 
         return {
@@ -33,7 +38,13 @@ export class FeedCommentListPresentationService {
         };
     }
 
-    buildReplyListResponse(replies: FeedCommentSnapshot[], totalCount: number, page: number, limit: number, userId?: string) {
+    buildReplyListResponse(
+        replies: FeedCommentSnapshot[],
+        totalCount: number,
+        page: number,
+        limit: number,
+        userId?: string,
+    ): FeedReplyListResult {
         return {
             replies: replies.map((reply) => ({
                 commentId: reply.id,
@@ -48,7 +59,7 @@ export class FeedCommentListPresentationService {
         };
     }
 
-    private toAuthorResponse(author: FeedCommentAuthorSnapshot | null): any {
+    private toAuthorResponse(author: FeedCommentAuthorSnapshot | null): FeedCommentAuthorResult | null {
         if (!author) {
             return null;
         }

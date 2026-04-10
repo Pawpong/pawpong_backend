@@ -1,8 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
-import { FeedResponseDto } from '../../dto/response/video-response.dto';
 import { FeedVideoCommandSnapshot } from '../../application/ports/feed-video-command.port';
 import { FeedVideoSnapshot, FeedVideoUploaderSnapshot } from '../../application/ports/feed-video-reader.port';
+import type {
+    FeedMyVideoListResult,
+    FeedPendingVideoMetaResult,
+    FeedPopularVideoItemResult,
+    FeedVideoFeedResult,
+    FeedVideoMetaResult,
+    FeedVideoUploaderResult,
+} from '../../application/types/feed-video-result.type';
 import { FeedVideoSummaryPresentationService } from '../../../domain/services/feed-video-summary-presentation.service';
 
 type SignedUrlResolver = (fileKey: string) => Promise<string>;
@@ -17,7 +24,7 @@ export class FeedVideoPresentationService {
         limit: number,
         totalCount: number,
         resolveSignedUrl: SignedUrlResolver,
-    ): Promise<FeedResponseDto> {
+    ): Promise<FeedVideoFeedResult> {
         const items = await Promise.all(
             videos.map(async (video) => ({
                 videoId: video.id,
@@ -37,7 +44,10 @@ export class FeedVideoPresentationService {
         };
     }
 
-    async buildPopularResponse(videos: FeedVideoSnapshot[], resolveSignedUrl: SignedUrlResolver): Promise<any[]> {
+    async buildPopularResponse(
+        videos: FeedVideoSnapshot[],
+        resolveSignedUrl: SignedUrlResolver,
+    ): Promise<FeedPopularVideoItemResult[]> {
         return Promise.all(
             videos.map(async (video) => ({
                 videoId: video.id,
@@ -56,7 +66,7 @@ export class FeedVideoPresentationService {
         limit: number,
         totalCount: number,
         resolveSignedUrl: SignedUrlResolver,
-    ): Promise<any> {
+    ): Promise<FeedMyVideoListResult> {
         const items = await Promise.all(
             videos.map(async (video) => ({
                 videoId: video.id,
@@ -77,7 +87,7 @@ export class FeedVideoPresentationService {
         };
     }
 
-    buildPendingMetaResponse(video: FeedVideoSnapshot): any {
+    buildPendingMetaResponse(video: FeedVideoSnapshot): FeedPendingVideoMetaResult {
         return {
             videoId: video.id,
             status: video.status,
@@ -86,7 +96,7 @@ export class FeedVideoPresentationService {
         };
     }
 
-    async buildMetaResponse(video: FeedVideoSnapshot, resolveSignedUrl: SignedUrlResolver): Promise<any> {
+    async buildMetaResponse(video: FeedVideoSnapshot, resolveSignedUrl: SignedUrlResolver): Promise<FeedVideoMetaResult> {
         return {
             videoId: video.id,
             title: video.title,
@@ -106,7 +116,7 @@ export class FeedVideoPresentationService {
         };
     }
 
-    private toUploaderResponse(uploader: FeedVideoUploaderSnapshot | null): any {
+    private toUploaderResponse(uploader: FeedVideoUploaderSnapshot | null): FeedVideoUploaderResult | null {
         return this.feedVideoSummaryPresentationService.toUploaderResponse(uploader);
     }
 }

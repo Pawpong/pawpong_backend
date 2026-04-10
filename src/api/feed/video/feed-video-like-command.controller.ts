@@ -6,6 +6,7 @@ import {
     TOGGLE_FEED_VIDEO_LIKE_USE_CASE,
     type ToggleFeedVideoLikeUseCasePort,
 } from '../like/application/ports/feed-like-interaction.port';
+import type { FeedLikeToggleResult } from '../like/application/types/feed-like-result.type';
 import { LikeToggleResponseDto } from '../like/dto/response/like-response.dto';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
 import { ApiToggleFeedVideoLikeEndpoint } from './swagger';
@@ -24,6 +25,7 @@ export class FeedVideoLikeCommandController {
         @CurrentUser('userId') userId: string,
         @CurrentActorType() actorType: ActorType,
     ): Promise<LikeToggleResponseDto> {
-        return this.toggleLikeUseCase.execute(videoId, userId, actorType);
+        return (await this.toggleLikeUseCase.execute(videoId, userId, actorType)) as
+            LikeToggleResponseDto & FeedLikeToggleResult;
     }
 }
