@@ -6,6 +6,7 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { BreederProfileResponseDto } from '../breeder/dto/response/breeder-profile-response.dto';
 import { GetBreederManagementProfileUseCase } from './application/use-cases/get-breeder-management-profile.use-case';
 import { UpdateBreederManagementProfileUseCase } from './application/use-cases/update-breeder-management-profile.use-case';
+import type { BreederManagementProfileResult } from './application/types/breeder-management-result.type';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { ProfileUpdateRequestDto } from './dto/request/profile-update-request.dto';
@@ -23,7 +24,10 @@ export class BreederManagementProfileInfoController {
     @ApiEndpoint(BreederManagementSwaggerDocs.profile)
     async getProfile(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<BreederProfileResponseDto>> {
         const result = await this.getBreederManagementProfileUseCase.execute(userId);
-        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileRetrieved);
+        return ApiResponseDto.success(
+            result as BreederProfileResponseDto & BreederManagementProfileResult,
+            BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileRetrieved,
+        );
     }
 
     @Patch('profile')

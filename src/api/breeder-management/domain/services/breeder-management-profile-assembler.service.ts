@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
-import { BreederProfileResponseDto } from '../../../breeder/dto/response/breeder-profile-response.dto';
 import type { BreederManagementFileUrlPort } from '../../application/ports/breeder-management-file-url.port';
 import type {
     BreederManagementAvailablePetRecord,
     BreederManagementBreederRecord,
     BreederManagementParentPetRecord,
 } from '../../application/ports/breeder-management-profile.port';
+import type { BreederManagementProfileResult } from '../../application/types/breeder-management-result.type';
 
 @Injectable()
 export class BreederManagementProfileAssemblerService {
@@ -15,7 +15,7 @@ export class BreederManagementProfileAssemblerService {
         parentPets: BreederManagementParentPetRecord[],
         availablePets: BreederManagementAvailablePetRecord[],
         fileUrlPort: BreederManagementFileUrlPort,
-    ): BreederProfileResponseDto {
+    ): BreederManagementProfileResult {
         const verificationWithSignedUrls = {
             ...breeder.verification,
             documents: (breeder.verification?.documents || []).map((document) => ({
@@ -82,6 +82,6 @@ export class BreederManagementProfileAssemblerService {
             applicationForm: breeder.applicationForm,
             statsInfo: breeder.stats,
             consultationAgreed: breeder.consultationAgreed ?? true,
-        } as unknown as BreederProfileResponseDto;
+        };
     }
 }

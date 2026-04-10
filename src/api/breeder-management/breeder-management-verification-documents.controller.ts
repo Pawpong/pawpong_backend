@@ -4,6 +4,7 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { UploadBreederManagementVerificationDocumentsUseCase } from './application/use-cases/upload-breeder-management-verification-documents.use-case';
+import type { BreederManagementUploadDocumentsResult } from './application/types/breeder-management-result.type';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
 import { UploadDocumentsRequestDto } from './dto/request/upload-documents-request.dto';
 import { UploadDocumentsResponseDto } from './dto/response/upload-documents-response.dto';
@@ -39,7 +40,7 @@ export class BreederManagementVerificationDocumentsController {
         );
 
         return ApiResponseDto.success(
-            result,
+            result as UploadDocumentsResponseDto & BreederManagementUploadDocumentsResult,
             `${dto.level} 레벨 브리더 인증 서류 ${result.count}개가 업로드되었습니다.`,
         );
     }

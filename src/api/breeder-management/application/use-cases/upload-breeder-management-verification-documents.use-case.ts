@@ -2,7 +2,6 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-profile.port';
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
-import { UploadDocumentsResponseDto, UploadedDocumentDto } from '../../dto/response/upload-documents-response.dto';
 import { BreederManagementVerificationDocumentStorePort } from '../ports/breeder-management-verification-document-store.port';
 import {
     BreederManagementVerificationDraftStorePort,
@@ -10,6 +9,10 @@ import {
 } from '../ports/breeder-management-verification-draft-store.port';
 import { BreederManagementVerificationOriginalFileNameService } from '../../domain/services/breeder-management-verification-original-file-name.service';
 import { BreederManagementVerificationDocumentPolicyService } from '../../domain/services/breeder-management-verification-document-policy.service';
+import type {
+    BreederManagementUploadDocumentsResult,
+    BreederManagementUploadedDocumentResult,
+} from '../types/breeder-management-result.type';
 
 @Injectable()
 export class UploadBreederManagementVerificationDocumentsUseCase {
@@ -27,7 +30,7 @@ export class UploadBreederManagementVerificationDocumentsUseCase {
         files: Express.Multer.File[],
         types: string[],
         level: 'new' | 'elite',
-    ): Promise<UploadDocumentsResponseDto> {
+    ): Promise<BreederManagementUploadDocumentsResult> {
         const breeder = await this.breederManagementProfilePort.findById(userId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
@@ -35,7 +38,7 @@ export class UploadBreederManagementVerificationDocumentsUseCase {
 
         this.breederManagementVerificationDocumentPolicyService.validateUploadRequest(files, types);
 
-        const uploadedDocuments: UploadedDocumentDto[] = [];
+        const uploadedDocuments: BreederManagementUploadedDocumentResult[] = [];
         const draftDocuments: BreederManagementVerificationDraftDocument[] = [];
 
         for (let index = 0; index < files.length; index += 1) {
@@ -64,6 +67,10 @@ export class UploadBreederManagementVerificationDocumentsUseCase {
 
         await this.breederManagementVerificationDraftStorePort.save(userId, draftDocuments);
 
-        return new UploadDocumentsResponseDto(uploadedDocuments.length, level, uploadedDocuments);
+        return {
+            count: uploadedDocuments.length,
+            level,
+            documents: uploadedDocuments,
+        };
     }
 }

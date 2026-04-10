@@ -1,12 +1,12 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { MyPetsListResponseDto } from '../../dto/response/my-pets-list-response.dto';
 import {
     BREEDER_MANAGEMENT_LIST_READER_PORT,
     type BreederManagementListReaderPort,
 } from '../ports/breeder-management-list-reader.port';
 import { BreederManagementMyPetMapperService } from '../../domain/services/breeder-management-my-pet-mapper.service';
 import { BreederManagementPaginationAssemblerService } from '../../domain/services/breeder-management-pagination-assembler.service';
+import type { BreederManagementMyPetsPageResult } from '../types/breeder-management-result.type';
 
 @Injectable()
 export class GetBreederManagementMyPetsUseCase {
@@ -23,7 +23,7 @@ export class GetBreederManagementMyPetsUseCase {
         includeInactive: boolean = false,
         page: number = 1,
         limit: number = 20,
-    ): Promise<MyPetsListResponseDto> {
+    ): Promise<BreederManagementMyPetsPageResult> {
         const breeder = await this.breederManagementListReaderPort.findBreederSummary(userId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
@@ -40,11 +40,12 @@ export class GetBreederManagementMyPetsUseCase {
         );
         const paginationResponse = this.breederManagementPaginationAssemblerService.toPage(items, page, limit, snapshot.total);
 
-        return Object.assign(paginationResponse, {
+        return {
+            ...paginationResponse,
             availableCount: snapshot.availableCount,
             reservedCount: snapshot.reservedCount,
             adoptedCount: snapshot.adoptedCount,
             inactiveCount: snapshot.inactiveCount,
-        }) as MyPetsListResponseDto;
+        };
     }
 }

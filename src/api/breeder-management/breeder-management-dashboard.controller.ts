@@ -5,6 +5,7 @@ import { ApiEndpoint } from '../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { BreederDashboardResponseDto } from '../breeder/dto/response/breeder-dashboard-response.dto';
 import { GetBreederManagementDashboardUseCase } from './application/use-cases/get-breeder-management-dashboard.use-case';
+import type { BreederManagementDashboardResult } from './application/types/breeder-management-result.type';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { BreederManagementSwaggerDocs } from './swagger';
@@ -17,6 +18,9 @@ export class BreederManagementDashboardController {
     @ApiEndpoint(BreederManagementSwaggerDocs.dashboard)
     async getDashboard(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<BreederDashboardResponseDto>> {
         const result = await this.getBreederManagementDashboardUseCase.execute(userId);
-        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.dashboardRetrieved);
+        return ApiResponseDto.success(
+            result as BreederDashboardResponseDto & BreederManagementDashboardResult,
+            BREEDER_MANAGEMENT_RESPONSE_MESSAGES.dashboardRetrieved,
+        );
     }
 }
