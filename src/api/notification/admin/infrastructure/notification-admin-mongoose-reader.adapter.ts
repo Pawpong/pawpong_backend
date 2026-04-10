@@ -1,4 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { FilterQuery } from 'mongoose';
+import { Notification } from '../../../../schema/notification.schema';
 import {
     NotificationAdminListFilterSnapshot,
     NotificationAdminPageSnapshot,
@@ -7,6 +9,7 @@ import {
     NotificationAdminStatsSnapshot,
 } from '../application/ports/notification-admin-reader.port';
 import { NotificationAdminRepository } from '../repository/notification-admin.repository';
+import type { NotificationDocumentRecord } from '../../types/notification-record.type';
 
 @Injectable()
 export class NotificationAdminMongooseReaderAdapter implements NotificationAdminReaderPort {
@@ -21,7 +24,7 @@ export class NotificationAdminMongooseReaderAdapter implements NotificationAdmin
         ]);
 
         return {
-            items: notifications.map((notification: any) => this.toRecord(notification)),
+            items: notifications.map((notification) => this.toRecord(notification)),
             totalItems,
         };
     }
@@ -42,8 +45,8 @@ export class NotificationAdminMongooseReaderAdapter implements NotificationAdmin
         };
     }
 
-    private buildQuery(filter: NotificationAdminListFilterSnapshot): Record<string, any> {
-        const query: Record<string, any> = {};
+    private buildQuery(filter: NotificationAdminListFilterSnapshot): FilterQuery<Notification> {
+        const query: FilterQuery<Notification> = {};
 
         if (filter.userId) {
             query.userId = filter.userId;
@@ -61,7 +64,7 @@ export class NotificationAdminMongooseReaderAdapter implements NotificationAdmin
         return query;
     }
 
-    private toRecord(notification: any): NotificationAdminRecordSnapshot {
+    private toRecord(notification: NotificationDocumentRecord): NotificationAdminRecordSnapshot {
         return {
             notificationId: notification._id.toString(),
             userId: notification.userId,

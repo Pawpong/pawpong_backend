@@ -1,15 +1,17 @@
 import { Injectable } from '@nestjs/common';
 
+import type { NotificationMetadata } from '../../../../schema/notification.schema';
 import { NotificationInboxRecord } from '../../application/ports/notification-inbox.port';
 import { NotificationPaginationAssemblerService } from './notification-pagination-assembler.service';
 import type { NotificationItemResult, NotificationPageResult } from '../../application/types/notification-result.type';
+import type { NotificationObjectIdLike } from '../../types/notification-record.type';
 
 type NotificationReadableRecord = {
-    _id: { toString(): string };
+    _id: NotificationObjectIdLike;
     type: NotificationInboxRecord['type'];
     title: string;
     body: string;
-    metadata?: Record<string, any>;
+    metadata?: NotificationMetadata;
     isRead: boolean;
     readAt?: Date;
     targetUrl?: string;

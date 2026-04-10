@@ -1,5 +1,5 @@
-import { NotificationType } from '../../../../schema/notification.schema';
-import { Notification } from '../../../../schema/notification.schema';
+import { NotificationType, Notification } from '../../../../schema/notification.schema';
+import type { NotificationMetadata } from '../../../../schema/notification.schema';
 
 export const NOTIFICATION_COMMAND_PORT = Symbol('NOTIFICATION_COMMAND_PORT');
 
@@ -11,7 +11,7 @@ export interface NotificationCreateCommand {
     type: NotificationType;
     title: string;
     body: string;
-    metadata?: Record<string, any>;
+    metadata?: NotificationMetadata;
     targetUrl?: string;
     isRead?: boolean;
 }

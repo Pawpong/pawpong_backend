@@ -1,13 +1,15 @@
 import { NotificationType } from '../../../../schema/notification.schema';
+import type { NotificationMetadata } from '../../../../schema/notification.schema';
+import type { NotificationObjectIdLike } from '../../types/notification-record.type';
 
 export const NOTIFICATION_INBOX_PORT = Symbol('NOTIFICATION_INBOX_PORT');
 
 export interface NotificationInboxRecord {
-    _id: { toString(): string };
+    _id: NotificationObjectIdLike;
     type: NotificationType;
     title: string;
     body: string;
-    metadata?: Record<string, any>;
+    metadata?: NotificationMetadata;
     isRead: boolean;
     readAt?: Date;
     targetUrl?: string;

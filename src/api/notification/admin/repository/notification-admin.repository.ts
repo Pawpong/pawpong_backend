@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 import { Notification } from '../../../../schema/notification.schema';
+import type { NotificationDocumentRecord, NotificationStatsAggregateRecord } from '../../types/notification-record.type';
 
 @Injectable()
 export class NotificationAdminRepository {
@@ -11,7 +12,7 @@ export class NotificationAdminRepository {
         private readonly notificationModel: Model<Notification>,
     ) {}
 
-    findPaged(query: Record<string, any>, page: number, limit: number) {
+    findPaged(query: FilterQuery<Notification>, page: number, limit: number): Promise<NotificationDocumentRecord[]> {
         const skip = (page - 1) * limit;
 
         return this.notificationModel
@@ -19,11 +20,11 @@ export class NotificationAdminRepository {
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
-            .lean()
+            .lean<NotificationDocumentRecord[]>()
             .exec();
     }
 
-    countDocuments(query: Record<string, any>): Promise<number> {
+    countDocuments(query: FilterQuery<Notification>): Promise<number> {
         return this.notificationModel.countDocuments(query).exec();
     }
 
@@ -35,8 +36,8 @@ export class NotificationAdminRepository {
         return this.notificationModel.countDocuments({ isRead: false }).exec();
     }
 
-    aggregateByType() {
-        return this.notificationModel.aggregate([
+    aggregateByType(): Promise<NotificationStatsAggregateRecord[]> {
+        return this.notificationModel.aggregate<NotificationStatsAggregateRecord>([
             {
                 $group: {
                     _id: '$type',
@@ -46,8 +47,8 @@ export class NotificationAdminRepository {
         ]);
     }
 
-    aggregateByRole() {
-        return this.notificationModel.aggregate([
+    aggregateByRole(): Promise<NotificationStatsAggregateRecord[]> {
+        return this.notificationModel.aggregate<NotificationStatsAggregateRecord>([
             {
                 $group: {
                     _id: '$userRole',

@@ -1,5 +1,6 @@
 import { NotificationType, RecipientType } from '../../../common/enum/user.enum';
 import type { NotificationItemResult } from '../application/types/notification-result.type';
+import type { NotificationMetadata } from '../../../schema/notification.schema';
 
 // Alias for backward compatibility
 export type NotificationItemDto = NotificationItemResult;
@@ -18,7 +19,7 @@ export interface NotificationCreateData {
     content: string;
     relatedId?: string;
     relatedType?: string;
-    metadata?: Record<string, any>;
+    metadata?: NotificationMetadata;
     targetUrl?: string;
 }
 
@@ -62,7 +63,7 @@ export class NotificationBuilder {
     private notificationContent: string;
     private relatedResourceId?: string;
     private relatedResourceType?: string;
-    private notificationMetadata?: Record<string, any>;
+    private notificationMetadata?: NotificationMetadata;
     private notificationTargetUrl?: string;
     private emailData?: EmailData;
 
@@ -113,7 +114,7 @@ export class NotificationBuilder {
      * @example
      * .metadata({ breederName: '행복한 강아지' })
      */
-    metadata(data: Record<string, any>): this {
+    metadata(data: NotificationMetadata): this {
         this.notificationMetadata = data;
         return this;
     }

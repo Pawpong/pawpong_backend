@@ -1,4 +1,6 @@
 import { NotificationType } from '../../../../../schema/notification.schema';
+import type { NotificationMetadata } from '../../../../../schema/notification.schema';
+import type { NotificationUserRole } from '../../../application/ports/notification-command.port';
 
 export interface NotificationAdminListFilterSnapshot {
     userId?: string;
@@ -12,11 +14,11 @@ export interface NotificationAdminListFilterSnapshot {
 export interface NotificationAdminRecordSnapshot {
     notificationId: string;
     userId: string;
-    userRole: string;
+    userRole: NotificationUserRole;
     type: NotificationType;
     title: string;
     body: string;
-    metadata?: Record<string, any>;
+    metadata?: NotificationMetadata;
     isRead: boolean;
     readAt?: Date;
     targetUrl?: string;

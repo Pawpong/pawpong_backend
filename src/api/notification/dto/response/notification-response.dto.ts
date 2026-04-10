@@ -1,6 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 import { NotificationType } from '../../../../schema/notification.schema';
+import type { NotificationMetadata } from '../../../../schema/notification.schema';
 
 /**
  * 알림 응답 DTO
@@ -54,7 +55,7 @@ export class NotificationResponseDto {
         description: '메타데이터',
         example: { breederId: '507f1f77bcf86cd799439011', breederName: '포퐁 브리더' },
     })
-    metadata?: Record<string, any>;
+    metadata?: NotificationMetadata;
 
     /**
      * 읽음 여부

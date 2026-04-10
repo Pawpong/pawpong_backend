@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { Notification, NotificationType } from '../../../../schema/notification.schema';
+import type { NotificationMetadata } from '../../../../schema/notification.schema';
 import { NotificationBuilder, NotificationCreateData, EmailData } from '../../builder/notification.builder';
 import { RecipientType } from '../../../../common/enum/user.enum';
 import { NotificationDispatchPort } from '../ports/notification-dispatch.port';
@@ -30,7 +31,7 @@ export class NotificationDispatchService extends NotificationDispatchPort {
         userId: string,
         userRole: 'adopter' | 'breeder',
         type: NotificationType,
-        metadata?: Record<string, any>,
+        metadata?: NotificationMetadata,
         targetUrl?: string,
     ): Promise<Notification> {
         return this.createNotificationUseCase.execute(userId, userRole, type, metadata, targetUrl);
