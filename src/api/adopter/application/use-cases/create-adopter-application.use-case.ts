@@ -1,7 +1,6 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
-import { ApplicationCreateResponseDto } from '../../dto/response/application-create-response.dto';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
@@ -13,6 +12,7 @@ import { AdopterApplicationCustomResponseBuilderService } from '../../domain/ser
 import { AdopterApplicationStandardResponseBuilderService } from '../../domain/services/adopter-application-standard-response-builder.service';
 import { AdopterApplicationCreateResponseFactoryService } from '../../domain/services/adopter-application-create-response-factory.service';
 import type { AdopterApplicationCreateCommand } from '../types/adopter-application-command.type';
+import type { AdopterApplicationCreateResult } from '../types/adopter-result.type';
 
 @Injectable()
 export class CreateAdopterApplicationUseCase {
@@ -33,7 +33,7 @@ export class CreateAdopterApplicationUseCase {
         userId: string,
         dto: AdopterApplicationCreateCommand,
         userRole?: string,
-    ): Promise<ApplicationCreateResponseDto> {
+    ): Promise<AdopterApplicationCreateResult> {
         await this.ensureApplicantExists(userId, userRole);
 
         if (!dto.privacyConsent) {

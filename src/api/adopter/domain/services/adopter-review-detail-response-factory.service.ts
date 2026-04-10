@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import type { AdopterReviewDetailRecord } from '../../application/ports/adopter-review-reader.port';
-import { MyReviewDetailDto } from '../../dto/response/my-review-detail.dto';
+import type { AdopterReviewDetailResult } from '../../application/types/adopter-result.type';
 
 @Injectable()
 export class AdopterReviewDetailResponseFactoryService {
-    create(review: AdopterReviewDetailRecord): MyReviewDetailDto {
+    create(review: AdopterReviewDetailRecord): AdopterReviewDetailResult {
         return {
             reviewId: review.reviewId,
             breederNickname: review.breederNickname || '알 수 없음',

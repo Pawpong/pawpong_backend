@@ -7,6 +7,7 @@ import type { AdopterApplicationReaderPort } from '../ports/adopter-application-
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import { AdopterApplicationDetailAssemblerService } from '../../domain/services/adopter-application-detail-assembler.service';
+import type { AdopterApplicationDetailResult } from '../types/adopter-result.type';
 
 @Injectable()
 export class GetAdopterApplicationDetailUseCase {
@@ -20,7 +21,7 @@ export class GetAdopterApplicationDetailUseCase {
         private readonly adopterApplicationDetailAssemblerService: AdopterApplicationDetailAssemblerService,
     ) {}
 
-    async execute(userId: string, applicationId: string): Promise<any> {
+    async execute(userId: string, applicationId: string): Promise<AdopterApplicationDetailResult> {
         const adopter = await this.adopterProfilePort.findById(userId);
         if (!adopter) {
             throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');

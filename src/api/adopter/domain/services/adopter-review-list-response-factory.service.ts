@@ -1,8 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import type { AdopterReviewListRecord } from '../../application/ports/adopter-review-reader.port';
-import { MyReviewItemDto } from '../../dto/response/my-review-item.dto';
+import type { AdopterReviewItemResult, AdopterReviewPageResult } from '../../application/types/adopter-result.type';
 import { AdopterPaginationAssemblerService } from './adopter-pagination-assembler.service';
 
 @Injectable()
@@ -14,13 +13,13 @@ export class AdopterReviewListResponseFactoryService {
         page: number,
         limit: number,
         total: number,
-    ): PaginationResponseDto<MyReviewItemDto> {
+    ): AdopterReviewPageResult {
         const items = reviews.map((review) => this.toItem(review));
 
         return this.adopterPaginationAssemblerService.build(items, page, limit, total);
     }
 
-    private toItem(review: AdopterReviewListRecord): MyReviewItemDto {
+    private toItem(review: AdopterReviewListRecord): AdopterReviewItemResult {
         return {
             reviewId: review.reviewId,
             applicationId: review.applicationId,
@@ -32,6 +31,6 @@ export class AdopterReviewListResponseFactoryService {
             content: review.content,
             reviewType: review.reviewType,
             writtenAt: review.writtenAt,
-        } as MyReviewItemDto & { applicationId: string | null; breederId: string | null };
+        };
     }
 }

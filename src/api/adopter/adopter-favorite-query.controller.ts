@@ -1,6 +1,7 @@
 import { Get, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../common/decorator/user.decorator';
+import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetFavoriteBreedersUseCase } from './application/use-cases/get-favorite-breeders.use-case';
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
@@ -20,6 +21,9 @@ export class AdopterFavoriteQueryController {
         @Query('limit') limit: number = 10,
     ): Promise<ApiResponseDto<FavoriteListResponseDto>> {
         const result = await this.getFavoriteBreedersUseCase.execute(userId, Number(page), Number(limit));
-        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.favoriteListRetrieved);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result) as FavoriteListResponseDto,
+            ADOPTER_RESPONSE_MESSAGES.favoriteListRetrieved,
+        );
     }
 }

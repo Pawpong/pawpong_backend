@@ -1,8 +1,9 @@
-import { plainToInstance } from 'class-transformer';
-
 import { PriceDisplayType } from '../../../common/enum/user.enum';
-import { ApplicationCreateResponseDto } from '../dto/response/application-create-response.dto';
-import { AdopterProfileResponseDto } from '../dto/response/adopter-profile-response.dto';
+import type {
+    AdopterApplicationCreateResult,
+    AdopterFavoriteBreederResult,
+    AdopterProfileResult,
+} from '../application/types/adopter-result.type';
 
 /**
  * Adopter 도메인 매퍼
@@ -30,8 +31,8 @@ export class AdopterMapper {
         savedApplication: any,
         breederName: string,
         petName?: string,
-    ): ApplicationCreateResponseDto {
-        return plainToInstance(ApplicationCreateResponseDto, {
+    ): AdopterApplicationCreateResult {
+        return {
             applicationId: savedApplication._id.toString(),
             breederId: savedApplication.breederId.toString(),
             breederName,
@@ -40,7 +41,7 @@ export class AdopterMapper {
             status: savedApplication.status,
             appliedAt: savedApplication.appliedAt.toISOString(),
             message: '입양 상담 신청이 성공적으로 접수되었습니다. 브리더의 응답을 기다려주세요.',
-        });
+        };
     }
 
     /**
@@ -49,8 +50,8 @@ export class AdopterMapper {
      * @param adopter Adopter Document
      * @returns AdopterProfileResponseDto
      */
-    static toProfileResponse(adopter: any): AdopterProfileResponseDto {
-        return plainToInstance(AdopterProfileResponseDto, {
+    static toProfileResponse(adopter: any): AdopterProfileResult {
+        return {
             adopterId: adopter._id.toString(),
             emailAddress: adopter.emailAddress,
             nickname: adopter.nickname,
@@ -82,7 +83,7 @@ export class AdopterMapper {
             })),
             createdAt: adopter.createdAt,
             updatedAt: adopter.updatedAt,
-        });
+        };
     }
 
     /**
@@ -99,7 +100,7 @@ export class AdopterMapper {
         breeder: any | null,
         profileImageUrl: string,
         representativePhotos: string[],
-    ): any {
+    ): AdopterFavoriteBreederResult {
         if (!breeder) {
             return {
                 breederId: favorite.favoriteBreederId,

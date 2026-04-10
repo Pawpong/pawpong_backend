@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { ReviewCreateResponseDto } from '../../dto/response/review-create-response.dto';
+import type { AdopterReviewCreateResult } from '../../application/types/adopter-result.type';
 import type { AdopterReviewCreatedRecord } from '../../application/ports/adopter-review-command.port';
 
 @Injectable()
 export class AdopterReviewCreateResponseFactoryService {
-    create(review: AdopterReviewCreatedRecord): ReviewCreateResponseDto {
+    create(review: AdopterReviewCreatedRecord): AdopterReviewCreateResult {
         return {
             reviewId: review._id.toString(),
             applicationId: review.applicationId.toString(),

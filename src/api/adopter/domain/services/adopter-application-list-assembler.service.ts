@@ -2,23 +2,25 @@ import { Injectable } from '@nestjs/common';
 
 import type { AdopterFileUrlPort } from '../../application/ports/adopter-file-url.port';
 import type { AdopterApplicationRecord } from '../../application/ports/adopter-application-reader.port';
-import { ApplicationListItemResponseDto } from '../../dto/response/application-list-item-response.dto';
-import { ApplicationListResponseDto } from '../../dto/response/application-list-response.dto';
+import type {
+    AdopterApplicationListItemResult,
+    AdopterApplicationPageResult,
+} from '../../application/types/adopter-result.type';
 import { AdopterPaginationAssemblerService } from './adopter-pagination-assembler.service';
 
 @Injectable()
 export class AdopterApplicationListAssemblerService {
     constructor(private readonly adopterPaginationAssemblerService: AdopterPaginationAssemblerService) {}
 
-    toEmptyResponse(page: number, limit: number): ApplicationListResponseDto {
-        return new ApplicationListResponseDto(this.adopterPaginationAssemblerService.createBuilder([], page, limit, 0));
+    toEmptyResponse(page: number, limit: number): AdopterApplicationPageResult {
+        return this.adopterPaginationAssemblerService.build([], page, limit, 0);
     }
 
     toItem(
         application: AdopterApplicationRecord,
         breeder: any | null,
         adopterFileUrlPort: AdopterFileUrlPort,
-    ): ApplicationListItemResponseDto {
+    ): AdopterApplicationListItemResult {
         return {
             applicationId: application._id.toString(),
             breederId: application.breederId.toString(),
@@ -36,18 +38,16 @@ export class AdopterApplicationListAssemblerService {
             animalType: (breeder?.profile?.specialization?.[0] || 'dog') as 'cat' | 'dog',
             applicationDate: this.formatDate(application.appliedAt),
             customResponses: application.customResponses || [],
-        } as ApplicationListItemResponseDto & { adopterId: string | null };
+        };
     }
 
     toPaginatedResponse(
-        items: ApplicationListItemResponseDto[],
+        items: AdopterApplicationListItemResult[],
         page: number,
         limit: number,
         totalItems: number,
-    ): ApplicationListResponseDto {
-        return new ApplicationListResponseDto(
-            this.adopterPaginationAssemblerService.createBuilder(items, page, limit, totalItems),
-        );
+    ): AdopterApplicationPageResult {
+        return this.adopterPaginationAssemblerService.build(items, page, limit, totalItems);
     }
 
     private formatDate(date: Date): string {
