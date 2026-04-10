@@ -10,6 +10,53 @@ import {
 } from '../application/ports/platform-admin-reader.port';
 import { PlatformAdminRepository } from '../repository/platform-admin.repository';
 
+type PlatformAdminApplicationStat = {
+    _id: ApplicationStatus;
+    count: number;
+};
+
+type PlatformAdminPopularBreedAggregate = {
+    _id: {
+        breed: string;
+        type: string;
+    };
+    applicationCount: number;
+    averagePrice?: number | null;
+};
+
+type PlatformAdminRegionalStatAggregate = {
+    _id: {
+        city?: string;
+        district?: string;
+    };
+    breederCount: number;
+    applicationCount?: number;
+    completedAdoptionCount?: number;
+};
+
+type PlatformAdminBreederPerformanceAggregate = {
+    breederId: {
+        toString(): string;
+    };
+    breederName: string;
+    city?: string;
+    applicationCount?: number;
+    completedAdoptionCount?: number;
+    averageRating?: number;
+    totalReviews?: number;
+    profileViews?: number;
+};
+
+type PlatformAdminReportStat = {
+    _id: 'pending' | 'resolved' | 'dismissed';
+    count: number;
+};
+
+type PlatformAdminFilterUsageAggregate = {
+    _id?: string;
+    count: number;
+};
+
 @Injectable()
 export class PlatformAdminMongooseReaderAdapter implements PlatformAdminReaderPort {
     constructor(private readonly platformAdminRepository: PlatformAdminRepository) {}
@@ -35,28 +82,32 @@ export class PlatformAdminMongooseReaderAdapter implements PlatformAdminReaderPo
             this.platformAdminRepository.countPendingBreeders(),
         ]);
 
-        const applicationStats = await this.platformAdminRepository.aggregateApplicationStats();
+        const applicationStats: PlatformAdminApplicationStat[] =
+            await this.platformAdminRepository.aggregateApplicationStats();
 
-        const totalApplications = applicationStats.reduce((sum: number, stat: any) => sum + stat.count, 0);
+        const totalApplications = applicationStats.reduce((sum, stat) => sum + stat.count, 0);
         const pendingApplications =
-            applicationStats.find((item: any) => item._id === ApplicationStatus.CONSULTATION_PENDING)?.count || 0;
+            applicationStats.find((item) => item._id === ApplicationStatus.CONSULTATION_PENDING)?.count || 0;
         const completedAdoptions =
-            applicationStats.find((item: any) => item._id === ApplicationStatus.ADOPTION_APPROVED)?.count || 0;
+            applicationStats.find((item) => item._id === ApplicationStatus.ADOPTION_APPROVED)?.count || 0;
         const rejectedApplications =
-            applicationStats.find((item: any) => item._id === ApplicationStatus.ADOPTION_REJECTED)?.count || 0;
+            applicationStats.find((item) => item._id === ApplicationStatus.ADOPTION_REJECTED)?.count || 0;
 
-        const popularBreeds = await this.platformAdminRepository.aggregatePopularBreeds(10);
+        const popularBreeds: PlatformAdminPopularBreedAggregate[] =
+            await this.platformAdminRepository.aggregatePopularBreeds(10);
 
-        const regionalStats = await this.platformAdminRepository.aggregateRegionalStats(10);
+        const regionalStats: PlatformAdminRegionalStatAggregate[] =
+            await this.platformAdminRepository.aggregateRegionalStats(10);
 
-        const breederPerformance = await this.platformAdminRepository.aggregateBreederPerformance(10);
+        const breederPerformance: PlatformAdminBreederPerformanceAggregate[] =
+            await this.platformAdminRepository.aggregateBreederPerformance(10);
 
-        const reportStats = await this.platformAdminRepository.aggregateReportStats();
+        const reportStats: PlatformAdminReportStat[] = await this.platformAdminRepository.aggregateReportStats();
 
-        const totalReports = reportStats.reduce((sum: number, stat: any) => sum + stat.count, 0);
-        const pendingReports = reportStats.find((item: any) => item._id === 'pending')?.count || 0;
-        const resolvedReports = reportStats.find((item: any) => item._id === 'resolved')?.count || 0;
-        const dismissedReports = reportStats.find((item: any) => item._id === 'dismissed')?.count || 0;
+        const totalReports = reportStats.reduce((sum, stat) => sum + stat.count, 0);
+        const pendingReports = reportStats.find((item) => item._id === 'pending')?.count || 0;
+        const resolvedReports = reportStats.find((item) => item._id === 'resolved')?.count || 0;
+        const dismissedReports = reportStats.find((item) => item._id === 'dismissed')?.count || 0;
 
         return {
             userStatistics: {
@@ -75,21 +126,21 @@ export class PlatformAdminMongooseReaderAdapter implements PlatformAdminReaderPo
                 pendingApplicationCount: pendingApplications,
                 rejectedApplicationCount: rejectedApplications,
             },
-            popularBreeds: popularBreeds.map((breed: any) => ({
+            popularBreeds: popularBreeds.map((breed) => ({
                 breedName: breed._id.breed,
                 petType: breed._id.type,
                 applicationCount: breed.applicationCount,
                 completedAdoptionCount: 0,
                 averagePrice: breed.averagePrice || 0,
             })),
-            regionalStatistics: regionalStats.map((region: any) => ({
+            regionalStatistics: regionalStats.map((region) => ({
                 cityName: region._id.city || 'Unknown',
                 districtName: region._id.district || 'Unknown',
                 breederCount: region.breederCount,
                 applicationCount: region.applicationCount || 0,
                 completedAdoptionCount: region.completedAdoptionCount || 0,
             })),
-            breederPerformanceRanking: breederPerformance.map((breeder: any) => ({
+            breederPerformanceRanking: breederPerformance.map((breeder) => ({
                 breederId: breeder.breederId.toString(),
                 breederName: breeder.breederName,
                 cityName: breeder.city || 'Unknown',
@@ -141,9 +192,11 @@ export class PlatformAdminMongooseReaderAdapter implements PlatformAdminReaderPo
             this.platformAdminRepository.countApprovedAdoptionsSince(twentyEightDaysAgo),
         ]);
 
-        const topLocations = await this.platformAdminRepository.aggregateTopLocations(10);
+        const topLocations: PlatformAdminFilterUsageAggregate[] =
+            await this.platformAdminRepository.aggregateTopLocations(10);
 
-        const topBreeds = await this.platformAdminRepository.aggregateTopBreeds(10);
+        const topBreeds: PlatformAdminFilterUsageAggregate[] =
+            await this.platformAdminRepository.aggregateTopBreeds(10);
 
         const [rejectedBreeders, resubmittedBreeders, resubmittedAndApproved] = await Promise.all([
             this.platformAdminRepository.countRejectedBreeders(),
@@ -174,10 +227,10 @@ export class PlatformAdminMongooseReaderAdapter implements PlatformAdminReaderPo
                 adoptions28Days,
             },
             filterUsageStats: {
-                topLocations: topLocations.map((location: any) =>
+                topLocations: topLocations.map((location) =>
                     this.toFilterUsageItem('location', location._id || 'Unknown', location.count),
                 ),
-                topBreeds: topBreeds.map((breed: any) =>
+                topBreeds: topBreeds.map((breed) =>
                     this.toFilterUsageItem('breed', breed._id || 'Unknown', breed.count),
                 ),
                 emptyResultFilters: [],
