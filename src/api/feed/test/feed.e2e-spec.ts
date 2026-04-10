@@ -54,6 +54,14 @@ describe('피드 종단간 테스트', () => {
             expect([200, 400, 404, 500]).toContain(response.status);
             console.log('존재하지 않는 영상 조회 검증 완료');
         });
+
+        it('잘못된 영상 ID 형식이면 400을 반환한다', async () => {
+            await request(app.getHttpServer())
+                .get('/api/feed/videos/not-a-mongo-id')
+                .expect(400);
+
+            console.log('잘못된 영상 ID 형식 400 확인');
+        });
     });
 
     /**
@@ -130,6 +138,14 @@ describe('피드 종단간 테스트', () => {
      * 댓글 기능
      */
     describe('댓글', () => {
+        it('잘못된 댓글 ID 형식으로 대댓글 조회 시 400', async () => {
+            await request(app.getHttpServer())
+                .get('/api/feed/comment/not-a-mongo-id/replies')
+                .expect(400);
+
+            console.log('잘못된 댓글 ID 형식 400 확인');
+        });
+
         it('인증 없이 댓글 작성 시 401', async () => {
             await request(app.getHttpServer())
                 .post('/api/feed/comment/000000000000000000000000')
