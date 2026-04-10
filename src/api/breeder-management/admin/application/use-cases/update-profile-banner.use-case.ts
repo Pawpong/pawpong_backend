@@ -1,12 +1,12 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { ProfileBannerResponseDto } from '../../dto/response/profile-banner-response.dto';
 import { BreederManagementBannerPresentationService } from '../../domain/services/breeder-management-banner-presentation.service';
 import {
     BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER,
     type BreederManagementAdminBannerWriterPort,
 } from '../ports/breeder-management-admin-banner-writer.port';
 import type { BreederManagementProfileBannerUpdateCommand } from '../types/breeder-management-admin-banner-command.type';
+import type { BreederManagementProfileBannerResult } from '../types/breeder-management-admin-banner-result.type';
 
 @Injectable()
 export class UpdateProfileBannerUseCase {
@@ -19,13 +19,13 @@ export class UpdateProfileBannerUseCase {
     async execute(
         bannerId: string,
         data: BreederManagementProfileBannerUpdateCommand,
-    ): Promise<ProfileBannerResponseDto> {
+    ): Promise<BreederManagementProfileBannerResult> {
         const banner = await this.bannerWriter.updateProfile(bannerId, data);
 
         if (!banner) {
             throw new BadRequestException('프로필 배너를 찾을 수 없습니다.');
         }
 
-        return this.breederManagementBannerPresentationService.toProfileResponseDto(banner);
+        return this.breederManagementBannerPresentationService.toProfileResult(banner);
     }
 }

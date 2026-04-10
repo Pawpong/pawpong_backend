@@ -4,12 +4,14 @@ import {
     BREEDER_MANAGEMENT_FILE_URL_PORT,
     type BreederManagementFileUrlPort,
 } from '../../../application/ports/breeder-management-file-url.port';
-import { CounselBannerResponseDto } from '../../dto/response/counsel-banner-response.dto';
-import { ProfileBannerResponseDto } from '../../dto/response/profile-banner-response.dto';
 import {
     CounselBannerSnapshot,
     ProfileBannerSnapshot,
 } from '../../application/ports/breeder-management-admin-banner-reader.port';
+import type {
+    BreederManagementCounselBannerResult,
+    BreederManagementProfileBannerResult,
+} from '../../application/types/breeder-management-admin-banner-result.type';
 
 @Injectable()
 export class BreederManagementBannerPresentationService {
@@ -18,14 +20,14 @@ export class BreederManagementBannerPresentationService {
         private readonly fileUrlPort: BreederManagementFileUrlPort,
     ) {}
 
-    toProfileResponseDto(banner: ProfileBannerSnapshot): ProfileBannerResponseDto {
+    toProfileResult(banner: ProfileBannerSnapshot): BreederManagementProfileBannerResult {
         return {
             ...this.toBannerBase(banner),
             bannerType: banner.bannerType,
         };
     }
 
-    toCounselResponseDto(banner: CounselBannerSnapshot): CounselBannerResponseDto {
+    toCounselResult(banner: CounselBannerSnapshot): BreederManagementCounselBannerResult {
         return this.toBannerBase(banner);
     }
 

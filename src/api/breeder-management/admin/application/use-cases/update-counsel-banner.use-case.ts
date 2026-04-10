@@ -1,12 +1,12 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { CounselBannerResponseDto } from '../../dto/response/counsel-banner-response.dto';
 import { BreederManagementBannerPresentationService } from '../../domain/services/breeder-management-banner-presentation.service';
 import {
     BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER,
     type BreederManagementAdminBannerWriterPort,
 } from '../ports/breeder-management-admin-banner-writer.port';
 import type { BreederManagementCounselBannerUpdateCommand } from '../types/breeder-management-admin-banner-command.type';
+import type { BreederManagementCounselBannerResult } from '../types/breeder-management-admin-banner-result.type';
 
 @Injectable()
 export class UpdateCounselBannerUseCase {
@@ -19,13 +19,13 @@ export class UpdateCounselBannerUseCase {
     async execute(
         bannerId: string,
         data: BreederManagementCounselBannerUpdateCommand,
-    ): Promise<CounselBannerResponseDto> {
+    ): Promise<BreederManagementCounselBannerResult> {
         const banner = await this.bannerWriter.updateCounsel(bannerId, data);
 
         if (!banner) {
             throw new BadRequestException('상담 배너를 찾을 수 없습니다.');
         }
 
-        return this.breederManagementBannerPresentationService.toCounselResponseDto(banner);
+        return this.breederManagementBannerPresentationService.toCounselResult(banner);
     }
 }

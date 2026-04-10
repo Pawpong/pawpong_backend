@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { CounselBannerResponseDto } from '../../dto/response/counsel-banner-response.dto';
 import { BreederManagementBannerPresentationService } from '../../domain/services/breeder-management-banner-presentation.service';
 import {
     BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER,
     type BreederManagementAdminBannerWriterPort,
 } from '../ports/breeder-management-admin-banner-writer.port';
 import type { BreederManagementCounselBannerCreateCommand } from '../types/breeder-management-admin-banner-command.type';
+import type { BreederManagementCounselBannerResult } from '../types/breeder-management-admin-banner-result.type';
 
 @Injectable()
 export class CreateCounselBannerUseCase {
@@ -16,8 +16,8 @@ export class CreateCounselBannerUseCase {
         private readonly breederManagementBannerPresentationService: BreederManagementBannerPresentationService,
     ) {}
 
-    async execute(data: BreederManagementCounselBannerCreateCommand): Promise<CounselBannerResponseDto> {
+    async execute(data: BreederManagementCounselBannerCreateCommand): Promise<BreederManagementCounselBannerResult> {
         const banner = await this.bannerWriter.createCounsel(data);
-        return this.breederManagementBannerPresentationService.toCounselResponseDto(banner);
+        return this.breederManagementBannerPresentationService.toCounselResult(banner);
     }
 }
