@@ -4,7 +4,7 @@ import { BreederSearchRequestDto } from '../../dto/request/breeder-search-reques
 import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import { BreederVerificationAdminListPaginationService } from '../../domain/services/breeder-verification-admin-list-pagination.service';
-import { BreederVerificationAdminListPresentationService } from '../../domain/services/breeder-verification-admin-list-presentation.service';
+import { BreederVerificationAdminLevelChangeListPresentationService } from '../../domain/services/breeder-verification-admin-level-change-list-presentation.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class GetLevelChangeRequestsUseCase {
         @Inject(BREEDER_VERIFICATION_ADMIN_READER)
         private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
-        private readonly breederVerificationAdminListPresentationService: BreederVerificationAdminListPresentationService,
+        private readonly breederVerificationAdminLevelChangeListPresentationService: BreederVerificationAdminLevelChangeListPresentationService,
         private readonly breederVerificationAdminListPaginationService: BreederVerificationAdminListPaginationService,
     ) {}
 
@@ -35,7 +35,7 @@ export class GetLevelChangeRequestsUseCase {
 
         return this.breederVerificationAdminListPaginationService.toPaginatedResponse(
             result.items.map((breeder) =>
-                this.breederVerificationAdminListPresentationService.toLevelChangeRequestResponse(breeder),
+                this.breederVerificationAdminLevelChangeListPresentationService.toResponse(breeder),
             ),
             pageNumber,
             itemsPerPage,

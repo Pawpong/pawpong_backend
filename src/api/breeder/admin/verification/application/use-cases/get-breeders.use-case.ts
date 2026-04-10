@@ -4,7 +4,7 @@ import { BreederSearchRequestDto } from '../../dto/request/breeder-search-reques
 import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import { BreederVerificationAdminListPaginationService } from '../../domain/services/breeder-verification-admin-list-pagination.service';
-import { BreederVerificationAdminListPresentationService } from '../../domain/services/breeder-verification-admin-list-presentation.service';
+import { BreederVerificationAdminBreederListPresentationService } from '../../domain/services/breeder-verification-admin-breeder-list-presentation.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class GetBreedersUseCase {
         @Inject(BREEDER_VERIFICATION_ADMIN_READER)
         private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
-        private readonly breederVerificationAdminListPresentationService: BreederVerificationAdminListPresentationService,
+        private readonly breederVerificationAdminBreederListPresentationService: BreederVerificationAdminBreederListPresentationService,
         private readonly breederVerificationAdminListPaginationService: BreederVerificationAdminListPaginationService,
     ) {}
 
@@ -34,7 +34,7 @@ export class GetBreedersUseCase {
         });
 
         return this.breederVerificationAdminListPaginationService.toPaginatedResponse(
-            result.items.map((breeder) => this.breederVerificationAdminListPresentationService.toBreederResponse(breeder)),
+            result.items.map((breeder) => this.breederVerificationAdminBreederListPresentationService.toResponse(breeder)),
             pageNumber,
             itemsPerPage,
             result.total,

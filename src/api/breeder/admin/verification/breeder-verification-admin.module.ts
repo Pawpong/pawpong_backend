@@ -20,8 +20,11 @@ import { BreederVerificationAdminPolicyService } from './domain/services/breeder
 import { BreederVerificationAdminActivityLogFactoryService } from './domain/services/breeder-verification-admin-activity-log-factory.service';
 import { BreederVerificationAdminCommandResponseService } from './domain/services/breeder-verification-admin-command-response.service';
 import { BreederVerificationAdminListPaginationService } from './domain/services/breeder-verification-admin-list-pagination.service';
-import { BreederVerificationAdminListPresentationService } from './domain/services/breeder-verification-admin-list-presentation.service';
+import { BreederVerificationAdminBreederListPresentationService } from './domain/services/breeder-verification-admin-breeder-list-presentation.service';
 import { BreederVerificationAdminDetailPresentationService } from './domain/services/breeder-verification-admin-presentation.service';
+import { BreederVerificationAdminLevelChangeListPresentationService } from './domain/services/breeder-verification-admin-level-change-list-presentation.service';
+import { BreederVerificationAdminListItemPresentationService } from './domain/services/breeder-verification-admin-list-item-presentation.service';
+import { BreederVerificationAdminPendingBreederListPresentationService } from './domain/services/breeder-verification-admin-pending-breeder-list-presentation.service';
 import { BreederVerificationAdminStatsPresentationService } from './domain/services/breeder-verification-admin-stats-presentation.service';
 import { BreederVerificationAdminMongooseRepositoryAdapter } from './infrastructure/breeder-verification-admin-mongoose.repository.adapter';
 import { BreederVerificationAdminNotifierAdapter } from './infrastructure/breeder-verification-admin-notifier.adapter';
@@ -75,7 +78,10 @@ import { NotificationModule } from '../../../notification/notification.module';
         BreederPaginationAssemblerService,
         BreederVerificationAdminCommandResponseService,
         BreederVerificationAdminListPaginationService,
-        BreederVerificationAdminListPresentationService,
+        BreederVerificationAdminListItemPresentationService,
+        BreederVerificationAdminLevelChangeListPresentationService,
+        BreederVerificationAdminPendingBreederListPresentationService,
+        BreederVerificationAdminBreederListPresentationService,
         BreederVerificationAdminDetailPresentationService,
         BreederVerificationAdminStatsPresentationService,
         BreederVerificationAdminRepository,
