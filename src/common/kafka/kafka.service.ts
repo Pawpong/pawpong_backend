@@ -90,7 +90,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
 
         try {
             this.kafkaClient.emit(topic, {
-                key: message.id || Date.now().toString(),
+                key: message.roomId || message.id || Date.now().toString(),
                 value: JSON.stringify(message),
             });
             this.logger.logDbOperation('KafkaService', 'emit', topic, { messageId: message.id });
