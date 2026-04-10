@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import type { BreederManagementFileUrlPort } from '../../application/ports/breeder-management-file-url.port';
 import type { BreederManagementBreederRecord } from '../../application/ports/breeder-management-profile.port';
+import type { BreederManagementVerificationStatusResult } from '../../application/types/breeder-management-result.type';
 
 @Injectable()
 export class BreederManagementVerificationStatusAssemblerService {
@@ -10,22 +11,7 @@ export class BreederManagementVerificationStatusAssemblerService {
     toResponse(
         breeder: BreederManagementBreederRecord,
         fileUrlPort: BreederManagementFileUrlPort,
-    ): {
-        status: string;
-        plan?: string;
-        level?: string;
-        submittedAt?: Date;
-        reviewedAt?: Date;
-        documents: Array<{
-            type: string;
-            fileName: string;
-            url: string;
-            originalFileName?: string;
-            uploadedAt?: Date;
-        }>;
-        rejectionReason?: string;
-        submittedByEmail: boolean;
-    } {
+    ): BreederManagementVerificationStatusResult {
         const verification = breeder.verification;
 
         this.logger.log(

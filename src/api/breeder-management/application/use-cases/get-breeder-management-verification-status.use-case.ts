@@ -5,6 +5,7 @@ import type { BreederManagementProfilePort } from '../ports/breeder-management-p
 import { BREEDER_MANAGEMENT_FILE_URL_PORT } from '../ports/breeder-management-file-url.port';
 import type { BreederManagementFileUrlPort } from '../ports/breeder-management-file-url.port';
 import { BreederManagementVerificationStatusAssemblerService } from '../../domain/services/breeder-management-verification-status-assembler.service';
+import type { BreederManagementVerificationStatusResult } from '../types/breeder-management-result.type';
 
 @Injectable()
 export class GetBreederManagementVerificationStatusUseCase {
@@ -16,7 +17,7 @@ export class GetBreederManagementVerificationStatusUseCase {
         private readonly breederManagementVerificationStatusAssemblerService: BreederManagementVerificationStatusAssemblerService,
     ) {}
 
-    async execute(userId: string) {
+    async execute(userId: string): Promise<BreederManagementVerificationStatusResult> {
         const breeder = await this.breederManagementProfilePort.findById(userId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');

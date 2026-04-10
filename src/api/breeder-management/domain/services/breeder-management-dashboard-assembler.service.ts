@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
-import { BreederDashboardResponseDto } from '../../../breeder/dto/response/breeder-dashboard-response.dto';
 import type {
     BreederManagementBreederRecord,
     BreederManagementRecentApplicationRecord,
 } from '../../application/ports/breeder-management-profile.port';
+import type { BreederManagementDashboardResult } from '../../application/types/breeder-management-result.type';
 
 @Injectable()
 export class BreederManagementDashboardAssemblerService {
@@ -13,7 +13,7 @@ export class BreederManagementDashboardAssemblerService {
         pendingApplications: number,
         recentApplications: BreederManagementRecentApplicationRecord[],
         availablePetsCount: number,
-    ): BreederDashboardResponseDto {
+    ): BreederManagementDashboardResult {
         return {
             profileInfo: {
                 verificationInfo: {

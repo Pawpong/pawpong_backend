@@ -1,12 +1,12 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { MyReviewsListResponseDto } from '../../dto/response/my-reviews-list-response.dto';
 import {
     BREEDER_MANAGEMENT_LIST_READER_PORT,
     type BreederManagementListReaderPort,
 } from '../ports/breeder-management-list-reader.port';
 import { BreederManagementMyReviewMapperService } from '../../domain/services/breeder-management-my-review-mapper.service';
 import { BreederManagementPaginationAssemblerService } from '../../domain/services/breeder-management-pagination-assembler.service';
+import type { BreederManagementMyReviewsPageResult } from '../types/breeder-management-result.type';
 
 @Injectable()
 export class GetBreederManagementMyReviewsUseCase {
@@ -22,7 +22,7 @@ export class GetBreederManagementMyReviewsUseCase {
         visibility: string = 'all',
         page: number = 1,
         limit: number = 10,
-    ): Promise<MyReviewsListResponseDto> {
+    ): Promise<BreederManagementMyReviewsPageResult> {
         const breeder = await this.breederManagementListReaderPort.findBreederSummary(userId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
@@ -37,11 +37,12 @@ export class GetBreederManagementMyReviewsUseCase {
             snapshot.filteredTotal,
         );
 
-        return Object.assign(paginationResponse, {
+        return {
+            ...paginationResponse,
             averageRating: breeder.averageRating || 0,
             totalReviews: snapshot.totalCount,
             visibleReviews: snapshot.visibleCount,
             hiddenReviews: snapshot.hiddenCount,
-        }) as MyReviewsListResponseDto;
+        };
     }
 }

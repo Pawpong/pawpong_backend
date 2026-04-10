@@ -2,8 +2,10 @@ import { Get, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiPaginatedEndpoint } from '../../common/decorator/swagger.decorator';
+import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetBreederManagementMyReviewsUseCase } from './application/use-cases/get-breeder-management-my-reviews.use-case';
+import type { BreederManagementMyReviewsPageResult } from './application/types/breeder-management-result.type';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
 import { MyReviewsListResponseDto } from './dto/response/my-reviews-list-response.dto';
@@ -27,6 +29,15 @@ export class BreederManagementReviewsQueryController {
             Number(page),
             Number(limit),
         );
-        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.myReviewsRetrieved);
+        const response = PaginationResponseDto.fromPageResult(result) as MyReviewsListResponseDto;
+        response.averageRating = result.averageRating;
+        response.totalReviews = result.totalReviews;
+        response.visibleReviews = result.visibleReviews;
+        response.hiddenReviews = result.hiddenReviews;
+
+        return ApiResponseDto.success(
+            response as MyReviewsListResponseDto & BreederManagementMyReviewsPageResult,
+            BREEDER_MANAGEMENT_RESPONSE_MESSAGES.myReviewsRetrieved,
+        );
     }
 }
