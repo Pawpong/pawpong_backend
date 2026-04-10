@@ -8,6 +8,7 @@ import {
     BreederAdminActivityLogEntry,
     BreederAdminBreederPatch,
 } from '../application/ports/breeder-admin-writer.port';
+import type { BreederAdminAdminDocumentRecord, BreederAdminBreederDocumentRecord } from '../types/breeder-admin-record.type';
 
 @Injectable()
 export class BreederAdminRepository {
@@ -16,18 +17,19 @@ export class BreederAdminRepository {
         @InjectModel(Breeder.name) private readonly breederModel: Model<BreederDocument>,
     ) {}
 
-    findAdminById(adminId: string) {
-        return this.adminModel.findById(adminId).select('name permissions activityLogs').lean();
+    findAdminById(adminId: string): Promise<BreederAdminAdminDocumentRecord | null> {
+        return this.adminModel.findById(adminId).select('name permissions activityLogs').lean<BreederAdminAdminDocumentRecord>().exec();
     }
 
-    findBreederById(breederId: string) {
+    findBreederById(breederId: string): Promise<BreederAdminBreederDocumentRecord | null> {
         return this.breederModel
             .findById(breederId)
             .select('name nickname emailAddress accountStatus suspensionReason suspendedAt isTestAccount verification')
-            .lean();
+            .lean<BreederAdminBreederDocumentRecord>()
+            .exec();
     }
 
-    updateBreeder(breederId: string, patch: BreederAdminBreederPatch) {
+    updateBreeder(breederId: string, patch: BreederAdminBreederPatch): Promise<BreederAdminBreederDocumentRecord | null> {
         const $set: Record<string, unknown> = {};
         const $unset: Record<string, ''> = {};
 
@@ -66,7 +68,8 @@ export class BreederAdminRepository {
         return this.breederModel
             .findByIdAndUpdate(breederId, update, { new: true })
             .select('name nickname emailAddress accountStatus suspensionReason suspendedAt isTestAccount verification')
-            .lean();
+            .lean<BreederAdminBreederDocumentRecord>()
+            .exec();
     }
 
     async appendAdminActivityLog(adminId: string, logEntry: BreederAdminActivityLogEntry): Promise<void> {

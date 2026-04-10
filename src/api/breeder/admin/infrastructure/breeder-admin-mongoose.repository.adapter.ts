@@ -10,6 +10,7 @@ import {
     BreederAdminWriterPort,
 } from '../application/ports/breeder-admin-writer.port';
 import { BreederAdminRepository } from '../repository/breeder-admin.repository';
+import type { BreederAdminAdminDocumentRecord, BreederAdminBreederDocumentRecord } from '../types/breeder-admin-record.type';
 
 @Injectable()
 export class BreederAdminMongooseRepositoryAdapter implements BreederAdminReaderPort, BreederAdminWriterPort {
@@ -37,7 +38,7 @@ export class BreederAdminMongooseRepositoryAdapter implements BreederAdminReader
         await this.breederAdminRepository.appendAdminActivityLog(adminId, logEntry);
     }
 
-    private toAdminSnapshot(admin: any): BreederAdminAdminSnapshot {
+    private toAdminSnapshot(admin: BreederAdminAdminDocumentRecord): BreederAdminAdminSnapshot {
         return {
             id: admin._id.toString(),
             name: admin.name,
@@ -46,16 +47,16 @@ export class BreederAdminMongooseRepositoryAdapter implements BreederAdminReader
         };
     }
 
-    private toBreederSnapshot(breeder: any): BreederAdminBreederSnapshot {
+    private toBreederSnapshot(breeder: BreederAdminBreederDocumentRecord): BreederAdminBreederSnapshot {
         return {
             id: breeder._id.toString(),
-            name: breeder.name,
+            name: breeder.name || '',
             nickname: breeder.nickname,
             emailAddress: breeder.emailAddress,
-            accountStatus: breeder.accountStatus,
+            accountStatus: breeder.accountStatus || 'active',
             suspensionReason: breeder.suspensionReason,
             suspendedAt: breeder.suspendedAt,
-            isTestAccount: breeder.isTestAccount,
+            isTestAccount: breeder.isTestAccount || false,
             verification: breeder.verification
                 ? {
                       status: breeder.verification.status,

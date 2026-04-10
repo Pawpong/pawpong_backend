@@ -1,10 +1,22 @@
+export interface BreederAdminPermissionSnapshot {
+    canManageBreeders?: boolean;
+}
+
+export interface BreederAdminActivityLogSnapshot {
+    logId: string;
+    action: string;
+    targetType: string;
+    targetId: string;
+    targetName?: string;
+    description: string;
+    performedAt: Date;
+}
+
 export interface BreederAdminAdminSnapshot {
     id: string;
     name: string;
-    permissions?: {
-        canManageBreeders?: boolean;
-    };
-    activityLogs?: Array<Record<string, any>>;
+    permissions?: BreederAdminPermissionSnapshot;
+    activityLogs?: BreederAdminActivityLogSnapshot[];
 }
 
 export interface BreederAdminBreederSnapshot {

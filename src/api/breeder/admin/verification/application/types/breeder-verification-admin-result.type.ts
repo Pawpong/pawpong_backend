@@ -1,5 +1,16 @@
 import type { PageResult } from '../../../../../../common/types/page-result.type';
 
+export type BreederVerificationProfileInfoResult = {
+    locationInfo?: {
+        cityName?: string;
+        districtName?: string;
+        detailAddress?: string;
+    };
+    specialization?: string[];
+    description?: string;
+    experienceYears?: number;
+};
+
 export type BreederVerificationInfoResult = {
     verificationStatus: string;
     subscriptionPlan: string;
@@ -18,7 +29,7 @@ export type BreederVerificationListItemResult = {
     accountStatus?: string;
     isTestAccount?: boolean;
     verificationInfo: BreederVerificationInfoResult;
-    profileInfo?: any;
+    profileInfo?: BreederVerificationProfileInfoResult;
     createdAt: Date;
 };
 
