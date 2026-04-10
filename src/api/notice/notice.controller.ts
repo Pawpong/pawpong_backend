@@ -31,7 +31,10 @@ export class NoticeController {
         @Query() paginationData: PaginationRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<NoticeResponseDto>>> {
         const result = await this.getNoticeListUseCase.execute(paginationData, 'published');
-        return ApiResponseDto.success(result, this.noticeQueryResponseMessageService.noticeListRetrieved());
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            this.noticeQueryResponseMessageService.noticeListRetrieved(),
+        );
     }
 
     /**

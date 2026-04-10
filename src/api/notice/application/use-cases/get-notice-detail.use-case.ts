@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
-import { NoticeResponseDto } from '../../dto/response/notice-response.dto';
 import { NoticePresentationService } from '../../domain/services/notice-presentation.service';
 import { NOTICE_READER, type NoticeReaderPort } from '../ports/notice-reader.port';
+import type { NoticeItemResult } from '../types/notice-result.type';
 
 @Injectable()
 export class GetNoticeDetailUseCase {
@@ -14,7 +14,7 @@ export class GetNoticeDetailUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(noticeId: string, increaseView: boolean = true): Promise<NoticeResponseDto> {
+    async execute(noticeId: string, increaseView: boolean = true): Promise<NoticeItemResult> {
         this.logger.logStart('getNoticeDetail', '공지사항 상세 조회 시작', { noticeId, increaseView });
 
         if (!noticeId) {
@@ -33,7 +33,7 @@ export class GetNoticeDetailUseCase {
             }
 
             this.logger.logSuccess('getNoticeDetail', '공지사항 상세 조회 완료', { noticeId });
-            return this.noticePresentationService.toResponseDto(notice);
+            return this.noticePresentationService.toItem(notice);
         } catch (error) {
             if (error instanceof NotFoundException || error instanceof BadRequestException) {
                 throw error;

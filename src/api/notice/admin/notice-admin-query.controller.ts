@@ -29,7 +29,10 @@ export class NoticeAdminQueryController {
         @Query('status') status?: 'published' | 'draft' | 'archived',
     ): Promise<ApiResponseDto<PaginationResponseDto<NoticeResponseDto>>> {
         const result = await this.getNoticeListUseCase.execute(paginationData, status as NoticeStatus | undefined);
-        return ApiResponseDto.success(result, this.noticeQueryResponseMessageService.noticeListRetrieved());
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            this.noticeQueryResponseMessageService.noticeListRetrieved(),
+        );
     }
 
     @Get(':noticeId')

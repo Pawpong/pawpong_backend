@@ -1,22 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../common/dto/pagination/pagination-builder.dto';
-import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
-import { NoticeResponseDto } from '../../dto/response/notice-response.dto';
+import { buildPageResult } from '../../../../common/types/page-result.type';
+import type { NoticeItemResult, NoticePageResult } from '../../application/types/notice-result.type';
 
 @Injectable()
 export class NoticePaginationAssemblerService {
-    build(
-        items: NoticeResponseDto[],
-        page: number,
-        limit: number,
-        totalItems: number,
-    ): PaginationResponseDto<NoticeResponseDto> {
-        return new PaginationBuilder<NoticeResponseDto>()
-            .setItems(items)
-            .setPage(page)
-            .setLimit(limit)
-            .setTotalCount(totalItems)
-            .build();
+    build(items: NoticeItemResult[], page: number, limit: number, totalItems: number): NoticePageResult {
+        return buildPageResult(items, page, limit, totalItems);
     }
 }

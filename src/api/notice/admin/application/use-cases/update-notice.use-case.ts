@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { NoticeResponseDto } from '../../../dto/response/notice-response.dto';
 import { NoticePresentationService } from '../../../domain/services/notice-presentation.service';
 import { NOTICE_WRITER, type NoticeWriterPort } from '../ports/notice-writer.port';
 import type { NoticeUpdateCommand } from '../types/notice-command.type';
+import type { NoticeItemResult } from '../../../application/types/notice-result.type';
 
 @Injectable()
 export class UpdateNoticeUseCase {
@@ -15,7 +15,7 @@ export class UpdateNoticeUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(noticeId: string, adminId: string, updateData: NoticeUpdateCommand): Promise<NoticeResponseDto> {
+    async execute(noticeId: string, adminId: string, updateData: NoticeUpdateCommand): Promise<NoticeItemResult> {
         this.logger.logStart('updateNotice', '공지사항 수정 시작', { noticeId, adminId });
 
         if (!noticeId) {
@@ -34,7 +34,7 @@ export class UpdateNoticeUseCase {
             }
 
             this.logger.logSuccess('updateNotice', '공지사항 수정 완료', { noticeId });
-            return this.noticePresentationService.toResponseDto(notice);
+            return this.noticePresentationService.toItem(notice);
         } catch (error) {
             if (error instanceof NotFoundException) {
                 throw error;
