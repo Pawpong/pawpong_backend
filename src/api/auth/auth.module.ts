@@ -92,7 +92,10 @@ import { SubmitAuthBreederDocumentsUseCase } from './application/use-cases/submi
 import { UploadAndSubmitAuthBreederDocumentsUseCase } from './application/use-cases/upload-and-submit-auth-breeder-documents.use-case';
 import { AuthSocialIdentityService } from './domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from './domain/services/auth-stored-file-name.service';
-import { AuthSocialCallbackResponseFactoryService } from './domain/services/auth-social-callback-response-factory.service';
+import { AuthSocialErrorRedirectResponseFactoryService } from './domain/services/auth-social-error-redirect-response-factory.service';
+import { AuthSocialLoginSuccessRedirectResponseFactoryService } from './domain/services/auth-social-login-success-redirect-response-factory.service';
+import { AuthSocialRedirectPathService } from './domain/services/auth-social-redirect-path.service';
+import { AuthSocialSignupRedirectResponseFactoryService } from './domain/services/auth-social-signup-redirect-response-factory.service';
 import { AuthProfileImageFilePolicyService } from './domain/services/auth-profile-image-file-policy.service';
 import { AuthBreederDocumentFilePolicyService } from './domain/services/auth-breeder-document-file-policy.service';
 import { AuthBreederDocumentOriginalFileNameService } from './domain/services/auth-breeder-document-original-file-name.service';
@@ -205,7 +208,10 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthProfileImageTargetAdapter,
         AuthSocialIdentityService,
         AuthStoredFileNameService,
-        AuthSocialCallbackResponseFactoryService,
+        AuthSocialRedirectPathService,
+        AuthSocialSignupRedirectResponseFactoryService,
+        AuthSocialLoginSuccessRedirectResponseFactoryService,
+        AuthSocialErrorRedirectResponseFactoryService,
         AuthProfileImageFilePolicyService,
         AuthBreederDocumentFilePolicyService,
         AuthBreederDocumentOriginalFileNameService,

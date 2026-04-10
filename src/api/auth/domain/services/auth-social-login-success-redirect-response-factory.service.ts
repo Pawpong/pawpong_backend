@@ -3,12 +3,12 @@ import { Injectable } from '@nestjs/common';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 
 import {
-    type AuthSocialCallbackProfile,
     type AuthSocialCallbackResult,
     type AuthSocialCallbackRole,
     type AuthSocialCallbackTokens,
     type AuthSocialCookieOptions,
 } from '../../application/ports/auth-social-callback.port';
+import { AuthSocialRedirectPathService } from './auth-social-redirect-path.service';
 
 type LoginSuccessInput = {
     frontendUrl: string;
@@ -21,30 +21,10 @@ type LoginSuccessInput = {
 };
 
 @Injectable()
-export class AuthSocialCallbackResponseFactoryService {
-    createSignupRedirect(input: {
-        frontendUrl: string;
-        userProfile: AuthSocialCallbackProfile;
-        tempUserId: string;
-    }): AuthSocialCallbackResult {
-        const params: Record<string, string> = {
-            tempId: input.tempUserId,
-            provider: input.userProfile.provider || '',
-            email: input.userProfile.email || '',
-            name: input.userProfile.name || '',
-            profileImage: input.userProfile.profileImage || '',
-        };
+export class AuthSocialLoginSuccessRedirectResponseFactoryService {
+    constructor(private readonly authSocialRedirectPathService: AuthSocialRedirectPathService) {}
 
-        if (input.userProfile.needsEmail) {
-            params.needsEmail = 'true';
-        }
-
-        return {
-            redirectUrl: `${input.frontendUrl}/signup?${new URLSearchParams(params).toString()}`,
-        };
-    }
-
-    createLoginSuccessRedirect(input: LoginSuccessInput): AuthSocialCallbackResult {
+    create(input: LoginSuccessInput): AuthSocialCallbackResult {
         const isLocalFrontend =
             (input.frontendUrl.includes('localhost') || input.frontendUrl.includes('127.0.0.1')) &&
             !input.frontendUrl.includes('local.pawpong.kr');
@@ -57,7 +37,7 @@ export class AuthSocialCallbackResponseFactoryService {
         if (!input.isProduction || isLocalFrontend || isVercelDev) {
             input.logger.log('[processSocialLoginCallback] URL 파라미터 방식으로 토큰 전달');
 
-            const redirectPath = this.extractRedirectPath(input.originUrl, input.logger, true);
+            const redirectPath = this.authSocialRedirectPathService.resolve(input.originUrl, input.logger, true);
 
             return {
                 redirectUrl: `${input.frontendUrl}/login/success?accessToken=${encodeURIComponent(input.tokens.accessToken)}&refreshToken=${encodeURIComponent(input.tokens.refreshToken)}&returnUrl=${encodeURIComponent(redirectPath)}`,
@@ -92,44 +72,11 @@ export class AuthSocialCallbackResponseFactoryService {
             },
         ];
 
-        const redirectPath = this.extractRedirectPath(input.originUrl, input.logger, false);
+        const redirectPath = this.authSocialRedirectPathService.resolve(input.originUrl, input.logger, false);
 
         return {
             redirectUrl: `${input.frontendUrl}${redirectPath}`,
             cookies,
         };
-    }
-
-    createErrorRedirect(frontendUrl: string, errorMessage: string): AuthSocialCallbackResult {
-        const errorParams = new URLSearchParams({
-            error: errorMessage,
-            type: errorMessage.includes('탈퇴')
-                ? 'deleted_account'
-                : errorMessage.includes('정지')
-                  ? 'suspended_account'
-                  : 'login_error',
-        });
-
-        return {
-            redirectUrl: `${frontendUrl}/login?${errorParams.toString()}`,
-        };
-    }
-
-    private extractRedirectPath(originUrl: string | undefined, logger: CustomLoggerService, isLocalLog: boolean): string {
-        let redirectPath = '/explore';
-
-        if (originUrl && originUrl.includes('|')) {
-            const parts = originUrl.split('|');
-            if (parts.length > 1 && parts[1]) {
-                redirectPath = parts[1];
-                logger.log(
-                    isLocalLog
-                        ? `[processSocialLoginCallback] 추출된 redirectPath (localhost): ${redirectPath}`
-                        : `[processSocialLoginCallback] 추출된 redirectPath: ${redirectPath}`,
-                );
-            }
-        }
-
-        return redirectPath;
     }
 }
