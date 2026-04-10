@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { BreederDetailResponseDto } from '../../dto/response/breeder-detail-response.dto';
 import { BREEDER_VERIFICATION_ADMIN_FILE_URL_PORT } from '../../application/ports/breeder-verification-admin-file-url.port';
 import type { BreederVerificationAdminFileUrlPort } from '../../application/ports/breeder-verification-admin-file-url.port';
 import {
     BreederVerificationAdminBreederSnapshot,
     BreederVerificationAdminVerificationSnapshot,
 } from '../../application/ports/breeder-verification-admin-reader.port';
+import type { BreederDetailResult } from '../../application/types/breeder-verification-admin-result.type';
 
 @Injectable()
 export class BreederVerificationAdminDetailPresentationService {
@@ -15,7 +15,7 @@ export class BreederVerificationAdminDetailPresentationService {
         private readonly fileUrlPort: BreederVerificationAdminFileUrlPort,
     ) {}
 
-    toBreederDetailResponse(breeder: BreederVerificationAdminBreederSnapshot): BreederDetailResponseDto {
+    toBreederDetailResponse(breeder: BreederVerificationAdminBreederSnapshot): BreederDetailResult {
         return {
             breederId: breeder.id,
             email: breeder.emailAddress,
