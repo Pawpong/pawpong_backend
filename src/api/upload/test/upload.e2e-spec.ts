@@ -299,6 +299,16 @@ describe('업로드 종단간 테스트', () => {
             expect(response.status).toBe(401);
             console.log('인증 없이 접근 거부 확인');
         });
+
+        it('잘못된 부모견/묘 ID로 요청 실패', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/api/upload/parent-pet-photos/not-a-mongo-id')
+                .set('Authorization', `Bearer ${breederToken}`)
+                .attach('files', testImageBuffer, 'parent-pet.jpg');
+
+            expect(response.status).toBe(400);
+            console.log('잘못된 부모견/묘 ID로 요청 거부 확인');
+        });
     });
 
     describe('단일 파일 업로드 (공개 경로)', () => {
