@@ -1,15 +1,18 @@
+import type {
+    AdopterFavoriteRecord,
+    AdopterProfileApplicationRecord,
+    AdopterProfileUpdateRecord,
+    AdopterWrittenReviewEmbeddedRecord,
+} from '../../types/adopter-profile.type';
+import type { AdopterObjectIdLike } from '../../types/adopter-application.type';
+import type { AdopterBreederRecord } from '../../types/adopter-breeder.type';
+
 export const ADOPTER_PROFILE_PORT = Symbol('ADOPTER_PROFILE_PORT');
 
-export interface FavoriteBreederRecord {
-    favoriteBreederId: string;
-    breederName: string;
-    breederProfileImageUrl?: string;
-    breederLocation?: string;
-    addedAt: Date;
-}
+export type FavoriteBreederRecord = AdopterFavoriteRecord;
 
 export interface AdopterProfileRecord {
-    _id: { toString(): string };
+    _id: AdopterObjectIdLike;
     emailAddress: string;
     nickname: string;
     phoneNumber?: string;
@@ -21,21 +24,36 @@ export interface AdopterProfileRecord {
     marketingAgreed?: boolean;
     marketingConsent?: boolean;
     favoriteBreederList?: FavoriteBreederRecord[];
-    adoptionApplicationList?: any[];
-    writtenReviewList?: any[];
-    createdAt?: Date;
-    updatedAt?: Date;
+    adoptionApplicationList?: AdopterProfileApplicationRecord[];
+    writtenReviewList?: AdopterWrittenReviewEmbeddedRecord[];
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface AdopterProfilePort {
-    findById(adopterId: string, userRole?: string): Promise<AdopterProfileRecord | null>;
-    updateProfile(adopterId: string, updateData: any, userRole?: string): Promise<AdopterProfileRecord | null>;
+    findById(adopterId: string): Promise<AdopterProfileRecord | null>;
+    findById(adopterId: string, userRole: string): Promise<AdopterProfileRecord | AdopterBreederRecord | null>;
+    findById(adopterId: string, userRole?: string): Promise<AdopterProfileRecord | AdopterBreederRecord | null>;
+    updateProfile(
+        adopterId: string,
+        updateData: AdopterProfileUpdateRecord,
+    ): Promise<AdopterProfileRecord | null>;
+    updateProfile(
+        adopterId: string,
+        updateData: AdopterProfileUpdateRecord,
+        userRole: string,
+    ): Promise<AdopterProfileRecord | AdopterBreederRecord | null>;
+    updateProfile(
+        adopterId: string,
+        updateData: AdopterProfileUpdateRecord,
+        userRole?: string,
+    ): Promise<AdopterProfileRecord | AdopterBreederRecord | null>;
     findFavoriteList(
         adopterId: string,
         page: number,
         limit: number,
         userRole?: string,
     ): Promise<{ favorites: FavoriteBreederRecord[]; total: number }>;
-    addFavoriteBreeder(adopterId: string, favoriteData: any, userRole?: string): Promise<void>;
+    addFavoriteBreeder(adopterId: string, favoriteData: FavoriteBreederRecord, userRole?: string): Promise<void>;
     removeFavoriteBreeder(adopterId: string, breederId: string, userRole?: string): Promise<void>;
 }

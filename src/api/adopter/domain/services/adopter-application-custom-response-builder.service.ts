@@ -2,10 +2,14 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { AdopterApplicationCustomResponseRecord } from '../../application/ports/adopter-application-command.port';
 import type { AdopterApplicationCreateCommand } from '../../application/types/adopter-application-command.type';
+import type { AdopterApplicationCustomQuestionRecord } from '../../types/adopter-application.type';
 
 @Injectable()
 export class AdopterApplicationCustomResponseBuilderService {
-    build(dto: AdopterApplicationCreateCommand, customQuestions: any[] = []): AdopterApplicationCustomResponseRecord[] {
+    build(
+        dto: AdopterApplicationCreateCommand,
+        customQuestions: AdopterApplicationCustomQuestionRecord[] = [],
+    ): AdopterApplicationCustomResponseRecord[] {
         return (dto.customResponses || []).map((response) => {
             const question = customQuestions.find((item) => item.id === response.questionId);
             if (!question) {

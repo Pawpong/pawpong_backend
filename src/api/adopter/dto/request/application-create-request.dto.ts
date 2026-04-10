@@ -10,6 +10,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
+import type { AdopterApplicationAnswerValue } from '../../types/adopter-application.type';
 
 /**
  * 커스텀 질문 응답 DTO
@@ -41,7 +42,7 @@ export class CustomQuestionAnswerDto {
         example: '오후 (13:00-17:00)',
     })
     @IsDefined({ message: '답변을 입력해주세요.' })
-    answer: any;
+    answer: AdopterApplicationAnswerValue;
 }
 
 /**

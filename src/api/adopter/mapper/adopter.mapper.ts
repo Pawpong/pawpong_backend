@@ -4,6 +4,21 @@ import type {
     AdopterFavoriteBreederResult,
     AdopterProfileResult,
 } from '../application/types/adopter-result.type';
+import type { AdopterApplicationCreatedRecord } from '../application/ports/adopter-application-command.port';
+import type { AdopterProfileRecord, FavoriteBreederRecord } from '../application/ports/adopter-profile.port';
+import type { AdopterBreederRecord } from '../types/adopter-breeder.type';
+import type { AdopterApplicationEmbeddedRecord } from '../types/adopter-application.type';
+import type {
+    AdopterFavoriteRecord,
+    AdopterProfileUpdateRecord,
+    AdopterWrittenReviewEmbeddedRecord,
+} from '../types/adopter-profile.type';
+import type { AdopterReportPayloadRecord } from '../types/adopter-report.type';
+import type {
+    AdopterBreederReviewWriteRecord,
+    AdopterReviewSourceApplicationRecord,
+    AdopterReviewWriteRecord,
+} from '../types/adopter-review.type';
 
 /**
  * Adopter 도메인 매퍼
@@ -28,7 +43,7 @@ export class AdopterMapper {
      * @returns ApplicationCreateResponseDto
      */
     static toApplicationCreateResponse(
-        savedApplication: any,
+        savedApplication: AdopterApplicationCreatedRecord,
         breederName: string,
         petName?: string,
     ): AdopterApplicationCreateResult {
@@ -50,7 +65,7 @@ export class AdopterMapper {
      * @param adopter Adopter Document
      * @returns AdopterProfileResponseDto
      */
-    static toProfileResponse(adopter: any): AdopterProfileResult {
+    static toProfileResponse(adopter: AdopterProfileRecord): AdopterProfileResult {
         return {
             adopterId: adopter._id.toString(),
             emailAddress: adopter.emailAddress,
@@ -60,21 +75,21 @@ export class AdopterMapper {
             accountStatus: adopter.accountStatus,
             authProvider: adopter.socialAuthInfo?.authProvider || 'local',
             marketingAgreed: adopter.marketingAgreed ?? false,
-            favoriteBreederList: (adopter.favoriteBreederList || []).map((fav: any) => ({
+            favoriteBreederList: (adopter.favoriteBreederList || []).map((fav: AdopterFavoriteRecord) => ({
                 breederId: fav.favoriteBreederId,
                 breederName: fav.breederName,
                 addedAt: fav.addedAt,
                 breederProfileImageUrl: fav.breederProfileImageUrl,
                 breederLocation: fav.breederLocation,
             })),
-            adoptionApplicationList: (adopter.adoptionApplicationList || []).map((app: any) => ({
+            adoptionApplicationList: (adopter.adoptionApplicationList || []).map((app: AdopterApplicationEmbeddedRecord) => ({
                 applicationId: app.applicationId,
                 breederId: app.targetBreederId,
                 petId: app.targetPetId,
                 applicationStatus: app.applicationStatus,
                 appliedAt: app.appliedAt,
             })),
-            writtenReviewList: (adopter.writtenReviewList || []).map((review: any) => ({
+            writtenReviewList: (adopter.writtenReviewList || []).map((review: AdopterWrittenReviewEmbeddedRecord) => ({
                 reviewId: review.reviewId,
                 breederId: review.targetBreederId,
                 rating: review.overallRating,
@@ -96,8 +111,8 @@ export class AdopterMapper {
      * @returns 즐겨찾기 브리더 상세 정보
      */
     static toFavoriteDetail(
-        favorite: any,
-        breeder: any | null,
+        favorite: FavoriteBreederRecord,
+        breeder: AdopterBreederRecord | null,
         profileImageUrl: string,
         representativePhotos: string[],
     ): AdopterFavoriteBreederResult {
@@ -155,7 +170,7 @@ export class AdopterMapper {
                 display: priceDisplay as PriceDisplayType,
             },
             availablePets:
-                breeder.availablePets?.filter((pet: any) => pet.status === 'available' && pet.isActive).length || 0,
+                breeder.availablePets?.filter((pet) => pet.status === 'available' && pet.isActive).length || 0,
             addedAt: favorite.addedAt,
             isActive: true,
         };
@@ -174,12 +189,12 @@ export class AdopterMapper {
      */
     static toAdopterReview(
         reviewId: string,
-        application: any,
+        application: AdopterReviewSourceApplicationRecord,
         reviewType: string,
         rating: number,
         content: string,
         photos: string[],
-    ): any {
+    ): AdopterReviewWriteRecord {
         return {
             reviewId,
             targetBreederId: application.targetBreederId,
@@ -218,7 +233,7 @@ export class AdopterMapper {
         rating: number,
         content: string,
         photos: string[],
-    ): any {
+    ): AdopterBreederReviewWriteRecord {
         return {
             reviewId,
             adopterId,
@@ -240,7 +255,7 @@ export class AdopterMapper {
      * @param breeder 브리더 Document
      * @returns 즐겨찾기 데이터
      */
-    static toFavoriteBreeder(breederId: string, breeder: any): any {
+    static toFavoriteBreeder(breederId: string, breeder: AdopterBreederRecord): FavoriteBreederRecord {
         return {
             favoriteBreederId: breederId,
             breederName: breeder.name,
@@ -268,7 +283,7 @@ export class AdopterMapper {
         type: string,
         description: string,
         status: string,
-    ): any {
+    ): AdopterReportPayloadRecord {
         return {
             reportId,
             reporterId: userId,
@@ -291,8 +306,8 @@ export class AdopterMapper {
         phone?: string;
         profileImage?: string;
         marketingConsent?: boolean;
-    }): any {
-        const mappedData: any = {};
+    }): AdopterProfileUpdateRecord {
+        const mappedData: AdopterProfileUpdateRecord = {};
         if (updateData.name) mappedData.fullName = updateData.name;
         if (updateData.phone) mappedData.phoneNumber = updateData.phone;
         if (updateData.profileImage) mappedData.profileImageFileName = updateData.profileImage;

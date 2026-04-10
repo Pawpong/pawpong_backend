@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
+import type { AdopterObjectIdLike } from '../../types/adopter-application.type';
 import {
     AdopterAdminAdminSnapshot,
     AdopterAdminApplicationDetailSnapshot,
@@ -10,7 +11,12 @@ import {
     AdopterAdminReaderPort,
     AdopterAdminReviewReportPageSnapshot,
 } from '../application/ports/adopter-admin-reader.port';
-import { AdopterAdminRepository } from '../repository/adopter-admin.repository';
+import {
+    AdopterAdminApplicationRepositoryRecord,
+    AdopterAdminNamedRecord,
+    AdopterAdminRepository,
+    AdopterAdminReviewRepositoryRecord,
+} from '../repository/adopter-admin.repository';
 
 @Injectable()
 export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
@@ -38,7 +44,7 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
         const reporterIds = Array.from(
             new Set(
                 reviews
-                    .map((review: any) => review.reportedBy?.toString())
+                    .map((review) => review.reportedBy?.toString())
                     .filter((value): value is string => Boolean(value)),
             ),
         ).map((value) => new Types.ObjectId(value));
@@ -49,24 +55,24 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
         ]);
 
         const adopterReporterMap = new Map(
-            reportingAdopters.map((adopter: any) => [adopter._id.toString(), adopter.nickname]),
+            reportingAdopters.map((adopter: AdopterAdminNamedRecord) => [adopter._id.toString(), adopter.nickname]),
         );
         const breederReporterMap = new Map(
-            reportingBreeders.map((breeder: any) => [breeder._id.toString(), breeder.name]),
+            reportingBreeders.map((breeder: AdopterAdminNamedRecord) => [breeder._id.toString(), breeder.name]),
         );
 
         return {
-            items: reviews.map((review: any) => {
+            items: reviews.map((review: AdopterAdminReviewRepositoryRecord) => {
                 const reporterId = review.reportedBy?.toString();
-                const breeder = review.breederId as any;
-                const author = review.adopterId as any;
+                const breeder = review.breederId;
+                const author = review.adopterId;
 
                 return {
                     reviewId: review._id.toString(),
-                    breederId: breeder?._id?.toString() || breeder?.toString() || '',
-                    breederName: breeder?.name || 'Unknown',
-                    authorId: author?._id?.toString() || author?.toString() || '',
-                    authorName: author?.nickname || 'Unknown',
+                    breederId: this.toReferencedId(breeder),
+                    breederName: this.toReferencedName(breeder, 'name', 'Unknown'),
+                    authorId: this.toReferencedId(author),
+                    authorName: this.toReferencedName(author, 'nickname', 'Unknown'),
                     reportedBy: reporterId,
                     reporterName:
                         (reporterId && adopterReporterMap.get(reporterId)) ||
@@ -89,7 +95,14 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
     async findApplicationList(
         filter: AdopterAdminApplicationListFilterSnapshot,
     ): Promise<AdopterAdminApplicationListSnapshot> {
-        const query: Record<string, any> = {};
+        const query: {
+            status?: ApplicationStatus;
+            breederId?: { $in: Types.ObjectId[] };
+            appliedAt?: {
+                $gte?: Date;
+                $lte?: Date;
+            };
+        } = {};
 
         if (filter.status) {
             query.status = filter.status;
@@ -111,7 +124,7 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
                 };
             }
 
-            query.breederId = { $in: breeders.map((breeder: any) => breeder._id) };
+            query.breederId = { $in: breeders.map((breeder) => breeder._id) };
         }
 
         if (filter.startDate || filter.endDate) {
@@ -139,18 +152,18 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
             ]);
 
         return {
-            items: applications.map((application: any) => {
-                const breeder = application.breederId as any;
+            items: applications.map((application: AdopterAdminApplicationRepositoryRecord) => {
+                const breeder = application.breederId;
 
                 return {
                     applicationId: application._id.toString(),
                     adopterName: application.adopterName,
                     adopterEmail: application.adopterEmail,
                     adopterPhone: application.adopterPhone,
-                    breederId: breeder?._id ? breeder._id.toString() : breeder ? breeder.toString() : '',
-                    breederName: breeder?.name || '알 수 없음',
+                    breederId: this.toReferencedId(breeder),
+                    breederName: this.toReferencedName(breeder, 'name', '알 수 없음'),
                     petName: application.petName,
-                    status: application.status,
+                    status: application.status as ApplicationStatus,
                     appliedAt: application.appliedAt,
                     processedAt: application.processedAt,
                 };
@@ -172,15 +185,15 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
             return null;
         }
 
-        const breeder = application.breederId as any;
+        const breeder = application.breederId;
 
         return {
             applicationId: application._id.toString(),
             adopterName: application.adopterName,
             adopterEmail: application.adopterEmail,
             adopterPhone: application.adopterPhone,
-            breederId: breeder?._id ? breeder._id.toString() : breeder ? breeder.toString() : '',
-            breederName: breeder?.name || '알 수 없음',
+            breederId: this.toReferencedId(breeder),
+            breederName: this.toReferencedName(breeder, 'name', '알 수 없음'),
             petName: application.petName,
             status: application.status as ApplicationStatus,
             standardResponses: application.standardResponses || {},
@@ -189,5 +202,39 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
             processedAt: application.processedAt,
             breederNotes: application.breederNotes,
         };
+    }
+
+    private toReferencedId(
+        value?: AdopterObjectIdLike | { _id?: AdopterObjectIdLike } | null,
+    ): string {
+        if (!value) {
+            return '';
+        }
+
+        if ('_id' in value && value._id) {
+            return value._id.toString();
+        }
+
+        return value.toString();
+    }
+
+    private toReferencedName<TField extends 'name' | 'nickname'>(
+        value: AdopterObjectIdLike | { _id?: AdopterObjectIdLike } | { name?: string; nickname?: string } | null | undefined,
+        field: TField,
+        fallback: string,
+    ): string {
+        if (!value || typeof value !== 'object') {
+            return fallback;
+        }
+
+        if (field === 'name' && 'name' in value && typeof value.name === 'string' && value.name) {
+            return value.name;
+        }
+
+        if (field === 'nickname' && 'nickname' in value && typeof value.nickname === 'string' && value.nickname) {
+            return value.nickname;
+        }
+
+        return fallback;
     }
 }

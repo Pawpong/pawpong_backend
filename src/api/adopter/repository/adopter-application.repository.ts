@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 import {
     AdoptionApplication,
@@ -8,6 +8,7 @@ import {
 } from '../../../schema/adoption-application.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 import type { AdopterApplicationCreateCommand } from '../application/ports/adopter-application-command.port';
+import type { AdopterObjectIdLike } from '../types/adopter-application.type';
 
 @Injectable()
 export class AdopterApplicationRepository {
@@ -38,7 +39,7 @@ export class AdopterApplicationRepository {
             .select('_id')
             .exec();
 
-        return breeders.map((breeder: any) => breeder._id.toString());
+        return breeders.map((breeder) => (breeder._id as AdopterObjectIdLike).toString());
     }
 
     countByAdopterId(adopterId: string, breederIds?: string[]): Promise<number> {
@@ -61,8 +62,8 @@ export class AdopterApplicationRepository {
         });
     }
 
-    private buildQuery(adopterId: string, breederIds?: string[]): Record<string, any> {
-        const query: Record<string, any> = { adopterId };
+    private buildQuery(adopterId: string, breederIds?: string[]): FilterQuery<AdoptionApplicationDocument> {
+        const query: FilterQuery<AdoptionApplicationDocument> = { adopterId };
         if (breederIds) {
             query.breederId = { $in: breederIds };
         }

@@ -6,6 +6,7 @@ import type {
     AdopterApplicationListItemResult,
     AdopterApplicationPageResult,
 } from '../../application/types/adopter-result.type';
+import type { AdopterBreederRecord } from '../../types/adopter-breeder.type';
 import { AdopterPaginationAssemblerService } from './adopter-pagination-assembler.service';
 
 @Injectable()
@@ -18,7 +19,7 @@ export class AdopterApplicationListAssemblerService {
 
     toItem(
         application: AdopterApplicationRecord,
-        breeder: any | null,
+        breeder: AdopterBreederRecord | null,
         adopterFileUrlPort: AdopterFileUrlPort,
     ): AdopterApplicationListItemResult {
         return {

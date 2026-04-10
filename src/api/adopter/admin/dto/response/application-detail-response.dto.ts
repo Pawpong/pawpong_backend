@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { ApplicationStatus } from '../../../../../common/enum/user.enum';
+import type { AdopterApplicationAnswerValue } from '../../../types/adopter-application.type';
 
 /**
  * 표준 신청 응답 데이터 DTO (어드민 상세 조회용)
@@ -59,7 +60,7 @@ export class AdminCustomResponseDto {
     questionType: string;
 
     @ApiProperty({ description: '응답 값' })
-    answer: any;
+    answer: AdopterApplicationAnswerValue;
 }
 
 /**

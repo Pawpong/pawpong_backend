@@ -1,4 +1,8 @@
 import { ApplicationStatus } from '../../../../../common/enum/user.enum';
+import type {
+    AdopterApplicationCustomResponseRecord,
+    AdopterApplicationStandardResponsesRecord,
+} from '../../../types/adopter-application.type';
 
 export interface AdopterAdminAdminSnapshot {
     adminId: string;
@@ -68,7 +72,7 @@ export interface AdopterAdminApplicationDetailCustomResponseSnapshot {
     questionId: string;
     questionLabel: string;
     questionType: string;
-    answer: any;
+    answer: AdopterApplicationCustomResponseRecord['answer'];
 }
 
 export interface AdopterAdminApplicationDetailSnapshot {
@@ -80,7 +84,7 @@ export interface AdopterAdminApplicationDetailSnapshot {
     breederName: string;
     petName?: string;
     status: ApplicationStatus;
-    standardResponses: Record<string, any>;
+    standardResponses: Partial<AdopterApplicationStandardResponsesRecord>;
     customResponses: AdopterAdminApplicationDetailCustomResponseSnapshot[];
     appliedAt: Date;
     processedAt?: Date;

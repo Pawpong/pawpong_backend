@@ -7,6 +7,10 @@ import type {
 } from '../application/ports/adopter-review-reader.port';
 import { AdopterReviewReaderPort } from '../application/ports/adopter-review-reader.port';
 import { AdopterReviewRepository } from '../repository/adopter-review.repository';
+import type {
+    AdopterReviewRepositoryBreederRecord,
+    AdopterReviewRepositoryRecord,
+} from '../types/adopter-review.type';
 
 @Injectable()
 export class AdopterReviewReaderAdapter extends AdopterReviewReaderPort {
@@ -22,9 +26,13 @@ export class AdopterReviewReaderAdapter extends AdopterReviewReaderPort {
     }
 
     async findPagedByAdopterId(adopterId: string, page: number, limit: number): Promise<AdopterReviewListRecord[]> {
-        const reviews = await this.adopterReviewRepository.findPagedByAdopterId(adopterId, page, limit);
+        const reviews = (await this.adopterReviewRepository.findPagedByAdopterId(
+            adopterId,
+            page,
+            limit,
+        )) as AdopterReviewRepositoryRecord[];
 
-        return reviews.map((review: any) => {
+        return reviews.map((review) => {
             const breeder = review.breederId;
             return {
                 reviewId: review._id.toString(),
@@ -44,13 +52,16 @@ export class AdopterReviewReaderAdapter extends AdopterReviewReaderPort {
     }
 
     async findDetailByAdopterId(adopterId: string, reviewId: string): Promise<AdopterReviewDetailRecord | null> {
-        const review = await this.adopterReviewRepository.findDetailByAdopterId(adopterId, reviewId);
+        const review = (await this.adopterReviewRepository.findDetailByAdopterId(
+            adopterId,
+            reviewId,
+        )) as AdopterReviewRepositoryRecord | null;
 
         if (!review) {
             return null;
         }
 
-        const breeder = review.breederId as any;
+        const breeder = review.breederId as AdopterReviewRepositoryBreederRecord | null | undefined;
 
         return {
             reviewId: review._id.toString(),

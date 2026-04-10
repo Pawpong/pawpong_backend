@@ -1,6 +1,8 @@
+import type { AdopterApplicationAnswerValue } from '../../types/adopter-application.type';
+
 export type AdopterApplicationCustomAnswerCommand = {
     questionId: string;
-    answer: unknown;
+    answer: AdopterApplicationAnswerValue;
 };
 
 export type AdopterApplicationCreateCommand = {
