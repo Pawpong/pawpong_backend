@@ -20,6 +20,10 @@ export class District extends Document {
      */
     @Prop({ type: [String], required: true })
     districts: string[];
+
+    createdAt: Date;
+
+    updatedAt: Date;
 }
 
 export const DistrictSchema = SchemaFactory.createForClass(District);

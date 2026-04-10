@@ -1,10 +1,10 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 
-import { UpdateDistrictRequestDto } from '../../../../breeder-management/request/update-district-request.dto';
 import type { DistrictAdminResult } from '../../../application/types/district-result.type';
 import { DistrictAdminPresentationService } from '../../../domain/services/district-admin-presentation.service';
 import { DISTRICT_ADMIN_READER, type DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
 import { DISTRICT_WRITER, type DistrictWriterPort } from '../ports/district-writer.port';
+import { UpdateDistrictCommand } from '../types/district-command.type';
 
 @Injectable()
 export class UpdateDistrictUseCase {
@@ -16,7 +16,7 @@ export class UpdateDistrictUseCase {
         private readonly districtAdminPresentationService: DistrictAdminPresentationService,
     ) {}
 
-    async execute(id: string, dto: UpdateDistrictRequestDto): Promise<DistrictAdminResult> {
+    async execute(id: string, dto: UpdateDistrictCommand): Promise<DistrictAdminResult> {
         const district = await this.districtAdminReader.findById(id);
 
         if (!district) {

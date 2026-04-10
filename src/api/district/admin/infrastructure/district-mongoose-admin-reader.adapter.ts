@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { DistrictAdminReaderPort, DistrictSnapshot } from '../application/ports/district-admin-reader.port';
 import { DistrictRepository } from '../../repository/district.repository';
+import { District } from '../../../../schema/district.schema';
 
 @Injectable()
 export class DistrictMongooseAdminReaderAdapter implements DistrictAdminReaderPort {
@@ -22,7 +23,7 @@ export class DistrictMongooseAdminReaderAdapter implements DistrictAdminReaderPo
         return district ? this.toSnapshot(district) : null;
     }
 
-    private toSnapshot(district: any): DistrictSnapshot {
+    private toSnapshot(district: District): DistrictSnapshot {
         return {
             id: district._id.toString(),
             city: district.city,

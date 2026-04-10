@@ -3,8 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { District } from '../../../schema/district.schema';
-import { CreateDistrictRequestDto } from '../../breeder-management/request/create-district-request.dto';
-import { UpdateDistrictRequestDto } from '../../breeder-management/request/update-district-request.dto';
+import { CreateDistrictCommand, UpdateDistrictCommand } from '../admin/application/types/district-command.type';
 
 @Injectable()
 export class DistrictRepository {
@@ -31,12 +30,12 @@ export class DistrictRepository {
             .exec();
     }
 
-    async create(dto: CreateDistrictRequestDto): Promise<District> {
+    async create(dto: CreateDistrictCommand): Promise<District> {
         const district = new this.districtModel(dto);
         return district.save();
     }
 
-    update(id: string, dto: UpdateDistrictRequestDto): Promise<District | null> {
+    update(id: string, dto: UpdateDistrictCommand): Promise<District | null> {
         return this.districtModel
             .findByIdAndUpdate(id, { $set: dto }, { new: true, runValidators: false })
             .exec();
