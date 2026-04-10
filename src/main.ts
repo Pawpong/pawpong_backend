@@ -174,6 +174,7 @@ async function bootstrap(): Promise<void> {
             client: {
                 clientId: 'pawpong-chat-consumer',
                 brokers: [kafkaBroker],
+                requestTimeout: 30000,
                 retry: {
                     initialRetryTime: 300,
                     retries: 10,
@@ -182,6 +183,8 @@ async function bootstrap(): Promise<void> {
             consumer: {
                 groupId: 'pawpong-chat-consumer-group',
                 allowAutoTopicCreation: true,
+                sessionTimeout: 30000,
+                heartbeatInterval: 3000,
             },
         },
     });
