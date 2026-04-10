@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { NotificationType, NOTIFICATION_MESSAGES } from '../../../../schema/notification.schema';
+import type { NotificationMetadata } from '../../../../schema/notification.schema';
 
 @Injectable()
 export class NotificationMessageTemplateService {
-    render(type: NotificationType, metadata?: Record<string, any>): { title: string; body: string } {
+    render(type: NotificationType, metadata?: NotificationMetadata): { title: string; body: string } {
         const template = NOTIFICATION_MESSAGES[type];
         if (!template) {
             throw new BadRequestException(`알 수 없는 알림 타입: ${type}`);

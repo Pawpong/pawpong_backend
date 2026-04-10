@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 import { Notification } from '../../../schema/notification.schema';
 import { NotificationCreateCommand } from '../application/ports/notification-command.port';
 import { NotificationInboxListOptions, NotificationInboxRecord } from '../application/ports/notification-inbox.port';
+import type { NotificationDocumentRecord } from '../types/notification-record.type';
 
 @Injectable()
 export class NotificationRepository {
@@ -31,19 +32,25 @@ export class NotificationRepository {
         userId: string,
         options: NotificationInboxListOptions,
     ): Promise<{ items: NotificationInboxRecord[]; totalItems: number }> {
-        const query: Record<string, any> = { userId };
+        const query: FilterQuery<Notification> = { userId };
         if (options.isRead !== undefined) {
             query.isRead = options.isRead;
         }
 
         const skip = (options.page - 1) * options.limit;
         const [items, totalItems] = await Promise.all([
-            this.notificationModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(options.limit).lean().exec(),
+            this.notificationModel
+                .find(query)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(options.limit)
+                .lean<NotificationDocumentRecord[]>()
+                .exec(),
             this.notificationModel.countDocuments(query).exec(),
         ]);
 
         return {
-            items: items as unknown as NotificationInboxRecord[],
+            items: items.map((item) => this.toInboxRecord(item)),
             totalItems,
         };
     }
@@ -52,14 +59,22 @@ export class NotificationRepository {
         return this.notificationModel.countDocuments({ userId, isRead: false }).exec();
     }
 
-    findByIdForUser(userId: string, notificationId: string): Promise<NotificationInboxRecord | null> {
-        return this.notificationModel.findOne({ _id: notificationId, userId }).exec() as Promise<NotificationInboxRecord | null>;
+    async findByIdForUser(userId: string, notificationId: string): Promise<NotificationInboxRecord | null> {
+        const notification = await this.notificationModel
+            .findOne({ _id: notificationId, userId })
+            .lean<NotificationDocumentRecord>()
+            .exec();
+
+        return notification ? this.toInboxRecord(notification) : null;
     }
 
-    markAsRead(userId: string, notificationId: string, readAt: Date): Promise<NotificationInboxRecord | null> {
-        return this.notificationModel
+    async markAsRead(userId: string, notificationId: string, readAt: Date): Promise<NotificationInboxRecord | null> {
+        const notification = await this.notificationModel
             .findOneAndUpdate({ _id: notificationId, userId }, { $set: { isRead: true, readAt } }, { new: true })
-            .exec() as Promise<NotificationInboxRecord | null>;
+            .lean<NotificationDocumentRecord>()
+            .exec();
+
+        return notification ? this.toInboxRecord(notification) : null;
     }
 
     async markAllAsRead(userId: string, readAt: Date): Promise<number> {
@@ -73,5 +88,19 @@ export class NotificationRepository {
     async deleteForUser(userId: string, notificationId: string): Promise<number> {
         const result = await this.notificationModel.deleteOne({ _id: notificationId, userId }).exec();
         return result.deletedCount;
+    }
+
+    private toInboxRecord(notification: NotificationDocumentRecord): NotificationInboxRecord {
+        return {
+            _id: notification._id,
+            type: notification.type,
+            title: notification.title,
+            body: notification.body,
+            metadata: notification.metadata,
+            isRead: notification.isRead,
+            readAt: notification.readAt,
+            targetUrl: notification.targetUrl,
+            createdAt: notification.createdAt,
+        };
     }
 }

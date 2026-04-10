@@ -1,5 +1,6 @@
 import { NotificationBuilder } from '../../builder/notification.builder';
 import { NotificationType, Notification } from '../../../../schema/notification.schema';
+import type { NotificationMetadata } from '../../../../schema/notification.schema';
 import { RecipientType } from '../../../../common/enum/user.enum';
 
 export abstract class NotificationDispatchPort {
@@ -7,7 +8,7 @@ export abstract class NotificationDispatchPort {
         userId: string,
         userRole: 'adopter' | 'breeder',
         type: NotificationType,
-        metadata?: Record<string, any>,
+        metadata?: NotificationMetadata,
         targetUrl?: string,
     ): Promise<Notification>;
 

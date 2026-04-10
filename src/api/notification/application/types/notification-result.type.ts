@@ -1,4 +1,5 @@
 import { NotificationType } from '../../../../schema/notification.schema';
+import type { NotificationMetadata } from '../../../../schema/notification.schema';
 import type { PageResult } from '../../../../common/types/page-result.type';
 
 export type NotificationItemResult = {
@@ -6,7 +7,7 @@ export type NotificationItemResult = {
     type: NotificationType;
     title: string;
     body: string;
-    metadata?: Record<string, any>;
+    metadata?: NotificationMetadata;
     isRead: boolean;
     readAt?: Date;
     targetUrl?: string;

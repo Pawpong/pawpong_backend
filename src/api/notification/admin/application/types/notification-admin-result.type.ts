@@ -1,14 +1,16 @@
 import { NotificationType } from '../../../../../schema/notification.schema';
+import type { NotificationMetadata } from '../../../../../schema/notification.schema';
+import type { NotificationUserRole } from '../../../application/ports/notification-command.port';
 import type { PageResult } from '../../../../../common/types/page-result.type';
 
 export type NotificationAdminItemResult = {
     notificationId: string;
     userId: string;
-    userRole: string;
+    userRole: NotificationUserRole;
     type: NotificationType;
     title: string;
     body: string;
-    metadata?: Record<string, any>;
+    metadata?: NotificationMetadata;
     isRead: boolean;
     readAt?: Date;
     targetUrl?: string;

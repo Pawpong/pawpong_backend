@@ -1,7 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { NotificationType } from '../../../../schema/notification.schema';
 import { Notification } from '../../../../schema/notification.schema';
+import { NotificationType } from '../../../../schema/notification.schema';
+import type { NotificationMetadata } from '../../../../schema/notification.schema';
 import {
     NOTIFICATION_COMMAND_PORT,
     NotificationUserRole,
@@ -21,7 +22,7 @@ export class CreateNotificationUseCase {
         userId: string,
         userRole: NotificationUserRole,
         type: NotificationType,
-        metadata?: Record<string, any>,
+        metadata?: NotificationMetadata,
         targetUrl?: string,
     ): Promise<Notification> {
         const message = this.notificationMessageTemplateService.render(type, metadata);

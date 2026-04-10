@@ -5,6 +5,17 @@ import { NotificationType } from '../common/enum/user.enum';
 // Re-export for backward compatibility
 export { NotificationType } from '../common/enum/user.enum';
 
+export type NotificationMetadataValue = string | number | boolean | null | undefined;
+export type NotificationMetadata = {
+    breederId?: string;
+    breederName?: string;
+    petId?: string;
+    petName?: string;
+    applicationId?: string;
+    reviewId?: string;
+    [key: string]: NotificationMetadataValue;
+};
+
 /**
  * 알림 타입별 메시지 템플릿
  * 백엔드에서 관리하는 고정 메시지
@@ -111,15 +122,7 @@ export class Notification extends Document {
      * 동적 데이터 (예: 브리더명, 반려동물명 등)
      */
     @Prop({ type: Object })
-    metadata?: {
-        breederId?: string;
-        breederName?: string;
-        petId?: string;
-        petName?: string;
-        applicationId?: string;
-        reviewId?: string;
-        [key: string]: any;
-    };
+    metadata?: NotificationMetadata;
 
     /**
      * 읽음 여부
