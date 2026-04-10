@@ -1,14 +1,13 @@
 import { Get, Param, Query } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetBreederParentPetsUseCase } from './application/use-cases/get-breeder-parent-pets.use-case';
 import { GetBreederPetDetailUseCase } from './application/use-cases/get-breeder-pet-detail.use-case';
 import { GetBreederPetsUseCase } from './application/use-cases/get-breeder-pets.use-case';
+import type { BreederPetsPageResult } from './application/types/breeder-result.type';
 import { BreederOptionalAuthController, BreederPublicController } from './decorator/breeder-public-controller.decorator';
 import { PetDetailResponseDto } from './dto/response/pet-detail-response.dto';
 import { ParentPetListResponseDto } from './dto/response/parent-pet-list.dto';
-import { PetsListResponseDto } from './dto/response/pets-list-response.dto';
 import { BREEDER_RESPONSE_MESSAGES } from './domain/services/breeder-response-message.service';
 import {
     ApiGetBreederParentPetsEndpoint,
@@ -30,7 +29,7 @@ export class BreederPetsController {
         @Query('status') status?: string,
         @Query('page') page: number = 1,
         @Query('limit') limit: number = 20,
-    ): Promise<ApiResponseDto<PetsListResponseDto>> {
+    ): Promise<ApiResponseDto<BreederPetsPageResult>> {
         const result = await this.getBreederPetsUseCase.execute(breederId, status, Number(page), Number(limit));
         return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.petsRetrieved);
     }

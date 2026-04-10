@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import type { BreederFileUrlPort } from '../../application/ports/breeder-file-url.port';
-import { PetsListResponseDto } from '../../dto/response/pets-list-response.dto';
+import type { BreederPetsPageResult } from '../../application/types/breeder-result.type';
 import { BreederBirthDateFormatterService } from './breeder-birth-date-formatter.service';
 import { BreederPaginationAssemblerService } from './breeder-pagination-assembler.service';
 
@@ -12,7 +12,13 @@ export class BreederPublicPetListResponseMapperService {
         private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService,
     ) {}
 
-    toPaginationResponse(pets: any[], status: string | undefined, page: number, limit: number, fileUrlPort: BreederFileUrlPort) {
+    toPaginationResponse(
+        pets: any[],
+        status: string | undefined,
+        page: number,
+        limit: number,
+        fileUrlPort: BreederFileUrlPort,
+    ): BreederPetsPageResult {
         const availableCount = pets.filter((pet) => pet.status === 'available').length;
         const reservedCount = pets.filter((pet) => pet.status === 'reserved').length;
         const adoptedCount = pets.filter((pet) => pet.status === 'adopted').length;
@@ -76,17 +82,18 @@ export class BreederPublicPetListResponseMapperService {
             };
         });
 
-        const paginationBuilder = this.breederPaginationAssemblerService.createBuilder(
+        const pageResult = this.breederPaginationAssemblerService.build(
             items,
             page,
             limit,
             filteredPets.length,
         );
 
-        return Object.assign(new PetsListResponseDto(paginationBuilder), {
+        return {
+            ...pageResult,
             availableCount,
             reservedCount,
             adoptedCount,
-        });
+        };
     }
 }
