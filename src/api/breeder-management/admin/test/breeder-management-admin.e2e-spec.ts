@@ -65,6 +65,31 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
                 .expect(403);
             console.log('일반 사용자 접근 403 확인');
         });
+
+        it('잘못된 프로필 배너 ID 형식으로 수정 시 400', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
+
+            const response = await request(app.getHttpServer())
+                .put('/api/breeder-management-admin/profile-banner/invalid-banner-id')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({})
+                .expect(400);
+
+            expect(response.body.message).toContain('올바르지 않은 배너 ID 형식');
+            console.log('잘못된 프로필 배너 ID 400 확인');
+        });
+
+        it('잘못된 프로필 배너 ID 형식으로 삭제 시 400', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
+
+            const response = await request(app.getHttpServer())
+                .delete('/api/breeder-management-admin/profile-banner/invalid-banner-id')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .expect(400);
+
+            expect(response.body.message).toContain('올바르지 않은 배너 ID 형식');
+            console.log('잘못된 프로필 배너 삭제 ID 400 확인');
+        });
     });
 
     /**
@@ -90,6 +115,31 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
 
             expect(response.body.success).toBe(true);
             console.log('전체 상담 배너 조회 성공');
+        });
+
+        it('잘못된 상담 배너 ID 형식으로 수정 시 400', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
+
+            const response = await request(app.getHttpServer())
+                .put('/api/breeder-management-admin/counsel-banner/invalid-banner-id')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({})
+                .expect(400);
+
+            expect(response.body.message).toContain('올바르지 않은 배너 ID 형식');
+            console.log('잘못된 상담 배너 ID 400 확인');
+        });
+
+        it('잘못된 상담 배너 ID 형식으로 삭제 시 400', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
+
+            const response = await request(app.getHttpServer())
+                .delete('/api/breeder-management-admin/counsel-banner/invalid-banner-id')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .expect(400);
+
+            expect(response.body.message).toContain('올바르지 않은 배너 ID 형식');
+            console.log('잘못된 상담 배너 삭제 ID 400 확인');
         });
     });
 });
