@@ -23,6 +23,6 @@ export class GetBreederApplicationFormUseCase {
             throw new BadRequestException('브리더를 찾을 수 없습니다.');
         }
 
-        return this.breederPublicApplicationFormBuilderService.build((breeder as any).applicationForm || []);
+        return this.breederPublicApplicationFormBuilderService.build(breeder.applicationForm || []);
     }
 }

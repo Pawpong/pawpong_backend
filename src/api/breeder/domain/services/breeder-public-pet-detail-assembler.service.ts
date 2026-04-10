@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
+import type { BreederPublicPetRecord } from '../../application/ports/breeder-public-reader.port';
+
 @Injectable()
 export class BreederPublicPetDetailAssemblerService {
-    toResponse(pet: any) {
+    toResponse(pet: BreederPublicPetRecord) {
         const father = pet.parentInfo?.father;
         const mother = pet.parentInfo?.mother;
 
