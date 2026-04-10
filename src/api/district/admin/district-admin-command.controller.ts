@@ -5,8 +5,8 @@ import { CreateDistrictUseCase } from './application/use-cases/create-district.u
 import { DeleteDistrictUseCase } from './application/use-cases/delete-district.use-case';
 import { UpdateDistrictUseCase } from './application/use-cases/update-district.use-case';
 import type { DistrictAdminResult } from '../application/types/district-result.type';
+import { DISTRICT_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from './constants/district-admin-response-messages';
 import { DistrictAdminProtectedController } from './decorator/district-admin-controller.decorator';
-import { DistrictAdminResponseMessageService } from './domain/services/district-admin-response-message.service';
 import { CreateDistrictRequestDto } from './dto/request/create-district-request.dto';
 import { UpdateDistrictRequestDto } from './dto/request/update-district-request.dto';
 import { DistrictResponseDto } from '../dto/response/district-response.dto';
@@ -22,7 +22,6 @@ export class DistrictAdminCommandController {
         private readonly createDistrictUseCase: CreateDistrictUseCase,
         private readonly updateDistrictUseCase: UpdateDistrictUseCase,
         private readonly deleteDistrictUseCase: DeleteDistrictUseCase,
-        private readonly districtAdminResponseMessageService: DistrictAdminResponseMessageService,
     ) {}
 
     @Post()
@@ -46,6 +45,6 @@ export class DistrictAdminCommandController {
     @ApiDeleteDistrictAdminEndpoint()
     async deleteDistrict(@Param('id') id: string): Promise<ApiResponseDto<null>> {
         await this.deleteDistrictUseCase.execute(id);
-        return ApiResponseDto.success(null, this.districtAdminResponseMessageService.districtDeleted());
+        return ApiResponseDto.success(null, DISTRICT_ADMIN_RESPONSE_MESSAGE_EXAMPLES.districtDeleted);
     }
 }

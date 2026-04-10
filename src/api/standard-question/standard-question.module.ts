@@ -15,9 +15,6 @@ import { ReorderStandardQuestionsUseCase } from './admin/application/use-cases/r
 import { ReseedStandardQuestionsUseCase } from './admin/application/use-cases/reseed-standard-questions.use-case';
 import { StandardQuestionPresentationService } from './domain/services/standard-question-presentation.service';
 import { StandardQuestionSeedCatalogService } from './domain/services/standard-question-seed-catalog.service';
-import { StandardQuestionAdminQuestionCommandResponseMessageService } from './admin/domain/services/standard-question-admin-question-command-response-message.service';
-import { StandardQuestionAdminQueryResponseMessageService } from './admin/domain/services/standard-question-admin-query-response-message.service';
-import { StandardQuestionAdminSeedCommandResponseMessageService } from './admin/domain/services/standard-question-admin-seed-command-response-message.service';
 import { StandardQuestionMongooseReaderAdapter } from './infrastructure/standard-question-mongoose-reader.adapter';
 import { StandardQuestionMongooseWriterAdapter } from './admin/infrastructure/standard-question-mongoose-writer.adapter';
 import { StandardQuestionRepository } from './repository/standard-question.repository';
@@ -37,9 +34,6 @@ import { StandardQuestion, StandardQuestionSchema } from '../../schema/standard-
         ReseedStandardQuestionsUseCase,
         StandardQuestionPresentationService,
         StandardQuestionSeedCatalogService,
-        StandardQuestionAdminQueryResponseMessageService,
-        StandardQuestionAdminQuestionCommandResponseMessageService,
-        StandardQuestionAdminSeedCommandResponseMessageService,
         StandardQuestionRepository,
         StandardQuestionMongooseReaderAdapter,
         StandardQuestionMongooseWriterAdapter,

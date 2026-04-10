@@ -6,9 +6,8 @@ import { ReseedStandardQuestionsUseCase } from './application/use-cases/reseed-s
 import { ToggleStandardQuestionStatusUseCase } from './application/use-cases/toggle-standard-question-status.use-case';
 import { UpdateStandardQuestionUseCase } from './application/use-cases/update-standard-question.use-case';
 import type { StandardQuestionResult } from './application/types/standard-question-result.type';
+import { STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from './constants/standard-question-admin-response-messages';
 import { StandardQuestionAdminProtectedController } from './decorator/standard-question-admin-controller.decorator';
-import { StandardQuestionAdminQuestionCommandResponseMessageService } from './domain/services/standard-question-admin-question-command-response-message.service';
-import { StandardQuestionAdminSeedCommandResponseMessageService } from './domain/services/standard-question-admin-seed-command-response-message.service';
 import { ReorderStandardQuestionsDto } from './dto/request/reorder-standard-questions.dto';
 import { ToggleStandardQuestionStatusDto } from './dto/request/toggle-standard-question-status.dto';
 import { UpdateStandardQuestionDto } from './dto/request/update-standard-question.dto';
@@ -27,8 +26,6 @@ export class StandardQuestionAdminCommandController {
         private readonly toggleStandardQuestionStatusUseCase: ToggleStandardQuestionStatusUseCase,
         private readonly reorderStandardQuestionsUseCase: ReorderStandardQuestionsUseCase,
         private readonly reseedStandardQuestionsUseCase: ReseedStandardQuestionsUseCase,
-        private readonly standardQuestionAdminQuestionCommandResponseMessageService: StandardQuestionAdminQuestionCommandResponseMessageService,
-        private readonly standardQuestionAdminSeedCommandResponseMessageService: StandardQuestionAdminSeedCommandResponseMessageService,
     ) {}
 
     @Patch(':id')
@@ -40,7 +37,7 @@ export class StandardQuestionAdminCommandController {
         const result = await this.updateStandardQuestionUseCase.execute(id, updateData);
         return ApiResponseDto.success(
             result as StandardQuestionResponseDto & StandardQuestionResult,
-            this.standardQuestionAdminQuestionCommandResponseMessageService.standardQuestionUpdated(),
+            STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionUpdated,
         );
     }
 
@@ -53,7 +50,7 @@ export class StandardQuestionAdminCommandController {
         const result = await this.toggleStandardQuestionStatusUseCase.execute(id, statusData.isActive);
         return ApiResponseDto.success(
             result as StandardQuestionResponseDto & StandardQuestionResult,
-            this.standardQuestionAdminQuestionCommandResponseMessageService.standardQuestionStatusUpdated(),
+            STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionStatusUpdated,
         );
     }
 
@@ -63,19 +60,13 @@ export class StandardQuestionAdminCommandController {
         @Body() reorderData: ReorderStandardQuestionsDto,
     ): Promise<ApiResponseDto<boolean>> {
         await this.reorderStandardQuestionsUseCase.execute(reorderData.reorderData);
-        return ApiResponseDto.success(
-            true,
-            this.standardQuestionAdminSeedCommandResponseMessageService.standardQuestionsReordered(),
-        );
+        return ApiResponseDto.success(true, STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsReordered);
     }
 
     @Post('reseed')
     @ApiReseedStandardQuestionsAdminEndpoint()
     async reseedStandardQuestions(): Promise<ApiResponseDto<boolean>> {
         await this.reseedStandardQuestionsUseCase.execute();
-        return ApiResponseDto.success(
-            true,
-            this.standardQuestionAdminSeedCommandResponseMessageService.standardQuestionsReseeded(),
-        );
+        return ApiResponseDto.success(true, STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsReseeded);
     }
 }

@@ -33,7 +33,6 @@ import { LoginAdminUseCase } from './admin/application/use-cases/login-admin.use
 import { RefreshAdminTokenUseCase } from './admin/application/use-cases/refresh-admin-token.use-case';
 import { AuthAdminAuthenticationService } from './admin/domain/services/auth-admin-authentication.service';
 import { AuthAdminPresentationService } from './admin/domain/services/auth-admin-presentation.service';
-import { AuthAdminResponseMessageService } from './admin/domain/services/auth-admin-response-message.service';
 import { AuthAdminRepositoryAdapter } from './admin/infrastructure/auth-admin-repository.adapter';
 import { AuthAdminBcryptAdapter } from './admin/infrastructure/auth-admin-bcrypt.adapter';
 import { AuthAdminJwtAdapter } from './admin/infrastructure/auth-admin-jwt.adapter';
@@ -187,7 +186,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthJwtTokenAdapter,
         AuthAdminAuthenticationService,
         AuthAdminPresentationService,
-        AuthAdminResponseMessageService,
         AuthAdopterRepository,
         AuthBreederRepository,
         AuthAdminRepository,
