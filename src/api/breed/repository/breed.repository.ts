@@ -3,8 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Breed } from '../../../schema/breed.schema';
-import { CreateBreedRequestDto } from '../admin/dto/request/create-breed-request.dto';
-import { UpdateBreedRequestDto } from '../admin/dto/request/update-breed-request.dto';
+import { type CreateBreedCommand, type UpdateBreedCommand } from '../admin/application/types/breed-command.type';
 
 @Injectable()
 export class BreedRepository {
@@ -31,12 +30,12 @@ export class BreedRepository {
         return this.breedModel.findOne(filter).exec();
     }
 
-    async create(dto: CreateBreedRequestDto): Promise<Breed> {
+    async create(dto: CreateBreedCommand): Promise<Breed> {
         const breed = new this.breedModel(dto);
         return breed.save();
     }
 
-    update(id: string, dto: UpdateBreedRequestDto): Promise<Breed | null> {
+    update(id: string, dto: UpdateBreedCommand): Promise<Breed | null> {
         return this.breedModel.findByIdAndUpdate(id, { $set: dto }, { new: true, runValidators: false }).exec();
     }
 

@@ -2,9 +2,9 @@ import { ConflictException, Inject, Injectable } from '@nestjs/common';
 
 import { BreedResponseDto } from '../../../dto/response/breed-response.dto';
 import { BreedAdminPresentationService } from '../../../domain/services/breed-admin-presentation.service';
-import { CreateBreedRequestDto } from '../../dto/request/create-breed-request.dto';
 import { BREED_ADMIN_READER, type BreedAdminReaderPort } from '../ports/breed-admin-reader.port';
 import { BREED_WRITER, type BreedWriterPort } from '../ports/breed-writer.port';
+import { type CreateBreedCommand } from '../types/breed-command.type';
 
 @Injectable()
 export class CreateBreedUseCase {
@@ -16,7 +16,7 @@ export class CreateBreedUseCase {
         private readonly breedAdminPresentationService: BreedAdminPresentationService,
     ) {}
 
-    async execute(dto: CreateBreedRequestDto): Promise<BreedResponseDto> {
+    async execute(dto: CreateBreedCommand): Promise<BreedResponseDto> {
         const existing = await this.breedAdminReader.findByPetTypeAndCategory(dto.petType, dto.category);
 
         if (existing) {
