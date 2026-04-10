@@ -4,6 +4,7 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiEndpoint } from '../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
+import { MongoObjectIdPipe } from '../../common/pipe/mongo-object-id.pipe';
 import { ReceivedApplicationListResponseDto } from '../breeder/dto/response/received-application-list-response.dto';
 import { GetBreederManagementApplicationDetailUseCase } from './application/use-cases/get-breeder-management-application-detail.use-case';
 import { GetBreederManagementReceivedApplicationsUseCase } from './application/use-cases/get-breeder-management-received-applications.use-case';
@@ -45,7 +46,8 @@ export class BreederManagementApplicationsQueryController {
     @ApiEndpoint(BreederManagementSwaggerDocs.applicationDetail)
     async getApplicationDetail(
         @CurrentUser('userId') userId: string,
-        @Param('applicationId') applicationId: string,
+        @Param('applicationId', new MongoObjectIdPipe('입양 신청', '올바르지 않은 입양 신청 ID 형식입니다.'))
+        applicationId: string,
     ): Promise<ApiResponseDto<BreederManagementApplicationDetailResponseDto>> {
         const result = await this.getBreederManagementApplicationDetailUseCase.execute(userId, applicationId);
         return ApiResponseDto.success(

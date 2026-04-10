@@ -55,6 +55,15 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
             expect(response.body.data.status).toBe('consultation_pending');
         });
 
+        it('잘못된 입양 신청 ID 형식이면 400을 반환한다', async () => {
+            const response = await request(context.app.getHttpServer())
+                .get('/api/breeder-management/applications/not-a-mongo-id')
+                .set('Authorization', `Bearer ${context.breederToken}`)
+                .expect(400);
+
+            expect(response.body.message || response.body.error).toContain('올바르지 않은 입양 신청 ID 형식');
+        });
+
         it('입양 신청 상태를 변경한다', async () => {
             const response = await request(context.app.getHttpServer())
                 .patch(`/api/breeder-management/applications/${applicationId}`)
@@ -69,6 +78,20 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.message).toBe('입양 신청 상태가 성공적으로 변경되었습니다.');
             expect(response.body.data.message).toBe('입양 신청 상태가 성공적으로 업데이트되었습니다.');
+        });
+
+        it('잘못된 입양 신청 ID 형식으로 상태 변경 시 400을 반환한다', async () => {
+            const response = await request(context.app.getHttpServer())
+                .patch('/api/breeder-management/applications/not-a-mongo-id')
+                .set('Authorization', `Bearer ${context.breederToken}`)
+                .send({
+                    applicationId,
+                    status: 'consultation_completed',
+                    notes: '형식 검증 테스트',
+                })
+                .expect(400);
+
+            expect(response.body.message || response.body.error).toContain('올바르지 않은 입양 신청 ID 형식');
         });
 
         it('상태 변경 후 상세를 다시 조회한다', async () => {
