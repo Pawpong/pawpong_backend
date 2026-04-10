@@ -1,10 +1,10 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
-import { InquiryAnswerCreateRequestDto } from '../../dto/request/inquiry-create-request.dto';
 import {
     InquiryBreederInfoSnapshot,
     InquiryCommandSnapshot,
 } from '../../application/ports/inquiry-command.port';
+import type { InquiryAnswerCreateCommand } from '../../application/types/inquiry-command.type';
 
 @Injectable()
 export class InquiryCommandPolicyService {
@@ -39,7 +39,7 @@ export class InquiryCommandPolicyService {
     buildAnswerData(
         breederId: string,
         breeder: InquiryBreederInfoSnapshot,
-        dto: InquiryAnswerCreateRequestDto,
+        dto: InquiryAnswerCreateCommand,
     ): {
         breederId: string;
         breederName: string;

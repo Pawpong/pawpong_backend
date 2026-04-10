@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { UserStatus } from '../../../../../common/enum/user.enum';
-import { UserManagementRequestDto } from '../../dto/request/user-management-request.dto';
 import { USER_ADMIN_READER, type UserAdminManagedUserRole, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
+import type { UserAdminStatusUpdateCommand } from '../types/user-admin-command.type';
 
 @Injectable()
 export class UpdateUserStatusUseCase {
@@ -22,7 +22,7 @@ export class UpdateUserStatusUseCase {
         adminId: string,
         userId: string,
         role: UserAdminManagedUserRole,
-        userData: UserManagementRequestDto,
+        userData: UserAdminStatusUpdateCommand,
     ): Promise<{ message: string }> {
         this.userAdminCommandPolicyService.assertCanManageUsers(
             await this.userAdminReader.findAdminById(adminId),

@@ -1,11 +1,10 @@
-import { NoticeCreateRequestDto } from '../../../dto/request/notice-create-request.dto';
-import { NoticeUpdateRequestDto } from '../../../dto/request/notice-update-request.dto';
 import { NoticeSnapshot } from '../../../application/ports/notice-reader.port';
+import type { NoticeCreateCommand, NoticeUpdateCommand } from '../types/notice-command.type';
 
 export const NOTICE_WRITER = Symbol('NOTICE_WRITER');
 
 export interface NoticeWriterPort {
-    create(adminId: string, adminName: string, createData: NoticeCreateRequestDto): Promise<NoticeSnapshot>;
-    update(noticeId: string, updateData: NoticeUpdateRequestDto): Promise<NoticeSnapshot | null>;
+    create(adminId: string, adminName: string, createData: NoticeCreateCommand): Promise<NoticeSnapshot>;
+    update(noticeId: string, updateData: NoticeUpdateCommand): Promise<NoticeSnapshot | null>;
     delete(noticeId: string): Promise<boolean>;
 }

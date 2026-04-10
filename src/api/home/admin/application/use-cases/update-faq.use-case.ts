@@ -2,8 +2,8 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { FaqResponseDto } from '../../../dto/response/faq-response.dto';
 import { HomeFaqCatalogService } from '../../../domain/services/home-faq-catalog.service';
-import { FaqUpdateRequestDto } from '../../dto/request/faq-update-request.dto';
 import { HOME_ADMIN_MANAGER, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
+import type { HomeFaqUpdateCommand } from '../types/home-admin-command.type';
 
 @Injectable()
 export class UpdateFaqUseCase {
@@ -13,7 +13,7 @@ export class UpdateFaqUseCase {
         private readonly homeFaqCatalogService: HomeFaqCatalogService,
     ) {}
 
-    async execute(faqId: string, data: FaqUpdateRequestDto): Promise<FaqResponseDto> {
+    async execute(faqId: string, data: HomeFaqUpdateCommand): Promise<FaqResponseDto> {
         const faq = await this.homeAdminManager.updateFaq(faqId, data);
 
         if (!faq) {

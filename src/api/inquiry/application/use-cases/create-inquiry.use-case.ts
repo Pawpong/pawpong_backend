@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
-import { InquiryCreateRequestDto } from '../../dto/request/inquiry-create-request.dto';
 import { InquiryCommandPolicyService } from '../../domain/services/inquiry-command-policy.service';
 import { INQUIRY_COMMAND, type InquiryCommandPort } from '../ports/inquiry-command.port';
+import type { InquiryCreateCommand } from '../types/inquiry-command.type';
 
 @Injectable()
 export class CreateInquiryUseCase {
@@ -14,7 +14,7 @@ export class CreateInquiryUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(userId: string, dto: InquiryCreateRequestDto): Promise<{ inquiryId: string }> {
+    async execute(userId: string, dto: InquiryCreateCommand): Promise<{ inquiryId: string }> {
         this.logger.logStart('createInquiry', '문의 작성', { userId, type: dto.type });
 
         if (!userId) {

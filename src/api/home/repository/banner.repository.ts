@@ -3,8 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Banner, BannerDocument } from '../../../schema/banner.schema';
-import { BannerCreateRequestDto } from '../admin/dto/request/banner-create-request.dto';
-import { BannerUpdateRequestDto } from '../admin/dto/request/banner-update-request.dto';
+import type { HomeBannerCommand, HomeBannerUpdateCommand } from '../admin/application/types/home-admin-command.type';
 
 @Injectable()
 export class BannerRepository {
@@ -18,11 +17,11 @@ export class BannerRepository {
         return this.bannerModel.find().sort({ order: 1 }).exec();
     }
 
-    create(data: BannerCreateRequestDto): Promise<BannerDocument> {
+    create(data: HomeBannerCommand): Promise<BannerDocument> {
         return this.bannerModel.create(data);
     }
 
-    update(bannerId: string, data: BannerUpdateRequestDto): Promise<BannerDocument | null> {
+    update(bannerId: string, data: HomeBannerUpdateCommand): Promise<BannerDocument | null> {
         return this.bannerModel.findByIdAndUpdate(bannerId, data, { new: true }).exec();
     }
 

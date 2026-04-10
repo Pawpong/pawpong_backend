@@ -4,8 +4,7 @@ import { Model } from 'mongoose';
 
 import { Notice } from '../../../schema/notice.schema';
 import { NoticeStatus } from '../application/ports/notice-reader.port';
-import { NoticeCreateRequestDto } from '../dto/request/notice-create-request.dto';
-import { NoticeUpdateRequestDto } from '../dto/request/notice-update-request.dto';
+import type { NoticeCreateCommand, NoticeUpdateCommand } from '../admin/application/types/notice-command.type';
 
 @Injectable()
 export class NoticeRepository {
@@ -34,7 +33,7 @@ export class NoticeRepository {
         await this.noticeModel.findByIdAndUpdate(noticeId, { $inc: { viewCount: 1 } }).exec();
     }
 
-    async create(adminId: string, adminName: string, createData: NoticeCreateRequestDto): Promise<Notice> {
+    async create(adminId: string, adminName: string, createData: NoticeCreateCommand): Promise<Notice> {
         const notice = new this.noticeModel({
             ...createData,
             authorId: adminId,
@@ -47,7 +46,7 @@ export class NoticeRepository {
         return notice.save();
     }
 
-    async update(noticeId: string, updateData: NoticeUpdateRequestDto): Promise<Notice | null> {
+    async update(noticeId: string, updateData: NoticeUpdateCommand): Promise<Notice | null> {
         const notice = await this.noticeModel.findById(noticeId).exec();
 
         if (!notice) {

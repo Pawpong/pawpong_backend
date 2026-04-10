@@ -2,11 +2,11 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import { NotificationAdminListRequestDto } from '../../dto/request/notification-admin-list-request.dto';
 import { NotificationAdminResponseDto } from '../../dto/response/notification-admin-response.dto';
 import { NOTIFICATION_ADMIN_READER } from '../ports/notification-admin-reader.port';
 import type { NotificationAdminReaderPort } from '../ports/notification-admin-reader.port';
 import { NotificationAdminListPresentationService } from '../../domain/services/notification-admin-list-presentation.service';
+import type { NotificationAdminListQuery } from '../types/notification-admin-query.type';
 
 @Injectable()
 export class GetAdminNotificationsUseCase {
@@ -19,7 +19,7 @@ export class GetAdminNotificationsUseCase {
 
     async execute(
         adminUserId: string,
-        filter: NotificationAdminListRequestDto,
+        filter: NotificationAdminListQuery,
     ): Promise<PaginationResponseDto<NotificationAdminResponseDto>> {
         this.logger.logStart('getNotifications', '관리자 알림 목록 조회 시작', {
             adminUserId,
