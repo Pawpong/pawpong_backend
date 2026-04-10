@@ -6,8 +6,7 @@ import { CreateAppVersionUseCase } from './application/use-cases/create-app-vers
 import { DeleteAppVersionUseCase } from './application/use-cases/delete-app-version.use-case';
 import { UpdateAppVersionUseCase } from './application/use-cases/update-app-version.use-case';
 import { AppVersionAdminProtectedController } from './decorator/app-version-admin-controller.decorator';
-import { AppVersionAdminDeleteResponseMessageService } from '../domain/services/app-version-admin-delete-response-message.service';
-import { AppVersionAdminWriteResponseMessageService } from '../domain/services/app-version-admin-write-response-message.service';
+import { APP_VERSION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/app-version-response-messages';
 import { AppVersionCreateRequestDto } from '../dto/request/app-version-create-request.dto';
 import { AppVersionUpdateRequestDto } from '../dto/request/app-version-update-request.dto';
 import { AppVersionResponseDto } from '../dto/response/app-version-response.dto';
@@ -23,8 +22,6 @@ export class AppVersionAdminCommandController {
         private readonly createAppVersionUseCase: CreateAppVersionUseCase,
         private readonly updateAppVersionUseCase: UpdateAppVersionUseCase,
         private readonly deleteAppVersionUseCase: DeleteAppVersionUseCase,
-        private readonly appVersionAdminWriteResponseMessageService: AppVersionAdminWriteResponseMessageService,
-        private readonly appVersionAdminDeleteResponseMessageService: AppVersionAdminDeleteResponseMessageService,
     ) {}
 
     @Post()
@@ -34,7 +31,7 @@ export class AppVersionAdminCommandController {
         @Body() createData: AppVersionCreateRequestDto,
     ): Promise<ApiResponseDto<AppVersionResponseDto>> {
         const result = await this.createAppVersionUseCase.execute(userId, createData);
-        return ApiResponseDto.success(result, this.appVersionAdminWriteResponseMessageService.appVersionCreated());
+        return ApiResponseDto.success(result, APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.appVersionCreated);
     }
 
     @Patch(':appVersionId')
@@ -45,7 +42,7 @@ export class AppVersionAdminCommandController {
         @Body() updateData: AppVersionUpdateRequestDto,
     ): Promise<ApiResponseDto<AppVersionResponseDto>> {
         const result = await this.updateAppVersionUseCase.execute(appVersionId, userId, updateData);
-        return ApiResponseDto.success(result, this.appVersionAdminWriteResponseMessageService.appVersionUpdated());
+        return ApiResponseDto.success(result, APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.appVersionUpdated);
     }
 
     @Delete(':appVersionId')
@@ -55,6 +52,6 @@ export class AppVersionAdminCommandController {
         @Param('appVersionId') appVersionId: string,
     ): Promise<ApiResponseDto<null>> {
         await this.deleteAppVersionUseCase.execute(appVersionId, userId);
-        return ApiResponseDto.success(null, this.appVersionAdminDeleteResponseMessageService.appVersionDeleted());
+        return ApiResponseDto.success(null, APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.appVersionDeleted);
     }
 }
