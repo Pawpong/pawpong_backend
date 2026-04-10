@@ -10,6 +10,7 @@ import {
 import { AvailablePetRepository } from '../repository/available-pet.repository';
 import { BannerRepository } from '../repository/banner.repository';
 import { FaqRepository } from '../repository/faq.repository';
+import type { HomeAvailablePetDocumentRecord } from '../types/home-document.type';
 
 @Injectable()
 export class HomeMongooseContentReaderAdapter implements HomeContentReaderPort {
@@ -54,7 +55,7 @@ export class HomeMongooseContentReaderAdapter implements HomeContentReaderPort {
     async readAvailablePets(limit: number): Promise<HomeAvailablePetSnapshot[]> {
         const pets = await this.availablePetRepository.findHomeAvailablePets(limit);
 
-        return pets.map((pet: any) => ({
+        return pets.map((pet: HomeAvailablePetDocumentRecord) => ({
             id: pet._id.toString(),
             name: pet.name,
             breed: pet.breed,

@@ -19,9 +19,9 @@ export class HomeAvailablePetsController {
     @ApiGetHomeAvailablePetsEndpoint()
     async getAvailablePets(
         @Query('limit') limit: number = 10,
-        @CurrentUser() user?: any,
+        @CurrentUser('userId') userId?: string,
     ): Promise<ApiResponseDto<AvailablePetResponseDto[]>> {
-        const isAuthenticated = !!user?.userId;
+        const isAuthenticated = !!userId;
         const pets = await this.getAvailablePetsUseCase.execute(limit, isAuthenticated);
         return ApiResponseDto.success(pets, this.homeAvailablePetResponseMessageService.availablePetsRetrieved());
     }

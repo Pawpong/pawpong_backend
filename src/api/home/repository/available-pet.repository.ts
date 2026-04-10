@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 import { AvailablePet, AvailablePetDocument } from '../../../schema/available-pet.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
+import type { HomeAvailablePetDocumentRecord } from '../types/home-document.type';
 
 /**
  * AvailablePet Repository
@@ -22,7 +23,7 @@ export class AvailablePetRepository {
      * @param limit 조회할 개수
      * @returns AvailablePet 배열
      */
-    async findAvailablePets(limit: number = 10): Promise<AvailablePetDocument[]> {
+    async findAvailablePets(limit: number = 10): Promise<HomeAvailablePetDocumentRecord[]> {
         // 활성 상태인 브리더 ID 목록 조회
         const activeBreeders = await this.breederModel.find({ accountStatus: 'active' }).select('_id').lean().exec();
         const activeBreederIds = activeBreeders.map((b) => b._id);
@@ -36,10 +37,11 @@ export class AvailablePetRepository {
             .populate('breederId', 'name')
             .sort({ createdAt: 1 })
             .limit(limit)
-            .exec() as any;
+            .lean<HomeAvailablePetDocumentRecord[]>()
+            .exec();
     }
 
-    async findHomeAvailablePets(limit: number): Promise<AvailablePetDocument[]> {
+    async findHomeAvailablePets(limit: number): Promise<HomeAvailablePetDocumentRecord[]> {
         const activeBreeders = await this.breederModel
             .find({ accountStatus: 'active', isTestAccount: { $ne: true } })
             .select('_id')
@@ -57,7 +59,8 @@ export class AvailablePetRepository {
             .populate('breederId', 'name profile')
             .sort({ createdAt: -1 })
             .limit(limit)
-            .exec() as any;
+            .lean<HomeAvailablePetDocumentRecord[]>()
+            .exec();
     }
 
     /**
@@ -66,7 +69,7 @@ export class AvailablePetRepository {
      * @returns AvailablePet 또는 null
      */
     async findById(id: string): Promise<AvailablePetDocument | null> {
-        return this.availablePetModel.findById(id).exec() as any;
+        return this.availablePetModel.findById(id).exec();
     }
 
     /**
@@ -76,10 +79,10 @@ export class AvailablePetRepository {
      * @returns AvailablePet 배열
      */
     async findByBreederId(breederId: string, status?: string): Promise<AvailablePetDocument[]> {
-        const query: any = { breederId, isActive: true };
+        const query: FilterQuery<AvailablePetDocument> = { breederId, isActive: true };
         if (status) {
             query.status = status;
         }
-        return this.availablePetModel.find(query).sort({ createdAt: 1 }).exec() as any;
+        return this.availablePetModel.find(query).sort({ createdAt: 1 }).exec();
     }
 }
