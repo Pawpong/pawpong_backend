@@ -8,6 +8,7 @@ import { ADOPTER_ADMIN_READER } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { ADOPTER_ADMIN_WRITER } from '../ports/adopter-admin-writer.port';
 import type { AdopterAdminWriterPort } from '../ports/adopter-admin-writer.port';
+import type { AdopterAdminReviewDeleteResult } from '../types/adopter-admin-result.type';
 
 @Injectable()
 export class DeleteAdopterAdminReviewUseCase {
@@ -21,7 +22,7 @@ export class DeleteAdopterAdminReviewUseCase {
         private readonly adopterAdminReviewResponseService: AdopterAdminReviewResponseService,
     ) {}
 
-    async execute(adminId: string, breederId: string, reviewId: string): Promise<any> {
+    async execute(adminId: string, breederId: string, reviewId: string): Promise<AdopterAdminReviewDeleteResult> {
         const admin = await this.adopterAdminReader.findAdminById(adminId);
         this.adopterAdminPolicyService.assertCanManageReports(admin);
 
@@ -38,6 +39,10 @@ export class DeleteAdopterAdminReviewUseCase {
 
         await this.adopterAdminWriter.appendAdminActivity(adminId, activityLog);
 
-        return this.adopterAdminReviewResponseService.toDeleteReviewResponse();
+        return this.adopterAdminReviewResponseService.toDeleteReviewResponse(
+            reviewId,
+            breederId,
+            review.breederName || 'Unknown',
+        );
     }
 }

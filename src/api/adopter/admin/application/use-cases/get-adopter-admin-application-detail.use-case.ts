@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AdminApplicationDetailResponseDto } from '../../dto/response/application-detail-response.dto';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminApplicationDetailPresentationService } from '../../domain/services/adopter-admin-application-detail-presentation.service';
 import { ADOPTER_ADMIN_READER } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
+import type { AdopterAdminApplicationDetailResult } from '../types/adopter-admin-result.type';
 
 @Injectable()
 export class GetAdopterAdminApplicationDetailUseCase {
@@ -15,7 +15,7 @@ export class GetAdopterAdminApplicationDetailUseCase {
         private readonly adopterAdminApplicationDetailPresentationService: AdopterAdminApplicationDetailPresentationService,
     ) {}
 
-    async execute(adminId: string, applicationId: string): Promise<AdminApplicationDetailResponseDto> {
+    async execute(adminId: string, applicationId: string): Promise<AdopterAdminApplicationDetailResult> {
         const admin = await this.adopterAdminReader.findAdminById(adminId);
         this.adopterAdminPolicyService.assertCanViewStatistics(admin);
         this.adopterAdminPolicyService.assertApplicationIdFormat(applicationId);

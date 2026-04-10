@@ -1,14 +1,17 @@
 import { Injectable } from '@nestjs/common';
 
-import { AdminApplicationListItemDto, AdminApplicationListResponseDto } from '../../dto/response/application-list-response.dto';
 import { AdopterAdminApplicationListSnapshot } from '../../application/ports/adopter-admin-reader.port';
+import type {
+    AdopterAdminApplicationListItemResult,
+    AdopterAdminApplicationListResult,
+} from '../../application/types/adopter-admin-result.type';
 
 @Injectable()
 export class AdopterAdminApplicationListAssemblerService {
-    toResponse(snapshot: AdopterAdminApplicationListSnapshot): AdminApplicationListResponseDto {
+    toResponse(snapshot: AdopterAdminApplicationListSnapshot): AdopterAdminApplicationListResult {
         return {
             applications: snapshot.items.map(
-                (item): AdminApplicationListItemDto => ({
+                (item): AdopterAdminApplicationListItemResult => ({
                     applicationId: item.applicationId,
                     adopterName: item.adopterName,
                     adopterEmail: item.adopterEmail,

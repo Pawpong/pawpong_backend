@@ -2,7 +2,6 @@ import { ForbiddenException } from '@nestjs/common';
 
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminReviewReportPresentationService } from '../../domain/services/adopter-admin-review-report-presentation.service';
-import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
 import { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { GetAdopterAdminReviewReportsUseCase } from './get-adopter-admin-review-reports.use-case';
 
@@ -44,7 +43,7 @@ describe('입양자 관리자 후기 신고 목록 조회 유스케이스', () =
         const useCase = new GetAdopterAdminReviewReportsUseCase(
             reader,
             new AdopterAdminPolicyService(),
-            new AdopterAdminReviewReportPresentationService(new AdopterPaginationAssemblerService()),
+            new AdopterAdminReviewReportPresentationService(),
         );
 
         await expect(useCase.execute('admin-1')).resolves.toMatchObject({
@@ -73,7 +72,7 @@ describe('입양자 관리자 후기 신고 목록 조회 유스케이스', () =
                 findApplicationDetail: jest.fn(),
             },
             new AdopterAdminPolicyService(),
-            new AdopterAdminReviewReportPresentationService(new AdopterPaginationAssemblerService()),
+            new AdopterAdminReviewReportPresentationService(),
         );
 
         await expect(useCase.execute('admin-1')).rejects.toBeInstanceOf(ForbiddenException);

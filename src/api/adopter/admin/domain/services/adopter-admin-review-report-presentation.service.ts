@@ -1,18 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import { ReviewReportItemDto } from '../../dto/response/review-report-list.dto';
 import { AdopterAdminReviewReportPageSnapshot } from '../../application/ports/adopter-admin-reader.port';
-import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
+import { buildPageResult } from '../../../../../common/types/page-result.type';
+import type { AdopterAdminReviewReportPageResult } from '../../application/types/adopter-admin-result.type';
 
 @Injectable()
 export class AdopterAdminReviewReportPresentationService {
-    constructor(private readonly adopterPaginationAssemblerService: AdopterPaginationAssemblerService) {}
-
     toReviewReportsPage(
         snapshot: AdopterAdminReviewReportPageSnapshot,
-    ): PaginationResponseDto<ReviewReportItemDto> {
-        return this.adopterPaginationAssemblerService.build(
+    ): AdopterAdminReviewReportPageResult {
+        return buildPageResult(
             snapshot.items.map((item) => ({
                 reviewId: item.reviewId,
                 breederId: item.breederId,
