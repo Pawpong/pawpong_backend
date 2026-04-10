@@ -1,10 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 
 import { Inquiry, InquiryDocument } from '../../../schema/inquiry.schema';
-import { Adopter } from '../../../schema/adopter.schema';
-import { Breeder } from '../../../schema/breeder.schema';
+import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
+import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
+import type {
+    InquiryAdopterNicknameRecord,
+    InquiryAnswerDocumentRecord,
+    InquiryBreederIdRecord,
+    InquiryBreederInfoRecord,
+    InquiryCreateRecord,
+    InquiryDocumentRecord,
+    InquirySortRecord,
+} from '../types/inquiry-document.type';
 
 /**
  * 문의 데이터 접근 계층 Repository
@@ -23,8 +32,8 @@ import { Breeder } from '../../../schema/breeder.schema';
 export class InquiryRepository {
     constructor(
         @InjectModel(Inquiry.name) private readonly inquiryModel: Model<InquiryDocument>,
-        @InjectModel(Adopter.name) private readonly adopterModel: Model<Adopter>,
-        @InjectModel(Breeder.name) private readonly breederModel: Model<Breeder>,
+        @InjectModel(Adopter.name) private readonly adopterModel: Model<AdopterDocument>,
+        @InjectModel(Breeder.name) private readonly breederModel: Model<BreederDocument>,
     ) {}
 
     /**
@@ -37,13 +46,19 @@ export class InquiryRepository {
      * @param limit 가져올 문서 수 (+1 포함)
      */
     async findPublicList(
-        filter: Record<string, any>,
-        sortOption: Record<string, any>,
+        filter: FilterQuery<InquiryDocument>,
+        sortOption: InquirySortRecord,
         skip: number,
         limit: number,
-    ): Promise<any[]> {
+    ): Promise<InquiryDocumentRecord[]> {
         try {
-            return await this.inquiryModel.find(filter).sort(sortOption).skip(skip).limit(limit).lean().exec();
+            return await this.inquiryModel
+                .find(filter)
+                .sort(sortOption)
+                .skip(skip)
+                .limit(limit)
+                .lean<InquiryDocumentRecord[]>()
+                .exec();
         } catch (error) {
             throw new Error(`문의 목록 조회 실패: ${error.message}`);
         }
@@ -57,9 +72,19 @@ export class InquiryRepository {
      * @param skip 건너뛸 문서 수
      * @param limit 가져올 문서 수 (+1 포함)
      */
-    async findByAuthor(filter: Record<string, any>, skip: number, limit: number): Promise<any[]> {
+    async findByAuthor(
+        filter: FilterQuery<InquiryDocument>,
+        skip: number,
+        limit: number,
+    ): Promise<InquiryDocumentRecord[]> {
         try {
-            return await this.inquiryModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean().exec();
+            return await this.inquiryModel
+                .find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean<InquiryDocumentRecord[]>()
+                .exec();
         } catch (error) {
             throw new Error(`내 문의 목록 조회 실패: ${error.message}`);
         }
@@ -71,9 +96,9 @@ export class InquiryRepository {
      * @param inquiryId 문의 고유 ID
      * @returns 문의 데이터 또는 null
      */
-    async findById(inquiryId: string): Promise<any | null> {
+    async findById(inquiryId: string): Promise<InquiryDocumentRecord | null> {
         try {
-            return await this.inquiryModel.findById(inquiryId).lean().exec();
+            return await this.inquiryModel.findById(inquiryId).lean<InquiryDocumentRecord>().exec();
         } catch (error) {
             throw new Error(`문의 조회 실패: ${error.message}`);
         }
@@ -99,19 +124,7 @@ export class InquiryRepository {
      * @param data 문의 생성 데이터
      * @returns 저장된 InquiryDocument
      */
-    async create(data: {
-        authorId: Types.ObjectId;
-        authorNickname: string;
-        title: string;
-        content: string;
-        type: 'common' | 'direct';
-        animalType: 'dog' | 'cat';
-        targetBreederId?: Types.ObjectId;
-        imageUrls: string[];
-        viewCount: number;
-        answers: any[];
-        status: string;
-    }): Promise<InquiryDocument> {
+    async create(data: InquiryCreateRecord): Promise<InquiryDocument> {
         try {
             const inquiry = new this.inquiryModel(data);
             return await inquiry.save();
@@ -126,7 +139,7 @@ export class InquiryRepository {
      * @param inquiryId 수정할 문의 ID
      * @param updateData 수정할 필드 데이터
      */
-    async update(inquiryId: string, updateData: Record<string, any>): Promise<void> {
+    async update(inquiryId: string, updateData: UpdateQuery<InquiryDocument>): Promise<void> {
         try {
             await this.inquiryModel.findByIdAndUpdate(inquiryId, { $set: updateData }).exec();
         } catch (error) {
@@ -203,9 +216,14 @@ export class InquiryRepository {
      * @param skip 건너뛸 문서 수
      * @param limit 가져올 문서 수 (+1 포함)
      */
-    async findByTargetBreeder(breederId: string, answered: boolean, skip: number, limit: number): Promise<any[]> {
+    async findByTargetBreeder(
+        breederId: string,
+        answered: boolean,
+        skip: number,
+        limit: number,
+    ): Promise<InquiryDocumentRecord[]> {
         try {
-            const filter: Record<string, any> = {
+            const filter: FilterQuery<InquiryDocument> = {
                 type: 'direct',
                 targetBreederId: new Types.ObjectId(breederId),
             };
@@ -216,7 +234,13 @@ export class InquiryRepository {
                 filter.answers = { $size: 0 }; // 답변 없음
             }
 
-            return await this.inquiryModel.find(filter).sort({ createdAt: -1 }).skip(skip).limit(limit).lean().exec();
+            return await this.inquiryModel
+                .find(filter)
+                .sort({ createdAt: -1 })
+                .skip(skip)
+                .limit(limit)
+                .lean<InquiryDocumentRecord[]>()
+                .exec();
         } catch (error) {
             throw new Error(`브리더 문의 목록 조회 실패: ${error.message}`);
         }
@@ -228,11 +252,9 @@ export class InquiryRepository {
      * @param userId 입양자 ID
      * @returns nickname 또는 null
      */
-    async findAdopterNickname(userId: string): Promise<{ nickname: string } | null> {
+    async findAdopterNickname(userId: string): Promise<InquiryAdopterNicknameRecord | null> {
         try {
-            return (await this.adopterModel.findById(userId).select('nickname').lean().exec()) as {
-                nickname: string;
-            } | null;
+            return await this.adopterModel.findById(userId).select('nickname').lean<InquiryAdopterNicknameRecord>().exec();
         } catch (error) {
             throw new Error(`입양자 닉네임 조회 실패: ${error.message}`);
         }
@@ -244,9 +266,9 @@ export class InquiryRepository {
      * @param breederId 확인할 브리더 ID
      * @returns 브리더 _id 또는 null
      */
-    async findBreederById(breederId: string): Promise<{ _id: any } | null> {
+    async findBreederById(breederId: string): Promise<InquiryBreederIdRecord | null> {
         try {
-            return (await this.breederModel.findById(breederId).select('_id').lean().exec()) as { _id: any } | null;
+            return await this.breederModel.findById(breederId).select('_id').lean<InquiryBreederIdRecord>().exec();
         } catch (error) {
             throw new Error(`브리더 조회 실패: ${error.message}`);
         }
@@ -260,18 +282,13 @@ export class InquiryRepository {
      */
     async findBreederInfo(
         breederId: string,
-    ): Promise<{ name: string; profileImageFileName?: string; petType?: string; breeds?: string[] } | null> {
+    ): Promise<InquiryBreederInfoRecord | null> {
         try {
-            return (await this.breederModel
+            return await this.breederModel
                 .findById(breederId)
                 .select('name profileImageFileName petType breeds')
-                .lean()
-                .exec()) as {
-                name: string;
-                profileImageFileName?: string;
-                petType?: string;
-                breeds?: string[];
-            } | null;
+                .lean<InquiryBreederInfoRecord>()
+                .exec();
         } catch (error) {
             throw new Error(`브리더 정보 조회 실패: ${error.message}`);
         }

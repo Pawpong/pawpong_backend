@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
+import { FilterQuery, Types } from 'mongoose';
 
 import { InquiryRepository } from '../repository/inquiry.repository';
 import {
@@ -9,13 +9,15 @@ import {
     MyInquiryListQuery,
     PublicInquiryListQuery,
 } from '../application/ports/inquiry-reader.port';
+import { InquiryDocument } from '../../../schema/inquiry.schema';
+import type { InquiryDocumentRecord, InquirySortRecord } from '../types/inquiry-document.type';
 
 @Injectable()
 export class InquiryRepositoryReaderAdapter implements InquiryReaderPort {
     constructor(private readonly inquiryRepository: InquiryRepository) {}
 
     async readPublicList(query: PublicInquiryListQuery): Promise<InquiryListSnapshot[]> {
-        const filter: Record<string, any> = { type: 'common', status: 'active' };
+        const filter: FilterQuery<InquiryDocument> = { type: 'common', status: 'active' };
         if (query.animalType) {
             filter.animalType = query.animalType;
         }
@@ -31,7 +33,7 @@ export class InquiryRepositoryReaderAdapter implements InquiryReaderPort {
     }
 
     async readMyList(query: MyInquiryListQuery): Promise<InquiryListSnapshot[]> {
-        const filter: Record<string, any> = {
+        const filter: FilterQuery<InquiryDocument> = {
             authorId: new Types.ObjectId(query.authorId),
         };
         if (query.animalType) {
@@ -62,7 +64,7 @@ export class InquiryRepositoryReaderAdapter implements InquiryReaderPort {
         this.inquiryRepository.incrementViewCount(inquiryId);
     }
 
-    private buildSortOption(sort: string): Record<string, any> {
+    private buildSortOption(sort: string): InquirySortRecord {
         switch (sort) {
             case 'latest_answer':
                 return { latestAnsweredAt: -1, createdAt: -1 };
@@ -74,7 +76,7 @@ export class InquiryRepositoryReaderAdapter implements InquiryReaderPort {
         }
     }
 
-    private toSnapshot(inquiry: any): InquiryListSnapshot {
+    private toSnapshot(inquiry: InquiryDocumentRecord): InquiryListSnapshot {
         return {
             id: inquiry._id.toString(),
             authorId: inquiry.authorId.toString(),
