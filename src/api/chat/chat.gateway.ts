@@ -114,6 +114,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     /**
      * 메시지 전송
      * payload: SendMessageRequestDto
+     *
+     * DB 저장 + Kafka emit까지만 수행.
+     * 실제 WebSocket broadcast는 ChatKafkaConsumer → broadcastNewMessage()가 담당.
+     * 이렇게 하면 서버가 여러 대일 때도 모든 인스턴스의 Consumer가 동일 메시지를 받아
+     * 각자 연결된 클라이언트에게 전달할 수 있음.
      */
     @SubscribeMessage('send_message')
     async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() dto: SendMessageRequestDto) {
@@ -123,22 +128,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         try {
-            const message = await this.sendMessageUseCase.execute(user.userId, user.role, dto);
-
-            // 채팅방의 모든 참여자에게 새 메시지 브로드캐스트
-            this.server.to(dto.roomId).emit('new_message', {
-                messageId: message.id,
-                roomId: message.roomId,
-                senderId: message.senderId,
-                senderRole: message.senderRole,
-                content: message.content,
-                messageType: message.messageType,
-                isRead: message.isRead,
-                createdAt: message.createdAt,
-            });
+            await this.sendMessageUseCase.execute(user.userId, user.role, dto);
         } catch (error) {
             client.emit('error', { message: error.message });
         }
+    }
+
+    /**
+     * Kafka Consumer(ChatKafkaConsumer)가 호출하는 broadcast 메서드.
+     * 채팅방에 연결된 모든 클라이언트에게 새 메시지를 전달한다.
+     */
+    broadcastNewMessage(message: {
+        messageId: string;
+        roomId: string;
+        senderId: string;
+        senderRole: string;
+        receiverId: string;
+        content: string;
+        messageType: string;
+        isRead: boolean;
+        createdAt: Date;
+    }): void {
+        this.server.to(message.roomId).emit('new_message', message);
     }
 
     /**
