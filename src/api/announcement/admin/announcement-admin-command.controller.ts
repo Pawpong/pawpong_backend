@@ -6,6 +6,7 @@ import { AnnouncementResponseDto } from '../dto/response/announcement-response.d
 import { CreateAnnouncementUseCase } from './application/use-cases/create-announcement.use-case';
 import { DeleteAnnouncementUseCase } from './application/use-cases/delete-announcement.use-case';
 import { UpdateAnnouncementUseCase } from './application/use-cases/update-announcement.use-case';
+import type { AnnouncementResult } from '../application/types/announcement-result.type';
 import { AnnouncementAdminProtectedController } from './decorator/announcement-admin-controller.decorator';
 import {
     ApiCreateAnnouncementAdminEndpoint,
@@ -24,7 +25,8 @@ export class AnnouncementAdminCommandController {
     @Post('announcement')
     @ApiCreateAnnouncementAdminEndpoint()
     async createAnnouncement(@Body() createDto: AnnouncementCreateRequestDto): Promise<AnnouncementResponseDto> {
-        return this.createAnnouncementUseCase.execute(createDto);
+        const result = await this.createAnnouncementUseCase.execute(createDto);
+        return result as AnnouncementResponseDto & AnnouncementResult;
     }
 
     @Put('announcement/:announcementId')
@@ -33,7 +35,8 @@ export class AnnouncementAdminCommandController {
         @Param('announcementId') announcementId: string,
         @Body() updateDto: AnnouncementUpdateRequestDto,
     ): Promise<AnnouncementResponseDto> {
-        return this.updateAnnouncementUseCase.execute(announcementId, updateDto);
+        const result = await this.updateAnnouncementUseCase.execute(announcementId, updateDto);
+        return result as AnnouncementResponseDto & AnnouncementResult;
     }
 
     @Delete('announcement/:announcementId')

@@ -2,10 +2,9 @@ import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { PaginationRequestDto } from '../../../../../common/dto/pagination/pagination-request.dto';
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import { AnnouncementResponseDto } from '../../../dto/response/announcement-response.dto';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
 import { AnnouncementAdminReaderPort } from '../ports/announcement-admin-reader.port';
+import type { AnnouncementPageResult } from '../../../application/types/announcement-result.type';
 
 @Injectable()
 export class GetAllAnnouncementsUseCase {
@@ -17,7 +16,7 @@ export class GetAllAnnouncementsUseCase {
 
     async execute(
         paginationDto: PaginationRequestDto,
-    ): Promise<PaginationResponseDto<AnnouncementResponseDto>> {
+    ): Promise<AnnouncementPageResult> {
         const page = paginationDto.page ?? 1;
         const limit = paginationDto.limit ?? 10;
 

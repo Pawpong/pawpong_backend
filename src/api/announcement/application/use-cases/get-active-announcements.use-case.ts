@@ -1,10 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
-import { AnnouncementResponseDto } from '../../dto/response/announcement-response.dto';
 import { AnnouncementPublicReaderPort } from '../ports/announcement-public-reader.port';
 import { AnnouncementResponseMapperService } from '../../domain/services/announcement-response-mapper.service';
 import { PaginationRequestDto } from '../../../../common/dto/pagination/pagination-request.dto';
+import type { AnnouncementPageResult } from '../types/announcement-result.type';
 
 @Injectable()
 export class GetActiveAnnouncementsUseCase {
@@ -15,7 +14,7 @@ export class GetActiveAnnouncementsUseCase {
 
     async execute(
         paginationDto: PaginationRequestDto,
-    ): Promise<PaginationResponseDto<AnnouncementResponseDto>> {
+    ): Promise<AnnouncementPageResult> {
         const page = paginationDto.page ?? 1;
         const limit = paginationDto.limit ?? 10;
 

@@ -5,6 +5,7 @@ import { PaginationResponseDto } from '../../common/dto/pagination/pagination-re
 import { AnnouncementResponseDto } from './dto/response/announcement-response.dto';
 import { GetActiveAnnouncementsUseCase } from './application/use-cases/get-active-announcements.use-case';
 import { GetAnnouncementByIdUseCase } from './application/use-cases/get-announcement-by-id.use-case';
+import type { AnnouncementPageResult, AnnouncementResult } from './application/types/announcement-result.type';
 import { ApiAnnouncementController, ApiGetActiveAnnouncementsEndpoint, ApiGetAnnouncementByIdEndpoint } from './swagger';
 
 /**
@@ -29,7 +30,8 @@ export class AnnouncementController {
     async getActiveAnnouncements(
         @Query() paginationDto: PaginationRequestDto,
     ): Promise<PaginationResponseDto<AnnouncementResponseDto>> {
-        return this.getActiveAnnouncementsUseCase.execute(paginationDto);
+        const result = await this.getActiveAnnouncementsUseCase.execute(paginationDto);
+        return PaginationResponseDto.fromPageResult(result as AnnouncementPageResult);
     }
 
     /**
@@ -40,6 +42,7 @@ export class AnnouncementController {
     @Get(':announcementId')
     @ApiGetAnnouncementByIdEndpoint()
     async getAnnouncementById(@Param('announcementId') announcementId: string): Promise<AnnouncementResponseDto> {
-        return this.getAnnouncementByIdUseCase.execute(announcementId);
+        const result = await this.getAnnouncementByIdUseCase.execute(announcementId);
+        return result as AnnouncementResponseDto & AnnouncementResult;
     }
 }

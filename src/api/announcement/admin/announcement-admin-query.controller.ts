@@ -3,6 +3,7 @@ import { Get, Query } from '@nestjs/common';
 import { PaginationRequestDto } from '../../../common/dto/pagination/pagination-request.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { GetAllAnnouncementsUseCase } from './application/use-cases/get-all-announcements.use-case';
+import type { AnnouncementPageResult } from '../application/types/announcement-result.type';
 import { AnnouncementAdminProtectedController } from './decorator/announcement-admin-controller.decorator';
 import { AnnouncementResponseDto } from '../dto/response/announcement-response.dto';
 import { ApiGetAllAnnouncementsAdminEndpoint } from './swagger';
@@ -16,6 +17,7 @@ export class AnnouncementAdminQueryController {
     async getAllAnnouncements(
         @Query() paginationDto: PaginationRequestDto,
     ): Promise<PaginationResponseDto<AnnouncementResponseDto>> {
-        return this.getAllAnnouncementsUseCase.execute(paginationDto);
+        const result = await this.getAllAnnouncementsUseCase.execute(paginationDto);
+        return PaginationResponseDto.fromPageResult(result as AnnouncementPageResult);
     }
 }
