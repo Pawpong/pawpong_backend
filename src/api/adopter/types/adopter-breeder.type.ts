@@ -12,7 +12,7 @@ export type AdopterBreederRecord = {
     nickname?: string;
     emailAddress?: string;
     accountStatus?: string;
-    profileImageFileName?: string;
+    profileImageFileName?: string | null;
     favoriteBreederList?: AdopterFavoriteRecord[];
     petType?: string;
     breeds?: string[];

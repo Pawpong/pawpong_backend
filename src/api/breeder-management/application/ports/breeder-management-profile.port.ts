@@ -9,6 +9,14 @@ export interface BreederManagementVerificationDocumentRecord {
     uploadedAt?: Date;
 }
 
+export interface BreederManagementBreederStatsRecord {
+    totalApplications?: number;
+    completedAdoptions?: number;
+    averageRating?: number;
+    totalReviews?: number;
+    profileViews?: number;
+}
+
 export interface BreederManagementApplicationFormRecord {
     id: string;
     type: string;
@@ -22,6 +30,7 @@ export interface BreederManagementApplicationFormRecord {
 export interface BreederManagementBreederRecord {
     _id: unknown;
     name: string;
+    nickname?: string;
     emailAddress: string;
     phoneNumber?: string;
     socialAuthInfo?: {
@@ -61,7 +70,7 @@ export interface BreederManagementBreederRecord {
     } | null;
     breeds?: string[];
     applicationForm?: BreederManagementApplicationFormRecord[];
-    stats?: unknown;
+    stats?: BreederManagementBreederStatsRecord;
     consultationAgreed?: boolean;
     [key: string]: unknown;
 }
@@ -69,16 +78,39 @@ export interface BreederManagementBreederRecord {
 export interface BreederManagementParentPetRecord {
     _id?: unknown;
     petId?: string;
+    name?: string;
+    breed?: string;
+    gender?: string;
+    birthDate?: Date;
     photoFileName?: string | null;
     photos?: string[];
-    toObject?: () => Record<string, unknown>;
+    healthRecords?: string[];
+    description?: string;
+    isActive?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
+    toObject?: () => Omit<BreederManagementParentPetRecord, 'toObject'>;
     [key: string]: unknown;
 }
 
 export interface BreederManagementAvailablePetRecord {
     _id?: unknown;
     petId?: string;
+    name?: string;
+    breed?: string;
+    gender?: string;
+    birthDate?: Date;
+    price?: number;
+    status?: string;
     photos?: string[];
+    description?: string;
+    isActive?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
+    parentInfo?: {
+        mother?: unknown;
+        father?: unknown;
+    };
     [key: string]: unknown;
 }
 

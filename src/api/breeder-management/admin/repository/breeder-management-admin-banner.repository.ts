@@ -10,6 +10,7 @@ import type {
     BreederManagementProfileBannerCreateCommand,
     BreederManagementProfileBannerUpdateCommand,
 } from '../application/types/breeder-management-admin-banner-command.type';
+import type { BreederManagementBannerDocumentRecord } from '../../types/breeder-management-document.type';
 
 @Injectable()
 export class BreederManagementAdminBannerRepository {
@@ -18,33 +19,46 @@ export class BreederManagementAdminBannerRepository {
         @InjectModel(CounselBanner.name) private readonly counselBannerModel: Model<CounselBannerDocument>,
     ) {}
 
-    findAllProfile() {
-        return this.authBannerModel.find().sort({ bannerType: 1, order: 1 }).lean().exec();
+    findAllProfile(): Promise<BreederManagementBannerDocumentRecord[]> {
+        return this.authBannerModel.find().sort({ bannerType: 1, order: 1 }).lean().exec() as Promise<
+            BreederManagementBannerDocumentRecord[]
+        >;
     }
 
-    findActiveProfile(bannerType?: 'login' | 'signup') {
+    findActiveProfile(bannerType?: 'login' | 'signup'): Promise<BreederManagementBannerDocumentRecord[]> {
         const query: Record<string, unknown> = { isActive: true };
         if (bannerType) {
             query.bannerType = bannerType;
         }
 
-        return this.authBannerModel.find(query).sort({ order: 1 }).lean().exec();
+        return this.authBannerModel.find(query).sort({ order: 1 }).lean().exec() as Promise<
+            BreederManagementBannerDocumentRecord[]
+        >;
     }
 
-    findAllCounsel() {
-        return this.counselBannerModel.find().sort({ order: 1 }).lean().exec();
+    findAllCounsel(): Promise<BreederManagementBannerDocumentRecord[]> {
+        return this.counselBannerModel.find().sort({ order: 1 }).lean().exec() as Promise<
+            BreederManagementBannerDocumentRecord[]
+        >;
     }
 
-    findActiveCounsel() {
-        return this.counselBannerModel.find({ isActive: true }).sort({ order: 1 }).lean().exec();
+    findActiveCounsel(): Promise<BreederManagementBannerDocumentRecord[]> {
+        return this.counselBannerModel.find({ isActive: true }).sort({ order: 1 }).lean().exec() as Promise<
+            BreederManagementBannerDocumentRecord[]
+        >;
     }
 
-    createProfile(data: BreederManagementProfileBannerCreateCommand) {
-        return this.authBannerModel.create(data);
+    createProfile(data: BreederManagementProfileBannerCreateCommand): Promise<BreederManagementBannerDocumentRecord> {
+        return this.authBannerModel.create(data) as Promise<BreederManagementBannerDocumentRecord>;
     }
 
-    updateProfile(bannerId: string, data: BreederManagementProfileBannerUpdateCommand) {
-        return this.authBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
+    updateProfile(
+        bannerId: string,
+        data: BreederManagementProfileBannerUpdateCommand,
+    ): Promise<BreederManagementBannerDocumentRecord | null> {
+        return this.authBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec() as Promise<
+            BreederManagementBannerDocumentRecord | null
+        >;
     }
 
     async deleteProfile(bannerId: string): Promise<boolean> {
@@ -52,12 +66,17 @@ export class BreederManagementAdminBannerRepository {
         return !!deleted;
     }
 
-    createCounsel(data: BreederManagementCounselBannerCreateCommand) {
-        return this.counselBannerModel.create(data);
+    createCounsel(data: BreederManagementCounselBannerCreateCommand): Promise<BreederManagementBannerDocumentRecord> {
+        return this.counselBannerModel.create(data) as Promise<BreederManagementBannerDocumentRecord>;
     }
 
-    updateCounsel(bannerId: string, data: BreederManagementCounselBannerUpdateCommand) {
-        return this.counselBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec();
+    updateCounsel(
+        bannerId: string,
+        data: BreederManagementCounselBannerUpdateCommand,
+    ): Promise<BreederManagementBannerDocumentRecord | null> {
+        return this.counselBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec() as Promise<
+            BreederManagementBannerDocumentRecord | null
+        >;
     }
 
     async deleteCounsel(bannerId: string): Promise<boolean> {

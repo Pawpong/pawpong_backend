@@ -13,6 +13,10 @@ import type {
     BreederManagementParentPetUpdateData,
     BreederManagementPetCommandPort,
 } from '../application/ports/breeder-management-pet-command.port';
+import type {
+    BreederManagementAvailablePetPersistencePayload,
+    BreederManagementParentPetPersistencePayload,
+} from '../types/breeder-management-document.type';
 
 @Injectable()
 export class BreederManagementPetCommandAdapter implements BreederManagementPetCommandPort {
@@ -32,8 +36,8 @@ export class BreederManagementPetCommandAdapter implements BreederManagementPetC
     }
 
     createParentPet(data: BreederManagementParentPetCreateData): Promise<BreederManagementParentPetCommandRecord> {
-        return this.parentPetRepository.create({
-            breederId: new Types.ObjectId(data.breederId) as any,
+        const createData: BreederManagementParentPetPersistencePayload = {
+            breederId: new Types.ObjectId(data.breederId),
             name: data.name,
             breed: data.breed,
             gender: data.gender,
@@ -42,7 +46,9 @@ export class BreederManagementPetCommandAdapter implements BreederManagementPetC
             description: data.description,
             photos: data.photos,
             isActive: data.isActive,
-        }) as Promise<BreederManagementParentPetCommandRecord>;
+        };
+
+        return this.parentPetRepository.create(createData) as Promise<BreederManagementParentPetCommandRecord>;
     }
 
     updateParentPet(
@@ -72,8 +78,8 @@ export class BreederManagementPetCommandAdapter implements BreederManagementPetC
     createAvailablePet(
         data: BreederManagementAvailablePetCreateData,
     ): Promise<BreederManagementAvailablePetCommandRecord> {
-        return this.availablePetManagementRepository.create({
-            breederId: new Types.ObjectId(data.breederId) as any,
+        const createData: BreederManagementAvailablePetPersistencePayload = {
+            breederId: new Types.ObjectId(data.breederId),
             name: data.name,
             breed: data.breed,
             gender: data.gender,
@@ -84,11 +90,13 @@ export class BreederManagementPetCommandAdapter implements BreederManagementPetC
             description: data.description,
             parentInfo: data.parentInfo
                 ? {
-                      mother: data.parentInfo.mother as any,
-                      father: data.parentInfo.father as any,
+                      mother: data.parentInfo.mother ? new Types.ObjectId(data.parentInfo.mother) : undefined,
+                      father: data.parentInfo.father ? new Types.ObjectId(data.parentInfo.father) : undefined,
                   }
                 : undefined,
-        }) as Promise<BreederManagementAvailablePetCommandRecord>;
+        };
+
+        return this.availablePetManagementRepository.create(createData) as Promise<BreederManagementAvailablePetCommandRecord>;
     }
 
     updateAvailablePet(

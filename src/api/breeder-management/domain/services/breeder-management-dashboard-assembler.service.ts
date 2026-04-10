@@ -25,12 +25,12 @@ export class BreederManagementDashboardAssemblerService {
                 },
             },
             statisticsInfo: {
-                totalApplicationCount: (breeder.stats as any)?.totalApplications || 0,
+                totalApplicationCount: breeder.stats?.totalApplications || 0,
                 pendingApplicationCount: pendingApplications,
-                completedAdoptionCount: (breeder.stats as any)?.completedAdoptions || 0,
-                averageRating: (breeder.stats as any)?.averageRating || 0,
-                totalReviewCount: (breeder.stats as any)?.totalReviews || 0,
-                profileViewCount: (breeder.stats as any)?.profileViews || 0,
+                completedAdoptionCount: breeder.stats?.completedAdoptions || 0,
+                averageRating: breeder.stats?.averageRating || 0,
+                totalReviewCount: breeder.stats?.totalReviews || 0,
+                profileViewCount: breeder.stats?.profileViews || 0,
             },
             recentApplicationList: (recentApplications || []).map((application) => ({
                 applicationId: String(application._id || ''),

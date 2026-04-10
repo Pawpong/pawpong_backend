@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { BreederReview, BreederReviewDocument } from '../../../schema/breeder-review.schema';
+import type { BreederManagementReviewDocumentRecord } from '../types/breeder-management-document.type';
 
 @Injectable()
 export class BreederManagementBreederReviewRepository {
@@ -29,7 +30,7 @@ export class BreederManagementBreederReviewRepository {
         visibility: string,
         skip: number,
         limit: number,
-    ) {
+    ): Promise<BreederManagementReviewDocumentRecord[]> {
         const filter: Record<string, unknown> = {
             breederId: new Types.ObjectId(breederId),
         };
@@ -46,7 +47,7 @@ export class BreederManagementBreederReviewRepository {
             .skip(skip)
             .limit(limit)
             .populate('adopterId', 'name nickname')
-            .lean()
+            .lean<BreederManagementReviewDocumentRecord[]>()
             .exec();
     }
 

@@ -13,7 +13,10 @@ export class BreederManagementVerificationSubmissionMapperService {
             status: VerificationStatus.REVIEWING,
             plan: verificationData.plan,
             submittedAt: new Date(),
-            documents: verificationData.documents as any,
+            documents: verificationData.documents.map((fileName) => ({
+                type: 'legacy',
+                fileName,
+            })),
             submittedByEmail: verificationData.submittedByEmail,
         };
     }

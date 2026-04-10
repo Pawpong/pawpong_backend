@@ -8,6 +8,7 @@ import type {
     BreederManagementProfileBannerUpdateCommand,
 } from '../application/types/breeder-management-admin-banner-command.type';
 import { BreederManagementAdminBannerRepository } from '../repository/breeder-management-admin-banner.repository';
+import type { BreederManagementBannerDocumentRecord } from '../../types/breeder-management-document.type';
 
 @Injectable()
 export class BreederManagementAdminBannerWriterAdapter implements BreederManagementAdminBannerWriterPort {
@@ -47,11 +48,11 @@ export class BreederManagementAdminBannerWriterAdapter implements BreederManagem
         return this.breederManagementAdminBannerRepository.deleteCounsel(bannerId);
     }
 
-    private toProfileSnapshot(banner: any): ProfileBannerSnapshot {
+    private toProfileSnapshot(banner: BreederManagementBannerDocumentRecord): ProfileBannerSnapshot {
         return {
             bannerId: banner._id.toString(),
             imageFileName: banner.imageFileName,
-            bannerType: banner.bannerType,
+            bannerType: banner.bannerType || 'login',
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,
@@ -61,7 +62,7 @@ export class BreederManagementAdminBannerWriterAdapter implements BreederManagem
         };
     }
 
-    private toCounselSnapshot(banner: any): CounselBannerSnapshot {
+    private toCounselSnapshot(banner: BreederManagementBannerDocumentRecord): CounselBannerSnapshot {
         return {
             bannerId: banner._id.toString(),
             imageFileName: banner.imageFileName,

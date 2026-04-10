@@ -26,33 +26,32 @@ export class BreederManagementProfileAssemblerService {
             })),
         };
 
-        const priceRange = (breeder.profile as any)?.priceRange;
+        const priceRange = breeder.profile?.priceRange;
+        const priceRangeMin = priceRange?.min ?? 0;
+        const priceRangeMax = priceRange?.max ?? 0;
         const profileWithSignedUrls = breeder.profile
             ? {
                   ...breeder.profile,
-                  representativePhotos: fileUrlPort.generateMany(
-                      ((breeder.profile as any)?.representativePhotos || []) as string[],
-                      60,
-                  ),
+                  representativePhotos: fileUrlPort.generateMany(breeder.profile.representativePhotos || [], 60),
                   priceRange: !priceRange
                       ? { min: 0, max: 0, display: 'not_set' }
                       : {
-                            min: priceRange.min || 0,
-                            max: priceRange.max || 0,
-                            display: priceRange.display || (priceRange.min > 0 || priceRange.max > 0 ? 'range' : 'not_set'),
+                            min: priceRangeMin,
+                            max: priceRangeMax,
+                            display: priceRange.display || (priceRangeMin > 0 || priceRangeMax > 0 ? 'range' : 'not_set'),
                         },
               }
             : breeder.profile;
 
         const parentPetsWithSignedUrls = (parentPets || []).map((pet) => {
-            const petObject = pet.toObject ? pet.toObject() : pet;
-            const photoFileName = petObject.photoFileName as string | null | undefined;
-            const photos = ((petObject.photos as string[] | undefined) || []).filter(Boolean);
+            const petObject: BreederManagementParentPetRecord = pet.toObject ? pet.toObject() : pet;
+            const photoFileName = petObject.photoFileName;
+            const photos = (petObject.photos || []).filter(Boolean);
             const additionalPhotos = photoFileName ? photos.filter((photo) => photo !== photoFileName) : photos;
 
             return {
                 ...petObject,
-                petId: String((pet as any)._id || (pet as any).petId || ''),
+                petId: String(petObject._id || petObject.petId || ''),
                 photoFileName: fileUrlPort.generateOneSafe(photoFileName, 60),
                 photos: fileUrlPort.generateMany(additionalPhotos, 60),
             };
@@ -60,8 +59,8 @@ export class BreederManagementProfileAssemblerService {
 
         const availablePetsWithSignedUrls = (availablePets || []).map((pet) => ({
             ...pet,
-            petId: String((pet as any)._id || pet.petId || ''),
-            photos: fileUrlPort.generateMany((pet.photos || []) as string[], 60),
+            petId: String(pet._id || pet.petId || ''),
+            photos: fileUrlPort.generateMany(pet.photos || [], 60),
         }));
 
         return {

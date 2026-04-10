@@ -24,30 +24,22 @@ export class BreederManagementProfileAdapter implements BreederManagementProfile
     ) {}
 
     findById(breederId: string): Promise<BreederManagementBreederRecord | null> {
-        return this.breederRepository.findById(breederId) as Promise<BreederManagementBreederRecord | null>;
+        return this.breederRepository.findById(breederId);
     }
 
     findByIdWithAllData(breederId: string): Promise<BreederManagementBreederRecord | null> {
-        return this.breederRepository.findByIdWithAllData(
-            breederId,
-        ) as Promise<BreederManagementBreederRecord | null>;
+        return this.breederRepository.findByIdWithAllData(breederId);
     }
 
     updateProfile(
         breederId: string,
         updateData: Record<string, unknown>,
     ): Promise<BreederManagementBreederRecord | null> {
-        return this.breederRepository.updateProfile(
-            breederId,
-            updateData,
-        ) as Promise<BreederManagementBreederRecord | null>;
+        return this.breederRepository.updateProfile(breederId, updateData);
     }
 
     findActiveParentPetsByBreederId(breederId: string): Promise<BreederManagementParentPetRecord[]> {
-        return this.parentPetRepository.findByBreederId(
-            breederId,
-            true,
-        ) as unknown as Promise<BreederManagementParentPetRecord[]>;
+        return this.parentPetRepository.findByBreederId(breederId, true);
     }
 
     async findActiveAvailablePetsByBreederId(breederId: string): Promise<BreederManagementAvailablePetRecord[]> {
@@ -55,7 +47,7 @@ export class BreederManagementProfileAdapter implements BreederManagementProfile
             includeInactive: false,
         });
 
-        return result.pets as unknown as BreederManagementAvailablePetRecord[];
+        return result.pets;
     }
 
     countPendingApplications(breederId: string): Promise<number> {
@@ -66,10 +58,7 @@ export class BreederManagementProfileAdapter implements BreederManagementProfile
         breederId: string,
         limit: number,
     ): Promise<BreederManagementRecentApplicationRecord[]> {
-        return this.adoptionApplicationRepository.findRecentByBreeder(
-            breederId,
-            limit,
-        ) as Promise<BreederManagementRecentApplicationRecord[]>;
+        return this.adoptionApplicationRepository.findRecentByBreeder(breederId, limit);
     }
 
     countActiveAvailablePets(breederId: string): Promise<number> {
