@@ -19,8 +19,10 @@ import { BREEDER_ADMIN_WRITER } from './application/ports/breeder-admin-writer.p
 import { BREEDER_ADMIN_NOTIFIER } from './application/ports/breeder-admin-notifier.port';
 import { BreederAdminPolicyService } from './domain/services/breeder-admin-policy.service';
 import { BreederAdminActivityLogFactoryService } from './domain/services/breeder-admin-activity-log-factory.service';
-import { BreederAdminPresentationService } from './domain/services/breeder-admin-presentation.service';
+import { BreederAdminReminderPresentationService } from './domain/services/breeder-admin-reminder-presentation.service';
 import { BreederAdminReminderPolicyService } from './domain/services/breeder-admin-reminder-policy.service';
+import { BreederAdminSuspensionPresentationService } from './domain/services/breeder-admin-suspension-presentation.service';
+import { BreederAdminTestAccountPresentationService } from './domain/services/breeder-admin-test-account-presentation.service';
 import { BreederAdminMongooseRepositoryAdapter } from './infrastructure/breeder-admin-mongoose.repository.adapter';
 import { BreederAdminNotifierAdapter } from './infrastructure/breeder-admin-notifier.adapter';
 import { BreederAdminRepository } from './repository/breeder-admin.repository';
@@ -63,7 +65,9 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
         SetBreederTestAccountUseCase,
         BreederAdminPolicyService,
         BreederAdminActivityLogFactoryService,
-        BreederAdminPresentationService,
+        BreederAdminSuspensionPresentationService,
+        BreederAdminReminderPresentationService,
+        BreederAdminTestAccountPresentationService,
         BreederAdminReminderPolicyService,
         BreederAdminRepository,
         BreederAdminMongooseRepositoryAdapter,

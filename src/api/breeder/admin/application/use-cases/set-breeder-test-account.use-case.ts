@@ -8,7 +8,7 @@ import type { BreederAdminReaderPort } from '../ports/breeder-admin-reader.port'
 import type { BreederAdminWriterPort } from '../ports/breeder-admin-writer.port';
 import { BreederAdminActivityLogFactoryService } from '../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../domain/services/breeder-admin-policy.service';
-import { BreederAdminPresentationService } from '../../domain/services/breeder-admin-presentation.service';
+import { BreederAdminTestAccountPresentationService } from '../../domain/services/breeder-admin-test-account-presentation.service';
 
 @Injectable()
 export class SetBreederTestAccountUseCase {
@@ -19,7 +19,7 @@ export class SetBreederTestAccountUseCase {
         private readonly breederAdminWriter: BreederAdminWriterPort,
         private readonly breederAdminPolicyService: BreederAdminPolicyService,
         private readonly breederAdminActivityLogFactoryService: BreederAdminActivityLogFactoryService,
-        private readonly breederAdminPresentationService: BreederAdminPresentationService,
+        private readonly breederAdminTestAccountPresentationService: BreederAdminTestAccountPresentationService,
     ) {}
 
     async execute(adminId: string, breederId: string, isTestAccount: boolean): Promise<SetTestAccountResponseDto> {
@@ -46,7 +46,7 @@ export class SetBreederTestAccountUseCase {
             ),
         );
 
-        return this.breederAdminPresentationService.createSetTestAccountResponse(
+        return this.breederAdminTestAccountPresentationService.create(
             breederId,
             this.breederAdminPolicyService.getBreederBusinessName(breeder),
             isTestAccount,
