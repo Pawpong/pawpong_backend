@@ -1,19 +1,17 @@
 import { Transform } from 'class-transformer';
 import { Allow } from 'class-validator';
 
-function toNumberWithDefault(defaultValue: number) {
-    return Transform(({ value }) => (value === undefined ? defaultValue : Number(value)));
-}
+import { parseIntegerWithFallback } from './feed-query-number.parser';
 
 export class FeedPopularLimitQueryDto {
     @Allow()
-    @toNumberWithDefault(10)
+    @Transform(({ value }) => parseIntegerWithFallback(value, 10))
     limit: number = 10;
 }
 
 export class FeedPopularTagLimitQueryDto {
     @Allow()
-    @toNumberWithDefault(20)
+    @Transform(({ value }) => parseIntegerWithFallback(value, 20))
     limit: number = 20;
 }
 
@@ -22,6 +20,6 @@ export class FeedSuggestTagQueryDto {
     q: string;
 
     @Allow()
-    @toNumberWithDefault(10)
+    @Transform(({ value }) => parseIntegerWithFallback(value, 10))
     limit: number = 10;
 }
