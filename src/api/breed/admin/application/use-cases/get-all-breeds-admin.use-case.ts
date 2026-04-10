@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { BreedResponseDto } from '../../../dto/response/breed-response.dto';
 import { BreedAdminPresentationService } from '../../../domain/services/breed-admin-presentation.service';
 import { BREED_ADMIN_READER, type BreedAdminReaderPort } from '../ports/breed-admin-reader.port';
+import { type BreedAdminItemResult } from '../types/breed-result.type';
 
 @Injectable()
 export class GetAllBreedsAdminUseCase {
@@ -12,7 +12,7 @@ export class GetAllBreedsAdminUseCase {
         private readonly breedAdminPresentationService: BreedAdminPresentationService,
     ) {}
 
-    async execute(): Promise<BreedResponseDto[]> {
+    async execute(): Promise<BreedAdminItemResult[]> {
         const breeds = await this.breedAdminReader.readAll();
         return breeds.map((breed) => this.breedAdminPresentationService.toResponseDto(breed));
     }
