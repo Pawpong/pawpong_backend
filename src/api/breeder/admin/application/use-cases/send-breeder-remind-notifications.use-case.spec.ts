@@ -4,7 +4,7 @@ import { RemindType } from '../../dto/request/breeder-remind-request.dto';
 import { SendBreederRemindNotificationsUseCase } from './send-breeder-remind-notifications.use-case';
 import { BreederAdminActivityLogFactoryService } from '../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../domain/services/breeder-admin-policy.service';
-import { BreederAdminPresentationService } from '../../domain/services/breeder-admin-presentation.service';
+import { BreederAdminReminderPresentationService } from '../../domain/services/breeder-admin-reminder-presentation.service';
 import { BreederAdminReminderPolicyService } from '../../domain/services/breeder-admin-reminder-policy.service';
 
 describe('브리더 리마인드 알림 발송 유스케이스', () => {
@@ -25,7 +25,7 @@ describe('브리더 리마인드 알림 발송 유스케이스', () => {
         breederAdminNotifier as any,
         new BreederAdminPolicyService(),
         new BreederAdminActivityLogFactoryService(),
-        new BreederAdminPresentationService(),
+        new BreederAdminReminderPresentationService(),
         new BreederAdminReminderPolicyService(),
     );
 

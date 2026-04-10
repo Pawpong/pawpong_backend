@@ -11,7 +11,7 @@ import type { BreederAdminWriterPort } from '../ports/breeder-admin-writer.port'
 import type { BreederAdminNotifierPort } from '../ports/breeder-admin-notifier.port';
 import { BreederAdminActivityLogFactoryService } from '../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../domain/services/breeder-admin-policy.service';
-import { BreederAdminPresentationService } from '../../domain/services/breeder-admin-presentation.service';
+import { BreederAdminReminderPresentationService } from '../../domain/services/breeder-admin-reminder-presentation.service';
 import { BreederAdminReminderPolicyService } from '../../domain/services/breeder-admin-reminder-policy.service';
 
 @Injectable()
@@ -25,7 +25,7 @@ export class SendBreederRemindNotificationsUseCase {
         private readonly breederAdminNotifier: BreederAdminNotifierPort,
         private readonly breederAdminPolicyService: BreederAdminPolicyService,
         private readonly breederAdminActivityLogFactoryService: BreederAdminActivityLogFactoryService,
-        private readonly breederAdminPresentationService: BreederAdminPresentationService,
+        private readonly breederAdminReminderPresentationService: BreederAdminReminderPresentationService,
         private readonly breederAdminReminderPolicyService: BreederAdminReminderPolicyService,
     ) {}
 
@@ -84,7 +84,7 @@ export class SendBreederRemindNotificationsUseCase {
             }
         }
 
-        return this.breederAdminPresentationService.createReminderResponse(
+        return this.breederAdminReminderPresentationService.create(
             remindData.breederIds.length,
             successIds,
             failIds,
