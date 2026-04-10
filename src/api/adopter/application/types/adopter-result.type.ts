@@ -1,5 +1,9 @@
 import { PriceDisplayType } from '../../../../common/enum/user.enum';
 import type { PageResult } from '../../../../common/types/page-result.type';
+import type {
+    AdopterApplicationAnswerValue,
+    AdopterApplicationStandardResponsesRecord,
+} from '../../types/adopter-application.type';
 
 export type AdopterProfileFavoriteResult = {
     breederId: string;
@@ -45,7 +49,7 @@ export type AdopterApplicationCustomResponseResult = {
     questionId: string;
     questionLabel: string;
     questionType: string;
-    answer: unknown;
+    answer: AdopterApplicationAnswerValue;
 };
 
 export type AdopterApplicationListItemResult = {
@@ -74,7 +78,7 @@ export type AdopterApplicationDetailResult = {
     petId?: string;
     petName?: string;
     status: string;
-    standardResponses?: Record<string, unknown>;
+    standardResponses?: AdopterApplicationStandardResponsesRecord;
     customResponses: AdopterApplicationCustomResponseResult[];
     appliedAt: string;
     processedAt?: string;
@@ -151,6 +155,14 @@ export type AdopterReviewCreateResult = {
 };
 
 export type AdopterReviewReportResult = {
+    message: string;
+};
+
+export type AdopterProfileUpdateResult = {
+    message: string;
+};
+
+export type AdopterFavoriteCommandResult = {
     message: string;
 };
 

@@ -3,6 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { AdopterMapper } from '../../mapper/adopter.mapper';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
+import type { AdopterProfileUpdateResult } from '../types/adopter-result.type';
 
 @Injectable()
 export class UpdateAdopterProfileUseCase {
@@ -11,7 +12,10 @@ export class UpdateAdopterProfileUseCase {
         private readonly adopterProfilePort: AdopterProfilePort,
     ) {}
 
-    async execute(userId: string, updateData: { name?: string; phone?: string; profileImage?: string }): Promise<any> {
+    async execute(
+        userId: string,
+        updateData: { name?: string; phone?: string; profileImage?: string },
+    ): Promise<AdopterProfileUpdateResult> {
         const mappedUpdateData = AdopterMapper.toProfileUpdateData(updateData);
         const adopter = await this.adopterProfilePort.updateProfile(userId, mappedUpdateData);
 

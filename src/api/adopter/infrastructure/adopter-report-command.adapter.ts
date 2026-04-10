@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { BreederRepository } from '../../breeder-management/repository/breeder.repository';
 import { AdopterReportCommandPort } from '../application/ports/adopter-report-command.port';
+import type { AdopterReportPayloadRecord } from '../types/adopter-report.type';
 
 @Injectable()
 export class AdopterReportCommandAdapter extends AdopterReportCommandPort {
@@ -9,7 +10,7 @@ export class AdopterReportCommandAdapter extends AdopterReportCommandPort {
         super();
     }
 
-    addReport(breederId: string, reportData: any): Promise<void> {
+    addReport(breederId: string, reportData: AdopterReportPayloadRecord): Promise<void> {
         return this.breederRepository.addReport(breederId, reportData);
     }
 }

@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import type { AdopterApplicationCreateCommand } from '../../application/types/adopter-application-command.type';
+import type { AdopterApplicationStandardResponsesRecord } from '../../types/adopter-application.type';
 
 @Injectable()
 export class AdopterApplicationStandardResponseBuilderService {
-    build(dto: AdopterApplicationCreateCommand): Record<string, any> {
+    build(dto: AdopterApplicationCreateCommand): AdopterApplicationStandardResponsesRecord {
         return {
             privacyConsent: dto.privacyConsent,
             selfIntroduction: dto.selfIntroduction,

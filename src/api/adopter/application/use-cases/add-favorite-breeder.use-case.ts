@@ -7,6 +7,7 @@ import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.p
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import { AdopterFavoritePolicyService } from '../../domain/services/adopter-favorite-policy.service';
 import type { AdopterFavoriteAddCommand } from '../types/adopter-favorite-command.type';
+import type { AdopterFavoriteCommandResult } from '../types/adopter-result.type';
 
 @Injectable()
 export class AddFavoriteBreederUseCase {
@@ -18,7 +19,11 @@ export class AddFavoriteBreederUseCase {
         private readonly adopterFavoritePolicyService: AdopterFavoritePolicyService,
     ) {}
 
-    async execute(userId: string, addFavoriteDto: AdopterFavoriteAddCommand, userRole?: string): Promise<any> {
+    async execute(
+        userId: string,
+        addFavoriteDto: AdopterFavoriteAddCommand,
+        userRole?: string,
+    ): Promise<AdopterFavoriteCommandResult> {
         const adopter = await this.adopterProfilePort.findById(userId, userRole);
         if (!adopter) {
             throw new BadRequestException(userRole === 'breeder' ? '브리더 정보를 찾을 수 없습니다.' : '입양자 정보를 찾을 수 없습니다.');

@@ -1,8 +1,13 @@
+import type {
+    AdopterApplicationAnswerValue,
+    AdopterApplicationStandardResponsesRecord,
+} from '../../types/adopter-application.type';
+
 export type AdopterApplicationCustomResponseRecord = {
     questionId: string;
     questionLabel: string;
     questionType: string;
-    answer: any;
+    answer: AdopterApplicationAnswerValue;
 };
 
 export type AdopterApplicationCreateCommand = {
@@ -14,7 +19,7 @@ export type AdopterApplicationCreateCommand = {
     petId?: string;
     petName?: string;
     status: string;
-    standardResponses: Record<string, any>;
+    standardResponses: AdopterApplicationStandardResponsesRecord;
     customResponses: AdopterApplicationCustomResponseRecord[];
     appliedAt: Date;
 };

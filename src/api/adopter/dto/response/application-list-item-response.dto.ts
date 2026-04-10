@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { AdopterApplicationAnswerValue } from '../../types/adopter-application.type';
 
 /**
  * 입양 신청 목록 아이템 응답 DTO
@@ -155,7 +156,16 @@ export class ApplicationListItemResponseDto {
                 questionId: { type: 'string', example: 'custom_1770782752825_0' },
                 questionLabel: { type: 'string', example: '방문 가능한 시간대를 선택해주세요' },
                 questionType: { type: 'string', example: 'select' },
-                answer: { type: 'any', example: '오후 (13:00-17:00)' },
+                answer: {
+                    oneOf: [
+                        { type: 'string', example: '오후 (13:00-17:00)' },
+                        {
+                            type: 'array',
+                            items: { type: 'string' },
+                            example: ['주말', '공휴일'],
+                        },
+                    ],
+                },
             },
         },
         required: false,
@@ -164,6 +174,6 @@ export class ApplicationListItemResponseDto {
         questionId: string;
         questionLabel: string;
         questionType: string;
-        answer: any;
+        answer: AdopterApplicationAnswerValue;
     }>;
 }

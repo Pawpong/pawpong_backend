@@ -4,6 +4,9 @@ import { AdopterRepository } from '../repository/adopter.repository';
 import { BreederRepository } from '../../breeder-management/repository/breeder.repository';
 import { AdopterProfilePort } from '../application/ports/adopter-profile.port';
 import { AdopterBreederFavoriteRepository } from '../repository/adopter-breeder-favorite.repository';
+import type { AdopterBreederRecord } from '../types/adopter-breeder.type';
+import type { AdopterProfileUpdateRecord, AdopterFavoriteRecord } from '../types/adopter-profile.type';
+import type { AdopterProfileRecord } from '../application/ports/adopter-profile.port';
 
 @Injectable()
 export class AdopterProfileAdapter implements AdopterProfilePort {
@@ -13,20 +16,35 @@ export class AdopterProfileAdapter implements AdopterProfilePort {
         private readonly adopterBreederFavoriteRepository: AdopterBreederFavoriteRepository,
     ) {}
 
-    findById(adopterId: string, userRole?: string) {
+    findById(adopterId: string): Promise<AdopterProfileRecord | null>;
+    findById(adopterId: string, userRole: string): Promise<AdopterProfileRecord | AdopterBreederRecord | null>;
+    findById(adopterId: string, userRole?: string): Promise<AdopterProfileRecord | AdopterBreederRecord | null> {
         if (userRole === 'breeder') {
-            return this.breederRepository.findById(adopterId) as any;
+            return this.breederRepository.findById(adopterId) as Promise<AdopterBreederRecord | null>;
         }
 
-        return this.adopterRepository.findById(adopterId);
+        return this.adopterRepository.findById(adopterId) as Promise<AdopterProfileRecord | null>;
     }
 
-    updateProfile(adopterId: string, updateData: any, userRole?: string) {
+    updateProfile(
+        adopterId: string,
+        updateData: AdopterProfileUpdateRecord,
+    ): Promise<AdopterProfileRecord | null>;
+    updateProfile(
+        adopterId: string,
+        updateData: AdopterProfileUpdateRecord,
+        userRole: string,
+    ): Promise<AdopterProfileRecord | AdopterBreederRecord | null>;
+    updateProfile(
+        adopterId: string,
+        updateData: AdopterProfileUpdateRecord,
+        userRole?: string,
+    ): Promise<AdopterProfileRecord | AdopterBreederRecord | null> {
         if (userRole === 'breeder') {
-            return this.breederRepository.updateProfile(adopterId, updateData) as any;
+            return this.breederRepository.updateProfile(adopterId, updateData) as Promise<AdopterBreederRecord | null>;
         }
 
-        return this.adopterRepository.updateProfile(adopterId, updateData);
+        return this.adopterRepository.updateProfile(adopterId, updateData) as Promise<AdopterProfileRecord | null>;
     }
 
     async findFavoriteList(adopterId: string, page: number, limit: number, userRole?: string) {
@@ -37,7 +55,7 @@ export class AdopterProfileAdapter implements AdopterProfilePort {
         return this.adopterRepository.findFavoriteList(adopterId, page, limit);
     }
 
-    async addFavoriteBreeder(adopterId: string, favoriteData: any, userRole?: string) {
+    async addFavoriteBreeder(adopterId: string, favoriteData: AdopterFavoriteRecord, userRole?: string) {
         if (userRole === 'breeder') {
             return this.adopterBreederFavoriteRepository.addFavoriteBreeder(adopterId, favoriteData);
         }

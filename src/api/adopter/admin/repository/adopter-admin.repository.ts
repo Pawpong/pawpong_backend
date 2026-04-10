@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 
 import { Admin, AdminDocument } from '../../../../schema/admin.schema';
 import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
@@ -11,6 +11,45 @@ import {
 import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
 import { BreederReview, BreederReviewDocument } from '../../../../schema/breeder-review.schema';
 import { AdopterAdminActivityLogEntry } from '../application/ports/adopter-admin-writer.port';
+import type {
+    AdopterApplicationCustomResponseRecord,
+    AdopterApplicationStandardResponsesRecord,
+    AdopterObjectIdLike,
+} from '../../types/adopter-application.type';
+
+export type AdopterAdminNamedRecord = {
+    _id: AdopterObjectIdLike;
+    nickname?: string;
+    name?: string;
+};
+
+export type AdopterAdminReviewRepositoryRecord = {
+    _id: AdopterObjectIdLike;
+    breederId?: { _id?: AdopterObjectIdLike; name?: string } | AdopterObjectIdLike | null;
+    adopterId?: { _id?: AdopterObjectIdLike; nickname?: string } | AdopterObjectIdLike | null;
+    reportedBy?: AdopterObjectIdLike;
+    reportReason?: string;
+    reportDescription?: string;
+    reportedAt?: Date;
+    content: string;
+    writtenAt: Date;
+    isVisible: boolean;
+};
+
+export type AdopterAdminApplicationRepositoryRecord = {
+    _id: AdopterObjectIdLike;
+    adopterName: string;
+    adopterEmail: string;
+    adopterPhone: string;
+    breederId?: { _id?: AdopterObjectIdLike; name?: string } | AdopterObjectIdLike | null;
+    petName?: string;
+    status: string;
+    standardResponses?: AdopterApplicationStandardResponsesRecord;
+    customResponses?: AdopterApplicationCustomResponseRecord[];
+    appliedAt: Date;
+    processedAt?: Date;
+    breederNotes?: string;
+};
 
 @Injectable()
 export class AdopterAdminRepository {
@@ -27,7 +66,10 @@ export class AdopterAdminRepository {
         return this.adminModel.findById(adminId).select('permissions').lean().exec();
     }
 
-    async findReportedReviews(page: number, limit: number): Promise<{ reviews: any[]; totalCount: number }> {
+    async findReportedReviews(
+        page: number,
+        limit: number,
+    ): Promise<{ reviews: AdopterAdminReviewRepositoryRecord[]; totalCount: number }> {
         const skip = (page - 1) * limit;
         const [reviews, totalCount] = await Promise.all([
             this.breederReviewModel
@@ -45,35 +87,39 @@ export class AdopterAdminRepository {
         return { reviews, totalCount };
     }
 
-    findAdoptersByIds(adopterIds: Types.ObjectId[]) {
+    findAdoptersByIds(adopterIds: Types.ObjectId[]): Promise<AdopterAdminNamedRecord[]> {
         if (adopterIds.length === 0) {
             return Promise.resolve([]);
         }
 
-        return this.adopterModel.find({ _id: { $in: adopterIds } }).select('nickname').lean().exec();
+        return this.adopterModel.find({ _id: { $in: adopterIds } }).select('nickname').lean().exec() as Promise<
+            AdopterAdminNamedRecord[]
+        >;
     }
 
-    findBreedersByIds(breederIds: Types.ObjectId[]) {
+    findBreedersByIds(breederIds: Types.ObjectId[]): Promise<AdopterAdminNamedRecord[]> {
         if (breederIds.length === 0) {
             return Promise.resolve([]);
         }
 
-        return this.breederModel.find({ _id: { $in: breederIds } }).select('name').lean().exec();
+        return this.breederModel.find({ _id: { $in: breederIds } }).select('name').lean().exec() as Promise<
+            AdopterAdminNamedRecord[]
+        >;
     }
 
-    findBreedersByName(name: string) {
+    findBreedersByName(name: string): Promise<Array<{ _id: Types.ObjectId }>> {
         return this.breederModel
             .find({ name: { $regex: name, $options: 'i' } })
             .select('_id')
             .lean()
-            .exec();
+            .exec() as Promise<Array<{ _id: Types.ObjectId }>>;
     }
 
-    countApplications(query: Record<string, any>): Promise<number> {
+    countApplications(query: FilterQuery<AdoptionApplicationDocument>): Promise<number> {
         return this.adoptionApplicationModel.countDocuments(query).exec();
     }
 
-    countApplicationsByStatus(query: Record<string, any>, status: string): Promise<number> {
+    countApplicationsByStatus(query: FilterQuery<AdoptionApplicationDocument>, status: string): Promise<number> {
         return this.adoptionApplicationModel
             .countDocuments({
                 ...query,
@@ -82,7 +128,11 @@ export class AdopterAdminRepository {
             .exec();
     }
 
-    findApplications(query: Record<string, any>, page: number, limit: number) {
+    findApplications(
+        query: FilterQuery<AdoptionApplicationDocument>,
+        page: number,
+        limit: number,
+    ): Promise<AdopterAdminApplicationRepositoryRecord[]> {
         return this.adoptionApplicationModel
             .find(query)
             .sort({ appliedAt: -1 })
@@ -90,11 +140,15 @@ export class AdopterAdminRepository {
             .limit(limit)
             .populate('breederId', 'name')
             .lean()
-            .exec();
+            .exec() as Promise<AdopterAdminApplicationRepositoryRecord[]>;
     }
 
-    findApplicationById(applicationId: string) {
-        return this.adoptionApplicationModel.findById(applicationId).populate('breederId', 'name').lean().exec();
+    findApplicationById(applicationId: string): Promise<AdopterAdminApplicationRepositoryRecord | null> {
+        return this.adoptionApplicationModel
+            .findById(applicationId)
+            .populate('breederId', 'name')
+            .lean()
+            .exec() as Promise<AdopterAdminApplicationRepositoryRecord | null>;
     }
 
     hideReview(breederId: string, reviewId: string) {
@@ -121,9 +175,9 @@ export class AdopterAdminRepository {
                 { _id: adminId },
                 {
                     $push: {
-                        activityLogs: logEntry as any,
+                        activityLogs: logEntry,
                     },
-                },
+                } as UpdateQuery<AdminDocument>,
             )
             .exec();
     }

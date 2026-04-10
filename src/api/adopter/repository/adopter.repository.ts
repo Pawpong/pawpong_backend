@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
+import type { FavoriteBreederRecord } from '../application/ports/adopter-profile.port';
+import type { AdopterProfileUpdateRecord } from '../types/adopter-profile.type';
 
 /**
  * 입양자 데이터 접근 계층 Repository
@@ -109,7 +111,7 @@ export class AdopterRepository {
      * @param updateData 수정할 데이터
      * @returns 수정된 입양자 정보 또는 null
      */
-    async updateProfile(adopterId: string, updateData: any): Promise<AdopterDocument | null> {
+    async updateProfile(adopterId: string, updateData: AdopterProfileUpdateRecord): Promise<AdopterDocument | null> {
         try {
             return await this.adopterModel
                 .findByIdAndUpdate(
@@ -137,7 +139,7 @@ export class AdopterRepository {
      * @param adopterId 입양자 ID
      * @param favoriteData 즐겨찾기할 브리더 정보
      */
-    async addFavoriteBreeder(adopterId: string, favoriteData: any): Promise<void> {
+    async addFavoriteBreeder(adopterId: string, favoriteData: FavoriteBreederRecord): Promise<void> {
         try {
             await this.adopterModel
                 .findByIdAndUpdate(adopterId, {
@@ -183,12 +185,12 @@ export class AdopterRepository {
      * @param breederId 브리더 ID
      * @returns 즐겨찾기 정보 또는 null
      */
-    async findExistingFavorite(adopterId: string, breederId: string): Promise<any | null> {
+    async findExistingFavorite(adopterId: string, breederId: string): Promise<FavoriteBreederRecord | null> {
         try {
             const adopter = await this.adopterModel.findById(adopterId).lean().exec();
             if (!adopter) return null;
 
-            return adopter.favoriteBreederList?.find((fav: any) => fav.favoriteBreederId === breederId) || null;
+            return adopter.favoriteBreederList?.find((fav) => fav.favoriteBreederId === breederId) || null;
         } catch (error) {
             throw new Error(`기존 즐겨찾기 확인 실패: ${error.message}`);
         }
@@ -261,7 +263,11 @@ export class AdopterRepository {
      * @param limit 페이지당 항목 수 (기본값: 10)
      * @returns 즐겨찾기 브리더 목록과 페이지네이션 정보
      */
-    async findFavoriteList(adopterId: string, page: number = 1, limit: number = 10): Promise<any> {
+    async findFavoriteList(
+        adopterId: string,
+        page: number = 1,
+        limit: number = 10,
+    ): Promise<{ favorites: FavoriteBreederRecord[]; total: number }> {
         try {
             const adopter = await this.adopterModel.findById(adopterId).select('favoriteBreederList').lean().exec();
 
@@ -297,9 +303,29 @@ export class AdopterRepository {
      * @param limit 페이지당 항목 수 (기본값: 20)
      * @returns 페이지네이션된 입양자 목록
      */
-    async findWithFilters(filters: any, page: number = 1, limit: number = 20): Promise<any> {
+    async findWithFilters(
+        filters: {
+            status?: string;
+            email?: string;
+            name?: string;
+            dateFrom?: string;
+            dateTo?: string;
+        },
+        page: number = 1,
+        limit: number = 20,
+    ): Promise<{
+        adopters: Array<Record<string, unknown>>;
+        pagination: {
+            currentPage: number;
+            totalPages: number;
+            totalItems: number;
+            itemsPerPage: number;
+            hasNextPage: boolean;
+            hasPrevPage: boolean;
+        };
+    }> {
         try {
-            const query: any = {};
+            const query: FilterQuery<AdopterDocument> = {};
 
             // 필터 조건 동적 구성
             if (filters.status) {

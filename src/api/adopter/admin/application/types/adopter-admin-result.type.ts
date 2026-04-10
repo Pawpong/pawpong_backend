@@ -1,5 +1,9 @@
 import { ApplicationStatus } from '../../../../../common/enum/user.enum';
 import type { PageResult } from '../../../../../common/types/page-result.type';
+import type {
+    AdopterApplicationAnswerValue,
+    AdopterApplicationStandardResponsesRecord,
+} from '../../../types/adopter-application.type';
 
 export type AdopterAdminApplicationListItemResult = {
     applicationId: string;
@@ -26,27 +30,13 @@ export type AdopterAdminApplicationListResult = {
     totalPages: number;
 };
 
-export type AdopterAdminStandardResponsesResult = {
-    privacyConsent: boolean;
-    selfIntroduction: string;
-    familyMembers: string;
-    allFamilyConsent: boolean;
-    allergyTestInfo: string;
-    timeAwayFromHome: string;
-    livingSpaceDescription: string;
-    previousPetExperience: string;
-    canProvideBasicCare: boolean;
-    canAffordMedicalExpenses: boolean;
-    preferredPetDescription?: string;
-    desiredAdoptionTiming?: string;
-    additionalNotes?: string;
-};
+export type AdopterAdminStandardResponsesResult = AdopterApplicationStandardResponsesRecord;
 
 export type AdopterAdminCustomResponseResult = {
     questionId: string;
     questionLabel: string;
     questionType: string;
-    answer: any;
+    answer: AdopterApplicationAnswerValue;
 };
 
 export type AdopterAdminApplicationDetailResult = {

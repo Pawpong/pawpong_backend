@@ -1,16 +1,22 @@
+import type {
+    AdopterApplicationCustomResponseRecord,
+    AdopterApplicationStandardResponsesRecord,
+    AdopterObjectIdLike,
+} from '../../types/adopter-application.type';
+
 export const ADOPTER_APPLICATION_READER_PORT = Symbol('ADOPTER_APPLICATION_READER_PORT');
 
 export interface AdopterApplicationRecord {
-    _id: { toString(): string };
-    breederId: { toString(): string };
-    adopterId?: { _id?: { toString(): string }; toString(): string } | string;
-    petId?: { toString(): string };
+    _id: AdopterObjectIdLike;
+    breederId: AdopterObjectIdLike;
+    adopterId?: { _id?: AdopterObjectIdLike; toString(): string } | string;
+    petId?: AdopterObjectIdLike;
     petName?: string;
     status: string;
     appliedAt: Date;
     processedAt?: Date;
-    standardResponses?: Record<string, any>;
-    customResponses?: any[];
+    standardResponses?: AdopterApplicationStandardResponsesRecord;
+    customResponses?: AdopterApplicationCustomResponseRecord[];
     breederNotes?: string;
 }
 
