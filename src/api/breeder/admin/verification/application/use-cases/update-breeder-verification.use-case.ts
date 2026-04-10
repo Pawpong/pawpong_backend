@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminTargetType } from '../../../../../../common/enum/user.enum';
-import { BreederVerificationRequestDto } from '../../dto/request/breeder-verification-request.dto';
 import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
 import { BREEDER_VERIFICATION_ADMIN_WRITER } from '../ports/breeder-verification-admin-writer.port';
 import { BREEDER_VERIFICATION_ADMIN_NOTIFIER } from '../ports/breeder-verification-admin-notifier.port';
@@ -10,6 +9,7 @@ import type { BreederVerificationAdminWriterPort } from '../ports/breeder-verifi
 import type { BreederVerificationAdminNotifierPort } from '../ports/breeder-verification-admin-notifier.port';
 import { BreederVerificationAdminActivityLogFactoryService } from '../../domain/services/breeder-verification-admin-activity-log-factory.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
+import type { BreederVerificationUpdateCommand } from '../types/breeder-verification-admin-command.type';
 
 @Injectable()
 export class UpdateBreederVerificationUseCase {
@@ -24,7 +24,11 @@ export class UpdateBreederVerificationUseCase {
         private readonly breederVerificationAdminActivityLogFactoryService: BreederVerificationAdminActivityLogFactoryService,
     ) {}
 
-    async execute(adminId: string, breederId: string, verificationData: BreederVerificationRequestDto): Promise<{ message: string }> {
+    async execute(
+        adminId: string,
+        breederId: string,
+        verificationData: BreederVerificationUpdateCommand,
+    ): Promise<{ message: string }> {
         this.breederVerificationAdminPolicyService.assertCanManageBreeders(
             await this.breederVerificationAdminReader.findAdminById(adminId),
             'Access denied',

@@ -1,9 +1,9 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
-import { AccountDeleteRequestDto } from '../../dto/request/account-delete-request.dto';
 import { AccountDeleteResponseDto } from '../../dto/response/account-delete-response.dto';
 import { AdopterAccountDeleteResponseFactoryService } from '../../domain/services/adopter-account-delete-response-factory.service';
 import { AdopterAccountCommandPort } from '../ports/adopter-account-command.port';
+import type { AdopterAccountDeleteCommand } from '../types/adopter-account-command.type';
 
 @Injectable()
 export class DeleteAdopterAccountUseCase {
@@ -12,7 +12,7 @@ export class DeleteAdopterAccountUseCase {
         private readonly adopterAccountDeleteResponseFactoryService: AdopterAccountDeleteResponseFactoryService,
     ) {}
 
-    async execute(userId: string, deleteData: AccountDeleteRequestDto): Promise<AccountDeleteResponseDto> {
+    async execute(userId: string, deleteData: AdopterAccountDeleteCommand): Promise<AccountDeleteResponseDto> {
         const adopter = await this.adopterAccountCommandPort.findAdopterById(userId);
         if (!adopter) {
             throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');

@@ -1,12 +1,12 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 
-import { FavoriteAddRequestDto } from '../../dto/request/favorite-add-request.dto';
 import { AdopterMapper } from '../../mapper/adopter.mapper';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import { AdopterFavoritePolicyService } from '../../domain/services/adopter-favorite-policy.service';
+import type { AdopterFavoriteAddCommand } from '../types/adopter-favorite-command.type';
 
 @Injectable()
 export class AddFavoriteBreederUseCase {
@@ -18,7 +18,7 @@ export class AddFavoriteBreederUseCase {
         private readonly adopterFavoritePolicyService: AdopterFavoritePolicyService,
     ) {}
 
-    async execute(userId: string, addFavoriteDto: FavoriteAddRequestDto, userRole?: string): Promise<any> {
+    async execute(userId: string, addFavoriteDto: AdopterFavoriteAddCommand, userRole?: string): Promise<any> {
         const adopter = await this.adopterProfilePort.findById(userId, userRole);
         if (!adopter) {
             throw new BadRequestException(userRole === 'breeder' ? '브리더 정보를 찾을 수 없습니다.' : '입양자 정보를 찾을 수 없습니다.');

@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ReportListRequestDto } from '../../dto/request/report-list-request.dto';
 import { BREEDER_REPORT_ADMIN_READER } from '../ports/breeder-report-admin-reader.port';
 import type { BreederReportAdminReaderPort } from '../ports/breeder-report-admin-reader.port';
 import { BreederReportAdminPolicyService } from '../../domain/services/breeder-report-admin-policy.service';
 import { BreederReportAdminPresentationService } from '../../domain/services/breeder-report-admin-presentation.service';
+import type { BreederReportListQuery } from '../types/breeder-report-admin-command.type';
 
 @Injectable()
 export class GetBreederReportsUseCase {
@@ -15,7 +15,7 @@ export class GetBreederReportsUseCase {
         private readonly breederReportAdminPresentationService: BreederReportAdminPresentationService,
     ) {}
 
-    async execute(adminId: string, filter: ReportListRequestDto): Promise<any> {
+    async execute(adminId: string, filter: BreederReportListQuery): Promise<any> {
         this.breederReportAdminPolicyService.assertCanManageBreeders(
             await this.breederReportAdminReader.findAdminById(adminId),
         );

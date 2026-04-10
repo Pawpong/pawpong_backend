@@ -1,7 +1,6 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
-import { ApplicationCreateRequestDto } from '../../dto/request/application-create-request.dto';
 import { ApplicationCreateResponseDto } from '../../dto/response/application-create-response.dto';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
@@ -13,6 +12,7 @@ import { AdopterApplicationNotifierPort } from '../ports/adopter-application-not
 import { AdopterApplicationCustomResponseBuilderService } from '../../domain/services/adopter-application-custom-response-builder.service';
 import { AdopterApplicationStandardResponseBuilderService } from '../../domain/services/adopter-application-standard-response-builder.service';
 import { AdopterApplicationCreateResponseFactoryService } from '../../domain/services/adopter-application-create-response-factory.service';
+import type { AdopterApplicationCreateCommand } from '../types/adopter-application-command.type';
 
 @Injectable()
 export class CreateAdopterApplicationUseCase {
@@ -31,7 +31,7 @@ export class CreateAdopterApplicationUseCase {
 
     async execute(
         userId: string,
-        dto: ApplicationCreateRequestDto,
+        dto: AdopterApplicationCreateCommand,
         userRole?: string,
     ): Promise<ApplicationCreateResponseDto> {
         await this.ensureApplicantExists(userId, userRole);
