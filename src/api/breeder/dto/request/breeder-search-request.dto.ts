@@ -3,17 +3,7 @@ import { Type } from 'class-transformer';
 import { IsEnum, IsOptional, IsNumber, Min, Max, IsString, IsBoolean } from 'class-validator';
 
 import { PetType } from '../../../../common/enum/user.enum';
-
-/**
- * 브리더 검색 정렬 기준 (레거시 API용)
- */
-export enum SortCriteria {
-    RATING = 'rating', // 평점순
-    REVIEWS = 'reviews', // 리뷰 많은순
-    LATEST = 'latest', // 최신 등록순
-    PRICE_LOW = 'price_low', // 가격 낮은순
-    PRICE_HIGH = 'price_high', // 가격 높은순
-}
+import { SortCriteria } from '../../constants/breeder-search.enum';
 
 /**
  * 브리더 검색 요청 DTO (레거시 API용)
