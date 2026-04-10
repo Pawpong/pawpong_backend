@@ -1,6 +1,7 @@
 import { Get } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
+import type { DistrictPublicResult } from './application/types/district-result.type';
 import { GetDistrictsResponseDto } from './dto/response/get-districts-response.dto';
 import { GetAllDistrictsUseCase } from './application/use-cases/get-all-districts.use-case';
 import { DistrictPublicController } from './decorator/district-controller.decorator';
@@ -14,6 +15,6 @@ export class DistrictController {
     @ApiGetAllDistrictsEndpoint()
     async getAllDistricts(): Promise<ApiResponseDto<GetDistrictsResponseDto[]>> {
         const result = await this.getAllDistrictsUseCase.execute();
-        return ApiResponseDto.success(result);
+        return ApiResponseDto.success(result as GetDistrictsResponseDto[] & DistrictPublicResult[]);
     }
 }

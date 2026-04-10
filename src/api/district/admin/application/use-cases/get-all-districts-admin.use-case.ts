@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { DistrictResponseDto } from '../../../dto/response/district-response.dto';
+import type { DistrictAdminResult } from '../../../application/types/district-result.type';
 import { DistrictAdminPresentationService } from '../../../domain/services/district-admin-presentation.service';
 import { DISTRICT_ADMIN_READER, type DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
 
@@ -12,7 +12,7 @@ export class GetAllDistrictsAdminUseCase {
         private readonly districtAdminPresentationService: DistrictAdminPresentationService,
     ) {}
 
-    async execute(): Promise<DistrictResponseDto[]> {
+    async execute(): Promise<DistrictAdminResult[]> {
         const districts = await this.districtAdminReader.readAll();
         return districts.map((district) => this.districtAdminPresentationService.toResponseDto(district));
     }
