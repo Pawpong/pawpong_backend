@@ -2,6 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 
 export type AdoptionApplicationDocument = AdoptionApplication & Document;
+export type AdoptionApplicationAnswerValue = string | string[];
 
 /**
  * 커스텀 질문 응답
@@ -36,7 +37,7 @@ export class CustomQuestionResponse {
      * - file: string (파일명)
      */
     @Prop({ type: MongooseSchema.Types.Mixed, required: true })
-    answer: any;
+    answer: AdoptionApplicationAnswerValue;
 }
 
 /**
