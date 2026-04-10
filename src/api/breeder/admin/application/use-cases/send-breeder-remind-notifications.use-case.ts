@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminAction, AdminTargetType } from '../../../../../common/enum/user.enum';
-import { BreederRemindResponseDto } from '../../dto/response/breeder-remind-response.dto';
 import { BREEDER_ADMIN_READER } from '../ports/breeder-admin-reader.port';
 import { BREEDER_ADMIN_WRITER } from '../ports/breeder-admin-writer.port';
 import { BREEDER_ADMIN_NOTIFIER } from '../ports/breeder-admin-notifier.port';
@@ -13,6 +12,7 @@ import { BreederAdminPolicyService } from '../../domain/services/breeder-admin-p
 import { BreederAdminReminderPresentationService } from '../../domain/services/breeder-admin-reminder-presentation.service';
 import { BreederAdminReminderPolicyService } from '../../domain/services/breeder-admin-reminder-policy.service';
 import type { BreederRemindCommand } from '../types/breeder-admin-command.type';
+import type { BreederAdminReminderResult } from '../types/breeder-admin-result.type';
 
 @Injectable()
 export class SendBreederRemindNotificationsUseCase {
@@ -29,7 +29,7 @@ export class SendBreederRemindNotificationsUseCase {
         private readonly breederAdminReminderPolicyService: BreederAdminReminderPolicyService,
     ) {}
 
-    async execute(adminId: string, remindData: BreederRemindCommand): Promise<BreederRemindResponseDto> {
+    async execute(adminId: string, remindData: BreederRemindCommand): Promise<BreederAdminReminderResult> {
         this.breederAdminPolicyService.assertCanManageBreeders(
             await this.breederAdminReader.findAdminById(adminId),
         );

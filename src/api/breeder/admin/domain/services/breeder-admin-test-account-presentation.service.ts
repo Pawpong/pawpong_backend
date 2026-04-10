@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { SetTestAccountResponseDto } from '../../dto/response/set-test-account-response.dto';
+import type { BreederAdminTestAccountResult } from '../../application/types/breeder-admin-result.type';
 
 @Injectable()
 export class BreederAdminTestAccountPresentationService {
@@ -9,7 +9,7 @@ export class BreederAdminTestAccountPresentationService {
         breederName: string,
         isTestAccount: boolean,
         updatedAt: Date,
-    ): SetTestAccountResponseDto {
+    ): BreederAdminTestAccountResult {
         return {
             breederId,
             breederName,

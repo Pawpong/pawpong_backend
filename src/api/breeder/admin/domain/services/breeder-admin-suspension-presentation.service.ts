@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { BreederSuspendResponseDto } from '../../dto/response/breeder-suspend-response.dto';
+import type { BreederAdminSuspensionResult } from '../../application/types/breeder-admin-result.type';
 
 @Injectable()
 export class BreederAdminSuspensionPresentationService {
@@ -9,7 +9,7 @@ export class BreederAdminSuspensionPresentationService {
         reason: string | undefined,
         suspendedAt: Date | undefined,
         notificationSent: boolean,
-    ): BreederSuspendResponseDto {
+    ): BreederAdminSuspensionResult {
         return {
             breederId,
             reason,

@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
-import { BreederRemindResponseDto } from '../../dto/response/breeder-remind-response.dto';
+import type { BreederAdminReminderResult } from '../../application/types/breeder-admin-result.type';
 
 @Injectable()
 export class BreederAdminReminderPresentationService {
-    create(totalCount: number, successIds: string[], failIds: string[], sentAt: Date): BreederRemindResponseDto {
+    create(totalCount: number, successIds: string[], failIds: string[], sentAt: Date): BreederAdminReminderResult {
         return {
             totalCount,
             successCount: successIds.length,
