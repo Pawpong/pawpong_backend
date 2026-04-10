@@ -5,7 +5,7 @@ import { ApiAppVersionController, ApiCheckAppVersionEndpoint } from './swagger';
 
 import { AppVersionCheckResponseDto } from './dto/response/app-version-check-response.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
-import { AppVersionPublicQueryResponseMessageService } from './domain/services/app-version-public-query-response-message.service';
+import { APP_VERSION_RESPONSE_MESSAGE_EXAMPLES } from './constants/app-version-response-messages';
 
 /**
  * 앱 버전 체크 컨트롤러 (공개 API)
@@ -14,10 +14,7 @@ import { AppVersionPublicQueryResponseMessageService } from './domain/services/a
 @ApiAppVersionController()
 @Controller('app-version')
 export class AppVersionController {
-    constructor(
-        private readonly checkAppVersionUseCase: CheckAppVersionUseCase,
-        private readonly appVersionPublicQueryResponseMessageService: AppVersionPublicQueryResponseMessageService,
-    ) {}
+    constructor(private readonly checkAppVersionUseCase: CheckAppVersionUseCase) {}
 
     /**
      * 앱 버전 체크 (RN 앱 시작 시 호출)
@@ -30,6 +27,6 @@ export class AppVersionController {
         @Query('currentVersion') currentVersion: string,
     ): Promise<ApiResponseDto<AppVersionCheckResponseDto>> {
         const result = await this.checkAppVersionUseCase.execute(platform, currentVersion);
-        return ApiResponseDto.success(result, this.appVersionPublicQueryResponseMessageService.versionChecked());
+        return ApiResponseDto.success(result, APP_VERSION_RESPONSE_MESSAGE_EXAMPLES.versionChecked);
     }
 }
