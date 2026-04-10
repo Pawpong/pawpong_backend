@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { SearchBreederRequestDto } from '../../dto/request/search-breeder-request.dto';
 import { BreederSortBy } from '../../constants/breeder-search.enum';
+import type { BreederExploreQuery } from '../../application/types/breeder-search-query.type';
 
 @Injectable()
 export class BreederExploreCriteriaService {
-    build(searchDto: SearchBreederRequestDto): {
+    build(searchDto: BreederExploreQuery): {
         filter: Record<string, unknown>;
         sortOrder: Record<string, 1 | -1>;
         page: number;

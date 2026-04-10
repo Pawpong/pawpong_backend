@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminAction, AdminTargetType } from '../../../../../common/enum/user.enum';
-import { BreederSuspendRequestDto } from '../../dto/request/breeder-suspend-request.dto';
 import { BreederSuspendResponseDto } from '../../dto/response/breeder-suspend-response.dto';
 import { BREEDER_ADMIN_READER } from '../ports/breeder-admin-reader.port';
 import { BREEDER_ADMIN_WRITER } from '../ports/breeder-admin-writer.port';
@@ -12,6 +11,7 @@ import type { BreederAdminNotifierPort } from '../ports/breeder-admin-notifier.p
 import { BreederAdminActivityLogFactoryService } from '../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../domain/services/breeder-admin-policy.service';
 import { BreederAdminSuspensionPresentationService } from '../../domain/services/breeder-admin-suspension-presentation.service';
+import type { BreederSuspendCommand } from '../types/breeder-admin-command.type';
 
 @Injectable()
 export class SuspendBreederUseCase {
@@ -30,7 +30,7 @@ export class SuspendBreederUseCase {
     async execute(
         adminId: string,
         breederId: string,
-        suspendData: BreederSuspendRequestDto,
+        suspendData: BreederSuspendCommand,
     ): Promise<BreederSuspendResponseDto> {
         this.breederAdminPolicyService.assertCanManageBreeders(
             await this.breederAdminReader.findAdminById(adminId),

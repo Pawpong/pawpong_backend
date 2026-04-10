@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { BreederSearchRequestDto } from '../../dto/request/breeder-search-request.dto';
 import { BreederSearchResponseDto } from '../../dto/response/breeder-search-response.dto';
 import { BREEDER_FILE_URL_PORT } from '../ports/breeder-file-url.port';
 import { BREEDER_PUBLIC_READER_PORT } from '../ports/breeder-public-reader.port';
@@ -9,6 +8,7 @@ import type { BreederPublicReaderPort } from '../ports/breeder-public-reader.por
 import { BreederSearchCriteriaService } from '../../domain/services/breeder-search-criteria.service';
 import { BreederSearchResultMapperService } from '../../domain/services/breeder-search-result-mapper.service';
 import { BreederPaginationAssemblerService } from '../../domain/services/breeder-pagination-assembler.service';
+import type { BreederSearchQuery } from '../types/breeder-search-query.type';
 
 @Injectable()
 export class SearchBreedersUseCase {
@@ -22,7 +22,7 @@ export class SearchBreedersUseCase {
         private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService,
     ) {}
 
-    async execute(searchDto: BreederSearchRequestDto): Promise<BreederSearchResponseDto> {
+    async execute(searchDto: BreederSearchQuery): Promise<BreederSearchResponseDto> {
         const page = searchDto.page || 1;
         const limit = searchDto.limit || 10;
         const { filter, sortOrder } = this.breederSearchCriteriaService.build(searchDto);

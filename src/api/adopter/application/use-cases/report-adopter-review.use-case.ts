@@ -1,6 +1,5 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { ReviewReportRequestDto } from '../../dto/request/review-report-request.dto';
 import { ReviewReportResponseDto } from '../../dto/response/review-report-response.dto';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
@@ -8,6 +7,7 @@ import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
 import { AdopterReviewCommandPort } from '../ports/adopter-review-command.port';
 import { AdopterReviewReportResponseFactoryService } from '../../domain/services/adopter-review-report-response-factory.service';
+import type { AdopterReviewReportCommand } from '../types/adopter-review-command.type';
 
 @Injectable()
 export class ReportAdopterReviewUseCase {
@@ -20,7 +20,7 @@ export class ReportAdopterReviewUseCase {
         private readonly adopterReviewReportResponseFactoryService: AdopterReviewReportResponseFactoryService,
     ) {}
 
-    async execute(userId: string, dto: ReviewReportRequestDto): Promise<ReviewReportResponseDto> {
+    async execute(userId: string, dto: AdopterReviewReportCommand): Promise<ReviewReportResponseDto> {
         const adopter = await this.adopterProfilePort.findById(userId);
         const breeder = await this.adopterBreederReaderPort.findById(userId);
 

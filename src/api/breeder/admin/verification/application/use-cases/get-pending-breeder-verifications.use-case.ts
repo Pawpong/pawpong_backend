@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { BreederSearchRequestDto } from '../../dto/request/breeder-search-request.dto';
 import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import { BreederVerificationAdminListPaginationService } from '../../domain/services/breeder-verification-admin-list-pagination.service';
 import { BreederVerificationAdminPendingBreederListPresentationService } from '../../domain/services/breeder-verification-admin-pending-breeder-list-presentation.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
+import type { BreederVerificationAdminSearchQuery } from '../types/breeder-verification-admin-command.type';
 
 @Injectable()
 export class GetPendingBreederVerificationsUseCase {
@@ -17,7 +17,7 @@ export class GetPendingBreederVerificationsUseCase {
         private readonly breederVerificationAdminListPaginationService: BreederVerificationAdminListPaginationService,
     ) {}
 
-    async execute(adminId: string, filter: BreederSearchRequestDto) {
+    async execute(adminId: string, filter: BreederVerificationAdminSearchQuery) {
         this.breederVerificationAdminPolicyService.assertCanManageBreeders(
             await this.breederVerificationAdminReader.findAdminById(adminId),
             'Access denied',

@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { BreederLevel } from '../../../../../../common/enum/user.enum';
-import { BreederLevelChangeRequestDto } from '../../dto/request/breeder-level-change-request.dto';
 import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
 import { BREEDER_VERIFICATION_ADMIN_WRITER } from '../ports/breeder-verification-admin-writer.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminWriterPort } from '../ports/breeder-verification-admin-writer.port';
 import { BreederVerificationAdminCommandResponseService } from '../../domain/services/breeder-verification-admin-command-response.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
+import type { BreederLevelChangeCommand } from '../types/breeder-verification-admin-command.type';
 
 @Injectable()
 export class ChangeBreederLevelUseCase {
@@ -20,7 +20,7 @@ export class ChangeBreederLevelUseCase {
         private readonly breederVerificationAdminCommandResponseService: BreederVerificationAdminCommandResponseService,
     ) {}
 
-    async execute(adminId: string, breederId: string, levelData: BreederLevelChangeRequestDto) {
+    async execute(adminId: string, breederId: string, levelData: BreederLevelChangeCommand) {
         const admin = this.breederVerificationAdminPolicyService.assertCanManageBreeders(
             await this.breederVerificationAdminReader.findAdminById(adminId),
             'Access denied',

@@ -1,6 +1,5 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { ReportCreateRequestDto } from '../../dto/request/report-create-request.dto';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
@@ -8,6 +7,7 @@ import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.p
 import { AdopterReportCommandPort } from '../ports/adopter-report-command.port';
 import { AdopterReportPayloadBuilderService } from '../../domain/services/adopter-report-payload-builder.service';
 import { AdopterReportResponseFactoryService } from '../../domain/services/adopter-report-response-factory.service';
+import type { AdopterReportCreateCommand } from '../types/adopter-report-command.type';
 
 @Injectable()
 export class CreateAdopterReportUseCase {
@@ -21,7 +21,7 @@ export class CreateAdopterReportUseCase {
         private readonly adopterReportResponseFactoryService: AdopterReportResponseFactoryService,
     ) {}
 
-    async execute(userId: string, dto: ReportCreateRequestDto) {
+    async execute(userId: string, dto: AdopterReportCreateCommand) {
         if (dto.reason === 'other' && (!dto.description || dto.description.trim() === '')) {
             throw new BadRequestException('기타 사유를 선택한 경우 상세 내용을 입력해주세요.');
         }
