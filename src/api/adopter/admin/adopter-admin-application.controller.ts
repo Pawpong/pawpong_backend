@@ -9,7 +9,7 @@ import { AdopterAdminProtectedController } from './decorator/adopter-admin-contr
 import { ApplicationListRequestDto } from './dto/request/application-list-request.dto';
 import { AdminApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
 import { AdminApplicationListResponseDto } from './dto/response/application-list-response.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from '../domain/services/adopter-response-message.service';
+import { ADOPTER_RESPONSE_MESSAGES } from '../constants/adopter-response-messages';
 import { ApiGetAdopterAdminApplicationDetailEndpoint, ApiGetAdopterAdminApplicationListEndpoint } from './swagger';
 
 @AdopterAdminProtectedController()

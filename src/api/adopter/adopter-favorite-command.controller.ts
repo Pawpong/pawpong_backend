@@ -8,7 +8,7 @@ import { AdopterProtectedController } from './decorator/adopter-protected-contro
 import { FavoriteAddRequestDto } from './dto/request/favorite-add-request.dto';
 import { FavoriteAddResponseDto } from './dto/response/favorite-add-response.dto';
 import { FavoriteRemoveResponseDto } from './dto/response/favorite-remove-response.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
+import { ADOPTER_RESPONSE_MESSAGES } from './constants/adopter-response-messages';
 import { ApiAddAdopterFavoriteEndpoint, ApiRemoveAdopterFavoriteEndpoint } from './swagger';
 
 @AdopterProtectedController()

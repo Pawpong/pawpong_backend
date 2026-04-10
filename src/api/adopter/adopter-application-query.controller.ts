@@ -10,7 +10,7 @@ import { AdopterProtectedController } from './decorator/adopter-protected-contro
 import { AdopterApplicationsQueryRequestDto } from './dto/request/adopter-pagination-query-request.dto';
 import { ApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
 import { ApplicationListResponseDto } from './dto/response/application-list-response.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
+import { ADOPTER_RESPONSE_MESSAGES } from './constants/adopter-response-messages';
 import { ApiGetAdopterApplicationDetailEndpoint, ApiGetAdopterApplicationsEndpoint } from './swagger';
 
 @AdopterProtectedController()

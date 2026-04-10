@@ -7,7 +7,7 @@ import type { AdopterApplicationCreateResult } from './application/types/adopter
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
 import { ApplicationCreateRequestDto } from './dto/request/application-create-request.dto';
 import { ApplicationCreateResponseDto } from './dto/response/application-create-response.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
+import { ADOPTER_RESPONSE_MESSAGES } from './constants/adopter-response-messages';
 import { ApiCreateAdopterApplicationEndpoint } from './swagger';
 
 @AdopterProtectedController()

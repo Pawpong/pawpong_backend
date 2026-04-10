@@ -10,7 +10,7 @@ import { AdopterProtectedController } from './decorator/adopter-protected-contro
 import { AdopterPaginationQueryRequestDto } from './dto/request/adopter-pagination-query-request.dto';
 import { MyReviewDetailDto } from './dto/response/my-review-detail.dto';
 import { MyReviewItemDto } from './dto/response/my-review-item.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
+import { ADOPTER_RESPONSE_MESSAGES } from './constants/adopter-response-messages';
 import { ApiGetAdopterReviewDetailEndpoint, ApiGetAdopterReviewsEndpoint } from './swagger';
 
 @AdopterProtectedController()

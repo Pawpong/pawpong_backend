@@ -7,7 +7,7 @@ import type { AdopterAccountDeleteResult } from './application/types/adopter-res
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
 import { AccountDeleteRequestDto } from './dto/request/account-delete-request.dto';
 import { AccountDeleteResponseDto } from './dto/response/account-delete-response.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
+import { ADOPTER_RESPONSE_MESSAGES } from './constants/adopter-response-messages';
 import { ApiDeleteAdopterAccountEndpoint } from './swagger';
 
 @AdopterProtectedController()
