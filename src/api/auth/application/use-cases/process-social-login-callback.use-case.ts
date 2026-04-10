@@ -7,14 +7,18 @@ import {
     type AuthSocialCallbackProfile,
     type AuthSocialCallbackResult,
 } from '../ports/auth-social-callback.port';
-import { AuthSocialCallbackResponseFactoryService } from '../../domain/services/auth-social-callback-response-factory.service';
+import { AuthSocialErrorRedirectResponseFactoryService } from '../../domain/services/auth-social-error-redirect-response-factory.service';
+import { AuthSocialLoginSuccessRedirectResponseFactoryService } from '../../domain/services/auth-social-login-success-redirect-response-factory.service';
+import { AuthSocialSignupRedirectResponseFactoryService } from '../../domain/services/auth-social-signup-redirect-response-factory.service';
 
 @Injectable()
 export class ProcessSocialLoginCallbackUseCase {
     constructor(
         @Inject(AuthSocialCallbackPort)
         private readonly authSocialCallbackPort: AuthSocialCallbackPort,
-        private readonly authSocialCallbackResponseFactory: AuthSocialCallbackResponseFactoryService,
+        private readonly authSocialSignupRedirectResponseFactory: AuthSocialSignupRedirectResponseFactoryService,
+        private readonly authSocialLoginSuccessRedirectResponseFactory: AuthSocialLoginSuccessRedirectResponseFactoryService,
+        private readonly authSocialErrorRedirectResponseFactory: AuthSocialErrorRedirectResponseFactoryService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -32,7 +36,7 @@ export class ProcessSocialLoginCallbackUseCase {
             const result = await this.authSocialCallbackPort.handleSocialLogin(userProfile);
 
             if (result.needsAdditionalInfo) {
-                return this.authSocialCallbackResponseFactory.createSignupRedirect({
+                return this.authSocialSignupRedirectResponseFactory.create({
                     frontendUrl,
                     userProfile,
                     tempUserId: result.tempUserId || '',
@@ -43,7 +47,7 @@ export class ProcessSocialLoginCallbackUseCase {
             const tokens = await this.authSocialCallbackPort.generateSocialLoginTokens(user);
             const { isProduction, cookieOptions } = this.authSocialCallbackPort.resolveCookieOptions();
 
-            return this.authSocialCallbackResponseFactory.createLoginSuccessRedirect({
+            return this.authSocialLoginSuccessRedirectResponseFactory.create({
                 frontendUrl,
                 originUrl: userProfile.originUrl,
                 role: user.role,
@@ -56,7 +60,7 @@ export class ProcessSocialLoginCallbackUseCase {
             const errorMessage = error instanceof Error ? error.message : '로그인 처리 중 오류가 발생했습니다.';
             this.logger.logError('processSocialLoginCallback', '소셜 로그인 콜백 처리 실패', error);
 
-            return this.authSocialCallbackResponseFactory.createErrorRedirect(frontendUrl, errorMessage);
+            return this.authSocialErrorRedirectResponseFactory.create(frontendUrl, errorMessage);
         }
     }
 }

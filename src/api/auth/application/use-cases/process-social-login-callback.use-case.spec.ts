@@ -6,7 +6,10 @@ import {
     type AuthSocialCallbackLoginResult,
     type AuthSocialCallbackProfile,
 } from '../ports/auth-social-callback.port';
-import { AuthSocialCallbackResponseFactoryService } from '../../domain/services/auth-social-callback-response-factory.service';
+import { AuthSocialErrorRedirectResponseFactoryService } from '../../domain/services/auth-social-error-redirect-response-factory.service';
+import { AuthSocialLoginSuccessRedirectResponseFactoryService } from '../../domain/services/auth-social-login-success-redirect-response-factory.service';
+import { AuthSocialRedirectPathService } from '../../domain/services/auth-social-redirect-path.service';
+import { AuthSocialSignupRedirectResponseFactoryService } from '../../domain/services/auth-social-signup-redirect-response-factory.service';
 import { ProcessSocialLoginCallbackUseCase } from './process-social-login-callback.use-case';
 
 class StubAuthSocialCallbackPort extends AuthSocialCallbackPort {
@@ -69,7 +72,9 @@ describe('소셜 로그인 콜백 처리 유스케이스', () => {
         port = new StubAuthSocialCallbackPort();
         useCase = new ProcessSocialLoginCallbackUseCase(
             port,
-            new AuthSocialCallbackResponseFactoryService(),
+            new AuthSocialSignupRedirectResponseFactoryService(),
+            new AuthSocialLoginSuccessRedirectResponseFactoryService(new AuthSocialRedirectPathService()),
+            new AuthSocialErrorRedirectResponseFactoryService(),
             logger,
         );
     });
