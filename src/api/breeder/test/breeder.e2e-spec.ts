@@ -176,6 +176,13 @@ describe('브리더 종단간 테스트', () => {
             expect(response.body.message || response.body.error).toContain('올바르지 않은 브리더 ID 형식');
             console.log('잘못된 ID 형식 실패 확인');
         });
+
+        it('잘못된 브리더 ID 형식으로 후기 조회도 400', async () => {
+            const response = await request(app.getHttpServer()).get('/api/breeder/invalid-id/reviews').expect(400);
+
+            expect(response.body.message || response.body.error).toContain('올바르지 않은 브리더 ID 형식');
+            console.log('잘못된 브리더 ID 형식 후기 조회 400 확인');
+        });
     });
 
     /**

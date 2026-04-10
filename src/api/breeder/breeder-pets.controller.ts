@@ -1,6 +1,7 @@
 import { Get, Param, Query } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
+import { MongoObjectIdPipe } from '../../common/pipe/mongo-object-id.pipe';
 import { GetBreederParentPetsUseCase } from './application/use-cases/get-breeder-parent-pets.use-case';
 import { GetBreederPetDetailUseCase } from './application/use-cases/get-breeder-pet-detail.use-case';
 import { GetBreederPetsUseCase } from './application/use-cases/get-breeder-pets.use-case';
@@ -26,7 +27,7 @@ export class BreederPetsController {
     @Get(':id/pets')
     @ApiGetBreederPetsEndpoint()
     async getBreederPets(
-        @Param('id') breederId: string,
+        @Param('id', new MongoObjectIdPipe('브리더', '올바르지 않은 브리더 ID 형식입니다.')) breederId: string,
         @Query() query: BreederPetsQueryRequestDto,
     ): Promise<ApiResponseDto<BreederPetsPageResult>> {
         const result = await this.getBreederPetsUseCase.execute(breederId, query.status, query.page, query.limit);
@@ -36,7 +37,7 @@ export class BreederPetsController {
     @Get(':id/parent-pets')
     @ApiGetBreederParentPetsEndpoint()
     async getParentPets(
-        @Param('id') breederId: string,
+        @Param('id', new MongoObjectIdPipe('브리더', '올바르지 않은 브리더 ID 형식입니다.')) breederId: string,
         @Query() query: BreederParentPetsQueryRequestDto,
     ): Promise<ApiResponseDto<ParentPetListResponseDto>> {
         const result = await this.getBreederParentPetsUseCase.execute(breederId, query.page, query.limit);
@@ -51,7 +52,7 @@ export class BreederPetDetailController {
     @Get(':id/pet/:petId')
     @ApiGetBreederPetDetailEndpoint()
     async getPetDetail(
-        @Param('id') breederId: string,
+        @Param('id', new MongoObjectIdPipe('브리더', '올바르지 않은 브리더 ID 형식입니다.')) breederId: string,
         @Param('petId') petId: string,
     ): Promise<ApiResponseDto<PetDetailResponseDto>> {
         const result = await this.getBreederPetDetailUseCase.execute(breederId, petId);
