@@ -17,14 +17,11 @@ import { MarkNotificationReadUseCase } from './application/use-cases/mark-notifi
 import { MarkAllNotificationsReadUseCase } from './application/use-cases/mark-all-notifications-read.use-case';
 import { DeleteNotificationUseCase } from './application/use-cases/delete-notification.use-case';
 import { SendNotificationEmailUseCase } from './application/use-cases/send-notification-email.use-case';
-import { NotificationDeleteResponseMessageService } from './domain/services/notification-delete-response-message.service';
 import { NotificationListPresentationService } from './domain/services/notification-list-presentation.service';
-import { NotificationListResponseMessageService } from './domain/services/notification-list-response-message.service';
 import { NotificationPaginationAssemblerService } from './domain/services/notification-pagination-assembler.service';
 import { NotificationMessageTemplateService } from './domain/services/notification-message-template.service';
 import { NotificationReadResponseMessageService } from './domain/services/notification-read-response-message.service';
 import { NotificationStateResponseService } from './domain/services/notification-state-response.service';
-import { NotificationUnreadCountResponseMessageService } from './domain/services/notification-unread-count-response-message.service';
 import { NotificationMongooseInboxAdapter } from './infrastructure/notification-mongoose-inbox.adapter';
 import { NotificationMongooseCommandAdapter } from './infrastructure/notification-mongoose-command.adapter';
 import { NotificationMailAdapter } from './infrastructure/notification-mail.adapter';
@@ -63,10 +60,7 @@ import { MailModule } from '../../common/mail/mail.module';
         CreateNotificationUseCase,
         CreateNotificationFromBuilderUseCase,
         NotificationListPresentationService,
-        NotificationListResponseMessageService,
-        NotificationUnreadCountResponseMessageService,
         NotificationReadResponseMessageService,
-        NotificationDeleteResponseMessageService,
         NotificationPaginationAssemblerService,
         NotificationMessageTemplateService,
         NotificationStateResponseService,
