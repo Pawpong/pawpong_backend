@@ -1,6 +1,7 @@
 import { Get, Inject, Param } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
+import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import {
     GET_FEED_VIDEO_LIKE_STATUS_USE_CASE,
     type GetFeedVideoLikeStatusUseCasePort,
@@ -20,7 +21,7 @@ export class FeedVideoLikeStatusController {
     @Get('like/:videoId/status')
     @ApiGetFeedVideoLikeStatusEndpoint()
     async getLikeStatus(
-        @Param('videoId') videoId: string,
+        @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
     ): Promise<LikeStatusResponseDto> {
         return (await this.getLikeStatusUseCase.execute(videoId, userId)) as

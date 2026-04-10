@@ -1,6 +1,7 @@
 import { Delete, Inject, Param } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
+import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import {
     DELETE_FEED_VIDEO_COMMENT_USE_CASE,
     type DeleteFeedVideoCommentUseCasePort,
@@ -19,7 +20,7 @@ export class FeedVideoCommentDeleteController {
     @Delete('comment/:commentId')
     @ApiDeleteFeedVideoCommentEndpoint()
     async deleteComment(
-        @Param('commentId') commentId: string,
+        @Param('commentId', new MongoObjectIdPipe('댓글')) commentId: string,
         @CurrentUser('userId') userId: string,
     ): Promise<VideoActionSuccessResponseDto> {
         return this.deleteCommentUseCase.execute(commentId, userId);

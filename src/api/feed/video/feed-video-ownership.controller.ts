@@ -1,6 +1,7 @@
 import { Delete, Param, Patch } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
+import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import { DeleteVideoUseCase } from './application/use-cases/delete-video.use-case';
 import { ToggleVideoVisibilityUseCase } from './application/use-cases/toggle-video-visibility.use-case';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
@@ -17,7 +18,7 @@ export class FeedVideoOwnershipController {
     @Delete('videos/:videoId')
     @ApiDeleteFeedVideoEndpoint()
     async deleteVideo(
-        @Param('videoId') videoId: string,
+        @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
     ): Promise<VideoActionSuccessResponseDto> {
         return this.deleteVideoUseCase.execute(videoId, userId);
@@ -26,7 +27,7 @@ export class FeedVideoOwnershipController {
     @Patch('videos/:videoId/visibility')
     @ApiToggleFeedVideoVisibilityEndpoint()
     async toggleVisibility(
-        @Param('videoId') videoId: string,
+        @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
     ): Promise<VideoVisibilityResponseDto> {
         return this.toggleVideoVisibilityUseCase.execute(videoId, userId);

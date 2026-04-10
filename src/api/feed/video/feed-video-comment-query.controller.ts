@@ -1,6 +1,7 @@
 import { Get, Inject, Param, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
+import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import {
     GET_FEED_VIDEO_COMMENTS_USE_CASE,
     GET_FEED_VIDEO_REPLIES_USE_CASE,
@@ -25,7 +26,7 @@ export class FeedVideoCommentQueryController {
     @Get('comment/:videoId')
     @ApiGetFeedVideoCommentsEndpoint()
     async getComments(
-        @Param('videoId') videoId: string,
+        @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @Query() query: FeedPaginationQueryDto,
         @CurrentUser('userId') userId?: string,
     ): Promise<CommentListResponseDto> {
@@ -36,7 +37,7 @@ export class FeedVideoCommentQueryController {
     @Get('comment/:commentId/replies')
     @ApiGetFeedVideoRepliesEndpoint()
     async getReplies(
-        @Param('commentId') commentId: string,
+        @Param('commentId', new MongoObjectIdPipe('댓글')) commentId: string,
         @Query() query: FeedPaginationQueryDto,
         @CurrentUser('userId') userId?: string,
     ): Promise<ReplyListResponseDto> {

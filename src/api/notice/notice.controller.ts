@@ -3,6 +3,7 @@ import { Controller, Get, Query, Param } from '@nestjs/common';
 import { PaginationRequestDto } from '../../common/dto/pagination/pagination-request.dto';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
+import { MongoObjectIdPipe } from '../../common/pipe/mongo-object-id.pipe';
 import { NoticeResponseDto } from './dto/response/notice-response.dto';
 import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';
 import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
@@ -42,7 +43,9 @@ export class NoticeController {
      */
     @Get(':noticeId')
     @ApiGetNoticeDetailEndpoint()
-    async getNoticeDetail(@Param('noticeId') noticeId: string): Promise<ApiResponseDto<NoticeResponseDto>> {
+    async getNoticeDetail(
+        @Param('noticeId', new MongoObjectIdPipe('공지사항')) noticeId: string,
+    ): Promise<ApiResponseDto<NoticeResponseDto>> {
         const result = await this.getNoticeDetailUseCase.execute(noticeId, true);
         return ApiResponseDto.success(result, this.noticeQueryResponseMessageService.noticeDetailRetrieved());
     }
