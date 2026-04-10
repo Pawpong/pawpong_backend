@@ -91,6 +91,15 @@ describe('공지사항 종단간 테스트', () => {
             console.log('활성 공지 상세 조회 성공');
         });
 
+        it('잘못된 공지사항 ID 형식이면 400을 반환한다', async () => {
+            const response = await request(app.getHttpServer())
+                .get('/api/announcement/not-a-mongo-id')
+                .expect(400);
+
+            expect(response.body.message || response.body.error).toContain('올바르지 않은 공지사항 ID');
+            console.log('잘못된 공지사항 ID 형식 400 확인');
+        });
+
         it('존재하지 않는 공지 조회 시 에러', async () => {
             const response = await request(app.getHttpServer())
                 .get('/api/announcement/000000000000000000000000');

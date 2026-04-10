@@ -2,6 +2,7 @@ import { Controller, Get, Query, Param } from '@nestjs/common';
 
 import { PaginationRequestDto } from '../../common/dto/pagination/pagination-request.dto';
 import { PaginationResponseDto } from '../../common/dto/pagination/pagination-response.dto';
+import { MongoObjectIdPipe } from '../../common/pipe/mongo-object-id.pipe';
 import { AnnouncementResponseDto } from './dto/response/announcement-response.dto';
 import { GetActiveAnnouncementsUseCase } from './application/use-cases/get-active-announcements.use-case';
 import { GetAnnouncementByIdUseCase } from './application/use-cases/get-announcement-by-id.use-case';
@@ -41,7 +42,10 @@ export class AnnouncementController {
      */
     @Get(':announcementId')
     @ApiGetAnnouncementByIdEndpoint()
-    async getAnnouncementById(@Param('announcementId') announcementId: string): Promise<AnnouncementResponseDto> {
+    async getAnnouncementById(
+        @Param('announcementId', new MongoObjectIdPipe('공지사항', '올바르지 않은 공지사항 ID입니다.'))
+        announcementId: string,
+    ): Promise<AnnouncementResponseDto> {
         const result = await this.getAnnouncementByIdUseCase.execute(announcementId);
         return result as AnnouncementResponseDto & AnnouncementResult;
     }
