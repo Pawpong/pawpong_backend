@@ -7,7 +7,7 @@ import { GetBreederReviewsUseCase } from './application/use-cases/get-breeder-re
 import { BreederOptionalAuthController } from './decorator/breeder-public-controller.decorator';
 import { BreederReviewsQueryRequestDto } from './dto/request/breeder-reviews-query-request.dto';
 import { BreederReviewItemDto } from './dto/response/breeder-reviews-response.dto';
-import { BREEDER_RESPONSE_MESSAGES } from './domain/services/breeder-response-message.service';
+import { BREEDER_RESPONSE_MESSAGES } from './constants/breeder-response-messages';
 import { ApiGetBreederReviewsEndpoint } from './swagger/decorators';
 
 @BreederOptionalAuthController()

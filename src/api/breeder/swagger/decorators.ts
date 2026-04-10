@@ -12,7 +12,7 @@ import { PetsListResponseDto, PetItemDto } from '../dto/response/pets-list-respo
 import { PetDetailResponseDto } from '../dto/response/pet-detail-response.dto';
 import { ParentPetListResponseDto } from '../dto/response/parent-pet-list.dto';
 import { PublicApplicationFormResponseDto } from '../dto/response/public-application-form.dto';
-import { BREEDER_RESPONSE_MESSAGES } from '../domain/services/breeder-response-message.service';
+import { BREEDER_RESPONSE_MESSAGES } from '../constants/breeder-response-messages';
 import { BreederSwaggerDocs } from './index';
 
 function ApiBreederIdParam() {

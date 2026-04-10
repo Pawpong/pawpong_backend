@@ -12,7 +12,7 @@ import { SearchBreederRequestDto } from './dto/request/search-breeder-request.dt
 import { BreederCardResponseDto } from './dto/response/breeder-card-response.dto';
 import { BreederExploreResponseDto } from './dto/response/breeder-explore-response.dto';
 import { BreederSearchResponseDto } from './dto/response/breeder-search-response.dto';
-import { BREEDER_RESPONSE_MESSAGES } from './domain/services/breeder-response-message.service';
+import { BREEDER_RESPONSE_MESSAGES } from './constants/breeder-response-messages';
 import { ApiExploreBreedersEndpoint, ApiGetPopularBreedersEndpoint, ApiSearchBreedersEndpoint } from './swagger/decorators';
 
 @BreederPublicController()

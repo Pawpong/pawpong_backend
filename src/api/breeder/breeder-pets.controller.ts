@@ -10,7 +10,7 @@ import { BreederOptionalAuthController, BreederPublicController } from './decora
 import { BreederParentPetsQueryRequestDto, BreederPetsQueryRequestDto } from './dto/request/breeder-pets-query-request.dto';
 import { PetDetailResponseDto } from './dto/response/pet-detail-response.dto';
 import { ParentPetListResponseDto } from './dto/response/parent-pet-list.dto';
-import { BREEDER_RESPONSE_MESSAGES } from './domain/services/breeder-response-message.service';
+import { BREEDER_RESPONSE_MESSAGES } from './constants/breeder-response-messages';
 import {
     ApiGetBreederParentPetsEndpoint,
     ApiGetBreederPetDetailEndpoint,
