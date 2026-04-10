@@ -12,8 +12,12 @@ import { FilterOptionsCatFurLengthsController } from './filter-options-cat-fur-l
 import { FilterOptionsDogSizesController } from './filter-options-dog-sizes.controller';
 import { FilterOptionsSortOptionsController } from './filter-options-sort-options.controller';
 import { FilterOptionsSummaryController } from './filter-options-summary.controller';
+import { FilterOptionsAdoptionStatusResponseMessageService } from './domain/services/filter-options-adoption-status-response-message.service';
+import { FilterOptionsBreederLevelResponseMessageService } from './domain/services/filter-options-breeder-level-response-message.service';
+import { FilterOptionsCatFurLengthResponseMessageService } from './domain/services/filter-options-cat-fur-length-response-message.service';
 import { FilterOptionsCatalogService } from './domain/services/filter-options-catalog.service';
-import { FilterOptionsCatalogResponseMessageService } from './domain/services/filter-options-catalog-response-message.service';
+import { FilterOptionsDogSizeResponseMessageService } from './domain/services/filter-options-dog-size-response-message.service';
+import { FilterOptionsSortOptionResponseMessageService } from './domain/services/filter-options-sort-option-response-message.service';
 import { FilterOptionsSummaryResponseMessageService } from './domain/services/filter-options-summary-response-message.service';
 
 @Module({
@@ -28,7 +32,11 @@ import { FilterOptionsSummaryResponseMessageService } from './domain/services/fi
     providers: [
         FilterOptionsCatalogService,
         FilterOptionsSummaryResponseMessageService,
-        FilterOptionsCatalogResponseMessageService,
+        FilterOptionsBreederLevelResponseMessageService,
+        FilterOptionsSortOptionResponseMessageService,
+        FilterOptionsDogSizeResponseMessageService,
+        FilterOptionsCatFurLengthResponseMessageService,
+        FilterOptionsAdoptionStatusResponseMessageService,
         GetAllFilterOptionsUseCase,
         GetBreederLevelsUseCase,
         GetSortOptionsUseCase,
