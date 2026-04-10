@@ -2,6 +2,7 @@ import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { LoginAdminUseCase } from './application/use-cases/login-admin.use-case';
+import type { AdminLoginResult } from './application/types/auth-admin-result.type';
 import { AuthAdminControllerBase } from './decorator/auth-admin-controller.decorator';
 import { AuthAdminResponseMessageService } from './domain/services/auth-admin-response-message.service';
 import { AdminLoginRequestDto } from '../dto/request/admin-login-request.dto';
@@ -20,6 +21,9 @@ export class AuthAdminLoginController {
     @ApiAdminLoginEndpoint()
     async loginAdmin(@Body() dto: AdminLoginRequestDto): Promise<ApiResponseDto<AdminLoginResponseDto>> {
         const result = await this.loginAdminUseCase.execute(dto.email, dto.password);
-        return ApiResponseDto.success(result, this.authAdminResponseMessageService.adminLoginCompleted());
+        return ApiResponseDto.success(
+            result as AdminLoginResponseDto & AdminLoginResult,
+            this.authAdminResponseMessageService.adminLoginCompleted(),
+        );
     }
 }
