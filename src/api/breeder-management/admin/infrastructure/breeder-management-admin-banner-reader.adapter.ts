@@ -5,6 +5,7 @@ import {
     ProfileBannerSnapshot,
 } from '../application/ports/breeder-management-admin-banner-reader.port';
 import { BreederManagementAdminBannerRepository } from '../repository/breeder-management-admin-banner.repository';
+import type { BreederManagementBannerDocumentRecord } from '../../types/breeder-management-document.type';
 
 @Injectable()
 export class BreederManagementAdminBannerReaderAdapter implements BreederManagementAdminBannerReaderPort {
@@ -30,11 +31,11 @@ export class BreederManagementAdminBannerReaderAdapter implements BreederManagem
         return banners.map((banner) => this.toCounselSnapshot(banner));
     }
 
-    private toProfileSnapshot(banner: any): ProfileBannerSnapshot {
+    private toProfileSnapshot(banner: BreederManagementBannerDocumentRecord): ProfileBannerSnapshot {
         return {
             bannerId: banner._id.toString(),
             imageFileName: banner.imageFileName,
-            bannerType: banner.bannerType,
+            bannerType: banner.bannerType || 'login',
             linkType: banner.linkType,
             linkUrl: banner.linkUrl,
             title: banner.title,
@@ -44,7 +45,7 @@ export class BreederManagementAdminBannerReaderAdapter implements BreederManagem
         };
     }
 
-    private toCounselSnapshot(banner: any): CounselBannerSnapshot {
+    private toCounselSnapshot(banner: BreederManagementBannerDocumentRecord): CounselBannerSnapshot {
         return {
             bannerId: banner._id.toString(),
             imageFileName: banner.imageFileName,

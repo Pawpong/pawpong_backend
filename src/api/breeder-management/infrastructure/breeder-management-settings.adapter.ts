@@ -22,9 +22,6 @@ export class BreederManagementSettingsAdapter implements BreederManagementSettin
         breederId: string,
         applicationForm: BreederManagementApplicationFormRecord[],
     ): Promise<BreederManagementBreederRecord | null> {
-        return this.breederRepository.updateApplicationForm(
-            breederId,
-            applicationForm,
-        ) as Promise<BreederManagementBreederRecord | null>;
+        return this.breederRepository.updateApplicationForm(breederId, applicationForm);
     }
 }

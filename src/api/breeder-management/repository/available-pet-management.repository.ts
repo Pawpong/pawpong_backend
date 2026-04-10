@@ -1,10 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { PetStatus } from '../../../common/enum/user.enum';
 
 import { AvailablePet, AvailablePetDocument } from '../../../schema/available-pet.schema';
+import type {
+    BreederManagementAvailablePetPersistencePayload,
+    BreederManagementPetDocumentRecord,
+} from '../types/breeder-management-document.type';
 
 /**
  * AvailablePetManagement Repository
@@ -20,7 +24,7 @@ export class AvailablePetManagementRepository {
      * @returns AvailablePet 또는 null
      */
     async findById(id: string): Promise<AvailablePetDocument | null> {
-        return this.availablePetModel.findById(id).exec() as any;
+        return this.availablePetModel.findById(id).exec();
     }
 
     /**
@@ -35,7 +39,7 @@ export class AvailablePetManagementRepository {
                 _id: new Types.ObjectId(id),
                 breederId: new Types.ObjectId(breederId),
             })
-            .exec() as any;
+            .exec();
     }
 
     /**
@@ -52,11 +56,11 @@ export class AvailablePetManagementRepository {
             page?: number;
             limit?: number;
         } = {},
-    ): Promise<{ pets: AvailablePetDocument[]; total: number }> {
+    ): Promise<{ pets: BreederManagementPetDocumentRecord[]; total: number }> {
         const { status, includeInactive = false, page = 1, limit = 20 } = options;
 
         // 필터 조건 구성
-        const filter: any = { breederId: new Types.ObjectId(breederId) };
+        const filter: FilterQuery<AvailablePetDocument> = { breederId: new Types.ObjectId(breederId) };
         if (!includeInactive) {
             filter.isActive = true;
         }
@@ -67,7 +71,9 @@ export class AvailablePetManagementRepository {
         const skip = (page - 1) * limit;
 
         const [pets, total] = await Promise.all([
-            this.availablePetModel.find(filter).sort({ createdAt: 1 }).skip(skip).limit(limit).lean() as any,
+            this.availablePetModel.find(filter).sort({ createdAt: 1 }).skip(skip).limit(limit).lean().exec() as Promise<
+                BreederManagementPetDocumentRecord[]
+            >,
             this.availablePetModel.countDocuments(filter),
         ]);
 
@@ -106,9 +112,9 @@ export class AvailablePetManagementRepository {
      * @param data 생성할 데이터
      * @returns 생성된 AvailablePet
      */
-    async create(data: Partial<AvailablePet>): Promise<AvailablePetDocument> {
+    async create(data: BreederManagementAvailablePetPersistencePayload): Promise<AvailablePetDocument> {
         const availablePet = new this.availablePetModel(data);
-        return availablePet.save() as any;
+        return availablePet.save();
     }
 
     /**
@@ -118,7 +124,7 @@ export class AvailablePetManagementRepository {
      * @returns 업데이트된 AvailablePet 또는 null
      */
     async update(id: string, updateData: Partial<AvailablePet>): Promise<AvailablePetDocument | null> {
-        return this.availablePetModel.findByIdAndUpdate(id, { $set: updateData }, { new: true }).exec() as any;
+        return this.availablePetModel.findByIdAndUpdate(id, { $set: updateData }, { new: true }).exec();
     }
 
     /**
@@ -128,7 +134,7 @@ export class AvailablePetManagementRepository {
      * @returns 업데이트된 AvailablePet 또는 null
      */
     async updateStatus(id: string, status: PetStatus): Promise<AvailablePetDocument | null> {
-        return this.availablePetModel.findByIdAndUpdate(id, { $set: { status } }, { new: true }).exec() as any;
+        return this.availablePetModel.findByIdAndUpdate(id, { $set: { status } }, { new: true }).exec();
     }
 
     /**
@@ -137,7 +143,7 @@ export class AvailablePetManagementRepository {
      * @returns 삭제된 AvailablePet 또는 null
      */
     async delete(id: string): Promise<AvailablePetDocument | null> {
-        return this.availablePetModel.findByIdAndDelete(id).exec() as any;
+        return this.availablePetModel.findByIdAndDelete(id).exec();
     }
 
     /**

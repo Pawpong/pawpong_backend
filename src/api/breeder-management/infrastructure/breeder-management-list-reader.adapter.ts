@@ -12,6 +12,10 @@ import type {
     BreederManagementReceivedApplicationRecord,
     BreederManagementReviewRecord,
 } from '../application/ports/breeder-management-list-reader.port';
+import type {
+    BreederManagementPetDocumentRecord,
+    BreederManagementReviewDocumentRecord,
+} from '../types/breeder-management-document.type';
 
 @Injectable()
 export class BreederManagementListReaderAdapter implements BreederManagementListReaderPort {
@@ -41,7 +45,7 @@ export class BreederManagementListReaderAdapter implements BreederManagementList
         const result = await this.adoptionApplicationRepository.findByBreederId(userId, page, limit);
 
         return {
-            applications: result.applications as unknown as BreederManagementReceivedApplicationRecord[],
+            applications: result.applications,
             total: result.total,
         };
     }
@@ -71,11 +75,11 @@ export class BreederManagementListReaderAdapter implements BreederManagementList
             this.availablePetRepository.countInactive(userId),
         ]);
 
-        const petIds = statsResult.pets.map((pet: any) => pet.petId || String(pet._id));
+        const petIds = statsResult.pets.map((pet: BreederManagementPetDocumentRecord) => pet.petId || String(pet._id));
         const applicationCountMap = await this.adoptionApplicationRepository.countByPetIds(petIds);
 
         return {
-            pets: statsResult.pets as unknown as BreederManagementPetRecord[],
+            pets: statsResult.pets,
             total: statsResult.total,
             availableCount,
             reservedCount,
@@ -119,7 +123,7 @@ export class BreederManagementListReaderAdapter implements BreederManagementList
                   );
 
         return {
-            reviews: reviews as unknown as BreederManagementReviewRecord[],
+            reviews: reviews,
             filteredTotal,
             totalCount,
             visibleCount,

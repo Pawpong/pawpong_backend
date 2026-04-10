@@ -22,7 +22,7 @@ export class GetBreederManagementApplicationFormUseCase {
 
         return this.breederManagementApplicationFormAssemblerService.toResponse(
             this.breederManagementStandardQuestionCatalogService.getAll(),
-            breeder.applicationForm as any,
+            breeder.applicationForm,
         );
     }
 }
