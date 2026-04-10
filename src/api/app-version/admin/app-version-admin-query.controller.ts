@@ -5,7 +5,7 @@ import { PaginationResponseDto } from '../../../common/dto/pagination/pagination
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { GetAppVersionListUseCase } from './application/use-cases/get-app-version-list.use-case';
 import { AppVersionAdminProtectedController } from './decorator/app-version-admin-controller.decorator';
-import { AppVersionQueryResponseMessageService } from '../domain/services/app-version-query-response-message.service';
+import { AppVersionAdminQueryResponseMessageService } from '../domain/services/app-version-admin-query-response-message.service';
 import { AppVersionResponseDto } from '../dto/response/app-version-response.dto';
 import { ApiGetAppVersionListAdminEndpoint } from './swagger';
 
@@ -13,7 +13,7 @@ import { ApiGetAppVersionListAdminEndpoint } from './swagger';
 export class AppVersionAdminQueryController {
     constructor(
         private readonly getAppVersionListUseCase: GetAppVersionListUseCase,
-        private readonly appVersionQueryResponseMessageService: AppVersionQueryResponseMessageService,
+        private readonly appVersionAdminQueryResponseMessageService: AppVersionAdminQueryResponseMessageService,
     ) {}
 
     @Get()
@@ -22,6 +22,6 @@ export class AppVersionAdminQueryController {
         @Query() paginationData: PaginationRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<AppVersionResponseDto>>> {
         const result = await this.getAppVersionListUseCase.execute(paginationData);
-        return ApiResponseDto.success(result, this.appVersionQueryResponseMessageService.appVersionListRetrieved());
+        return ApiResponseDto.success(result, this.appVersionAdminQueryResponseMessageService.appVersionListRetrieved());
     }
 }

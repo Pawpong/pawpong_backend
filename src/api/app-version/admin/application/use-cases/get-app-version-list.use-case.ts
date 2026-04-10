@@ -4,7 +4,7 @@ import { PaginationRequestDto } from '../../../../../common/dto/pagination/pagin
 import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { AppVersionResponseDto } from '../../../dto/response/app-version-response.dto';
-import { AppVersionAdminPresentationService } from '../../domain/services/app-version-admin-presentation.service';
+import { AppVersionAdminListPresentationService } from '../../domain/services/app-version-admin-list-presentation.service';
 import { APP_VERSION_ADMIN_READER, type AppVersionAdminReaderPort } from '../ports/app-version-admin-reader.port';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class GetAppVersionListUseCase {
     constructor(
         @Inject(APP_VERSION_ADMIN_READER)
         private readonly appVersionAdminReader: AppVersionAdminReaderPort,
-        private readonly appVersionAdminPresentationService: AppVersionAdminPresentationService,
+        private readonly appVersionAdminListPresentationService: AppVersionAdminListPresentationService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -32,7 +32,7 @@ export class GetAppVersionListUseCase {
                 currentPage: page,
             });
 
-            return this.appVersionAdminPresentationService.toPaginationResponse(items, page, limit, totalItems);
+            return this.appVersionAdminListPresentationService.toPaginationResponse(items, page, limit, totalItems);
         } catch (error) {
             this.logger.logError('getAppVersionList', '앱 버전 목록 조회', error);
             throw new BadRequestException('앱 버전 목록 조회에 실패했습니다.');
