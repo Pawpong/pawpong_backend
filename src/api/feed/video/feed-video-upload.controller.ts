@@ -2,6 +2,7 @@ import { Body, Param, Post } from '@nestjs/common';
 
 import { CurrentActorType, type ActorType } from '../../../common/decorator/current-actor-type.decorator';
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
+import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import { CompleteUploadUseCase } from './application/use-cases/complete-upload.use-case';
 import { GetUploadUrlUseCase } from './application/use-cases/get-upload-url.use-case';
 import type { FeedVideoUploadUrlResult } from './application/types/feed-video-result.type';
@@ -36,7 +37,7 @@ export class FeedVideoUploadController {
     @Post('videos/:videoId/upload-complete')
     @ApiCompleteFeedVideoUploadEndpoint()
     async completeUpload(
-        @Param('videoId') videoId: string,
+        @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
     ): Promise<UploadCompleteResponseDto> {
         return this.completeUploadUseCase.execute(videoId, userId);

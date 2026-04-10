@@ -1,6 +1,7 @@
 import { Body, Inject, Param, Patch } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
+import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import {
     UPDATE_FEED_VIDEO_COMMENT_USE_CASE,
     type UpdateFeedVideoCommentUseCasePort,
@@ -21,7 +22,7 @@ export class FeedVideoCommentUpdateController {
     @Patch('comment/:commentId')
     @ApiUpdateFeedVideoCommentEndpoint()
     async updateComment(
-        @Param('commentId') commentId: string,
+        @Param('commentId', new MongoObjectIdPipe('댓글')) commentId: string,
         @CurrentUser('userId') userId: string,
         @Body() dto: UpdateCommentRequestDto,
     ): Promise<CommentUpdateResponseDto> {

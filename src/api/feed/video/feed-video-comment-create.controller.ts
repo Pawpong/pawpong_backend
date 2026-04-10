@@ -2,6 +2,7 @@ import { Body, Inject, Param, Post } from '@nestjs/common';
 
 import { CurrentActorType, type ActorType } from '../../../common/decorator/current-actor-type.decorator';
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
+import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import {
     CREATE_FEED_VIDEO_COMMENT_USE_CASE,
     type CreateFeedVideoCommentUseCasePort,
@@ -22,7 +23,7 @@ export class FeedVideoCommentCreateController {
     @Post('comment/:videoId')
     @ApiCreateFeedVideoCommentEndpoint()
     async createComment(
-        @Param('videoId') videoId: string,
+        @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
         @CurrentActorType() actorType: ActorType,
         @Body() dto: CreateCommentRequestDto,

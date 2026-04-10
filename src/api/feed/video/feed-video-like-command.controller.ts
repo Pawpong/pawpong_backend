@@ -2,6 +2,7 @@ import { Inject, Param, Post } from '@nestjs/common';
 
 import { CurrentActorType, type ActorType } from '../../../common/decorator/current-actor-type.decorator';
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
+import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import {
     TOGGLE_FEED_VIDEO_LIKE_USE_CASE,
     type ToggleFeedVideoLikeUseCasePort,
@@ -21,7 +22,7 @@ export class FeedVideoLikeCommandController {
     @Post('like/:videoId')
     @ApiToggleFeedVideoLikeEndpoint()
     async toggleLike(
-        @Param('videoId') videoId: string,
+        @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
         @CurrentActorType() actorType: ActorType,
     ): Promise<LikeToggleResponseDto> {
