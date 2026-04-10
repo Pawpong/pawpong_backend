@@ -2,8 +2,7 @@ import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 
 import { AuthSessionPort, type AuthSessionRole } from '../ports/auth-session.port';
 import { AuthTokenPort } from '../ports/auth-token.port';
-import { RefreshTokenRequestDto } from '../../dto/request/refresh-token-request.dto';
-import { TokenResponseDto } from '../../dto/response/token-response.dto';
+import { type AuthTokenSet } from '../types/auth-token-set.type';
 
 @Injectable()
 export class RefreshAuthTokenUseCase {
@@ -14,9 +13,9 @@ export class RefreshAuthTokenUseCase {
         private readonly authTokenPort: AuthTokenPort,
     ) {}
 
-    async execute(refreshTokenDto: RefreshTokenRequestDto): Promise<TokenResponseDto> {
+    async execute(refreshToken: string): Promise<AuthTokenSet> {
         try {
-            const payload = this.authTokenPort.verifyRefreshToken(refreshTokenDto.refreshToken);
+            const payload = this.authTokenPort.verifyRefreshToken(refreshToken);
 
             if (payload.role !== 'adopter' && payload.role !== 'breeder') {
                 throw new UnauthorizedException('유효하지 않은 사용자 역할입니다.');
@@ -33,7 +32,7 @@ export class RefreshAuthTokenUseCase {
             }
 
             const isTokenValid = await this.authTokenPort.compareRefreshToken(
-                refreshTokenDto.refreshToken,
+                refreshToken,
                 user.refreshTokenHash,
             );
 
