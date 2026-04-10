@@ -8,9 +8,14 @@ import { DeleteUploadedFileRequestDto } from '../dto/request/delete-uploaded-fil
 import { UploadFolderRequestDto } from '../dto/request/upload-folder-request.dto';
 import { UploadResponseDto } from '../dto/response/upload-response.dto';
 
+type UploadMultipartSchemaProperty = Record<string, unknown> & {
+    items?: UploadMultipartSchemaProperty;
+    oneOf?: UploadMultipartSchemaProperty[];
+};
+
 function buildMultipartFileBodySchema(
     fileFieldName: 'file' | 'files',
-    extraProperties: Record<string, any> = {},
+    extraProperties: Record<string, UploadMultipartSchemaProperty> = {},
     requiredFields: string[] = [fileFieldName],
 ) {
     return {

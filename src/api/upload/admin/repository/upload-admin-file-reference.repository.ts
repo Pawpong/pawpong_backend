@@ -9,6 +9,14 @@ import { Banner, BannerDocument } from '../../../../schema/banner.schema';
 import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
 import { CounselBanner, CounselBannerDocument } from '../../../../schema/counsel-banner.schema';
 import { ParentPet, ParentPetDocument } from '../../../../schema/parent-pet.schema';
+import type {
+    UploadAdminReferencedAdopterDocumentRecord,
+    UploadAdminReferencedAvailablePetDocumentRecord,
+    UploadAdminReferencedBannerDocumentRecord,
+    UploadAdminReferencedBreederDocumentRecord,
+    UploadAdminReferencedParentPetDocumentRecord,
+    UploadAdminReferencedSingleImageBannerDocumentRecord,
+} from '../types/upload-admin-file-reference-record.type';
 
 @Injectable()
 export class UploadAdminFileReferenceRepository {
@@ -70,11 +78,11 @@ export class UploadAdminFileReferenceRepository {
                 ],
             })
             .select('profileImageFileName profile.representativePhotos verification.documents')
-            .lean()
+            .lean<UploadAdminReferencedBreederDocumentRecord[]>()
             .exec();
 
         const files = new Set<string>();
-        for (const breeder of breeders as any[]) {
+        for (const breeder of breeders) {
             if (breeder.profileImageFileName) {
                 files.add(breeder.profileImageFileName);
             }
@@ -94,39 +102,43 @@ export class UploadAdminFileReferenceRepository {
     }
 
     async readAvailablePetPhotoFiles(): Promise<string[]> {
-        const pets = await this.availablePetModel.find({ photos: { $exists: true, $ne: [] } }).select('photos').lean().exec();
-        return pets.flatMap((pet: any) => pet.photos || []);
+        const pets = await this.availablePetModel
+            .find({ photos: { $exists: true, $ne: [] } })
+            .select('photos')
+            .lean<UploadAdminReferencedAvailablePetDocumentRecord[]>()
+            .exec();
+        return pets.flatMap((pet) => pet.photos || []);
     }
 
     async readParentPetPhotoFiles(): Promise<string[]> {
         const parentPets = await this.parentPetModel
             .find({ photoFileName: { $exists: true, $nin: [null, ''] } })
             .select('photoFileName')
-            .lean()
+            .lean<UploadAdminReferencedParentPetDocumentRecord[]>()
             .exec();
 
-        return parentPets.flatMap((parentPet: any) => (parentPet.photoFileName ? [parentPet.photoFileName] : []));
+        return parentPets.flatMap((parentPet) => (parentPet.photoFileName ? [parentPet.photoFileName] : []));
     }
 
     async readAdopterProfileImageFiles(): Promise<string[]> {
         const adopters = await this.adopterModel
             .find({ profileImageFileName: { $exists: true, $nin: [null, ''] } })
             .select('profileImageFileName')
-            .lean()
+            .lean<UploadAdminReferencedAdopterDocumentRecord[]>()
             .exec();
 
-        return adopters.flatMap((adopter: any) => (adopter.profileImageFileName ? [adopter.profileImageFileName] : []));
+        return adopters.flatMap((adopter) => (adopter.profileImageFileName ? [adopter.profileImageFileName] : []));
     }
 
     async readBannerImageFiles(): Promise<string[]> {
         const banners = await this.bannerModel
             .find()
             .select('desktopImageFileName mobileImageFileName imageFileName')
-            .lean()
+            .lean<UploadAdminReferencedBannerDocumentRecord[]>()
             .exec();
 
         const files = new Set<string>();
-        for (const banner of banners as any[]) {
+        for (const banner of banners) {
             if (banner.desktopImageFileName) files.add(banner.desktopImageFileName);
             if (banner.mobileImageFileName) files.add(banner.mobileImageFileName);
             if (banner.imageFileName) files.add(banner.imageFileName);
@@ -136,12 +148,20 @@ export class UploadAdminFileReferenceRepository {
     }
 
     async readAuthBannerImageFiles(): Promise<string[]> {
-        const banners = await this.authBannerModel.find().select('imageFileName').lean().exec();
-        return banners.flatMap((banner: any) => (banner.imageFileName ? [banner.imageFileName] : []));
+        const banners = await this.authBannerModel
+            .find()
+            .select('imageFileName')
+            .lean<UploadAdminReferencedSingleImageBannerDocumentRecord[]>()
+            .exec();
+        return banners.flatMap((banner) => (banner.imageFileName ? [banner.imageFileName] : []));
     }
 
     async readCounselBannerImageFiles(): Promise<string[]> {
-        const banners = await this.counselBannerModel.find().select('imageFileName').lean().exec();
-        return banners.flatMap((banner: any) => (banner.imageFileName ? [banner.imageFileName] : []));
+        const banners = await this.counselBannerModel
+            .find()
+            .select('imageFileName')
+            .lean<UploadAdminReferencedSingleImageBannerDocumentRecord[]>()
+            .exec();
+        return banners.flatMap((banner) => (banner.imageFileName ? [banner.imageFileName] : []));
     }
 }
