@@ -1,11 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
-import { BreedResponseDto } from '../../dto/response/breed-response.dto';
 import { BreedAdminSnapshot } from '../../admin/application/ports/breed-admin-reader.port';
 
 @Injectable()
 export class BreedAdminPresentationService {
-    toResponseDto(breed: BreedAdminSnapshot): BreedResponseDto {
+    toResponseDto(breed: BreedAdminSnapshot) {
         return {
             id: breed.id,
             petType: breed.petType,
