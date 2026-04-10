@@ -1,11 +1,8 @@
 import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
-import { AuthSocialUserResponseMessageService } from './auth-social-user-response-message.service';
 
-describe('소셜 유저 조회 응답 메시지 서비스', () => {
-    const service = new AuthSocialUserResponseMessageService();
-
+describe('소셜 유저 조회 응답 메시지 상수', () => {
     it('소셜 유저 조회 메시지를 반환한다', () => {
-        expect(service.getSocialUserCheckMessage(true)).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.socialUserFound);
-        expect(service.getSocialUserCheckMessage(false)).toBe(AUTH_RESPONSE_MESSAGE_EXAMPLES.socialUserNotFound);
+        expect(AUTH_RESPONSE_MESSAGE_EXAMPLES.socialUserFound).toBe('가입된 사용자입니다.');
+        expect(AUTH_RESPONSE_MESSAGE_EXAMPLES.socialUserNotFound).toBe('미가입 사용자입니다.');
     });
 });
