@@ -1,17 +1,17 @@
 import { Injectable } from '@nestjs/common';
 
-import { BreederVerificationResponseDto } from '../../dto/response/breeder-verification-response.dto';
 import {
     BreederVerificationAdminBreederSnapshot,
     BreederVerificationAdminVerificationSnapshot,
 } from '../../application/ports/breeder-verification-admin-reader.port';
+import type { BreederVerificationInfoResult, BreederVerificationListItemResult } from '../../application/types/breeder-verification-admin-result.type';
 
 @Injectable()
 export class BreederVerificationAdminListItemPresentationService {
     createBaseResponse(
         breeder: BreederVerificationAdminBreederSnapshot,
-        verificationInfo: BreederVerificationResponseDto['verificationInfo'],
-    ): BreederVerificationResponseDto {
+        verificationInfo: BreederVerificationInfoResult,
+    ): BreederVerificationListItemResult {
         return {
             breederId: breeder.id,
             breederName: breeder.nickname,

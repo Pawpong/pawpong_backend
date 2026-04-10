@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import { BreederVerificationAdminBreederSnapshot } from '../../application/ports/breeder-verification-admin-reader.port';
-import { BreederLevelChangeResponseDto } from '../../dto/response/breeder-level-change-response.dto';
+import type {
+    BreederDocumentReminderResult,
+    BreederLevelChangeResult,
+} from '../../application/types/breeder-verification-admin-result.type';
 
 @Injectable()
 export class BreederVerificationAdminCommandResponseService {
@@ -11,7 +14,7 @@ export class BreederVerificationAdminCommandResponseService {
         newLevel: string,
         changedAt: Date,
         changedBy: string,
-    ): BreederLevelChangeResponseDto {
+    ): BreederLevelChangeResult {
         return {
             breederId: breeder.id,
             breederName: breeder.nickname,
@@ -22,7 +25,7 @@ export class BreederVerificationAdminCommandResponseService {
         };
     }
 
-    toDocumentReminderResponse(sentCount: number, breederIds: string[]): { sentCount: number; breederIds: string[] } {
+    toDocumentReminderResponse(sentCount: number, breederIds: string[]): BreederDocumentReminderResult {
         return {
             sentCount,
             breederIds,

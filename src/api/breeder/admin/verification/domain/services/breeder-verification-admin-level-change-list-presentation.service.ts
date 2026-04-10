@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { BreederVerificationResponseDto } from '../../dto/response/breeder-verification-response.dto';
 import { BreederVerificationAdminBreederSnapshot } from '../../application/ports/breeder-verification-admin-reader.port';
+import type { BreederVerificationListItemResult } from '../../application/types/breeder-verification-admin-result.type';
 import { BreederVerificationAdminListItemPresentationService } from './breeder-verification-admin-list-item-presentation.service';
 
 @Injectable()
@@ -10,7 +10,7 @@ export class BreederVerificationAdminLevelChangeListPresentationService {
         private readonly breederVerificationAdminListItemPresentationService: BreederVerificationAdminListItemPresentationService,
     ) {}
 
-    toResponse(breeder: BreederVerificationAdminBreederSnapshot): BreederVerificationResponseDto {
+    toResponse(breeder: BreederVerificationAdminBreederSnapshot): BreederVerificationListItemResult {
         const levelChangeRequest = breeder.verification?.levelChangeRequest;
 
         return this.breederVerificationAdminListItemPresentationService.createBaseResponse(breeder, {

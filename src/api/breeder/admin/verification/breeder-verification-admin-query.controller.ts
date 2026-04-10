@@ -31,7 +31,10 @@ export class BreederVerificationAdminQueryController {
         @Query() filter: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
         const result = await this.getBreedersUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.breederListRetrieved);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            BREEDER_RESPONSE_MESSAGES.breederListRetrieved,
+        );
     }
 
     @Get('verification/pending')
@@ -41,7 +44,10 @@ export class BreederVerificationAdminQueryController {
         @Query() filter: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
         const result = await this.getPendingBreederVerificationsUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.pendingBreederListRetrieved);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            BREEDER_RESPONSE_MESSAGES.pendingBreederListRetrieved,
+        );
     }
 
     @Get('verification/level-change-requests')
@@ -51,6 +57,9 @@ export class BreederVerificationAdminQueryController {
         @Query() filter: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederVerificationResponseDto>>> {
         const result = await this.getLevelChangeRequestsUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.levelChangeRequestListRetrieved);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            BREEDER_RESPONSE_MESSAGES.levelChangeRequestListRetrieved,
+        );
     }
 }
