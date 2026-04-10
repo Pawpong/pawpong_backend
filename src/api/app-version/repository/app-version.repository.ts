@@ -3,8 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { AppVersion } from '../../../schema/app-version.schema';
-import { AppVersionCreateRequestDto } from '../dto/request/app-version-create-request.dto';
-import { AppVersionUpdateRequestDto } from '../dto/request/app-version-update-request.dto';
+import { type AppVersionCreateCommand, type AppVersionUpdateCommand } from '../admin/application/types/app-version-command.type';
 
 @Injectable()
 export class AppVersionRepository {
@@ -22,7 +21,7 @@ export class AppVersionRepository {
         return this.appVersionModel.find().sort({ createdAt: -1 }).skip(skip).limit(limit).exec();
     }
 
-    async create(createData: AppVersionCreateRequestDto): Promise<AppVersion> {
+    async create(createData: AppVersionCreateCommand): Promise<AppVersion> {
         const appVersion = new this.appVersionModel({
             ...createData,
             isActive: createData.isActive ?? true,
@@ -31,7 +30,7 @@ export class AppVersionRepository {
         return appVersion.save();
     }
 
-    async update(appVersionId: string, updateData: AppVersionUpdateRequestDto): Promise<AppVersion | null> {
+    async update(appVersionId: string, updateData: AppVersionUpdateCommand): Promise<AppVersion | null> {
         const appVersion = await this.appVersionModel.findById(appVersionId).exec();
 
         if (!appVersion) {
