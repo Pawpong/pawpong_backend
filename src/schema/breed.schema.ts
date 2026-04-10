@@ -32,6 +32,10 @@ export class Breed extends Document {
      */
     @Prop({ type: [String], required: true })
     breeds: string[];
+
+    createdAt: Date;
+
+    updatedAt: Date;
 }
 
 export const BreedSchema = SchemaFactory.createForClass(Breed);
