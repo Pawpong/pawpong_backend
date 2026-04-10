@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { FaqResponseDto } from '../../../dto/response/faq-response.dto';
 import { HomeFaqCatalogService } from '../../../domain/services/home-faq-catalog.service';
 import { HOME_ADMIN_MANAGER, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
+import type { HomeFaqResult } from '../../../application/types/home-content-result.type';
 
 @Injectable()
 export class GetAllFaqsUseCase {
@@ -12,8 +12,8 @@ export class GetAllFaqsUseCase {
         private readonly homeFaqCatalogService: HomeFaqCatalogService,
     ) {}
 
-    async execute(): Promise<FaqResponseDto[]> {
+    async execute(): Promise<HomeFaqResult[]> {
         const faqs = await this.homeAdminManager.readAllFaqs();
-        return this.homeFaqCatalogService.buildResponse(faqs);
+        return this.homeFaqCatalogService.buildResults(faqs);
     }
 }

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { HomeAvailablePetSnapshot } from '../../application/ports/home-content-reader.port';
+import type { HomeAvailablePetResult } from '../../application/types/home-content-result.type';
 
 type SignedUrlGenerator = (fileName: string, expirationMinutes?: number) => string;
 
@@ -11,11 +12,11 @@ export class HomeAvailablePetCatalogService {
         return Math.min(normalizedLimit, 50);
     }
 
-    buildResponse(
+    buildResults(
         pets: HomeAvailablePetSnapshot[],
         isAuthenticated: boolean,
         generateSignedUrl: SignedUrlGenerator,
-    ): any[] {
+    ): HomeAvailablePetResult[] {
         return pets.map((pet) => ({
             petId: pet.id,
             name: pet.name,
@@ -25,7 +26,7 @@ export class HomeAvailablePetCatalogService {
             price: isAuthenticated ? pet.price || 0 : null,
             mainPhoto:
                 pet.photos.length > 0 ? generateSignedUrl(pet.photos[0], 60) : 'https://via.placeholder.com/300',
-            birthDate: pet.birthDate || null,
+            birthDate: pet.birthDate ? new Date(pet.birthDate).toISOString() : null,
             ageInMonths: this.calculateAgeInMonths(pet.birthDate),
             location: {
                 city: pet.breederCity || '',

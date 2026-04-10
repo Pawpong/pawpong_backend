@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { BannerResponseDto } from '../../../dto/response/banner-response.dto';
 import { HomeBannerCatalogService } from '../../../domain/services/home-banner-catalog.service';
 import { HOME_ASSET_URL, type HomeAssetUrlPort } from '../../../application/ports/home-asset-url.port';
 import { HOME_ADMIN_MANAGER, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
 import type { HomeBannerUpdateCommand } from '../types/home-admin-command.type';
+import type { HomeBannerResult } from '../../../application/types/home-content-result.type';
 
 @Injectable()
 export class UpdateBannerUseCase {
@@ -16,14 +16,14 @@ export class UpdateBannerUseCase {
         private readonly homeAssetUrl: HomeAssetUrlPort,
     ) {}
 
-    async execute(bannerId: string, data: HomeBannerUpdateCommand): Promise<BannerResponseDto> {
+    async execute(bannerId: string, data: HomeBannerUpdateCommand): Promise<HomeBannerResult> {
         const banner = await this.homeAdminManager.updateBanner(bannerId, data);
 
         if (!banner) {
             throw new BadRequestException('배너를 찾을 수 없습니다.');
         }
 
-        return this.homeBannerCatalogService.buildResponse([banner], (fileName, expirationMinutes) =>
+        return this.homeBannerCatalogService.buildResults([banner], (fileName, expirationMinutes) =>
             this.homeAssetUrl.generateSignedUrl(fileName, expirationMinutes),
         )[0];
     }

@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 
-import { BannerResponseDto } from '../../dto/response/banner-response.dto';
 import { HomeBannerSnapshot } from '../../application/ports/home-content-reader.port';
+import type { HomeBannerResult } from '../../application/types/home-content-result.type';
 
 type SignedUrlGenerator = (fileName: string, expirationMinutes?: number) => string;
 
 @Injectable()
 export class HomeBannerCatalogService {
-    buildResponse(banners: HomeBannerSnapshot[], generateSignedUrl: SignedUrlGenerator): BannerResponseDto[] {
+    buildResults(banners: HomeBannerSnapshot[], generateSignedUrl: SignedUrlGenerator): HomeBannerResult[] {
         return banners.map((banner) => {
             const desktopFileName = banner.desktopImageFileName || banner.imageFileName || '';
             const mobileFileName = banner.mobileImageFileName || banner.imageFileName || '';
