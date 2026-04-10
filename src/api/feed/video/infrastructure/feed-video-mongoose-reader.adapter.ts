@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { FeedVideoReaderPort, FeedVideoSnapshot } from '../application/ports/feed-video-reader.port';
 import { FeedVideoRepository } from '../repository/feed-video.repository';
+import type { FeedUploaderDocumentRecord, FeedVideoDocumentRecord } from '../../types/feed-document.type';
 
 @Injectable()
 export class FeedVideoMongooseReaderAdapter implements FeedVideoReaderPort {
@@ -29,7 +30,12 @@ export class FeedVideoMongooseReaderAdapter implements FeedVideoReaderPort {
         return video ? this.toSnapshot(video) : null;
     }
 
-    private toSnapshot(video: any): FeedVideoSnapshot {
+    private toSnapshot(video: FeedVideoDocumentRecord): FeedVideoSnapshot {
+        const uploader =
+            video.uploadedBy && typeof video.uploadedBy === 'object' && '_id' in video.uploadedBy
+                ? (video.uploadedBy as FeedUploaderDocumentRecord)
+                : null;
+
         return {
             id: video._id.toString(),
             title: video.title,
@@ -44,12 +50,12 @@ export class FeedVideoMongooseReaderAdapter implements FeedVideoReaderPort {
             likeCount: video.likeCount,
             commentCount: video.commentCount,
             tags: video.tags || [],
-            uploadedBy: video.uploadedBy
+            uploadedBy: uploader
                 ? {
-                      id: video.uploadedBy._id.toString(),
-                      name: video.uploadedBy.name,
-                      profileImageFileName: video.uploadedBy.profileImageFileName,
-                      businessName: video.uploadedBy.businessName,
+                      id: uploader._id.toString(),
+                      name: uploader.name,
+                      profileImageFileName: uploader.profileImageFileName,
+                      businessName: uploader.businessName,
                   }
                 : null,
             createdAt: video.createdAt,

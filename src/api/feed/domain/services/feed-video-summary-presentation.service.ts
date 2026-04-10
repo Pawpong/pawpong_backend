@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { FeedVideoUploaderResult } from '../../video/application/types/feed-video-result.type';
 
 type FeedUploaderSummarySnapshot = {
     id: string;
@@ -9,7 +10,7 @@ type FeedUploaderSummarySnapshot = {
 
 @Injectable()
 export class FeedVideoSummaryPresentationService {
-    toUploaderResponse(uploader: FeedUploaderSummarySnapshot | null): any {
+    toUploaderResponse(uploader: FeedUploaderSummarySnapshot | null): FeedVideoUploaderResult | null {
         if (!uploader) {
             return null;
         }

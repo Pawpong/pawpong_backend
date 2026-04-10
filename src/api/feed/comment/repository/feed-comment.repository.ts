@@ -4,6 +4,7 @@ import { Model, Types } from 'mongoose';
 
 import { Video, VideoDocument } from '../../../../schema/video.schema';
 import { VideoComment } from '../../../../schema/video-comment.schema';
+import type { FeedCommentDocumentRecord, FeedObjectIdLike } from '../../types/feed-document.type';
 
 @Injectable()
 export class FeedCommentRepository {
@@ -21,7 +22,7 @@ export class FeedCommentRepository {
         return this.videoModel.findById(objectId).lean().exec();
     }
 
-    findCommentByIdWithAuthor(commentId: string) {
+    findCommentByIdWithAuthor(commentId: string): Promise<FeedCommentDocumentRecord | null> {
         const objectId = this.toObjectId(commentId);
         if (!objectId) {
             return Promise.resolve(null);
@@ -31,7 +32,7 @@ export class FeedCommentRepository {
             .findById(objectId)
             .populate('userId', 'name profileImageFileName businessName')
             .lean()
-            .exec();
+            .exec() as Promise<FeedCommentDocumentRecord | null>;
     }
 
     createComment(data: {
@@ -40,24 +41,24 @@ export class FeedCommentRepository {
         userModel: 'Breeder' | 'Adopter';
         content: string;
         parentId?: string;
-    }) {
+    }): Promise<FeedCommentDocumentRecord> {
         return this.videoCommentModel.create({
             videoId: new Types.ObjectId(data.videoId),
             userId: new Types.ObjectId(data.userId),
             userModel: data.userModel,
             content: data.content,
             parentId: data.parentId ? new Types.ObjectId(data.parentId) : undefined,
-        });
+        }) as Promise<FeedCommentDocumentRecord>;
     }
 
     async incrementVideoCommentCount(videoId: string, delta: number): Promise<void> {
         await this.videoModel.updateOne({ _id: videoId }, { $inc: { commentCount: delta } }).exec();
     }
 
-    findRootCommentsByVideo(videoId: string, skip: number, limit: number) {
+    findRootCommentsByVideo(videoId: string, skip: number, limit: number): Promise<FeedCommentDocumentRecord[]> {
         const videoObjectId = this.toObjectId(videoId);
         if (!videoObjectId) {
-            return Promise.resolve([]);
+            return Promise.resolve([] as FeedCommentDocumentRecord[]);
         }
 
         return this.videoCommentModel
@@ -71,7 +72,7 @@ export class FeedCommentRepository {
             .limit(limit)
             .populate('userId', 'name profileImageFileName businessName')
             .lean()
-            .exec();
+            .exec() as Promise<FeedCommentDocumentRecord[]>;
     }
 
     countRootCommentsByVideo(videoId: string): Promise<number> {
@@ -114,10 +115,10 @@ export class FeedCommentRepository {
         ]);
     }
 
-    findRepliesByParent(commentId: string, skip: number, limit: number) {
+    findRepliesByParent(commentId: string, skip: number, limit: number): Promise<FeedCommentDocumentRecord[]> {
         const commentObjectId = this.toObjectId(commentId);
         if (!commentObjectId) {
-            return Promise.resolve([]);
+            return Promise.resolve([] as FeedCommentDocumentRecord[]);
         }
 
         return this.videoCommentModel
@@ -130,7 +131,7 @@ export class FeedCommentRepository {
             .limit(limit)
             .populate('userId', 'name profileImageFileName businessName')
             .lean()
-            .exec();
+            .exec() as Promise<FeedCommentDocumentRecord[]>;
     }
 
     countRepliesByParent(commentId: string): Promise<number> {
@@ -147,7 +148,7 @@ export class FeedCommentRepository {
             .exec();
     }
 
-    updateCommentContent(commentId: string, content: string) {
+    updateCommentContent(commentId: string, content: string): Promise<FeedCommentDocumentRecord | null> {
         const objectId = this.toObjectId(commentId);
         if (!objectId) {
             return Promise.resolve(null);
@@ -157,10 +158,10 @@ export class FeedCommentRepository {
             .findByIdAndUpdate(objectId, { content }, { new: true })
             .populate('userId', 'name profileImageFileName businessName')
             .lean()
-            .exec();
+            .exec() as Promise<FeedCommentDocumentRecord | null>;
     }
 
-    markDeleted(commentId: string) {
+    markDeleted(commentId: string): Promise<FeedCommentDocumentRecord | null> {
         const objectId = this.toObjectId(commentId);
         if (!objectId) {
             return Promise.resolve(null);
@@ -170,7 +171,7 @@ export class FeedCommentRepository {
             .findByIdAndUpdate(objectId, { isDeleted: true }, { new: true })
             .populate('userId', 'name profileImageFileName businessName')
             .lean()
-            .exec();
+            .exec() as Promise<FeedCommentDocumentRecord | null>;
     }
 
     private toObjectId(value: string): Types.ObjectId | null {

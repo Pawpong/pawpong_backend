@@ -4,12 +4,13 @@ import { Model, Types } from 'mongoose';
 
 import { Video, VideoDocument, VideoStatus } from '../../../../schema/video.schema';
 import { FeedVideoEncodingResult } from '../application/ports/feed-video-command.port';
+import type { FeedVideoDocumentRecord } from '../../types/feed-document.type';
 
 @Injectable()
 export class FeedVideoRepository {
     constructor(@InjectModel(Video.name) private readonly videoModel: Model<VideoDocument>) {}
 
-    findPublicFeed(skip: number, limit: number) {
+    findPublicFeed(skip: number, limit: number): Promise<FeedVideoDocumentRecord[]> {
         return this.videoModel
             .find({ status: VideoStatus.READY, isPublic: true })
             .sort({ createdAt: -1 })
@@ -17,29 +18,29 @@ export class FeedVideoRepository {
             .limit(limit)
             .populate('uploadedBy', 'name profileImageFileName businessName')
             .lean()
-            .exec();
+            .exec() as Promise<FeedVideoDocumentRecord[]>;
     }
 
     countPublicFeed(): Promise<number> {
         return this.videoModel.countDocuments({ status: VideoStatus.READY, isPublic: true }).exec();
     }
 
-    findPopular(limit: number) {
+    findPopular(limit: number): Promise<FeedVideoDocumentRecord[]> {
         return this.videoModel
             .find({ status: VideoStatus.READY, isPublic: true })
             .sort({ viewCount: -1 })
             .limit(limit)
             .populate('uploadedBy', 'name profileImageFileName businessName')
             .lean()
-            .exec();
+            .exec() as Promise<FeedVideoDocumentRecord[]>;
     }
 
-    findByIdWithUploader(videoId: string) {
+    findByIdWithUploader(videoId: string): Promise<FeedVideoDocumentRecord | null> {
         return this.videoModel
             .findById(videoId)
             .populate('uploadedBy', 'name profileImageFileName businessName')
             .lean()
-            .exec();
+            .exec() as Promise<FeedVideoDocumentRecord | null>;
     }
 
     async createPendingVideo(data: {
@@ -63,22 +64,22 @@ export class FeedVideoRepository {
         return { videoId: video.id as string };
     }
 
-    findById(videoId: string) {
-        return this.videoModel.findById(videoId).lean().exec();
+    findById(videoId: string): Promise<FeedVideoDocumentRecord | null> {
+        return this.videoModel.findById(videoId).lean().exec() as Promise<FeedVideoDocumentRecord | null>;
     }
 
     async markAsProcessing(videoId: string): Promise<void> {
         await this.videoModel.updateOne({ _id: videoId }, { status: VideoStatus.PROCESSING }).exec();
     }
 
-    findMine(userId: string, skip: number, limit: number) {
+    findMine(userId: string, skip: number, limit: number): Promise<FeedVideoDocumentRecord[]> {
         return this.videoModel
             .find({ uploadedBy: new Types.ObjectId(userId) })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
             .lean()
-            .exec();
+            .exec() as Promise<FeedVideoDocumentRecord[]>;
     }
 
     countMine(userId: string): Promise<number> {

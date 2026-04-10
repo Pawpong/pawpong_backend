@@ -5,6 +5,7 @@ import {
     FeedCommentReplyCountSnapshot,
     FeedCommentSnapshot,
 } from '../application/ports/feed-comment-manager.port';
+import type { FeedCommentDocumentRecord, FeedUploaderDocumentRecord } from '../../types/feed-document.type';
 
 @Injectable()
 export class FeedCommentMongooseManagerAdapter implements FeedCommentManagerPort {
@@ -77,8 +78,11 @@ export class FeedCommentMongooseManagerAdapter implements FeedCommentManagerPort
         return comment ? this.toCommentSnapshot(comment) : null;
     }
 
-    private toCommentSnapshot(comment: any): FeedCommentSnapshot {
-        const populatedAuthor = comment.userId && typeof comment.userId === 'object' && '_id' in comment.userId ? comment.userId : null;
+    private toCommentSnapshot(comment: FeedCommentDocumentRecord): FeedCommentSnapshot {
+        const populatedAuthor =
+            comment.userId && typeof comment.userId === 'object' && '_id' in comment.userId
+                ? (comment.userId as FeedUploaderDocumentRecord)
+                : null;
 
         return {
             id: comment._id.toString(),

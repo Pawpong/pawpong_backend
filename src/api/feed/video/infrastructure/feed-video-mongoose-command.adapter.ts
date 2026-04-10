@@ -5,6 +5,7 @@ import {
     FeedVideoEncodingResult,
 } from '../application/ports/feed-video-command.port';
 import { FeedVideoRepository } from '../repository/feed-video.repository';
+import type { FeedVideoDocumentRecord } from '../../types/feed-document.type';
 
 @Injectable()
 export class FeedVideoMongooseCommandAdapter implements FeedVideoCommandPort {
@@ -60,7 +61,7 @@ export class FeedVideoMongooseCommandAdapter implements FeedVideoCommandPort {
         await this.feedVideoRepository.markEncodingFailed(videoId, reason);
     }
 
-    private toSnapshot(video: any): FeedVideoCommandSnapshot {
+    private toSnapshot(video: FeedVideoDocumentRecord): FeedVideoCommandSnapshot {
         return {
             id: video._id.toString(),
             uploadedById: video.uploadedBy.toString(),
