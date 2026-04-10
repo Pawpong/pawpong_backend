@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 import { Admin, AdminDocument } from '../../../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../../../schema/breeder.schema';
@@ -9,6 +9,7 @@ import {
     BreederVerificationAdminActivityLogEntry,
     BreederVerificationAdminUpdateVerificationCommand,
 } from '../application/ports/breeder-verification-admin-writer.port';
+import type { BreederAdminAdminDocumentRecord, BreederAdminBreederDocumentRecord } from '../../types/breeder-admin-record.type';
 
 @Injectable()
 export class BreederVerificationAdminRepository {
@@ -17,13 +18,15 @@ export class BreederVerificationAdminRepository {
         @InjectModel(Breeder.name) private readonly breederModel: Model<BreederDocument>,
     ) {}
 
-    findAdminById(adminId: string) {
-        return this.adminModel.findById(adminId).select('name permissions').lean();
+    findAdminById(adminId: string): Promise<BreederAdminAdminDocumentRecord | null> {
+        return this.adminModel.findById(adminId).select('name permissions').lean<BreederAdminAdminDocumentRecord>().exec();
     }
 
-    getLevelChangeRequests(criteria: BreederVerificationAdminSearchCriteria) {
+    getLevelChangeRequests(
+        criteria: BreederVerificationAdminSearchCriteria,
+    ): Promise<{ items: BreederAdminBreederDocumentRecord[]; total: number }> {
         const { cityName, searchKeyword, pageNumber, itemsPerPage } = criteria;
-        const query: Record<string, any> = {
+        const query: FilterQuery<BreederDocument> = {
             'verification.isLevelChangeRequested': true,
             'verification.status': 'reviewing',
         };
@@ -43,9 +46,11 @@ export class BreederVerificationAdminRepository {
         return this.search(query, pageNumber, itemsPerPage, { 'verification.submittedAt': -1 });
     }
 
-    getPendingBreeders(criteria: BreederVerificationAdminSearchCriteria) {
+    getPendingBreeders(
+        criteria: BreederVerificationAdminSearchCriteria,
+    ): Promise<{ items: BreederAdminBreederDocumentRecord[]; total: number }> {
         const { verificationStatus, cityName, searchKeyword, pageNumber, itemsPerPage } = criteria;
-        const query: Record<string, any> = {
+        const query: FilterQuery<BreederDocument> = {
             'verification.isLevelChangeRequested': { $ne: true },
         };
 
@@ -66,9 +71,9 @@ export class BreederVerificationAdminRepository {
         return this.search(query, pageNumber, itemsPerPage, { 'verification.submittedAt': -1 });
     }
 
-    getBreeders(criteria: BreederVerificationAdminSearchCriteria) {
+    getBreeders(criteria: BreederVerificationAdminSearchCriteria): Promise<{ items: BreederAdminBreederDocumentRecord[]; total: number }> {
         const { verificationStatus, cityName, searchKeyword, pageNumber, itemsPerPage } = criteria;
-        const query: Record<string, any> = {};
+        const query: FilterQuery<BreederDocument> = {};
 
         if (verificationStatus) {
             query['verification.status'] = verificationStatus;
@@ -85,11 +90,12 @@ export class BreederVerificationAdminRepository {
         return this.search(query, pageNumber, itemsPerPage, { createdAt: -1 });
     }
 
-    findBreederById(breederId: string) {
+    findBreederById(breederId: string): Promise<BreederAdminBreederDocumentRecord | null> {
         return this.breederModel
             .findById(breederId)
             .select('_id name nickname emailAddress phoneNumber accountStatus isTestAccount verification profile createdAt updatedAt breeds')
-            .lean();
+            .lean<BreederAdminBreederDocumentRecord>()
+            .exec();
     }
 
     countApprovedBreeders() {
@@ -103,7 +109,7 @@ export class BreederVerificationAdminRepository {
         });
     }
 
-    findApprovedBreedersMissingDocuments(reviewedBefore: Date) {
+    findApprovedBreedersMissingDocuments(reviewedBefore: Date): Promise<BreederAdminBreederDocumentRecord[]> {
         return this.breederModel
             .find({
                 'verification.status': 'approved',
@@ -111,7 +117,8 @@ export class BreederVerificationAdminRepository {
                 $or: [{ 'verification.documents': { $exists: false } }, { 'verification.documents': { $size: 0 } }],
             })
             .select('_id name nickname emailAddress phoneNumber verification')
-            .lean();
+            .lean<BreederAdminBreederDocumentRecord[]>()
+            .exec();
     }
 
     async updateBreederVerification(
@@ -165,11 +172,11 @@ export class BreederVerificationAdminRepository {
     }
 
     private async search(
-        query: Record<string, any>,
+        query: FilterQuery<BreederDocument>,
         pageNumber: number,
         itemsPerPage: number,
         sort: Record<string, 1 | -1>,
-    ) {
+    ): Promise<{ items: BreederAdminBreederDocumentRecord[]; total: number }> {
         const skip = (pageNumber - 1) * itemsPerPage;
 
         const [items, total] = await Promise.all([
@@ -179,7 +186,8 @@ export class BreederVerificationAdminRepository {
                 .sort(sort)
                 .skip(skip)
                 .limit(itemsPerPage)
-                .lean(),
+                .lean<BreederAdminBreederDocumentRecord[]>()
+                .exec(),
             this.breederModel.countDocuments(query),
         ]);
 

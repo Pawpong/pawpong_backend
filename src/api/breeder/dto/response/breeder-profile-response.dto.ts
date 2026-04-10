@@ -213,6 +213,87 @@ export class BreederVerificationDto {
     verificationStatus: string;
 }
 
+export class BreederProfileParentPetInfoDto {
+    @ApiProperty({ description: '부모견/묘 ID', example: '507f1f77bcf86cd799439011' })
+    id: string;
+
+    @ApiProperty({ description: '대표 이미지 URL', example: 'https://example.com/parent.jpg' })
+    avatarUrl: string;
+
+    @ApiProperty({ description: '이름', example: '루비' })
+    name: string;
+
+    @ApiProperty({ description: '성별', example: 'female' })
+    sex: string;
+
+    @ApiProperty({ description: '출생 정보', example: '2022년 3월생' })
+    birth: string;
+
+    @ApiProperty({ description: '품종', example: '골든 리트리버' })
+    breed: string;
+
+    @ApiProperty({ description: '사진 목록', type: [String], example: ['https://example.com/parent-1.jpg'] })
+    photos: string[];
+}
+
+export class BreederProfileAvailablePetInfoDto {
+    @ApiProperty({ description: '개체 ID', example: '507f1f77bcf86cd799439012' })
+    petId: string;
+
+    @ApiProperty({ description: '이름', example: '콩이' })
+    name: string;
+
+    @ApiProperty({ description: '품종', example: '골든 리트리버' })
+    breed: string;
+
+    @ApiProperty({ description: '성별', example: 'male' })
+    gender: string;
+
+    @ApiProperty({ description: '출생일', example: '2024-01-01T00:00:00.000Z', required: false })
+    birthDate?: Date;
+
+    @ApiProperty({ description: '가격', example: 1500000, required: false })
+    price?: number;
+
+    @ApiProperty({ description: '상태', example: 'available', required: false })
+    status?: string;
+
+    @ApiProperty({ description: '소개', example: '활발한 성격의 아이입니다.' })
+    description: string;
+
+    @ApiProperty({ description: '대표 사진', example: 'https://example.com/pet-main.jpg' })
+    photo: string;
+
+    @ApiProperty({ description: '사진 목록', type: [String], example: ['https://example.com/pet-1.jpg'] })
+    photos: string[];
+
+    @ApiProperty({ description: '부모견/묘 정보', type: () => [BreederProfileParentPetInfoDto] })
+    parents: BreederProfileParentPetInfoDto[];
+}
+
+export class BreederProfileReviewInfoDto {
+    @ApiProperty({ description: '후기 ID', example: 'review_123', required: false })
+    reviewId?: string;
+
+    @ApiProperty({ description: '작성일', example: '2024-01-01T00:00:00.000Z', required: false })
+    writtenAt?: Date;
+
+    @ApiProperty({ description: '후기 타입', example: 'completed', required: false })
+    type?: string;
+
+    @ApiProperty({ description: '입양자 이름', example: '김입양자', required: false })
+    adopterName?: string;
+
+    @ApiProperty({ description: '평점', example: 5, required: false })
+    rating?: number;
+
+    @ApiProperty({ description: '후기 내용', example: '상담이 정말 친절했어요.', required: false })
+    content?: string;
+
+    @ApiProperty({ description: '대표 사진', example: 'https://example.com/review.jpg', required: false })
+    photo?: string;
+}
+
 /**
  * 브리더 프로필 응답 DTO
  * 브리더 상세 정보 조회 시 반환되는 데이터 구조입니다.
@@ -296,9 +377,9 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '부모견/부모묘 정보',
-        type: Array,
+        type: () => [BreederProfileParentPetInfoDto],
     })
-    parentPetInfo: any[];
+    parentPetInfo: BreederProfileParentPetInfoDto[];
 
     /**
      * 분양 가능한 반려동물 정보
@@ -306,9 +387,9 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '분양 가능한 반려동물 정보',
-        type: Array,
+        type: () => [BreederProfileAvailablePetInfoDto],
     })
-    availablePetInfo: any[];
+    availablePetInfo: BreederProfileAvailablePetInfoDto[];
 
     /**
      * 후기 정보
@@ -316,9 +397,9 @@ export class BreederProfileResponseDto {
      */
     @ApiProperty({
         description: '후기 정보',
-        type: Array,
+        type: () => [BreederProfileReviewInfoDto],
     })
-    reviewInfo: any[];
+    reviewInfo: BreederProfileReviewInfoDto[];
 
     /**
      * 브리더 통계 정보

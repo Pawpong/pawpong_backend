@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, PipelineStage } from 'mongoose';
 
 import { Admin, AdminDocument } from '../../../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../../../schema/breeder.schema';
@@ -9,6 +9,11 @@ import {
     BreederReportAdminActivityLogEntry,
     BreederReportAdminReportPatch,
 } from '../application/ports/breeder-report-admin-writer.port';
+import type {
+    BreederAdminAdminDocumentRecord,
+    BreederAdminReportAggregateResult,
+    BreederAdminReportOwnerDocumentRecord,
+} from '../../types/breeder-admin-record.type';
 
 @Injectable()
 export class BreederReportAdminRepository {
@@ -17,13 +22,13 @@ export class BreederReportAdminRepository {
         @InjectModel(Breeder.name) private readonly breederModel: Model<BreederDocument>,
     ) {}
 
-    findAdminById(adminId: string) {
-        return this.adminModel.findById(adminId).select('name permissions').lean();
+    findAdminById(adminId: string): Promise<BreederAdminAdminDocumentRecord | null> {
+        return this.adminModel.findById(adminId).select('name permissions').lean<BreederAdminAdminDocumentRecord>().exec();
     }
 
-    async getReports(query: BreederReportAdminReportListQuery) {
+    async getReports(query: BreederReportAdminReportListQuery): Promise<BreederAdminReportAggregateResult | null> {
         const skip = (query.pageNumber - 1) * query.itemsPerPage;
-        const pipeline: any[] = [{ $match: { 'reports.0': { $exists: true } } }, { $unwind: '$reports' }];
+        const pipeline: PipelineStage[] = [{ $match: { 'reports.0': { $exists: true } } }, { $unwind: '$reports' }];
 
         if (query.status) {
             pipeline.push({ $match: { 'reports.status': query.status } });
@@ -54,12 +59,16 @@ export class BreederReportAdminRepository {
             },
         );
 
-        const [result] = await this.breederModel.aggregate(pipeline);
+        const [result] = await this.breederModel.aggregate<BreederAdminReportAggregateResult>(pipeline);
         return result;
     }
 
-    findBreederWithReport(reportId: string) {
-        return this.breederModel.findOne({ 'reports.reportId': reportId }).select('name nickname reports').lean();
+    findBreederWithReport(reportId: string): Promise<BreederAdminReportOwnerDocumentRecord | null> {
+        return this.breederModel
+            .findOne({ 'reports.reportId': reportId })
+            .select('name nickname reports')
+            .lean<BreederAdminReportOwnerDocumentRecord>()
+            .exec();
     }
 
     async updateReport(breederId: string, reportId: string, patch: BreederReportAdminReportPatch): Promise<void> {

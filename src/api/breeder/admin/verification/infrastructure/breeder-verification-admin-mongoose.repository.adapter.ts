@@ -13,6 +13,7 @@ import {
     BreederVerificationAdminWriterPort,
 } from '../application/ports/breeder-verification-admin-writer.port';
 import { BreederVerificationAdminRepository } from '../repository/breeder-verification-admin.repository';
+import type { BreederAdminBreederDocumentRecord } from '../../types/breeder-admin-record.type';
 
 @Injectable()
 export class BreederVerificationAdminMongooseRepositoryAdapter
@@ -96,12 +97,12 @@ export class BreederVerificationAdminMongooseRepositoryAdapter
         await this.breederVerificationAdminRepository.appendAdminActivityLog(adminId, logEntry);
     }
 
-    private toBreederSnapshot(breeder: any): BreederVerificationAdminBreederSnapshot {
+    private toBreederSnapshot(breeder: BreederAdminBreederDocumentRecord): BreederVerificationAdminBreederSnapshot {
         return {
             id: breeder._id.toString(),
             name: breeder.name,
-            nickname: breeder.nickname,
-            emailAddress: breeder.emailAddress,
+            nickname: breeder.nickname || '',
+            emailAddress: breeder.emailAddress || '',
             phoneNumber: breeder.phoneNumber,
             accountStatus: breeder.accountStatus,
             isTestAccount: breeder.isTestAccount,

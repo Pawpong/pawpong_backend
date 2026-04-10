@@ -12,6 +12,7 @@ import {
     BreederReportAdminWriterPort,
 } from '../application/ports/breeder-report-admin-writer.port';
 import { BreederReportAdminRepository } from '../repository/breeder-report-admin.repository';
+import type { BreederAdminReportListItemRecord } from '../../types/breeder-admin-record.type';
 
 @Injectable()
 export class BreederReportAdminMongooseRepositoryAdapter
@@ -37,10 +38,10 @@ export class BreederReportAdminMongooseRepositoryAdapter
         const result = await this.breederReportAdminRepository.getReports(query);
 
         return {
-            items: (result?.items || []).map((item: any) => ({
+            items: (result?.items || []).map((item: BreederAdminReportListItemRecord) => ({
                 reportId: item.reportId,
                 targetId: item.targetId?.toString() || '',
-                targetName: item.targetName,
+                targetName: item.targetName || '',
                 type: item.type,
                 description: item.description,
                 status: item.status,
@@ -53,7 +54,7 @@ export class BreederReportAdminMongooseRepositoryAdapter
 
     async findReportById(reportId: string): Promise<BreederReportAdminReportSnapshot | null> {
         const breeder = await this.breederReportAdminRepository.findBreederWithReport(reportId);
-        const report = breeder?.reports?.find((item: any) => item.reportId === reportId);
+        const report = breeder?.reports?.find((item) => item.reportId === reportId);
 
         if (!breeder || !report) {
             return null;
@@ -62,7 +63,7 @@ export class BreederReportAdminMongooseRepositoryAdapter
         return {
             reportId: report.reportId,
             breederId: breeder._id.toString(),
-            breederName: breeder.nickname || breeder.name,
+            breederName: breeder.nickname || breeder.name || '',
             status: report.status,
             type: report.type,
             description: report.description,

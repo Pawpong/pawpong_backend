@@ -1,5 +1,47 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+export class BreederVerificationProfileLocationDto {
+    @ApiProperty({ description: '도시명', example: '서울', required: false })
+    cityName?: string;
+
+    @ApiProperty({ description: '구/군명', example: '강남구', required: false })
+    districtName?: string;
+
+    @ApiProperty({ description: '상세 주소', example: '테헤란로 123', required: false })
+    detailAddress?: string;
+}
+
+export class BreederVerificationProfileInfoDto {
+    @ApiProperty({
+        description: '위치 정보',
+        type: () => BreederVerificationProfileLocationDto,
+        required: false,
+    })
+    locationInfo?: BreederVerificationProfileLocationDto;
+
+    @ApiProperty({
+        description: '전문 분야',
+        type: [String],
+        example: ['골든 리트리버'],
+        required: false,
+    })
+    specialization?: string[];
+
+    @ApiProperty({
+        description: '소개글',
+        example: '20년 경력의 전문 브리더입니다.',
+        required: false,
+    })
+    description?: string;
+
+    @ApiProperty({
+        description: '경력 연수',
+        example: 20,
+        required: false,
+    })
+    experienceYears?: number;
+}
+
 /**
  * 브리더 인증 정보 응답 DTO
  */
@@ -91,8 +133,9 @@ export class BreederVerificationResponseDto {
     @ApiProperty({
         description: '브리더 프로필 정보',
         required: false,
+        type: () => BreederVerificationProfileInfoDto,
     })
-    profileInfo?: any;
+    profileInfo?: BreederVerificationProfileInfoDto;
 
     /**
      * 계정 생성 일시
