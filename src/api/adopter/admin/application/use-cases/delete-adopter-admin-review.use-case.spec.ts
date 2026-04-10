@@ -36,7 +36,11 @@ describe('입양자 관리자 후기 삭제 유스케이스', () => {
             new AdopterAdminReviewResponseService(),
         );
 
-        await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).resolves.toEqual({
+        await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).resolves.toMatchObject({
+            reviewId: 'review-1',
+            breederId: 'breeder-1',
+            breederName: '브리더',
+            deleteReason: 'Review deleted successfully',
             message: 'Review deleted successfully',
         });
         expect(writer.appendAdminActivity).toHaveBeenCalled();

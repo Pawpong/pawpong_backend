@@ -26,7 +26,10 @@ export class AdopterAdminReviewController {
         @Query('limit') limit: string = '10',
     ): Promise<ApiResponseDto<PaginationResponseDto<ReviewReportItemDto>>> {
         const result = await this.getAdopterAdminReviewReportsUseCase.execute(adminId, page, limit);
-        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.adminReviewReportListRetrieved);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            ADOPTER_RESPONSE_MESSAGES.adminReviewReportListRetrieved,
+        );
     }
 
     @Delete('reviews/:breederId/:reviewId')

@@ -1,11 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import { ReviewReportItemDto } from '../../dto/response/review-report-list.dto';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminReviewReportPresentationService } from '../../domain/services/adopter-admin-review-report-presentation.service';
 import { ADOPTER_ADMIN_READER } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
+import type { AdopterAdminReviewReportPageResult } from '../types/adopter-admin-result.type';
 
 @Injectable()
 export class GetAdopterAdminReviewReportsUseCase {
@@ -20,7 +19,7 @@ export class GetAdopterAdminReviewReportsUseCase {
         adminId: string,
         pageStr: string = '1',
         limitStr: string = '10',
-    ): Promise<PaginationResponseDto<ReviewReportItemDto>> {
+    ): Promise<AdopterAdminReviewReportPageResult> {
         const admin = await this.adopterAdminReader.findAdminById(adminId);
         this.adopterAdminPolicyService.assertCanManageReports(admin);
 
