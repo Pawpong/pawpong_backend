@@ -1,11 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { PaginationRequestDto } from '../../../../../common/dto/pagination/pagination-request.dto';
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { AppVersionResponseDto } from '../../../dto/response/app-version-response.dto';
 import { AppVersionAdminListPresentationService } from '../../domain/services/app-version-admin-list-presentation.service';
 import { APP_VERSION_ADMIN_READER, type AppVersionAdminReaderPort } from '../ports/app-version-admin-reader.port';
+import { type AppVersionAdminListQuery, type AppVersionAdminPageResult } from '../types/app-version-query.type';
 
 @Injectable()
 export class GetAppVersionListUseCase {
@@ -17,8 +15,8 @@ export class GetAppVersionListUseCase {
     ) {}
 
     async execute(
-        paginationData: PaginationRequestDto,
-    ): Promise<PaginationResponseDto<AppVersionResponseDto>> {
+        paginationData: AppVersionAdminListQuery,
+    ): Promise<AppVersionAdminPageResult> {
         this.logger.logStart('getAppVersionList', '앱 버전 목록 조회 시작', paginationData);
 
         const page = paginationData.page ?? 1;

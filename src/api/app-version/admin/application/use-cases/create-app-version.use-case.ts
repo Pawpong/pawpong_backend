@@ -1,11 +1,11 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { AppVersionResponseDto } from '../../../dto/response/app-version-response.dto';
 import { AppVersionAdminCommandPolicyService } from '../../domain/services/app-version-admin-command-policy.service';
 import { AppVersionAdminItemPresentationService } from '../../domain/services/app-version-admin-item-presentation.service';
 import { APP_VERSION_WRITER, type AppVersionWriterPort } from '../ports/app-version-writer.port';
 import { type AppVersionCreateCommand } from '../types/app-version-command.type';
+import { type AppVersionAdminItemResult } from '../types/app-version-query.type';
 
 @Injectable()
 export class CreateAppVersionUseCase {
@@ -17,7 +17,7 @@ export class CreateAppVersionUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(adminId: string, createData: AppVersionCreateCommand): Promise<AppVersionResponseDto> {
+    async execute(adminId: string, createData: AppVersionCreateCommand): Promise<AppVersionAdminItemResult> {
         this.logger.logStart('createAppVersion', '앱 버전 생성 시작', { adminId, platform: createData.platform });
         this.appVersionAdminCommandPolicyService.ensureAdminId(adminId);
 

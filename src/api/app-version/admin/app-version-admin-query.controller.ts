@@ -22,6 +22,9 @@ export class AppVersionAdminQueryController {
         @Query() paginationData: PaginationRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<AppVersionResponseDto>>> {
         const result = await this.getAppVersionListUseCase.execute(paginationData);
-        return ApiResponseDto.success(result, this.appVersionAdminQueryResponseMessageService.appVersionListRetrieved());
+        return ApiResponseDto.success(
+            result as unknown as PaginationResponseDto<AppVersionResponseDto>,
+            this.appVersionAdminQueryResponseMessageService.appVersionListRetrieved(),
+        );
     }
 }

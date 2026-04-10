@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { AppVersionCheckResponseDto } from '../../dto/response/app-version-check-response.dto';
 import { ActiveAppVersionSnapshot } from '../../application/ports/app-version-reader.port';
 
 @Injectable()
@@ -9,7 +8,7 @@ export class AppVersionPolicyService {
         platform: 'ios' | 'android',
         currentVersion: string,
         versionInfo: ActiveAppVersionSnapshot | null,
-    ): AppVersionCheckResponseDto {
+    ) {
         if (!versionInfo) {
             return {
                 needsForceUpdate: false,

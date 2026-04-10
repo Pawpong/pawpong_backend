@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
-import { AppVersionCheckResponseDto } from '../../dto/response/app-version-check-response.dto';
 import { APP_VERSION_READER, type AppVersionReaderPort } from '../ports/app-version-reader.port';
+import { type AppVersionCheckResult } from '../types/app-version-result.type';
 import { AppVersionPolicyService } from '../../domain/services/app-version-policy.service';
 
 @Injectable()
@@ -14,7 +14,7 @@ export class CheckAppVersionUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(platform: 'ios' | 'android', currentVersion: string): Promise<AppVersionCheckResponseDto> {
+    async execute(platform: 'ios' | 'android', currentVersion: string): Promise<AppVersionCheckResult> {
         this.logger.logStart('checkVersion', '앱 버전 체크', { platform, currentVersion });
 
         if (!platform || !currentVersion) {
