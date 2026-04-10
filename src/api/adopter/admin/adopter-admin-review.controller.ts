@@ -6,6 +6,7 @@ import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { DeleteAdopterAdminReviewUseCase } from './application/use-cases/delete-adopter-admin-review.use-case';
 import { GetAdopterAdminReviewReportsUseCase } from './application/use-cases/get-adopter-admin-review-reports.use-case';
 import { AdopterAdminProtectedController } from './decorator/adopter-admin-controller.decorator';
+import { ReviewReportListQueryRequestDto } from './dto/request/review-report-list-query-request.dto';
 import { ReviewDeleteResponseDto } from './dto/response/review-delete-response.dto';
 import { ReviewReportItemDto } from './dto/response/review-report-list.dto';
 import { ADOPTER_RESPONSE_MESSAGES } from '../domain/services/adopter-response-message.service';
@@ -22,10 +23,9 @@ export class AdopterAdminReviewController {
     @ApiGetAdopterAdminReviewReportsEndpoint()
     async getReviewReports(
         @CurrentUser('userId') adminId: string,
-        @Query('page') page: string = '1',
-        @Query('limit') limit: string = '10',
+        @Query() query: ReviewReportListQueryRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<ReviewReportItemDto>>> {
-        const result = await this.getAdopterAdminReviewReportsUseCase.execute(adminId, page, limit);
+        const result = await this.getAdopterAdminReviewReportsUseCase.execute(adminId, query.page, query.limit);
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result),
             ADOPTER_RESPONSE_MESSAGES.adminReviewReportListRetrieved,
