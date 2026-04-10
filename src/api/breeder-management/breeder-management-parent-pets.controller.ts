@@ -7,7 +7,7 @@ import { AddBreederManagementParentPetUseCase } from './application/use-cases/ad
 import { RemoveBreederManagementParentPetUseCase } from './application/use-cases/remove-breeder-management-parent-pet.use-case';
 import { UpdateBreederManagementParentPetUseCase } from './application/use-cases/update-breeder-management-parent-pet.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { ParentPetAddDto } from './dto/request/parent-pet-add-request.dto';
 import { ParentPetUpdateDto } from './dto/request/parent-pet-update-request.dto';
 import { PetAddResponseDto } from './dto/response/pet-add-response.dto';

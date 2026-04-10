@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import type { BreederManagementApplicationFormRecord } from '../../application/ports/breeder-management-profile.port';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../../constants/breeder-management-response-messages';
 
 @Injectable()
 export class BreederManagementApplicationCommandResponseService {

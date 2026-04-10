@@ -7,7 +7,7 @@ import { AddBreederManagementReviewReplyUseCase } from './application/use-cases/
 import { RemoveBreederManagementReviewReplyUseCase } from './application/use-cases/remove-breeder-management-review-reply.use-case';
 import { UpdateBreederManagementReviewReplyUseCase } from './application/use-cases/update-breeder-management-review-reply.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { ReviewReplyRequestDto } from './dto/request/review-reply-request.dto';
 import { ReviewReplyDeleteResponseDto, ReviewReplyResponseDto } from './dto/response/review-reply-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';

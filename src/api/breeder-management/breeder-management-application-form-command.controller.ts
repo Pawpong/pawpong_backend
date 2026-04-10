@@ -6,7 +6,7 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { UpdateBreederManagementApplicationFormUseCase } from './application/use-cases/update-breeder-management-application-form.use-case';
 import { UpdateBreederManagementSimpleApplicationFormUseCase } from './application/use-cases/update-breeder-management-simple-application-form.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { ApplicationFormUpdateRequestDto } from './dto/request/application-form-update-request.dto';
 import { SimpleApplicationFormUpdateRequestDto } from './dto/request/simple-application-form-update-request.dto';
 import {

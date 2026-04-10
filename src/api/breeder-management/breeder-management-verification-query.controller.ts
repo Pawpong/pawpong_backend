@@ -6,7 +6,7 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetBreederManagementVerificationStatusUseCase } from './application/use-cases/get-breeder-management-verification-status.use-case';
 import type { BreederManagementVerificationStatusResult } from './application/types/breeder-management-result.type';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { VerificationStatusResponseDto } from './dto/response/verification-status-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
 

@@ -7,7 +7,7 @@ import { DeleteProfileBannerUseCase } from './application/use-cases/delete-profi
 import { GetAllProfileBannersUseCase } from './application/use-cases/get-all-profile-banners.use-case';
 import { UpdateProfileBannerUseCase } from './application/use-cases/update-profile-banner.use-case';
 import { BreederManagementAdminProtectedController } from './decorator/breeder-management-admin-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
 import { ProfileBannerCreateRequestDto } from './dto/request/profile-banner-create-request.dto';
 import { ProfileBannerUpdateRequestDto } from './dto/request/profile-banner-update-request.dto';
 import { ProfileBannerResponseDto } from './dto/response/profile-banner-response.dto';

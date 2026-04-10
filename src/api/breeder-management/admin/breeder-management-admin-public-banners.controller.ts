@@ -8,7 +8,7 @@ import {
     type GetActiveProfileBannersQueryPort,
 } from './application/ports/breeder-management-public-banner-query.port';
 import { BreederManagementAdminPublicController } from './decorator/breeder-management-admin-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
 import { CounselBannerResponseDto } from './dto/response/counsel-banner-response.dto';
 import { ProfileBannerResponseDto } from './dto/response/profile-banner-response.dto';
 import { ApiGetActiveCounselBannersAdminEndpoint, ApiGetActiveProfileBannersAdminEndpoint } from './swagger';

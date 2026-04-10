@@ -7,7 +7,7 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetBreederManagementMyPetsUseCase } from './application/use-cases/get-breeder-management-my-pets.use-case';
 import type { BreederManagementMyPetsPageResult } from './application/types/breeder-management-result.type';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { MyPetsQueryRequestDto } from './dto/request/my-pets-query-request.dto';
 import { MyPetsListResponseDto } from './dto/response/my-pets-list-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';

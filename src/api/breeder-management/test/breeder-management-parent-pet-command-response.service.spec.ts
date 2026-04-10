@@ -1,5 +1,5 @@
 import { BreederManagementParentPetCommandResponseService } from '../domain/services/breeder-management-parent-pet-command-response.service';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
 
 describe('브리더 관리 부모견 응답 서비스', () => {
     const service = new BreederManagementParentPetCommandResponseService();
