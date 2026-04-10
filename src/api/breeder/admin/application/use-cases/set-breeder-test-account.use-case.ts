@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminTargetType } from '../../../../../common/enum/user.enum';
-import { SetTestAccountResponseDto } from '../../dto/response/set-test-account-response.dto';
 import { BREEDER_ADMIN_READER } from '../ports/breeder-admin-reader.port';
 import { BREEDER_ADMIN_WRITER } from '../ports/breeder-admin-writer.port';
 import type { BreederAdminReaderPort } from '../ports/breeder-admin-reader.port';
@@ -9,6 +8,7 @@ import type { BreederAdminWriterPort } from '../ports/breeder-admin-writer.port'
 import { BreederAdminActivityLogFactoryService } from '../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../domain/services/breeder-admin-policy.service';
 import { BreederAdminTestAccountPresentationService } from '../../domain/services/breeder-admin-test-account-presentation.service';
+import type { BreederAdminTestAccountResult } from '../types/breeder-admin-result.type';
 
 @Injectable()
 export class SetBreederTestAccountUseCase {
@@ -22,7 +22,7 @@ export class SetBreederTestAccountUseCase {
         private readonly breederAdminTestAccountPresentationService: BreederAdminTestAccountPresentationService,
     ) {}
 
-    async execute(adminId: string, breederId: string, isTestAccount: boolean): Promise<SetTestAccountResponseDto> {
+    async execute(adminId: string, breederId: string, isTestAccount: boolean): Promise<BreederAdminTestAccountResult> {
         this.breederAdminPolicyService.assertCanManageBreeders(
             await this.breederAdminReader.findAdminById(adminId),
         );
