@@ -3,6 +3,7 @@ import { Get } from '@nestjs/common';
 import { CurrentUser } from '../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { GetPlatformMvpStatsUseCase } from './application/use-cases/get-platform-mvp-stats.use-case';
+import type { PlatformAdminMvpStatsResult } from './application/types/platform-admin-result.type';
 import { PlatformAdminProtectedController } from './decorator/platform-admin-controller.decorator';
 import { PlatformAdminResponseMessageService } from './domain/services/platform-admin-response-message.service';
 import { MvpStatsResponseDto } from './dto/response/mvp-stats-response.dto';
@@ -19,6 +20,9 @@ export class PlatformAdminMvpStatsController {
     @ApiGetPlatformMvpStatsEndpoint()
     async getMvpStats(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<MvpStatsResponseDto>> {
         const result = await this.getPlatformMvpStatsUseCase.execute(userId);
-        return ApiResponseDto.success(result, this.platformAdminResponseMessageService.platformMvpStatsRetrieved());
+        return ApiResponseDto.success(
+            result as MvpStatsResponseDto & PlatformAdminMvpStatsResult,
+            this.platformAdminResponseMessageService.platformMvpStatsRetrieved(),
+        );
     }
 }

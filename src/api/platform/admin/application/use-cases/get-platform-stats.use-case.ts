@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AdminStatsResponseDto } from '../../dto/response/admin-stats-response.dto';
 import { PLATFORM_ADMIN_READER, type PlatformAdminReaderPort } from '../ports/platform-admin-reader.port';
 import { PlatformAdminPresentationService } from '../../domain/services/platform-admin-presentation.service';
 import { PlatformAdminQueryPolicyService } from '../../domain/services/platform-admin-query-policy.service';
 import type { PlatformStatsQuery } from '../types/platform-admin-query.type';
+import type { PlatformAdminStatsResult } from '../types/platform-admin-result.type';
 
 @Injectable()
 export class GetPlatformStatsUseCase {
@@ -15,7 +15,7 @@ export class GetPlatformStatsUseCase {
         private readonly platformAdminPresentationService: PlatformAdminPresentationService,
     ) {}
 
-    async execute(adminId: string, filter: PlatformStatsQuery): Promise<AdminStatsResponseDto> {
+    async execute(adminId: string, filter: PlatformStatsQuery): Promise<PlatformAdminStatsResult> {
         this.platformAdminQueryPolicyService.assertCanViewStatistics(
             await this.platformAdminReader.findAdminById(adminId),
             'Access denied',
