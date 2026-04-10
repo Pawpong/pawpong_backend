@@ -1,6 +1,34 @@
 export type UserAdminManagedUserRole = 'adopter' | 'breeder';
 export type UserAdminDeletedUserRole = 'all' | UserAdminManagedUserRole;
 
+export interface UserAdminAdminPermissionsSnapshot {
+    canManageUsers?: boolean;
+    canManageBreeders?: boolean;
+    canManageReports?: boolean;
+    canViewStatistics?: boolean;
+    canManageAdmins?: boolean;
+}
+
+export interface UserAdminActivityLogSnapshot {
+    logId: string;
+    action: string;
+    targetType: string;
+    targetId: string;
+    targetName?: string;
+    description: string;
+    performedAt: Date;
+}
+
+export interface UserAdminManagedUserStatisticsSnapshot {
+    totalApplications?: number;
+    totalFavorites?: number;
+    completedAdoptions?: number;
+    averageRating?: number;
+    totalReviews?: number;
+    profileViews?: number;
+    lastUpdated?: Date;
+}
+
 export interface UserAdminAdminSnapshot {
     id: string;
     name: string;
@@ -8,11 +36,10 @@ export interface UserAdminAdminSnapshot {
     profileImage?: string;
     status: string;
     adminLevel: string;
-    permissions?: {
-        canManageUsers?: boolean;
-    };
-    activityLogs?: Array<Record<string, any>>;
-    createdAt?: Date;
+    permissions?: UserAdminAdminPermissionsSnapshot;
+    activityLogs?: UserAdminActivityLogSnapshot[];
+    lastLoginAt?: Date;
+    createdAt: Date;
 }
 
 export interface UserAdminUserSearchCriteria {
@@ -32,7 +59,7 @@ export interface UserAdminManagedUserSnapshot {
     accountStatus: string;
     lastLoginAt?: Date;
     createdAt?: Date;
-    stats?: Record<string, any>;
+    stats?: UserAdminManagedUserStatisticsSnapshot;
     deletedAt?: Date;
     deleteReason?: string;
     deleteReasonDetail?: string;

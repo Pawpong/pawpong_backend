@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 import { Admin, AdminDocument } from '../../../../schema/admin.schema';
 import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
@@ -17,6 +17,15 @@ import {
     UserAdminPhoneWhitelistCreateCommand,
     UserAdminPhoneWhitelistUpdateCommand,
 } from '../application/ports/user-admin-writer.port';
+import type {
+    UserAdminAdminDocumentRecord,
+    UserAdminDeletedReasonAggregateRecord,
+    UserAdminDeletedUserListItemRecord,
+    UserAdminDeletedUserStatsDocumentRecord,
+    UserAdminManagedUserDocumentRecord,
+    UserAdminManagedUserListItemRecord,
+    UserAdminPhoneWhitelistDocumentRecord,
+} from '../types/user-admin-record.type';
 
 @Injectable()
 export class UserAdminRepository {
@@ -27,12 +36,12 @@ export class UserAdminRepository {
         @InjectModel(PhoneWhitelist.name) private readonly phoneWhitelistModel: Model<PhoneWhitelistDocument>,
     ) {}
 
-    findAdminById(adminId: string) {
-        return this.adminModel.findById(adminId).select('-password').lean();
+    findAdminById(adminId: string): Promise<UserAdminAdminDocumentRecord | null> {
+        return this.adminModel.findById(adminId).select('-password').lean<UserAdminAdminDocumentRecord>().exec();
     }
 
     async getUsers(criteria: UserAdminUserSearchCriteria): Promise<{
-        items: Array<any & { role: UserAdminManagedUserRole }>;
+        items: UserAdminManagedUserListItemRecord[];
         total: number;
     }> {
         const { userRole, page, limit } = criteria;
@@ -47,7 +56,8 @@ export class UserAdminRepository {
                     .sort({ createdAt: -1 })
                     .skip(skip)
                     .limit(limit)
-                    .lean(),
+                    .lean<UserAdminManagedUserDocumentRecord[]>()
+                    .exec(),
                 this.adopterModel.countDocuments(query),
             ]);
 
@@ -66,7 +76,8 @@ export class UserAdminRepository {
                     .sort({ createdAt: -1 })
                     .skip(skip)
                     .limit(limit)
-                    .lean(),
+                    .lean<UserAdminManagedUserDocumentRecord[]>()
+                    .exec(),
                 this.breederModel.countDocuments(query),
             ]);
 
@@ -86,12 +97,14 @@ export class UserAdminRepository {
                 .find(adopterQuery)
                 .select('nickname emailAddress accountStatus lastLoginAt createdAt')
                 .sort({ createdAt: -1 })
-                .lean(),
+                .lean<UserAdminManagedUserDocumentRecord[]>()
+                .exec(),
             this.breederModel
                 .find(breederQuery)
                 .select('name emailAddress accountStatus lastLoginAt createdAt stats')
                 .sort({ createdAt: -1 })
-                .lean(),
+                .lean<UserAdminManagedUserDocumentRecord[]>()
+                .exec(),
         ]);
 
         const items = [
@@ -111,18 +124,22 @@ export class UserAdminRepository {
         };
     }
 
-    findManagedUserById(role: UserAdminManagedUserRole, userId: string) {
-        return this.getManagedUserModel(role).findById(userId).lean();
+    findManagedUserById(role: UserAdminManagedUserRole, userId: string): Promise<UserAdminManagedUserDocumentRecord | null> {
+        if (role === 'adopter') {
+            return this.adopterModel.findById(userId).lean<UserAdminManagedUserDocumentRecord>().exec();
+        }
+
+        return this.breederModel.findById(userId).lean<UserAdminManagedUserDocumentRecord>().exec();
     }
 
     async getDeletedUsers(criteria: UserAdminDeletedUserSearchCriteria): Promise<{
-        items: Array<any & { userRole: UserAdminManagedUserRole }>;
+        items: UserAdminDeletedUserListItemRecord[];
         total: number;
     }> {
         const { role, deleteReason, page, limit } = criteria;
         const skip = (page - 1) * limit;
 
-        let items: Array<any & { userRole: UserAdminManagedUserRole }> = [];
+        let items: UserAdminDeletedUserListItemRecord[] = [];
         let total = 0;
 
         if (role === 'all' || role === 'adopter') {
@@ -134,7 +151,8 @@ export class UserAdminRepository {
                     .sort({ deletedAt: -1 })
                     .skip(role === 'adopter' ? skip : 0)
                     .limit(role === 'adopter' ? limit : Math.ceil(limit / 2))
-                    .lean(),
+                    .lean<UserAdminManagedUserDocumentRecord[]>()
+                    .exec(),
                 this.adopterModel.countDocuments(query),
             ]);
 
@@ -151,7 +169,8 @@ export class UserAdminRepository {
                     .sort({ deletedAt: -1 })
                     .skip(role === 'breeder' ? skip : 0)
                     .limit(role === 'breeder' ? limit : Math.ceil(limit / 2))
-                    .lean(),
+                    .lean<UserAdminManagedUserDocumentRecord[]>()
+                    .exec(),
                 this.breederModel.countDocuments(query),
             ]);
 
@@ -171,18 +190,18 @@ export class UserAdminRepository {
         };
     }
 
-    async getDeletedUserStats() {
+    async getDeletedUserStats(): Promise<UserAdminDeletedUserStatsDocumentRecord> {
         const [totalDeletedAdopters, totalDeletedBreeders] = await Promise.all([
             this.adopterModel.countDocuments({ accountStatus: 'deleted' }),
             this.breederModel.countDocuments({ accountStatus: 'deleted' }),
         ]);
 
         const [adopterReasonStats, breederReasonStats] = await Promise.all([
-            this.adopterModel.aggregate([
+            this.adopterModel.aggregate<UserAdminDeletedReasonAggregateRecord>([
                 { $match: { accountStatus: 'deleted', deleteReason: { $exists: true, $ne: null } } },
                 { $group: { _id: '$deleteReason', count: { $sum: 1 } } },
             ]),
-            this.breederModel.aggregate([
+            this.breederModel.aggregate<UserAdminDeletedReasonAggregateRecord>([
                 { $match: { accountStatus: 'deleted', deleteReason: { $exists: true, $ne: null } } },
                 { $group: { _id: '$deleteReason', count: { $sum: 1 } } },
             ]),
@@ -198,7 +217,8 @@ export class UserAdminRepository {
                 .select('deleteReasonDetail deletedAt')
                 .sort({ deletedAt: -1 })
                 .limit(25)
-                .lean(),
+                .lean<{ deleteReasonDetail?: string; deletedAt?: Date }[]>()
+                .exec(),
             this.breederModel
                 .find({
                     accountStatus: 'deleted',
@@ -208,7 +228,8 @@ export class UserAdminRepository {
                 .select('deleteReasonDetail deletedAt')
                 .sort({ deletedAt: -1 })
                 .limit(25)
-                .lean(),
+                .lean<{ deleteReasonDetail?: string; deletedAt?: Date }[]>()
+                .exec(),
         ]);
 
         const now = new Date();
@@ -234,16 +255,16 @@ export class UserAdminRepository {
         };
     }
 
-    listPhoneWhitelist() {
-        return this.phoneWhitelistModel.find().sort({ createdAt: -1 }).lean();
+    listPhoneWhitelist(): Promise<UserAdminPhoneWhitelistDocumentRecord[]> {
+        return this.phoneWhitelistModel.find().sort({ createdAt: -1 }).lean<UserAdminPhoneWhitelistDocumentRecord[]>().exec();
     }
 
-    findPhoneWhitelistById(id: string) {
-        return this.phoneWhitelistModel.findById(id).lean();
+    findPhoneWhitelistById(id: string): Promise<UserAdminPhoneWhitelistDocumentRecord | null> {
+        return this.phoneWhitelistModel.findById(id).lean<UserAdminPhoneWhitelistDocumentRecord>().exec();
     }
 
-    findPhoneWhitelistByPhoneNumber(phoneNumber: string) {
-        return this.phoneWhitelistModel.findOne({ phoneNumber }).lean();
+    findPhoneWhitelistByPhoneNumber(phoneNumber: string): Promise<UserAdminPhoneWhitelistDocumentRecord | null> {
+        return this.phoneWhitelistModel.findOne({ phoneNumber }).lean<UserAdminPhoneWhitelistDocumentRecord>().exec();
     }
 
     updateManagedUser(role: UserAdminManagedUserRole, userId: string, patch: UserAdminManagedUserPatch) {
@@ -297,11 +318,24 @@ export class UserAdminRepository {
             update.$unset = $unset;
         }
 
-        return this.getManagedUserModel(role).findByIdAndUpdate(userId, update, { new: true }).lean();
+        if (role === 'adopter') {
+            return this.adopterModel
+                .findByIdAndUpdate(userId, update, { new: true })
+                .lean<UserAdminManagedUserDocumentRecord>()
+                .exec();
+        }
+
+        return this.breederModel
+            .findByIdAndUpdate(userId, update, { new: true })
+            .lean<UserAdminManagedUserDocumentRecord>()
+            .exec();
     }
 
     async deleteManagedUser(role: UserAdminManagedUserRole, userId: string): Promise<boolean> {
-        const result = await this.getManagedUserModel(role).findByIdAndDelete(userId);
+        const result =
+            role === 'adopter'
+                ? await this.adopterModel.findByIdAndDelete(userId)
+                : await this.breederModel.findByIdAndDelete(userId);
         return !!result;
     }
 
@@ -323,10 +357,10 @@ export class UserAdminRepository {
             },
         ]);
 
-        return created.toObject();
+        return created.toObject() as UserAdminPhoneWhitelistDocumentRecord;
     }
 
-    updatePhoneWhitelist(id: string, command: UserAdminPhoneWhitelistUpdateCommand) {
+    updatePhoneWhitelist(id: string, command: UserAdminPhoneWhitelistUpdateCommand): Promise<UserAdminPhoneWhitelistDocumentRecord | null> {
         const $set: Record<string, unknown> = {};
 
         if (command.description !== undefined) {
@@ -336,7 +370,10 @@ export class UserAdminRepository {
             $set.isActive = command.isActive;
         }
 
-        return this.phoneWhitelistModel.findByIdAndUpdate(id, { $set }, { new: true }).lean();
+        return this.phoneWhitelistModel
+            .findByIdAndUpdate(id, { $set }, { new: true })
+            .lean<UserAdminPhoneWhitelistDocumentRecord>()
+            .exec();
     }
 
     async deletePhoneWhitelist(id: string): Promise<boolean> {
@@ -344,8 +381,8 @@ export class UserAdminRepository {
         return !!result;
     }
 
-    private buildAdopterQuery(criteria: UserAdminUserSearchCriteria): Record<string, any> {
-        const query: Record<string, any> = {};
+    private buildAdopterQuery(criteria: UserAdminUserSearchCriteria): FilterQuery<AdopterDocument> {
+        const query: FilterQuery<AdopterDocument> = {};
 
         if (criteria.accountStatus) {
             query.accountStatus = criteria.accountStatus;
@@ -360,8 +397,8 @@ export class UserAdminRepository {
         return query;
     }
 
-    private buildBreederQuery(criteria: UserAdminUserSearchCriteria): Record<string, any> {
-        const query: Record<string, any> = {};
+    private buildBreederQuery(criteria: UserAdminUserSearchCriteria): FilterQuery<BreederDocument> {
+        const query: FilterQuery<BreederDocument> = {};
 
         if (criteria.accountStatus) {
             query.accountStatus = criteria.accountStatus;
@@ -376,15 +413,12 @@ export class UserAdminRepository {
         return query;
     }
 
-    private buildDeletedUserQuery(deleteReason?: string): Record<string, any> {
-        const query: Record<string, any> = { accountStatus: 'deleted' };
+    private buildDeletedUserQuery(deleteReason?: string): { accountStatus: 'deleted'; deleteReason?: string } {
+        const query: { accountStatus: 'deleted'; deleteReason?: string } = { accountStatus: 'deleted' };
         if (deleteReason) {
             query.deleteReason = deleteReason;
         }
         return query;
     }
 
-    private getManagedUserModel(role: UserAdminManagedUserRole): Model<any> {
-        return role === 'adopter' ? this.adopterModel : this.breederModel;
-    }
 }

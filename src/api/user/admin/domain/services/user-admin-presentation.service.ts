@@ -6,6 +6,7 @@ import {
 } from '../../application/ports/user-admin-reader.port';
 import { UserAdminPaginationAssemblerService } from './user-admin-pagination-assembler.service';
 import type {
+    UserAdminAdminProfileResult,
     UserAdminUserManagementItemResult,
     UserAdminUserManagementPageResult,
 } from '../../application/types/user-admin-result.type';
@@ -14,7 +15,7 @@ import type {
 export class UserAdminPresentationService {
     constructor(private readonly userAdminPaginationAssemblerService: UserAdminPaginationAssemblerService) {}
 
-    toAdminProfileResponse(admin: UserAdminAdminSnapshot): any {
+    toAdminProfileResponse(admin: UserAdminAdminSnapshot): UserAdminAdminProfileResult {
         return {
             id: admin.id,
             name: admin.name,
@@ -25,6 +26,7 @@ export class UserAdminPresentationService {
             permissions: admin.permissions,
             activityLogs: admin.activityLogs?.slice(-10) || [],
             createdAt: admin.createdAt,
+            lastLoginAt: admin.lastLoginAt,
         };
     }
 
