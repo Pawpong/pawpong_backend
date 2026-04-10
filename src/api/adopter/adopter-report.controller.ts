@@ -7,7 +7,7 @@ import type { AdopterReportCreateResult } from './application/types/adopter-resu
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
 import { ReportCreateRequestDto } from './dto/request/report-create-request.dto';
 import { ReportCreateResponseDto } from './dto/response/report-create-response.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
+import { ADOPTER_RESPONSE_MESSAGES } from './constants/adopter-response-messages';
 import { ApiCreateAdopterReportEndpoint } from './swagger';
 
 @AdopterProtectedController()

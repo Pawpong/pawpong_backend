@@ -9,7 +9,7 @@ import { AdopterAdminProtectedController } from './decorator/adopter-admin-contr
 import { ReviewReportListQueryRequestDto } from './dto/request/review-report-list-query-request.dto';
 import { ReviewDeleteResponseDto } from './dto/response/review-delete-response.dto';
 import { ReviewReportItemDto } from './dto/response/review-report-list.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from '../domain/services/adopter-response-message.service';
+import { ADOPTER_RESPONSE_MESSAGES } from '../constants/adopter-response-messages';
 import { ApiDeleteAdopterAdminReviewEndpoint, ApiGetAdopterAdminReviewReportsEndpoint } from './swagger';
 
 @AdopterAdminProtectedController()

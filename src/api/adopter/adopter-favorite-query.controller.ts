@@ -7,7 +7,7 @@ import { GetFavoriteBreedersUseCase } from './application/use-cases/get-favorite
 import { AdopterProtectedController } from './decorator/adopter-protected-controller.decorator';
 import { AdopterPaginationQueryRequestDto } from './dto/request/adopter-pagination-query-request.dto';
 import { FavoriteListResponseDto } from './dto/response/favorite-list-response.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
+import { ADOPTER_RESPONSE_MESSAGES } from './constants/adopter-response-messages';
 import { ApiGetAdopterFavoritesEndpoint } from './swagger';
 
 @AdopterProtectedController()

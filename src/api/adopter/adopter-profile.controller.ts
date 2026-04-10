@@ -9,7 +9,7 @@ import { AdopterProtectedController } from './decorator/adopter-protected-contro
 import { ProfileUpdateRequestDto } from './dto/request/profile-update-request.dto';
 import { AdopterProfileResponseDto } from './dto/response/adopter-profile-response.dto';
 import { AdopterProfileUpdateResponseDto } from './dto/response/profile-update-response.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
+import { ADOPTER_RESPONSE_MESSAGES } from './constants/adopter-response-messages';
 import { ApiGetAdopterProfileEndpoint, ApiUpdateAdopterProfileEndpoint } from './swagger';
 
 @AdopterProtectedController()

@@ -10,7 +10,7 @@ import { ReviewCreateRequestDto } from './dto/request/review-create-request.dto'
 import { ReviewReportRequestDto } from './dto/request/review-report-request.dto';
 import { ReviewCreateResponseDto } from './dto/response/review-create-response.dto';
 import { ReviewReportResponseDto } from './dto/response/review-report-response.dto';
-import { ADOPTER_RESPONSE_MESSAGES } from './domain/services/adopter-response-message.service';
+import { ADOPTER_RESPONSE_MESSAGES } from './constants/adopter-response-messages';
 import { ApiCreateAdopterReviewEndpoint, ApiReportAdopterReviewEndpoint } from './swagger';
 
 @AdopterProtectedController()
