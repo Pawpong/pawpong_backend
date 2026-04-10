@@ -20,6 +20,11 @@ let mongod: MongoMemoryServer;
  * - 글로벌 파이프: ValidationPipe (transform, whitelist 활성화)
  */
 export async function createTestingApp(): Promise<INestApplication> {
+    if (mongod) {
+        await mongod.stop();
+        mongod = undefined as any;
+    }
+
     // 인메모리 MongoDB 서버 시작
     mongod = await MongoMemoryServer.create();
     const mongoUri = mongod.getUri();
@@ -47,6 +52,21 @@ export async function createTestingApp(): Promise<INestApplication> {
 
     await app.init();
     return app;
+}
+
+/**
+ * E2E 테스트용 NestJS 애플리케이션 종료
+ *
+ * @description
+ * createTestingApp으로 생성한 앱과 인메모리 MongoDB를 함께 종료합니다.
+ */
+export async function closeTestingApp(app: INestApplication): Promise<void> {
+    await app.close();
+
+    if (mongod) {
+        await mongod.stop();
+        mongod = undefined as any;
+    }
 }
 
 /**
@@ -82,12 +102,6 @@ export async function cleanupDatabase(app: INestApplication): Promise<void> {
         }
     } catch {
         // 연결이 이미 닫힌 경우 무시
-    }
-
-    // 인메모리 MongoDB 서버 정리
-    if (mongod) {
-        await mongod.stop();
-        mongod = undefined as any;
     }
 }
 
