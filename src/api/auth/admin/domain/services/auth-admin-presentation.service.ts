@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { AdminLoginResponseDto } from '../../../dto/response/admin-login-response.dto';
 import { AuthAdminSnapshot } from '../../application/ports/auth-admin-reader.port';
+import type { AdminLoginResult, AdminRefreshTokenResult } from '../../application/types/auth-admin-result.type';
 
 @Injectable()
 export class AuthAdminPresentationService {
@@ -11,7 +11,7 @@ export class AuthAdminPresentationService {
             accessToken: string;
             refreshToken: string;
         },
-    ): AdminLoginResponseDto {
+    ): AdminLoginResult {
         return {
             adminId: admin.adminId,
             email: admin.email,
@@ -23,7 +23,7 @@ export class AuthAdminPresentationService {
         };
     }
 
-    toRefreshResponse(accessToken: string): { accessToken: string } {
+    toRefreshResponse(accessToken: string): AdminRefreshTokenResult {
         return { accessToken };
     }
 }

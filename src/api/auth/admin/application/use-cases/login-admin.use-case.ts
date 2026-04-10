@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { AdminLoginResponseDto } from '../../../dto/response/admin-login-response.dto';
 import { AuthAdminAuthenticationService } from '../../domain/services/auth-admin-authentication.service';
 import { AuthAdminPresentationService } from '../../domain/services/auth-admin-presentation.service';
 import { AUTH_ADMIN_PASSWORD } from '../ports/auth-admin-password.port';
@@ -10,6 +9,7 @@ import { AUTH_ADMIN_READER } from '../ports/auth-admin-reader.port';
 import type { AuthAdminReaderPort } from '../ports/auth-admin-reader.port';
 import { AUTH_ADMIN_TOKEN } from '../ports/auth-admin-token.port';
 import type { AuthAdminTokenPort } from '../ports/auth-admin-token.port';
+import type { AdminLoginResult } from '../types/auth-admin-result.type';
 
 @Injectable()
 export class LoginAdminUseCase {
@@ -25,7 +25,7 @@ export class LoginAdminUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(email: string, password: string): Promise<AdminLoginResponseDto> {
+    async execute(email: string, password: string): Promise<AdminLoginResult> {
         this.logger.logStart('loginAdmin', '관리자 로그인 시작', { email });
 
         const admin = await this.authAdminReader.findActiveByEmail(email);
