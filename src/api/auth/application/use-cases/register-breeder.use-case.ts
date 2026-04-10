@@ -136,7 +136,7 @@ export class RegisterBreederUseCase {
         void this.authRegistrationNotificationPort.notifyBreederRegistered({
             userId,
             email: savedBreeder.emailAddress,
-            name: savedBreeder.name,
+            name: savedBreeder.name || dto.breederName,
             phone: savedBreeder.phoneNumber,
             registrationType: socialAuthInfo ? 'social' : 'email',
             provider: socialAuthInfo?.authProvider,
@@ -146,7 +146,7 @@ export class RegisterBreederUseCase {
             void this.authRegistrationNotificationPort.notifyBreederDocumentsSubmitted({
                 userId,
                 email: savedBreeder.emailAddress,
-                name: savedBreeder.name,
+                name: savedBreeder.name || dto.breederName,
                 documents: verificationDocuments.map((document) => ({
                     type: document.type,
                     fileName: document.fileName,

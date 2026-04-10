@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
+import type { StringValue } from 'ms';
 
 import { AuthTokenPort, type AuthRefreshTokenPayload } from '../application/ports/auth-token.port';
 import { type AuthSessionRole } from '../application/ports/auth-session.port';
@@ -23,16 +24,16 @@ export class AuthJwtTokenAdapter extends AuthTokenPort {
             role,
         };
 
-        const jwtExpiration = (this.configService.get<string>('JWT_EXPIRATION') || '24h') as string;
+        const jwtExpiration = (this.configService.get<string>('JWT_EXPIRATION') || '24h') as StringValue;
         const accessToken = this.jwtService.sign(payload, {
-            expiresIn: jwtExpiration as any,
+            expiresIn: jwtExpiration,
         });
 
-        const jwtRefreshExpiration = (this.configService.get<string>('JWT_REFRESH_EXPIRATION') || '7d') as string;
+        const jwtRefreshExpiration = (this.configService.get<string>('JWT_REFRESH_EXPIRATION') || '7d') as StringValue;
         const refreshToken = this.jwtService.sign(
             { ...payload, type: 'refresh' },
             {
-                expiresIn: jwtRefreshExpiration as any,
+                expiresIn: jwtRefreshExpiration,
             },
         );
 

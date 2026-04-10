@@ -74,7 +74,7 @@ export class RegisterAdopterUseCase {
         void this.authRegistrationNotificationPort.notifyAdopterRegistered({
             userId,
             email: savedAdopter.emailAddress,
-            nickname: savedAdopter.nickname,
+            nickname: savedAdopter.nickname || dto.nickname,
             phone: savedAdopter.phoneNumber,
             registrationType: 'social',
             provider,

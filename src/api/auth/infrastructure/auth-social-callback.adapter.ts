@@ -108,9 +108,9 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
                 user: {
                     userId: adopter._id.toString(),
                     email: adopter.emailAddress,
-                    name: adopter.nickname,
+                    name: adopter.nickname || adopter.emailAddress,
                     role: 'adopter',
-                    profileImage: adopter.profileImageFileName,
+                    profileImage: adopter.profileImageFileName ?? undefined,
                 },
             };
         }
@@ -137,9 +137,9 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
                 user: {
                     userId: breeder._id.toString(),
                     email: breeder.emailAddress,
-                    name: breeder.name,
+                    name: breeder.name || breeder.nickname || breeder.emailAddress,
                     role: 'breeder',
-                    profileImage: breeder.profileImageFileName,
+                    profileImage: breeder.profileImageFileName ?? undefined,
                 },
             };
         }
