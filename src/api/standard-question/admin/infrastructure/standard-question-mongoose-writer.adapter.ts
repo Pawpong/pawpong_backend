@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { StandardQuestionDocument } from '../../../../schema/standard-question.schema';
 import { StandardQuestionSnapshot } from '../../application/ports/standard-question-reader.port';
 import {
     StandardQuestionReorderCommand,
@@ -36,7 +37,7 @@ export class StandardQuestionMongooseWriterAdapter implements StandardQuestionWr
         return this.standardQuestionRepository.replaceAll(questions);
     }
 
-    private toSnapshot(question: any): StandardQuestionSnapshot {
+    private toSnapshot(question: StandardQuestionDocument): StandardQuestionSnapshot {
         return {
             id: question.id,
             type: question.type,
