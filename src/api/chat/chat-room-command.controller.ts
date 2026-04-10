@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Body, Param, UseGuards } from '@nestjs/common';
+import { Controller, Post, Delete, Body, Param, UseGuards, HttpCode, ForbiddenException } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
@@ -22,11 +22,15 @@ export class ChatRoomCommandController {
 
     @Post('rooms')
     @Roles('adopter')
+    @HttpCode(200)
     @ApiCreateOrGetRoomEndpoint()
     async createOrGetRoom(
-        @CurrentUser() user: { userId: string },
+        @CurrentUser() user: { userId: string; role: string },
         @Body() dto: CreateRoomRequestDto,
     ) {
+        if (user.role !== 'adopter') {
+            throw new ForbiddenException('채팅방은 입양자만 생성할 수 있습니다.');
+        }
         const room = await this.createOrGetRoomUseCase.execute(user.userId, dto);
         return room;
     }
