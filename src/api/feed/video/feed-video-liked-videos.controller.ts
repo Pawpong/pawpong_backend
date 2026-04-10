@@ -6,6 +6,7 @@ import {
     type GetMyLikedFeedVideosUseCasePort,
 } from '../like/application/ports/feed-like-interaction.port';
 import type { FeedMyLikedVideosResult } from '../like/application/types/feed-like-result.type';
+import { FeedPaginationQueryDto } from './dto/request/feed-pagination-query.dto';
 import { MyLikedVideosResponseDto } from '../like/dto/response/like-response.dto';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
 import { ApiGetMyLikedFeedVideosEndpoint } from './swagger';
@@ -21,10 +22,9 @@ export class FeedVideoLikedVideosController {
     @ApiGetMyLikedFeedVideosEndpoint()
     async getMyLikedVideos(
         @CurrentUser('userId') userId: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 20,
+        @Query() query: FeedPaginationQueryDto,
     ): Promise<MyLikedVideosResponseDto> {
-        return (await this.getMyLikedVideosUseCase.execute(userId, Number(page), Number(limit))) as
+        return (await this.getMyLikedVideosUseCase.execute(userId, query.page, query.limit)) as
             MyLikedVideosResponseDto & FeedMyLikedVideosResult;
     }
 }

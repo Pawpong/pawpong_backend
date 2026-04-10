@@ -4,6 +4,7 @@ import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { GetMyVideosUseCase } from './application/use-cases/get-my-videos.use-case';
 import type { FeedMyVideoListResult } from './application/types/feed-video-result.type';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
+import { FeedPaginationQueryDto } from './dto/request/feed-pagination-query.dto';
 import { MyVideoListResponseDto } from './dto/response/video-response.dto';
 import { ApiGetMyFeedVideosEndpoint } from './swagger';
 
@@ -15,10 +16,9 @@ export class FeedVideoLibraryController {
     @ApiGetMyFeedVideosEndpoint()
     async getMyVideos(
         @CurrentUser('userId') userId: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 20,
+        @Query() query: FeedPaginationQueryDto,
     ): Promise<MyVideoListResponseDto> {
-        return (await this.getMyVideosUseCase.execute(userId, Number(page), Number(limit))) as
+        return (await this.getMyVideosUseCase.execute(userId, query.page, query.limit)) as
             MyVideoListResponseDto & FeedMyVideoListResult;
     }
 }

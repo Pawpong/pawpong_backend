@@ -8,6 +8,7 @@ import {
     type GetFeedVideoRepliesUseCasePort,
 } from '../comment/application/ports/feed-comment-interaction.port';
 import type { FeedCommentListResult, FeedReplyListResult } from '../comment/application/types/feed-comment-result.type';
+import { FeedPaginationQueryDto } from './dto/request/feed-pagination-query.dto';
 import { CommentListResponseDto, ReplyListResponseDto } from '../comment/dto/response/comment-response.dto';
 import { FeedOptionalAuthController } from './decorator/feed-video-controller.decorator';
 import { ApiGetFeedVideoCommentsEndpoint, ApiGetFeedVideoRepliesEndpoint } from './swagger';
@@ -25,11 +26,10 @@ export class FeedVideoCommentQueryController {
     @ApiGetFeedVideoCommentsEndpoint()
     async getComments(
         @Param('videoId') videoId: string,
+        @Query() query: FeedPaginationQueryDto,
         @CurrentUser('userId') userId?: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 20,
     ): Promise<CommentListResponseDto> {
-        return (await this.getCommentsUseCase.execute(videoId, userId, Number(page), Number(limit))) as
+        return (await this.getCommentsUseCase.execute(videoId, userId, query.page, query.limit)) as
             CommentListResponseDto & FeedCommentListResult;
     }
 
@@ -37,11 +37,10 @@ export class FeedVideoCommentQueryController {
     @ApiGetFeedVideoRepliesEndpoint()
     async getReplies(
         @Param('commentId') commentId: string,
+        @Query() query: FeedPaginationQueryDto,
         @CurrentUser('userId') userId?: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 20,
     ): Promise<ReplyListResponseDto> {
-        return (await this.getRepliesUseCase.execute(commentId, userId, Number(page), Number(limit))) as
+        return (await this.getRepliesUseCase.execute(commentId, userId, query.page, query.limit)) as
             ReplyListResponseDto & FeedReplyListResult;
     }
 }
