@@ -17,7 +17,6 @@ import { GetAllDistrictsAdminUseCase } from './admin/application/use-cases/get-a
 import { GetDistrictByIdAdminUseCase } from './admin/application/use-cases/get-district-by-id-admin.use-case';
 import { UpdateDistrictUseCase } from './admin/application/use-cases/update-district.use-case';
 import { DeleteDistrictUseCase } from './admin/application/use-cases/delete-district.use-case';
-import { DistrictAdminResponseMessageService } from './admin/domain/services/district-admin-response-message.service';
 import { DistrictMongooseAdminReaderAdapter } from './admin/infrastructure/district-mongoose-admin-reader.adapter';
 import { DistrictMongooseWriterAdapter } from './admin/infrastructure/district-mongoose-writer.adapter';
 import { DistrictRepository } from './repository/district.repository';
@@ -34,7 +33,6 @@ import { District, DistrictSchema } from '../../schema/district.schema';
         GetDistrictByIdAdminUseCase,
         UpdateDistrictUseCase,
         DeleteDistrictUseCase,
-        DistrictAdminResponseMessageService,
         DistrictOrderingService,
         DistrictAdminPresentationService,
         DistrictRepository,

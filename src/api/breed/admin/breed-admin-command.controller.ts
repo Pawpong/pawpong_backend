@@ -4,8 +4,8 @@ import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { CreateBreedUseCase } from './application/use-cases/create-breed.use-case';
 import { DeleteBreedUseCase } from './application/use-cases/delete-breed.use-case';
 import { UpdateBreedUseCase } from './application/use-cases/update-breed.use-case';
+import { BREED_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from './constants/breed-admin-response-messages';
 import { BreedAdminControllerBase } from './decorator/breed-admin-controller.decorator';
-import { BreedAdminResponseMessageService } from './domain/services/breed-admin-response-message.service';
 import { CreateBreedRequestDto } from './dto/request/create-breed-request.dto';
 import { UpdateBreedRequestDto } from './dto/request/update-breed-request.dto';
 import { BreedResponseDto } from '../dto/response/breed-response.dto';
@@ -21,7 +21,6 @@ export class BreedAdminCommandController {
         private readonly createBreedUseCase: CreateBreedUseCase,
         private readonly updateBreedUseCase: UpdateBreedUseCase,
         private readonly deleteBreedUseCase: DeleteBreedUseCase,
-        private readonly breedAdminResponseMessageService: BreedAdminResponseMessageService,
     ) {}
 
     @Post()
@@ -45,6 +44,6 @@ export class BreedAdminCommandController {
     @ApiDeleteBreedAdminEndpoint()
     async deleteBreed(@Param('id') id: string): Promise<ApiResponseDto<null>> {
         await this.deleteBreedUseCase.execute(id);
-        return ApiResponseDto.success(null, this.breedAdminResponseMessageService.breedDeleted());
+        return ApiResponseDto.success(null, BREED_ADMIN_RESPONSE_MESSAGE_EXAMPLES.breedDeleted);
     }
 }
