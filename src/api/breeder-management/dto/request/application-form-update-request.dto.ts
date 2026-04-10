@@ -37,7 +37,7 @@ export class CustomQuestionFieldDto {
         enum: ['text', 'textarea', 'select', 'radio', 'checkbox', 'file'],
     })
     @IsEnum(['text', 'textarea', 'select', 'radio', 'checkbox', 'file'])
-    type: string;
+    type: 'text' | 'textarea' | 'select' | 'radio' | 'checkbox' | 'file';
 
     /**
      * 질문 라벨 (실제 표시되는 질문)

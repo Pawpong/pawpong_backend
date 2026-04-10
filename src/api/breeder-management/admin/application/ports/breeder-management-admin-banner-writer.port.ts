@@ -1,16 +1,24 @@
-import { CounselBannerCreateRequestDto } from '../../dto/request/counsel-banner-create-request.dto';
-import { CounselBannerUpdateRequestDto } from '../../dto/request/counsel-banner-update-request.dto';
-import { ProfileBannerCreateRequestDto } from '../../dto/request/profile-banner-create-request.dto';
-import { ProfileBannerUpdateRequestDto } from '../../dto/request/profile-banner-update-request.dto';
 import { CounselBannerSnapshot, ProfileBannerSnapshot } from './breeder-management-admin-banner-reader.port';
+import type {
+    BreederManagementCounselBannerCreateCommand,
+    BreederManagementCounselBannerUpdateCommand,
+    BreederManagementProfileBannerCreateCommand,
+    BreederManagementProfileBannerUpdateCommand,
+} from '../types/breeder-management-admin-banner-command.type';
 
 export const BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER = Symbol('BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER');
 
 export interface BreederManagementAdminBannerWriterPort {
-    createProfile(data: ProfileBannerCreateRequestDto): Promise<ProfileBannerSnapshot>;
-    updateProfile(bannerId: string, data: ProfileBannerUpdateRequestDto): Promise<ProfileBannerSnapshot | null>;
+    createProfile(data: BreederManagementProfileBannerCreateCommand): Promise<ProfileBannerSnapshot>;
+    updateProfile(
+        bannerId: string,
+        data: BreederManagementProfileBannerUpdateCommand,
+    ): Promise<ProfileBannerSnapshot | null>;
     deleteProfile(bannerId: string): Promise<boolean>;
-    createCounsel(data: CounselBannerCreateRequestDto): Promise<CounselBannerSnapshot>;
-    updateCounsel(bannerId: string, data: CounselBannerUpdateRequestDto): Promise<CounselBannerSnapshot | null>;
+    createCounsel(data: BreederManagementCounselBannerCreateCommand): Promise<CounselBannerSnapshot>;
+    updateCounsel(
+        bannerId: string,
+        data: BreederManagementCounselBannerUpdateCommand,
+    ): Promise<CounselBannerSnapshot | null>;
     deleteCounsel(bannerId: string): Promise<boolean>;
 }

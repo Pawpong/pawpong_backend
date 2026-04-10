@@ -2,10 +2,10 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
-import { ApplicationStatusUpdateRequestDto } from '../../dto/request/application-status-update-request.dto';
 import { BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT } from '../ports/breeder-management-application-workflow.port';
 import type { BreederManagementApplicationWorkflowPort } from '../ports/breeder-management-application-workflow.port';
 import { BreederManagementApplicationStatusResponseService } from '../../domain/services/breeder-management-application-status-response.service';
+import type { BreederManagementApplicationStatusUpdateCommand } from '../types/breeder-management-application-command.type';
 
 @Injectable()
 export class UpdateBreederManagementApplicationStatusUseCase {
@@ -16,7 +16,7 @@ export class UpdateBreederManagementApplicationStatusUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(userId: string, applicationId: string, updateData: ApplicationStatusUpdateRequestDto) {
+    async execute(userId: string, applicationId: string, updateData: BreederManagementApplicationStatusUpdateCommand) {
         this.logger.logStart('updateApplicationStatus', '입양 신청 상태 업데이트 시작', {
             userId,
             applicationId,

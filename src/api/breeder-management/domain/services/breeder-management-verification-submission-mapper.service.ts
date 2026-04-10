@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
 import { VerificationStatus } from '../../../../common/enum/user.enum';
-import { VerificationSubmitRequestDto } from '../../dto/request/verification-submit-request.dto';
 import type { BreederManagementVerificationRecord } from '../../application/ports/breeder-management-settings.port';
+import type { BreederManagementVerificationSubmitCommand } from '../../application/types/breeder-management-verification-command.type';
 
 @Injectable()
 export class BreederManagementVerificationSubmissionMapperService {
-    toVerificationRecord(verificationData: VerificationSubmitRequestDto): BreederManagementVerificationRecord {
+    toVerificationRecord(
+        verificationData: BreederManagementVerificationSubmitCommand,
+    ): BreederManagementVerificationRecord {
         return {
             status: VerificationStatus.REVIEWING,
             plan: verificationData.plan,

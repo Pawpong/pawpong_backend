@@ -1,12 +1,12 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { AvailablePetAddDto } from '../../dto/request/available-pet-add-request.dto';
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-profile.port';
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
 import { BreederManagementAvailablePetCommandResponseService } from '../../domain/services/breeder-management-available-pet-command-response.service';
 import { BreederManagementAvailablePetCommandMapperService } from '../../domain/services/breeder-management-available-pet-command-mapper.service';
+import type { BreederManagementAvailablePetCreateCommand } from '../types/breeder-management-pet-command.type';
 
 @Injectable()
 export class AddBreederManagementAvailablePetUseCase {
@@ -19,7 +19,10 @@ export class AddBreederManagementAvailablePetUseCase {
         private readonly breederManagementAvailablePetCommandResponseService: BreederManagementAvailablePetCommandResponseService,
     ) {}
 
-    async execute(userId: string, availablePetDto: AvailablePetAddDto): Promise<{ petId: string; message: string }> {
+    async execute(
+        userId: string,
+        availablePetDto: BreederManagementAvailablePetCreateCommand,
+    ): Promise<{ petId: string; message: string }> {
         const breeder = await this.breederManagementProfilePort.findById(userId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');

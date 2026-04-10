@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { AvailablePetAddDto } from '../../dto/request/available-pet-add-request.dto';
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
 import { BreederManagementAvailablePetCommandResponseService } from '../../domain/services/breeder-management-available-pet-command-response.service';
 import { BreederManagementAvailablePetCommandMapperService } from '../../domain/services/breeder-management-available-pet-command-mapper.service';
+import type { BreederManagementAvailablePetUpdateCommand } from '../types/breeder-management-pet-command.type';
 
 @Injectable()
 export class UpdateBreederManagementAvailablePetUseCase {
@@ -18,7 +18,7 @@ export class UpdateBreederManagementAvailablePetUseCase {
     async execute(
         userId: string,
         petId: string,
-        updateData: Partial<AvailablePetAddDto>,
+        updateData: BreederManagementAvailablePetUpdateCommand,
     ): Promise<{ message: string }> {
         const pet = await this.breederManagementPetCommandPort.findAvailablePetByIdAndBreeder(petId, userId);
         if (!pet) {

@@ -1,10 +1,10 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { ProfileUpdateRequestDto } from '../../dto/request/profile-update-request.dto';
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-profile.port';
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BreederManagementProfileCommandResponseService } from '../../domain/services/breeder-management-profile-command-response.service';
 import { BreederManagementProfileUpdateMapperService } from '../../domain/services/breeder-management-profile-update-mapper.service';
+import type { BreederManagementProfileUpdateCommand } from '../types/breeder-management-profile-command.type';
 
 @Injectable()
 export class UpdateBreederManagementProfileUseCase {
@@ -15,7 +15,7 @@ export class UpdateBreederManagementProfileUseCase {
         private readonly breederManagementProfileCommandResponseService: BreederManagementProfileCommandResponseService,
     ) {}
 
-    async execute(userId: string, updateData: ProfileUpdateRequestDto): Promise<{ message: string }> {
+    async execute(userId: string, updateData: BreederManagementProfileUpdateCommand): Promise<{ message: string }> {
         const breeder = await this.breederManagementProfilePort.findByIdWithAllData(userId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');

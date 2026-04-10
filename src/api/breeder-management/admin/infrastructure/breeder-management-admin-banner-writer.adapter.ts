@@ -1,24 +1,26 @@
 import { Injectable } from '@nestjs/common';
-import { CounselBannerCreateRequestDto } from '../dto/request/counsel-banner-create-request.dto';
-import { CounselBannerUpdateRequestDto } from '../dto/request/counsel-banner-update-request.dto';
-import { ProfileBannerCreateRequestDto } from '../dto/request/profile-banner-create-request.dto';
-import { ProfileBannerUpdateRequestDto } from '../dto/request/profile-banner-update-request.dto';
 import { CounselBannerSnapshot, ProfileBannerSnapshot } from '../application/ports/breeder-management-admin-banner-reader.port';
 import { BreederManagementAdminBannerWriterPort } from '../application/ports/breeder-management-admin-banner-writer.port';
+import type {
+    BreederManagementCounselBannerCreateCommand,
+    BreederManagementCounselBannerUpdateCommand,
+    BreederManagementProfileBannerCreateCommand,
+    BreederManagementProfileBannerUpdateCommand,
+} from '../application/types/breeder-management-admin-banner-command.type';
 import { BreederManagementAdminBannerRepository } from '../repository/breeder-management-admin-banner.repository';
 
 @Injectable()
 export class BreederManagementAdminBannerWriterAdapter implements BreederManagementAdminBannerWriterPort {
     constructor(private readonly breederManagementAdminBannerRepository: BreederManagementAdminBannerRepository) {}
 
-    async createProfile(data: ProfileBannerCreateRequestDto): Promise<ProfileBannerSnapshot> {
+    async createProfile(data: BreederManagementProfileBannerCreateCommand): Promise<ProfileBannerSnapshot> {
         const banner = await this.breederManagementAdminBannerRepository.createProfile(data);
         return this.toProfileSnapshot(banner);
     }
 
     async updateProfile(
         bannerId: string,
-        data: ProfileBannerUpdateRequestDto,
+        data: BreederManagementProfileBannerUpdateCommand,
     ): Promise<ProfileBannerSnapshot | null> {
         const banner = await this.breederManagementAdminBannerRepository.updateProfile(bannerId, data);
         return banner ? this.toProfileSnapshot(banner) : null;
@@ -28,14 +30,14 @@ export class BreederManagementAdminBannerWriterAdapter implements BreederManagem
         return this.breederManagementAdminBannerRepository.deleteProfile(bannerId);
     }
 
-    async createCounsel(data: CounselBannerCreateRequestDto): Promise<CounselBannerSnapshot> {
+    async createCounsel(data: BreederManagementCounselBannerCreateCommand): Promise<CounselBannerSnapshot> {
         const banner = await this.breederManagementAdminBannerRepository.createCounsel(data);
         return this.toCounselSnapshot(banner);
     }
 
     async updateCounsel(
         bannerId: string,
-        data: CounselBannerUpdateRequestDto,
+        data: BreederManagementCounselBannerUpdateCommand,
     ): Promise<CounselBannerSnapshot | null> {
         const banner = await this.breederManagementAdminBannerRepository.updateCounsel(bannerId, data);
         return banner ? this.toCounselSnapshot(banner) : null;

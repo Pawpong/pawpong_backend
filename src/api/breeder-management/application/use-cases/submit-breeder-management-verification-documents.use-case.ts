@@ -9,10 +9,10 @@ import { BREEDER_MANAGEMENT_SETTINGS_PORT } from '../ports/breeder-management-se
 import type { BreederManagementSettingsPort } from '../ports/breeder-management-settings.port';
 import { BreederManagementVerificationDraftStorePort } from '../ports/breeder-management-verification-draft-store.port';
 import { BreederManagementVerificationNotifierPort } from '../ports/breeder-management-verification-notifier.port';
-import { SubmitDocumentsRequestDto } from '../../dto/request/submit-documents-request.dto';
 import { BreederManagementVerificationCommandResponseService } from '../../domain/services/breeder-management-verification-command-response.service';
 import { BreederManagementVerificationDocumentPolicyService } from '../../domain/services/breeder-management-verification-document-policy.service';
 import { BreederManagementVerificationNotificationPayloadFactoryService } from '../../domain/services/breeder-management-verification-notification-payload-factory.service';
+import type { BreederManagementVerificationDocumentsSubmitCommand } from '../types/breeder-management-verification-command.type';
 
 @Injectable()
 export class SubmitBreederManagementVerificationDocumentsUseCase {
@@ -30,7 +30,7 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
         private readonly breederManagementVerificationNotificationPayloadFactoryService: BreederManagementVerificationNotificationPayloadFactoryService,
     ) {}
 
-    async execute(userId: string, dto: SubmitDocumentsRequestDto): Promise<{ message: string }> {
+    async execute(userId: string, dto: BreederManagementVerificationDocumentsSubmitCommand): Promise<{ message: string }> {
         const breeder = await this.breederManagementProfilePort.findById(userId);
         if (!breeder) {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
