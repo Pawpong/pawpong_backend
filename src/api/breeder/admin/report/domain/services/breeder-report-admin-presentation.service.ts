@@ -1,12 +1,15 @@
 import { Injectable } from '@nestjs/common';
 
-import { ReportActionResponseDto } from '../../dto/response/report-action-response.dto';
-import { ReportListResponseDto } from '../../dto/response/report-list-response.dto';
 import { BreederPaginationAssemblerService } from '../../../../domain/services/breeder-pagination-assembler.service';
 import {
     BreederReportAdminReportListItemSnapshot,
     BreederReportAdminReportListResult,
 } from '../../application/ports/breeder-report-admin-reader.port';
+import type {
+    BreederReportAdminActionResult,
+    BreederReportAdminListItemResult,
+    BreederReportAdminPageResult,
+} from '../../application/types/breeder-report-admin-result.type';
 
 @Injectable()
 export class BreederReportAdminPresentationService {
@@ -16,7 +19,7 @@ export class BreederReportAdminPresentationService {
         result: BreederReportAdminReportListResult,
         pageNumber: number,
         itemsPerPage: number,
-    ): any {
+    ): BreederReportAdminPageResult {
         return this.breederPaginationAssemblerService.build(
             result.items.map((item) => this.toReportListItem(item)),
             pageNumber,
@@ -32,7 +35,7 @@ export class BreederReportAdminPresentationService {
         status: string,
         adminNotes: string | undefined,
         processedAt: Date,
-    ): ReportActionResponseDto {
+    ): BreederReportAdminActionResult {
         return {
             reportId,
             breederId,
@@ -43,7 +46,7 @@ export class BreederReportAdminPresentationService {
         };
     }
 
-    private toReportListItem(item: BreederReportAdminReportListItemSnapshot): ReportListResponseDto {
+    private toReportListItem(item: BreederReportAdminReportListItemSnapshot): BreederReportAdminListItemResult {
         return {
             reportId: item.reportId,
             targetId: item.targetId,
