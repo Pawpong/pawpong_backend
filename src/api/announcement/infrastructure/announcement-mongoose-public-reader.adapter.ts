@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { AnnouncementDocument } from '../../../schema/announcement.schema';
 
 import {
     AnnouncementPublicReaderPort,
@@ -35,7 +36,7 @@ export class AnnouncementMongoosePublicReaderAdapter extends AnnouncementPublicR
         return announcement ? this.toItem(announcement) : null;
     }
 
-    private toItem(announcement: any): AnnouncementPublicItem {
+    private toItem(announcement: AnnouncementDocument): AnnouncementPublicItem {
         return {
             announcementId: announcement._id.toString(),
             title: announcement.title,

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
+import { AnnouncementDocument } from '../../../../schema/announcement.schema';
 import { AnnouncementPublicItem } from '../../application/ports/announcement-public-reader.port';
 import { AnnouncementWriterPort } from '../application/ports/announcement-writer.port';
 import { AnnouncementRepository } from '../../repository/announcement.repository';
@@ -34,7 +35,7 @@ export class AnnouncementMongooseWriterAdapter implements AnnouncementWriterPort
         return this.announcementRepository.deleteById(announcementId);
     }
 
-    private toItem(announcement: any): AnnouncementPublicItem {
+    private toItem(announcement: AnnouncementDocument): AnnouncementPublicItem {
         return {
             announcementId: announcement._id.toString(),
             title: announcement.title,
