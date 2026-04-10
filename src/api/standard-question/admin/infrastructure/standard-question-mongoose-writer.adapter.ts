@@ -1,18 +1,18 @@
 import { Injectable } from '@nestjs/common';
 
 import { StandardQuestionSnapshot } from '../../application/ports/standard-question-reader.port';
-import { UpdateStandardQuestionDto } from '../dto/request/update-standard-question.dto';
 import {
     StandardQuestionReorderCommand,
     StandardQuestionWriterPort,
 } from '../application/ports/standard-question-writer.port';
 import { StandardQuestionRepository } from '../../repository/standard-question.repository';
+import type { StandardQuestionUpdateCommand } from '../application/types/standard-question-command.type';
 
 @Injectable()
 export class StandardQuestionMongooseWriterAdapter implements StandardQuestionWriterPort {
     constructor(private readonly standardQuestionRepository: StandardQuestionRepository) {}
 
-    async update(id: string, updateData: UpdateStandardQuestionDto): Promise<StandardQuestionSnapshot | null> {
+    async update(id: string, updateData: StandardQuestionUpdateCommand): Promise<StandardQuestionSnapshot | null> {
         const question = await this.standardQuestionRepository.update(id, updateData);
         if (!question) {
             return null;
