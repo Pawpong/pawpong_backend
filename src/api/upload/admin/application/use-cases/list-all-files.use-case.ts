@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { StorageListResponseDto } from '../../dto/response/storage-list-response.dto';
 import { UploadAdminStoragePresentationService } from '../../domain/services/upload-admin-storage-presentation.service';
 import { UPLOAD_ADMIN_STORAGE, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
+import type { UploadAdminStorageListResult } from '../types/upload-admin-result.type';
 
 @Injectable()
 export class ListAllFilesUseCase {
@@ -14,12 +14,12 @@ export class ListAllFilesUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(prefix?: string): Promise<StorageListResponseDto> {
+    async execute(prefix?: string): Promise<UploadAdminStorageListResult> {
         this.logger.logStart('listAllFiles', '스토리지 파일 목록 조회 시작', { prefix });
 
         try {
             const result = await this.uploadAdminStorage.list(prefix, 1000);
-            const response = this.uploadAdminStoragePresentationService.toListResponseDto(
+            const response = this.uploadAdminStoragePresentationService.toListResult(
                 result.files,
                 result.isTruncated,
             );

@@ -1,12 +1,12 @@
 import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
 
-import { UploadResponseDto } from '../../dto/response/upload-response.dto';
 import { UPLOAD_FILE_STORE } from '../ports/upload-file-store.port';
 import { UPLOAD_OWNER_PORT } from '../ports/upload-owner.port';
 import type { UploadFileStorePort } from '../ports/upload-file-store.port';
 import type { UploadOwnerPort } from '../ports/upload-owner.port';
 import { UploadResponseMapper } from '../mappers/upload-response.mapper';
 import { UploadFilePolicyService } from '../../domain/services/upload-file-policy.service';
+import type { UploadFileResult } from '../types/upload-result.type';
 
 @Injectable()
 export class UploadRepresentativePhotosUseCase {
@@ -16,7 +16,7 @@ export class UploadRepresentativePhotosUseCase {
         private readonly uploadFilePolicy: UploadFilePolicyService,
     ) {}
 
-    async execute(files: Express.Multer.File[], userId: string, role: string): Promise<UploadResponseDto[]> {
+    async execute(files: Express.Multer.File[], userId: string, role: string): Promise<UploadFileResult[]> {
         if (role !== 'breeder') {
             throw new ForbiddenException('브리더만 대표 사진을 업로드할 수 있습니다.');
         }
@@ -29,6 +29,6 @@ export class UploadRepresentativePhotosUseCase {
             resources.map((resource) => resource.fileName),
         );
 
-        return UploadResponseMapper.toDtos(resources, files);
+        return UploadResponseMapper.toResults(resources, files);
     }
 }

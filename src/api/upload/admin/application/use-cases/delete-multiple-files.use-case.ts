@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { DeleteFilesResponseDto } from '../../dto/response/delete-files-response.dto';
 import { UploadAdminStoragePolicyService } from '../../domain/services/upload-admin-storage-policy.service';
 import { UPLOAD_ADMIN_STORAGE, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
+import type { UploadAdminDeleteFilesResult } from '../types/upload-admin-result.type';
 
 @Injectable()
 export class DeleteMultipleFilesUseCase {
@@ -14,7 +14,7 @@ export class DeleteMultipleFilesUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(fileNames: string[]): Promise<DeleteFilesResponseDto> {
+    async execute(fileNames: string[]): Promise<UploadAdminDeleteFilesResult> {
         this.logger.logStart('deleteMultipleFiles', '다중 파일 삭제 시작', { count: fileNames.length });
         this.uploadAdminStoragePolicyService.ensureFileNames(fileNames);
 

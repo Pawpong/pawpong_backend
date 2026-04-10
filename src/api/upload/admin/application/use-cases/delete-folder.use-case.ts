@@ -1,13 +1,13 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { DeleteFilesResponseDto } from '../../dto/response/delete-files-response.dto';
 import { UploadAdminStoragePolicyService } from '../../domain/services/upload-admin-storage-policy.service';
 import {
     DELETE_MULTIPLE_UPLOAD_ADMIN_FILES_COMMAND,
     type DeleteMultipleUploadAdminFilesCommandPort,
 } from '../ports/upload-admin-file-orchestration.port';
 import { UPLOAD_ADMIN_STORAGE, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
+import type { UploadAdminDeleteFilesResult } from '../types/upload-admin-result.type';
 
 @Injectable()
 export class DeleteFolderUseCase {
@@ -20,7 +20,7 @@ export class DeleteFolderUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(folder: string): Promise<DeleteFilesResponseDto> {
+    async execute(folder: string): Promise<UploadAdminDeleteFilesResult> {
         this.logger.logStart('deleteFolder', '폴더 전체 삭제 시작', { folder });
 
         const prefix = this.uploadAdminStoragePolicyService.normalizeFolderPrefix(folder);
