@@ -2,18 +2,15 @@ import { Body, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { CheckFileReferencesUseCase } from './application/use-cases/check-file-references.use-case';
+import { UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from './constants/upload-admin-response-messages';
 import { UploadAdminProtectedController } from './decorator/upload-admin-controller.decorator';
 import { CheckFileReferencesRequestDto } from './dto/request/check-file-references-request.dto';
 import { FileReferenceResponseDto } from './dto/response/file-reference-response.dto';
-import { UploadAdminReferenceQueryResponseMessageService } from './domain/services/upload-admin-reference-query-response-message.service';
 import { ApiCheckFileReferencesAdminEndpoint } from './swagger';
 
 @UploadAdminProtectedController()
 export class UploadAdminCheckFileReferencesController {
-    constructor(
-        private readonly checkFileReferencesUseCase: CheckFileReferencesUseCase,
-        private readonly uploadAdminReferenceQueryResponseMessageService: UploadAdminReferenceQueryResponseMessageService,
-    ) {}
+    constructor(private readonly checkFileReferencesUseCase: CheckFileReferencesUseCase) {}
 
     @Post('files/check-references')
     @ApiCheckFileReferencesAdminEndpoint()
@@ -21,6 +18,6 @@ export class UploadAdminCheckFileReferencesController {
         @Body() data: CheckFileReferencesRequestDto,
     ): Promise<ApiResponseDto<FileReferenceResponseDto>> {
         const result = await this.checkFileReferencesUseCase.execute(data.fileKeys);
-        return ApiResponseDto.success(result, this.uploadAdminReferenceQueryResponseMessageService.fileReferencesChecked());
+        return ApiResponseDto.success(result, UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.fileReferencesChecked);
     }
 }
