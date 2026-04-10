@@ -1,7 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import { AppVersionResponseDto } from '../../../dto/response/app-version-response.dto';
 import { AppVersionAdminSnapshot } from '../../application/ports/app-version-admin-reader.port';
 import { AppVersionAdminPaginationAssemblerService } from './app-version-admin-pagination-assembler.service';
 import { AppVersionAdminItemPresentationService } from './app-version-admin-item-presentation.service';
@@ -18,7 +16,7 @@ export class AppVersionAdminListPresentationService {
         page: number,
         limit: number,
         totalItems: number,
-    ): PaginationResponseDto<AppVersionResponseDto> {
+    ) {
         return this.appVersionAdminPaginationAssemblerService.build(
             items.map((item) => this.appVersionAdminItemPresentationService.toResponseDto(item)),
             page,
