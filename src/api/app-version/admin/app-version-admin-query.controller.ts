@@ -23,7 +23,7 @@ export class AppVersionAdminQueryController {
     ): Promise<ApiResponseDto<PaginationResponseDto<AppVersionResponseDto>>> {
         const result = await this.getAppVersionListUseCase.execute(paginationData);
         return ApiResponseDto.success(
-            result as unknown as PaginationResponseDto<AppVersionResponseDto>,
+            PaginationResponseDto.fromPageResult(result),
             this.appVersionAdminQueryResponseMessageService.appVersionListRetrieved(),
         );
     }
