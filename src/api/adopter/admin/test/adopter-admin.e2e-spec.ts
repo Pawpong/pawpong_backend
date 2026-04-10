@@ -57,6 +57,18 @@ describe('입양자 관리자 종단간 테스트', () => {
     });
 
     describe('GET /api/adopter-관리자/applications/:applicationId', () => {
+        it('잘못된 신청 ID 형식이면 400', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
+
+            const response = await request(app.getHttpServer())
+                .get('/api/adopter-admin/applications/not-a-mongo-id')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .expect(400);
+
+            expect(response.body.message || response.body.error).toContain('올바르지 않은 신청 ID 형식');
+            console.log('잘못된 신청 ID 형식 400 확인');
+        });
+
         it('존재하지 않는 신청 조회 시 에러', async () => {
             if (!adminToken) { console.log('주의: 스킵'); return; }
 

@@ -32,12 +32,6 @@ export class AdopterAdminPolicyService {
         return review;
     }
 
-    assertApplicationIdFormat(applicationId: string): void {
-        if (!/^[a-fA-F0-9]{24}$/.test(applicationId)) {
-            throw new BadRequestException('올바르지 않은 신청 ID 형식입니다.');
-        }
-    }
-
     assertApplicationExists(
         application: AdopterAdminApplicationDetailSnapshot | null,
     ): AdopterAdminApplicationDetailSnapshot {

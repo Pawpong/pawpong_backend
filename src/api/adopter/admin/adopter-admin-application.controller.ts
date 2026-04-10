@@ -2,6 +2,7 @@ import { Get, Param, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
+import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import { GetAdopterAdminApplicationDetailUseCase } from './application/use-cases/get-adopter-admin-application-detail.use-case';
 import { GetAdopterAdminApplicationListUseCase } from './application/use-cases/get-adopter-admin-application-list.use-case';
 import { AdopterAdminProtectedController } from './decorator/adopter-admin-controller.decorator';
@@ -32,7 +33,8 @@ export class AdopterAdminApplicationController {
     @ApiGetAdopterAdminApplicationDetailEndpoint()
     async getApplicationDetail(
         @CurrentUser('userId') adminId: string,
-        @Param('applicationId') applicationId: string,
+        @Param('applicationId', new MongoObjectIdPipe('신청', '올바르지 않은 신청 ID 형식입니다.'))
+        applicationId: string,
     ): Promise<ApiResponseDto<AdminApplicationDetailResponseDto>> {
         const result = await this.getAdopterAdminApplicationDetailUseCase.execute(adminId, applicationId);
         return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.adminApplicationDetailRetrieved);
