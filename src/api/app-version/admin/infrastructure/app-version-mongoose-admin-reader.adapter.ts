@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { AppVersion } from '../../../../schema/app-version.schema';
 import { AppVersionAdminPage, AppVersionAdminReaderPort, AppVersionAdminSnapshot } from '../application/ports/app-version-admin-reader.port';
 import { AppVersionRepository } from '../../repository/app-version.repository';
 
@@ -20,7 +21,7 @@ export class AppVersionMongooseAdminReaderAdapter implements AppVersionAdminRead
         };
     }
 
-    private toSnapshot(version: any): AppVersionAdminSnapshot {
+    private toSnapshot(version: AppVersion): AppVersionAdminSnapshot {
         return {
             appVersionId: version._id.toString(),
             platform: version.platform,
