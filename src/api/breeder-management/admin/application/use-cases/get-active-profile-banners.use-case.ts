@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ProfileBannerResponseDto } from '../../dto/response/profile-banner-response.dto';
 import { BreederManagementBannerPresentationService } from '../../domain/services/breeder-management-banner-presentation.service';
 import {
     BREEDER_MANAGEMENT_ADMIN_BANNER_READER,
     type BreederManagementAdminBannerReaderPort,
 } from '../ports/breeder-management-admin-banner-reader.port';
+import type { BreederManagementProfileBannerResult } from '../types/breeder-management-admin-banner-result.type';
 
 @Injectable()
 export class GetActiveProfileBannersUseCase {
@@ -15,8 +15,8 @@ export class GetActiveProfileBannersUseCase {
         private readonly breederManagementBannerPresentationService: BreederManagementBannerPresentationService,
     ) {}
 
-    async execute(bannerType?: 'login' | 'signup'): Promise<ProfileBannerResponseDto[]> {
+    async execute(bannerType?: 'login' | 'signup'): Promise<BreederManagementProfileBannerResult[]> {
         const banners = await this.bannerReader.readActiveProfile(bannerType);
-        return banners.map((banner) => this.breederManagementBannerPresentationService.toProfileResponseDto(banner));
+        return banners.map((banner) => this.breederManagementBannerPresentationService.toProfileResult(banner));
     }
 }
