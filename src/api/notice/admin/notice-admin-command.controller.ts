@@ -2,6 +2,7 @@ import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
+import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import { CreateNoticeUseCase } from './application/use-cases/create-notice.use-case';
 import { DeleteNoticeUseCase } from './application/use-cases/delete-notice.use-case';
 import { UpdateNoticeUseCase } from './application/use-cases/update-notice.use-case';
@@ -41,7 +42,7 @@ export class NoticeAdminCommandController {
     @ApiUpdateNoticeAdminEndpoint()
     async updateNotice(
         @CurrentUser('userId') adminId: string,
-        @Param('noticeId') noticeId: string,
+        @Param('noticeId', new MongoObjectIdPipe('공지', '올바르지 않은 공지 ID 형식입니다.')) noticeId: string,
         @Body() updateData: NoticeUpdateRequestDto,
     ): Promise<ApiResponseDto<NoticeResponseDto>> {
         const result = await this.updateNoticeUseCase.execute(noticeId, adminId, updateData);
@@ -52,7 +53,7 @@ export class NoticeAdminCommandController {
     @ApiDeleteNoticeAdminEndpoint()
     async deleteNotice(
         @CurrentUser('userId') adminId: string,
-        @Param('noticeId') noticeId: string,
+        @Param('noticeId', new MongoObjectIdPipe('공지', '올바르지 않은 공지 ID 형식입니다.')) noticeId: string,
     ): Promise<ApiResponseDto<null>> {
         await this.deleteNoticeUseCase.execute(noticeId, adminId);
         return ApiResponseDto.success(null, this.noticeDeleteResponseMessageService.noticeDeleted());

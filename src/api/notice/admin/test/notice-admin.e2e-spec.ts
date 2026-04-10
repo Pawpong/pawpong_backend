@@ -64,6 +64,18 @@ describe('공지 관리자 종단간 테스트', () => {
             expect(response.body.success).toBe(true);
             console.log('공지 목록 조회 성공');
         });
+
+        it('잘못된 공지 ID 형식으로 상세 조회 시 400', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
+
+            const response = await request(app.getHttpServer())
+                .get('/api/notice-admin/invalid-notice-id')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .expect(400);
+
+            expect(response.body.message).toContain('올바르지 않은 공지 ID 형식');
+            console.log('잘못된 공지 상세 ID 400 확인');
+        });
     });
 
     describe('PATCH /api/notice-관리자/:noticeId', () => {
@@ -79,6 +91,19 @@ describe('공지 관리자 종단간 테스트', () => {
             expect(response.body.success).toBe(true);
             console.log('공지 수정 성공');
         });
+
+        it('잘못된 공지 ID 형식으로 수정 시 400', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
+
+            const response = await request(app.getHttpServer())
+                .patch('/api/notice-admin/invalid-notice-id')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({ title: '수정 시도' })
+                .expect(400);
+
+            expect(response.body.message).toContain('올바르지 않은 공지 ID 형식');
+            console.log('잘못된 공지 수정 ID 400 확인');
+        });
     });
 
     describe('DELETE /api/notice-관리자/:noticeId', () => {
@@ -92,6 +117,18 @@ describe('공지 관리자 종단간 테스트', () => {
 
             expect(response.body.success).toBe(true);
             console.log('공지 삭제 성공');
+        });
+
+        it('잘못된 공지 ID 형식으로 삭제 시 400', async () => {
+            if (!adminToken) { console.log('주의: 스킵'); return; }
+
+            const response = await request(app.getHttpServer())
+                .delete('/api/notice-admin/invalid-notice-id')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .expect(400);
+
+            expect(response.body.message).toContain('올바르지 않은 공지 ID 형식');
+            console.log('잘못된 공지 삭제 ID 400 확인');
         });
     });
 });
