@@ -1,4 +1,4 @@
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
 
 describe('브리더 관리 응답 메시지 서비스', () => {
     it('공개 경로와 관리자 경로가 공유하는 메시지 계약을 유지한다', () => {

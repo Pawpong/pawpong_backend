@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../../constants/breeder-management-response-messages';
 
 @Injectable()
 export class BreederManagementAccountCommandResponseService {

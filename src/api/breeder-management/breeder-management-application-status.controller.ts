@@ -6,7 +6,7 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { MongoObjectIdPipe } from '../../common/pipe/mongo-object-id.pipe';
 import { UpdateBreederManagementApplicationStatusUseCase } from './application/use-cases/update-breeder-management-application-status.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { ApplicationStatusUpdateRequestDto } from './dto/request/application-status-update-request.dto';
 import { ApplicationStatusUpdateResponseDto } from './dto/response/application-status-update-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';

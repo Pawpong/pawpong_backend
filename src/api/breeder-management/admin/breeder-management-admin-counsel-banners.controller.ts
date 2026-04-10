@@ -7,7 +7,7 @@ import { DeleteCounselBannerUseCase } from './application/use-cases/delete-couns
 import { GetAllCounselBannersUseCase } from './application/use-cases/get-all-counsel-banners.use-case';
 import { UpdateCounselBannerUseCase } from './application/use-cases/update-counsel-banner.use-case';
 import { BreederManagementAdminProtectedController } from './decorator/breeder-management-admin-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
 import { CounselBannerCreateRequestDto } from './dto/request/counsel-banner-create-request.dto';
 import { CounselBannerUpdateRequestDto } from './dto/request/counsel-banner-update-request.dto';
 import { CounselBannerResponseDto } from './dto/response/counsel-banner-response.dto';

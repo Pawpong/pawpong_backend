@@ -13,7 +13,7 @@ import type {
     BreederManagementReceivedApplicationsPageResult,
 } from './application/types/breeder-management-result.type';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { ApplicationsGetRequestDto } from './dto/request/applications-fetch-request.dto';
 import { BreederManagementApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';

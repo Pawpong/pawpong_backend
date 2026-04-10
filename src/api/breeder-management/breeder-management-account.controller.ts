@@ -5,7 +5,7 @@ import { ApiEndpoint } from '../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { DeleteBreederManagementAccountUseCase } from './application/use-cases/delete-breeder-management-account.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { BreederAccountDeleteRequestDto } from './dto/request/breeder-account-delete-request.dto';
 import { BreederAccountDeleteResponseDto } from './dto/response/breeder-account-delete-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';

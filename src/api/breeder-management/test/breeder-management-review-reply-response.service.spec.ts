@@ -1,5 +1,5 @@
 import { BreederManagementReviewReplyResponseService } from '../domain/services/breeder-management-review-reply-response.service';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
 
 describe('브리더 관리 후기 답글 응답 서비스', () => {
     const service = new BreederManagementReviewReplyResponseService();

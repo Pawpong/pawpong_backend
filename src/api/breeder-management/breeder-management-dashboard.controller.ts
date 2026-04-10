@@ -7,7 +7,7 @@ import { BreederDashboardResponseDto } from '../breeder/dto/response/breeder-das
 import { GetBreederManagementDashboardUseCase } from './application/use-cases/get-breeder-management-dashboard.use-case';
 import type { BreederManagementDashboardResult } from './application/types/breeder-management-result.type';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { BreederManagementSwaggerDocs } from './swagger';
 
 @BreederManagementProtectedController()

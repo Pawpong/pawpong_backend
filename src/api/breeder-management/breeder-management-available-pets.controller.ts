@@ -8,7 +8,7 @@ import { RemoveBreederManagementAvailablePetUseCase } from './application/use-ca
 import { UpdateBreederManagementAvailablePetStatusUseCase } from './application/use-cases/update-breeder-management-available-pet-status.use-case';
 import { UpdateBreederManagementAvailablePetUseCase } from './application/use-cases/update-breeder-management-available-pet.use-case';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { AvailablePetAddDto } from './dto/request/available-pet-add-request.dto';
 import { PetStatusUpdateRequestDto } from './dto/request/pet-status-update-request.dto';
 import { PetAddResponseDto } from './dto/response/pet-add-response.dto';
