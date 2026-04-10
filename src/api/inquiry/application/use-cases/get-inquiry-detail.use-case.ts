@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { InquiryDetailResponseDto } from '../../dto/response/inquiry-detail-response.dto';
 import { InquiryViewService } from '../../domain/services/inquiry-view.service';
 import { INQUIRY_ASSET_URL, type InquiryAssetUrlPort } from '../ports/inquiry-asset-url.port';
 import { INQUIRY_READER, type InquiryReaderPort } from '../ports/inquiry-reader.port';
+import type { InquiryDetailResult } from '../types/inquiry-result.type';
 
 @Injectable()
 export class GetInquiryDetailUseCase {
@@ -15,7 +15,7 @@ export class GetInquiryDetailUseCase {
         private readonly inquiryAssetUrl: InquiryAssetUrlPort,
     ) {}
 
-    async execute(inquiryId: string, userId?: string): Promise<InquiryDetailResponseDto> {
+    async execute(inquiryId: string, userId?: string): Promise<InquiryDetailResult> {
         if (!inquiryId) {
             throw new BadRequestException('문의 ID가 필요합니다.');
         }

@@ -3,6 +3,7 @@ import { Get, Query } from '@nestjs/common';
 import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetBreederInquiriesUseCase } from './application/use-cases/get-breeder-inquiries.use-case';
+import type { InquiryListResult } from './application/types/inquiry-result.type';
 import { InquiryProtectedController } from './decorator/inquiry-controller.decorator';
 import { InquiryBreederQueryResponseMessageService } from './domain/services/inquiry-breeder-query-response-message.service';
 import { BreederInquiryListQueryRequestDto } from './dto/request/inquiry-query-request.dto';
@@ -23,6 +24,9 @@ export class InquiryBreederQueryController {
         @Query() query: BreederInquiryListQueryRequestDto,
     ): Promise<ApiResponseDto<InquiryListResponseDto>> {
         const result = await this.getBreederInquiriesUseCase.execute(userId, query.answered, query.page, query.limit);
-        return ApiResponseDto.success(result, this.inquiryBreederQueryResponseMessageService.breederInquiriesRetrieved());
+        return ApiResponseDto.success(
+            result as InquiryListResponseDto & InquiryListResult,
+            this.inquiryBreederQueryResponseMessageService.breederInquiriesRetrieved(),
+        );
     }
 }
