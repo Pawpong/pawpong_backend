@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import {
     AdoptionApplication,
@@ -19,6 +19,9 @@ export class AdopterReviewRepository {
     ) {}
 
     findApplicationById(applicationId: string) {
+        if (!Types.ObjectId.isValid(applicationId)) {
+            return Promise.resolve(null);
+        }
         return this.adoptionApplicationModel.findById(applicationId).exec();
     }
 
@@ -28,6 +31,9 @@ export class AdopterReviewRepository {
     }
 
     findReviewById(reviewId: string) {
+        if (!Types.ObjectId.isValid(reviewId)) {
+            return Promise.resolve(null);
+        }
         return this.breederReviewModel.findById(reviewId).exec();
     }
 
@@ -69,6 +75,9 @@ export class AdopterReviewRepository {
     }
 
     findDetailByAdopterId(adopterId: string, reviewId: string) {
+        if (!Types.ObjectId.isValid(reviewId)) {
+            return Promise.resolve(null);
+        }
         return this.breederReviewModel
             .findOne({ _id: reviewId, adopterId })
             .populate('breederId', 'nickname profileImageFileName verification.level petType')

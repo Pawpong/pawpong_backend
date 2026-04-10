@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import {
     AdoptionApplication,
@@ -56,6 +56,9 @@ export class AdopterApplicationRepository {
     }
 
     findByIdForAdopter(adopterId: string, applicationId: string) {
+        if (!Types.ObjectId.isValid(applicationId)) {
+            return Promise.resolve(null);
+        }
         return this.adoptionApplicationModel.findOne({
             _id: applicationId,
             adopterId,
