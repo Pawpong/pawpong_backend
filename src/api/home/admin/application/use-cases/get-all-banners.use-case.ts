@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { BannerResponseDto } from '../../../dto/response/banner-response.dto';
 import { HomeBannerCatalogService } from '../../../domain/services/home-banner-catalog.service';
 import { HOME_ASSET_URL, type HomeAssetUrlPort } from '../../../application/ports/home-asset-url.port';
 import { HOME_ADMIN_MANAGER, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
+import type { HomeBannerResult } from '../../../application/types/home-content-result.type';
 
 @Injectable()
 export class GetAllBannersUseCase {
@@ -15,10 +15,10 @@ export class GetAllBannersUseCase {
         private readonly homeAssetUrl: HomeAssetUrlPort,
     ) {}
 
-    async execute(): Promise<BannerResponseDto[]> {
+    async execute(): Promise<HomeBannerResult[]> {
         const banners = await this.homeAdminManager.readAllBanners();
 
-        return this.homeBannerCatalogService.buildResponse(banners, (fileName, expirationMinutes) =>
+        return this.homeBannerCatalogService.buildResults(banners, (fileName, expirationMinutes) =>
             this.homeAssetUrl.generateSignedUrl(fileName, expirationMinutes),
         );
     }

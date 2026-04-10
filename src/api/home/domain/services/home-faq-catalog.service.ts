@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { FaqResponseDto } from '../../dto/response/faq-response.dto';
 import { HomeFaqSnapshot } from '../../application/ports/home-content-reader.port';
+import type { HomeFaqResult } from '../../application/types/home-content-result.type';
 
 @Injectable()
 export class HomeFaqCatalogService {
-    buildResponse(faqs: HomeFaqSnapshot[]): FaqResponseDto[] {
+    buildResults(faqs: HomeFaqSnapshot[]): HomeFaqResult[] {
         return faqs.map((faq) => ({
             faqId: faq.id,
             question: faq.question,
