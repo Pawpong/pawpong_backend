@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { BreederExploreResponseDto } from '../../dto/response/breeder-explore-response.dto';
 import { BREEDER_FILE_URL_PORT } from '../ports/breeder-file-url.port';
 import { BREEDER_PUBLIC_READER_PORT } from '../ports/breeder-public-reader.port';
 import type { BreederFileUrlPort } from '../ports/breeder-file-url.port';
@@ -10,6 +9,7 @@ import { BreederExploreFavoriteReaderService } from '../../domain/services/breed
 import { BreederExploreCardMapperService } from '../../domain/services/breeder-explore-card-mapper.service';
 import { BreederPaginationAssemblerService } from '../../domain/services/breeder-pagination-assembler.service';
 import type { BreederExploreQuery } from '../types/breeder-search-query.type';
+import type { BreederExplorePageResult } from '../types/breeder-result.type';
 
 @Injectable()
 export class ExploreBreedersUseCase {
@@ -24,7 +24,7 @@ export class ExploreBreedersUseCase {
         private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService,
     ) {}
 
-    async execute(searchDto: BreederExploreQuery, userId?: string): Promise<BreederExploreResponseDto> {
+    async execute(searchDto: BreederExploreQuery, userId?: string): Promise<BreederExplorePageResult> {
         const { filter, sortOrder, page, limit, isAdoptionAvailable } = this.breederExploreCriteriaService.build(searchDto);
         const availableBreederIds = await this.breederPublicReaderPort.findBreederIdsWithAvailablePets();
         const availableBreederIdSet = new Set(availableBreederIds);
@@ -48,6 +48,6 @@ export class ExploreBreedersUseCase {
             ),
         );
 
-        return new BreederExploreResponseDto(this.breederPaginationAssemblerService.createBuilder(items, page, limit, total));
+        return this.breederPaginationAssemblerService.build(items, page, limit, total);
     }
 }

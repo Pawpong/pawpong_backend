@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PriceDisplayType } from '../../../../common/enum/user.enum';
 import type { BreederFileUrlPort } from '../../application/ports/breeder-file-url.port';
 import type { BreederPublicBreederRecord, BreederPublicPetRecord } from '../../application/ports/breeder-public-reader.port';
-import { BreederProfileResponseDto } from '../../dto/response/breeder-profile-response.dto';
+import type { BreederProfileResult } from '../../application/types/breeder-result.type';
 import { BreederBirthDateFormatterService } from './breeder-birth-date-formatter.service';
 
 @Injectable()
@@ -16,7 +16,7 @@ export class BreederPublicProfileAssemblerService {
         availablePets: BreederPublicPetRecord[],
         parentPets: BreederPublicPetRecord[],
         breederFileUrlPort: BreederFileUrlPort,
-    ): BreederProfileResponseDto {
+    ): BreederProfileResult {
         const profilePrice = breeder.profile?.priceRange || { min: 0, max: 0, display: 'not_set' };
         const finalDisplay = profilePrice.display
             ? profilePrice.display
@@ -89,7 +89,7 @@ export class BreederPublicProfileAssemblerService {
                 averageRating: breeder.stats?.averageRating || 0,
             },
             createdAt: breeder.createdAt,
-        } as unknown as BreederProfileResponseDto;
+        };
     }
 
     private toParentCards(parentInfo: BreederPublicPetRecord['parentInfo'], breederFileUrlPort: BreederFileUrlPort) {

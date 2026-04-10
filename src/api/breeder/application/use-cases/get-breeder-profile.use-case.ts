@@ -1,12 +1,12 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
-import { BreederProfileResponseDto } from '../../dto/response/breeder-profile-response.dto';
 import { BREEDER_FILE_URL_PORT } from '../ports/breeder-file-url.port';
 import { BREEDER_PUBLIC_READER_PORT } from '../ports/breeder-public-reader.port';
 import type { BreederFileUrlPort } from '../ports/breeder-file-url.port';
 import type { BreederPublicReaderPort } from '../ports/breeder-public-reader.port';
 import { BreederPublicProfileAssemblerService } from '../../domain/services/breeder-public-profile-assembler.service';
+import type { BreederProfileResult } from '../types/breeder-result.type';
 
 @Injectable()
 export class GetBreederProfileUseCase {
@@ -18,7 +18,7 @@ export class GetBreederProfileUseCase {
         private readonly breederPublicProfileAssemblerService: BreederPublicProfileAssemblerService,
     ) {}
 
-    async execute(breederId: string, userId?: string): Promise<BreederProfileResponseDto> {
+    async execute(breederId: string, userId?: string): Promise<BreederProfileResult> {
         if (!Types.ObjectId.isValid(breederId)) {
             throw new BadRequestException('올바르지 않은 브리더 ID 형식입니다.');
         }

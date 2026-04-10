@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
 import { PriceDisplayType } from '../../../../common/enum/user.enum';
-import { BreederCardResponseDto } from '../../dto/response/breeder-card-response.dto';
 import type { BreederFileUrlPort } from '../../application/ports/breeder-file-url.port';
 import type { BreederPublicBreederRecord } from '../../application/ports/breeder-public-reader.port';
+import type { BreederCardResult } from '../../application/types/breeder-result.type';
 
 type BreederPriceRange = {
     min?: number;
@@ -18,7 +18,7 @@ export class BreederExploreCardMapperService {
         breederFileUrlPort: BreederFileUrlPort,
         availableBreederIdSet: Set<string>,
         favoritedBreederIdSet: Set<string>,
-    ): BreederCardResponseDto {
+    ): BreederCardResult {
         const priceRange = breeder.profile?.priceRange || { min: 0, max: 0, display: 'not_set' };
 
         return {
@@ -50,7 +50,7 @@ export class BreederExploreCardMapperService {
         breeder: BreederPublicBreederRecord,
         breederFileUrlPort: BreederFileUrlPort,
         availableBreederIdSet: Set<string>,
-    ): BreederCardResponseDto {
+    ): BreederCardResult {
         return {
             breederId: String(breeder._id),
             breederName: breeder.name,

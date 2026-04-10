@@ -4,8 +4,8 @@ import { CurrentUser } from '../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { GetBreederApplicationFormUseCase } from './application/use-cases/get-breeder-application-form.use-case';
 import { GetBreederProfileUseCase } from './application/use-cases/get-breeder-profile.use-case';
+import type { BreederProfileResult } from './application/types/breeder-result.type';
 import { BreederOptionalAuthController, BreederPublicController } from './decorator/breeder-public-controller.decorator';
-import { BreederProfileResponseDto } from './dto/response/breeder-profile-response.dto';
 import { PublicApplicationFormResponseDto } from './dto/response/public-application-form.dto';
 import { BREEDER_RESPONSE_MESSAGES } from './domain/services/breeder-response-message.service';
 import { ApiGetBreederApplicationFormEndpoint, ApiGetBreederProfileEndpoint } from './swagger/decorators';
@@ -19,7 +19,7 @@ export class BreederProfileController {
     async getBreederProfile(
         @Param('id') breederId: string,
         @CurrentUser('userId') userId?: string,
-    ): Promise<ApiResponseDto<BreederProfileResponseDto>> {
+    ): Promise<ApiResponseDto<BreederProfileResult>> {
         const result = await this.getBreederProfileUseCase.execute(breederId, userId);
         return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.profileRetrieved);
     }

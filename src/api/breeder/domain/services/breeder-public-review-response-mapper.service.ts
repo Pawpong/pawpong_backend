@@ -1,15 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
+import type { BreederReviewPageResult } from '../../application/types/breeder-result.type';
 import { BreederPaginationAssemblerService } from './breeder-pagination-assembler.service';
 
 @Injectable()
 export class BreederPublicReviewResponseMapperService {
     constructor(private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService) {}
 
-    toPaginationResponse(reviews: any[], total: number, page: number, limit: number) {
+    toPaginationResponse(reviews: any[], total: number, page: number, limit: number): BreederReviewPageResult {
         const formattedReviews = reviews.map((review: any) => ({
             reviewId: review._id.toString(),
-            applicationId: review.applicationId?._id?.toString() || review.applicationId?.toString(),
+            applicationId: review.applicationId?._id?.toString() || review.applicationId?.toString() || '',
             adopterName: review.adopterId?.nickname || '알 수 없음',
             petName: review.applicationId?.petName || undefined,
             content: review.content,

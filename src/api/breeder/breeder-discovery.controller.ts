@@ -28,7 +28,10 @@ export class BreederDiscoveryController {
         @Query() searchDto: BreederSearchRequestDto,
     ): Promise<ApiResponseDto<BreederSearchResponseDto>> {
         const result = await this.searchBreedersUseCase.execute(searchDto);
-        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.searchCompleted);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            BREEDER_RESPONSE_MESSAGES.searchCompleted,
+        );
     }
 
     @Get('popular')
@@ -50,6 +53,9 @@ export class BreederExploreController {
         @CurrentUser('userId') userId?: string,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederCardResponseDto>>> {
         const result = await this.exploreBreedersUseCase.execute(searchDto, userId);
-        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.breederListRetrieved);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            BREEDER_RESPONSE_MESSAGES.breederListRetrieved,
+        );
     }
 }

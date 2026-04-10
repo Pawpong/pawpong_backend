@@ -20,6 +20,9 @@ export class BreederReviewsController {
         @Query('limit') limit: number = 10,
     ): Promise<ApiResponseDto<PaginationResponseDto<BreederReviewItemDto>>> {
         const result = await this.getBreederReviewsUseCase.execute(breederId, Number(page), Number(limit));
-        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.reviewsRetrieved);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            BREEDER_RESPONSE_MESSAGES.reviewsRetrieved,
+        );
     }
 }
