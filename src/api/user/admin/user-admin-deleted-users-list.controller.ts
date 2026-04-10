@@ -21,6 +21,9 @@ export class UserAdminDeletedUsersListController {
         @Query() filter: DeletedUserSearchRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<DeletedUserResponseDto>>> {
         const result = await this.getDeletedUsersUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, USER_ADMIN_RESPONSE_MESSAGES.deletedUsersRetrieved);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            USER_ADMIN_RESPONSE_MESSAGES.deletedUsersRetrieved,
+        );
     }
 }

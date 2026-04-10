@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { UserAdminManagedUserRole } from '../../application/ports/user-admin-reader.port';
+import type { UserAdminHardDeleteResult, UserAdminStatusUpdateResult } from '../../application/types/user-admin-result.type';
 
 @Injectable()
 export class UserAdminDeletedUserCommandResponseService {
@@ -9,7 +10,7 @@ export class UserAdminDeletedUserCommandResponseService {
         role: UserAdminManagedUserRole,
         previousStatus: string,
         updatedAt: Date,
-    ) {
+    ): UserAdminStatusUpdateResult {
         return {
             userId,
             role,
@@ -25,7 +26,7 @@ export class UserAdminDeletedUserCommandResponseService {
         role: UserAdminManagedUserRole,
         userName: string,
         userEmail: string,
-    ) {
+    ): UserAdminHardDeleteResult {
         return {
             userId,
             role,

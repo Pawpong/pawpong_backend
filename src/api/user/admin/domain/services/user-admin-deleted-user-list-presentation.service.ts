@@ -1,9 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import { DeletedUserResponseDto } from '../../dto/response/deleted-user-response.dto';
 import { UserAdminDeletedUserListResultSnapshot } from '../../application/ports/user-admin-reader.port';
 import { UserAdminPaginationAssemblerService } from './user-admin-pagination-assembler.service';
+import type {
+    UserAdminDeletedUserItemResult,
+    UserAdminDeletedUserPageResult,
+} from '../../application/types/user-admin-result.type';
 
 @Injectable()
 export class UserAdminDeletedUserListPresentationService {
@@ -13,9 +15,9 @@ export class UserAdminDeletedUserListPresentationService {
         result: UserAdminDeletedUserListResultSnapshot,
         page: number,
         limit: number,
-    ): PaginationResponseDto<DeletedUserResponseDto> {
+    ): UserAdminDeletedUserPageResult {
         const items = result.items.map(
-            (user): DeletedUserResponseDto => ({
+            (user): UserAdminDeletedUserItemResult => ({
                 userId: user.id,
                 email: user.emailAddress,
                 nickname: user.nickname || '',

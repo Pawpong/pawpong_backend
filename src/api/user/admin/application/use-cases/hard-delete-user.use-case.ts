@@ -6,6 +6,7 @@ import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
 import { UserAdminDeletedUserCommandResponseService } from '../../domain/services/user-admin-deleted-user-command-response.service';
+import type { UserAdminHardDeleteResult } from '../types/user-admin-result.type';
 
 @Injectable()
 export class HardDeleteUserUseCase {
@@ -19,7 +20,7 @@ export class HardDeleteUserUseCase {
         private readonly userAdminDeletedUserCommandResponseService: UserAdminDeletedUserCommandResponseService,
     ) {}
 
-    async execute(adminId: string, userId: string, role: UserAdminManagedUserRole): Promise<any> {
+    async execute(adminId: string, userId: string, role: UserAdminManagedUserRole): Promise<UserAdminHardDeleteResult> {
         this.userAdminCommandPolicyService.assertSuperAdmin(await this.userAdminReader.findAdminById(adminId));
 
         const user = this.userAdminCommandPolicyService.assertManagedUserExists(

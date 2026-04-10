@@ -1,11 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import { UserManagementResponseDto } from '../../dto/response/user-management-response.dto';
 import { USER_ADMIN_READER, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
 import { UserAdminPresentationService } from '../../domain/services/user-admin-presentation.service';
 import type { UserAdminUserSearchQuery } from '../types/user-admin-command.type';
+import type { UserAdminUserManagementPageResult } from '../types/user-admin-result.type';
 
 @Injectable()
 export class GetUsersUseCase {
@@ -19,7 +18,7 @@ export class GetUsersUseCase {
     async execute(
         adminId: string,
         filter: UserAdminUserSearchQuery,
-    ): Promise<PaginationResponseDto<UserManagementResponseDto>> {
+    ): Promise<UserAdminUserManagementPageResult> {
         this.userAdminCommandPolicyService.assertCanManageUsers(
             await this.userAdminReader.findAdminById(adminId),
             'Access denied',

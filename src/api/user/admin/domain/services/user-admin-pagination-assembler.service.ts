@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationBuilder } from '../../../../../common/dto/pagination/pagination-builder.dto';
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
+import { buildPageResult } from '../../../../../common/types/page-result.type';
+import type { PageResult } from '../../../../../common/types/page-result.type';
 
 @Injectable()
 export class UserAdminPaginationAssemblerService {
-    build<T>(items: T[], page: number, limit: number, totalCount: number): PaginationResponseDto<T> {
-        return new PaginationBuilder<T>().setItems(items).setPage(page).setLimit(limit).setTotalCount(totalCount).build();
+    build<T>(items: T[], page: number, limit: number, totalCount: number): PageResult<T> {
+        return buildPageResult(items, page, limit, totalCount);
     }
 }
