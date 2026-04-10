@@ -7,6 +7,7 @@ import {
     type SuggestFeedTagsUseCasePort,
 } from '../tag/application/ports/feed-tag-interaction.port';
 import type { FeedPopularTagResult, FeedTagSuggestionResult } from '../tag/application/types/feed-tag-result.type';
+import { FeedPopularTagLimitQueryDto, FeedSuggestTagQueryDto } from './dto/request/feed-limit-query.dto';
 import { PopularTagItemDto, TagSuggestionItemDto } from '../tag/dto/response/tag-response.dto';
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
 import { ApiGetPopularFeedTagsEndpoint, ApiSuggestFeedTagsEndpoint } from './swagger';
@@ -22,14 +23,14 @@ export class FeedVideoTagCatalogController {
 
     @Get('tag/popular')
     @ApiGetPopularFeedTagsEndpoint()
-    async getPopularTags(@Query('limit') limit: number = 20): Promise<PopularTagItemDto[]> {
-        return (await this.getPopularTagsUseCase.execute(Number(limit))) as Array<PopularTagItemDto & FeedPopularTagResult>;
+    async getPopularTags(@Query() query: FeedPopularTagLimitQueryDto): Promise<PopularTagItemDto[]> {
+        return (await this.getPopularTagsUseCase.execute(query.limit)) as Array<PopularTagItemDto & FeedPopularTagResult>;
     }
 
     @Get('tag/suggest')
     @ApiSuggestFeedTagsEndpoint()
-    async suggestTags(@Query('q') query: string, @Query('limit') limit: number = 10): Promise<TagSuggestionItemDto[]> {
-        return (await this.suggestTagsUseCase.execute(query, Number(limit))) as Array<
+    async suggestTags(@Query() query: FeedSuggestTagQueryDto): Promise<TagSuggestionItemDto[]> {
+        return (await this.suggestTagsUseCase.execute(query.q, query.limit)) as Array<
             TagSuggestionItemDto & FeedTagSuggestionResult
         >;
     }

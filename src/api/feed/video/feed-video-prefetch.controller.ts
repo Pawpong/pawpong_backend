@@ -3,6 +3,7 @@ import { Param, Post, Query } from '@nestjs/common';
 import { PrefetchAllQualitySegmentsUseCase } from './application/use-cases/prefetch-all-quality-segments.use-case';
 import type { FeedVideoSegmentPrefetchResult } from './application/types/feed-video-result.type';
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
+import { FeedPrefetchQueryDto } from './dto/request/feed-prefetch-query.dto';
 import { SegmentPrefetchResponseDto } from './dto/response/video-response.dto';
 import { FeedVideoPrefetchPresentationService } from './infrastructure/feed-video-prefetch-presentation.service';
 import { ApiPrefetchFeedVideoSegmentsEndpoint } from './swagger';
@@ -18,12 +19,11 @@ export class FeedVideoPrefetchController {
     @ApiPrefetchFeedVideoSegmentsEndpoint()
     async prefetchSegments(
         @Param('videoId') videoId: string,
-        @Query('segment') segment: number,
-        @Query('count') count: number = 5,
+        @Query() query: FeedPrefetchQueryDto,
     ): Promise<SegmentPrefetchResponseDto> {
-        const requestedCount = Number(count);
+        const requestedCount = query.count;
 
-        await this.prefetchAllQualitySegmentsUseCase.execute(videoId, Number(segment), requestedCount);
+        await this.prefetchAllQualitySegmentsUseCase.execute(videoId, query.segment, requestedCount);
         return this.feedVideoPrefetchPresentationService.buildResponse(requestedCount) as
             SegmentPrefetchResponseDto & FeedVideoSegmentPrefetchResult;
     }
