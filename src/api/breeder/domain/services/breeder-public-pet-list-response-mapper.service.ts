@@ -1,9 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import type { BreederFileUrlPort } from '../../application/ports/breeder-file-url.port';
-import type { BreederPetsPageResult } from '../../application/types/breeder-result.type';
+import type { BreederPublicPetRecord } from '../../application/ports/breeder-public-reader.port';
 import { BreederBirthDateFormatterService } from './breeder-birth-date-formatter.service';
 import { BreederPaginationAssemblerService } from './breeder-pagination-assembler.service';
+import type { BreederPetParentResult, BreederPetsPageResult } from '../../application/types/breeder-result.type';
 
 @Injectable()
 export class BreederPublicPetListResponseMapperService {
@@ -13,7 +14,7 @@ export class BreederPublicPetListResponseMapperService {
     ) {}
 
     toPaginationResponse(
-        pets: any[],
+        pets: BreederPublicPetRecord[],
         status: string | undefined,
         page: number,
         limit: number,
@@ -27,13 +28,13 @@ export class BreederPublicPetListResponseMapperService {
         const skip = (page - 1) * limit;
         const pagedPets = filteredPets.slice(skip, skip + limit);
 
-        const items = pagedPets.map((pet: any) => {
-            const birthDate = new Date(pet.birthDate);
+        const items = pagedPets.map((pet) => {
+            const birthDate = pet.birthDate;
             const now = new Date();
             const ageInMonths = Math.floor((now.getTime() - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30));
             const photos = fileUrlPort.generateMany(pet.photos || [], 60 * 24);
 
-            const parents: any[] = [];
+            const parents: BreederPetParentResult[] = [];
             if (pet.parentInfo?.mother) {
                 const mother = pet.parentInfo.mother;
                 const motherPhotos = fileUrlPort.generateMany(mother.photos || [], 60 * 24);

@@ -24,7 +24,7 @@ export class GetBreederPetDetailUseCase {
         }
 
         const pets = await this.breederPublicReaderPort.findActiveAvailablePetsByBreederId(breederId);
-        const pet = pets.find((item: any) => item._id?.toString() === petId);
+        const pet = pets.find((item) => String(item._id) === petId);
         if (!pet) {
             throw new BadRequestException('반려동물을 찾을 수 없습니다.');
         }

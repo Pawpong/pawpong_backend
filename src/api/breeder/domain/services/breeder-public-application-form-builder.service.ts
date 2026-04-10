@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import type { BreederPublicApplicationFormFieldRecord } from '../../application/ports/breeder-public-reader.port';
 
 @Injectable()
 export class BreederPublicApplicationFormBuilderService {
@@ -20,9 +21,9 @@ export class BreederPublicApplicationFormBuilderService {
         ];
     }
 
-    build(customQuestionsSource: any[]) {
+    build(customQuestionsSource: BreederPublicApplicationFormFieldRecord[]) {
         const standardQuestions = this.getStandardQuestions();
-        const customQuestions = (customQuestionsSource || []).map((q: any, index: number) => ({
+        const customQuestions = (customQuestionsSource || []).map((q, index: number) => ({
             id: q.id,
             type: q.type,
             label: q.label,

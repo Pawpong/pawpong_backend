@@ -28,7 +28,7 @@ export class GetBreederProfileUseCase {
             throw new BadRequestException('브리더를 찾을 수 없습니다.');
         }
 
-        if ((breeder as any).accountStatus === 'deleted') {
+        if (breeder.accountStatus === 'deleted') {
             throw new BadRequestException('탈퇴한 브리더의 프로필은 조회할 수 없습니다.');
         }
 

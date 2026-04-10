@@ -1,7 +1,46 @@
 export const BREEDER_PUBLIC_READER_PORT = 'BREEDER_PUBLIC_READER_PORT';
 
+export interface BreederPublicObjectIdLike {
+    toString(): string;
+}
+
+export interface BreederPublicFavoriteRecord {
+    favoriteBreederId: string;
+}
+
+export interface BreederPublicApplicationFormFieldRecord {
+    id: string;
+    type: string;
+    label: string;
+    required: boolean;
+    options?: string[];
+    placeholder?: string;
+    order?: number;
+}
+
+export interface BreederPublicReviewPreviewRecord {
+    reviewId?: string;
+    writtenAt?: Date;
+    type?: string;
+    adopterName?: string;
+    rating?: number;
+    content?: string;
+    photos?: string[];
+    isVisible?: boolean;
+}
+
+export interface BreederPublicParentPetEmbeddedRecord {
+    _id: BreederPublicObjectIdLike;
+    name: string;
+    breed: string;
+    gender: string;
+    birthDate: Date;
+    photos?: string[];
+    photoFileName?: string;
+}
+
 export interface BreederPublicBreederRecord {
-    _id: unknown;
+    _id: BreederPublicObjectIdLike;
     name: string;
     emailAddress: string;
     socialAuthInfo?: {
@@ -29,6 +68,8 @@ export interface BreederPublicBreederRecord {
     petType?: string;
     detailBreed?: string;
     breeds?: string[];
+    availablePets?: Array<unknown>;
+    favoriteBreederList?: BreederPublicFavoriteRecord[];
     stats?: {
         totalFavorites?: number;
         totalReviews?: number;
@@ -36,45 +77,68 @@ export interface BreederPublicBreederRecord {
         profileViews?: number;
         [key: string]: unknown;
     };
-    applicationForm?: Array<{
-        id?: string;
-        type?: string;
-        label?: string;
-        required?: boolean;
-        options?: string[];
-        placeholder?: string;
-    }>;
-    reviews?: Array<{
-        reviewId?: string;
-        writtenAt?: Date;
-        type?: string;
-        adopterName?: string;
-        rating?: number;
-        content?: string;
-        photos?: string[];
-        isVisible?: boolean;
-    }>;
+    applicationForm?: BreederPublicApplicationFormFieldRecord[];
+    reviews?: BreederPublicReviewPreviewRecord[];
     createdAt?: Date;
     accountStatus?: string;
     [key: string]: unknown;
 }
 
 export interface BreederPublicPetRecord {
-    _id: unknown;
+    _id: BreederPublicObjectIdLike;
     name: string;
     breed: string;
     gender: string;
-    birthDate?: Date;
-    price?: number;
-    status?: string;
+    birthDate: Date;
+    price: number;
+    status: string;
     description?: string;
     photos?: string[];
     photoFileName?: string;
+    vaccinations?: string[];
+    healthRecords?: string[];
+    microchipNumber?: string;
+    availableFrom?: Date;
+    specialNotes?: string;
+    createdAt: Date;
     parentInfo?: {
-        mother?: any;
-        father?: any;
+        mother?: BreederPublicParentPetEmbeddedRecord | null;
+        father?: BreederPublicParentPetEmbeddedRecord | null;
     };
     [key: string]: unknown;
+}
+
+export interface BreederPublicParentPetRecord {
+    _id: BreederPublicObjectIdLike;
+    name: string;
+    breed: string;
+    gender: string;
+    birthDate: Date;
+    photoFileName?: string;
+    healthRecords?: string[];
+    description?: string;
+    photos?: string[];
+    [key: string]: unknown;
+}
+
+export interface BreederPublicReviewRecord {
+    _id: BreederPublicObjectIdLike;
+    applicationId?: {
+        _id?: BreederPublicObjectIdLike;
+        petName?: string;
+        toString(): string;
+    };
+    adopterId?:
+        | {
+              nickname?: string;
+              toString(): string;
+          }
+    content: string;
+    writtenAt: Date;
+    type: string;
+    replyContent?: string | null;
+    replyWrittenAt?: Date | null;
+    replyUpdatedAt?: Date | null;
 }
 
 export interface BreederPublicReaderPort {
@@ -91,10 +155,10 @@ export interface BreederPublicReaderPort {
     findBreederIdsWithAvailablePets(): Promise<string[]>;
     incrementProfileViews(breederId: string): Promise<void>;
     findActiveAvailablePetsByBreederId(breederId: string): Promise<BreederPublicPetRecord[]>;
-    findActiveParentPetsByBreederId(breederId: string): Promise<BreederPublicPetRecord[]>;
+    findActiveParentPetsByBreederId(breederId: string): Promise<BreederPublicParentPetRecord[]>;
     findVisibleBreederReviewsByBreederId(
         breederId: string,
         page: number,
         limit: number,
-    ): Promise<{ reviews: any[]; total: number }>;
+    ): Promise<{ reviews: BreederPublicReviewRecord[]; total: number }>;
 }

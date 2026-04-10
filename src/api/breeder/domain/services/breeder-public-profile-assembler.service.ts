@@ -2,8 +2,12 @@ import { Injectable } from '@nestjs/common';
 
 import { PriceDisplayType } from '../../../../common/enum/user.enum';
 import type { BreederFileUrlPort } from '../../application/ports/breeder-file-url.port';
-import type { BreederPublicBreederRecord, BreederPublicPetRecord } from '../../application/ports/breeder-public-reader.port';
-import type { BreederProfileResult } from '../../application/types/breeder-result.type';
+import type {
+    BreederPublicBreederRecord,
+    BreederPublicParentPetRecord,
+    BreederPublicPetRecord,
+} from '../../application/ports/breeder-public-reader.port';
+import type { BreederProfileParentCardResult, BreederProfileResult } from '../../application/types/breeder-result.type';
 import { BreederBirthDateFormatterService } from './breeder-birth-date-formatter.service';
 
 @Injectable()
@@ -14,7 +18,7 @@ export class BreederPublicProfileAssemblerService {
         breeder: BreederPublicBreederRecord,
         isFavorited: boolean,
         availablePets: BreederPublicPetRecord[],
-        parentPets: BreederPublicPetRecord[],
+        parentPets: BreederPublicParentPetRecord[],
         breederFileUrlPort: BreederFileUrlPort,
     ): BreederProfileResult {
         const profilePrice = breeder.profile?.priceRange || { min: 0, max: 0, display: 'not_set' };
@@ -36,7 +40,7 @@ export class BreederPublicProfileAssemblerService {
             authProvider: breeder.socialAuthInfo?.authProvider || 'local',
             breederLevel: breeder.verification?.level || 'new',
             petType: breeder.petType || 'dog',
-            detailBreed: (breeder as any).detailBreed,
+            detailBreed: breeder.detailBreed,
             breeds: breeder.breeds || [],
             location: breeder.profile?.location
                 ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
@@ -93,7 +97,7 @@ export class BreederPublicProfileAssemblerService {
     }
 
     private toParentCards(parentInfo: BreederPublicPetRecord['parentInfo'], breederFileUrlPort: BreederFileUrlPort) {
-        const parentCards: any[] = [];
+        const parentCards: BreederProfileParentCardResult[] = [];
 
         if (parentInfo?.mother) {
             const motherPhotos = breederFileUrlPort.generateMany(parentInfo.mother.photos || [], 60 * 24);

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import type {
     BreederPublicBreederRecord,
+    BreederPublicParentPetRecord,
     BreederPublicPetRecord,
+    BreederPublicReviewRecord,
     BreederPublicReaderPort,
 } from '../application/ports/breeder-public-reader.port';
 import { BreederPublicRepository } from '../repository/breeder-public.repository';
@@ -18,22 +20,15 @@ export class BreederPublicReaderAdapter implements BreederPublicReaderPort {
     ): Promise<{ breeders: BreederPublicBreederRecord[]; total: number }> {
         const [breeders, total] = await this.breederPublicRepository.searchPublicBreeders(filter, sortOrder, page, limit);
 
-        return {
-            breeders: breeders as unknown as BreederPublicBreederRecord[],
-            total,
-        };
+        return { breeders, total };
     }
 
     async findPopularPublicBreeders(limit: number): Promise<BreederPublicBreederRecord[]> {
-        const breeders = await this.breederPublicRepository.findPopularPublicBreeders(limit);
-
-        return breeders as unknown as BreederPublicBreederRecord[];
+        return this.breederPublicRepository.findPopularPublicBreeders(limit);
     }
 
     async findPublicBreederById(breederId: string): Promise<BreederPublicBreederRecord | null> {
-        const breeder = await this.breederPublicRepository.findPublicBreederById(breederId);
-
-        return (breeder as unknown as BreederPublicBreederRecord | null) || null;
+        return this.breederPublicRepository.findPublicBreederById(breederId);
     }
 
     async findAdopterFavoriteBreederIds(userId: string): Promise<string[] | null> {
@@ -53,22 +48,18 @@ export class BreederPublicReaderAdapter implements BreederPublicReaderPort {
     }
 
     async findActiveAvailablePetsByBreederId(breederId: string): Promise<BreederPublicPetRecord[]> {
-        const availablePets = await this.breederPublicRepository.findActiveAvailablePetsByBreederId(breederId);
-
-        return availablePets as unknown as BreederPublicPetRecord[];
+        return this.breederPublicRepository.findActiveAvailablePetsByBreederId(breederId);
     }
 
-    async findActiveParentPetsByBreederId(breederId: string): Promise<BreederPublicPetRecord[]> {
-        const parentPets = await this.breederPublicRepository.findActiveParentPetsByBreederId(breederId);
-
-        return parentPets as unknown as BreederPublicPetRecord[];
+    async findActiveParentPetsByBreederId(breederId: string): Promise<BreederPublicParentPetRecord[]> {
+        return this.breederPublicRepository.findActiveParentPetsByBreederId(breederId);
     }
 
     async findVisibleBreederReviewsByBreederId(
         breederId: string,
         page: number,
         limit: number,
-    ): Promise<{ reviews: any[]; total: number }> {
+    ): Promise<{ reviews: BreederPublicReviewRecord[]; total: number }> {
         const [reviews, total] = await this.breederPublicRepository.findVisibleBreederReviewsByBreederId(
             breederId,
             page,

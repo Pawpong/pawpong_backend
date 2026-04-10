@@ -19,7 +19,7 @@ export class BreederSearchResultMapperService {
                 : undefined,
             profilePhotos: breederFileUrlPort.generateMany(breeder.profile?.representativePhotos || [], 60 * 24),
             verificationStatus: breeder.verification?.status || 'pending',
-            availablePets: (breeder as any).availablePets?.length || 0,
+            availablePets: breeder.availablePets?.length || 0,
         };
     }
 }

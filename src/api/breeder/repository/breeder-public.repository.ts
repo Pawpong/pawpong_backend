@@ -7,6 +7,12 @@ import { AvailablePet, AvailablePetDocument } from '../../../schema/available-pe
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 import { BreederReview, BreederReviewDocument } from '../../../schema/breeder-review.schema';
 import { ParentPet, ParentPetDocument } from '../../../schema/parent-pet.schema';
+import type {
+    BreederPublicBreederRecord,
+    BreederPublicParentPetRecord,
+    BreederPublicPetRecord,
+    BreederPublicReviewRecord,
+} from '../application/ports/breeder-public-reader.port';
 
 @Injectable()
 export class BreederPublicRepository {
@@ -18,7 +24,12 @@ export class BreederPublicRepository {
         @InjectModel(AvailablePet.name) private readonly availablePetModel: Model<AvailablePetDocument>,
     ) {}
 
-    searchPublicBreeders(filter: Record<string, unknown>, sortOrder: Record<string, 1 | -1>, page: number, limit: number) {
+    searchPublicBreeders(
+        filter: Record<string, unknown>,
+        sortOrder: Record<string, 1 | -1>,
+        page: number,
+        limit: number,
+    ): Promise<[BreederPublicBreederRecord[], number]> {
         const skip = (page - 1) * limit;
 
         return Promise.all([
@@ -29,12 +40,12 @@ export class BreederPublicRepository {
                 .skip(skip)
                 .limit(limit)
                 .lean()
-                .exec(),
+                .exec() as Promise<BreederPublicBreederRecord[]>,
             this.breederModel.countDocuments(filter).exec(),
         ]);
     }
 
-    findPopularPublicBreeders(limit: number) {
+    findPopularPublicBreeders(limit: number): Promise<BreederPublicBreederRecord[]> {
         return this.breederModel
             .find({
                 'verification.status': 'approved',
@@ -44,15 +55,15 @@ export class BreederPublicRepository {
             .sort({ 'stats.totalFavorites': -1, 'stats.averageRating': -1 })
             .limit(limit)
             .lean()
-            .exec();
+            .exec() as Promise<BreederPublicBreederRecord[]>;
     }
 
-    findPublicBreederById(breederId: string) {
+    findPublicBreederById(breederId: string): Promise<BreederPublicBreederRecord | null> {
         return this.breederModel
             .findById(breederId)
             .select('-password -socialAuth -receivedApplications -reports')
             .lean()
-            .exec();
+            .exec() as Promise<BreederPublicBreederRecord | null>;
     }
 
     async findAdopterFavoriteBreederIds(userId: string): Promise<string[] | null> {
@@ -61,7 +72,7 @@ export class BreederPublicRepository {
             return null;
         }
 
-        return (adopter.favoriteBreederList || []).map((favorite: any) => favorite.favoriteBreederId);
+        return (adopter.favoriteBreederList || []).map((favorite) => favorite.favoriteBreederId);
     }
 
     async findBreederFavoriteBreederIds(userId: string): Promise<string[] | null> {
@@ -70,7 +81,7 @@ export class BreederPublicRepository {
             return null;
         }
 
-        return (((breeder as any).favoriteBreederList || []) as any[]).map((favorite) => favorite.favoriteBreederId);
+        return (breeder.favoriteBreederList || []).map((favorite) => favorite.favoriteBreederId);
     }
 
     async findBreederIdsWithAvailablePets(): Promise<string[]> {
@@ -86,20 +97,27 @@ export class BreederPublicRepository {
         await this.breederModel.findByIdAndUpdate(breederId, { $inc: { 'stats.profileViews': 1 } }).exec();
     }
 
-    findActiveAvailablePetsByBreederId(breederId: string) {
+    findActiveAvailablePetsByBreederId(breederId: string): Promise<BreederPublicPetRecord[]> {
         return this.availablePetModel
             .find({ breederId: new Types.ObjectId(breederId), isActive: true })
             .populate('parentInfo.mother')
             .populate('parentInfo.father')
             .lean()
-            .exec();
+            .exec() as Promise<BreederPublicPetRecord[]>;
     }
 
-    findActiveParentPetsByBreederId(breederId: string) {
-        return this.parentPetModel.find({ breederId: new Types.ObjectId(breederId), isActive: true }).lean().exec();
+    findActiveParentPetsByBreederId(breederId: string): Promise<BreederPublicParentPetRecord[]> {
+        return this.parentPetModel
+            .find({ breederId: new Types.ObjectId(breederId), isActive: true })
+            .lean()
+            .exec() as Promise<BreederPublicParentPetRecord[]>;
     }
 
-    findVisibleBreederReviewsByBreederId(breederId: string, page: number, limit: number) {
+    findVisibleBreederReviewsByBreederId(
+        breederId: string,
+        page: number,
+        limit: number,
+    ): Promise<[BreederPublicReviewRecord[], number]> {
         const breederOid = new Types.ObjectId(breederId);
         const skip = (page - 1) * limit;
 
@@ -112,7 +130,7 @@ export class BreederPublicRepository {
                 .populate('adopterId', 'nickname')
                 .populate('applicationId', 'petName')
                 .lean()
-                .exec(),
+                .exec() as Promise<BreederPublicReviewRecord[]>,
             this.breederReviewModel.countDocuments({ breederId: breederOid, isVisible: true }).exec(),
         ]);
     }

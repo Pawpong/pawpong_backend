@@ -1,16 +1,22 @@
 import { Injectable } from '@nestjs/common';
 
 import type { BreederFileUrlPort } from '../../application/ports/breeder-file-url.port';
+import type { BreederPublicParentPetRecord } from '../../application/ports/breeder-public-reader.port';
 
 @Injectable()
 export class BreederPublicParentPetListResponseMapperService {
-    toResponse(parentPets: any[], page: number | undefined, limit: number | undefined, fileUrlPort: BreederFileUrlPort) {
+    toResponse(
+        parentPets: BreederPublicParentPetRecord[],
+        page: number | undefined,
+        limit: number | undefined,
+        fileUrlPort: BreederFileUrlPort,
+    ) {
         const currentPage = page && page > 0 ? page : 1;
         const itemsPerPage = limit && limit > 0 ? limit : 0;
         const skip = itemsPerPage > 0 ? (currentPage - 1) * itemsPerPage : 0;
         const pagedParentPets = itemsPerPage > 0 ? parentPets.slice(skip, skip + itemsPerPage) : parentPets;
 
-        const items = pagedParentPets.map((pet: any) => ({
+        const items = pagedParentPets.map((pet) => ({
             petId: pet._id.toString(),
             name: pet.name,
             breed: pet.breed,
