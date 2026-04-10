@@ -1,6 +1,7 @@
 import { Body, Delete, Get, Param, Post, Put } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
+import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import { CreateProfileBannerUseCase } from './application/use-cases/create-profile-banner.use-case';
 import { DeleteProfileBannerUseCase } from './application/use-cases/delete-profile-banner.use-case';
 import { GetAllProfileBannersUseCase } from './application/use-cases/get-all-profile-banners.use-case';
@@ -43,7 +44,7 @@ export class BreederManagementAdminProfileBannersController {
     @Put('profile-banner/:bannerId')
     @ApiUpdateProfileBannerAdminEndpoint()
     async updateProfileBanner(
-        @Param('bannerId') bannerId: string,
+        @Param('bannerId', new MongoObjectIdPipe('배너', '올바르지 않은 배너 ID 형식입니다.')) bannerId: string,
         @Body() data: ProfileBannerUpdateRequestDto,
     ): Promise<ApiResponseDto<ProfileBannerResponseDto>> {
         const banner = await this.updateProfileBannerUseCase.execute(bannerId, data);
@@ -52,7 +53,9 @@ export class BreederManagementAdminProfileBannersController {
 
     @Delete('profile-banner/:bannerId')
     @ApiDeleteProfileBannerAdminEndpoint()
-    async deleteProfileBanner(@Param('bannerId') bannerId: string): Promise<ApiResponseDto<null>> {
+    async deleteProfileBanner(
+        @Param('bannerId', new MongoObjectIdPipe('배너', '올바르지 않은 배너 ID 형식입니다.')) bannerId: string,
+    ): Promise<ApiResponseDto<null>> {
         await this.deleteProfileBannerUseCase.execute(bannerId);
         return ApiResponseDto.success(null, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerDeleted);
     }
