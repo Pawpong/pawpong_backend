@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { Notice } from '../../../../schema/notice.schema';
 import { NoticeSnapshot } from '../../application/ports/notice-reader.port';
 import { NoticeWriterPort } from '../application/ports/notice-writer.port';
 import { NoticeRepository } from '../../repository/notice.repository';
@@ -26,7 +27,7 @@ export class NoticeMongooseWriterAdapter implements NoticeWriterPort {
         return this.noticeRepository.deleteById(noticeId);
     }
 
-    private toSnapshot(notice: any): NoticeSnapshot {
+    private toSnapshot(notice: Notice): NoticeSnapshot {
         return {
             id: notice._id.toString(),
             title: notice.title,

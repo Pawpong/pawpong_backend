@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
+import { Notice } from '../../../schema/notice.schema';
 import { NoticeReaderPort, NoticeSnapshot, NoticeStatus } from '../application/ports/notice-reader.port';
 import { NoticeRepository } from '../repository/notice.repository';
 
@@ -26,7 +27,7 @@ export class NoticeMongooseReaderAdapter implements NoticeReaderPort {
         await this.noticeRepository.incrementViewCount(noticeId);
     }
 
-    private toSnapshot(notice: any): NoticeSnapshot {
+    private toSnapshot(notice: Notice): NoticeSnapshot {
         return {
             id: notice._id.toString(),
             title: notice.title,
