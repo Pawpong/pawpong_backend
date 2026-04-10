@@ -5,6 +5,7 @@ import {
     GET_FEED_VIDEO_LIKE_STATUS_USE_CASE,
     type GetFeedVideoLikeStatusUseCasePort,
 } from '../like/application/ports/feed-like-interaction.port';
+import type { FeedLikeStatusResult } from '../like/application/types/feed-like-result.type';
 import { LikeStatusResponseDto } from '../like/dto/response/like-response.dto';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
 import { ApiGetFeedVideoLikeStatusEndpoint } from './swagger';
@@ -22,6 +23,7 @@ export class FeedVideoLikeStatusController {
         @Param('videoId') videoId: string,
         @CurrentUser('userId') userId: string,
     ): Promise<LikeStatusResponseDto> {
-        return this.getLikeStatusUseCase.execute(videoId, userId);
+        return (await this.getLikeStatusUseCase.execute(videoId, userId)) as
+            LikeStatusResponseDto & FeedLikeStatusResult;
     }
 }

@@ -1,6 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import { FeedTagUploaderSnapshot, FeedTagVideoSnapshot } from '../../application/ports/feed-tag-reader.port';
+import type {
+    FeedTagSearchResult,
+    FeedTagUploaderResult,
+} from '../../application/types/feed-tag-result.type';
 import { FeedVideoSummaryPresentationService } from '../../../domain/services/feed-video-summary-presentation.service';
 
 type ThumbnailUrlResolver = (fileKey?: string) => string | Promise<string | null> | null;
@@ -16,7 +20,7 @@ export class FeedTagPresentationService {
         limit: number,
         totalCount: number,
         resolveThumbnailUrl: ThumbnailUrlResolver,
-    ) {
+    ): Promise<FeedTagSearchResult> {
         const items = await Promise.all(
             videos.map(async (video) => ({
                 videoId: video.id,
@@ -38,7 +42,7 @@ export class FeedTagPresentationService {
         };
     }
 
-    private toUploaderResponse(uploader: FeedTagUploaderSnapshot | null): any {
+    private toUploaderResponse(uploader: FeedTagUploaderSnapshot | null): FeedTagUploaderResult | null {
         return this.feedVideoSummaryPresentationService.toUploaderResponse(uploader);
     }
 }

@@ -5,6 +5,7 @@ import {
     UPDATE_FEED_VIDEO_COMMENT_USE_CASE,
     type UpdateFeedVideoCommentUseCasePort,
 } from '../comment/application/ports/feed-comment-interaction.port';
+import type { FeedCommentUpdateResult } from '../comment/application/types/feed-comment-result.type';
 import { UpdateCommentRequestDto } from '../comment/dto/request/comment-request.dto';
 import { CommentUpdateResponseDto } from '../comment/dto/response/comment-response.dto';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
@@ -24,6 +25,7 @@ export class FeedVideoCommentUpdateController {
         @CurrentUser('userId') userId: string,
         @Body() dto: UpdateCommentRequestDto,
     ): Promise<CommentUpdateResponseDto> {
-        return this.updateCommentUseCase.execute(commentId, userId, dto.content);
+        return (await this.updateCommentUseCase.execute(commentId, userId, dto.content)) as
+            CommentUpdateResponseDto & FeedCommentUpdateResult;
     }
 }

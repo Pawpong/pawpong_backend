@@ -6,6 +6,7 @@ import {
     CREATE_FEED_VIDEO_COMMENT_USE_CASE,
     type CreateFeedVideoCommentUseCasePort,
 } from '../comment/application/ports/feed-comment-interaction.port';
+import type { FeedCommentCreateResult } from '../comment/application/types/feed-comment-result.type';
 import { CreateCommentRequestDto } from '../comment/dto/request/comment-request.dto';
 import { CommentCreateResponseDto } from '../comment/dto/response/comment-response.dto';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
@@ -26,6 +27,12 @@ export class FeedVideoCommentCreateController {
         @CurrentActorType() actorType: ActorType,
         @Body() dto: CreateCommentRequestDto,
     ): Promise<CommentCreateResponseDto> {
-        return this.createCommentUseCase.execute(videoId, userId, actorType, dto.content, dto.parentId);
+        return (await this.createCommentUseCase.execute(
+            videoId,
+            userId,
+            actorType,
+            dto.content,
+            dto.parentId,
+        )) as CommentCreateResponseDto & FeedCommentCreateResult;
     }
 }

@@ -3,10 +3,10 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
-import { FeedResponseDto } from '../../dto/response/video-response.dto';
 import { FEED_VIDEO_READER, type FeedVideoReaderPort } from '../ports/feed-video-reader.port';
 import { FeedVideoPresentationService } from '../../domain/services/feed-video-presentation.service';
 import { FeedVideoAssetUrlService } from '../../infrastructure/feed-video-asset-url.service';
+import type { FeedVideoFeedResult } from '../types/feed-video-result.type';
 
 @Injectable()
 export class GetFeedUseCase {
@@ -20,9 +20,9 @@ export class GetFeedUseCase {
         private readonly feedCacheKeyService: FeedCacheKeyService,
     ) {}
 
-    async execute(page: number = 1, limit: number = 20): Promise<FeedResponseDto> {
+    async execute(page: number = 1, limit: number = 20): Promise<FeedVideoFeedResult> {
         const cacheKey = this.feedCacheKeyService.getFeedKey(page, limit);
-        const cached = await this.cacheManager.get<FeedResponseDto>(cacheKey);
+        const cached = await this.cacheManager.get<FeedVideoFeedResult>(cacheKey);
         if (cached) {
             return cached;
         }

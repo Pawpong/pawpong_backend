@@ -7,6 +7,7 @@ import { FEED_VIDEO_READER, type FeedVideoReaderPort } from '../ports/feed-video
 import { FeedVideoPresentationService } from '../../domain/services/feed-video-presentation.service';
 import { FeedVideoAssetUrlService } from '../../infrastructure/feed-video-asset-url.service';
 import { VideoStatus } from '../../../../../schema/video.schema';
+import type { FeedVideoMetaQueryResult } from '../types/feed-video-result.type';
 
 @Injectable()
 export class GetVideoMetaUseCase {
@@ -20,9 +21,9 @@ export class GetVideoMetaUseCase {
         private readonly feedCacheKeyService: FeedCacheKeyService,
     ) {}
 
-    async execute(videoId: string): Promise<any> {
+    async execute(videoId: string): Promise<FeedVideoMetaQueryResult> {
         const cacheKey = this.feedCacheKeyService.getVideoMetaKey(videoId);
-        const cached = await this.cacheManager.get(cacheKey);
+        const cached = await this.cacheManager.get<FeedVideoMetaQueryResult>(cacheKey);
         if (cached) {
             return cached;
         }
