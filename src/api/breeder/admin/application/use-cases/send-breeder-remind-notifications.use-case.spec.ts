@@ -1,6 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 
-import { RemindType } from '../../dto/request/breeder-remind-request.dto';
+import { RemindType } from '../../constants/breeder-remind.enum';
 import { SendBreederRemindNotificationsUseCase } from './send-breeder-remind-notifications.use-case';
 import { BreederAdminActivityLogFactoryService } from '../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../domain/services/breeder-admin-policy.service';

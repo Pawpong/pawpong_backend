@@ -4,7 +4,7 @@ import { NotificationType, VerificationStatus } from '../../../../../common/enum
 import {
     BreederAdminReminderEmailTemplate,
 } from '../../application/ports/breeder-admin-notifier.port';
-import { RemindType } from '../../dto/request/breeder-remind-request.dto';
+import { RemindType } from '../../constants/breeder-remind.enum';
 
 export interface BreederAdminReminderPlan {
     requiredVerificationStatus: VerificationStatus;

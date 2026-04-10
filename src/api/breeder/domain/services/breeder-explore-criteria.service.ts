@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import { SearchBreederRequestDto, BreederSortBy } from '../../dto/request/search-breeder-request.dto';
+import { SearchBreederRequestDto } from '../../dto/request/search-breeder-request.dto';
+import { BreederSortBy } from '../../constants/breeder-search.enum';
 
 @Injectable()
 export class BreederExploreCriteriaService {
