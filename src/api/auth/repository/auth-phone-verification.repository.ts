@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
@@ -19,9 +19,12 @@ export class AuthPhoneVerificationRepository {
     }
 
     async hasRegisteredPhone(phoneNumber: string): Promise<boolean> {
+        const breederPhoneQuery: FilterQuery<BreederDocument> = {
+            $or: [{ phoneNumber }, { phone: phoneNumber }],
+        };
         const [adopter, breeder] = await Promise.all([
             this.adopterModel.exists({ phoneNumber }).exec(),
-            this.breederModel.exists({ $or: [{ phoneNumber }, { phone: phoneNumber }] } as any).exec(),
+            this.breederModel.exists(breederPhoneQuery).exec(),
         ]);
 
         return !!adopter || !!breeder;

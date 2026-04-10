@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 
 import { AuthAdopterRepository } from '../repository/auth-adopter.repository';
 import { AuthBreederRepository } from '../repository/auth-breeder.repository';
-import { AuthRegistrationPort, type AuthRegistrationRecord } from '../application/ports/auth-registration.port';
+import { AuthRegistrationPort } from '../application/ports/auth-registration.port';
+import type { AuthRegistrationRecord } from '../types/auth-record.type';
 
 @Injectable()
 export class AuthRegistrationAdapter implements AuthRegistrationPort {
@@ -12,19 +13,19 @@ export class AuthRegistrationAdapter implements AuthRegistrationPort {
     ) {}
 
     findAdopterByEmail(email: string): Promise<AuthRegistrationRecord | null> {
-        return this.authAdopterRepository.findByEmail(email) as Promise<AuthRegistrationRecord | null>;
+        return this.authAdopterRepository.findByEmail(email);
     }
 
     findAdopterByNickname(nickname: string): Promise<AuthRegistrationRecord | null> {
-        return this.authAdopterRepository.findByNickname(nickname) as Promise<AuthRegistrationRecord | null>;
+        return this.authAdopterRepository.findByNickname(nickname);
     }
 
     findAdopterBySocialAuth(provider: string, providerId: string): Promise<AuthRegistrationRecord | null> {
-        return this.authAdopterRepository.findBySocialAuth(provider, providerId) as Promise<AuthRegistrationRecord | null>;
+        return this.authAdopterRepository.findBySocialAuth(provider, providerId);
     }
 
-    createAdopter(adopterData: Record<string, any>): Promise<AuthRegistrationRecord> {
-        return this.authAdopterRepository.create(adopterData) as Promise<AuthRegistrationRecord>;
+    createAdopter(adopterData: Record<string, unknown>): Promise<AuthRegistrationRecord> {
+        return this.authAdopterRepository.create(adopterData);
     }
 
     async saveAdopterRefreshToken(userId: string, refreshTokenHash: string): Promise<void> {
@@ -35,19 +36,19 @@ export class AuthRegistrationAdapter implements AuthRegistrationPort {
     }
 
     findBreederByEmail(email: string): Promise<AuthRegistrationRecord | null> {
-        return this.authBreederRepository.findByEmail(email) as Promise<AuthRegistrationRecord | null>;
+        return this.authBreederRepository.findByEmail(email);
     }
 
     findBreederByName(breederName: string): Promise<AuthRegistrationRecord | null> {
-        return this.authBreederRepository.findByBreederName(breederName) as Promise<AuthRegistrationRecord | null>;
+        return this.authBreederRepository.findByBreederName(breederName);
     }
 
     findBreederBySocialAuth(provider: string, providerId: string): Promise<AuthRegistrationRecord | null> {
-        return this.authBreederRepository.findBySocialAuth(provider, providerId) as Promise<AuthRegistrationRecord | null>;
+        return this.authBreederRepository.findBySocialAuth(provider, providerId);
     }
 
-    createBreeder(breederData: Record<string, any>): Promise<AuthRegistrationRecord> {
-        return this.authBreederRepository.create(breederData) as Promise<AuthRegistrationRecord>;
+    createBreeder(breederData: Record<string, unknown>): Promise<AuthRegistrationRecord> {
+        return this.authBreederRepository.create(breederData);
     }
 
     async saveBreederRefreshToken(userId: string, refreshTokenHash: string): Promise<void> {

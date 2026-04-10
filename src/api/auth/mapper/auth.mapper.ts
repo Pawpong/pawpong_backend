@@ -7,6 +7,26 @@ import {
     type RegisterAdopterAuthSignupResult,
     type RegisterBreederAuthSignupResult,
 } from '../application/types/auth-signup.type';
+import type {
+    AuthParsedSocialAuthInfo,
+    AuthRegistrationRecord,
+    AuthSocialLoginUserRecord,
+    AuthVerificationUploadMap,
+} from '../types/auth-record.type';
+
+type AuthTokenPair = {
+    accessToken: string;
+    refreshToken: string;
+};
+
+type AuthTokenBundle = AuthTokenPair & {
+    accessTokenExpiresIn: number;
+    refreshTokenExpiresIn: number;
+};
+
+type AuthJwtSigner = {
+    sign(payload: Record<string, unknown>, options: { expiresIn: string }): string;
+};
 
 /**
  * Auth 도메인 매퍼
@@ -30,13 +50,13 @@ export class AuthMapper {
      * @returns 입양자 회원가입 결과
      */
     static toAdopterRegisterResponse(
-        savedAdopter: any,
-        tokens: { accessToken: string; refreshToken: string },
+        savedAdopter: AuthRegistrationRecord,
+        tokens: AuthTokenPair,
     ): RegisterAdopterAuthSignupResult {
         return {
             adopterId: savedAdopter._id.toString(),
             email: savedAdopter.emailAddress,
-            nickname: savedAdopter.nickname,
+            nickname: savedAdopter.nickname || '',
             phoneNumber: savedAdopter.phoneNumber || '',
             profileImage: savedAdopter.profileImageFileName || '',
             userRole: 'adopter',
@@ -55,20 +75,20 @@ export class AuthMapper {
      * @returns 브리더 회원가입 결과
      */
     static toBreederRegisterResponse(
-        savedBreeder: any,
-        tokens: { accessToken: string; refreshToken: string },
+        savedBreeder: AuthRegistrationRecord,
+        tokens: AuthTokenPair,
     ): RegisterBreederAuthSignupResult {
         return {
             breederId: savedBreeder._id.toString(),
             email: savedBreeder.emailAddress,
-            breederName: savedBreeder.name,
+            breederName: savedBreeder.name || savedBreeder.nickname || '',
             breederLocation:
                 `${savedBreeder.profile?.location?.city || ''} ${savedBreeder.profile?.location?.district || ''}`.trim(),
-            animal: savedBreeder.petType,
-            breeds: savedBreeder.breeds,
-            plan: savedBreeder.verification.plan,
-            level: savedBreeder.verification.level,
-            verificationStatus: savedBreeder.verification.status,
+            animal: savedBreeder.petType || '',
+            breeds: savedBreeder.breeds || [],
+            plan: savedBreeder.verification?.plan || '',
+            level: savedBreeder.verification?.level || '',
+            verificationStatus: savedBreeder.verification?.status || '',
             createdAt: savedBreeder.createdAt?.toISOString() || new Date().toISOString(),
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
@@ -84,13 +104,8 @@ export class AuthMapper {
      * @returns 소셜 회원가입 완료 결과
      */
     static toSocialRegistrationResponse(
-        savedUser: any,
-        tokens: {
-            accessToken: string;
-            refreshToken: string;
-            accessTokenExpiresIn: number;
-            refreshTokenExpiresIn: number;
-        },
+        savedUser: AuthRegistrationRecord,
+        tokens: AuthTokenBundle,
         role: 'adopter' | 'breeder',
         message: string,
     ): AuthResult {
@@ -102,10 +117,10 @@ export class AuthMapper {
             userInfo: {
                 userId: savedUser._id.toString(),
                 emailAddress: savedUser.emailAddress,
-                nickname: role === 'adopter' ? savedUser.nickname : savedUser.name,
+                nickname: role === 'adopter' ? savedUser.nickname || '' : savedUser.name || savedUser.nickname || '',
                 userRole: role,
                 accountStatus: savedUser.accountStatus,
-                profileImageFileName: savedUser.profileImageFileName,
+                profileImageFileName: savedUser.profileImageFileName ?? undefined,
             },
             message,
         };
@@ -119,13 +134,8 @@ export class AuthMapper {
      * @returns 소셜 로그인 토큰 응답
      */
     static toSocialLoginTokenResponse(
-        user: any,
-        tokens: {
-            accessToken: string;
-            refreshToken: string;
-            accessTokenExpiresIn: number;
-            refreshTokenExpiresIn: number;
-        },
+        user: AuthSocialLoginUserRecord,
+        tokens: AuthTokenBundle,
     ): {
         accessToken: string;
         refreshToken: string;
@@ -161,7 +171,7 @@ export class AuthMapper {
      * @returns 서류 제출 응답 데이터
      */
     static toDocumentSubmitResponse(
-        breeder: any,
+        breeder: AuthRegistrationRecord,
         breederLevel: 'elite' | 'new',
         documents: {
             idCardUrl: string;
@@ -174,12 +184,12 @@ export class AuthMapper {
     ): {
         breederId: string;
         verificationStatus: string;
-        uploadedDocuments: any;
+        uploadedDocuments: AuthVerificationUploadMap;
         isDocumentsComplete: boolean;
         submittedAt: Date;
         estimatedProcessingTime: string;
     } {
-        const uploadedDocuments: any = {
+        const uploadedDocuments: AuthVerificationUploadMap = {
             idCard: documents.idCardUrl,
             animalProductionLicense: documents.animalProductionLicenseUrl,
         };
@@ -195,10 +205,10 @@ export class AuthMapper {
 
         return {
             breederId: breeder._id.toString(),
-            verificationStatus: breeder.verification.status,
+            verificationStatus: breeder.verification?.status || '',
             uploadedDocuments,
             isDocumentsComplete: true,
-            submittedAt: breeder.verification.submittedAt,
+            submittedAt: breeder.verification?.submittedAt || new Date(),
             estimatedProcessingTime: '3-5일',
         };
     }
@@ -209,14 +219,14 @@ export class AuthMapper {
      * @param adopter 입양자 Document
      * @returns 소셜 유저 체크 응답
      */
-    static toSocialUserCheckResponseAdopter(adopter: any): SocialCheckUserResult {
+    static toSocialUserCheckResponseAdopter(adopter: AuthRegistrationRecord): SocialCheckUserResult {
         return {
             exists: true,
             userRole: 'adopter',
             userId: adopter._id.toString(),
             email: adopter.emailAddress,
-            nickname: adopter.nickname,
-            profileImageFileName: adopter.profileImageFileName,
+            nickname: adopter.nickname || '',
+            profileImageFileName: adopter.profileImageFileName ?? undefined,
         };
     }
 
@@ -226,14 +236,14 @@ export class AuthMapper {
      * @param breeder 브리더 Document
      * @returns 소셜 유저 체크 응답
      */
-    static toSocialUserCheckResponseBreeder(breeder: any): SocialCheckUserResult {
+    static toSocialUserCheckResponseBreeder(breeder: AuthRegistrationRecord): SocialCheckUserResult {
         return {
             exists: true,
             userRole: 'breeder',
             userId: breeder._id.toString(),
             email: breeder.emailAddress,
-            nickname: breeder.name,
-            profileImageFileName: breeder.profileImageFileName,
+            nickname: breeder.name || breeder.nickname || '',
+            profileImageFileName: breeder.profileImageFileName ?? undefined,
         };
     }
 
@@ -312,13 +322,8 @@ export class AuthMapper {
         userId: string,
         email: string,
         role: string,
-        jwtService: any,
-    ): {
-        accessToken: string;
-        refreshToken: string;
-        accessTokenExpiresIn: number;
-        refreshTokenExpiresIn: number;
-    } {
+        jwtService: AuthJwtSigner,
+    ): AuthTokenBundle {
         const payload = {
             sub: userId,
             email,
@@ -352,7 +357,7 @@ export class AuthMapper {
      * @param tempId 임시 ID (예: "temp_kakao_4479198661_1759826027884")
      * @returns 파싱된 소셜 정보 또는 undefined
      */
-    static parseSocialAuthInfo(tempId?: string, provider?: string): any | undefined {
+    static parseSocialAuthInfo(tempId?: string, provider?: string): AuthParsedSocialAuthInfo | undefined {
         if (!tempId || !provider) {
             return undefined;
         }

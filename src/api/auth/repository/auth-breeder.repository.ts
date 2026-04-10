@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
+import type { AuthRegistrationRecord } from '../types/auth-record.type';
 
 /**
  * Auth 도메인용 Breeder Repository
@@ -24,42 +25,42 @@ export class AuthBreederRepository {
     /**
      * ID로 브리더 조회
      */
-    async findById(id: string): Promise<BreederDocument | null> {
-        return this.breederModel.findById(id).exec() as Promise<BreederDocument | null>;
+    async findById(id: string): Promise<AuthRegistrationRecord | null> {
+        return this.breederModel.findById(id).exec();
     }
 
     /**
      * 이메일로 브리더 조회
      */
-    async findByEmail(email: string): Promise<BreederDocument | null> {
-        return this.breederModel.findOne({ emailAddress: email }).exec() as Promise<BreederDocument | null>;
+    async findByEmail(email: string): Promise<AuthRegistrationRecord | null> {
+        return this.breederModel.findOne({ emailAddress: email }).exec();
     }
 
     /**
      * 소셜 인증 정보로 브리더 조회
      */
-    async findBySocialAuth(provider: string, providerId: string): Promise<BreederDocument | null> {
+    async findBySocialAuth(provider: string, providerId: string): Promise<AuthRegistrationRecord | null> {
         return this.breederModel
             .findOne({
                 'socialAuthInfo.authProvider': provider,
                 'socialAuthInfo.providerUserId': providerId,
             })
-            .exec() as Promise<BreederDocument | null>;
+            .exec();
     }
 
     /**
      * 브리더 상호명(name)으로 브리더 조회
      */
-    async findByBreederName(name: string): Promise<BreederDocument | null> {
-        return this.breederModel.findOne({ name }).exec() as Promise<BreederDocument | null>;
+    async findByBreederName(name: string): Promise<AuthRegistrationRecord | null> {
+        return this.breederModel.findOne({ name }).exec();
     }
 
     /**
      * 브리더 생성
      */
-    async create(breederData: Partial<Breeder>): Promise<BreederDocument> {
+    async create(breederData: Record<string, unknown>): Promise<AuthRegistrationRecord> {
         const breeder = new this.breederModel(breederData);
-        return breeder.save() as any;
+        return breeder.save();
     }
 
     /**

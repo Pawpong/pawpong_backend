@@ -1,9 +1,10 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
+import { JwtModule, type JwtModuleOptions } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigService } from '@nestjs/config';
 import { WinstonModule } from 'nest-winston';
 import { MongooseModule } from '@nestjs/mongoose';
+import type { StringValue } from 'ms';
 
 import { winstonConfig } from '../../common/config/winston.config';
 import { JwtStrategy } from '../../common/strategy/jwt.strategy';
@@ -140,13 +141,12 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         PassportModule,
         WinstonModule.forRoot(winstonConfig),
         JwtModule.registerAsync({
-            useFactory: async (configService: ConfigService) =>
-                ({
-                    secret: configService.get<string>('JWT_SECRET'),
+            useFactory: (configService: ConfigService): JwtModuleOptions => ({
+                    secret: configService.get<string>('JWT_SECRET') || '',
                     signOptions: {
-                        expiresIn: configService.get<string>('JWT_EXPIRATION') || '24h',
+                        expiresIn: (configService.get<string>('JWT_EXPIRATION') || '24h') as StringValue,
                     },
-                }) as any,
+                }),
             inject: [ConfigService],
         }),
     ],
