@@ -1,23 +1,22 @@
 import { Injectable } from '@nestjs/common';
 
-import { AppVersionCreateRequestDto } from '../../dto/request/app-version-create-request.dto';
-import { AppVersionUpdateRequestDto } from '../../dto/request/app-version-update-request.dto';
 import { AppVersionAdminSnapshot } from '../application/ports/app-version-admin-reader.port';
 import { AppVersionWriterPort } from '../application/ports/app-version-writer.port';
+import { type AppVersionCreateCommand, type AppVersionUpdateCommand } from '../application/types/app-version-command.type';
 import { AppVersionRepository } from '../../repository/app-version.repository';
 
 @Injectable()
 export class AppVersionMongooseWriterAdapter implements AppVersionWriterPort {
     constructor(private readonly appVersionRepository: AppVersionRepository) {}
 
-    async create(createData: AppVersionCreateRequestDto): Promise<AppVersionAdminSnapshot> {
+    async create(createData: AppVersionCreateCommand): Promise<AppVersionAdminSnapshot> {
         const appVersion = await this.appVersionRepository.create(createData);
         return this.toSnapshot(appVersion);
     }
 
     async update(
         appVersionId: string,
-        updateData: AppVersionUpdateRequestDto,
+        updateData: AppVersionUpdateCommand,
     ): Promise<AppVersionAdminSnapshot | null> {
         const appVersion = await this.appVersionRepository.update(appVersionId, updateData);
         if (!appVersion) {

@@ -1,11 +1,10 @@
-import { AppVersionCreateRequestDto } from '../../../dto/request/app-version-create-request.dto';
-import { AppVersionUpdateRequestDto } from '../../../dto/request/app-version-update-request.dto';
 import { AppVersionAdminSnapshot } from './app-version-admin-reader.port';
+import { type AppVersionCreateCommand, type AppVersionUpdateCommand } from '../types/app-version-command.type';
 
 export const APP_VERSION_WRITER = Symbol('APP_VERSION_WRITER');
 
 export interface AppVersionWriterPort {
-    create(createData: AppVersionCreateRequestDto): Promise<AppVersionAdminSnapshot>;
-    update(appVersionId: string, updateData: AppVersionUpdateRequestDto): Promise<AppVersionAdminSnapshot | null>;
+    create(createData: AppVersionCreateCommand): Promise<AppVersionAdminSnapshot>;
+    update(appVersionId: string, updateData: AppVersionUpdateCommand): Promise<AppVersionAdminSnapshot | null>;
     delete(appVersionId: string): Promise<boolean>;
 }
