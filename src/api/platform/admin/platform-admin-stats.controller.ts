@@ -3,6 +3,7 @@ import { Get, Query } from '@nestjs/common';
 import { CurrentUser } from '../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { GetPlatformStatsUseCase } from './application/use-cases/get-platform-stats.use-case';
+import type { PlatformAdminStatsResult } from './application/types/platform-admin-result.type';
 import { PlatformAdminProtectedController } from './decorator/platform-admin-controller.decorator';
 import { PlatformAdminResponseMessageService } from './domain/services/platform-admin-response-message.service';
 import { StatsFilterRequestDto } from './dto/request/stats-filter-request.dto';
@@ -23,6 +24,9 @@ export class PlatformAdminStatsController {
         @Query() filter: StatsFilterRequestDto,
     ): Promise<ApiResponseDto<AdminStatsResponseDto>> {
         const result = await this.getPlatformStatsUseCase.execute(userId, filter);
-        return ApiResponseDto.success(result, this.platformAdminResponseMessageService.platformStatsRetrieved());
+        return ApiResponseDto.success(
+            result as AdminStatsResponseDto & PlatformAdminStatsResult,
+            this.platformAdminResponseMessageService.platformStatsRetrieved(),
+        );
     }
 }

@@ -1,12 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
-import { AdminStatsResponseDto } from '../../dto/response/admin-stats-response.dto';
-import { MvpStatsResponseDto } from '../../dto/response/mvp-stats-response.dto';
 import { PlatformAdminMvpStatsSnapshot, PlatformAdminStatsSnapshot } from '../../application/ports/platform-admin-reader.port';
+import type { PlatformAdminMvpStatsResult, PlatformAdminStatsResult } from '../../application/types/platform-admin-result.type';
 
 @Injectable()
 export class PlatformAdminPresentationService {
-    toAdminStatsResponse(snapshot: PlatformAdminStatsSnapshot): AdminStatsResponseDto {
+    toAdminStatsResponse(snapshot: PlatformAdminStatsSnapshot): PlatformAdminStatsResult {
         return {
             userStatistics: snapshot.userStatistics,
             adoptionStatistics: snapshot.adoptionStatistics,
@@ -17,7 +16,7 @@ export class PlatformAdminPresentationService {
         };
     }
 
-    toMvpStatsResponse(snapshot: PlatformAdminMvpStatsSnapshot): MvpStatsResponseDto {
+    toMvpStatsResponse(snapshot: PlatformAdminMvpStatsSnapshot): PlatformAdminMvpStatsResult {
         return {
             activeUserStats: snapshot.activeUserStats,
             consultationStats: snapshot.consultationStats,

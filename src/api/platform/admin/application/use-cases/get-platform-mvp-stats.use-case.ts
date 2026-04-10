@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { MvpStatsResponseDto } from '../../dto/response/mvp-stats-response.dto';
 import { PLATFORM_ADMIN_READER, type PlatformAdminReaderPort } from '../ports/platform-admin-reader.port';
 import { PlatformAdminPresentationService } from '../../domain/services/platform-admin-presentation.service';
 import { PlatformAdminQueryPolicyService } from '../../domain/services/platform-admin-query-policy.service';
+import type { PlatformAdminMvpStatsResult } from '../types/platform-admin-result.type';
 
 @Injectable()
 export class GetPlatformMvpStatsUseCase {
@@ -14,7 +14,7 @@ export class GetPlatformMvpStatsUseCase {
         private readonly platformAdminPresentationService: PlatformAdminPresentationService,
     ) {}
 
-    async execute(adminId: string): Promise<MvpStatsResponseDto> {
+    async execute(adminId: string): Promise<PlatformAdminMvpStatsResult> {
         this.platformAdminQueryPolicyService.assertCanViewStatistics(
             await this.platformAdminReader.findAdminById(adminId),
             '통계 조회 권한이 없습니다.',
