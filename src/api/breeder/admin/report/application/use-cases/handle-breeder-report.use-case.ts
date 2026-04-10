@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { ReportActionResponseDto } from '../../dto/response/report-action-response.dto';
 import { BREEDER_REPORT_ADMIN_READER } from '../ports/breeder-report-admin-reader.port';
 import { BREEDER_REPORT_ADMIN_WRITER } from '../ports/breeder-report-admin-writer.port';
 import type { BreederReportAdminReaderPort } from '../ports/breeder-report-admin-reader.port';
@@ -9,6 +8,7 @@ import { BreederReportAdminPolicyService } from '../../domain/services/breeder-r
 import { BreederReportAdminActivityLogFactoryService } from '../../domain/services/breeder-report-admin-activity-log-factory.service';
 import { BreederReportAdminPresentationService } from '../../domain/services/breeder-report-admin-presentation.service';
 import type { BreederReportActionCommand } from '../types/breeder-report-admin-command.type';
+import type { BreederReportAdminActionResult } from '../types/breeder-report-admin-result.type';
 
 @Injectable()
 export class HandleBreederReportUseCase {
@@ -26,7 +26,7 @@ export class HandleBreederReportUseCase {
         adminId: string,
         reportId: string,
         actionData: BreederReportActionCommand,
-    ): Promise<ReportActionResponseDto> {
+    ): Promise<BreederReportAdminActionResult> {
         this.breederReportAdminPolicyService.assertCanManageBreeders(
             await this.breederReportAdminReader.findAdminById(adminId),
         );

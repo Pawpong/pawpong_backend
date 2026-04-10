@@ -21,6 +21,9 @@ export class BreederReportAdminQueryController {
         @Query() filter: ReportListRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<ReportListResponseDto>>> {
         const result = await this.getBreederReportsUseCase.execute(adminId, filter);
-        return ApiResponseDto.success(result, BREEDER_RESPONSE_MESSAGES.breederReportListRetrieved);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            BREEDER_RESPONSE_MESSAGES.breederReportListRetrieved,
+        );
     }
 }

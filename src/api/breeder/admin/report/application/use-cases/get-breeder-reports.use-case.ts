@@ -5,6 +5,7 @@ import type { BreederReportAdminReaderPort } from '../ports/breeder-report-admin
 import { BreederReportAdminPolicyService } from '../../domain/services/breeder-report-admin-policy.service';
 import { BreederReportAdminPresentationService } from '../../domain/services/breeder-report-admin-presentation.service';
 import type { BreederReportListQuery } from '../types/breeder-report-admin-command.type';
+import type { BreederReportAdminPageResult } from '../types/breeder-report-admin-result.type';
 
 @Injectable()
 export class GetBreederReportsUseCase {
@@ -15,7 +16,7 @@ export class GetBreederReportsUseCase {
         private readonly breederReportAdminPresentationService: BreederReportAdminPresentationService,
     ) {}
 
-    async execute(adminId: string, filter: BreederReportListQuery): Promise<any> {
+    async execute(adminId: string, filter: BreederReportListQuery): Promise<BreederReportAdminPageResult> {
         this.breederReportAdminPolicyService.assertCanManageBreeders(
             await this.breederReportAdminReader.findAdminById(adminId),
         );
