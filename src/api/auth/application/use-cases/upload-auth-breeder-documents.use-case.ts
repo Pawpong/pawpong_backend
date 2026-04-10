@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
 
-import { VerificationDocumentsResponseDto } from '../../dto/response/verification-documents-response.dto';
 import { AuthTempUploadPort, type AuthTempUploadDocument } from '../ports/auth-temp-upload.port';
 import { AuthUploadFileStorePort } from '../ports/auth-upload-file-store.port';
+import { type VerificationDocumentsResult } from '../types/auth-response.type';
 import { AuthBreederDocumentFilePolicyService } from '../../domain/services/auth-breeder-document-file-policy.service';
 import { AuthBreederDocumentOriginalFileNameService } from '../../domain/services/auth-breeder-document-original-file-name.service';
 
 type AuthBreederDocumentUploadResult = {
-    response: VerificationDocumentsResponseDto;
+    response: VerificationDocumentsResult;
     count: number;
 };
 
@@ -62,7 +62,10 @@ export class UploadAuthBreederDocumentsUseCase {
         }
 
         return {
-            response: new VerificationDocumentsResponseDto(uploadedDocuments, uploadedDocuments),
+            response: {
+                uploadedDocuments,
+                allDocuments: uploadedDocuments,
+            },
             count: uploadedDocuments.length,
         };
     }

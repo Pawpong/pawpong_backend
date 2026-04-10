@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { AuthMapper } from '../../mapper/auth.mapper';
 import { AuthRegistrationPort } from '../ports/auth-registration.port';
-import { SocialCheckUserResponseDto } from '../../dto/response/social-check-user-response.dto';
+import { type SocialCheckUserResult } from '../types/auth-response.type';
 
 @Injectable()
 export class CheckSocialUserUseCase {
@@ -11,7 +11,7 @@ export class CheckSocialUserUseCase {
         private readonly authRegistrationPort: AuthRegistrationPort,
     ) {}
 
-    async execute(provider: string, providerId: string, email?: string): Promise<SocialCheckUserResponseDto> {
+    async execute(provider: string, providerId: string, email?: string): Promise<SocialCheckUserResult> {
         void email;
 
         const adopter = await this.authRegistrationPort.findAdopterBySocialAuth(provider, providerId);
@@ -24,6 +24,6 @@ export class CheckSocialUserUseCase {
             return AuthMapper.toSocialUserCheckResponseBreeder(breeder);
         }
 
-        return AuthMapper.toSocialUserCheckResponseNotFound() as SocialCheckUserResponseDto;
+        return AuthMapper.toSocialUserCheckResponseNotFound();
     }
 }

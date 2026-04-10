@@ -1,9 +1,12 @@
-import { plainToInstance } from 'class-transformer';
-
-import { AuthResponseDto } from '../dto/response/auth-response.dto';
-import { VerificationDocumentsResponseDto } from '../dto/response/verification-documents-response.dto';
-import { RegisterAdopterResponseDto } from '../dto/response/register-adopter-response.dto';
-import { RegisterBreederResponseDto } from '../dto/response/register-breeder-response.dto';
+import {
+    type AuthResult,
+    type SocialCheckUserResult,
+    type VerificationDocumentsResult,
+} from '../application/types/auth-response.type';
+import {
+    type RegisterAdopterAuthSignupResult,
+    type RegisterBreederAuthSignupResult,
+} from '../application/types/auth-signup.type';
 
 /**
  * Auth 도메인 매퍼
@@ -24,13 +27,13 @@ export class AuthMapper {
      *
      * @param savedAdopter 저장된 입양자 Document
      * @param tokens JWT 토큰 객체
-     * @returns RegisterAdopterResponseDto
+     * @returns 입양자 회원가입 결과
      */
     static toAdopterRegisterResponse(
         savedAdopter: any,
         tokens: { accessToken: string; refreshToken: string },
-    ): RegisterAdopterResponseDto {
-        return plainToInstance(RegisterAdopterResponseDto, {
+    ): RegisterAdopterAuthSignupResult {
+        return {
             adopterId: savedAdopter._id.toString(),
             email: savedAdopter.emailAddress,
             nickname: savedAdopter.nickname,
@@ -41,7 +44,7 @@ export class AuthMapper {
             createdAt: savedAdopter.createdAt?.toISOString() || new Date().toISOString(),
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
-        });
+        };
     }
 
     /**
@@ -49,13 +52,13 @@ export class AuthMapper {
      *
      * @param savedBreeder 저장된 브리더 Document
      * @param tokens JWT 토큰 객체
-     * @returns RegisterBreederResponseDto
+     * @returns 브리더 회원가입 결과
      */
     static toBreederRegisterResponse(
         savedBreeder: any,
         tokens: { accessToken: string; refreshToken: string },
-    ): RegisterBreederResponseDto {
-        return plainToInstance(RegisterBreederResponseDto, {
+    ): RegisterBreederAuthSignupResult {
+        return {
             breederId: savedBreeder._id.toString(),
             email: savedBreeder.emailAddress,
             breederName: savedBreeder.name,
@@ -69,7 +72,7 @@ export class AuthMapper {
             createdAt: savedBreeder.createdAt?.toISOString() || new Date().toISOString(),
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
-        });
+        };
     }
 
     /**
@@ -78,7 +81,7 @@ export class AuthMapper {
      * @param savedUser 저장된 사용자 Document (Adopter 또는 Breeder)
      * @param tokens JWT 토큰 객체
      * @param role 사용자 역할
-     * @returns AuthResponseDto
+     * @returns 소셜 회원가입 완료 결과
      */
     static toSocialRegistrationResponse(
         savedUser: any,
@@ -90,8 +93,8 @@ export class AuthMapper {
         },
         role: 'adopter' | 'breeder',
         message: string,
-    ): AuthResponseDto {
-        return plainToInstance(AuthResponseDto, {
+    ): AuthResult {
+        return {
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
             accessTokenExpiresIn: tokens.accessTokenExpiresIn,
@@ -105,7 +108,7 @@ export class AuthMapper {
                 profileImageFileName: savedUser.profileImageFileName,
             },
             message,
-        });
+        };
     }
 
     /**
@@ -206,14 +209,7 @@ export class AuthMapper {
      * @param adopter 입양자 Document
      * @returns 소셜 유저 체크 응답
      */
-    static toSocialUserCheckResponseAdopter(adopter: any): {
-        exists: boolean;
-        userRole: string;
-        userId: string;
-        email: string;
-        nickname: string;
-        profileImageFileName: string;
-    } {
+    static toSocialUserCheckResponseAdopter(adopter: any): SocialCheckUserResult {
         return {
             exists: true,
             userRole: 'adopter',
@@ -230,14 +226,7 @@ export class AuthMapper {
      * @param breeder 브리더 Document
      * @returns 소셜 유저 체크 응답
      */
-    static toSocialUserCheckResponseBreeder(breeder: any): {
-        exists: boolean;
-        userRole: string;
-        userId: string;
-        email: string;
-        nickname: string;
-        profileImageFileName: string;
-    } {
+    static toSocialUserCheckResponseBreeder(breeder: any): SocialCheckUserResult {
         return {
             exists: true,
             userRole: 'breeder',
@@ -253,9 +242,7 @@ export class AuthMapper {
      *
      * @returns 미가입 사용자 응답
      */
-    static toSocialUserCheckResponseNotFound(): {
-        exists: boolean;
-    } {
+    static toSocialUserCheckResponseNotFound(): SocialCheckUserResult {
         return {
             exists: false,
         };
@@ -298,10 +285,13 @@ export class AuthMapper {
             uploadedAt: Date;
         }>,
     ): {
-        response: VerificationDocumentsResponseDto;
+        response: VerificationDocumentsResult;
         count: number;
     } {
-        const response = new VerificationDocumentsResponseDto(uploadedDocuments, uploadedDocuments);
+        const response: VerificationDocumentsResult = {
+            uploadedDocuments,
+            allDocuments: uploadedDocuments,
+        };
 
         return {
             response,

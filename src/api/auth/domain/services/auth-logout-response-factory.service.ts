@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
-import { LogoutResponseDto } from '../../dto/response/logout-response.dto';
+import { type LogoutResult } from '../../application/types/auth-response.type';
 
 @Injectable()
 export class AuthLogoutResponseFactoryService {
-    createLoggedOut(loggedOutAt: string): LogoutResponseDto {
+    createLoggedOut(loggedOutAt: string): LogoutResult {
         return {
             success: true,
             loggedOutAt,

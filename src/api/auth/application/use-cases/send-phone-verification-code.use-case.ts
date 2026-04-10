@@ -6,7 +6,7 @@ import { AUTH_PHONE_VERIFICATION_STORE_PORT } from '../ports/auth-phone-verifica
 import type { AuthPhoneVerificationRegistryPort } from '../ports/auth-phone-verification-registry.port';
 import type { AuthPhoneVerificationSenderPort } from '../ports/auth-phone-verification-sender.port';
 import type { AuthPhoneVerificationStorePort } from '../ports/auth-phone-verification-store.port';
-import { PhoneVerificationResponseDto } from '../../dto/response/phone-verification-response.dto';
+import { type PhoneVerificationResult } from '../types/auth-response.type';
 import { AuthPhoneVerificationResponseFactoryService } from '../../domain/services/auth-phone-verification-response-factory.service';
 import { AuthPhoneVerificationPolicyService } from '../../domain/services/auth-phone-verification-policy.service';
 
@@ -23,7 +23,7 @@ export class SendPhoneVerificationCodeUseCase {
         private readonly authPhoneVerificationResponseFactoryService: AuthPhoneVerificationResponseFactoryService,
     ) {}
 
-    async execute(phone: string): Promise<PhoneVerificationResponseDto> {
+    async execute(phone: string): Promise<PhoneVerificationResult> {
         const normalizedPhone = this.authPhoneVerificationPolicyService.normalizePhoneNumber(phone);
         const isWhitelisted = await this.authPhoneVerificationRegistryPort.isPhoneWhitelisted(normalizedPhone);
 
