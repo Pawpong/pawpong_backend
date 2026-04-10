@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
-import { NotificationAdminResponseDto } from '../../dto/response/notification-admin-response.dto';
 import {
     NotificationAdminPageSnapshot,
     NotificationAdminRecordSnapshot,
 } from '../../application/ports/notification-admin-reader.port';
 import { NotificationAdminPaginationAssemblerService } from './notification-admin-pagination-assembler.service';
+import type {
+    NotificationAdminItemResult,
+    NotificationAdminPageResult,
+} from '../../application/types/notification-admin-result.type';
 
 @Injectable()
 export class NotificationAdminListPresentationService {
@@ -14,7 +16,7 @@ export class NotificationAdminListPresentationService {
         private readonly notificationAdminPaginationAssemblerService: NotificationAdminPaginationAssemblerService,
     ) {}
 
-    toItem(record: NotificationAdminRecordSnapshot): NotificationAdminResponseDto {
+    toItem(record: NotificationAdminRecordSnapshot): NotificationAdminItemResult {
         return {
             notificationId: record.notificationId,
             userId: record.userId,
@@ -35,7 +37,7 @@ export class NotificationAdminListPresentationService {
         pageSnapshot: NotificationAdminPageSnapshot,
         page: number,
         limit: number,
-    ): PaginationResponseDto<NotificationAdminResponseDto> {
+    ): NotificationAdminPageResult {
         return this.notificationAdminPaginationAssemblerService.build(
             pageSnapshot.items.map((item) => this.toItem(item)),
             page,

@@ -1,9 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
-import { NotificationResponseDto } from '../../dto/response/notification-response.dto';
 import { NotificationInboxRecord } from '../../application/ports/notification-inbox.port';
 import { NotificationPaginationAssemblerService } from './notification-pagination-assembler.service';
+import type { NotificationItemResult, NotificationPageResult } from '../../application/types/notification-result.type';
 
 type NotificationReadableRecord = {
     _id: { toString(): string };
@@ -21,7 +20,7 @@ type NotificationReadableRecord = {
 export class NotificationListPresentationService {
     constructor(private readonly notificationPaginationAssemblerService: NotificationPaginationAssemblerService) {}
 
-    toItem(notification: NotificationReadableRecord): NotificationResponseDto {
+    toItem(notification: NotificationReadableRecord): NotificationItemResult {
         return {
             notificationId: notification._id.toString(),
             type: notification.type,
@@ -40,7 +39,7 @@ export class NotificationListPresentationService {
         page: number,
         limit: number,
         totalItems: number,
-    ): PaginationResponseDto<NotificationResponseDto> {
+    ): NotificationPageResult {
         return this.notificationPaginationAssemblerService.build(
             notifications.map((notification) => this.toItem(notification)),
             page,

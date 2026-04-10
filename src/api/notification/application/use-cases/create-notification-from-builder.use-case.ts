@@ -8,7 +8,7 @@ import {
 import type { NotificationCommandPort } from '../ports/notification-command.port';
 import { NotificationListPresentationService } from '../../domain/services/notification-list-presentation.service';
 import { NotificationCreateData } from '../../builder/notification.builder';
-import { NotificationResponseDto } from '../../dto/response/notification-response.dto';
+import type { NotificationItemResult } from '../types/notification-result.type';
 
 @Injectable()
 export class CreateNotificationFromBuilderUseCase {
@@ -18,7 +18,7 @@ export class CreateNotificationFromBuilderUseCase {
         private readonly notificationListPresentationService: NotificationListPresentationService,
     ) {}
 
-    async execute(data: NotificationCreateData): Promise<NotificationResponseDto> {
+    async execute(data: NotificationCreateData): Promise<NotificationItemResult> {
         const userRole: NotificationUserRole =
             data.recipientType === RecipientType.BREEDER ? 'breeder' : 'adopter';
 

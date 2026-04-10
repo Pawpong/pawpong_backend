@@ -24,6 +24,9 @@ export class NotificationAdminQueryController {
         @Query() filter: NotificationAdminListRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<NotificationAdminResponseDto>>> {
         const result = await this.getAdminNotificationsUseCase.execute(userId, filter);
-        return ApiResponseDto.success(result, this.notificationListResponseMessageService.notificationsListed());
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            this.notificationListResponseMessageService.notificationsListed(),
+        );
     }
 }

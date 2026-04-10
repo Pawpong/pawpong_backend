@@ -1,8 +1,8 @@
 import { NotificationType, RecipientType } from '../../../common/enum/user.enum';
-import { NotificationResponseDto } from '../dto/response/notification-response.dto';
+import type { NotificationItemResult } from '../application/types/notification-result.type';
 
 // Alias for backward compatibility
-export type NotificationItemDto = NotificationResponseDto;
+export type NotificationItemDto = NotificationItemResult;
 
 export interface EmailData {
     to: string;

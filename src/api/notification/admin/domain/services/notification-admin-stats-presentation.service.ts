@@ -3,11 +3,11 @@ import { Injectable } from '@nestjs/common';
 import {
     NotificationAdminStatsSnapshot,
 } from '../../application/ports/notification-admin-reader.port';
-import { NotificationStatsResponseDto } from '../../dto/response/notification-admin-response.dto';
+import type { NotificationAdminStatsResult } from '../../application/types/notification-admin-result.type';
 
 @Injectable()
 export class NotificationAdminStatsPresentationService {
-    toStats(snapshot: NotificationAdminStatsSnapshot): NotificationStatsResponseDto {
+    toStats(snapshot: NotificationAdminStatsSnapshot): NotificationAdminStatsResult {
         return {
             totalNotifications: snapshot.totalNotifications,
             unreadNotifications: snapshot.unreadNotifications,
