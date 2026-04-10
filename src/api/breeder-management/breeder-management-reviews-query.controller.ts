@@ -8,6 +8,7 @@ import { GetBreederManagementMyReviewsUseCase } from './application/use-cases/ge
 import type { BreederManagementMyReviewsPageResult } from './application/types/breeder-management-result.type';
 import { BreederManagementProtectedController } from './decorator/breeder-management-protected-controller.decorator';
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './domain/services/breeder-management-response-message.service';
+import { MyReviewsQueryRequestDto } from './dto/request/my-reviews-query-request.dto';
 import { MyReviewsListResponseDto } from './dto/response/my-reviews-list-response.dto';
 import { BreederManagementSwaggerDocs } from './swagger';
 
@@ -19,15 +20,13 @@ export class BreederManagementReviewsQueryController {
     @ApiPaginatedEndpoint(BreederManagementSwaggerDocs.myReviews)
     async getMyReviews(
         @CurrentUser('userId') userId: string,
-        @Query('visibility') visibility?: string,
-        @Query('page') page: number = 1,
-        @Query('limit') limit: number = 10,
+        @Query() query: MyReviewsQueryRequestDto,
     ): Promise<ApiResponseDto<MyReviewsListResponseDto>> {
         const result = await this.getBreederManagementMyReviewsUseCase.execute(
             userId,
-            visibility || 'all',
-            Number(page),
-            Number(limit),
+            query.visibility || 'all',
+            query.page,
+            query.limit,
         );
         const response = PaginationResponseDto.fromPageResult(result) as MyReviewsListResponseDto;
         response.averageRating = result.averageRating;
