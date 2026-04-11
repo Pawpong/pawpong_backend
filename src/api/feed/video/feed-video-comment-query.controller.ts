@@ -2,12 +2,14 @@ import { Get, Inject, Param, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
+import type {
+    GetFeedVideoCommentsUseCasePort,
+    GetFeedVideoRepliesUseCasePort,
+} from '../comment/application/ports/feed-comment-interaction.port';
 import {
     GET_FEED_VIDEO_COMMENTS_USE_CASE,
     GET_FEED_VIDEO_REPLIES_USE_CASE,
-    type GetFeedVideoCommentsUseCasePort,
-    type GetFeedVideoRepliesUseCasePort,
-} from '../comment/application/ports/feed-comment-interaction.port';
+} from '../comment/application/tokens/feed-comment-interaction.token';
 import type { FeedCommentListResult, FeedReplyListResult } from '../comment/application/types/feed-comment-result.type';
 import { FeedPaginationQueryDto } from './dto/request/feed-pagination-query.dto';
 import { CommentListResponseDto, ReplyListResponseDto } from '../comment/dto/response/comment-response.dto';

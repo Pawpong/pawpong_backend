@@ -1,10 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { UploadAdminStoragePolicyService } from '../../domain/services/upload-admin-storage-policy.service';
+import type { ListAllUploadAdminFilesQueryPort } from '../ports/upload-admin-file-orchestration.port';
 import {
     LIST_ALL_UPLOAD_ADMIN_FILES_QUERY,
-    type ListAllUploadAdminFilesQueryPort,
-} from '../ports/upload-admin-file-orchestration.port';
+} from '../tokens/upload-admin-file-orchestration.token';
 import type { UploadAdminStorageListResult } from '../types/upload-admin-result.type';
 
 @Injectable()

@@ -2,10 +2,10 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { UploadAdminStoragePolicyService } from '../../domain/services/upload-admin-storage-policy.service';
+import type { DeleteMultipleUploadAdminFilesCommandPort } from '../ports/upload-admin-file-orchestration.port';
 import {
     DELETE_MULTIPLE_UPLOAD_ADMIN_FILES_COMMAND,
-    type DeleteMultipleUploadAdminFilesCommandPort,
-} from '../ports/upload-admin-file-orchestration.port';
+} from '../tokens/upload-admin-file-orchestration.token';
 import { UPLOAD_ADMIN_STORAGE_PORT, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
 import type { UploadAdminDeleteFilesResult } from '../types/upload-admin-result.type';
 

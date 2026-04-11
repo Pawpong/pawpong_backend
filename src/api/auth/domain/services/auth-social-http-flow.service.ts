@@ -2,12 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Response } from 'express';
 
 import type { AuthSocialCallbackProfile } from '../../application/ports/auth-social-callback.port';
+import type {
+    GetSocialLoginRedirectUrlQueryPort,
+    ProcessSocialLoginCallbackFlowPort,
+} from '../../application/ports/auth-social-flow.port';
 import {
     GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY,
     PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW,
-    type GetSocialLoginRedirectUrlQueryPort,
-    type ProcessSocialLoginCallbackFlowPort,
-} from '../../application/ports/auth-social-flow.port';
+} from '../../application/tokens/auth-social-flow.token';
 import { AuthHttpCookieService } from './auth-http-cookie.service';
 
 @Injectable()

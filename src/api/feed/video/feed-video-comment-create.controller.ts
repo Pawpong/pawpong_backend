@@ -3,10 +3,10 @@ import { Body, Inject, Param, Post } from '@nestjs/common';
 import { CurrentActorType, type ActorType } from '../../../common/decorator/current-actor-type.decorator';
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
+import type { CreateFeedVideoCommentUseCasePort } from '../comment/application/ports/feed-comment-interaction.port';
 import {
     CREATE_FEED_VIDEO_COMMENT_USE_CASE,
-    type CreateFeedVideoCommentUseCasePort,
-} from '../comment/application/ports/feed-comment-interaction.port';
+} from '../comment/application/tokens/feed-comment-interaction.token';
 import type { FeedCommentCreateResult } from '../comment/application/types/feed-comment-result.type';
 import { CreateCommentRequestDto } from '../comment/dto/request/comment-request.dto';
 import { CommentCreateResponseDto } from '../comment/dto/response/comment-response.dto';

@@ -1,11 +1,13 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
+import type {
+    RegisterAdopterAuthSignupPort,
+    RegisterBreederAuthSignupPort,
+} from '../ports/auth-signup-completion.port';
 import {
     REGISTER_ADOPTER_AUTH_SIGNUP,
     REGISTER_BREEDER_AUTH_SIGNUP,
-    type RegisterAdopterAuthSignupPort,
-    type RegisterBreederAuthSignupPort,
-} from '../ports/auth-signup-completion.port';
+} from '../tokens/auth-signup-completion.token';
 import {
     type CompleteSocialRegistrationCommand,
     type RegisterAdopterAuthSignupCommand,

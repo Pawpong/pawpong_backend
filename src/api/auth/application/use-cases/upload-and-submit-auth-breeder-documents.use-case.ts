@@ -4,9 +4,9 @@ import { CustomLoggerService } from '../../../../common/logger/custom-logger.ser
 import { AUTH_UPLOAD_FILE_STORE_PORT, type AuthUploadFileStorePort } from '../ports/auth-upload-file-store.port';
 import {
     AuthBreederDocumentSubmissionResponse,
-    SUBMIT_AUTH_BREEDER_DOCUMENTS,
     type SubmitAuthBreederDocumentsPort,
 } from '../ports/auth-breeder-document-submission.port';
+import { SUBMIT_AUTH_BREEDER_DOCUMENTS_USE_CASE } from '../tokens/auth-breeder-document-submission.token';
 
 type AuthBreederDocumentFileMap = {
     idCard?: Express.Multer.File[];
@@ -21,7 +21,7 @@ export class UploadAndSubmitAuthBreederDocumentsUseCase {
     constructor(
         @Inject(AUTH_UPLOAD_FILE_STORE_PORT)
         private readonly authUploadFileStorePort: AuthUploadFileStorePort,
-        @Inject(SUBMIT_AUTH_BREEDER_DOCUMENTS)
+        @Inject(SUBMIT_AUTH_BREEDER_DOCUMENTS_USE_CASE)
         private readonly submitAuthBreederDocumentsUseCase: SubmitAuthBreederDocumentsPort,
         private readonly logger: CustomLoggerService,
     ) {}

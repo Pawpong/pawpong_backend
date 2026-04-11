@@ -63,6 +63,14 @@ export interface AlimtalkOptions {
     buttons?: AlimtalkButton[];
 }
 
+type AlimtalkKakaoOptions = {
+    pfId: string;
+    templateId: string;
+    variables: Record<string, string>;
+    adFlag: boolean;
+    disableSms: boolean;
+};
+
 @Injectable()
 export class AlimtalkService implements OnModuleInit {
     private readonly messageService: CoolsmsMessageService;
@@ -186,7 +194,7 @@ export class AlimtalkService implements OnModuleInit {
             // 알림톡 발송 요청
             // 중요: 강조 타입 템플릿은 템플릿 자체에 이미 강조 구조가 설정되어 있어서
             // API 호출 시에는 variables만 전달하면 됩니다.
-            const kakaoOptions: any = {
+            const kakaoOptions: AlimtalkKakaoOptions = {
                 pfId: this.pfId,
                 templateId: templateId,
                 variables: variables,

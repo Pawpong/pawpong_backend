@@ -32,7 +32,7 @@ import {
     CREATE_NOTIFICATION_DISPATCH_USE_CASE,
     CREATE_NOTIFICATION_FROM_BUILDER_DISPATCH_USE_CASE,
     SEND_NOTIFICATION_EMAIL_DISPATCH_USE_CASE,
-} from './application/ports/notification-dispatch-use-case.port';
+} from './application/tokens/notification-dispatch-use-case.token';
 
 import { Notification, NotificationSchema } from '../../schema/notification.schema';
 
