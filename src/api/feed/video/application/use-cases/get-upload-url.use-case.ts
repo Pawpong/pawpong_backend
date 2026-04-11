@@ -1,16 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 
-import { FEED_VIDEO_COMMAND, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
-import { FEED_VIDEO_FILE_STORAGE, type FeedVideoFileStoragePort } from '../ports/feed-video-file-storage.port';
+import { FEED_VIDEO_COMMAND_PORT, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
+import { FEED_VIDEO_FILE_STORAGE_PORT, type FeedVideoFileStoragePort } from '../ports/feed-video-file-storage.port';
 import type { FeedVideoUploadUrlResult } from '../types/feed-video-result.type';
 
 @Injectable()
 export class GetUploadUrlUseCase {
     constructor(
-        @Inject(FEED_VIDEO_COMMAND)
+        @Inject(FEED_VIDEO_COMMAND_PORT)
         private readonly feedVideoCommand: FeedVideoCommandPort,
-        @Inject(FEED_VIDEO_FILE_STORAGE)
+        @Inject(FEED_VIDEO_FILE_STORAGE_PORT)
         private readonly feedVideoFileStorage: FeedVideoFileStoragePort,
     ) {}
 

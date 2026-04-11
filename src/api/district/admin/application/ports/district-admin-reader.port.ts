@@ -6,7 +6,7 @@ export interface DistrictSnapshot {
     updatedAt: Date;
 }
 
-export const DISTRICT_ADMIN_READER = Symbol('DISTRICT_ADMIN_READER');
+export const DISTRICT_ADMIN_READER_PORT = Symbol('DISTRICT_ADMIN_READER_PORT');
 
 export interface DistrictAdminReaderPort {
     readAll(): Promise<DistrictSnapshot[]>;

@@ -10,12 +10,12 @@ import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detai
 import { NoticePaginationAssemblerService } from './domain/services/notice-pagination-assembler.service';
 import { NoticePresentationService } from './domain/services/notice-presentation.service';
 import { NoticeMongooseReaderAdapter } from './infrastructure/notice-mongoose-reader.adapter';
-import { NOTICE_READER } from './application/ports/notice-reader.port';
+import { NOTICE_READER_PORT } from './application/ports/notice-reader.port';
 import { CreateNoticeUseCase } from './admin/application/use-cases/create-notice.use-case';
 import { UpdateNoticeUseCase } from './admin/application/use-cases/update-notice.use-case';
 import { DeleteNoticeUseCase } from './admin/application/use-cases/delete-notice.use-case';
 import { NoticeMongooseWriterAdapter } from './admin/infrastructure/notice-mongoose-writer.adapter';
-import { NOTICE_WRITER } from './admin/application/ports/notice-writer.port';
+import { NOTICE_WRITER_PORT } from './admin/application/ports/notice-writer.port';
 import { NoticeRepository } from './repository/notice.repository';
 
 /**
@@ -38,11 +38,11 @@ import { NoticeRepository } from './repository/notice.repository';
         DeleteNoticeUseCase,
         NoticeMongooseWriterAdapter,
         {
-            provide: NOTICE_READER,
+            provide: NOTICE_READER_PORT,
             useExisting: NoticeMongooseReaderAdapter,
         },
         {
-            provide: NOTICE_WRITER,
+            provide: NOTICE_WRITER_PORT,
             useExisting: NoticeMongooseWriterAdapter,
         },
     ],

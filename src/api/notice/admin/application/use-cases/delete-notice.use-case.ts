@@ -2,12 +2,12 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
-import { NOTICE_WRITER, type NoticeWriterPort } from '../ports/notice-writer.port';
+import { NOTICE_WRITER_PORT, type NoticeWriterPort } from '../ports/notice-writer.port';
 
 @Injectable()
 export class DeleteNoticeUseCase {
     constructor(
-        @Inject(NOTICE_WRITER)
+        @Inject(NOTICE_WRITER_PORT)
         private readonly noticeWriter: NoticeWriterPort,
         private readonly logger: CustomLoggerService,
     ) {}

@@ -16,7 +16,7 @@ export interface AdopterAdminDeletedReviewSnapshot {
     breederName: string;
 }
 
-export const ADOPTER_ADMIN_WRITER = Symbol('ADOPTER_ADMIN_WRITER');
+export const ADOPTER_ADMIN_WRITER_PORT = Symbol('ADOPTER_ADMIN_WRITER_PORT');
 
 export interface AdopterAdminWriterPort {
     hideReview(breederId: string, reviewId: string): Promise<AdopterAdminDeletedReviewSnapshot | null>;

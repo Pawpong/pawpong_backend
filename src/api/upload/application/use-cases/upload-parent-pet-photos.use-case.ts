@@ -1,6 +1,6 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 
-import { UPLOAD_FILE_STORE } from '../ports/upload-file-store.port';
+import { UPLOAD_FILE_STORE_PORT } from '../ports/upload-file-store.port';
 import { UPLOAD_OWNER_PORT } from '../ports/upload-owner.port';
 import type { UploadFileStorePort } from '../ports/upload-file-store.port';
 import type { UploadOwnerPort } from '../ports/upload-owner.port';
@@ -13,7 +13,7 @@ import type { UploadFileResult } from '../types/upload-result.type';
 @Injectable()
 export class UploadParentPetPhotosUseCase {
     constructor(
-        @Inject(UPLOAD_FILE_STORE) private readonly fileStore: UploadFileStorePort,
+        @Inject(UPLOAD_FILE_STORE_PORT) private readonly fileStore: UploadFileStorePort,
         @Inject(UPLOAD_OWNER_PORT) private readonly uploadOwner: UploadOwnerPort,
         private readonly uploadFilePolicy: UploadFilePolicyService,
         private readonly uploadStoredFilePathService: UploadStoredFilePathService,

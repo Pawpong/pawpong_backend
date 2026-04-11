@@ -10,7 +10,7 @@ export interface StandardQuestionSnapshot {
     description?: string;
 }
 
-export const STANDARD_QUESTION_READER = Symbol('STANDARD_QUESTION_READER');
+export const STANDARD_QUESTION_READER_PORT = Symbol('STANDARD_QUESTION_READER_PORT');
 
 export interface StandardQuestionReaderPort {
     readAll(): Promise<StandardQuestionSnapshot[]>;

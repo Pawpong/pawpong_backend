@@ -3,13 +3,13 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AppVersionAdminListPresentationService } from '../../domain/services/app-version-admin-list-presentation.service';
-import { APP_VERSION_ADMIN_READER, type AppVersionAdminReaderPort } from '../ports/app-version-admin-reader.port';
+import { APP_VERSION_ADMIN_READER_PORT, type AppVersionAdminReaderPort } from '../ports/app-version-admin-reader.port';
 import { type AppVersionAdminListQuery, type AppVersionAdminPageResult } from '../types/app-version-query.type';
 
 @Injectable()
 export class GetAppVersionListUseCase {
     constructor(
-        @Inject(APP_VERSION_ADMIN_READER)
+        @Inject(APP_VERSION_ADMIN_READER_PORT)
         private readonly appVersionAdminReader: AppVersionAdminReaderPort,
         private readonly appVersionAdminListPresentationService: AppVersionAdminListPresentationService,
         private readonly logger: CustomLoggerService,

@@ -21,7 +21,7 @@ export interface CounselBannerSnapshot {
     isActive: boolean;
 }
 
-export const BREEDER_MANAGEMENT_ADMIN_BANNER_READER = Symbol('BREEDER_MANAGEMENT_ADMIN_BANNER_READER');
+export const BREEDER_MANAGEMENT_ADMIN_BANNER_READER_PORT = Symbol('BREEDER_MANAGEMENT_ADMIN_BANNER_READER_PORT');
 
 export interface BreederManagementAdminBannerReaderPort {
     readAllProfile(): Promise<ProfileBannerSnapshot[]>;

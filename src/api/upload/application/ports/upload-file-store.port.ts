@@ -1,4 +1,4 @@
-export const UPLOAD_FILE_STORE = Symbol('UPLOAD_FILE_STORE');
+export const UPLOAD_FILE_STORE_PORT = Symbol('UPLOAD_FILE_STORE_PORT');
 
 export interface StoredUploadResource {
     readonly fileName: string;

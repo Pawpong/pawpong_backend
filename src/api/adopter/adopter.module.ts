@@ -24,8 +24,8 @@ import { AdopterAdminPresentationService } from './admin/domain/services/adopter
 import { AdopterAdminActivityLogFactoryService } from './admin/domain/services/adopter-admin-activity-log-factory.service';
 import { AdopterAdminReviewReportPresentationService } from './admin/domain/services/adopter-admin-review-report-presentation.service';
 import { AdopterAdminReviewResponseService } from './admin/domain/services/adopter-admin-review-response.service';
-import { ADOPTER_ADMIN_READER } from './admin/application/ports/adopter-admin-reader.port';
-import { ADOPTER_ADMIN_WRITER } from './admin/application/ports/adopter-admin-writer.port';
+import { ADOPTER_ADMIN_READER_PORT } from './admin/application/ports/adopter-admin-reader.port';
+import { ADOPTER_ADMIN_WRITER_PORT } from './admin/application/ports/adopter-admin-writer.port';
 import { AdopterAdminReaderAdapter } from './admin/infrastructure/adopter-admin-reader.adapter';
 import { AdopterAdminWriterAdapter } from './admin/infrastructure/adopter-admin-writer.adapter';
 import { GetAdopterProfileUseCase } from './application/use-cases/get-adopter-profile.use-case';
@@ -185,11 +185,11 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             useExisting: AdopterProfileAdapter,
         },
         {
-            provide: ADOPTER_ADMIN_READER,
+            provide: ADOPTER_ADMIN_READER_PORT,
             useExisting: AdopterAdminReaderAdapter,
         },
         {
-            provide: ADOPTER_ADMIN_WRITER,
+            provide: ADOPTER_ADMIN_WRITER_PORT,
             useExisting: AdopterAdminWriterAdapter,
         },
         {

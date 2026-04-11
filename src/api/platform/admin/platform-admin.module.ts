@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { PlatformAdminMvpStatsController } from './platform-admin-mvp-stats.controller';
 import { PlatformAdminStatsController } from './platform-admin-stats.controller';
-import { PLATFORM_ADMIN_READER } from './application/ports/platform-admin-reader.port';
+import { PLATFORM_ADMIN_READER_PORT } from './application/ports/platform-admin-reader.port';
 import { GetPlatformMvpStatsUseCase } from './application/use-cases/get-platform-mvp-stats.use-case';
 import { GetPlatformStatsUseCase } from './application/use-cases/get-platform-stats.use-case';
 import { PlatformAdminPresentationService } from './domain/services/platform-admin-presentation.service';
@@ -43,7 +43,7 @@ import { AdoptionApplication, AdoptionApplicationSchema } from '../../../schema/
         PlatformAdminRepository,
         PlatformAdminMongooseReaderAdapter,
         {
-            provide: PLATFORM_ADMIN_READER,
+            provide: PLATFORM_ADMIN_READER_PORT,
             useExisting: PlatformAdminMongooseReaderAdapter,
         },
     ],

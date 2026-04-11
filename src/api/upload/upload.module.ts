@@ -14,8 +14,8 @@ import { UploadMultipleFilesController } from './upload-multiple-files.controlle
 import { UploadParentPetPhotoController } from './upload-parent-pet-photo.controller';
 import { UploadRepresentativePhotoController } from './upload-representative-photo.controller';
 import { UploadSingleFileController } from './upload-single-file.controller';
-import { UPLOAD_ADMIN_STORAGE } from './admin/application/ports/upload-admin-storage.port';
-import { UPLOAD_ADMIN_REFERENCE_READER } from './admin/application/ports/upload-admin-reference-reader.port';
+import { UPLOAD_ADMIN_STORAGE_PORT } from './admin/application/ports/upload-admin-storage.port';
+import { UPLOAD_ADMIN_REFERENCE_READER_PORT } from './admin/application/ports/upload-admin-reference-reader.port';
 import { ListAllFilesUseCase } from './admin/application/use-cases/list-all-files.use-case';
 import { ListFilesByFolderUseCase } from './admin/application/use-cases/list-files-by-folder.use-case';
 import { DeleteFileUseCase } from './admin/application/use-cases/delete-file.use-case';
@@ -31,7 +31,7 @@ import {
     DELETE_MULTIPLE_UPLOAD_ADMIN_FILES_COMMAND,
     LIST_ALL_UPLOAD_ADMIN_FILES_QUERY,
 } from './admin/application/ports/upload-admin-file-orchestration.port';
-import { UPLOAD_FILE_STORE } from './application/ports/upload-file-store.port';
+import { UPLOAD_FILE_STORE_PORT } from './application/ports/upload-file-store.port';
 import { UPLOAD_OWNER_PORT } from './application/ports/upload-owner.port';
 import { UploadRepresentativePhotosUseCase } from './application/use-cases/upload-representative-photos.use-case';
 import { UploadAvailablePetPhotosUseCase } from './application/use-cases/upload-available-pet-photos.use-case';
@@ -111,7 +111,7 @@ import { StorageModule } from '../../common/storage/storage.module';
         UploadAdminStorageAdapter,
         UploadAdminFileReferenceReaderAdapter,
         {
-            provide: UPLOAD_FILE_STORE,
+            provide: UPLOAD_FILE_STORE_PORT,
             useExisting: UploadStorageAdapter,
         },
         {
@@ -119,11 +119,11 @@ import { StorageModule } from '../../common/storage/storage.module';
             useExisting: UploadMongooseOwnerAdapter,
         },
         {
-            provide: UPLOAD_ADMIN_STORAGE,
+            provide: UPLOAD_ADMIN_STORAGE_PORT,
             useExisting: UploadAdminStorageAdapter,
         },
         {
-            provide: UPLOAD_ADMIN_REFERENCE_READER,
+            provide: UPLOAD_ADMIN_REFERENCE_READER_PORT,
             useExisting: UploadAdminFileReferenceReaderAdapter,
         },
         {

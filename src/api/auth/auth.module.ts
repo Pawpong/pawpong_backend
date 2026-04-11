@@ -36,9 +36,9 @@ import { AuthAdminPresentationService } from './admin/domain/services/auth-admin
 import { AuthAdminRepositoryAdapter } from './admin/infrastructure/auth-admin-repository.adapter';
 import { AuthAdminBcryptAdapter } from './admin/infrastructure/auth-admin-bcrypt.adapter';
 import { AuthAdminJwtAdapter } from './admin/infrastructure/auth-admin-jwt.adapter';
-import { AUTH_ADMIN_READER } from './admin/application/ports/auth-admin-reader.port';
-import { AUTH_ADMIN_PASSWORD } from './admin/application/ports/auth-admin-password.port';
-import { AUTH_ADMIN_TOKEN } from './admin/application/ports/auth-admin-token.port';
+import { AUTH_ADMIN_READER_PORT } from './admin/application/ports/auth-admin-reader.port';
+import { AUTH_ADMIN_PASSWORD_PORT } from './admin/application/ports/auth-admin-password.port';
+import { AUTH_ADMIN_TOKEN_PORT } from './admin/application/ports/auth-admin-token.port';
 import { AUTH_TOKEN_PORT } from './application/ports/auth-token.port';
 
 import { AuthAdminRepository } from './repository/auth-admin.repository';
@@ -234,15 +234,15 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             useExisting: AuthBreederVerificationCommandAdapter,
         },
         {
-            provide: AUTH_ADMIN_READER,
+            provide: AUTH_ADMIN_READER_PORT,
             useExisting: AuthAdminRepositoryAdapter,
         },
         {
-            provide: AUTH_ADMIN_PASSWORD,
+            provide: AUTH_ADMIN_PASSWORD_PORT,
             useExisting: AuthAdminBcryptAdapter,
         },
         {
-            provide: AUTH_ADMIN_TOKEN,
+            provide: AUTH_ADMIN_TOKEN_PORT,
             useExisting: AuthAdminJwtAdapter,
         },
         {

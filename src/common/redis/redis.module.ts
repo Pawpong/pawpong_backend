@@ -5,6 +5,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
 import { getErrorMessage } from '../utils/error.util';
+import { REDIS_SERVICE_TOKEN } from './redis.token';
 
 /**
  * 직접 ioredis를 사용하는 Redis 서비스
@@ -219,7 +220,13 @@ export class RedisService implements OnModuleDestroy {
             inject: [ConfigService],
         }),
     ],
-    providers: [RedisService],
-    exports: [CacheModule, BullModule, RedisService],
+    providers: [
+        RedisService,
+        {
+            provide: REDIS_SERVICE_TOKEN,
+            useExisting: RedisService,
+        },
+    ],
+    exports: [CacheModule, BullModule, REDIS_SERVICE_TOKEN, RedisService],
 })
 export class RedisModule {}

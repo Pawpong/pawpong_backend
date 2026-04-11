@@ -4,16 +4,16 @@ import type { Cache } from 'cache-manager';
 
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedVideoCommandPolicyService } from '../../domain/services/feed-video-command-policy.service';
-import { FEED_VIDEO_COMMAND, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
-import { FEED_VIDEO_FILE_STORAGE, type FeedVideoFileStoragePort } from '../ports/feed-video-file-storage.port';
+import { FEED_VIDEO_COMMAND_PORT, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
+import { FEED_VIDEO_FILE_STORAGE_PORT, type FeedVideoFileStoragePort } from '../ports/feed-video-file-storage.port';
 
 @Injectable()
 export class DeleteVideoUseCase {
     constructor(
-        @Inject(FEED_VIDEO_COMMAND)
+        @Inject(FEED_VIDEO_COMMAND_PORT)
         private readonly feedVideoCommand: FeedVideoCommandPort,
         private readonly feedVideoCommandPolicyService: FeedVideoCommandPolicyService,
-        @Inject(FEED_VIDEO_FILE_STORAGE)
+        @Inject(FEED_VIDEO_FILE_STORAGE_PORT)
         private readonly feedVideoFileStorage: FeedVideoFileStoragePort,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,

@@ -23,8 +23,8 @@ import { GetPhoneWhitelistUseCase } from './application/use-cases/get-phone-whit
 import { AddPhoneWhitelistUseCase } from './application/use-cases/add-phone-whitelist.use-case';
 import { UpdatePhoneWhitelistUseCase } from './application/use-cases/update-phone-whitelist.use-case';
 import { DeletePhoneWhitelistUseCase } from './application/use-cases/delete-phone-whitelist.use-case';
-import { USER_ADMIN_READER } from './application/ports/user-admin-reader.port';
-import { USER_ADMIN_WRITER } from './application/ports/user-admin-writer.port';
+import { USER_ADMIN_READER_PORT } from './application/ports/user-admin-reader.port';
+import { USER_ADMIN_WRITER_PORT } from './application/ports/user-admin-writer.port';
 import { UserAdminCommandPolicyService } from './domain/services/user-admin-command-policy.service';
 import { UserAdminDeletedUserCommandResponseService } from './domain/services/user-admin-deleted-user-command-response.service';
 import { UserAdminDeletedUserListPresentationService } from './domain/services/user-admin-deleted-user-list-presentation.service';
@@ -96,11 +96,11 @@ import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whit
         UserAdminRepository,
         UserAdminMongooseRepositoryAdapter,
         {
-            provide: USER_ADMIN_READER,
+            provide: USER_ADMIN_READER_PORT,
             useExisting: UserAdminMongooseRepositoryAdapter,
         },
         {
-            provide: USER_ADMIN_WRITER,
+            provide: USER_ADMIN_WRITER_PORT,
             useExisting: UserAdminMongooseRepositoryAdapter,
         },
     ],

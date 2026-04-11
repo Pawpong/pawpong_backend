@@ -36,7 +36,7 @@ export interface HomeAvailablePetSnapshot {
 
 export type HomeFaqAudience = 'adopter' | 'breeder';
 
-export const HOME_CONTENT_READER = Symbol('HOME_CONTENT_READER');
+export const HOME_CONTENT_READER_PORT = Symbol('HOME_CONTENT_READER_PORT');
 
 export interface HomeContentReaderPort {
     readActiveBanners(): Promise<HomeBannerSnapshot[]>;

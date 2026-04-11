@@ -17,7 +17,7 @@ export interface BreederAdminReminderNotificationCommand {
     emailTemplate: BreederAdminReminderEmailTemplate;
 }
 
-export const BREEDER_ADMIN_NOTIFIER = Symbol('BREEDER_ADMIN_NOTIFIER');
+export const BREEDER_ADMIN_NOTIFIER_PORT = Symbol('BREEDER_ADMIN_NOTIFIER_PORT');
 
 export interface BreederAdminNotifierPort {
     sendSuspensionEmail(recipient: BreederAdminNotificationRecipient, reason: string): Promise<void>;

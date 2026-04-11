@@ -1,7 +1,7 @@
 import { StandardQuestionSnapshot } from '../../../application/ports/standard-question-reader.port';
 import type { StandardQuestionUpdateCommand } from '../types/standard-question-command.type';
 
-export const STANDARD_QUESTION_WRITER = Symbol('STANDARD_QUESTION_WRITER');
+export const STANDARD_QUESTION_WRITER_PORT = Symbol('STANDARD_QUESTION_WRITER_PORT');
 
 export interface StandardQuestionReorderCommand {
     id: string;

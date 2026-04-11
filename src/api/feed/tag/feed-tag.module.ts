@@ -4,7 +4,7 @@ import { Video, VideoSchema } from '../../../schema/video.schema';
 import { StorageModule } from '../../../common/storage/storage.module';
 import { FeedCacheKeyService } from '../domain/services/feed-cache-key.service';
 import { FeedVideoSummaryPresentationService } from '../domain/services/feed-video-summary-presentation.service';
-import { FEED_TAG_ASSET_URL } from './application/ports/feed-tag-asset-url.port';
+import { FEED_TAG_ASSET_URL_PORT } from './application/ports/feed-tag-asset-url.port';
 import {
     GET_POPULAR_FEED_TAGS_USE_CASE,
     SEARCH_FEED_VIDEOS_BY_TAG_USE_CASE,
@@ -18,7 +18,7 @@ import { FeedTagPresentationService } from './domain/services/feed-tag-presentat
 import { FeedTagMongooseReaderAdapter } from './infrastructure/feed-tag-mongoose-reader.adapter';
 import { FeedTagStorageAssetUrlAdapter } from './infrastructure/feed-tag-storage-asset-url.adapter';
 import { FeedTagRepository } from './repository/feed-tag.repository';
-import { FEED_TAG_READER } from './application/ports/feed-tag-reader.port';
+import { FEED_TAG_READER_PORT } from './application/ports/feed-tag-reader.port';
 
 /**
  * 피드 태그 모듈
@@ -40,11 +40,11 @@ import { FEED_TAG_READER } from './application/ports/feed-tag-reader.port';
         FeedTagMongooseReaderAdapter,
         FeedTagStorageAssetUrlAdapter,
         {
-            provide: FEED_TAG_READER,
+            provide: FEED_TAG_READER_PORT,
             useExisting: FeedTagMongooseReaderAdapter,
         },
         {
-            provide: FEED_TAG_ASSET_URL,
+            provide: FEED_TAG_ASSET_URL_PORT,
             useExisting: FeedTagStorageAssetUrlAdapter,
         },
         {

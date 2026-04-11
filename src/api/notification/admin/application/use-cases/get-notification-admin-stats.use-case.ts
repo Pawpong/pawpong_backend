@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { NOTIFICATION_ADMIN_READER } from '../ports/notification-admin-reader.port';
+import { NOTIFICATION_ADMIN_READER_PORT } from '../ports/notification-admin-reader.port';
 import type { NotificationAdminReaderPort } from '../ports/notification-admin-reader.port';
 import { NotificationAdminStatsPresentationService } from '../../domain/services/notification-admin-stats-presentation.service';
 import type { NotificationAdminStatsResult } from '../types/notification-admin-result.type';
@@ -9,7 +9,7 @@ import type { NotificationAdminStatsResult } from '../types/notification-admin-r
 @Injectable()
 export class GetNotificationAdminStatsUseCase {
     constructor(
-        @Inject(NOTIFICATION_ADMIN_READER)
+        @Inject(NOTIFICATION_ADMIN_READER_PORT)
         private readonly notificationAdminReader: NotificationAdminReaderPort,
         private readonly notificationAdminStatsPresentationService: NotificationAdminStatsPresentationService,
         private readonly logger: CustomLoggerService,

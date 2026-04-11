@@ -1,6 +1,6 @@
 import { AdminAction, AdminTargetType } from '../../../../../../common/enum/user.enum';
 
-export const BREEDER_REPORT_ADMIN_WRITER = Symbol('BREEDER_REPORT_ADMIN_WRITER');
+export const BREEDER_REPORT_ADMIN_WRITER_PORT = Symbol('BREEDER_REPORT_ADMIN_WRITER_PORT');
 
 export interface BreederReportAdminActivityLogEntry {
     logId: string;

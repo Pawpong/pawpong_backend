@@ -35,7 +35,7 @@ export interface UserAdminPhoneWhitelistUpdateCommand {
     isActive?: boolean;
 }
 
-export const USER_ADMIN_WRITER = Symbol('USER_ADMIN_WRITER');
+export const USER_ADMIN_WRITER_PORT = Symbol('USER_ADMIN_WRITER_PORT');
 
 export interface UserAdminWriterPort {
     updateManagedUser(

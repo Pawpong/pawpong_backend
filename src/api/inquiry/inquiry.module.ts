@@ -17,14 +17,14 @@ import { GetBreederInquiriesUseCase } from './application/use-cases/get-breeder-
 import { GetInquiryDetailUseCase } from './application/use-cases/get-inquiry-detail.use-case';
 import { GetInquiryListUseCase } from './application/use-cases/get-inquiry-list.use-case';
 import { GetMyInquiriesUseCase } from './application/use-cases/get-my-inquiries.use-case';
-import { INQUIRY_ASSET_URL } from './application/ports/inquiry-asset-url.port';
+import { INQUIRY_ASSET_URL_PORT } from './application/ports/inquiry-asset-url.port';
 import { InquiryCommandPolicyService } from './domain/services/inquiry-command-policy.service';
 import { InquiryViewService } from './domain/services/inquiry-view.service';
-import { INQUIRY_COMMAND } from './application/ports/inquiry-command.port';
+import { INQUIRY_COMMAND_PORT } from './application/ports/inquiry-command.port';
 import { InquiryRepositoryCommandAdapter } from './infrastructure/inquiry-repository-command.adapter';
 import { InquiryRepositoryReaderAdapter } from './infrastructure/inquiry-repository-reader.adapter';
 import { InquiryStorageAssetUrlAdapter } from './infrastructure/inquiry-storage-asset-url.adapter';
-import { INQUIRY_READER } from './application/ports/inquiry-reader.port';
+import { INQUIRY_READER_PORT } from './application/ports/inquiry-reader.port';
 
 import { Inquiry, InquirySchema } from '../../schema/inquiry.schema';
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
@@ -69,15 +69,15 @@ import { StorageModule } from '../../common/storage/storage.module';
         InquiryRepositoryCommandAdapter,
         InquiryStorageAssetUrlAdapter,
         {
-            provide: INQUIRY_READER,
+            provide: INQUIRY_READER_PORT,
             useExisting: InquiryRepositoryReaderAdapter,
         },
         {
-            provide: INQUIRY_COMMAND,
+            provide: INQUIRY_COMMAND_PORT,
             useExisting: InquiryRepositoryCommandAdapter,
         },
         {
-            provide: INQUIRY_ASSET_URL,
+            provide: INQUIRY_ASSET_URL_PORT,
             useExisting: InquiryStorageAssetUrlAdapter,
         },
     ],

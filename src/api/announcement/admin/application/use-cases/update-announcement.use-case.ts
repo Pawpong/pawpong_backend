@@ -4,14 +4,14 @@ import { Types } from 'mongoose';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
-import { ANNOUNCEMENT_WRITER, type AnnouncementWriterPort } from '../ports/announcement-writer.port';
+import { ANNOUNCEMENT_WRITER_PORT, type AnnouncementWriterPort } from '../ports/announcement-writer.port';
 import type { AnnouncementUpdateCommand } from '../types/announcement-command.type';
 import type { AnnouncementResult } from '../../../application/types/announcement-result.type';
 
 @Injectable()
 export class UpdateAnnouncementUseCase {
     constructor(
-        @Inject(ANNOUNCEMENT_WRITER)
+        @Inject(ANNOUNCEMENT_WRITER_PORT)
         private readonly announcementWriter: AnnouncementWriterPort,
         private readonly announcementResponseMapperService: AnnouncementResponseMapperService,
         private readonly logger: CustomLoggerService,

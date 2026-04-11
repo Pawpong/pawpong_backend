@@ -5,7 +5,7 @@ import { NotificationAdminQueryController } from './notification-admin-query.con
 import { NotificationAdminStatsController } from './notification-admin-stats.controller';
 
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
-import { NOTIFICATION_ADMIN_READER } from './application/ports/notification-admin-reader.port';
+import { NOTIFICATION_ADMIN_READER_PORT } from './application/ports/notification-admin-reader.port';
 import { GetAdminNotificationsUseCase } from './application/use-cases/get-admin-notifications.use-case';
 import { GetNotificationAdminStatsUseCase } from './application/use-cases/get-notification-admin-stats.use-case';
 import { NotificationAdminListPresentationService } from './domain/services/notification-admin-list-presentation.service';
@@ -33,7 +33,7 @@ import { Notification, NotificationSchema } from '../../../schema/notification.s
         NotificationAdminRepository,
         NotificationAdminMongooseReaderAdapter,
         {
-            provide: NOTIFICATION_ADMIN_READER,
+            provide: NOTIFICATION_ADMIN_READER_PORT,
             useExisting: NotificationAdminMongooseReaderAdapter,
         },
     ],

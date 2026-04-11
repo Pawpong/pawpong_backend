@@ -1,12 +1,12 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { FeedCommentListPresentationService } from '../../domain/services/feed-comment-list-presentation.service';
-import { FEED_COMMENT_MANAGER, type FeedCommentManagerPort } from '../ports/feed-comment-manager.port';
+import { FEED_COMMENT_MANAGER_PORT, type FeedCommentManagerPort } from '../ports/feed-comment-manager.port';
 
 @Injectable()
 export class GetRepliesUseCase {
     constructor(
-        @Inject(FEED_COMMENT_MANAGER)
+        @Inject(FEED_COMMENT_MANAGER_PORT)
         private readonly feedCommentManager: FeedCommentManagerPort,
         private readonly feedCommentListPresentationService: FeedCommentListPresentationService,
     ) {}

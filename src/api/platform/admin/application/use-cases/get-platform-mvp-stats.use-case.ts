@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { PLATFORM_ADMIN_READER, type PlatformAdminReaderPort } from '../ports/platform-admin-reader.port';
+import { PLATFORM_ADMIN_READER_PORT, type PlatformAdminReaderPort } from '../ports/platform-admin-reader.port';
 import { PlatformAdminPresentationService } from '../../domain/services/platform-admin-presentation.service';
 import { PlatformAdminQueryPolicyService } from '../../domain/services/platform-admin-query-policy.service';
 import type { PlatformAdminMvpStatsResult } from '../types/platform-admin-result.type';
@@ -8,7 +8,7 @@ import type { PlatformAdminMvpStatsResult } from '../types/platform-admin-result
 @Injectable()
 export class GetPlatformMvpStatsUseCase {
     constructor(
-        @Inject(PLATFORM_ADMIN_READER)
+        @Inject(PLATFORM_ADMIN_READER_PORT)
         private readonly platformAdminReader: PlatformAdminReaderPort,
         private readonly platformAdminQueryPolicyService: PlatformAdminQueryPolicyService,
         private readonly platformAdminPresentationService: PlatformAdminPresentationService,

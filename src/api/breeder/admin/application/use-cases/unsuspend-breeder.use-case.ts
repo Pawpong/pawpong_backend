@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminAction, AdminTargetType } from '../../../../../common/enum/user.enum';
-import { BREEDER_ADMIN_READER } from '../ports/breeder-admin-reader.port';
-import { BREEDER_ADMIN_WRITER } from '../ports/breeder-admin-writer.port';
-import { BREEDER_ADMIN_NOTIFIER } from '../ports/breeder-admin-notifier.port';
+import { BREEDER_ADMIN_READER_PORT } from '../ports/breeder-admin-reader.port';
+import { BREEDER_ADMIN_WRITER_PORT } from '../ports/breeder-admin-writer.port';
+import { BREEDER_ADMIN_NOTIFIER_PORT } from '../ports/breeder-admin-notifier.port';
 import type { BreederAdminReaderPort } from '../ports/breeder-admin-reader.port';
 import type { BreederAdminWriterPort } from '../ports/breeder-admin-writer.port';
 import type { BreederAdminNotifierPort } from '../ports/breeder-admin-notifier.port';
@@ -15,11 +15,11 @@ import type { BreederAdminSuspensionResult } from '../types/breeder-admin-result
 @Injectable()
 export class UnsuspendBreederUseCase {
     constructor(
-        @Inject(BREEDER_ADMIN_READER)
+        @Inject(BREEDER_ADMIN_READER_PORT)
         private readonly breederAdminReader: BreederAdminReaderPort,
-        @Inject(BREEDER_ADMIN_WRITER)
+        @Inject(BREEDER_ADMIN_WRITER_PORT)
         private readonly breederAdminWriter: BreederAdminWriterPort,
-        @Inject(BREEDER_ADMIN_NOTIFIER)
+        @Inject(BREEDER_ADMIN_NOTIFIER_PORT)
         private readonly breederAdminNotifier: BreederAdminNotifierPort,
         private readonly breederAdminPolicyService: BreederAdminPolicyService,
         private readonly breederAdminActivityLogFactoryService: BreederAdminActivityLogFactoryService,

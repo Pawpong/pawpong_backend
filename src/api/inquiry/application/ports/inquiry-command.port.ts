@@ -17,7 +17,7 @@ export interface InquiryBreederInfoSnapshot {
     breeds?: string[];
 }
 
-export const INQUIRY_COMMAND = Symbol('INQUIRY_COMMAND');
+export const INQUIRY_COMMAND_PORT = Symbol('INQUIRY_COMMAND_PORT');
 
 export interface InquiryCommandPort {
     findInquiryById(inquiryId: string): Promise<InquiryCommandSnapshot | null>;

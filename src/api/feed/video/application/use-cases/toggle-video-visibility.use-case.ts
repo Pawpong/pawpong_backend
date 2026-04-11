@@ -4,12 +4,12 @@ import type { Cache } from 'cache-manager';
 
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedVideoCommandPolicyService } from '../../domain/services/feed-video-command-policy.service';
-import { FEED_VIDEO_COMMAND, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
+import { FEED_VIDEO_COMMAND_PORT, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
 
 @Injectable()
 export class ToggleVideoVisibilityUseCase {
     constructor(
-        @Inject(FEED_VIDEO_COMMAND)
+        @Inject(FEED_VIDEO_COMMAND_PORT)
         private readonly feedVideoCommand: FeedVideoCommandPort,
         private readonly feedVideoCommandPolicyService: FeedVideoCommandPolicyService,
         @Inject(CACHE_MANAGER)

@@ -1,16 +1,16 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { FeedLikePresentationService } from '../../domain/services/feed-like-presentation.service';
-import { FEED_LIKE_ASSET_URL, type FeedLikeAssetUrlPort } from '../ports/feed-like-asset-url.port';
-import { FEED_LIKE_MANAGER, type FeedLikeManagerPort } from '../ports/feed-like-manager.port';
+import { FEED_LIKE_ASSET_URL_PORT, type FeedLikeAssetUrlPort } from '../ports/feed-like-asset-url.port';
+import { FEED_LIKE_MANAGER_PORT, type FeedLikeManagerPort } from '../ports/feed-like-manager.port';
 
 @Injectable()
 export class GetMyLikedVideosUseCase {
     constructor(
-        @Inject(FEED_LIKE_MANAGER)
+        @Inject(FEED_LIKE_MANAGER_PORT)
         private readonly feedLikeManager: FeedLikeManagerPort,
         private readonly feedLikePresentationService: FeedLikePresentationService,
-        @Inject(FEED_LIKE_ASSET_URL)
+        @Inject(FEED_LIKE_ASSET_URL_PORT)
         private readonly feedLikeAssetUrl: FeedLikeAssetUrlPort,
     ) {}
 

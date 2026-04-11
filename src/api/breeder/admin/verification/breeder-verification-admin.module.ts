@@ -12,9 +12,9 @@ import { GetBreederDetailUseCase } from './application/use-cases/get-breeder-det
 import { GetBreederStatsUseCase } from './application/use-cases/get-breeder-stats.use-case';
 import { SendDocumentRemindersUseCase } from './application/use-cases/send-document-reminders.use-case';
 import { ChangeBreederLevelUseCase } from './application/use-cases/change-breeder-level.use-case';
-import { BREEDER_VERIFICATION_ADMIN_READER } from './application/ports/breeder-verification-admin-reader.port';
-import { BREEDER_VERIFICATION_ADMIN_WRITER } from './application/ports/breeder-verification-admin-writer.port';
-import { BREEDER_VERIFICATION_ADMIN_NOTIFIER } from './application/ports/breeder-verification-admin-notifier.port';
+import { BREEDER_VERIFICATION_ADMIN_READER_PORT } from './application/ports/breeder-verification-admin-reader.port';
+import { BREEDER_VERIFICATION_ADMIN_WRITER_PORT } from './application/ports/breeder-verification-admin-writer.port';
+import { BREEDER_VERIFICATION_ADMIN_NOTIFIER_PORT } from './application/ports/breeder-verification-admin-notifier.port';
 import { BREEDER_VERIFICATION_ADMIN_FILE_URL_PORT } from './application/ports/breeder-verification-admin-file-url.port';
 import { BreederVerificationAdminPolicyService } from './domain/services/breeder-verification-admin-policy.service';
 import { BreederVerificationAdminActivityLogFactoryService } from './domain/services/breeder-verification-admin-activity-log-factory.service';
@@ -89,15 +89,15 @@ import { NotificationModule } from '../../../notification/notification.module';
         BreederVerificationAdminNotifierAdapter,
         BreederVerificationAdminFileUrlAdapter,
         {
-            provide: BREEDER_VERIFICATION_ADMIN_READER,
+            provide: BREEDER_VERIFICATION_ADMIN_READER_PORT,
             useExisting: BreederVerificationAdminMongooseRepositoryAdapter,
         },
         {
-            provide: BREEDER_VERIFICATION_ADMIN_WRITER,
+            provide: BREEDER_VERIFICATION_ADMIN_WRITER_PORT,
             useExisting: BreederVerificationAdminMongooseRepositoryAdapter,
         },
         {
-            provide: BREEDER_VERIFICATION_ADMIN_NOTIFIER,
+            provide: BREEDER_VERIFICATION_ADMIN_NOTIFIER_PORT,
             useExisting: BreederVerificationAdminNotifierAdapter,
         },
         {

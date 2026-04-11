@@ -1,4 +1,4 @@
-export const SYSTEM_RUNTIME_READER = Symbol('SYSTEM_RUNTIME_READER');
+export const SYSTEM_RUNTIME_READER_PORT = Symbol('SYSTEM_RUNTIME_READER_PORT');
 
 export interface SystemRuntimeSnapshot {
     readonly timestamp: string;

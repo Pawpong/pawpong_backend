@@ -50,7 +50,7 @@ export interface BreederInquiryListQuery {
     limit: number;
 }
 
-export const INQUIRY_READER = Symbol('INQUIRY_READER');
+export const INQUIRY_READER_PORT = Symbol('INQUIRY_READER_PORT');
 
 export interface InquiryReaderPort {
     readPublicList(query: PublicInquiryListQuery): Promise<InquiryListSnapshot[]>;

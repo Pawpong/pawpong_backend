@@ -13,9 +13,9 @@ import { GetAllFaqsUseCase } from './application/use-cases/get-all-faqs.use-case
 import { CreateFaqUseCase } from './application/use-cases/create-faq.use-case';
 import { UpdateFaqUseCase } from './application/use-cases/update-faq.use-case';
 import { DeleteFaqUseCase } from './application/use-cases/delete-faq.use-case';
-import { HOME_ASSET_URL } from '../application/ports/home-asset-url.port';
+import { HOME_ASSET_URL_PORT } from '../application/ports/home-asset-url.port';
 import { HomeAdminMongooseManagerAdapter } from './infrastructure/home-admin-mongoose-manager.adapter';
-import { HOME_ADMIN_MANAGER } from './application/ports/home-admin-manager.port';
+import { HOME_ADMIN_MANAGER_PORT } from './application/ports/home-admin-manager.port';
 import { HomeBannerCatalogService } from '../domain/services/home-banner-catalog.service';
 import { HomeFaqCatalogService } from '../domain/services/home-faq-catalog.service';
 import { HomeStorageAssetUrlAdapter } from '../infrastructure/home-storage-asset-url.adapter';
@@ -57,11 +57,11 @@ import { StorageModule } from '../../../common/storage/storage.module';
         HomeAdminMongooseManagerAdapter,
         HomeStorageAssetUrlAdapter,
         {
-            provide: HOME_ADMIN_MANAGER,
+            provide: HOME_ADMIN_MANAGER_PORT,
             useExisting: HomeAdminMongooseManagerAdapter,
         },
         {
-            provide: HOME_ASSET_URL,
+            provide: HOME_ASSET_URL_PORT,
             useExisting: HomeStorageAssetUrlAdapter,
         },
     ],

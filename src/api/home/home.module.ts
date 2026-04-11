@@ -10,8 +10,8 @@ import { HomeFaqsController } from './home-faqs.controller';
 import { HomeAvailablePetCatalogService } from './domain/services/home-available-pet-catalog.service';
 import { HomeBannerCatalogService } from './domain/services/home-banner-catalog.service';
 import { HomeFaqCatalogService } from './domain/services/home-faq-catalog.service';
-import { HOME_ASSET_URL } from './application/ports/home-asset-url.port';
-import { HOME_CONTENT_READER } from './application/ports/home-content-reader.port';
+import { HOME_ASSET_URL_PORT } from './application/ports/home-asset-url.port';
+import { HOME_CONTENT_READER_PORT } from './application/ports/home-content-reader.port';
 import { HomeMongooseContentReaderAdapter } from './infrastructure/home-mongoose-content-reader.adapter';
 import { HomeStorageAssetUrlAdapter } from './infrastructure/home-storage-asset-url.adapter';
 import { AvailablePetRepository } from './repository/available-pet.repository';
@@ -49,11 +49,11 @@ import { StorageModule } from '../../common/storage/storage.module';
         HomeMongooseContentReaderAdapter,
         HomeStorageAssetUrlAdapter,
         {
-            provide: HOME_CONTENT_READER,
+            provide: HOME_CONTENT_READER_PORT,
             useExisting: HomeMongooseContentReaderAdapter,
         },
         {
-            provide: HOME_ASSET_URL,
+            provide: HOME_ASSET_URL_PORT,
             useExisting: HomeStorageAssetUrlAdapter,
         },
     ],

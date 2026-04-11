@@ -1,11 +1,11 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { BREED_WRITER, type BreedWriterPort } from '../ports/breed-writer.port';
+import { BREED_WRITER_PORT, type BreedWriterPort } from '../ports/breed-writer.port';
 
 @Injectable()
 export class DeleteBreedUseCase {
     constructor(
-        @Inject(BREED_WRITER)
+        @Inject(BREED_WRITER_PORT)
         private readonly breedWriter: BreedWriterPort,
     ) {}
 

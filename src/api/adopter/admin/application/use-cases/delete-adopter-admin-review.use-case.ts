@@ -4,18 +4,18 @@ import { AdminAction, AdminTargetType } from '../../../../../common/enum/user.en
 import { AdopterAdminActivityLogFactoryService } from '../../domain/services/adopter-admin-activity-log-factory.service';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminReviewResponseService } from '../../domain/services/adopter-admin-review-response.service';
-import { ADOPTER_ADMIN_READER } from '../ports/adopter-admin-reader.port';
+import { ADOPTER_ADMIN_READER_PORT } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
-import { ADOPTER_ADMIN_WRITER } from '../ports/adopter-admin-writer.port';
+import { ADOPTER_ADMIN_WRITER_PORT } from '../ports/adopter-admin-writer.port';
 import type { AdopterAdminWriterPort } from '../ports/adopter-admin-writer.port';
 import type { AdopterAdminReviewDeleteResult } from '../types/adopter-admin-result.type';
 
 @Injectable()
 export class DeleteAdopterAdminReviewUseCase {
     constructor(
-        @Inject(ADOPTER_ADMIN_READER)
+        @Inject(ADOPTER_ADMIN_READER_PORT)
         private readonly adopterAdminReader: AdopterAdminReaderPort,
-        @Inject(ADOPTER_ADMIN_WRITER)
+        @Inject(ADOPTER_ADMIN_WRITER_PORT)
         private readonly adopterAdminWriter: AdopterAdminWriterPort,
         private readonly adopterAdminPolicyService: AdopterAdminPolicyService,
         private readonly adopterAdminActivityLogFactoryService: AdopterAdminActivityLogFactoryService,

@@ -1,14 +1,14 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { HomeFaqCatalogService } from '../../../domain/services/home-faq-catalog.service';
-import { HOME_ADMIN_MANAGER, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
+import { HOME_ADMIN_MANAGER_PORT, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
 import type { HomeFaqUpdateCommand } from '../types/home-admin-command.type';
 import type { HomeFaqResult } from '../../../application/types/home-content-result.type';
 
 @Injectable()
 export class UpdateFaqUseCase {
     constructor(
-        @Inject(HOME_ADMIN_MANAGER)
+        @Inject(HOME_ADMIN_MANAGER_PORT)
         private readonly homeAdminManager: HomeAdminManagerPort,
         private readonly homeFaqCatalogService: HomeFaqCatalogService,
     ) {}

@@ -6,13 +6,13 @@ import {
     DELETE_MULTIPLE_UPLOAD_ADMIN_FILES_COMMAND,
     type DeleteMultipleUploadAdminFilesCommandPort,
 } from '../ports/upload-admin-file-orchestration.port';
-import { UPLOAD_ADMIN_STORAGE, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
+import { UPLOAD_ADMIN_STORAGE_PORT, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
 import type { UploadAdminDeleteFilesResult } from '../types/upload-admin-result.type';
 
 @Injectable()
 export class DeleteFolderUseCase {
     constructor(
-        @Inject(UPLOAD_ADMIN_STORAGE)
+        @Inject(UPLOAD_ADMIN_STORAGE_PORT)
         private readonly uploadAdminStorage: UploadAdminStoragePort,
         private readonly uploadAdminStoragePolicyService: UploadAdminStoragePolicyService,
         @Inject(DELETE_MULTIPLE_UPLOAD_ADMIN_FILES_COMMAND)

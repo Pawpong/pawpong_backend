@@ -1,11 +1,11 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { DISTRICT_WRITER, type DistrictWriterPort } from '../ports/district-writer.port';
+import { DISTRICT_WRITER_PORT, type DistrictWriterPort } from '../ports/district-writer.port';
 
 @Injectable()
 export class DeleteDistrictUseCase {
     constructor(
-        @Inject(DISTRICT_WRITER)
+        @Inject(DISTRICT_WRITER_PORT)
         private readonly districtWriter: DistrictWriterPort,
     ) {}
 

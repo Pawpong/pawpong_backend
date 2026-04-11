@@ -4,8 +4,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { StandardQuestionAdminCommandController } from './admin/standard-question-admin-command.controller';
 import { StandardQuestionAdminQueryController } from './admin/standard-question-admin-query.controller';
 
-import { STANDARD_QUESTION_READER } from './application/ports/standard-question-reader.port';
-import { STANDARD_QUESTION_WRITER } from './admin/application/ports/standard-question-writer.port';
+import { STANDARD_QUESTION_READER_PORT } from './application/ports/standard-question-reader.port';
+import { STANDARD_QUESTION_WRITER_PORT } from './admin/application/ports/standard-question-writer.port';
 import { GetAllActiveStandardQuestionsUseCase } from './application/use-cases/get-all-active-standard-questions.use-case';
 import { GetStandardQuestionByIdUseCase } from './application/use-cases/get-standard-question-by-id.use-case';
 import { GetAllStandardQuestionsUseCase } from './admin/application/use-cases/get-all-standard-questions.use-case';
@@ -38,11 +38,11 @@ import { StandardQuestion, StandardQuestionSchema } from '../../schema/standard-
         StandardQuestionMongooseReaderAdapter,
         StandardQuestionMongooseWriterAdapter,
         {
-            provide: STANDARD_QUESTION_READER,
+            provide: STANDARD_QUESTION_READER_PORT,
             useExisting: StandardQuestionMongooseReaderAdapter,
         },
         {
-            provide: STANDARD_QUESTION_WRITER,
+            provide: STANDARD_QUESTION_WRITER_PORT,
             useExisting: StandardQuestionMongooseWriterAdapter,
         },
     ],

@@ -26,7 +26,7 @@ export interface FeedVideoSnapshot {
     failureReason?: string;
 }
 
-export const FEED_VIDEO_READER = Symbol('FEED_VIDEO_READER');
+export const FEED_VIDEO_READER_PORT = Symbol('FEED_VIDEO_READER_PORT');
 
 export interface FeedVideoReaderPort {
     readPublicFeed(skip: number, limit: number): Promise<FeedVideoSnapshot[]>;

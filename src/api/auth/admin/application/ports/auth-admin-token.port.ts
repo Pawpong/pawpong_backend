@@ -12,7 +12,7 @@ export interface AuthAdminVerifiedTokenPayload {
     adminLevel?: string;
 }
 
-export const AUTH_ADMIN_TOKEN = Symbol('AUTH_ADMIN_TOKEN');
+export const AUTH_ADMIN_TOKEN_PORT = Symbol('AUTH_ADMIN_TOKEN_PORT');
 
 export interface AuthAdminTokenPort {
     createAccessToken(payload: AuthAdminIssuedTokenPayload): string;

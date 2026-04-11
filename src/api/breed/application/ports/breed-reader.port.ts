@@ -1,4 +1,4 @@
-export const BREED_READER = Symbol('BREED_READER');
+export const BREED_READER_PORT = Symbol('BREED_READER_PORT');
 
 export type BreedCategorySnapshot = {
     readonly category: string;

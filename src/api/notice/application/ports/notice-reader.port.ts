@@ -14,7 +14,7 @@ export interface NoticeSnapshot {
     updatedAt: Date;
 }
 
-export const NOTICE_READER = Symbol('NOTICE_READER');
+export const NOTICE_READER_PORT = Symbol('NOTICE_READER_PORT');
 
 export interface NoticeReaderPort {
     countByStatus(status?: NoticeStatus): Promise<number>;

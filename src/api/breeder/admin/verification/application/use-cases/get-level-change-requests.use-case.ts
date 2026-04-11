@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
+import { BREEDER_VERIFICATION_ADMIN_READER_PORT } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import { BreederVerificationAdminListPaginationService } from '../../domain/services/breeder-verification-admin-list-pagination.service';
 import { BreederVerificationAdminLevelChangeListPresentationService } from '../../domain/services/breeder-verification-admin-level-change-list-presentation.service';
@@ -10,7 +10,7 @@ import type { BreederVerificationAdminSearchQuery } from '../types/breeder-verif
 @Injectable()
 export class GetLevelChangeRequestsUseCase {
     constructor(
-        @Inject(BREEDER_VERIFICATION_ADMIN_READER)
+        @Inject(BREEDER_VERIFICATION_ADMIN_READER_PORT)
         private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
         private readonly breederVerificationAdminLevelChangeListPresentationService: BreederVerificationAdminLevelChangeListPresentationService,

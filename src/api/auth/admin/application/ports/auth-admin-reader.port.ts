@@ -15,7 +15,7 @@ export interface AuthAdminSnapshot {
     permissions: AuthAdminPermissionSnapshot;
 }
 
-export const AUTH_ADMIN_READER = Symbol('AUTH_ADMIN_READER');
+export const AUTH_ADMIN_READER_PORT = Symbol('AUTH_ADMIN_READER_PORT');
 
 export interface AuthAdminReaderPort {
     findActiveByEmail(email: string): Promise<AuthAdminSnapshot | null>;

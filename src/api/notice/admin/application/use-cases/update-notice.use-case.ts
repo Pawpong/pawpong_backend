@@ -3,14 +3,14 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { NoticePresentationService } from '../../../domain/services/notice-presentation.service';
-import { NOTICE_WRITER, type NoticeWriterPort } from '../ports/notice-writer.port';
+import { NOTICE_WRITER_PORT, type NoticeWriterPort } from '../ports/notice-writer.port';
 import type { NoticeUpdateCommand } from '../types/notice-command.type';
 import type { NoticeItemResult } from '../../../application/types/notice-result.type';
 
 @Injectable()
 export class UpdateNoticeUseCase {
     constructor(
-        @Inject(NOTICE_WRITER)
+        @Inject(NOTICE_WRITER_PORT)
         private readonly noticeWriter: NoticeWriterPort,
         private readonly noticePresentationService: NoticePresentationService,
         private readonly logger: CustomLoggerService,

@@ -1,11 +1,11 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { UPLOAD_FILE_STORE } from '../ports/upload-file-store.port';
+import { UPLOAD_FILE_STORE_PORT } from '../ports/upload-file-store.port';
 import type { UploadFileStorePort } from '../ports/upload-file-store.port';
 
 @Injectable()
 export class DeleteUploadedFileUseCase {
-    constructor(@Inject(UPLOAD_FILE_STORE) private readonly fileStore: UploadFileStorePort) {}
+    constructor(@Inject(UPLOAD_FILE_STORE_PORT) private readonly fileStore: UploadFileStorePort) {}
 
     async execute(fileName: string): Promise<void> {
         if (!fileName) {

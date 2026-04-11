@@ -20,7 +20,7 @@ import { FeedCommentListPresentationService } from './domain/services/feed-comme
 import { FeedCommentPolicyService } from './domain/services/feed-comment-policy.service';
 import { FeedCommentMongooseManagerAdapter } from './infrastructure/feed-comment-mongoose-manager.adapter';
 import { FeedCommentRepository } from './repository/feed-comment.repository';
-import { FEED_COMMENT_MANAGER } from './application/ports/feed-comment-manager.port';
+import { FEED_COMMENT_MANAGER_PORT } from './application/ports/feed-comment-manager.port';
 
 /**
  * 피드 댓글 모듈
@@ -47,7 +47,7 @@ import { FEED_COMMENT_MANAGER } from './application/ports/feed-comment-manager.p
         FeedCommentRepository,
         FeedCommentMongooseManagerAdapter,
         {
-            provide: FEED_COMMENT_MANAGER,
+            provide: FEED_COMMENT_MANAGER_PORT,
             useExisting: FeedCommentMongooseManagerAdapter,
         },
         {
