@@ -7,8 +7,8 @@ import {
 import type { BreederVerificationInfoResult, BreederVerificationListItemResult } from '../../application/types/breeder-verification-admin-result.type';
 
 @Injectable()
-export class BreederVerificationAdminListItemPresentationService {
-    createBaseResponse(
+export class BreederVerificationAdminListItemMapperService {
+    toResult(
         breeder: BreederVerificationAdminBreederSnapshot,
         verificationInfo: BreederVerificationInfoResult,
     ): BreederVerificationListItemResult {

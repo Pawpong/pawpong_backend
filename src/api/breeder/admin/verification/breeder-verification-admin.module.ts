@@ -20,12 +20,12 @@ import { BreederVerificationAdminPolicyService } from './domain/services/breeder
 import { BreederVerificationAdminActivityLogFactoryService } from './domain/services/breeder-verification-admin-activity-log-factory.service';
 import { BreederVerificationAdminCommandResponseService } from './domain/services/breeder-verification-admin-command-response.service';
 import { BreederVerificationAdminListPaginationService } from './domain/services/breeder-verification-admin-list-pagination.service';
-import { BreederVerificationAdminBreederListPresentationService } from './domain/services/breeder-verification-admin-breeder-list-presentation.service';
-import { BreederVerificationAdminDetailPresentationService } from './domain/services/breeder-verification-admin-presentation.service';
-import { BreederVerificationAdminLevelChangeListPresentationService } from './domain/services/breeder-verification-admin-level-change-list-presentation.service';
-import { BreederVerificationAdminListItemPresentationService } from './domain/services/breeder-verification-admin-list-item-presentation.service';
-import { BreederVerificationAdminPendingBreederListPresentationService } from './domain/services/breeder-verification-admin-pending-breeder-list-presentation.service';
-import { BreederVerificationAdminStatsPresentationService } from './domain/services/breeder-verification-admin-stats-presentation.service';
+import { BreederVerificationAdminBreederItemMapperService } from './domain/services/breeder-verification-admin-breeder-item-mapper.service';
+import { BreederVerificationAdminDetailMapperService } from './domain/services/breeder-verification-admin-detail-mapper.service';
+import { BreederVerificationAdminLevelChangeItemMapperService } from './domain/services/breeder-verification-admin-level-change-item-mapper.service';
+import { BreederVerificationAdminListItemMapperService } from './domain/services/breeder-verification-admin-list-item-mapper.service';
+import { BreederVerificationAdminPendingBreederItemMapperService } from './domain/services/breeder-verification-admin-pending-breeder-item-mapper.service';
+import { BreederVerificationAdminStatsResultMapperService } from './domain/services/breeder-verification-admin-stats-result-mapper.service';
 import { BreederVerificationAdminMongooseRepositoryAdapter } from './infrastructure/breeder-verification-admin-mongoose.repository.adapter';
 import { BreederVerificationAdminNotifierAdapter } from './infrastructure/breeder-verification-admin-notifier.adapter';
 import { BreederVerificationAdminFileUrlAdapter } from './infrastructure/breeder-verification-admin-file-url.adapter';
@@ -78,12 +78,12 @@ import { NotificationModule } from '../../../notification/notification.module';
         BreederPaginationAssemblerService,
         BreederVerificationAdminCommandResponseService,
         BreederVerificationAdminListPaginationService,
-        BreederVerificationAdminListItemPresentationService,
-        BreederVerificationAdminLevelChangeListPresentationService,
-        BreederVerificationAdminPendingBreederListPresentationService,
-        BreederVerificationAdminBreederListPresentationService,
-        BreederVerificationAdminDetailPresentationService,
-        BreederVerificationAdminStatsPresentationService,
+        BreederVerificationAdminListItemMapperService,
+        BreederVerificationAdminLevelChangeItemMapperService,
+        BreederVerificationAdminPendingBreederItemMapperService,
+        BreederVerificationAdminBreederItemMapperService,
+        BreederVerificationAdminDetailMapperService,
+        BreederVerificationAdminStatsResultMapperService,
         BreederVerificationAdminRepository,
         BreederVerificationAdminMongooseRepositoryAdapter,
         BreederVerificationAdminNotifierAdapter,

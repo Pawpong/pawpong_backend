@@ -4,8 +4,8 @@ import { BreederVerificationAdminStatsSnapshot } from '../../application/ports/b
 import type { BreederStatsResult } from '../../application/types/breeder-verification-admin-result.type';
 
 @Injectable()
-export class BreederVerificationAdminStatsPresentationService {
-    toBreederStatsResponse(stats: BreederVerificationAdminStatsSnapshot): BreederStatsResult {
+export class BreederVerificationAdminStatsResultMapperService {
+    toResult(stats: BreederVerificationAdminStatsSnapshot): BreederStatsResult {
         return {
             totalApproved: stats.totalApproved,
             eliteCount: stats.eliteCount,

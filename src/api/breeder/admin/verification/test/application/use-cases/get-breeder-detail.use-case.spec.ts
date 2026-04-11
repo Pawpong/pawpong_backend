@@ -1,7 +1,7 @@
 import { ForbiddenException } from '@nestjs/common';
 
 import { GetBreederDetailUseCase } from '../../../application/use-cases/get-breeder-detail.use-case';
-import { BreederVerificationAdminDetailPresentationService } from '../../../domain/services/breeder-verification-admin-presentation.service';
+import { BreederVerificationAdminDetailMapperService } from '../../../domain/services/breeder-verification-admin-detail-mapper.service';
 import { BreederVerificationAdminPolicyService } from '../../../domain/services/breeder-verification-admin-policy.service';
 
 describe('브리더 상세 조회 유스케이스', () => {
@@ -9,10 +9,14 @@ describe('브리더 상세 조회 유스케이스', () => {
         findAdminById: jest.fn(),
         findBreederById: jest.fn(),
     };
-    const presentationService = new BreederVerificationAdminDetailPresentationService({
+    const detailMapperService = new BreederVerificationAdminDetailMapperService({
         generateOne: jest.fn((fileName: string) => `https://cdn.test/${fileName}`),
     } as any);
-    const useCase = new GetBreederDetailUseCase(reader as any, new BreederVerificationAdminPolicyService(), presentationService);
+    const useCase = new GetBreederDetailUseCase(
+        reader as any,
+        new BreederVerificationAdminPolicyService(),
+        detailMapperService,
+    );
 
     beforeEach(() => {
         jest.clearAllMocks();
