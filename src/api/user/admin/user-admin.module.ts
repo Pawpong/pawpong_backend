@@ -31,7 +31,8 @@ import { UserAdminDeletedUserListPresentationService } from './domain/services/u
 import { UserAdminDeletedUserStatsPresentationService } from './domain/services/user-admin-deleted-user-stats-presentation.service';
 import { UserAdminPaginationAssemblerService } from './domain/services/user-admin-pagination-assembler.service';
 import { UserAdminPhoneWhitelistPresentationService } from './domain/services/user-admin-phone-whitelist-presentation.service';
-import { UserAdminPresentationService } from './domain/services/user-admin-presentation.service';
+import { UserAdminAdminProfileMapperService } from './domain/services/user-admin-admin-profile-mapper.service';
+import { UserAdminUserPageAssemblerService } from './domain/services/user-admin-user-page-assembler.service';
 import { UserAdminActivityLogFactoryService } from './domain/services/user-admin-activity-log-factory.service';
 import { UserAdminMongooseRepositoryAdapter } from './infrastructure/user-admin-mongoose.repository.adapter';
 import { UserAdminRepository } from './repository/user-admin.repository';
@@ -91,7 +92,8 @@ import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whit
         UserAdminDeletedUserCommandResponseService,
         UserAdminPaginationAssemblerService,
         UserAdminPhoneWhitelistPresentationService,
-        UserAdminPresentationService,
+        UserAdminAdminProfileMapperService,
+        UserAdminUserPageAssemblerService,
         UserAdminActivityLogFactoryService,
         UserAdminRepository,
         UserAdminMongooseRepositoryAdapter,

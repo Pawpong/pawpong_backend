@@ -1,36 +1,17 @@
 import { Injectable } from '@nestjs/common';
 
-import {
-    UserAdminAdminSnapshot,
-    UserAdminUserListResultSnapshot,
-} from '../../application/ports/user-admin-reader.port';
+import { UserAdminUserListResultSnapshot } from '../../application/ports/user-admin-reader.port';
 import { UserAdminPaginationAssemblerService } from './user-admin-pagination-assembler.service';
 import type {
-    UserAdminAdminProfileResult,
     UserAdminUserManagementItemResult,
     UserAdminUserManagementPageResult,
 } from '../../application/types/user-admin-result.type';
 
 @Injectable()
-export class UserAdminPresentationService {
+export class UserAdminUserPageAssemblerService {
     constructor(private readonly userAdminPaginationAssemblerService: UserAdminPaginationAssemblerService) {}
 
-    toAdminProfileResponse(admin: UserAdminAdminSnapshot): UserAdminAdminProfileResult {
-        return {
-            id: admin.id,
-            name: admin.name,
-            email: admin.email,
-            profileImage: admin.profileImage,
-            status: admin.status,
-            adminLevel: admin.adminLevel,
-            permissions: admin.permissions,
-            activityLogs: admin.activityLogs?.slice(-10) || [],
-            createdAt: admin.createdAt,
-            lastLoginAt: admin.lastLoginAt,
-        };
-    }
-
-    toUsersPaginationResponse(
+    build(
         result: UserAdminUserListResultSnapshot,
         page: number,
         limit: number,
