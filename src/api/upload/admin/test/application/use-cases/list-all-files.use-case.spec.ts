@@ -1,5 +1,5 @@
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
-import { UploadAdminStoragePresentationService } from '../../../domain/services/upload-admin-storage-presentation.service';
+import { UploadAdminStorageListAssemblerService } from '../../../domain/services/upload-admin-storage-list-assembler.service';
 import { UploadAdminStoragePort } from '../../../application/ports/upload-admin-storage.port';
 import { ListAllFilesUseCase } from '../../../application/use-cases/list-all-files.use-case';
 
@@ -33,7 +33,7 @@ describe('전체 파일 목록 조회 유스케이스', () => {
         };
         const useCase = new ListAllFilesUseCase(
             uploadAdminStorage,
-            new UploadAdminStoragePresentationService(),
+            new UploadAdminStorageListAssemblerService(),
             logger,
         );
 
