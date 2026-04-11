@@ -7,6 +7,7 @@ import { Model } from 'mongoose';
 import { Request } from 'express';
 import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
+import type { AuthenticatedRequestUser, JwtPayloadClaims } from '../types/authenticated-request-user.type';
 
 /**
  * JWT 전략 클래스
@@ -47,7 +48,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
      * 토큰이 유효할 때 호출되어 사용자 정보를 반환합니다.
      * 탈퇴된 계정인 경우 UnauthorizedException을 발생시킵니다.
      */
-    async validate(payload: any) {
+    async validate(payload: JwtPayloadClaims): Promise<AuthenticatedRequestUser> {
         // 사용자 조회 및 탈퇴 여부 확인
         let accountStatus: string | undefined;
         if (payload.role === 'adopter') {

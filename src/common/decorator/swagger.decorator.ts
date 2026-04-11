@@ -3,6 +3,8 @@ import { ApiOperation, ApiResponse, ApiBearerAuth, ApiTags, ApiExtraModels, getS
 
 import { ApiResponseDto } from '../dto/response/api-response.dto';
 
+type ApiSchema = Record<string, unknown>;
+
 type ApiErrorResponseOption = {
     status: number;
     description: string;
@@ -12,40 +14,40 @@ type ApiErrorResponseOption = {
 type ApiEndpointOptions = {
     summary: string;
     description?: string;
-    responseType?: Type<any> | [Type<any>];
-    dataSchema?: Record<string, any>;
+    responseType?: Type<unknown> | [Type<unknown>];
+    dataSchema?: ApiSchema;
     isPublic?: boolean;
     successStatus?: number;
     successDescription?: string;
     successMessageExample?: string;
     errorResponses?: readonly ApiErrorResponseOption[];
-    additionalModels?: Type<any>[];
+    additionalModels?: Type<unknown>[];
     nullableData?: boolean;
 };
 
 type ApiPaginatedEndpointOptions = {
     summary: string;
     description?: string;
-    responseType: Type<any>;
-    itemType?: Type<any>;
+    responseType: Type<unknown>;
+    itemType?: Type<unknown>;
     isPublic?: boolean;
     successStatus?: number;
     successDescription?: string;
     successMessageExample?: string;
     errorResponses?: readonly ApiErrorResponseOption[];
-    additionalModels?: Type<any>[];
+    additionalModels?: Type<unknown>[];
 };
 
 type ApiRawEndpointOptions = {
     summary: string;
     description?: string;
-    responseType?: Type<any> | [Type<any>];
-    responseSchema?: Record<string, any>;
+    responseType?: Type<unknown> | [Type<unknown>];
+    responseSchema?: ApiSchema;
     isPublic?: boolean;
     successStatus?: number;
     successDescription?: string;
     errorResponses?: readonly ApiErrorResponseOption[];
-    additionalModels?: Type<any>[];
+    additionalModels?: Type<unknown>[];
 };
 
 function buildErrorResponses(

@@ -30,7 +30,7 @@ export interface UserEvent {
     userId?: string;
     sessionId?: string;
     eventType: string;
-    eventData: Record<string, any>;
+    eventData: Record<string, unknown>;
     timestamp: Date;
     userAgent?: string;
     ip?: string;
@@ -86,7 +86,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     /**
      * 메시지 발행 (Producer)
      */
-    async emit(topic: KafkaTopic, message: any): Promise<void> {
+    async emit<T extends { id?: string } & Record<string, unknown>>(topic: KafkaTopic, message: T): Promise<void> {
         if (!this.isConnected) {
             this.logger.logWarning('KafkaService', `Kafka 미연결 상태 - 메시지 스킵: ${topic}`, null);
             return;

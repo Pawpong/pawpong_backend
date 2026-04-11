@@ -101,7 +101,7 @@ const dockerJsonFormat = winston.format.combine(
     })(),
     winston.format.printf((info) => {
         const { timestamp, level, message, context, stack, ...rest } = info;
-        const logObject: Record<string, any> = {
+        const logObject: Record<string, unknown> = {
             timestamp,
             level,
             message,

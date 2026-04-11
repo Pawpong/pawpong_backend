@@ -3,6 +3,11 @@ import { Request, Response } from 'express';
 
 import { ApiResponseDto } from '../dto/response/api-response.dto';
 
+type HttpExceptionResponseBody = {
+    message?: string | string[];
+    error?: string;
+};
+
 /**
  * HTTP 예외 필터
  * 모든 HTTP 예외를 ApiResponseDto 형식으로 변환하여 반환합니다.
@@ -25,13 +30,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
         if (typeof exceptionResponse === 'string') {
             errorMessage = exceptionResponse;
         } else if (typeof exceptionResponse === 'object' && exceptionResponse !== null) {
-            const responseObj = exceptionResponse as any;
-            errorMessage = responseObj.message || responseObj.error || 'Unknown error';
+            const responseObj = exceptionResponse as HttpExceptionResponseBody;
+            const rawMessage = responseObj.message ?? responseObj.error;
+            errorMessage = Array.isArray(rawMessage) ? rawMessage.join(', ') : rawMessage || 'Unknown error';
 
-            // message가 배열인 경우 (ValidationPipe 에러)
-            if (Array.isArray(errorMessage)) {
-                errorMessage = errorMessage.join(', ');
-            }
         } else {
             errorMessage = 'Unknown error';
         }
@@ -53,7 +55,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
 export class AllExceptionsFilter implements ExceptionFilter {
     private readonly logger = new Logger(AllExceptionsFilter.name);
 
-    catch(exception: any, host: ArgumentsHost) {
+    catch(exception: unknown, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
@@ -61,9 +63,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
         const message = exception instanceof Error ? exception.message : 'Internal server error';
+        const stack = exception instanceof Error ? exception.stack : undefined;
 
         // 에러 로깅
-        this.logger.error(`[${request.method}] ${request.url} - ${status} - ${message}`, exception.stack);
+        this.logger.error(`[${request.method}] ${request.url} - ${status} - ${message}`, stack);
 
         // ApiResponseDto 형식으로 응답
         const errorResponse = ApiResponseDto.error(message, status);
