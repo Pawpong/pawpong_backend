@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { UpdateStandardQuestionUseCase } from '../../../application/use-cases/update-standard-question.use-case';
-import { StandardQuestionPresentationService } from '../../../../domain/services/standard-question-presentation.service';
+import { StandardQuestionResultMapperService } from '../../../../domain/services/standard-question-result-mapper.service';
 import { StandardQuestionWriterPort } from '../../../application/ports/standard-question-writer.port';
 
 describe('기본 질문 수정 유스케이스', () => {
@@ -21,7 +21,7 @@ describe('기본 질문 수정 유스케이스', () => {
         };
         const useCase = new UpdateStandardQuestionUseCase(
             standardQuestionWriter,
-            new StandardQuestionPresentationService(),
+            new StandardQuestionResultMapperService(),
         );
 
         await expect(useCase.execute('privacyConsent', { label: '수정된 질문' })).resolves.toMatchObject({
@@ -38,7 +38,7 @@ describe('기본 질문 수정 유스케이스', () => {
                 reorder: jest.fn(),
                 replaceAll: jest.fn(),
             },
-            new StandardQuestionPresentationService(),
+            new StandardQuestionResultMapperService(),
         );
 
         await expect(useCase.execute('missing', { label: '수정' })).rejects.toBeInstanceOf(BadRequestException);

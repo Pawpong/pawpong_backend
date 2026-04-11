@@ -13,7 +13,7 @@ import { UpdateStandardQuestionUseCase } from './admin/application/use-cases/upd
 import { ToggleStandardQuestionStatusUseCase } from './admin/application/use-cases/toggle-standard-question-status.use-case';
 import { ReorderStandardQuestionsUseCase } from './admin/application/use-cases/reorder-standard-questions.use-case';
 import { ReseedStandardQuestionsUseCase } from './admin/application/use-cases/reseed-standard-questions.use-case';
-import { StandardQuestionPresentationService } from './domain/services/standard-question-presentation.service';
+import { StandardQuestionResultMapperService } from './domain/services/standard-question-result-mapper.service';
 import { StandardQuestionSeedCatalogService } from './domain/services/standard-question-seed-catalog.service';
 import { StandardQuestionMongooseReaderAdapter } from './infrastructure/standard-question-mongoose-reader.adapter';
 import { StandardQuestionMongooseWriterAdapter } from './admin/infrastructure/standard-question-mongoose-writer.adapter';
@@ -32,7 +32,7 @@ import { StandardQuestion, StandardQuestionSchema } from '../../schema/standard-
         ToggleStandardQuestionStatusUseCase,
         ReorderStandardQuestionsUseCase,
         ReseedStandardQuestionsUseCase,
-        StandardQuestionPresentationService,
+        StandardQuestionResultMapperService,
         StandardQuestionSeedCatalogService,
         StandardQuestionRepository,
         StandardQuestionMongooseReaderAdapter,
