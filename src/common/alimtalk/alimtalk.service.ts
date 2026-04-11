@@ -250,11 +250,6 @@ export class AlimtalkService implements OnModuleInit {
             fallbackToSms: template.fallbackToSms,
         });
     }
-
-    // ============================================
-    // 비즈니스 로직별 편의 메서드
-    // ============================================
-
     /**
      * 회원가입 인증번호 알림톡 발송
      * 중요: CoolSMS/Solapi API는 변수 키를 "#{변수명}" 형식으로 전달해야 합니다.
