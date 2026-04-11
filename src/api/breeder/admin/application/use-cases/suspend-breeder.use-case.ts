@@ -9,7 +9,7 @@ import type { BreederAdminWriterPort } from '../ports/breeder-admin-writer.port'
 import type { BreederAdminNotifierPort } from '../ports/breeder-admin-notifier.port';
 import { BreederAdminActivityLogFactoryService } from '../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../domain/services/breeder-admin-policy.service';
-import { BreederAdminSuspensionPresentationService } from '../../domain/services/breeder-admin-suspension-presentation.service';
+import { BreederAdminSuspensionResultMapperService } from '../../domain/services/breeder-admin-suspension-result-mapper.service';
 import type { BreederSuspendCommand } from '../types/breeder-admin-command.type';
 import type { BreederAdminSuspensionResult } from '../types/breeder-admin-result.type';
 
@@ -24,7 +24,7 @@ export class SuspendBreederUseCase {
         private readonly breederAdminNotifier: BreederAdminNotifierPort,
         private readonly breederAdminPolicyService: BreederAdminPolicyService,
         private readonly breederAdminActivityLogFactoryService: BreederAdminActivityLogFactoryService,
-        private readonly breederAdminSuspensionPresentationService: BreederAdminSuspensionPresentationService,
+        private readonly breederAdminSuspensionResultMapperService: BreederAdminSuspensionResultMapperService,
     ) {}
 
     async execute(
@@ -70,7 +70,7 @@ export class SuspendBreederUseCase {
             suspendData.reason,
         );
 
-        return this.breederAdminSuspensionPresentationService.create(
+        return this.breederAdminSuspensionResultMapperService.toResult(
             breederId,
             suspendData.reason,
             suspendedAt,

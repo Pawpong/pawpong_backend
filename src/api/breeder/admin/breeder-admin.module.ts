@@ -19,10 +19,10 @@ import { BREEDER_ADMIN_WRITER_PORT } from './application/ports/breeder-admin-wri
 import { BREEDER_ADMIN_NOTIFIER_PORT } from './application/ports/breeder-admin-notifier.port';
 import { BreederAdminPolicyService } from './domain/services/breeder-admin-policy.service';
 import { BreederAdminActivityLogFactoryService } from './domain/services/breeder-admin-activity-log-factory.service';
-import { BreederAdminReminderPresentationService } from './domain/services/breeder-admin-reminder-presentation.service';
+import { BreederAdminReminderResultMapperService } from './domain/services/breeder-admin-reminder-result-mapper.service';
 import { BreederAdminReminderPolicyService } from './domain/services/breeder-admin-reminder-policy.service';
-import { BreederAdminSuspensionPresentationService } from './domain/services/breeder-admin-suspension-presentation.service';
-import { BreederAdminTestAccountPresentationService } from './domain/services/breeder-admin-test-account-presentation.service';
+import { BreederAdminSuspensionResultMapperService } from './domain/services/breeder-admin-suspension-result-mapper.service';
+import { BreederAdminTestAccountResultMapperService } from './domain/services/breeder-admin-test-account-result-mapper.service';
 import { BreederAdminMongooseRepositoryAdapter } from './infrastructure/breeder-admin-mongoose.repository.adapter';
 import { BreederAdminNotifierAdapter } from './infrastructure/breeder-admin-notifier.adapter';
 import { BreederAdminRepository } from './repository/breeder-admin.repository';
@@ -65,9 +65,9 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
         SetBreederTestAccountUseCase,
         BreederAdminPolicyService,
         BreederAdminActivityLogFactoryService,
-        BreederAdminSuspensionPresentationService,
-        BreederAdminReminderPresentationService,
-        BreederAdminTestAccountPresentationService,
+        BreederAdminSuspensionResultMapperService,
+        BreederAdminReminderResultMapperService,
+        BreederAdminTestAccountResultMapperService,
         BreederAdminReminderPolicyService,
         BreederAdminRepository,
         BreederAdminMongooseRepositoryAdapter,
