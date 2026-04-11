@@ -2,6 +2,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import type { Cache } from 'cache-manager';
 
+import { getErrorStack } from '../../../../../common/utils/error.util';
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FEED_VIDEO_COMMAND, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
 
@@ -19,8 +20,7 @@ export class IncrementViewCountUseCase {
 
     async execute(videoId: string): Promise<void> {
         void this.feedVideoCommand.incrementViewCount(videoId).catch((error) => {
-            const trace = error instanceof Error ? error.stack : undefined;
-            this.logger.error(`[incrementViewCount] 조회수 증가 실패 - videoId: ${videoId}`, trace);
+            this.logger.error(`[incrementViewCount] 조회수 증가 실패 - videoId: ${videoId}`, getErrorStack(error));
         });
 
         await this.cacheManager.del(this.feedCacheKeyService.getVideoMetaKey(videoId));

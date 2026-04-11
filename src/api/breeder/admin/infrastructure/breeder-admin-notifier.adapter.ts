@@ -3,6 +3,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { RecipientType } from '../../../../common/enum/user.enum';
 import { MailService } from '../../../../common/mail/mail.service';
 import { MailTemplateService } from '../../../../common/mail/mail-template.service';
+import { getErrorStack } from '../../../../common/utils/error.util';
 import { NotificationDispatchPort } from '../../../../api/notification/application/ports/notification-dispatch.port';
 import {
     BreederAdminNotifierPort,
@@ -33,9 +34,7 @@ export class BreederAdminNotifierAdapter implements BreederAdminNotifierPort {
                 subject: emailContent.subject,
                 html: emailContent.html,
             })
-            .catch((error: unknown) =>
-                this.logger.error('브리더 정지 이메일 발송 실패', error instanceof Error ? error.stack : undefined),
-            );
+            .catch((error: unknown) => this.logger.error('브리더 정지 이메일 발송 실패', getErrorStack(error)));
     }
 
     async sendUnsuspensionEmail(recipient: BreederAdminNotificationRecipient): Promise<void> {
@@ -50,9 +49,7 @@ export class BreederAdminNotifierAdapter implements BreederAdminNotifierPort {
                 subject: emailContent.subject,
                 html: emailContent.html,
             })
-            .catch((error: unknown) =>
-                this.logger.error('브리더 정지 해제 이메일 발송 실패', error instanceof Error ? error.stack : undefined),
-            );
+            .catch((error: unknown) => this.logger.error('브리더 정지 해제 이메일 발송 실패', getErrorStack(error)));
     }
 
     async sendReminder(command: BreederAdminReminderNotificationCommand): Promise<void> {
