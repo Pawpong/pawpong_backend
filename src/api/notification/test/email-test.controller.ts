@@ -290,35 +290,35 @@ export class EmailTestController {
 </head>
 <body>
     <div class="container">
-        <h1>🐾 포퐁 이메일 템플릿 미리보기</h1>
+        <h1>포퐁 이메일 템플릿 미리보기</h1>
 
         <a href="/api/email-test/render?type=breeder-approval" class="button">
-            1️⃣ 브리더 승인 이메일
+            1. 브리더 승인 이메일
         </a>
         <p class="description">브리더 입점이 승인되었을 때 발송되는 이메일</p>
 
         <a href="/api/email-test/render?type=breeder-rejection" class="button">
-            2️⃣ 브리더 반려 이메일
+            2. 브리더 반려 이메일
         </a>
         <p class="description">브리더 입점이 반려되었을 때 발송되는 이메일</p>
 
         <a href="/api/email-test/render?type=new-application" class="button">
-            3️⃣ 새로운 상담 신청 알림
+            3. 새로운 상담 신청 알림
         </a>
         <p class="description">입양자가 상담 신청했을 때 브리더에게 발송되는 이메일</p>
 
         <a href="/api/email-test/render?type=document-reminder" class="button">
-            4️⃣ 서류 미제출 리마인드
+            4. 서류 미제출 리마인드
         </a>
         <p class="description">브리더가 서류를 제출하지 않았을 때 발송되는 이메일</p>
 
         <a href="/api/email-test/render?type=application-confirmation" class="button">
-            5️⃣ 상담 신청 확인 (입양자용)
+            5. 상담 신청 확인 (입양자용)
         </a>
         <p class="description">입양자가 상담 신청 후 받는 확인 이메일</p>
 
         <a href="/api/email-test/render?type=new-review" class="button">
-            6️⃣ 신규 후기 등록 알림 (브리더용)
+            6. 신규 후기 등록 알림 (브리더용)
         </a>
         <p class="description">브리더에게 새 후기가 등록되었을 때 발송되는 이메일</p>
     </div>

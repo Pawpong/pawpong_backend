@@ -5,13 +5,13 @@ import { User } from './user.schema';
 export type AdopterDocument = Adopter & Document;
 
 /**
- * ❌ 제거됨: AdoptionApplicationInfo
+ * 제거됨: AdoptionApplicationInfo
  * 이유: AdoptionApplication 별도 컬렉션에서 참조 방식으로 관리
  * 조회: AdoptionApplication.find({ adopterId })
  */
 
 /**
- * ❌ 제거됨: WrittenReviewInfo
+ * 제거됨: WrittenReviewInfo
  * 이유: BreederReview 별도 컬렉션에서 참조 방식으로 관리
  * 조회: BreederReview.find({ adopterId })
  */
@@ -182,13 +182,13 @@ export class Adopter extends User {
     preferredLocation?: string;
 
     /**
-     * ❌ 제거: adoptionApplicationList
+     * 제거: adoptionApplicationList
      * 대체: AdoptionApplication 컬렉션에서 참조
      * 조회: AdoptionApplication.find({ adopterId })
      */
 
     /**
-     * ❌ 제거: writtenReviewList
+     * 제거: writtenReviewList
      * 대체: BreederReview 컬렉션에서 참조
      * 조회: BreederReview.find({ adopterId })
      */
