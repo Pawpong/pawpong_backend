@@ -1,10 +1,10 @@
-import { BreederVerificationAdminBreederListPresentationService } from '../domain/services/breeder-verification-admin-breeder-list-presentation.service';
-import { BreederVerificationAdminListItemPresentationService } from '../domain/services/breeder-verification-admin-list-item-presentation.service';
+import { BreederVerificationAdminBreederItemMapperService } from '../domain/services/breeder-verification-admin-breeder-item-mapper.service';
+import { BreederVerificationAdminListItemMapperService } from '../domain/services/breeder-verification-admin-list-item-mapper.service';
 
-describe('브리더 인증 관리자 전체 목록 응답 서비스', () => {
+describe('브리더 인증 관리자 전체 목록 항목 매퍼', () => {
     it('일반 브리더 목록 응답 계약을 유지한다', () => {
-        const service = new BreederVerificationAdminBreederListPresentationService(
-            new BreederVerificationAdminListItemPresentationService(),
+        const service = new BreederVerificationAdminBreederItemMapperService(
+            new BreederVerificationAdminListItemMapperService(),
         );
 
         expect(

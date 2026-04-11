@@ -1,10 +1,10 @@
-import { BreederVerificationAdminLevelChangeListPresentationService } from '../domain/services/breeder-verification-admin-level-change-list-presentation.service';
-import { BreederVerificationAdminListItemPresentationService } from '../domain/services/breeder-verification-admin-list-item-presentation.service';
+import { BreederVerificationAdminLevelChangeItemMapperService } from '../domain/services/breeder-verification-admin-level-change-item-mapper.service';
+import { BreederVerificationAdminListItemMapperService } from '../domain/services/breeder-verification-admin-list-item-mapper.service';
 
-describe('브리더 인증 관리자 레벨 변경 목록 응답 서비스', () => {
+describe('브리더 인증 관리자 레벨 변경 항목 매퍼', () => {
     it('레벨 변경 요청 응답 계약을 유지한다', () => {
-        const service = new BreederVerificationAdminLevelChangeListPresentationService(
-            new BreederVerificationAdminListItemPresentationService(),
+        const service = new BreederVerificationAdminLevelChangeItemMapperService(
+            new BreederVerificationAdminListItemMapperService(),
         );
 
         expect(

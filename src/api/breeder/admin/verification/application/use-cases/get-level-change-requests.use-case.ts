@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { BREEDER_VERIFICATION_ADMIN_READER_PORT } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import { BreederVerificationAdminListPaginationService } from '../../domain/services/breeder-verification-admin-list-pagination.service';
-import { BreederVerificationAdminLevelChangeListPresentationService } from '../../domain/services/breeder-verification-admin-level-change-list-presentation.service';
+import { BreederVerificationAdminLevelChangeItemMapperService } from '../../domain/services/breeder-verification-admin-level-change-item-mapper.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 import type { BreederVerificationAdminSearchQuery } from '../types/breeder-verification-admin-command.type';
 
@@ -13,7 +13,7 @@ export class GetLevelChangeRequestsUseCase {
         @Inject(BREEDER_VERIFICATION_ADMIN_READER_PORT)
         private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
-        private readonly breederVerificationAdminLevelChangeListPresentationService: BreederVerificationAdminLevelChangeListPresentationService,
+        private readonly breederVerificationAdminLevelChangeItemMapperService: BreederVerificationAdminLevelChangeItemMapperService,
         private readonly breederVerificationAdminListPaginationService: BreederVerificationAdminListPaginationService,
     ) {}
 
@@ -34,9 +34,7 @@ export class GetLevelChangeRequestsUseCase {
         });
 
         return this.breederVerificationAdminListPaginationService.toPaginatedResponse(
-            result.items.map((breeder) =>
-                this.breederVerificationAdminLevelChangeListPresentationService.toResponse(breeder),
-            ),
+            result.items.map((breeder) => this.breederVerificationAdminLevelChangeItemMapperService.toResponse(breeder)),
             pageNumber,
             itemsPerPage,
             result.total,

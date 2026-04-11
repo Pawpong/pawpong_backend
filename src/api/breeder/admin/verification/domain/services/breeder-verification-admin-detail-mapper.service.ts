@@ -9,13 +9,13 @@ import {
 import type { BreederDetailResult } from '../../application/types/breeder-verification-admin-result.type';
 
 @Injectable()
-export class BreederVerificationAdminDetailPresentationService {
+export class BreederVerificationAdminDetailMapperService {
     constructor(
         @Inject(BREEDER_VERIFICATION_ADMIN_FILE_URL_PORT)
         private readonly fileUrlPort: BreederVerificationAdminFileUrlPort,
     ) {}
 
-    toBreederDetailResponse(breeder: BreederVerificationAdminBreederSnapshot): BreederDetailResult {
+    toResult(breeder: BreederVerificationAdminBreederSnapshot): BreederDetailResult {
         return {
             breederId: breeder.id,
             email: breeder.emailAddress,
