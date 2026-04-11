@@ -9,7 +9,8 @@ import { BREEDER_REPORT_ADMIN_READER_PORT } from './application/ports/breeder-re
 import { BREEDER_REPORT_ADMIN_WRITER_PORT } from './application/ports/breeder-report-admin-writer.port';
 import { BreederReportAdminPolicyService } from './domain/services/breeder-report-admin-policy.service';
 import { BreederReportAdminActivityLogFactoryService } from './domain/services/breeder-report-admin-activity-log-factory.service';
-import { BreederReportAdminPresentationService } from './domain/services/breeder-report-admin-presentation.service';
+import { BreederReportAdminActionResultMapperService } from './domain/services/breeder-report-admin-action-result-mapper.service';
+import { BreederReportAdminPageAssemblerService } from './domain/services/breeder-report-admin-page-assembler.service';
 import { BreederReportAdminMongooseRepositoryAdapter } from './infrastructure/breeder-report-admin-mongoose.repository.adapter';
 import { BreederReportAdminRepository } from './repository/breeder-report-admin.repository';
 import { BreederPaginationAssemblerService } from '../../domain/services/breeder-pagination-assembler.service';
@@ -38,7 +39,8 @@ import { Admin, AdminSchema } from '../../../../schema/admin.schema';
         BreederReportAdminPolicyService,
         BreederReportAdminActivityLogFactoryService,
         BreederPaginationAssemblerService,
-        BreederReportAdminPresentationService,
+        BreederReportAdminPageAssemblerService,
+        BreederReportAdminActionResultMapperService,
         BreederReportAdminRepository,
         BreederReportAdminMongooseRepositoryAdapter,
         {

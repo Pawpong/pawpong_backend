@@ -1,8 +1,8 @@
 import { ForbiddenException } from '@nestjs/common';
 
 import { GetBreederReportsUseCase } from '../../../application/use-cases/get-breeder-reports.use-case';
+import { BreederReportAdminPageAssemblerService } from '../../../domain/services/breeder-report-admin-page-assembler.service';
 import { BreederReportAdminPolicyService } from '../../../domain/services/breeder-report-admin-policy.service';
-import { BreederReportAdminPresentationService } from '../../../domain/services/breeder-report-admin-presentation.service';
 import { BreederPaginationAssemblerService } from '../../../../../domain/services/breeder-pagination-assembler.service';
 
 describe('브리더 신고 목록 조회 유스케이스', () => {
@@ -15,7 +15,7 @@ describe('브리더 신고 목록 조회 유스케이스', () => {
     const useCase = new GetBreederReportsUseCase(
         reader as any,
         new BreederReportAdminPolicyService(),
-        new BreederReportAdminPresentationService(new BreederPaginationAssemblerService()),
+        new BreederReportAdminPageAssemblerService(new BreederPaginationAssemblerService()),
     );
 
     beforeEach(() => {

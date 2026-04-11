@@ -6,16 +6,15 @@ import {
     BreederReportAdminReportListResult,
 } from '../../application/ports/breeder-report-admin-reader.port';
 import type {
-    BreederReportAdminActionResult,
     BreederReportAdminListItemResult,
     BreederReportAdminPageResult,
 } from '../../application/types/breeder-report-admin-result.type';
 
 @Injectable()
-export class BreederReportAdminPresentationService {
+export class BreederReportAdminPageAssemblerService {
     constructor(private readonly breederPaginationAssemblerService: BreederPaginationAssemblerService) {}
 
-    createReportListResponse(
+    build(
         result: BreederReportAdminReportListResult,
         pageNumber: number,
         itemsPerPage: number,
@@ -26,24 +25,6 @@ export class BreederReportAdminPresentationService {
             itemsPerPage,
             result.totalCount,
         );
-    }
-
-    createReportActionResponse(
-        reportId: string,
-        breederId: string,
-        action: string,
-        status: string,
-        adminNotes: string | undefined,
-        processedAt: Date,
-    ): BreederReportAdminActionResult {
-        return {
-            reportId,
-            breederId,
-            action,
-            status,
-            adminNotes,
-            processedAt,
-        };
     }
 
     private toReportListItem(item: BreederReportAdminReportListItemSnapshot): BreederReportAdminListItemResult {
