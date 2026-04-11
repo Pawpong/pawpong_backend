@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { AuthAdminSnapshot } from '../../application/ports/auth-admin-reader.port';
-import type { AdminLoginResult, AdminRefreshTokenResult } from '../../application/types/auth-admin-result.type';
+import type { AdminLoginResult } from '../../application/types/auth-admin-result.type';
 
 @Injectable()
-export class AuthAdminPresentationService {
-    toLoginResponse(
+export class AuthAdminLoginResultMapperService {
+    toResult(
         admin: AuthAdminSnapshot,
         tokens: {
             accessToken: string;
@@ -21,9 +21,5 @@ export class AuthAdminPresentationService {
             accessToken: tokens.accessToken,
             refreshToken: tokens.refreshToken,
         };
-    }
-
-    toRefreshResponse(accessToken: string): AdminRefreshTokenResult {
-        return { accessToken };
     }
 }

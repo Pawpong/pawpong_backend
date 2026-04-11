@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { AuthAdminAuthenticationService } from '../../domain/services/auth-admin-authentication.service';
-import { AuthAdminPresentationService } from '../../domain/services/auth-admin-presentation.service';
+import { AuthAdminLoginResultMapperService } from '../../domain/services/auth-admin-login-result-mapper.service';
 import { AUTH_ADMIN_PASSWORD_PORT } from '../ports/auth-admin-password.port';
 import type { AuthAdminPasswordPort } from '../ports/auth-admin-password.port';
 import { AUTH_ADMIN_READER_PORT } from '../ports/auth-admin-reader.port';
@@ -21,7 +21,7 @@ export class LoginAdminUseCase {
         @Inject(AUTH_ADMIN_TOKEN_PORT)
         private readonly authAdminToken: AuthAdminTokenPort,
         private readonly authAdminAuthenticationService: AuthAdminAuthenticationService,
-        private readonly authAdminPresentationService: AuthAdminPresentationService,
+        private readonly authAdminLoginResultMapperService: AuthAdminLoginResultMapperService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -47,7 +47,7 @@ export class LoginAdminUseCase {
         const payload = this.authAdminAuthenticationService.toTokenPayload(admin);
         const accessToken = this.authAdminToken.createAccessToken(payload);
         const refreshToken = this.authAdminToken.createRefreshToken(payload);
-        const response = this.authAdminPresentationService.toLoginResponse(admin, {
+        const response = this.authAdminLoginResultMapperService.toResult(admin, {
             accessToken,
             refreshToken,
         });

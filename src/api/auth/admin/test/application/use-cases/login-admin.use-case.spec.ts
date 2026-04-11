@@ -2,7 +2,7 @@ import { UnauthorizedException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { AuthAdminAuthenticationService } from '../../../domain/services/auth-admin-authentication.service';
-import { AuthAdminPresentationService } from '../../../domain/services/auth-admin-presentation.service';
+import { AuthAdminLoginResultMapperService } from '../../../domain/services/auth-admin-login-result-mapper.service';
 import { AuthAdminPasswordPort } from '../../../application/ports/auth-admin-password.port';
 import { AuthAdminReaderPort, AuthAdminSnapshot } from '../../../application/ports/auth-admin-reader.port';
 import { AuthAdminTokenPort } from '../../../application/ports/auth-admin-token.port';
@@ -48,7 +48,7 @@ describe('관리자 로그인 유스케이스', () => {
             passwordPort,
             tokenPort,
             new AuthAdminAuthenticationService(),
-            new AuthAdminPresentationService(),
+            new AuthAdminLoginResultMapperService(),
             logger,
         );
 
@@ -79,7 +79,7 @@ describe('관리자 로그인 유스케이스', () => {
                 verifyRefreshToken: jest.fn(),
             },
             new AuthAdminAuthenticationService(),
-            new AuthAdminPresentationService(),
+            new AuthAdminLoginResultMapperService(),
             logger,
         );
 
@@ -103,7 +103,7 @@ describe('관리자 로그인 유스케이스', () => {
                 verifyRefreshToken: jest.fn(),
             },
             new AuthAdminAuthenticationService(),
-            new AuthAdminPresentationService(),
+            new AuthAdminLoginResultMapperService(),
             logger,
         );
 
