@@ -1,6 +1,7 @@
 import { Injectable, Inject, LoggerService } from '@nestjs/common';
 import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
 import { Logger } from 'winston';
+import { getErrorMessage, getErrorStack } from '../utils/error.util';
 
 /**
  * 커스텀 로거 서비스
@@ -94,8 +95,8 @@ export class CustomLoggerService implements LoggerService {
      * @param context 컨텍스트
      */
     logError(methodName: string, description: string, error: unknown, context?: string) {
-        const errorMessage = error instanceof Error ? error.message : String(error);
-        const stack = error instanceof Error ? error.stack : undefined;
+        const errorMessage = getErrorMessage(error);
+        const stack = getErrorStack(error);
         this.error(`[${methodName}] ${description}: 에러 - ${errorMessage}`, stack, context);
     }
 

@@ -1,6 +1,7 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { AdminAction, AdminTargetType } from '../../../../../../common/enum/user.enum';
+import { getErrorMessage } from '../../../../../../common/utils/error.util';
 import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
 import { BREEDER_VERIFICATION_ADMIN_WRITER } from '../ports/breeder-verification-admin-writer.port';
 import { BREEDER_VERIFICATION_ADMIN_NOTIFIER } from '../ports/breeder-verification-admin-notifier.port';
@@ -62,11 +63,7 @@ export class SendDocumentRemindersUseCase {
                     ),
                 );
             } catch (error) {
-                this.logger.error(
-                    `Failed to send reminder to breeder ${breeder.id}: ${
-                        error instanceof Error ? error.message : String(error)
-                    }`,
-                );
+                this.logger.error(`Failed to send reminder to breeder ${breeder.id}: ${getErrorMessage(error)}`);
             }
         }
 

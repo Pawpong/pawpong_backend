@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { AlimtalkTemplate, AlimtalkTemplateDocument } from '../../../schema/alimtalk-template.schema';
+import { getErrorMessage } from '../../utils/error.util';
 import { AlimtalkService } from '../alimtalk.service';
 
 import { TemplateUpdateRequestDto } from './dto/request/template-update-request.dto';
@@ -52,7 +53,7 @@ export class AlimtalkAdminService {
                 totalCount: templateList.length,
             };
         } catch (error) {
-            this.logger.error(`[getTemplates] 템플릿 목록 조회 실패: ${error.message}`);
+            this.logger.error(`[getTemplates] 템플릿 목록 조회 실패: ${getErrorMessage(error)}`);
             throw new BadRequestException('템플릿 목록 조회에 실패했습니다.');
         }
     }
@@ -83,7 +84,7 @@ export class AlimtalkAdminService {
                 updatedAt: template.updatedAt ? new Date(template.updatedAt).toISOString() : new Date().toISOString(),
             };
         } catch (error) {
-            this.logger.error(`[getTemplateByCode] 템플릿 조회 실패: ${error.message}`);
+            this.logger.error(`[getTemplateByCode] 템플릿 조회 실패: ${getErrorMessage(error)}`);
             if (error instanceof BadRequestException) {
                 throw error;
             }
@@ -140,7 +141,7 @@ export class AlimtalkAdminService {
                     : new Date().toISOString(),
             };
         } catch (error) {
-            this.logger.error(`[updateTemplate] 템플릿 업데이트 실패: ${error.message}`);
+            this.logger.error(`[updateTemplate] 템플릿 업데이트 실패: ${getErrorMessage(error)}`);
             if (error instanceof BadRequestException) {
                 throw error;
             }
@@ -193,7 +194,7 @@ export class AlimtalkAdminService {
                 updatedAt: template.updatedAt ? new Date(template.updatedAt).toISOString() : new Date().toISOString(),
             };
         } catch (error) {
-            this.logger.error(`[createTemplate] 템플릿 생성 실패: ${error.message}`);
+            this.logger.error(`[createTemplate] 템플릿 생성 실패: ${getErrorMessage(error)}`);
             if (error instanceof BadRequestException) {
                 throw error;
             }
@@ -226,7 +227,7 @@ export class AlimtalkAdminService {
                 message: `템플릿이 삭제되었습니다: ${templateCode}`,
             };
         } catch (error) {
-            this.logger.error(`[deleteTemplate] 템플릿 삭제 실패: ${error.message}`);
+            this.logger.error(`[deleteTemplate] 템플릿 삭제 실패: ${getErrorMessage(error)}`);
             if (error instanceof BadRequestException) {
                 throw error;
             }
@@ -247,7 +248,7 @@ export class AlimtalkAdminService {
                 message: '템플릿 캐시가 성공적으로 갱신되었습니다.',
             };
         } catch (error) {
-            this.logger.error(`[refreshCache] 템플릿 캐시 갱신 실패: ${error.message}`);
+            this.logger.error(`[refreshCache] 템플릿 캐시 갱신 실패: ${getErrorMessage(error)}`);
             throw new BadRequestException('템플릿 캐시 갱신에 실패했습니다.');
         }
     }

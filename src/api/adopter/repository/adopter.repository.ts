@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
+import { getErrorMessage, getErrorStack, hasErrorCode } from '../../../common/utils/error.util';
 import type { FavoriteBreederRecord } from '../application/ports/adopter-profile.port';
 import type { AdopterProfileUpdateRecord } from '../types/adopter-profile.type';
 
@@ -41,7 +42,7 @@ export class AdopterRepository {
                 .lean()
                 .exec()) as AdopterDocument | null;
         } catch (error) {
-            throw new Error(`입양자 조회 실패: ${error.message}`);
+            throw new Error(`입양자 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -60,7 +61,7 @@ export class AdopterRepository {
                 .lean()
                 .exec()) as AdopterDocument | null;
         } catch (error) {
-            throw new Error(`입양자 전체 정보 조회 실패: ${error.message}`);
+            throw new Error(`입양자 전체 정보 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -75,7 +76,7 @@ export class AdopterRepository {
         try {
             return await this.adopterModel.findOne({ email_address: email.toLowerCase() }).exec();
         } catch (error) {
-            throw new Error(`이메일로 입양자 조회 실패: ${error.message}`);
+            throw new Error(`이메일로 입양자 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -96,10 +97,10 @@ export class AdopterRepository {
             });
             return await adopter.save();
         } catch (error) {
-            if (error.code === 11000) {
+            if (hasErrorCode(error, 11000)) {
                 throw new Error('이미 등록된 이메일 주소입니다.');
             }
-            throw new Error(`입양자 생성 실패: ${error.message}`);
+            throw new Error(`입양자 생성 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -128,7 +129,7 @@ export class AdopterRepository {
                 .select('-password_hash')
                 .exec();
         } catch (error) {
-            throw new Error(`입양자 프로필 업데이트 실패: ${error.message}`);
+            throw new Error(`입양자 프로필 업데이트 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -151,7 +152,7 @@ export class AdopterRepository {
                 })
                 .exec();
         } catch (error) {
-            throw new Error(`즐겨찾기 브리더 추가 실패: ${error.message}`);
+            throw new Error(`즐겨찾기 브리더 추가 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -173,7 +174,7 @@ export class AdopterRepository {
                 })
                 .exec();
         } catch (error) {
-            throw new Error(`즐겨찾기 브리더 제거 실패: ${error.message}`);
+            throw new Error(`즐겨찾기 브리더 제거 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -192,7 +193,7 @@ export class AdopterRepository {
 
             return adopter.favoriteBreederList?.find((fav) => fav.favoriteBreederId === breederId) || null;
         } catch (error) {
-            throw new Error(`기존 즐겨찾기 확인 실패: ${error.message}`);
+            throw new Error(`기존 즐겨찾기 확인 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -213,7 +214,7 @@ export class AdopterRepository {
                 })
                 .exec();
         } catch (error) {
-            throw new Error(`입양자 계정 비활성화 실패: ${error.message}`);
+            throw new Error(`입양자 계정 비활성화 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -231,7 +232,7 @@ export class AdopterRepository {
                 })
                 .exec();
         } catch (error) {
-            throw new Error(`활성 입양자 수 조회 실패: ${error.message}`);
+            throw new Error(`활성 입양자 수 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -245,8 +246,8 @@ export class AdopterRepository {
         try {
             await this.adopterModel.findByIdAndUpdate(adopterId, { $set: { last_activity_at: new Date() } }).exec();
         } catch (error) {
-            const message = error instanceof Error ? error.message : String(error);
-            const trace = error instanceof Error ? error.stack : undefined;
+            const message = getErrorMessage(error);
+            const trace = getErrorStack(error);
             this.logger.warn(`입양자 활동 시간 업데이트 실패: ${message}`);
             if (trace) {
                 this.logger.debug(trace);
@@ -290,7 +291,7 @@ export class AdopterRepository {
                 total,
             };
         } catch (error) {
-            throw new Error(`즐겨찾기 목록 조회 실패: ${error.message}`);
+            throw new Error(`즐겨찾기 목록 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -370,7 +371,7 @@ export class AdopterRepository {
                 },
             };
         } catch (error) {
-            throw new Error(`입양자 검색 실패: ${error.message}`);
+            throw new Error(`입양자 검색 실패: ${getErrorMessage(error)}`);
         }
     }
 }
