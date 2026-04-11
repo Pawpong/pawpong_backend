@@ -3,7 +3,7 @@ import { BadRequestException } from '@nestjs/common';
 import { SuspendBreederUseCase } from '../../../application/use-cases/suspend-breeder.use-case';
 import { BreederAdminActivityLogFactoryService } from '../../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../../domain/services/breeder-admin-policy.service';
-import { BreederAdminSuspensionPresentationService } from '../../../domain/services/breeder-admin-suspension-presentation.service';
+import { BreederAdminSuspensionResultMapperService } from '../../../domain/services/breeder-admin-suspension-result-mapper.service';
 
 describe('브리더 정지 유스케이스', () => {
     const breederAdminReader = {
@@ -24,7 +24,7 @@ describe('브리더 정지 유스케이스', () => {
         breederAdminNotifier as any,
         new BreederAdminPolicyService(),
         new BreederAdminActivityLogFactoryService(),
-        new BreederAdminSuspensionPresentationService(),
+        new BreederAdminSuspensionResultMapperService(),
     );
 
     beforeEach(() => {

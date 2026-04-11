@@ -9,7 +9,7 @@ import type { BreederAdminWriterPort } from '../ports/breeder-admin-writer.port'
 import type { BreederAdminNotifierPort } from '../ports/breeder-admin-notifier.port';
 import { BreederAdminActivityLogFactoryService } from '../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../domain/services/breeder-admin-policy.service';
-import { BreederAdminSuspensionPresentationService } from '../../domain/services/breeder-admin-suspension-presentation.service';
+import { BreederAdminSuspensionResultMapperService } from '../../domain/services/breeder-admin-suspension-result-mapper.service';
 import type { BreederAdminSuspensionResult } from '../types/breeder-admin-result.type';
 
 @Injectable()
@@ -23,7 +23,7 @@ export class UnsuspendBreederUseCase {
         private readonly breederAdminNotifier: BreederAdminNotifierPort,
         private readonly breederAdminPolicyService: BreederAdminPolicyService,
         private readonly breederAdminActivityLogFactoryService: BreederAdminActivityLogFactoryService,
-        private readonly breederAdminSuspensionPresentationService: BreederAdminSuspensionPresentationService,
+        private readonly breederAdminSuspensionResultMapperService: BreederAdminSuspensionResultMapperService,
     ) {}
 
     async execute(adminId: string, breederId: string): Promise<BreederAdminSuspensionResult> {
@@ -60,7 +60,7 @@ export class UnsuspendBreederUseCase {
             emailAddress: breeder.emailAddress,
         });
 
-        return this.breederAdminSuspensionPresentationService.create(
+        return this.breederAdminSuspensionResultMapperService.toResult(
             breederId,
             undefined,
             undefined,

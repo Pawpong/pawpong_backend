@@ -3,7 +3,7 @@ import { ForbiddenException } from '@nestjs/common';
 import { SetBreederTestAccountUseCase } from '../../../application/use-cases/set-breeder-test-account.use-case';
 import { BreederAdminActivityLogFactoryService } from '../../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../../domain/services/breeder-admin-policy.service';
-import { BreederAdminTestAccountPresentationService } from '../../../domain/services/breeder-admin-test-account-presentation.service';
+import { BreederAdminTestAccountResultMapperService } from '../../../domain/services/breeder-admin-test-account-result-mapper.service';
 
 describe('브리더 테스트 계정 설정 유스케이스', () => {
     const breederAdminReader = {
@@ -20,7 +20,7 @@ describe('브리더 테스트 계정 설정 유스케이스', () => {
         breederAdminWriter as any,
         new BreederAdminPolicyService(),
         new BreederAdminActivityLogFactoryService(),
-        new BreederAdminTestAccountPresentationService(),
+        new BreederAdminTestAccountResultMapperService(),
     );
 
     beforeEach(() => {
