@@ -2,10 +2,10 @@ import { Delete, Inject, Param } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
+import type { DeleteFeedVideoCommentUseCasePort } from '../comment/application/ports/feed-comment-interaction.port';
 import {
     DELETE_FEED_VIDEO_COMMENT_USE_CASE,
-    type DeleteFeedVideoCommentUseCasePort,
-} from '../comment/application/ports/feed-comment-interaction.port';
+} from '../comment/application/tokens/feed-comment-interaction.token';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
 import { VideoActionSuccessResponseDto } from './dto/response/video-response.dto';
 import { ApiDeleteFeedVideoCommentEndpoint } from './swagger';

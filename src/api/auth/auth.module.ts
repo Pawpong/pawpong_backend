@@ -66,12 +66,12 @@ import { AUTH_PHONE_VERIFICATION_STORE_PORT } from './application/ports/auth-pho
 import {
     GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY,
     PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW,
-} from './application/ports/auth-social-flow.port';
+} from './application/tokens/auth-social-flow.token';
 import {
     REGISTER_ADOPTER_AUTH_SIGNUP,
     REGISTER_BREEDER_AUTH_SIGNUP,
-} from './application/ports/auth-signup-completion.port';
-import { SUBMIT_AUTH_BREEDER_DOCUMENTS } from './application/ports/auth-breeder-document-submission.port';
+} from './application/tokens/auth-signup-completion.token';
+import { SUBMIT_AUTH_BREEDER_DOCUMENTS_USE_CASE } from './application/tokens/auth-breeder-document-submission.token';
 import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
 import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
 import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
@@ -290,7 +290,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             useExisting: RegisterBreederUseCase,
         },
         {
-            provide: SUBMIT_AUTH_BREEDER_DOCUMENTS,
+            provide: SUBMIT_AUTH_BREEDER_DOCUMENTS_USE_CASE,
             useExisting: SubmitAuthBreederDocumentsUseCase,
         },
         JwtStrategy,

@@ -100,7 +100,7 @@ import { BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER_PORT } from './admin/application
 import {
     GET_ACTIVE_COUNSEL_BANNERS_QUERY,
     GET_ACTIVE_PROFILE_BANNERS_QUERY,
-} from './admin/application/ports/breeder-management-public-banner-query.port';
+} from './admin/application/tokens/breeder-management-public-banner-query.token';
 import { GetAllProfileBannersUseCase } from './admin/application/use-cases/get-all-profile-banners.use-case';
 import { GetActiveProfileBannersUseCase } from './admin/application/use-cases/get-active-profile-banners.use-case';
 import { CreateProfileBannerUseCase } from './admin/application/use-cases/create-profile-banner.use-case';

@@ -1,12 +1,14 @@
 import { Get, Inject } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
+import type {
+    GetActiveCounselBannersQueryPort,
+    GetActiveProfileBannersQueryPort,
+} from './application/ports/breeder-management-public-banner-query.port';
 import {
     GET_ACTIVE_COUNSEL_BANNERS_QUERY,
     GET_ACTIVE_PROFILE_BANNERS_QUERY,
-    type GetActiveCounselBannersQueryPort,
-    type GetActiveProfileBannersQueryPort,
-} from './application/ports/breeder-management-public-banner-query.port';
+} from './application/tokens/breeder-management-public-banner-query.token';
 import { BreederManagementAdminPublicController } from './decorator/breeder-management-admin-controller.decorator';
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
 import { CounselBannerResponseDto } from './dto/response/counsel-banner-response.dto';

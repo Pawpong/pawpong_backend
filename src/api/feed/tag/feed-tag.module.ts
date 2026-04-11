@@ -9,7 +9,7 @@ import {
     GET_POPULAR_FEED_TAGS_USE_CASE,
     SEARCH_FEED_VIDEOS_BY_TAG_USE_CASE,
     SUGGEST_FEED_TAGS_USE_CASE,
-} from './application/ports/feed-tag-interaction.port';
+} from './application/tokens/feed-tag-interaction.token';
 import { SearchByTagUseCase } from './application/use-cases/search-by-tag.use-case';
 import { GetPopularTagsUseCase } from './application/use-cases/get-popular-tags.use-case';
 import { SuggestTagsUseCase } from './application/use-cases/suggest-tags.use-case';

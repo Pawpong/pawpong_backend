@@ -1,10 +1,10 @@
 import { Get, Inject, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
+import type { GetMyLikedFeedVideosUseCasePort } from '../like/application/ports/feed-like-interaction.port';
 import {
     GET_MY_LIKED_FEED_VIDEOS_USE_CASE,
-    type GetMyLikedFeedVideosUseCasePort,
-} from '../like/application/ports/feed-like-interaction.port';
+} from '../like/application/tokens/feed-like-interaction.token';
 import type { FeedMyLikedVideosResult } from '../like/application/types/feed-like-result.type';
 import { FeedPaginationQueryDto } from './dto/request/feed-pagination-query.dto';
 import { MyLikedVideosResponseDto } from '../like/dto/response/like-response.dto';

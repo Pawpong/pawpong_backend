@@ -11,6 +11,23 @@ import { TemplateCreateRequestDto } from './dto/request/template-create-request.
 import { TemplateListResponseDto, TemplateListItemDto } from './dto/response/template-list-response.dto';
 import { TemplateDetailResponseDto } from './dto/response/template-detail-response.dto';
 
+type AlimtalkTemplateRecord = Pick<
+    AlimtalkTemplate,
+    | 'templateCode'
+    | 'templateId'
+    | 'name'
+    | 'description'
+    | 'requiredVariables'
+    | 'fallbackToSms'
+    | 'isActive'
+    | 'reviewStatus'
+    | 'memo'
+    | 'buttons'
+> & {
+    createdAt?: Date | string;
+    updatedAt?: Date | string;
+};
+
 /**
  * 알림톡 템플릿 관리 Admin 서비스
  *
@@ -26,27 +43,56 @@ export class AlimtalkAdminService {
         private readonly alimtalkService: AlimtalkService,
     ) {}
 
+    private toIsoString(value?: Date | string): string {
+        return value ? new Date(value).toISOString() : new Date().toISOString();
+    }
+
+    private toTemplateListItem(template: AlimtalkTemplateRecord): TemplateListItemDto {
+        return {
+            templateCode: template.templateCode,
+            templateId: template.templateId,
+            name: template.name,
+            description: template.description,
+            requiredVariables: template.requiredVariables,
+            fallbackToSms: template.fallbackToSms,
+            isActive: template.isActive,
+            reviewStatus: template.reviewStatus,
+            memo: template.memo,
+            buttons: template.buttons,
+            createdAt: this.toIsoString(template.createdAt),
+            updatedAt: this.toIsoString(template.updatedAt),
+        };
+    }
+
+    private toTemplateDetail(template: AlimtalkTemplateRecord): TemplateDetailResponseDto {
+        return {
+            templateCode: template.templateCode,
+            templateId: template.templateId,
+            name: template.name,
+            description: template.description,
+            requiredVariables: template.requiredVariables,
+            fallbackToSms: template.fallbackToSms,
+            isActive: template.isActive,
+            reviewStatus: template.reviewStatus,
+            memo: template.memo,
+            buttons: template.buttons,
+            createdAt: this.toIsoString(template.createdAt),
+            updatedAt: this.toIsoString(template.updatedAt),
+        };
+    }
+
     /**
      * 전체 알림톡 템플릿 목록 조회
      */
     async getTemplates(): Promise<TemplateListResponseDto> {
         try {
-            const templates = await this.alimtalkTemplateModel.find().sort({ createdAt: -1 }).lean().exec();
+            const templates = await this.alimtalkTemplateModel
+                .find()
+                .sort({ createdAt: -1 })
+                .lean<AlimtalkTemplateRecord[]>()
+                .exec();
 
-            const templateList: TemplateListItemDto[] = templates.map((template: any) => ({
-                templateCode: template.templateCode,
-                templateId: template.templateId,
-                name: template.name,
-                description: template.description,
-                requiredVariables: template.requiredVariables,
-                fallbackToSms: template.fallbackToSms,
-                isActive: template.isActive,
-                reviewStatus: template.reviewStatus,
-                memo: template.memo,
-                buttons: template.buttons,
-                createdAt: template.createdAt ? new Date(template.createdAt).toISOString() : new Date().toISOString(),
-                updatedAt: template.updatedAt ? new Date(template.updatedAt).toISOString() : new Date().toISOString(),
-            }));
+            const templateList = templates.map((template) => this.toTemplateListItem(template));
 
             return {
                 templates: templateList,
@@ -63,26 +109,16 @@ export class AlimtalkAdminService {
      */
     async getTemplateByCode(templateCode: string): Promise<TemplateDetailResponseDto> {
         try {
-            const template: any = await this.alimtalkTemplateModel.findOne({ templateCode }).lean().exec();
+            const template = await this.alimtalkTemplateModel
+                .findOne({ templateCode })
+                .lean<AlimtalkTemplateRecord | null>()
+                .exec();
 
             if (!template) {
                 throw new BadRequestException(`템플릿을 찾을 수 없습니다: ${templateCode}`);
             }
 
-            return {
-                templateCode: template.templateCode,
-                templateId: template.templateId,
-                name: template.name,
-                description: template.description,
-                requiredVariables: template.requiredVariables,
-                fallbackToSms: template.fallbackToSms,
-                isActive: template.isActive,
-                reviewStatus: template.reviewStatus,
-                memo: template.memo,
-                buttons: template.buttons,
-                createdAt: template.createdAt ? new Date(template.createdAt).toISOString() : new Date().toISOString(),
-                updatedAt: template.updatedAt ? new Date(template.updatedAt).toISOString() : new Date().toISOString(),
-            };
+            return this.toTemplateDetail(template);
         } catch (error) {
             this.logger.error(`[getTemplateByCode] 템플릿 조회 실패: ${getErrorMessage(error)}`);
             if (error instanceof BadRequestException) {
@@ -108,9 +144,9 @@ export class AlimtalkAdminService {
             }
 
             // 템플릿 업데이트
-            const updatedTemplate: any = await this.alimtalkTemplateModel
+            const updatedTemplate = await this.alimtalkTemplateModel
                 .findOneAndUpdate({ templateCode }, { $set: updateData }, { new: true })
-                .lean()
+                .lean<AlimtalkTemplateRecord | null>()
                 .exec();
 
             if (!updatedTemplate) {
@@ -122,24 +158,7 @@ export class AlimtalkAdminService {
             // 템플릿 캐시 갱신
             await this.alimtalkService.refreshTemplateCache();
 
-            return {
-                templateCode: updatedTemplate.templateCode,
-                templateId: updatedTemplate.templateId,
-                name: updatedTemplate.name,
-                description: updatedTemplate.description,
-                requiredVariables: updatedTemplate.requiredVariables,
-                fallbackToSms: updatedTemplate.fallbackToSms,
-                isActive: updatedTemplate.isActive,
-                reviewStatus: updatedTemplate.reviewStatus,
-                memo: updatedTemplate.memo,
-                buttons: updatedTemplate.buttons,
-                createdAt: updatedTemplate.createdAt
-                    ? new Date(updatedTemplate.createdAt).toISOString()
-                    : new Date().toISOString(),
-                updatedAt: updatedTemplate.updatedAt
-                    ? new Date(updatedTemplate.updatedAt).toISOString()
-                    : new Date().toISOString(),
-            };
+            return this.toTemplateDetail(updatedTemplate);
         } catch (error) {
             this.logger.error(`[updateTemplate] 템플릿 업데이트 실패: ${getErrorMessage(error)}`);
             if (error instanceof BadRequestException) {
@@ -177,22 +196,9 @@ export class AlimtalkAdminService {
             // 템플릿 캐시 갱신
             await this.alimtalkService.refreshTemplateCache();
 
-            const template: any = newTemplate.toObject();
+            const template = newTemplate.toObject<AlimtalkTemplateRecord>();
 
-            return {
-                templateCode: template.templateCode,
-                templateId: template.templateId,
-                name: template.name,
-                description: template.description,
-                requiredVariables: template.requiredVariables,
-                fallbackToSms: template.fallbackToSms,
-                isActive: template.isActive,
-                reviewStatus: template.reviewStatus,
-                memo: template.memo,
-                buttons: template.buttons,
-                createdAt: template.createdAt ? new Date(template.createdAt).toISOString() : new Date().toISOString(),
-                updatedAt: template.updatedAt ? new Date(template.updatedAt).toISOString() : new Date().toISOString(),
-            };
+            return this.toTemplateDetail(template);
         } catch (error) {
             this.logger.error(`[createTemplate] 템플릿 생성 실패: ${getErrorMessage(error)}`);
             if (error instanceof BadRequestException) {

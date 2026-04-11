@@ -5,14 +5,16 @@ import type { NotificationMetadata } from '../../../../schema/notification.schem
 import { NotificationBuilder, NotificationCreateData, EmailData } from '../../builder/notification.builder';
 import { RecipientType } from '../../../../common/enum/user.enum';
 import { NOTIFICATION_DISPATCH_PORT, type NotificationDispatchPort } from '../ports/notification-dispatch.port';
+import type {
+    CreateNotificationDispatchUseCasePort,
+    CreateNotificationFromBuilderDispatchUseCasePort,
+    SendNotificationEmailDispatchUseCasePort,
+} from '../ports/notification-dispatch-use-case.port';
 import {
     CREATE_NOTIFICATION_DISPATCH_USE_CASE,
     CREATE_NOTIFICATION_FROM_BUILDER_DISPATCH_USE_CASE,
     SEND_NOTIFICATION_EMAIL_DISPATCH_USE_CASE,
-    type CreateNotificationDispatchUseCasePort,
-    type CreateNotificationFromBuilderDispatchUseCasePort,
-    type SendNotificationEmailDispatchUseCasePort,
-} from '../ports/notification-dispatch-use-case.port';
+} from '../tokens/notification-dispatch-use-case.token';
 
 @Injectable()
 export class NotificationDispatchService implements NotificationDispatchPort {

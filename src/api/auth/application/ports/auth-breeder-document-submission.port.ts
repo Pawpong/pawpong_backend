@@ -1,5 +1,3 @@
-export const SUBMIT_AUTH_BREEDER_DOCUMENTS = Symbol('SUBMIT_AUTH_BREEDER_DOCUMENTS');
-
 export type AuthBreederDocumentUrls = {
     idCardUrl: string;
     animalProductionLicenseUrl: string;

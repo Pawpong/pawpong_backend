@@ -1,9 +1,9 @@
 import { Get, Inject, Query } from '@nestjs/common';
 
+import type { SearchFeedVideosByTagUseCasePort } from '../tag/application/ports/feed-tag-interaction.port';
 import {
     SEARCH_FEED_VIDEOS_BY_TAG_USE_CASE,
-    type SearchFeedVideosByTagUseCasePort,
-} from '../tag/application/ports/feed-tag-interaction.port';
+} from '../tag/application/tokens/feed-tag-interaction.token';
 import type { FeedTagSearchResult } from '../tag/application/types/feed-tag-result.type';
 import { FeedTagSearchQueryDto } from './dto/request/feed-tag-search-query.dto';
 import { TagSearchResponseDto } from '../tag/dto/response/tag-response.dto';

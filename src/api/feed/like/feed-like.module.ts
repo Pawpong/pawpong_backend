@@ -10,7 +10,7 @@ import {
     GET_FEED_VIDEO_LIKE_STATUS_USE_CASE,
     GET_MY_LIKED_FEED_VIDEOS_USE_CASE,
     TOGGLE_FEED_VIDEO_LIKE_USE_CASE,
-} from './application/ports/feed-like-interaction.port';
+} from './application/tokens/feed-like-interaction.token';
 import { ToggleLikeUseCase } from './application/use-cases/toggle-like.use-case';
 import { GetLikeStatusUseCase } from './application/use-cases/get-like-status.use-case';
 import { GetMyLikedVideosUseCase } from './application/use-cases/get-my-liked-videos.use-case';

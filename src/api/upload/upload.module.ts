@@ -30,7 +30,7 @@ import { UploadAdminFileReferenceReaderAdapter } from './admin/infrastructure/up
 import {
     DELETE_MULTIPLE_UPLOAD_ADMIN_FILES_COMMAND,
     LIST_ALL_UPLOAD_ADMIN_FILES_QUERY,
-} from './admin/application/ports/upload-admin-file-orchestration.port';
+} from './admin/application/tokens/upload-admin-file-orchestration.token';
 import { UPLOAD_FILE_STORE_PORT } from './application/ports/upload-file-store.port';
 import { UPLOAD_OWNER_PORT } from './application/ports/upload-owner.port';
 import { UploadRepresentativePhotosUseCase } from './application/use-cases/upload-representative-photos.use-case';

@@ -3,10 +3,10 @@ import { Inject, Param, Post } from '@nestjs/common';
 import { CurrentActorType, type ActorType } from '../../../common/decorator/current-actor-type.decorator';
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
+import type { ToggleFeedVideoLikeUseCasePort } from '../like/application/ports/feed-like-interaction.port';
 import {
     TOGGLE_FEED_VIDEO_LIKE_USE_CASE,
-    type ToggleFeedVideoLikeUseCasePort,
-} from '../like/application/ports/feed-like-interaction.port';
+} from '../like/application/tokens/feed-like-interaction.token';
 import type { FeedLikeToggleResult } from '../like/application/types/feed-like-result.type';
 import { LikeToggleResponseDto } from '../like/dto/response/like-response.dto';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';

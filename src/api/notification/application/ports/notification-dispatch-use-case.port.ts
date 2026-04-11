@@ -4,12 +4,6 @@ import type { NotificationMetadata } from '../../../../schema/notification.schem
 import { NotificationUserRole } from './notification-command.port';
 import type { NotificationItemResult } from '../types/notification-result.type';
 
-export const CREATE_NOTIFICATION_DISPATCH_USE_CASE = Symbol('CREATE_NOTIFICATION_DISPATCH_USE_CASE');
-export const CREATE_NOTIFICATION_FROM_BUILDER_DISPATCH_USE_CASE = Symbol(
-    'CREATE_NOTIFICATION_FROM_BUILDER_DISPATCH_USE_CASE',
-);
-export const SEND_NOTIFICATION_EMAIL_DISPATCH_USE_CASE = Symbol('SEND_NOTIFICATION_EMAIL_DISPATCH_USE_CASE');
-
 export interface CreateNotificationDispatchUseCasePort {
     execute(
         userId: string,

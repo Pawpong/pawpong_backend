@@ -14,7 +14,7 @@ import {
     GET_FEED_VIDEO_COMMENTS_USE_CASE,
     GET_FEED_VIDEO_REPLIES_USE_CASE,
     UPDATE_FEED_VIDEO_COMMENT_USE_CASE,
-} from './application/ports/feed-comment-interaction.port';
+} from './application/tokens/feed-comment-interaction.token';
 import { FeedCommentCommandResponseService } from './domain/services/feed-comment-command-response.service';
 import { FeedCommentListPresentationService } from './domain/services/feed-comment-list-presentation.service';
 import { FeedCommentPolicyService } from './domain/services/feed-comment-policy.service';

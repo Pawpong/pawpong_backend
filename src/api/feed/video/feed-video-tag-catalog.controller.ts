@@ -1,11 +1,13 @@
 import { Get, Inject, Query } from '@nestjs/common';
 
+import type {
+    GetPopularFeedTagsUseCasePort,
+    SuggestFeedTagsUseCasePort,
+} from '../tag/application/ports/feed-tag-interaction.port';
 import {
     GET_POPULAR_FEED_TAGS_USE_CASE,
     SUGGEST_FEED_TAGS_USE_CASE,
-    type GetPopularFeedTagsUseCasePort,
-    type SuggestFeedTagsUseCasePort,
-} from '../tag/application/ports/feed-tag-interaction.port';
+} from '../tag/application/tokens/feed-tag-interaction.token';
 import type { FeedPopularTagResult, FeedTagSuggestionResult } from '../tag/application/types/feed-tag-result.type';
 import { FeedPopularTagLimitQueryDto, FeedSuggestTagQueryDto } from './dto/request/feed-limit-query.dto';
 import { PopularTagItemDto, TagSuggestionItemDto } from '../tag/dto/response/tag-response.dto';
