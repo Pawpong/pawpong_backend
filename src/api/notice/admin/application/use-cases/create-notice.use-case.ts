@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
-import { NoticePresentationService } from '../../../domain/services/notice-presentation.service';
+import { NoticeItemMapperService } from '../../../domain/services/notice-item-mapper.service';
 import { NOTICE_WRITER_PORT, type NoticeWriterPort } from '../ports/notice-writer.port';
 import type { NoticeCreateCommand } from '../types/notice-command.type';
 import type { NoticeItemResult } from '../../../application/types/notice-result.type';
@@ -12,7 +12,7 @@ export class CreateNoticeUseCase {
     constructor(
         @Inject(NOTICE_WRITER_PORT)
         private readonly noticeWriter: NoticeWriterPort,
-        private readonly noticePresentationService: NoticePresentationService,
+        private readonly noticeItemMapperService: NoticeItemMapperService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -30,7 +30,7 @@ export class CreateNoticeUseCase {
                 noticeId: notice.id,
             });
 
-            return this.noticePresentationService.toItem(notice);
+            return this.noticeItemMapperService.toItem(notice);
         } catch (error) {
             rethrowIfHttpException(error);
             this.logger.logError('createNotice', '공지사항 생성', error);

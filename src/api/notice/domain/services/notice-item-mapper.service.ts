@@ -1,24 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import { NoticeSnapshot } from '../../application/ports/notice-reader.port';
-import { NoticePaginationAssemblerService } from './notice-pagination-assembler.service';
-import type { NoticeItemResult, NoticePageResult } from '../../application/types/notice-result.type';
+import type { NoticeItemResult } from '../../application/types/notice-result.type';
 
 @Injectable()
-export class NoticePresentationService {
-    constructor(private readonly noticePaginationAssemblerService: NoticePaginationAssemblerService) {}
-
-    buildPage(
-        notices: NoticeSnapshot[],
-        page: number,
-        limit: number,
-        totalItems: number,
-    ): NoticePageResult {
-        const items = notices.map((notice) => this.toItem(notice));
-
-        return this.noticePaginationAssemblerService.build(items, page, limit, totalItems);
-    }
-
+export class NoticeItemMapperService {
     toItem(notice: NoticeSnapshot): NoticeItemResult {
         return {
             noticeId: notice.id,

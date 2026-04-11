@@ -3,7 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { PaginationRequestDto } from '../../../../common/dto/pagination/pagination-request.dto';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../common/utils/http-exception.util';
-import { NoticePresentationService } from '../../domain/services/notice-presentation.service';
+import { NoticePageAssemblerService } from '../../domain/services/notice-page-assembler.service';
 import { NOTICE_READER_PORT, type NoticeReaderPort, type NoticeStatus } from '../ports/notice-reader.port';
 import type { NoticePageResult } from '../types/notice-result.type';
 
@@ -12,7 +12,7 @@ export class GetNoticeListUseCase {
     constructor(
         @Inject(NOTICE_READER_PORT)
         private readonly noticeReader: NoticeReaderPort,
-        private readonly noticePresentationService: NoticePresentationService,
+        private readonly noticePageAssemblerService: NoticePageAssemblerService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -39,7 +39,7 @@ export class GetNoticeListUseCase {
                 currentPage: page,
             });
 
-            return this.noticePresentationService.buildPage(notices, page, limit, totalItems);
+            return this.noticePageAssemblerService.build(notices, page, limit, totalItems);
         } catch (error) {
             rethrowIfHttpException(error);
             this.logger.logError('getNoticeList', '공지사항 목록 조회', error);

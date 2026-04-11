@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../common/utils/http-exception.util';
-import { NoticePresentationService } from '../../domain/services/notice-presentation.service';
+import { NoticeItemMapperService } from '../../domain/services/notice-item-mapper.service';
 import { NOTICE_READER_PORT, type NoticeReaderPort } from '../ports/notice-reader.port';
 import type { NoticeItemResult } from '../types/notice-result.type';
 
@@ -11,7 +11,7 @@ export class GetNoticeDetailUseCase {
     constructor(
         @Inject(NOTICE_READER_PORT)
         private readonly noticeReader: NoticeReaderPort,
-        private readonly noticePresentationService: NoticePresentationService,
+        private readonly noticeItemMapperService: NoticeItemMapperService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -34,7 +34,7 @@ export class GetNoticeDetailUseCase {
             }
 
             this.logger.logSuccess('getNoticeDetail', '공지사항 상세 조회 완료', { noticeId });
-            return this.noticePresentationService.toItem(notice);
+            return this.noticeItemMapperService.toItem(notice);
         } catch (error) {
             rethrowIfHttpException(error);
             this.logger.logError('getNoticeDetail', '공지사항 상세 조회', error);

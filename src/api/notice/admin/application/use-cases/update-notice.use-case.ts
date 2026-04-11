@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
-import { NoticePresentationService } from '../../../domain/services/notice-presentation.service';
+import { NoticeItemMapperService } from '../../../domain/services/notice-item-mapper.service';
 import { NOTICE_WRITER_PORT, type NoticeWriterPort } from '../ports/notice-writer.port';
 import type { NoticeUpdateCommand } from '../types/notice-command.type';
 import type { NoticeItemResult } from '../../../application/types/notice-result.type';
@@ -12,7 +12,7 @@ export class UpdateNoticeUseCase {
     constructor(
         @Inject(NOTICE_WRITER_PORT)
         private readonly noticeWriter: NoticeWriterPort,
-        private readonly noticePresentationService: NoticePresentationService,
+        private readonly noticeItemMapperService: NoticeItemMapperService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -35,7 +35,7 @@ export class UpdateNoticeUseCase {
             }
 
             this.logger.logSuccess('updateNotice', '공지사항 수정 완료', { noticeId });
-            return this.noticePresentationService.toItem(notice);
+            return this.noticeItemMapperService.toItem(notice);
         } catch (error) {
             rethrowIfHttpException(error);
             this.logger.logError('updateNotice', '공지사항 수정', error);

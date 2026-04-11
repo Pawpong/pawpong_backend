@@ -8,7 +8,8 @@ import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';
 import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
 import { NoticePaginationAssemblerService } from './domain/services/notice-pagination-assembler.service';
-import { NoticePresentationService } from './domain/services/notice-presentation.service';
+import { NoticeItemMapperService } from './domain/services/notice-item-mapper.service';
+import { NoticePageAssemblerService } from './domain/services/notice-page-assembler.service';
 import { NoticeMongooseReaderAdapter } from './infrastructure/notice-mongoose-reader.adapter';
 import { NOTICE_READER_PORT } from './application/ports/notice-reader.port';
 import { CreateNoticeUseCase } from './admin/application/use-cases/create-notice.use-case';
@@ -30,7 +31,8 @@ import { NoticeRepository } from './repository/notice.repository';
         GetNoticeListUseCase,
         GetNoticeDetailUseCase,
         NoticePaginationAssemblerService,
-        NoticePresentationService,
+        NoticeItemMapperService,
+        NoticePageAssemblerService,
         NoticeRepository,
         NoticeMongooseReaderAdapter,
         CreateNoticeUseCase,
