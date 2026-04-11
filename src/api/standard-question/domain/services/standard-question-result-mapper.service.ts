@@ -4,7 +4,7 @@ import { StandardQuestionSnapshot } from '../../application/ports/standard-quest
 import type { StandardQuestionResult } from '../../admin/application/types/standard-question-result.type';
 
 @Injectable()
-export class StandardQuestionPresentationService {
+export class StandardQuestionResultMapperService {
     toResult(question: StandardQuestionSnapshot): StandardQuestionResult {
         return {
             id: question.id,
