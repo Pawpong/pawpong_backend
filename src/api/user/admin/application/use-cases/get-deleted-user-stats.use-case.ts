@@ -5,7 +5,7 @@ import { USER_ADMIN_READER_PORT, type UserAdminReaderPort } from '../ports/user-
 import { USER_ADMIN_WRITER_PORT, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
-import { UserAdminDeletedUserStatsPresentationService } from '../../domain/services/user-admin-deleted-user-stats-presentation.service';
+import { UserAdminDeletedUserStatsResultMapperService } from '../../domain/services/user-admin-deleted-user-stats-result-mapper.service';
 import type { UserAdminDeletedUserStatsResult } from '../types/user-admin-result.type';
 
 @Injectable()
@@ -17,7 +17,7 @@ export class GetDeletedUserStatsUseCase {
         private readonly userAdminWriter: UserAdminWriterPort,
         private readonly userAdminCommandPolicyService: UserAdminCommandPolicyService,
         private readonly userAdminActivityLogFactoryService: UserAdminActivityLogFactoryService,
-        private readonly userAdminDeletedUserStatsPresentationService: UserAdminDeletedUserStatsPresentationService,
+        private readonly userAdminDeletedUserStatsResultMapperService: UserAdminDeletedUserStatsResultMapperService,
     ) {}
 
     async execute(adminId: string): Promise<UserAdminDeletedUserStatsResult> {
@@ -39,6 +39,6 @@ export class GetDeletedUserStatsUseCase {
             ),
         );
 
-        return this.userAdminDeletedUserStatsPresentationService.toDeletedUserStatsResponse(result);
+        return this.userAdminDeletedUserStatsResultMapperService.toResult(result);
     }
 }

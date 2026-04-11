@@ -4,7 +4,7 @@ import { UserAdminDeletedReasonStatSnapshot, UserAdminDeletedUserStatsSnapshot }
 import type { UserAdminDeletedUserStatsResult } from '../../application/types/user-admin-result.type';
 
 @Injectable()
-export class UserAdminDeletedUserStatsPresentationService {
+export class UserAdminDeletedUserStatsResultMapperService {
     private readonly adopterReasonLabels: Record<string, string> = {
         already_adopted: '이미 입양을 마쳤어요',
         no_suitable_pet: '마음에 드는 아이가 없어요',
@@ -23,7 +23,7 @@ export class UserAdminDeletedUserStatsPresentationService {
         other: '기타',
     };
 
-    toDeletedUserStatsResponse(snapshot: UserAdminDeletedUserStatsSnapshot): UserAdminDeletedUserStatsResult {
+    toResult(snapshot: UserAdminDeletedUserStatsSnapshot): UserAdminDeletedUserStatsResult {
         const totalDeletedUsers = snapshot.totalDeletedAdopters + snapshot.totalDeletedBreeders;
 
         return {

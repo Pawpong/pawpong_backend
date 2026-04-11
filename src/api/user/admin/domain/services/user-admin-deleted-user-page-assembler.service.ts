@@ -8,10 +8,10 @@ import type {
 } from '../../application/types/user-admin-result.type';
 
 @Injectable()
-export class UserAdminDeletedUserListPresentationService {
+export class UserAdminDeletedUserPageAssemblerService {
     constructor(private readonly userAdminPaginationAssemblerService: UserAdminPaginationAssemblerService) {}
 
-    toDeletedUsersPaginationResponse(
+    build(
         result: UserAdminDeletedUserListResultSnapshot,
         page: number,
         limit: number,

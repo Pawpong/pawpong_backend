@@ -27,10 +27,10 @@ import { USER_ADMIN_READER_PORT } from './application/ports/user-admin-reader.po
 import { USER_ADMIN_WRITER_PORT } from './application/ports/user-admin-writer.port';
 import { UserAdminCommandPolicyService } from './domain/services/user-admin-command-policy.service';
 import { UserAdminDeletedUserCommandResponseService } from './domain/services/user-admin-deleted-user-command-response.service';
-import { UserAdminDeletedUserListPresentationService } from './domain/services/user-admin-deleted-user-list-presentation.service';
-import { UserAdminDeletedUserStatsPresentationService } from './domain/services/user-admin-deleted-user-stats-presentation.service';
+import { UserAdminDeletedUserPageAssemblerService } from './domain/services/user-admin-deleted-user-page-assembler.service';
+import { UserAdminDeletedUserStatsResultMapperService } from './domain/services/user-admin-deleted-user-stats-result-mapper.service';
 import { UserAdminPaginationAssemblerService } from './domain/services/user-admin-pagination-assembler.service';
-import { UserAdminPhoneWhitelistPresentationService } from './domain/services/user-admin-phone-whitelist-presentation.service';
+import { UserAdminPhoneWhitelistResultMapperService } from './domain/services/user-admin-phone-whitelist-result-mapper.service';
 import { UserAdminAdminProfileMapperService } from './domain/services/user-admin-admin-profile-mapper.service';
 import { UserAdminUserPageAssemblerService } from './domain/services/user-admin-user-page-assembler.service';
 import { UserAdminActivityLogFactoryService } from './domain/services/user-admin-activity-log-factory.service';
@@ -87,11 +87,11 @@ import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whit
         UpdatePhoneWhitelistUseCase,
         DeletePhoneWhitelistUseCase,
         UserAdminCommandPolicyService,
-        UserAdminDeletedUserListPresentationService,
-        UserAdminDeletedUserStatsPresentationService,
+        UserAdminDeletedUserPageAssemblerService,
+        UserAdminDeletedUserStatsResultMapperService,
         UserAdminDeletedUserCommandResponseService,
         UserAdminPaginationAssemblerService,
-        UserAdminPhoneWhitelistPresentationService,
+        UserAdminPhoneWhitelistResultMapperService,
         UserAdminAdminProfileMapperService,
         UserAdminUserPageAssemblerService,
         UserAdminActivityLogFactoryService,
