@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { NoticePresentationService } from '../../../domain/services/notice-presentation.service';
 import { NOTICE_WRITER, type NoticeWriterPort } from '../ports/notice-writer.port';
 import type { NoticeUpdateCommand } from '../types/notice-command.type';
@@ -36,10 +37,7 @@ export class UpdateNoticeUseCase {
             this.logger.logSuccess('updateNotice', '공지사항 수정 완료', { noticeId });
             return this.noticePresentationService.toItem(notice);
         } catch (error) {
-            if (error instanceof NotFoundException) {
-                throw error;
-            }
-
+            rethrowIfHttpException(error);
             this.logger.logError('updateNotice', '공지사항 수정', error);
             throw new BadRequestException('공지사항 수정에 실패했습니다.');
         }

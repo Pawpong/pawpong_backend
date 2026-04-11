@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
 import { ANNOUNCEMENT_WRITER, type AnnouncementWriterPort } from '../ports/announcement-writer.port';
 import type { AnnouncementUpdateCommand } from '../types/announcement-command.type';
@@ -42,10 +43,7 @@ export class UpdateAnnouncementUseCase {
 
             return this.announcementResponseMapperService.toResponse(announcement);
         } catch (error) {
-            if (error instanceof BadRequestException) {
-                throw error;
-            }
-
+            rethrowIfHttpException(error);
             this.logger.logError('updateAnnouncement', '공지사항 수정 실패', error);
             throw new BadRequestException('공지사항을 수정할 수 없습니다.');
         }
