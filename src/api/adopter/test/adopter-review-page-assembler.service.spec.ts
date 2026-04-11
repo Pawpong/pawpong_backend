@@ -25,8 +25,8 @@ describe('입양자 후기 페이지 assembler', () => {
             11,
         );
 
-        expect(result.meta.page).toBe(2);
-        expect(result.meta.totalCount).toBe(11);
+        expect(result.pagination.currentPage).toBe(2);
+        expect(result.pagination.totalItems).toBe(11);
         expect(result.items).toEqual([
             {
                 reviewId: 'review-id',
