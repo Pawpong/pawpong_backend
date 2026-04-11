@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
-import { AppVersionAdminListPresentationService } from '../../domain/services/app-version-admin-list-presentation.service';
+import { AppVersionAdminPageAssemblerService } from '../../domain/services/app-version-admin-page-assembler.service';
 import { APP_VERSION_ADMIN_READER_PORT, type AppVersionAdminReaderPort } from '../ports/app-version-admin-reader.port';
 import { type AppVersionAdminListQuery, type AppVersionAdminPageResult } from '../types/app-version-query.type';
 
@@ -11,7 +11,7 @@ export class GetAppVersionListUseCase {
     constructor(
         @Inject(APP_VERSION_ADMIN_READER_PORT)
         private readonly appVersionAdminReader: AppVersionAdminReaderPort,
-        private readonly appVersionAdminListPresentationService: AppVersionAdminListPresentationService,
+        private readonly appVersionAdminPageAssemblerService: AppVersionAdminPageAssemblerService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -31,7 +31,7 @@ export class GetAppVersionListUseCase {
                 currentPage: page,
             });
 
-            return this.appVersionAdminListPresentationService.toPaginationResponse(items, page, limit, totalItems);
+            return this.appVersionAdminPageAssemblerService.build(items, page, limit, totalItems);
         } catch (error) {
             rethrowIfHttpException(error);
             this.logger.logError('getAppVersionList', '앱 버전 목록 조회', error);

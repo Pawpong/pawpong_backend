@@ -2,7 +2,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { AppVersionAdminCommandPolicyService } from '../../../../admin/domain/services/app-version-admin-command-policy.service';
-import { AppVersionAdminItemPresentationService } from '../../../../admin/domain/services/app-version-admin-item-presentation.service';
+import { AppVersionAdminItemMapperService } from '../../../../admin/domain/services/app-version-admin-item-mapper.service';
 import { UpdateAppVersionUseCase } from '../../../../admin/application/use-cases/update-app-version.use-case';
 import { AppVersionWriterPort } from '../../../../admin/application/ports/app-version-writer.port';
 
@@ -33,7 +33,7 @@ describe('앱 버전 수정 유스케이스', () => {
         };
         const useCase = new UpdateAppVersionUseCase(
             appVersionWriter,
-            new AppVersionAdminItemPresentationService(),
+            new AppVersionAdminItemMapperService(),
             new AppVersionAdminCommandPolicyService(),
             logger,
         );
@@ -55,7 +55,7 @@ describe('앱 버전 수정 유스케이스', () => {
                 update: jest.fn().mockResolvedValue(null),
                 delete: jest.fn(),
             },
-            new AppVersionAdminItemPresentationService(),
+            new AppVersionAdminItemMapperService(),
             new AppVersionAdminCommandPolicyService(),
             logger,
         );
@@ -70,7 +70,7 @@ describe('앱 버전 수정 유스케이스', () => {
                 update: jest.fn(),
                 delete: jest.fn(),
             },
-            new AppVersionAdminItemPresentationService(),
+            new AppVersionAdminItemMapperService(),
             new AppVersionAdminCommandPolicyService(),
             logger,
         );

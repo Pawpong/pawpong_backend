@@ -16,8 +16,8 @@ import { GetAppVersionListUseCase } from './admin/application/use-cases/get-app-
 import { UpdateAppVersionUseCase } from './admin/application/use-cases/update-app-version.use-case';
 import { DeleteAppVersionUseCase } from './admin/application/use-cases/delete-app-version.use-case';
 import { AppVersionAdminCommandPolicyService } from './admin/domain/services/app-version-admin-command-policy.service';
-import { AppVersionAdminItemPresentationService } from './admin/domain/services/app-version-admin-item-presentation.service';
-import { AppVersionAdminListPresentationService } from './admin/domain/services/app-version-admin-list-presentation.service';
+import { AppVersionAdminItemMapperService } from './admin/domain/services/app-version-admin-item-mapper.service';
+import { AppVersionAdminPageAssemblerService } from './admin/domain/services/app-version-admin-page-assembler.service';
 import { AppVersionAdminPaginationAssemblerService } from './admin/domain/services/app-version-admin-pagination-assembler.service';
 import { AppVersionMongooseAdminReaderAdapter } from './admin/infrastructure/app-version-mongoose-admin-reader.adapter';
 import { AppVersionMongooseWriterAdapter } from './admin/infrastructure/app-version-mongoose-writer.adapter';
@@ -39,8 +39,8 @@ import { AppVersionRepository } from './repository/app-version.repository';
         DeleteAppVersionUseCase,
         AppVersionPolicyService,
         AppVersionAdminCommandPolicyService,
-        AppVersionAdminItemPresentationService,
-        AppVersionAdminListPresentationService,
+        AppVersionAdminItemMapperService,
+        AppVersionAdminPageAssemblerService,
         AppVersionAdminPaginationAssemblerService,
         AppVersionRepository,
         AppVersionMongooseReaderAdapter,
