@@ -5,9 +5,9 @@ import { ObjectId } from 'mongodb';
 import { Connection } from 'mongoose';
 import request from 'supertest';
 
-import { DiscordWebhookService } from '../../../common/discord/discord-webhook.service';
-import { StorageService } from '../../../common/storage/storage.service';
-import { closeTestingApp, createTestingApp } from '../../../common/test/test-utils';
+import { DiscordWebhookService } from '../../../../common/discord/discord-webhook.service';
+import { StorageService } from '../../../../common/storage/storage.service';
+import { closeTestingApp, createTestingApp } from '../../../../common/test/test-utils';
 
 export type BreederManagementE2eContext = {
     app: INestApplication;

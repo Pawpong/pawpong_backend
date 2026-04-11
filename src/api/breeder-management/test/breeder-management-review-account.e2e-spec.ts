@@ -8,7 +8,7 @@ import {
     closeBreederManagementE2eContext,
     createBreederManagementE2eContext,
     seedBreederManagementReview,
-} from './breeder-management-e2e.fixture';
+} from './fixtures/breeder-management.e2e.fixture';
 
 describe('브리더 관리 후기와 계정 종단간 테스트', () => {
     let context: BreederManagementE2eContext;

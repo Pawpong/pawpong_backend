@@ -6,7 +6,7 @@ import {
     closeAuthE2eContext,
     createAuthE2eContext,
     registerAdopter,
-} from './auth-e2e.fixture';
+} from './fixtures/auth.e2e.fixture';
 
 describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
     let context: AuthE2eContext;
