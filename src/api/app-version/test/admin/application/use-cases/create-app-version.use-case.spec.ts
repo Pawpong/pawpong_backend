@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { AppVersionAdminCommandPolicyService } from '../../../../admin/domain/services/app-version-admin-command-policy.service';
-import { AppVersionAdminItemPresentationService } from '../../../../admin/domain/services/app-version-admin-item-presentation.service';
+import { AppVersionAdminItemMapperService } from '../../../../admin/domain/services/app-version-admin-item-mapper.service';
 import { type AppVersionWriterPort } from '../../../../admin/application/ports/app-version-writer.port';
 import { CreateAppVersionUseCase } from '../../../../admin/application/use-cases/create-app-version.use-case';
 
@@ -34,7 +34,7 @@ describe('앱 버전 생성 유스케이스', () => {
 
         const useCase = new CreateAppVersionUseCase(
             appVersionWriter,
-            new AppVersionAdminItemPresentationService(),
+            new AppVersionAdminItemMapperService(),
             new AppVersionAdminCommandPolicyService(),
             logger,
         );
@@ -63,7 +63,7 @@ describe('앱 버전 생성 유스케이스', () => {
                 update: jest.fn(),
                 delete: jest.fn(),
             },
-            new AppVersionAdminItemPresentationService(),
+            new AppVersionAdminItemMapperService(),
             new AppVersionAdminCommandPolicyService(),
             logger,
         );

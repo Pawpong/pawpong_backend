@@ -3,7 +3,7 @@ import { BadRequestException, Inject, Injectable, NotFoundException } from '@nes
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AppVersionAdminCommandPolicyService } from '../../domain/services/app-version-admin-command-policy.service';
-import { AppVersionAdminItemPresentationService } from '../../domain/services/app-version-admin-item-presentation.service';
+import { AppVersionAdminItemMapperService } from '../../domain/services/app-version-admin-item-mapper.service';
 import { APP_VERSION_WRITER_PORT, type AppVersionWriterPort } from '../ports/app-version-writer.port';
 import { type AppVersionUpdateCommand } from '../types/app-version-command.type';
 import { type AppVersionAdminItemResult } from '../types/app-version-query.type';
@@ -13,7 +13,7 @@ export class UpdateAppVersionUseCase {
     constructor(
         @Inject(APP_VERSION_WRITER_PORT)
         private readonly appVersionWriter: AppVersionWriterPort,
-        private readonly appVersionAdminItemPresentationService: AppVersionAdminItemPresentationService,
+        private readonly appVersionAdminItemMapperService: AppVersionAdminItemMapperService,
         private readonly appVersionAdminCommandPolicyService: AppVersionAdminCommandPolicyService,
         private readonly logger: CustomLoggerService,
     ) {}
@@ -36,7 +36,7 @@ export class UpdateAppVersionUseCase {
             }
 
             this.logger.logSuccess('updateAppVersion', '앱 버전 수정 완료', { appVersionId });
-            return this.appVersionAdminItemPresentationService.toResponseDto(updated);
+            return this.appVersionAdminItemMapperService.toResult(updated);
         } catch (error) {
             rethrowIfHttpException(error);
             this.logger.logError('updateAppVersion', '앱 버전 수정', error);

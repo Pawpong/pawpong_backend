@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { AppVersionAdminSnapshot } from '../../application/ports/app-version-admin-reader.port';
+import type { AppVersionAdminItemResult } from '../../application/types/app-version-query.type';
 
 @Injectable()
-export class AppVersionAdminItemPresentationService {
-    toResponseDto(appVersion: AppVersionAdminSnapshot) {
+export class AppVersionAdminItemMapperService {
+    toResult(appVersion: AppVersionAdminSnapshot): AppVersionAdminItemResult {
         return {
             appVersionId: appVersion.appVersionId,
             platform: appVersion.platform,
