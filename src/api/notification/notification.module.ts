@@ -17,7 +17,8 @@ import { MarkNotificationReadUseCase } from './application/use-cases/mark-notifi
 import { MarkAllNotificationsReadUseCase } from './application/use-cases/mark-all-notifications-read.use-case';
 import { DeleteNotificationUseCase } from './application/use-cases/delete-notification.use-case';
 import { SendNotificationEmailUseCase } from './application/use-cases/send-notification-email.use-case';
-import { NotificationListPresentationService } from './domain/services/notification-list-presentation.service';
+import { NotificationItemMapperService } from './domain/services/notification-item-mapper.service';
+import { NotificationPageAssemblerService } from './domain/services/notification-page-assembler.service';
 import { NotificationPaginationAssemblerService } from './domain/services/notification-pagination-assembler.service';
 import { NotificationMessageTemplateService } from './domain/services/notification-message-template.service';
 import { NotificationStateResponseService } from './domain/services/notification-state-response.service';
@@ -58,7 +59,8 @@ import { MailModule } from '../../common/mail/mail.module';
         NotificationDispatchService,
         CreateNotificationUseCase,
         CreateNotificationFromBuilderUseCase,
-        NotificationListPresentationService,
+        NotificationItemMapperService,
+        NotificationPageAssemblerService,
         NotificationPaginationAssemblerService,
         NotificationMessageTemplateService,
         NotificationStateResponseService,

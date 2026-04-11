@@ -2,8 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import type { NotificationMetadata } from '../../../../schema/notification.schema';
 import { NotificationInboxRecord } from '../../application/ports/notification-inbox.port';
-import { NotificationPaginationAssemblerService } from './notification-pagination-assembler.service';
-import type { NotificationItemResult, NotificationPageResult } from '../../application/types/notification-result.type';
+import type { NotificationItemResult } from '../../application/types/notification-result.type';
 import type { NotificationObjectIdLike } from '../../types/notification-record.type';
 
 type NotificationReadableRecord = {
@@ -19,9 +18,7 @@ type NotificationReadableRecord = {
 };
 
 @Injectable()
-export class NotificationListPresentationService {
-    constructor(private readonly notificationPaginationAssemblerService: NotificationPaginationAssemblerService) {}
-
+export class NotificationItemMapperService {
     toItem(notification: NotificationReadableRecord): NotificationItemResult {
         return {
             notificationId: notification._id.toString(),
@@ -34,19 +31,5 @@ export class NotificationListPresentationService {
             targetUrl: notification.targetUrl,
             createdAt: notification.createdAt,
         };
-    }
-
-    toPage(
-        notifications: NotificationInboxRecord[],
-        page: number,
-        limit: number,
-        totalItems: number,
-    ): NotificationPageResult {
-        return this.notificationPaginationAssemblerService.build(
-            notifications.map((notification) => this.toItem(notification)),
-            page,
-            limit,
-            totalItems,
-        );
     }
 }
