@@ -96,8 +96,6 @@ export class SocialCompleteRequestDto {
     @IsOptional()
     marketingAgreed?: boolean;
 
-    // ===== 입양자 전용 필드 =====
-
     /**
      * 닉네임 (입양자 전용)
      * @example "펫러버"
@@ -110,8 +108,6 @@ export class SocialCompleteRequestDto {
     @IsString()
     @IsOptional()
     nickname?: string;
-
-    // ===== 브리더 전용 필드 =====
 
     /**
      * 브리딩 동물 종류 (브리더 전용)
