@@ -4,7 +4,7 @@ import {
     BreederManagementE2eContext,
     closeBreederManagementE2eContext,
     createBreederManagementE2eContext,
-} from './breeder-management-e2e.fixture';
+} from './fixtures/breeder-management.e2e.fixture';
 
 describe('브리더 관리 인증 종단간 테스트', () => {
     let context: BreederManagementE2eContext;
