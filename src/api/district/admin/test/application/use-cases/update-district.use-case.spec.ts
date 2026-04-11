@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
 import { UpdateDistrictUseCase } from '../../../application/use-cases/update-district.use-case';
-import { DistrictAdminPresentationService } from '../../../../domain/services/district-admin-presentation.service';
+import { DistrictAdminResultMapperService } from '../../../../domain/services/district-admin-result-mapper.service';
 import { DistrictAdminReaderPort } from '../../../application/ports/district-admin-reader.port';
 import { DistrictWriterPort } from '../../../application/ports/district-writer.port';
 
@@ -32,7 +32,7 @@ describe('지역 수정 유스케이스', () => {
         const useCase = new UpdateDistrictUseCase(
             districtAdminReader,
             districtWriter,
-            new DistrictAdminPresentationService(),
+            new DistrictAdminResultMapperService(),
         );
 
         await expect(useCase.execute('district-1', { districts: ['수원시', '성남시'] })).resolves.toMatchObject({
@@ -53,7 +53,7 @@ describe('지역 수정 유스케이스', () => {
                 update: jest.fn(),
                 delete: jest.fn(),
             },
-            new DistrictAdminPresentationService(),
+            new DistrictAdminResultMapperService(),
         );
 
         await expect(useCase.execute('missing', { districts: ['구'] })).rejects.toBeInstanceOf(BadRequestException);
@@ -84,7 +84,7 @@ describe('지역 수정 유스케이스', () => {
                 update: jest.fn(),
                 delete: jest.fn(),
             },
-            new DistrictAdminPresentationService(),
+            new DistrictAdminResultMapperService(),
         );
 
         await expect(useCase.execute('district-1', { city: '서울특별시' })).rejects.toBeInstanceOf(

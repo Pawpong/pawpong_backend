@@ -1,7 +1,7 @@
 import { ConflictException } from '@nestjs/common';
 
 import { CreateDistrictUseCase } from '../../../application/use-cases/create-district.use-case';
-import { DistrictAdminPresentationService } from '../../../../domain/services/district-admin-presentation.service';
+import { DistrictAdminResultMapperService } from '../../../../domain/services/district-admin-result-mapper.service';
 import { DistrictAdminReaderPort } from '../../../application/ports/district-admin-reader.port';
 import { DistrictWriterPort } from '../../../application/ports/district-writer.port';
 
@@ -26,7 +26,7 @@ describe('지역 생성 유스케이스', () => {
         const useCase = new CreateDistrictUseCase(
             districtAdminReader,
             districtWriter,
-            new DistrictAdminPresentationService(),
+            new DistrictAdminResultMapperService(),
         );
 
         await expect(useCase.execute({ city: '경기도', districts: ['수원시'] })).resolves.toMatchObject({
@@ -53,7 +53,7 @@ describe('지역 생성 유스케이스', () => {
                 update: jest.fn(),
                 delete: jest.fn(),
             },
-            new DistrictAdminPresentationService(),
+            new DistrictAdminResultMapperService(),
         );
 
         await expect(useCase.execute({ city: '경기도', districts: ['수원시'] })).rejects.toBeInstanceOf(

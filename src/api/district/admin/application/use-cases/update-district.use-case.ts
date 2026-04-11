@@ -1,7 +1,7 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 
 import type { DistrictAdminResult } from '../../../application/types/district-result.type';
-import { DistrictAdminPresentationService } from '../../../domain/services/district-admin-presentation.service';
+import { DistrictAdminResultMapperService } from '../../../domain/services/district-admin-result-mapper.service';
 import { DISTRICT_ADMIN_READER_PORT, type DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
 import { DISTRICT_WRITER_PORT, type DistrictWriterPort } from '../ports/district-writer.port';
 import { UpdateDistrictCommand } from '../types/district-command.type';
@@ -13,7 +13,7 @@ export class UpdateDistrictUseCase {
         private readonly districtAdminReader: DistrictAdminReaderPort,
         @Inject(DISTRICT_WRITER_PORT)
         private readonly districtWriter: DistrictWriterPort,
-        private readonly districtAdminPresentationService: DistrictAdminPresentationService,
+        private readonly districtAdminResultMapperService: DistrictAdminResultMapperService,
     ) {}
 
     async execute(id: string, dto: UpdateDistrictCommand): Promise<DistrictAdminResult> {
@@ -37,6 +37,6 @@ export class UpdateDistrictUseCase {
             throw new BadRequestException(`ID ${id}에 해당하는 지역을 찾을 수 없습니다.`);
         }
 
-        return this.districtAdminPresentationService.toResponseDto(updated);
+        return this.districtAdminResultMapperService.toResult(updated);
     }
 }
