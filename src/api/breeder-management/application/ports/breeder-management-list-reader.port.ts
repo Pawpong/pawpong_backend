@@ -1,4 +1,4 @@
-export const BREEDER_MANAGEMENT_LIST_READER_PORT = 'BREEDER_MANAGEMENT_LIST_READER_PORT';
+export const BREEDER_MANAGEMENT_LIST_READER_PORT = Symbol('BREEDER_MANAGEMENT_LIST_READER_PORT');
 
 export interface BreederManagementBreederSummary {
     averageRating?: number;

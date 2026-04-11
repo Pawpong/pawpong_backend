@@ -7,7 +7,9 @@ export type AuthSessionUser = {
     readonly refreshTokenHash: string | null;
 };
 
-export abstract class AuthSessionPort {
-    abstract findById(userId: string, role: AuthSessionRole): Promise<AuthSessionUser | null>;
-    abstract updateRefreshToken(userId: string, role: AuthSessionRole, refreshTokenHash: string | null): Promise<void>;
+export const AUTH_SESSION_PORT = Symbol('AUTH_SESSION_PORT');
+
+export interface AuthSessionPort {
+    findById(userId: string, role: AuthSessionRole): Promise<AuthSessionUser | null>;
+    updateRefreshToken(userId: string, role: AuthSessionRole, refreshTokenHash: string | null): Promise<void>;
 }

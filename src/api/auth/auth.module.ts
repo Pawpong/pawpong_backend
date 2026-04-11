@@ -39,7 +39,7 @@ import { AuthAdminJwtAdapter } from './admin/infrastructure/auth-admin-jwt.adapt
 import { AUTH_ADMIN_READER } from './admin/application/ports/auth-admin-reader.port';
 import { AUTH_ADMIN_PASSWORD } from './admin/application/ports/auth-admin-password.port';
 import { AUTH_ADMIN_TOKEN } from './admin/application/ports/auth-admin-token.port';
-import { AuthTokenPort } from './application/ports/auth-token.port';
+import { AUTH_TOKEN_PORT } from './application/ports/auth-token.port';
 
 import { AuthAdminRepository } from './repository/auth-admin.repository';
 import { AuthPhoneVerificationRepository } from './repository/auth-phone-verification.repository';
@@ -53,13 +53,13 @@ import { AuthTempUploadStore } from './infrastructure/auth-temp-upload.store';
 import { AuthJwtTokenAdapter } from './infrastructure/auth-jwt-token.adapter';
 import { AuthUploadFileStoreAdapter } from './infrastructure/auth-upload-file-store.adapter';
 import { AuthProfileImageTargetAdapter } from './infrastructure/auth-profile-image-target.adapter';
-import { AuthRegistrationPort } from './application/ports/auth-registration.port';
-import { AuthRegistrationNotificationPort } from './application/ports/auth-registration-notification.port';
-import { AuthSessionPort } from './application/ports/auth-session.port';
-import { AuthTempUploadPort } from './application/ports/auth-temp-upload.port';
-import { AuthSocialCallbackPort } from './application/ports/auth-social-callback.port';
-import { AuthUploadFileStorePort } from './application/ports/auth-upload-file-store.port';
-import { AuthProfileImageTargetPort } from './application/ports/auth-profile-image-target.port';
+import { AUTH_REGISTRATION_PORT } from './application/ports/auth-registration.port';
+import { AUTH_REGISTRATION_NOTIFICATION_PORT } from './application/ports/auth-registration-notification.port';
+import { AUTH_SESSION_PORT } from './application/ports/auth-session.port';
+import { AUTH_TEMP_UPLOAD_PORT } from './application/ports/auth-temp-upload.port';
+import { AUTH_SOCIAL_CALLBACK_PORT } from './application/ports/auth-social-callback.port';
+import { AUTH_UPLOAD_FILE_STORE_PORT } from './application/ports/auth-upload-file-store.port';
+import { AUTH_PROFILE_IMAGE_TARGET_PORT } from './application/ports/auth-profile-image-target.port';
 import { AUTH_PHONE_VERIFICATION_REGISTRY_PORT } from './application/ports/auth-phone-verification-registry.port';
 import { AUTH_PHONE_VERIFICATION_SENDER_PORT } from './application/ports/auth-phone-verification-sender.port';
 import { AUTH_PHONE_VERIFICATION_STORE_PORT } from './application/ports/auth-phone-verification-store.port';
@@ -214,7 +214,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthPhoneVerificationMongooseRegistryAdapter,
         AuthPhoneVerificationAlimtalkAdapter,
         {
-            provide: AuthRegistrationPort,
+            provide: AUTH_REGISTRATION_PORT,
             useExisting: AuthRegistrationAdapter,
         },
         {
@@ -246,31 +246,31 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             useExisting: AuthAdminJwtAdapter,
         },
         {
-            provide: AuthRegistrationNotificationPort,
+            provide: AUTH_REGISTRATION_NOTIFICATION_PORT,
             useExisting: AuthRegistrationNotificationAdapter,
         },
         {
-            provide: AuthTokenPort,
+            provide: AUTH_TOKEN_PORT,
             useExisting: AuthJwtTokenAdapter,
         },
         {
-            provide: AuthSessionPort,
+            provide: AUTH_SESSION_PORT,
             useExisting: AuthSessionAdapter,
         },
         {
-            provide: AuthSocialCallbackPort,
+            provide: AUTH_SOCIAL_CALLBACK_PORT,
             useExisting: AuthSocialCallbackAdapter,
         },
         {
-            provide: AuthTempUploadPort,
+            provide: AUTH_TEMP_UPLOAD_PORT,
             useExisting: AuthTempUploadStore,
         },
         {
-            provide: AuthUploadFileStorePort,
+            provide: AUTH_UPLOAD_FILE_STORE_PORT,
             useExisting: AuthUploadFileStoreAdapter,
         },
         {
-            provide: AuthProfileImageTargetPort,
+            provide: AUTH_PROFILE_IMAGE_TARGET_PORT,
             useExisting: AuthProfileImageTargetAdapter,
         },
         {

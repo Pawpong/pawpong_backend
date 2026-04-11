@@ -1,6 +1,6 @@
 import { PetStatus } from '../../../../common/enum/user.enum';
 
-export const BREEDER_MANAGEMENT_PET_COMMAND_PORT = 'BREEDER_MANAGEMENT_PET_COMMAND_PORT';
+export const BREEDER_MANAGEMENT_PET_COMMAND_PORT = Symbol('BREEDER_MANAGEMENT_PET_COMMAND_PORT');
 
 export interface BreederManagementParentPetCreateData {
     breederId: string;

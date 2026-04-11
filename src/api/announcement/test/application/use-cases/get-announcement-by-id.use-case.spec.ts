@@ -1,11 +1,15 @@
 import { BadRequestException } from '@nestjs/common';
 
-import { AnnouncementPublicReaderPort, type AnnouncementPublicItem, type AnnouncementPublicListResult } from '../../../application/ports/announcement-public-reader.port';
+import type {
+    AnnouncementPublicItem,
+    AnnouncementPublicListResult,
+    AnnouncementPublicReaderPort,
+} from '../../../application/ports/announcement-public-reader.port';
 import { AnnouncementPaginationAssemblerService } from '../../../domain/services/announcement-pagination-assembler.service';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
 import { GetAnnouncementByIdUseCase } from '../../../application/use-cases/get-announcement-by-id.use-case';
 
-class StubAnnouncementPublicReaderPort extends AnnouncementPublicReaderPort {
+class StubAnnouncementPublicReaderPort implements AnnouncementPublicReaderPort {
     item: AnnouncementPublicItem | null = {
         announcementId: '507f1f77bcf86cd799439011',
         title: '공지 1',

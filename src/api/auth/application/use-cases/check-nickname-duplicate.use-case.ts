@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AuthRegistrationPort } from '../ports/auth-registration.port';
+import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../ports/auth-registration.port';
 
 @Injectable()
 export class CheckNicknameDuplicateUseCase {
     constructor(
-        @Inject(AuthRegistrationPort)
+        @Inject(AUTH_REGISTRATION_PORT)
         private readonly authRegistrationPort: AuthRegistrationPort,
     ) {}
 

@@ -1,4 +1,4 @@
-export const BREEDER_MANAGEMENT_REVIEW_REPLY_PORT = 'BREEDER_MANAGEMENT_REVIEW_REPLY_PORT';
+export const BREEDER_MANAGEMENT_REVIEW_REPLY_PORT = Symbol('BREEDER_MANAGEMENT_REVIEW_REPLY_PORT');
 
 export interface BreederManagementReviewReplyRecord {
     _id?: unknown;

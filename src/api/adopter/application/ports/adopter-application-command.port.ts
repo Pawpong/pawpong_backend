@@ -32,10 +32,12 @@ export type AdopterApplicationCreatedRecord = {
     appliedAt: Date;
 };
 
-export abstract class AdopterApplicationCommandPort {
-    abstract findPendingByAdopterAndBreeder(
+export const ADOPTER_APPLICATION_COMMAND_PORT = Symbol('ADOPTER_APPLICATION_COMMAND_PORT');
+
+export interface AdopterApplicationCommandPort {
+    findPendingByAdopterAndBreeder(
         adopterId: string,
         breederId: string,
     ): Promise<AdopterApplicationCreatedRecord | null>;
-    abstract create(command: AdopterApplicationCreateCommand): Promise<AdopterApplicationCreatedRecord>;
+    create(command: AdopterApplicationCreateCommand): Promise<AdopterApplicationCreatedRecord>;
 }

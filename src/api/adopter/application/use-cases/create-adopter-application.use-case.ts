@@ -5,9 +5,15 @@ import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
-import { AdopterPetReaderPort } from '../ports/adopter-pet-reader.port';
-import { AdopterApplicationCommandPort } from '../ports/adopter-application-command.port';
-import { AdopterApplicationNotifierPort } from '../ports/adopter-application-notifier.port';
+import { ADOPTER_PET_READER_PORT, type AdopterPetReaderPort } from '../ports/adopter-pet-reader.port';
+import {
+    ADOPTER_APPLICATION_COMMAND_PORT,
+    type AdopterApplicationCommandPort,
+} from '../ports/adopter-application-command.port';
+import {
+    ADOPTER_APPLICATION_NOTIFIER_PORT,
+    type AdopterApplicationNotifierPort,
+} from '../ports/adopter-application-notifier.port';
 import { AdopterApplicationCustomResponseBuilderService } from '../../domain/services/adopter-application-custom-response-builder.service';
 import { AdopterApplicationStandardResponseBuilderService } from '../../domain/services/adopter-application-standard-response-builder.service';
 import type { AdopterApplicationCreateCommand } from '../types/adopter-application-command.type';
@@ -21,8 +27,11 @@ export class CreateAdopterApplicationUseCase {
         private readonly adopterProfilePort: AdopterProfilePort,
         @Inject(ADOPTER_BREEDER_READER_PORT)
         private readonly adopterBreederReaderPort: AdopterBreederReaderPort,
+        @Inject(ADOPTER_PET_READER_PORT)
         private readonly adopterPetReaderPort: AdopterPetReaderPort,
+        @Inject(ADOPTER_APPLICATION_COMMAND_PORT)
         private readonly adopterApplicationCommandPort: AdopterApplicationCommandPort,
+        @Inject(ADOPTER_APPLICATION_NOTIFIER_PORT)
         private readonly adopterApplicationNotifierPort: AdopterApplicationNotifierPort,
         private readonly adopterApplicationCustomResponseBuilderService: AdopterApplicationCustomResponseBuilderService,
         private readonly adopterApplicationStandardResponseBuilderService: AdopterApplicationStandardResponseBuilderService,

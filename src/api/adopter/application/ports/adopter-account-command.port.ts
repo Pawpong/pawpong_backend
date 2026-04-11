@@ -11,8 +11,10 @@ export type AdopterDeleteAccountCommand = {
     otherReason?: string;
 };
 
-export abstract class AdopterAccountCommandPort {
-    abstract findAdopterById(userId: string): Promise<AdopterAccountRecord | null>;
-    abstract softDeleteAdopter(command: AdopterDeleteAccountCommand): Promise<void>;
-    abstract notifyAdopterWithdrawal(command: AdopterDeleteAccountCommand, adopter: AdopterAccountRecord): Promise<void>;
+export const ADOPTER_ACCOUNT_COMMAND_PORT = Symbol('ADOPTER_ACCOUNT_COMMAND_PORT');
+
+export interface AdopterAccountCommandPort {
+    findAdopterById(userId: string): Promise<AdopterAccountRecord | null>;
+    softDeleteAdopter(command: AdopterDeleteAccountCommand): Promise<void>;
+    notifyAdopterWithdrawal(command: AdopterDeleteAccountCommand, adopter: AdopterAccountRecord): Promise<void>;
 }

@@ -1,15 +1,19 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { PaginationRequestDto } from '../../../../../common/dto/pagination/pagination-request.dto';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
-import { AnnouncementAdminReaderPort } from '../ports/announcement-admin-reader.port';
+import {
+    ANNOUNCEMENT_ADMIN_READER_PORT,
+    type AnnouncementAdminReaderPort,
+} from '../ports/announcement-admin-reader.port';
 import type { AnnouncementPageResult } from '../../../application/types/announcement-result.type';
 
 @Injectable()
 export class GetAllAnnouncementsUseCase {
     constructor(
+        @Inject(ANNOUNCEMENT_ADMIN_READER_PORT)
         private readonly announcementAdminReader: AnnouncementAdminReaderPort,
         private readonly announcementResponseMapperService: AnnouncementResponseMapperService,
         private readonly logger: CustomLoggerService,

@@ -27,12 +27,14 @@ export type AdopterReviewRecord = {
     _id: { toString(): string };
 };
 
-export abstract class AdopterReviewCommandPort {
-    abstract findApplicationById(applicationId: string): Promise<AdopterReviewApplicationRecord | null>;
-    abstract create(command: AdopterReviewCreateCommand): Promise<AdopterReviewCreatedRecord>;
-    abstract incrementBreederReviewCount(breederId: string): Promise<void>;
-    abstract findReviewById(reviewId: string): Promise<AdopterReviewRecord | null>;
-    abstract markAsReported(
+export const ADOPTER_REVIEW_COMMAND_PORT = Symbol('ADOPTER_REVIEW_COMMAND_PORT');
+
+export interface AdopterReviewCommandPort {
+    findApplicationById(applicationId: string): Promise<AdopterReviewApplicationRecord | null>;
+    create(command: AdopterReviewCreateCommand): Promise<AdopterReviewCreatedRecord>;
+    incrementBreederReviewCount(breederId: string): Promise<void>;
+    findReviewById(reviewId: string): Promise<AdopterReviewRecord | null>;
+    markAsReported(
         reviewId: string,
         reporterId: string,
         reason: string,

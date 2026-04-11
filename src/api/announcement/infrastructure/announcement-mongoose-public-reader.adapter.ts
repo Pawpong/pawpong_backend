@@ -2,18 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { AnnouncementDocument } from '../../../schema/announcement.schema';
 
 import {
-    AnnouncementPublicReaderPort,
     type AnnouncementPublicItem,
     type AnnouncementPublicListQuery,
     type AnnouncementPublicListResult,
+    type AnnouncementPublicReaderPort,
 } from '../application/ports/announcement-public-reader.port';
 import { AnnouncementRepository } from '../repository/announcement.repository';
 
 @Injectable()
-export class AnnouncementMongoosePublicReaderAdapter extends AnnouncementPublicReaderPort {
-    constructor(private readonly announcementRepository: AnnouncementRepository) {
-        super();
-    }
+export class AnnouncementMongoosePublicReaderAdapter implements AnnouncementPublicReaderPort {
+    constructor(private readonly announcementRepository: AnnouncementRepository) {}
 
     async findActiveAnnouncements(query: AnnouncementPublicListQuery): Promise<AnnouncementPublicListResult> {
         const skip = (query.page - 1) * query.limit;

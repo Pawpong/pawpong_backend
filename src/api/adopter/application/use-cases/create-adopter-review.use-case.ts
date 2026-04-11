@@ -5,8 +5,11 @@ import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
-import { AdopterReviewCommandPort } from '../ports/adopter-review-command.port';
-import { AdopterReviewNotifierPort } from '../ports/adopter-review-notifier.port';
+import { ADOPTER_REVIEW_COMMAND_PORT, type AdopterReviewCommandPort } from '../ports/adopter-review-command.port';
+import {
+    ADOPTER_REVIEW_NOTIFIER_PORT,
+    type AdopterReviewNotifierPort,
+} from '../ports/adopter-review-notifier.port';
 import type { AdopterReviewCreateCommand } from '../types/adopter-review-command.type';
 import type { AdopterReviewCreateResult } from '../types/adopter-result.type';
 
@@ -17,7 +20,9 @@ export class CreateAdopterReviewUseCase {
         private readonly adopterProfilePort: AdopterProfilePort,
         @Inject(ADOPTER_BREEDER_READER_PORT)
         private readonly adopterBreederReaderPort: AdopterBreederReaderPort,
+        @Inject(ADOPTER_REVIEW_COMMAND_PORT)
         private readonly adopterReviewCommandPort: AdopterReviewCommandPort,
+        @Inject(ADOPTER_REVIEW_NOTIFIER_PORT)
         private readonly adopterReviewNotifierPort: AdopterReviewNotifierPort,
     ) {}
 

@@ -3,20 +3,21 @@ import { Inject, Injectable } from '@nestjs/common';
 import { RecipientType } from '../../../common/enum/user.enum';
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
 import { NotificationType } from '../../../schema/notification.schema';
-import { NotificationDispatchPort } from '../../notification/application/ports/notification-dispatch.port';
+import {
+    NOTIFICATION_DISPATCH_PORT,
+    type NotificationDispatchPort,
+} from '../../notification/application/ports/notification-dispatch.port';
 import { BreederRepository } from '../../breeder-management/repository/breeder.repository';
-import { AdopterReviewNotifierPort } from '../application/ports/adopter-review-notifier.port';
+import type { AdopterReviewNotifierPort } from '../application/ports/adopter-review-notifier.port';
 
 @Injectable()
-export class AdopterReviewNotifierAdapter extends AdopterReviewNotifierPort {
+export class AdopterReviewNotifierAdapter implements AdopterReviewNotifierPort {
     constructor(
         private readonly breederRepository: BreederRepository,
-        @Inject(NotificationDispatchPort)
+        @Inject(NOTIFICATION_DISPATCH_PORT)
         private readonly notificationDispatchPort: NotificationDispatchPort,
         private readonly mailTemplateService: MailTemplateService,
-    ) {
-        super();
-    }
+    ) {}
 
     async notifyBreederOfNewReview(breederId: string): Promise<void> {
         const breeder = await this.breederRepository.findById(breederId);

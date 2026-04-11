@@ -1,16 +1,16 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { hasErrorName } from '../../../../common/utils/error.util';
 
-import { AuthSessionPort, type AuthSessionRole } from '../ports/auth-session.port';
-import { AuthTokenPort } from '../ports/auth-token.port';
+import { AUTH_SESSION_PORT, type AuthSessionPort, type AuthSessionRole } from '../ports/auth-session.port';
+import { AUTH_TOKEN_PORT, type AuthTokenPort } from '../ports/auth-token.port';
 import { type AuthTokenSet } from '../types/auth-token-set.type';
 
 @Injectable()
 export class RefreshAuthTokenUseCase {
     constructor(
-        @Inject(AuthSessionPort)
+        @Inject(AUTH_SESSION_PORT)
         private readonly authSessionPort: AuthSessionPort,
-        @Inject(AuthTokenPort)
+        @Inject(AUTH_TOKEN_PORT)
         private readonly authTokenPort: AuthTokenPort,
     ) {}
 

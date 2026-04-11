@@ -8,12 +8,14 @@ export type AuthRefreshTokenPayload = {
     type?: string;
 };
 
-export abstract class AuthTokenPort {
-    abstract generateTokens(userId: string, email: string, role: AuthSessionRole): AuthTokenSet;
+export const AUTH_TOKEN_PORT = Symbol('AUTH_TOKEN_PORT');
 
-    abstract verifyRefreshToken(refreshToken: string): AuthRefreshTokenPayload;
+export interface AuthTokenPort {
+    generateTokens(userId: string, email: string, role: AuthSessionRole): AuthTokenSet;
 
-    abstract hashRefreshToken(refreshToken: string): Promise<string>;
+    verifyRefreshToken(refreshToken: string): AuthRefreshTokenPayload;
 
-    abstract compareRefreshToken(refreshToken: string, hashedRefreshToken: string): Promise<boolean>;
+    hashRefreshToken(refreshToken: string): Promise<string>;
+
+    compareRefreshToken(refreshToken: string, hashedRefreshToken: string): Promise<boolean>;
 }

@@ -69,14 +69,14 @@ import { AdopterApplicationReaderAdapter } from './infrastructure/adopter-applic
 import { AdopterFileUrlAdapter } from './infrastructure/adopter-file-url.adapter';
 import { ADOPTER_PROFILE_PORT } from './application/ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from './application/ports/adopter-breeder-reader.port';
-import { AdopterPetReaderPort } from './application/ports/adopter-pet-reader.port';
-import { AdopterApplicationCommandPort } from './application/ports/adopter-application-command.port';
-import { AdopterApplicationNotifierPort } from './application/ports/adopter-application-notifier.port';
-import { AdopterReportCommandPort } from './application/ports/adopter-report-command.port';
-import { AdopterReviewCommandPort } from './application/ports/adopter-review-command.port';
-import { AdopterReviewNotifierPort } from './application/ports/adopter-review-notifier.port';
-import { AdopterReviewReaderPort } from './application/ports/adopter-review-reader.port';
-import { AdopterAccountCommandPort } from './application/ports/adopter-account-command.port';
+import { ADOPTER_PET_READER_PORT } from './application/ports/adopter-pet-reader.port';
+import { ADOPTER_APPLICATION_COMMAND_PORT } from './application/ports/adopter-application-command.port';
+import { ADOPTER_APPLICATION_NOTIFIER_PORT } from './application/ports/adopter-application-notifier.port';
+import { ADOPTER_REPORT_COMMAND_PORT } from './application/ports/adopter-report-command.port';
+import { ADOPTER_REVIEW_COMMAND_PORT } from './application/ports/adopter-review-command.port';
+import { ADOPTER_REVIEW_NOTIFIER_PORT } from './application/ports/adopter-review-notifier.port';
+import { ADOPTER_REVIEW_READER_PORT } from './application/ports/adopter-review-reader.port';
+import { ADOPTER_ACCOUNT_COMMAND_PORT } from './application/ports/adopter-account-command.port';
 import { ADOPTER_APPLICATION_READER_PORT } from './application/ports/adopter-application-reader.port';
 import { ADOPTER_FILE_URL_PORT } from './application/ports/adopter-file-url.port';
 
@@ -197,35 +197,35 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             useExisting: AdopterBreederReaderAdapter,
         },
         {
-            provide: AdopterPetReaderPort,
+            provide: ADOPTER_PET_READER_PORT,
             useExisting: AdopterPetReaderAdapter,
         },
         {
-            provide: AdopterApplicationCommandPort,
+            provide: ADOPTER_APPLICATION_COMMAND_PORT,
             useExisting: AdopterApplicationCommandAdapter,
         },
         {
-            provide: AdopterApplicationNotifierPort,
+            provide: ADOPTER_APPLICATION_NOTIFIER_PORT,
             useExisting: AdopterApplicationNotifierAdapter,
         },
         {
-            provide: AdopterReportCommandPort,
+            provide: ADOPTER_REPORT_COMMAND_PORT,
             useExisting: AdopterReportCommandAdapter,
         },
         {
-            provide: AdopterReviewCommandPort,
+            provide: ADOPTER_REVIEW_COMMAND_PORT,
             useExisting: AdopterReviewCommandAdapter,
         },
         {
-            provide: AdopterReviewNotifierPort,
+            provide: ADOPTER_REVIEW_NOTIFIER_PORT,
             useExisting: AdopterReviewNotifierAdapter,
         },
         {
-            provide: AdopterReviewReaderPort,
+            provide: ADOPTER_REVIEW_READER_PORT,
             useExisting: AdopterReviewReaderAdapter,
         },
         {
-            provide: AdopterAccountCommandPort,
+            provide: ADOPTER_ACCOUNT_COMMAND_PORT,
             useExisting: AdopterAccountCommandAdapter,
         },
         {

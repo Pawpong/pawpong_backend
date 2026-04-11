@@ -5,13 +5,13 @@ import ffprobeInstaller from '@ffprobe-installer/ffprobe';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
-import { FeedVideoMetadata, FeedVideoTranscoderPort } from '../application/ports/feed-video-transcoder.port';
+import type { FeedVideoMetadata, FeedVideoTranscoderPort } from '../application/ports/feed-video-transcoder.port';
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 ffmpeg.setFfprobePath(ffprobeInstaller.path);
 
 @Injectable()
-export class FeedVideoFfmpegAdapter extends FeedVideoTranscoderPort {
+export class FeedVideoFfmpegAdapter implements FeedVideoTranscoderPort {
     private readonly logger = new Logger(FeedVideoFfmpegAdapter.name);
 
     async convertToHLS(inputFile: string, outputDir: string, resolutions: number[] = [360, 480, 720]): Promise<void> {

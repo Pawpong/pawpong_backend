@@ -1,10 +1,13 @@
-import { AnnouncementPublicReaderPort, type AnnouncementPublicListResult } from '../../../application/ports/announcement-public-reader.port';
+import type {
+    AnnouncementPublicListResult,
+    AnnouncementPublicReaderPort,
+} from '../../../application/ports/announcement-public-reader.port';
 import { PaginationRequestDto } from '../../../../../common/dto/pagination/pagination-request.dto';
 import { AnnouncementPaginationAssemblerService } from '../../../domain/services/announcement-pagination-assembler.service';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
 import { GetActiveAnnouncementsUseCase } from '../../../application/use-cases/get-active-announcements.use-case';
 
-class StubAnnouncementPublicReaderPort extends AnnouncementPublicReaderPort {
+class StubAnnouncementPublicReaderPort implements AnnouncementPublicReaderPort {
     listResult: AnnouncementPublicListResult = {
         items: [
             {

@@ -1,13 +1,13 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AuthSessionPort, type AuthSessionRole } from '../ports/auth-session.port';
+import { AUTH_SESSION_PORT, type AuthSessionPort, type AuthSessionRole } from '../ports/auth-session.port';
 import { type LogoutResult } from '../types/auth-response.type';
 import { buildAuthLogoutResult } from '../../constants/auth-response-messages';
 
 @Injectable()
 export class LogoutUseCase {
     constructor(
-        @Inject(AuthSessionPort)
+        @Inject(AUTH_SESSION_PORT)
         private readonly authSessionPort: AuthSessionPort,
     ) {}
 

@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
-import { AuthUploadFileStorePort } from '../ports/auth-upload-file-store.port';
+import { AUTH_UPLOAD_FILE_STORE_PORT, type AuthUploadFileStorePort } from '../ports/auth-upload-file-store.port';
 import {
     AuthBreederDocumentSubmissionResponse,
     SUBMIT_AUTH_BREEDER_DOCUMENTS,
@@ -19,6 +19,7 @@ type AuthBreederDocumentFileMap = {
 @Injectable()
 export class UploadAndSubmitAuthBreederDocumentsUseCase {
     constructor(
+        @Inject(AUTH_UPLOAD_FILE_STORE_PORT)
         private readonly authUploadFileStorePort: AuthUploadFileStorePort,
         @Inject(SUBMIT_AUTH_BREEDER_DOCUMENTS)
         private readonly submitAuthBreederDocumentsUseCase: SubmitAuthBreederDocumentsPort,

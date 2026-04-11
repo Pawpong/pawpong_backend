@@ -1,10 +1,10 @@
 import {
-    BreederManagementVerificationDraftStorePort,
     type BreederManagementVerificationDraftDocument,
+    type BreederManagementVerificationDraftStorePort,
 } from '../../../application/ports/breeder-management-verification-draft-store.port';
 import {
-    BreederManagementVerificationDocumentStorePort,
     type BreederManagementUploadedVerificationDocument,
+    type BreederManagementVerificationDocumentStorePort,
 } from '../../../application/ports/breeder-management-verification-document-store.port';
 import { BreederManagementVerificationDocumentPolicyService } from '../../../domain/services/breeder-management-verification-document-policy.service';
 import { BreederManagementVerificationOriginalFileNameService } from '../../../domain/services/breeder-management-verification-original-file-name.service';
@@ -18,7 +18,7 @@ class StubProfilePort {
     }
 }
 
-class StubDocumentStore extends BreederManagementVerificationDocumentStorePort {
+class StubDocumentStore implements BreederManagementVerificationDocumentStorePort {
     async upload(file: Express.Multer.File): Promise<BreederManagementUploadedVerificationDocument> {
         return {
             fileName: `verification/breeder-id/${file.originalname}`,
@@ -27,7 +27,7 @@ class StubDocumentStore extends BreederManagementVerificationDocumentStorePort {
     }
 }
 
-class StubDraftStore extends BreederManagementVerificationDraftStorePort {
+class StubDraftStore implements BreederManagementVerificationDraftStorePort {
     documents: BreederManagementVerificationDraftDocument[] = [];
 
     async save(_userId: string, documents: BreederManagementVerificationDraftDocument[]): Promise<void> {

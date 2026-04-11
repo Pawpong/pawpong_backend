@@ -6,17 +6,15 @@ import type {
     AdopterReviewCreatedRecord,
     AdopterReviewRecord,
 } from '../application/ports/adopter-review-command.port';
-import { AdopterReviewCommandPort } from '../application/ports/adopter-review-command.port';
+import type { AdopterReviewCommandPort } from '../application/ports/adopter-review-command.port';
 import { AdopterReviewRepository } from '../repository/adopter-review.repository';
 
 @Injectable()
-export class AdopterReviewCommandAdapter extends AdopterReviewCommandPort {
+export class AdopterReviewCommandAdapter implements AdopterReviewCommandPort {
     constructor(
         private readonly adopterReviewRepository: AdopterReviewRepository,
         private readonly breederRepository: BreederRepository,
-    ) {
-        super();
-    }
+    ) {}
 
     async findApplicationById(applicationId: string): Promise<AdopterReviewApplicationRecord | null> {
         return (await this.adopterReviewRepository.findApplicationById(

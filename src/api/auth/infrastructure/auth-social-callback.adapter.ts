@@ -5,9 +5,9 @@ import { CustomLoggerService } from '../../../common/logger/custom-logger.servic
 
 import { AuthAdopterRepository } from '../repository/auth-adopter.repository';
 import { AuthBreederRepository } from '../repository/auth-breeder.repository';
-import { AuthTokenPort } from '../application/ports/auth-token.port';
+import { AUTH_TOKEN_PORT, type AuthTokenPort } from '../application/ports/auth-token.port';
 import {
-    AuthSocialCallbackPort,
+    type AuthSocialCallbackPort,
     type AuthSocialAuthenticatedUser,
     type AuthSocialCallbackLoginResult,
     type AuthSocialCallbackProfile,
@@ -20,7 +20,7 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
         private readonly authBreederRepository: AuthBreederRepository,
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
-        @Inject(AuthTokenPort)
+        @Inject(AUTH_TOKEN_PORT)
         private readonly authTokenPort: AuthTokenPort,
     ) {}
 

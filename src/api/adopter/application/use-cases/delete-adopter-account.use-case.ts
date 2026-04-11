@@ -1,13 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { AdopterAccountCommandPort } from '../ports/adopter-account-command.port';
+import { ADOPTER_ACCOUNT_COMMAND_PORT, type AdopterAccountCommandPort } from '../ports/adopter-account-command.port';
 import type { AdopterAccountDeleteCommand } from '../types/adopter-account-command.type';
 import type { AdopterAccountDeleteResult } from '../types/adopter-result.type';
 import { ADOPTER_RESPONSE_PAYLOAD_MESSAGES } from '../../constants/adopter-response-messages';
 
 @Injectable()
 export class DeleteAdopterAccountUseCase {
-    constructor(private readonly adopterAccountCommandPort: AdopterAccountCommandPort) {}
+    constructor(
+        @Inject(ADOPTER_ACCOUNT_COMMAND_PORT)
+        private readonly adopterAccountCommandPort: AdopterAccountCommandPort,
+    ) {}
 
     async execute(userId: string, deleteData: AdopterAccountDeleteCommand): Promise<AdopterAccountDeleteResult> {
         const adopter = await this.adopterAccountCommandPort.findAdopterById(userId);

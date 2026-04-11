@@ -6,10 +6,12 @@ export type FeedVideoMetadata = {
     bitrate: number;
 };
 
-export abstract class FeedVideoTranscoderPort {
-    abstract convertToHLS(inputFile: string, outputDir: string, resolutions?: number[]): Promise<void>;
+export const FEED_VIDEO_TRANSCODER_PORT = Symbol('FEED_VIDEO_TRANSCODER_PORT');
 
-    abstract generateThumbnail(videoFile: string, outputFile: string, timePercent?: number): Promise<void>;
+export interface FeedVideoTranscoderPort {
+    convertToHLS(inputFile: string, outputDir: string, resolutions?: number[]): Promise<void>;
 
-    abstract getVideoMetadata(videoFile: string): Promise<FeedVideoMetadata>;
+    generateThumbnail(videoFile: string, outputFile: string, timePercent?: number): Promise<void>;
+
+    getVideoMetadata(videoFile: string): Promise<FeedVideoMetadata>;
 }

@@ -3,16 +3,14 @@ import { Injectable } from '@nestjs/common';
 import { DiscordWebhookService } from '../../../common/discord/discord-webhook.service';
 import { AdopterRepository } from '../repository/adopter.repository';
 import type { AdopterAccountRecord, AdopterDeleteAccountCommand } from '../application/ports/adopter-account-command.port';
-import { AdopterAccountCommandPort } from '../application/ports/adopter-account-command.port';
+import type { AdopterAccountCommandPort } from '../application/ports/adopter-account-command.port';
 
 @Injectable()
-export class AdopterAccountCommandAdapter extends AdopterAccountCommandPort {
+export class AdopterAccountCommandAdapter implements AdopterAccountCommandPort {
     constructor(
         private readonly adopterRepository: AdopterRepository,
         private readonly discordWebhookService: DiscordWebhookService,
-    ) {
-        super();
-    }
+    ) {}
 
     findAdopterById(userId: string): Promise<AdopterAccountRecord | null> {
         return this.adopterRepository.findById(userId) as Promise<AdopterAccountRecord | null>;

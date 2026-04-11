@@ -4,8 +4,10 @@ export type AuthRegistrationDocumentNotificationItem = {
     originalFileName?: string;
 };
 
-export abstract class AuthRegistrationNotificationPort {
-    abstract notifyAdopterRegistered(input: {
+export const AUTH_REGISTRATION_NOTIFICATION_PORT = Symbol('AUTH_REGISTRATION_NOTIFICATION_PORT');
+
+export interface AuthRegistrationNotificationPort {
+    notifyAdopterRegistered(input: {
         userId: string;
         email: string;
         nickname: string;
@@ -13,7 +15,7 @@ export abstract class AuthRegistrationNotificationPort {
         registrationType: 'email' | 'social';
         provider?: string;
     }): Promise<void>;
-    abstract notifyBreederRegistered(input: {
+    notifyBreederRegistered(input: {
         userId: string;
         email: string;
         name: string;
@@ -21,7 +23,7 @@ export abstract class AuthRegistrationNotificationPort {
         registrationType: 'email' | 'social';
         provider?: string;
     }): Promise<void>;
-    abstract notifyBreederDocumentsSubmitted(input: {
+    notifyBreederDocumentsSubmitted(input: {
         userId: string;
         email: string;
         name: string;
