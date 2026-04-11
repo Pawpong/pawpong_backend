@@ -86,7 +86,7 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
             const adopterByEmail = await this.authAdopterRepository.findByEmail(profile.email);
             if (adopterByEmail) {
                 this.logger.log(
-                    `[handleSocialLogin] ⚠️ 이메일로 Adopter 찾음: ${adopterByEmail.emailAddress}, socialAuthInfo: ${JSON.stringify(adopterByEmail.socialAuthInfo || 'null')}`,
+                    `[handleSocialLogin] 이메일로 Adopter 찾음: ${adopterByEmail.emailAddress}, socialAuthInfo: ${JSON.stringify(adopterByEmail.socialAuthInfo || 'null')}`,
                 );
             }
         }
