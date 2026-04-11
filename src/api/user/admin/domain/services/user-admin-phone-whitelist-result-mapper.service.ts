@@ -7,15 +7,15 @@ import type {
 } from '../../application/types/user-admin-result.type';
 
 @Injectable()
-export class UserAdminPhoneWhitelistPresentationService {
-    toPhoneWhitelistListResponse(items: UserAdminPhoneWhitelistSnapshot[]): UserAdminPhoneWhitelistListResult {
+export class UserAdminPhoneWhitelistResultMapperService {
+    toListResult(items: UserAdminPhoneWhitelistSnapshot[]): UserAdminPhoneWhitelistListResult {
         return {
-            items: items.map((item) => this.toPhoneWhitelistResponse(item)),
+            items: items.map((item) => this.toItemResult(item)),
             total: items.length,
         };
     }
 
-    toPhoneWhitelistResponse(item: UserAdminPhoneWhitelistSnapshot): UserAdminPhoneWhitelistItemResult {
+    toItemResult(item: UserAdminPhoneWhitelistSnapshot): UserAdminPhoneWhitelistItemResult {
         return {
             id: item.id,
             phoneNumber: item.phoneNumber,

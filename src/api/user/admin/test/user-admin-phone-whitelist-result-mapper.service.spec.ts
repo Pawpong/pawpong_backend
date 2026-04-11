@@ -1,11 +1,11 @@
-import { UserAdminPhoneWhitelistPresentationService } from '../domain/services/user-admin-phone-whitelist-presentation.service';
+import { UserAdminPhoneWhitelistResultMapperService } from '../domain/services/user-admin-phone-whitelist-result-mapper.service';
 
-describe('사용자 관리자 화이트리스트 응답 서비스', () => {
+describe('사용자 관리자 화이트리스트 결과 매퍼', () => {
     it('전화번호 화이트리스트 목록 응답 계약을 유지한다', () => {
-        const service = new UserAdminPhoneWhitelistPresentationService();
+        const service = new UserAdminPhoneWhitelistResultMapperService();
 
         expect(
-            service.toPhoneWhitelistListResponse([
+            service.toListResult([
                 {
                     id: 'wl-1',
                     phoneNumber: '01012345678',

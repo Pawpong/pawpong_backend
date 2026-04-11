@@ -5,7 +5,7 @@ import { USER_ADMIN_READER_PORT, type UserAdminReaderPort } from '../ports/user-
 import { USER_ADMIN_WRITER_PORT, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
-import { UserAdminDeletedUserListPresentationService } from '../../domain/services/user-admin-deleted-user-list-presentation.service';
+import { UserAdminDeletedUserPageAssemblerService } from '../../domain/services/user-admin-deleted-user-page-assembler.service';
 import type { UserAdminDeletedUserSearchQuery } from '../types/user-admin-command.type';
 import type { UserAdminDeletedUserPageResult } from '../types/user-admin-result.type';
 
@@ -18,7 +18,7 @@ export class GetDeletedUsersUseCase {
         private readonly userAdminWriter: UserAdminWriterPort,
         private readonly userAdminCommandPolicyService: UserAdminCommandPolicyService,
         private readonly userAdminActivityLogFactoryService: UserAdminActivityLogFactoryService,
-        private readonly userAdminDeletedUserListPresentationService: UserAdminDeletedUserListPresentationService,
+        private readonly userAdminDeletedUserPageAssemblerService: UserAdminDeletedUserPageAssemblerService,
     ) {}
 
     async execute(
@@ -52,6 +52,6 @@ export class GetDeletedUsersUseCase {
             ),
         );
 
-        return this.userAdminDeletedUserListPresentationService.toDeletedUsersPaginationResponse(result, page, limit);
+        return this.userAdminDeletedUserPageAssemblerService.build(result, page, limit);
     }
 }
