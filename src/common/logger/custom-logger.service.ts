@@ -11,6 +11,22 @@ import { Logger } from 'winston';
 export class CustomLoggerService implements LoggerService {
     constructor(@Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger) {}
 
+    private toLogText(value: unknown): string {
+        if (value === undefined || value === null) {
+            return '';
+        }
+
+        if (typeof value === 'string') {
+            return value;
+        }
+
+        try {
+            return JSON.stringify(value);
+        } catch {
+            return String(value);
+        }
+    }
+
     /**
      * 정보 레벨 로그를 출력합니다.
      * @param message 로그 메시지
@@ -64,8 +80,9 @@ export class CustomLoggerService implements LoggerService {
      * @param result 결과값
      * @param context 컨텍스트
      */
-    logSuccess(methodName: string, description: string, result?: any, context?: string) {
-        const resultText = result ? ` 결과: ${JSON.stringify(result)}` : '';
+    logSuccess(methodName: string, description: string, result?: unknown, context?: string) {
+        const serialized = this.toLogText(result);
+        const resultText = serialized ? ` 결과: ${serialized}` : '';
         this.log(`[${methodName}] ${description}:${resultText}`, context);
     }
 
@@ -76,7 +93,7 @@ export class CustomLoggerService implements LoggerService {
      * @param error 에러 객체
      * @param context 컨텍스트
      */
-    logError(methodName: string, description: string, error: any, context?: string) {
+    logError(methodName: string, description: string, error: unknown, context?: string) {
         const errorMessage = error instanceof Error ? error.message : String(error);
         const stack = error instanceof Error ? error.stack : undefined;
         this.error(`[${methodName}] ${description}: 에러 - ${errorMessage}`, stack, context);
@@ -89,8 +106,9 @@ export class CustomLoggerService implements LoggerService {
      * @param params 입력 파라미터
      * @param context 컨텍스트
      */
-    logStart(methodName: string, description: string, params?: any, context?: string) {
-        const paramsText = params ? ` 파라미터: ${JSON.stringify(params)}` : '';
+    logStart(methodName: string, description: string, params?: unknown, context?: string) {
+        const serialized = this.toLogText(params);
+        const paramsText = serialized ? ` 파라미터: ${serialized}` : '';
         this.debug(`[${methodName}] ${description} 시작${paramsText}`, context);
     }
 
@@ -101,8 +119,9 @@ export class CustomLoggerService implements LoggerService {
      * @param details 상세 정보
      * @param context 컨텍스트
      */
-    logWarning(methodName: string, description: string, details?: any, context?: string) {
-        const detailsText = details ? ` 상세: ${JSON.stringify(details)}` : '';
+    logWarning(methodName: string, description: string, details?: unknown, context?: string) {
+        const serialized = this.toLogText(details);
+        const detailsText = serialized ? ` 상세: ${serialized}` : '';
         this.warn(`[${methodName}] ${description}${detailsText}`, context);
     }
 
@@ -114,8 +133,9 @@ export class CustomLoggerService implements LoggerService {
      * @param result 작업 결과
      * @param context 컨텍스트
      */
-    logDbOperation(methodName: string, operation: string, collection: string, result?: any, context?: string) {
-        const resultText = result ? ` 결과: ${typeof result === 'object' ? JSON.stringify(result) : result}` : '';
+    logDbOperation(methodName: string, operation: string, collection: string, result?: unknown, context?: string) {
+        const serialized = this.toLogText(result);
+        const resultText = serialized ? ` 결과: ${serialized}` : '';
         this.debug(`[${methodName}] DB ${operation.toUpperCase()} 작업 - ${collection}${resultText}`, context);
     }
 
@@ -127,8 +147,9 @@ export class CustomLoggerService implements LoggerService {
      * @param requestData 요청 데이터
      * @param context 컨텍스트
      */
-    logApiRequest(methodName: string, userId: string, userRole: string, requestData?: any, context?: string) {
-        const dataText = requestData ? ` 요청데이터: ${JSON.stringify(requestData)}` : '';
+    logApiRequest(methodName: string, userId: string, userRole: string, requestData?: unknown, context?: string) {
+        const serialized = this.toLogText(requestData);
+        const dataText = serialized ? ` 요청데이터: ${serialized}` : '';
         this.log(`[${methodName}] API 요청 - 사용자ID: ${userId}, 역할: ${userRole}${dataText}`, context);
     }
 

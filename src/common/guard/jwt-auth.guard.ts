@@ -3,6 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 
 import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
+import type { AuthGuardInfo, AuthenticatedRequestUser } from '../types/authenticated-request-user.type';
 
 /**
  * JWT 인증 가드
@@ -31,7 +32,15 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         return super.canActivate(context);
     }
 
-    handleRequest(err: any, user: any, info: any) {
+    handleRequest<TUser = AuthenticatedRequestUser>(
+        err: unknown,
+        user: AuthenticatedRequestUser | false | null,
+        info: AuthGuardInfo | undefined,
+        context: ExecutionContext,
+        status?: unknown,
+    ): TUser {
+        void context;
+        void status;
         // 에러가 있거나 user가 없으면 인증 실패
         if (err || !user) {
             if (info) {
@@ -53,6 +62,6 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
             throw new UnauthorizedException('인증에 실패했습니다.');
         }
 
-        return user;
+        return user as TUser;
     }
 }
