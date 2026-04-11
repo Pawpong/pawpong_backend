@@ -2,7 +2,7 @@ import { UnauthorizedException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { AuthAdminAuthenticationService } from '../../../domain/services/auth-admin-authentication.service';
-import { AuthAdminPresentationService } from '../../../domain/services/auth-admin-presentation.service';
+import { AuthAdminRefreshTokenResultMapperService } from '../../../domain/services/auth-admin-refresh-token-result-mapper.service';
 import { AuthAdminReaderPort, AuthAdminSnapshot } from '../../../application/ports/auth-admin-reader.port';
 import {
     AuthAdminIssuedTokenPayload,
@@ -52,7 +52,7 @@ describe('관리자 token 재발급 유스케이스', () => {
             reader,
             tokenPort,
             new AuthAdminAuthenticationService(),
-            new AuthAdminPresentationService(),
+            new AuthAdminRefreshTokenResultMapperService(),
             logger,
         );
 
@@ -81,7 +81,7 @@ describe('관리자 token 재발급 유스케이스', () => {
                 }),
             },
             new AuthAdminAuthenticationService(),
-            new AuthAdminPresentationService(),
+            new AuthAdminRefreshTokenResultMapperService(),
             logger,
         );
 
@@ -104,7 +104,7 @@ describe('관리자 token 재발급 유스케이스', () => {
                 } satisfies AuthAdminVerifiedTokenPayload),
             },
             new AuthAdminAuthenticationService(),
-            new AuthAdminPresentationService(),
+            new AuthAdminRefreshTokenResultMapperService(),
             logger,
         );
 

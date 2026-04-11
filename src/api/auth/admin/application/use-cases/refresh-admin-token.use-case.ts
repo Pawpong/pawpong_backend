@@ -2,7 +2,7 @@ import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { AuthAdminAuthenticationService } from '../../domain/services/auth-admin-authentication.service';
-import { AuthAdminPresentationService } from '../../domain/services/auth-admin-presentation.service';
+import { AuthAdminRefreshTokenResultMapperService } from '../../domain/services/auth-admin-refresh-token-result-mapper.service';
 import { AUTH_ADMIN_READER_PORT } from '../ports/auth-admin-reader.port';
 import type { AuthAdminReaderPort } from '../ports/auth-admin-reader.port';
 import { AUTH_ADMIN_TOKEN_PORT } from '../ports/auth-admin-token.port';
@@ -16,7 +16,7 @@ export class RefreshAdminTokenUseCase {
         @Inject(AUTH_ADMIN_TOKEN_PORT)
         private readonly authAdminToken: AuthAdminTokenPort,
         private readonly authAdminAuthenticationService: AuthAdminAuthenticationService,
-        private readonly authAdminPresentationService: AuthAdminPresentationService,
+        private readonly authAdminRefreshTokenResultMapperService: AuthAdminRefreshTokenResultMapperService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -52,7 +52,7 @@ export class RefreshAdminTokenUseCase {
                 email: payload.email,
             });
 
-            return this.authAdminPresentationService.toRefreshResponse(accessToken);
+            return this.authAdminRefreshTokenResultMapperService.toResult(accessToken);
         } catch (error) {
             this.logger.logError('refreshAdminToken', '토큰 갱신 실패', error);
             throw new UnauthorizedException('유효하지 않은 토큰입니다.');
