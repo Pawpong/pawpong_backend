@@ -26,6 +26,14 @@ export const AUTH_RESPONSE_MESSAGE_EXAMPLES = {
         'new 레벨 브리더 인증 서류 2개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.',
 } as const;
 
+export function buildAuthLogoutResult(loggedOutAt: string) {
+    return {
+        success: true,
+        loggedOutAt,
+        message: AUTH_RESPONSE_MESSAGE_EXAMPLES.logoutCompleted,
+    } as const;
+}
+
 export function buildAuthDuplicateCheckMessage(
     kind: 'email' | 'nickname' | 'breederName',
     isDuplicate: boolean,
@@ -55,6 +63,20 @@ export function buildAuthProfileUploadMessage(hasAuthenticatedUser: boolean, tem
     }
 
     return AUTH_RESPONSE_MESSAGE_EXAMPLES.profileImageUploaded;
+}
+
+export function buildAuthPhoneVerificationCodeSentResult() {
+    return {
+        success: true,
+        message: AUTH_RESPONSE_MESSAGE_EXAMPLES.phoneVerificationCodeSent,
+    } as const;
+}
+
+export function buildAuthPhoneVerificationCompletedResult() {
+    return {
+        success: true,
+        message: AUTH_RESPONSE_MESSAGE_EXAMPLES.phoneVerificationCompleted,
+    } as const;
 }
 
 export function buildAuthBreederDocumentsUploadMessage(level: string, count: number, tempId?: string): string {

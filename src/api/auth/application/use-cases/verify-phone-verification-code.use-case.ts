@@ -3,7 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { AUTH_PHONE_VERIFICATION_STORE_PORT } from '../ports/auth-phone-verification-store.port';
 import type { AuthPhoneVerificationStorePort } from '../ports/auth-phone-verification-store.port';
 import { type PhoneVerificationResult } from '../types/auth-response.type';
-import { AuthPhoneVerificationResponseFactoryService } from '../../domain/services/auth-phone-verification-response-factory.service';
+import { buildAuthPhoneVerificationCompletedResult } from '../../constants/auth-response-messages';
 import { AuthPhoneVerificationPolicyService } from '../../domain/services/auth-phone-verification-policy.service';
 
 @Injectable()
@@ -12,7 +12,6 @@ export class VerifyPhoneVerificationCodeUseCase {
         @Inject(AUTH_PHONE_VERIFICATION_STORE_PORT)
         private readonly authPhoneVerificationStorePort: AuthPhoneVerificationStorePort,
         private readonly authPhoneVerificationPolicyService: AuthPhoneVerificationPolicyService,
-        private readonly authPhoneVerificationResponseFactoryService: AuthPhoneVerificationResponseFactoryService,
     ) {}
 
     execute(phone: string, code: string): PhoneVerificationResult {
@@ -49,6 +48,6 @@ export class VerifyPhoneVerificationCodeUseCase {
         verification.verified = true;
         this.authPhoneVerificationStorePort.save(verification);
 
-        return this.authPhoneVerificationResponseFactoryService.createPhoneVerificationCompleted();
+        return buildAuthPhoneVerificationCompletedResult();
     }
 }
