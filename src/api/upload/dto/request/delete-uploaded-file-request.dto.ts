@@ -8,5 +8,5 @@ export class DeleteUploadedFileRequestDto {
     })
     @IsString({ message: '파일명이 없습니다' })
     @IsNotEmpty({ message: '파일명이 없습니다' })
-    fileName: string;
+    fileName!: string;
 }

@@ -11,5 +11,5 @@ export class CheckFileReferencesRequestDto {
     @ArrayMinSize(1, { message: '최소 1개 이상의 파일 키가 필요합니다.' })
     @IsString({ each: true })
     @IsNotEmpty({ each: true })
-    fileKeys: string[];
+    fileKeys!: string[];
 }
