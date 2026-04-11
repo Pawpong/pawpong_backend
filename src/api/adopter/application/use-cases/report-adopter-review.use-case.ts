@@ -5,9 +5,9 @@ import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.por
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
 import { AdopterReviewCommandPort } from '../ports/adopter-review-command.port';
-import { AdopterReviewReportResponseFactoryService } from '../../domain/services/adopter-review-report-response-factory.service';
 import type { AdopterReviewReportCommand } from '../types/adopter-review-command.type';
 import type { AdopterReviewReportResult } from '../types/adopter-result.type';
+import { ADOPTER_RESPONSE_PAYLOAD_MESSAGES } from '../../constants/adopter-response-messages';
 
 @Injectable()
 export class ReportAdopterReviewUseCase {
@@ -17,7 +17,6 @@ export class ReportAdopterReviewUseCase {
         @Inject(ADOPTER_BREEDER_READER_PORT)
         private readonly adopterBreederReaderPort: AdopterBreederReaderPort,
         private readonly adopterReviewCommandPort: AdopterReviewCommandPort,
-        private readonly adopterReviewReportResponseFactoryService: AdopterReviewReportResponseFactoryService,
     ) {}
 
     async execute(userId: string, dto: AdopterReviewReportCommand): Promise<AdopterReviewReportResult> {
@@ -41,6 +40,8 @@ export class ReportAdopterReviewUseCase {
             new Date(),
         );
 
-        return this.adopterReviewReportResponseFactoryService.create();
+        return {
+            message: ADOPTER_RESPONSE_PAYLOAD_MESSAGES.reviewReported,
+        };
     }
 }

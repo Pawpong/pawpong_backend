@@ -6,8 +6,8 @@ import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
 import { AdopterReportCommandPort } from '../ports/adopter-report-command.port';
 import { AdopterReportPayloadBuilderService } from '../../domain/services/adopter-report-payload-builder.service';
-import { AdopterReportResponseFactoryService } from '../../domain/services/adopter-report-response-factory.service';
 import type { AdopterReportCreateCommand } from '../types/adopter-report-command.type';
+import { ADOPTER_RESPONSE_PAYLOAD_MESSAGES } from '../../constants/adopter-response-messages';
 
 @Injectable()
 export class CreateAdopterReportUseCase {
@@ -18,7 +18,6 @@ export class CreateAdopterReportUseCase {
         private readonly adopterBreederReaderPort: AdopterBreederReaderPort,
         private readonly adopterReportCommandPort: AdopterReportCommandPort,
         private readonly adopterReportPayloadBuilderService: AdopterReportPayloadBuilderService,
-        private readonly adopterReportResponseFactoryService: AdopterReportResponseFactoryService,
     ) {}
 
     async execute(userId: string, dto: AdopterReportCreateCommand) {
@@ -35,7 +34,10 @@ export class CreateAdopterReportUseCase {
         const { reportId, report } = this.adopterReportPayloadBuilderService.build(userId, reporterName, dto);
         await this.adopterReportCommandPort.addReport(dto.breederId, report);
 
-        return this.adopterReportResponseFactoryService.create(reportId);
+        return {
+            reportId,
+            message: ADOPTER_RESPONSE_PAYLOAD_MESSAGES.reportAccepted,
+        };
     }
 
     private async resolveReporterName(userId: string): Promise<string> {

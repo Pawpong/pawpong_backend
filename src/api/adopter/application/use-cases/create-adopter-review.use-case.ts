@@ -7,7 +7,6 @@ import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
 import { AdopterReviewCommandPort } from '../ports/adopter-review-command.port';
 import { AdopterReviewNotifierPort } from '../ports/adopter-review-notifier.port';
-import { AdopterReviewCreateResponseFactoryService } from '../../domain/services/adopter-review-create-response-factory.service';
 import type { AdopterReviewCreateCommand } from '../types/adopter-review-command.type';
 import type { AdopterReviewCreateResult } from '../types/adopter-result.type';
 
@@ -20,7 +19,6 @@ export class CreateAdopterReviewUseCase {
         private readonly adopterBreederReaderPort: AdopterBreederReaderPort,
         private readonly adopterReviewCommandPort: AdopterReviewCommandPort,
         private readonly adopterReviewNotifierPort: AdopterReviewNotifierPort,
-        private readonly adopterReviewCreateResponseFactoryService: AdopterReviewCreateResponseFactoryService,
     ) {}
 
     async execute(userId: string, dto: AdopterReviewCreateCommand): Promise<AdopterReviewCreateResult> {
@@ -62,6 +60,12 @@ export class CreateAdopterReviewUseCase {
         await this.adopterReviewCommandPort.incrementBreederReviewCount(application.breederId.toString());
         await this.adopterReviewNotifierPort.notifyBreederOfNewReview(application.breederId.toString());
 
-        return this.adopterReviewCreateResponseFactoryService.create(savedReview);
+        return {
+            reviewId: savedReview._id.toString(),
+            applicationId: savedReview.applicationId.toString(),
+            breederId: savedReview.breederId.toString(),
+            reviewType: savedReview.type,
+            writtenAt: savedReview.writtenAt.toISOString(),
+        };
     }
 }
