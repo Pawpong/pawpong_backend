@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 
-import { BreederManagementBannerPresentationService } from '../../../domain/services/breeder-management-banner-presentation.service';
+import { BreederManagementBannerResultMapperService } from '../../../domain/services/breeder-management-banner-result-mapper.service';
 import { UpdateProfileBannerUseCase } from '../../../application/use-cases/update-profile-banner.use-case';
 import { BreederManagementAdminBannerWriterPort } from '../../../application/ports/breeder-management-admin-banner-writer.port';
 import { BreederManagementFileUrlPort } from '../../../../application/ports/breeder-management-file-url.port';
@@ -33,7 +33,7 @@ describe('프로필 배너 수정 유스케이스', () => {
         };
         const useCase = new UpdateProfileBannerUseCase(
             bannerWriter,
-            new BreederManagementBannerPresentationService(fileUrlPort),
+            new BreederManagementBannerResultMapperService(fileUrlPort),
         );
 
         await expect(useCase.execute('banner-1', { title: '수정됨' })).resolves.toMatchObject({
@@ -52,7 +52,7 @@ describe('프로필 배너 수정 유스케이스', () => {
                 updateCounsel: jest.fn(),
                 deleteCounsel: jest.fn(),
             },
-            new BreederManagementBannerPresentationService(fileUrlPort),
+            new BreederManagementBannerResultMapperService(fileUrlPort),
         );
 
         await expect(useCase.execute('missing', { title: '수정' })).rejects.toBeInstanceOf(BadRequestException);

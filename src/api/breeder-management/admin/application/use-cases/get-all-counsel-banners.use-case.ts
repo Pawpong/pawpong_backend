@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { BreederManagementBannerPresentationService } from '../../domain/services/breeder-management-banner-presentation.service';
+import { BreederManagementBannerResultMapperService } from '../../domain/services/breeder-management-banner-result-mapper.service';
 import {
     BREEDER_MANAGEMENT_ADMIN_BANNER_READER_PORT,
     type BreederManagementAdminBannerReaderPort,
@@ -12,11 +12,11 @@ export class GetAllCounselBannersUseCase {
     constructor(
         @Inject(BREEDER_MANAGEMENT_ADMIN_BANNER_READER_PORT)
         private readonly bannerReader: BreederManagementAdminBannerReaderPort,
-        private readonly breederManagementBannerPresentationService: BreederManagementBannerPresentationService,
+        private readonly breederManagementBannerResultMapperService: BreederManagementBannerResultMapperService,
     ) {}
 
     async execute(): Promise<BreederManagementCounselBannerResult[]> {
         const banners = await this.bannerReader.readAllCounsel();
-        return banners.map((banner) => this.breederManagementBannerPresentationService.toCounselResult(banner));
+        return banners.map((banner) => this.breederManagementBannerResultMapperService.toCounselResult(banner));
     }
 }

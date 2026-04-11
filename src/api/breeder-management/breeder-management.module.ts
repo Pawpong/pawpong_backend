@@ -111,7 +111,7 @@ import { GetActiveCounselBannersUseCase } from './admin/application/use-cases/ge
 import { CreateCounselBannerUseCase } from './admin/application/use-cases/create-counsel-banner.use-case';
 import { UpdateCounselBannerUseCase } from './admin/application/use-cases/update-counsel-banner.use-case';
 import { DeleteCounselBannerUseCase } from './admin/application/use-cases/delete-counsel-banner.use-case';
-import { BreederManagementBannerPresentationService } from './admin/domain/services/breeder-management-banner-presentation.service';
+import { BreederManagementBannerResultMapperService } from './admin/domain/services/breeder-management-banner-result-mapper.service';
 import { BreederManagementAdminBannerReaderAdapter } from './admin/infrastructure/breeder-management-admin-banner-reader.adapter';
 import { BreederManagementAdminBannerWriterAdapter } from './admin/infrastructure/breeder-management-admin-banner-writer.adapter';
 import { BreederManagementAdminBannerRepository } from './admin/repository/breeder-management-admin-banner.repository';
@@ -220,7 +220,7 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         BreederManagementReviewReplyResponseService,
         BreederManagementAccountCommandResponseService,
         BreederManagementApplicationDetailAssemblerService,
-        BreederManagementBannerPresentationService,
+        BreederManagementBannerResultMapperService,
         BreederManagementProfileAdapter,
         BreederManagementFileUrlAdapter,
         BreederManagementAdminBannerReaderAdapter,
