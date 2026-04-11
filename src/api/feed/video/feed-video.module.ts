@@ -26,7 +26,9 @@ import { UpdateEncodingCompleteUseCase } from './application/use-cases/update-en
 import { UpdateEncodingFailedUseCase } from './application/use-cases/update-encoding-failed.use-case';
 import { ProxyHlsFileUseCase } from './application/use-cases/proxy-hls-file.use-case';
 import { PrefetchAllQualitySegmentsUseCase } from './application/use-cases/prefetch-all-quality-segments.use-case';
-import { FeedVideoPresentationService } from './domain/services/feed-video-presentation.service';
+import { FeedVideoLibraryAssemblerService } from './domain/services/feed-video-library-assembler.service';
+import { FeedVideoMetaAssemblerService } from './domain/services/feed-video-meta-assembler.service';
+import { FeedVideoPublicListAssemblerService } from './domain/services/feed-video-public-list-assembler.service';
 import { FeedVideoCommandPolicyService } from './domain/services/feed-video-command-policy.service';
 import { FeedVideoStreamingService } from './domain/services/feed-video-streaming.service';
 import { FeedVideoAssetUrlService } from './infrastructure/feed-video-asset-url.service';
@@ -133,7 +135,9 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         PrefetchAllQualitySegmentsUseCase,
         FeedCacheKeyService,
         FeedVideoSummaryPresentationService,
-        FeedVideoPresentationService,
+        FeedVideoPublicListAssemblerService,
+        FeedVideoLibraryAssemblerService,
+        FeedVideoMetaAssemblerService,
         FeedVideoCommandPolicyService,
         FeedVideoStreamingService,
         FeedVideoAssetUrlService,

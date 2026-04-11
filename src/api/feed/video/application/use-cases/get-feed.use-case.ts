@@ -4,7 +4,7 @@ import type { Cache } from 'cache-manager';
 
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FEED_VIDEO_READER_PORT, type FeedVideoReaderPort } from '../ports/feed-video-reader.port';
-import { FeedVideoPresentationService } from '../../domain/services/feed-video-presentation.service';
+import { FeedVideoPublicListAssemblerService } from '../../domain/services/feed-video-public-list-assembler.service';
 import { FeedVideoAssetUrlService } from '../../infrastructure/feed-video-asset-url.service';
 import type { FeedVideoFeedResult } from '../types/feed-video-result.type';
 
@@ -13,7 +13,7 @@ export class GetFeedUseCase {
     constructor(
         @Inject(FEED_VIDEO_READER_PORT)
         private readonly feedVideoReader: FeedVideoReaderPort,
-        private readonly feedVideoPresentationService: FeedVideoPresentationService,
+        private readonly feedVideoPublicListAssemblerService: FeedVideoPublicListAssemblerService,
         private readonly feedVideoAssetUrlService: FeedVideoAssetUrlService,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
@@ -33,7 +33,7 @@ export class GetFeedUseCase {
             this.feedVideoReader.countPublicFeed(),
         ]);
 
-        const result = await this.feedVideoPresentationService.buildFeedResponse(
+        const result = await this.feedVideoPublicListAssemblerService.buildFeedResult(
             videos,
             page,
             limit,
