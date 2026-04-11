@@ -4,8 +4,8 @@ import { UploadAdminStoredObjectSnapshot } from '../../application/ports/upload-
 import type { UploadAdminStorageFileResult, UploadAdminStorageListResult } from '../../application/types/upload-admin-result.type';
 
 @Injectable()
-export class UploadAdminStoragePresentationService {
-    toListResult(files: UploadAdminStoredObjectSnapshot[], isTruncated: boolean): UploadAdminStorageListResult {
+export class UploadAdminStorageListAssemblerService {
+    build(files: UploadAdminStoredObjectSnapshot[], isTruncated: boolean): UploadAdminStorageListResult {
         const items = files.map((file) => this.toFileResult(file));
 
         return {

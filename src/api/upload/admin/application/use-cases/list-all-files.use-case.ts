@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { UploadAdminStoragePresentationService } from '../../domain/services/upload-admin-storage-presentation.service';
+import { UploadAdminStorageListAssemblerService } from '../../domain/services/upload-admin-storage-list-assembler.service';
 import { UPLOAD_ADMIN_STORAGE_PORT, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
 import type { UploadAdminStorageListResult } from '../types/upload-admin-result.type';
 
@@ -10,7 +10,7 @@ export class ListAllFilesUseCase {
     constructor(
         @Inject(UPLOAD_ADMIN_STORAGE_PORT)
         private readonly uploadAdminStorage: UploadAdminStoragePort,
-        private readonly uploadAdminStoragePresentationService: UploadAdminStoragePresentationService,
+        private readonly uploadAdminStorageListAssemblerService: UploadAdminStorageListAssemblerService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -19,7 +19,7 @@ export class ListAllFilesUseCase {
 
         try {
             const result = await this.uploadAdminStorage.list(prefix, 1000);
-            const response = this.uploadAdminStoragePresentationService.toListResult(
+            const response = this.uploadAdminStorageListAssemblerService.build(
                 result.files,
                 result.isTruncated,
             );

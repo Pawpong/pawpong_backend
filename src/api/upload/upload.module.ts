@@ -24,7 +24,7 @@ import { DeleteFolderUseCase } from './admin/application/use-cases/delete-folder
 import { CheckFileReferencesUseCase } from './admin/application/use-cases/check-file-references.use-case';
 import { GetAllReferencedFilesUseCase } from './admin/application/use-cases/get-all-referenced-files.use-case';
 import { UploadAdminStoragePolicyService } from './admin/domain/services/upload-admin-storage-policy.service';
-import { UploadAdminStoragePresentationService } from './admin/domain/services/upload-admin-storage-presentation.service';
+import { UploadAdminStorageListAssemblerService } from './admin/domain/services/upload-admin-storage-list-assembler.service';
 import { UploadAdminStorageAdapter } from './admin/infrastructure/upload-admin-storage.adapter';
 import { UploadAdminFileReferenceReaderAdapter } from './admin/infrastructure/upload-admin-file-reference-reader.adapter';
 import {
@@ -103,7 +103,7 @@ import { StorageModule } from '../../common/storage/storage.module';
         UploadStoredFilePathService,
         UploadPhotoCollectionService,
         UploadAdminStoragePolicyService,
-        UploadAdminStoragePresentationService,
+        UploadAdminStorageListAssemblerService,
         UploadOwnerRepository,
         UploadAdminFileReferenceRepository,
         UploadStorageAdapter,
