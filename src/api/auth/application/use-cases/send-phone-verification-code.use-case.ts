@@ -7,7 +7,7 @@ import type { AuthPhoneVerificationRegistryPort } from '../ports/auth-phone-veri
 import type { AuthPhoneVerificationSenderPort } from '../ports/auth-phone-verification-sender.port';
 import type { AuthPhoneVerificationStorePort } from '../ports/auth-phone-verification-store.port';
 import { type PhoneVerificationResult } from '../types/auth-response.type';
-import { AuthPhoneVerificationResponseFactoryService } from '../../domain/services/auth-phone-verification-response-factory.service';
+import { buildAuthPhoneVerificationCodeSentResult } from '../../constants/auth-response-messages';
 import { AuthPhoneVerificationPolicyService } from '../../domain/services/auth-phone-verification-policy.service';
 
 @Injectable()
@@ -20,7 +20,6 @@ export class SendPhoneVerificationCodeUseCase {
         @Inject(AUTH_PHONE_VERIFICATION_SENDER_PORT)
         private readonly authPhoneVerificationSenderPort: AuthPhoneVerificationSenderPort,
         private readonly authPhoneVerificationPolicyService: AuthPhoneVerificationPolicyService,
-        private readonly authPhoneVerificationResponseFactoryService: AuthPhoneVerificationResponseFactoryService,
     ) {}
 
     async execute(phone: string): Promise<PhoneVerificationResult> {
@@ -57,6 +56,6 @@ export class SendPhoneVerificationCodeUseCase {
             throw new InternalServerErrorException('인증번호 발송에 실패했습니다. 잠시 후 다시 시도해주세요.');
         }
 
-        return this.authPhoneVerificationResponseFactoryService.createPhoneVerificationCodeSent();
+        return buildAuthPhoneVerificationCodeSentResult();
     }
 }

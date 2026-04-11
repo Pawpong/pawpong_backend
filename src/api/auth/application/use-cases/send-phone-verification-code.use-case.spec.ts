@@ -1,7 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { SendPhoneVerificationCodeUseCase } from './send-phone-verification-code.use-case';
-import { AuthPhoneVerificationResponseFactoryService } from '../../domain/services/auth-phone-verification-response-factory.service';
 import { AuthPhoneVerificationPolicyService } from '../../domain/services/auth-phone-verification-policy.service';
 
 describe('전화번호 인증 코드 발송 유스케이스', () => {
@@ -30,7 +29,6 @@ describe('전화번호 인증 코드 발송 유스케이스', () => {
             authPhoneVerificationStorePort as any,
             authPhoneVerificationSenderPort as any,
             policyService,
-            new AuthPhoneVerificationResponseFactoryService(),
         );
     });
 

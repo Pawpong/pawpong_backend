@@ -101,8 +101,6 @@ import { AuthBreederDocumentFilePolicyService } from './domain/services/auth-bre
 import { AuthBreederDocumentOriginalFileNameService } from './domain/services/auth-breeder-document-original-file-name.service';
 import { AuthBreederDocumentSubmissionService } from './domain/services/auth-breeder-document-submission.service';
 import { AuthPhoneVerificationPolicyService } from './domain/services/auth-phone-verification-policy.service';
-import { AuthPhoneVerificationResponseFactoryService } from './domain/services/auth-phone-verification-response-factory.service';
-import { AuthLogoutResponseFactoryService } from './domain/services/auth-logout-response-factory.service';
 import { AuthHttpCookieService } from './domain/services/auth-http-cookie.service';
 import { AuthSocialHttpFlowService } from './domain/services/auth-social-http-flow.service';
 import { AuthBreederVerificationCommandAdapter } from './infrastructure/auth-breeder-verification-command.adapter';
@@ -209,8 +207,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthBreederDocumentOriginalFileNameService,
         AuthBreederDocumentSubmissionService,
         AuthPhoneVerificationPolicyService,
-        AuthPhoneVerificationResponseFactoryService,
-        AuthLogoutResponseFactoryService,
         AuthHttpCookieService,
         AuthSocialHttpFlowService,
         AuthBreederVerificationCommandAdapter,
