@@ -3,8 +3,10 @@ import { NotificationType, Notification } from '../../../../schema/notification.
 import type { NotificationMetadata } from '../../../../schema/notification.schema';
 import { RecipientType } from '../../../../common/enum/user.enum';
 
-export abstract class NotificationDispatchPort {
-    abstract createNotification(
+export const NOTIFICATION_DISPATCH_PORT = Symbol('NOTIFICATION_DISPATCH_PORT');
+
+export interface NotificationDispatchPort {
+    createNotification(
         userId: string,
         userRole: 'adopter' | 'breeder',
         type: NotificationType,
@@ -12,5 +14,5 @@ export abstract class NotificationDispatchPort {
         targetUrl?: string,
     ): Promise<Notification>;
 
-    abstract to(recipientId: string, recipientType: RecipientType): NotificationBuilder;
+    to(recipientId: string, recipientType: RecipientType): NotificationBuilder;
 }

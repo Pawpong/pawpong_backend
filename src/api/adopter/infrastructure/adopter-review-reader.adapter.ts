@@ -5,7 +5,7 @@ import type {
     AdopterReviewDetailRecord,
     AdopterReviewListRecord,
 } from '../application/ports/adopter-review-reader.port';
-import { AdopterReviewReaderPort } from '../application/ports/adopter-review-reader.port';
+import type { AdopterReviewReaderPort } from '../application/ports/adopter-review-reader.port';
 import { AdopterReviewRepository } from '../repository/adopter-review.repository';
 import type {
     AdopterReviewRepositoryBreederRecord,
@@ -13,13 +13,11 @@ import type {
 } from '../types/adopter-review.type';
 
 @Injectable()
-export class AdopterReviewReaderAdapter extends AdopterReviewReaderPort {
+export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {
     constructor(
         private readonly adopterReviewRepository: AdopterReviewRepository,
         private readonly storageService: StorageService,
-    ) {
-        super();
-    }
+    ) {}
 
     countByAdopterId(adopterId: string): Promise<number> {
         return this.adopterReviewRepository.countByAdopterId(adopterId);

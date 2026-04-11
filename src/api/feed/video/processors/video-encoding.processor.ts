@@ -7,7 +7,10 @@ import { getErrorMessage } from '../../../../common/utils/error.util';
 import { StorageService } from '../../../../common/storage/storage.service';
 import { UpdateEncodingCompleteUseCase } from '../application/use-cases/update-encoding-complete.use-case';
 import { UpdateEncodingFailedUseCase } from '../application/use-cases/update-encoding-failed.use-case';
-import { FeedVideoTranscoderPort } from '../application/ports/feed-video-transcoder.port';
+import {
+    FEED_VIDEO_TRANSCODER_PORT,
+    type FeedVideoTranscoderPort,
+} from '../application/ports/feed-video-transcoder.port';
 
 /**
  * 동영상 인코딩 Worker
@@ -20,7 +23,7 @@ export class VideoEncodingProcessor extends WorkerHost {
     private readonly logger = new Logger(VideoEncodingProcessor.name);
 
     constructor(
-        @Inject(FeedVideoTranscoderPort)
+        @Inject(FEED_VIDEO_TRANSCODER_PORT)
         private readonly feedVideoTranscoderPort: FeedVideoTranscoderPort,
         private readonly updateEncodingCompleteUseCase: UpdateEncodingCompleteUseCase,
         private readonly updateEncodingFailedUseCase: UpdateEncodingFailedUseCase,

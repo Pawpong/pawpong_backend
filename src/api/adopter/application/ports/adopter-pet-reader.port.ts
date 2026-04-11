@@ -4,6 +4,8 @@ export type AdopterPetRecord = {
     status?: string;
 };
 
-export abstract class AdopterPetReaderPort {
-    abstract findByIdAndBreeder(petId: string, breederId: string): Promise<AdopterPetRecord | null>;
+export const ADOPTER_PET_READER_PORT = Symbol('ADOPTER_PET_READER_PORT');
+
+export interface AdopterPetReaderPort {
+    findByIdAndBreeder(petId: string, breederId: string): Promise<AdopterPetRecord | null>;
 }

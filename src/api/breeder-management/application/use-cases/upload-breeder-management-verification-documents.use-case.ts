@@ -2,10 +2,14 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-profile.port';
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
-import { BreederManagementVerificationDocumentStorePort } from '../ports/breeder-management-verification-document-store.port';
 import {
-    BreederManagementVerificationDraftStorePort,
+    BREEDER_MANAGEMENT_VERIFICATION_DOCUMENT_STORE_PORT,
+    type BreederManagementVerificationDocumentStorePort,
+} from '../ports/breeder-management-verification-document-store.port';
+import {
+    BREEDER_MANAGEMENT_VERIFICATION_DRAFT_STORE_PORT,
     type BreederManagementVerificationDraftDocument,
+    type BreederManagementVerificationDraftStorePort,
 } from '../ports/breeder-management-verification-draft-store.port';
 import { BreederManagementVerificationOriginalFileNameService } from '../../domain/services/breeder-management-verification-original-file-name.service';
 import { BreederManagementVerificationDocumentPolicyService } from '../../domain/services/breeder-management-verification-document-policy.service';
@@ -19,7 +23,9 @@ export class UploadBreederManagementVerificationDocumentsUseCase {
     constructor(
         @Inject(BREEDER_MANAGEMENT_PROFILE_PORT)
         private readonly breederManagementProfilePort: BreederManagementProfilePort,
+        @Inject(BREEDER_MANAGEMENT_VERIFICATION_DOCUMENT_STORE_PORT)
         private readonly breederManagementVerificationDocumentStorePort: BreederManagementVerificationDocumentStorePort,
+        @Inject(BREEDER_MANAGEMENT_VERIFICATION_DRAFT_STORE_PORT)
         private readonly breederManagementVerificationDraftStorePort: BreederManagementVerificationDraftStorePort,
         private readonly breederManagementVerificationOriginalFileNameService: BreederManagementVerificationOriginalFileNameService,
         private readonly breederManagementVerificationDocumentPolicyService: BreederManagementVerificationDocumentPolicyService,

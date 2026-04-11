@@ -3,7 +3,7 @@ import type {
     BreederManagementBreederRecord,
 } from './breeder-management-profile.port';
 
-export const BREEDER_MANAGEMENT_SETTINGS_PORT = 'BREEDER_MANAGEMENT_SETTINGS_PORT';
+export const BREEDER_MANAGEMENT_SETTINGS_PORT = Symbol('BREEDER_MANAGEMENT_SETTINGS_PORT');
 
 export interface BreederManagementStoredVerificationDocumentRecord {
     type: string;

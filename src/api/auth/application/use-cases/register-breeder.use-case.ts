@@ -2,10 +2,13 @@ import { BadRequestException, ConflictException, Inject, Injectable } from '@nes
 
 import { BreederPlan, UserStatus, VerificationStatus } from '../../../../common/enum/user.enum';
 import { AuthMapper } from '../../mapper/auth.mapper';
-import { AuthRegistrationPort } from '../ports/auth-registration.port';
-import { AuthRegistrationNotificationPort } from '../ports/auth-registration-notification.port';
-import { AuthTempUploadPort } from '../ports/auth-temp-upload.port';
-import { AuthTokenPort } from '../ports/auth-token.port';
+import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../ports/auth-registration.port';
+import {
+    AUTH_REGISTRATION_NOTIFICATION_PORT,
+    type AuthRegistrationNotificationPort,
+} from '../ports/auth-registration-notification.port';
+import { AUTH_TEMP_UPLOAD_PORT, type AuthTempUploadPort } from '../ports/auth-temp-upload.port';
+import { AUTH_TOKEN_PORT, type AuthTokenPort } from '../ports/auth-token.port';
 import { type RegisterBreederAuthSignupCommand, type RegisterBreederAuthSignupResult } from '../types/auth-signup.type';
 import { AuthSocialIdentityService } from '../../domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from '../../domain/services/auth-stored-file-name.service';
@@ -13,12 +16,13 @@ import { AuthStoredFileNameService } from '../../domain/services/auth-stored-fil
 @Injectable()
 export class RegisterBreederUseCase {
     constructor(
-        @Inject(AuthRegistrationPort)
+        @Inject(AUTH_REGISTRATION_PORT)
         private readonly authRegistrationPort: AuthRegistrationPort,
-        @Inject(AuthRegistrationNotificationPort)
+        @Inject(AUTH_REGISTRATION_NOTIFICATION_PORT)
         private readonly authRegistrationNotificationPort: AuthRegistrationNotificationPort,
+        @Inject(AUTH_TEMP_UPLOAD_PORT)
         private readonly authTempUploadPort: AuthTempUploadPort,
-        @Inject(AuthTokenPort)
+        @Inject(AUTH_TOKEN_PORT)
         private readonly authTokenPort: AuthTokenPort,
         private readonly authSocialIdentityService: AuthSocialIdentityService,
         private readonly authStoredFileNameService: AuthStoredFileNameService,

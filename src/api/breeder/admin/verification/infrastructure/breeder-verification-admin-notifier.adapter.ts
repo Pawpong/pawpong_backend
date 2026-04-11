@@ -2,7 +2,10 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { NotificationType, RecipientType } from '../../../../../common/enum/user.enum';
 import { MailTemplateService } from '../../../../../common/mail/mail-template.service';
-import { NotificationDispatchPort } from '../../../../notification/application/ports/notification-dispatch.port';
+import {
+    NOTIFICATION_DISPATCH_PORT,
+    type NotificationDispatchPort,
+} from '../../../../notification/application/ports/notification-dispatch.port';
 import type {
     BreederVerificationAdminNotifierPort,
     BreederVerificationAdminNotificationRecipient,
@@ -12,7 +15,7 @@ import type {
 export class BreederVerificationAdminNotifierAdapter implements BreederVerificationAdminNotifierPort {
     constructor(
         private readonly mailTemplateService: MailTemplateService,
-        @Inject(NotificationDispatchPort)
+        @Inject(NOTIFICATION_DISPATCH_PORT)
         private readonly notificationDispatchPort: NotificationDispatchPort,
     ) {}
 

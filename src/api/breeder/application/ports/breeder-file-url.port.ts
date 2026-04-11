@@ -1,4 +1,4 @@
-export const BREEDER_FILE_URL_PORT = 'BREEDER_FILE_URL_PORT';
+export const BREEDER_FILE_URL_PORT = Symbol('BREEDER_FILE_URL_PORT');
 
 export interface BreederFileUrlPort {
     generateOne(fileName: string, expirationMinutes?: number): string;

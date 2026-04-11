@@ -1,10 +1,10 @@
-import { AuthTempUploadPort, type AuthTempUploadDocument, type AuthTempUploadInfo } from '../../../application/ports/auth-temp-upload.port';
-import { AuthUploadFileStorePort, type AuthUploadedStorageFile } from '../../../application/ports/auth-upload-file-store.port';
+import type { AuthTempUploadDocument, AuthTempUploadInfo, AuthTempUploadPort } from '../../../application/ports/auth-temp-upload.port';
+import type { AuthUploadFileStorePort, AuthUploadedStorageFile } from '../../../application/ports/auth-upload-file-store.port';
 import { AuthBreederDocumentFilePolicyService } from '../../../domain/services/auth-breeder-document-file-policy.service';
 import { AuthBreederDocumentOriginalFileNameService } from '../../../domain/services/auth-breeder-document-original-file-name.service';
 import { UploadAuthBreederDocumentsUseCase } from '../../../application/use-cases/upload-auth-breeder-documents.use-case';
 
-class StubAuthUploadFileStorePort extends AuthUploadFileStorePort {
+class StubAuthUploadFileStorePort implements AuthUploadFileStorePort {
     async upload(file: Express.Multer.File, folder: string): Promise<AuthUploadedStorageFile> {
         return {
             cdnUrl: `https://cdn.test/${folder}/${file.originalname}`,
@@ -13,7 +13,7 @@ class StubAuthUploadFileStorePort extends AuthUploadFileStorePort {
     }
 }
 
-class StubAuthTempUploadPort extends AuthTempUploadPort {
+class StubAuthTempUploadPort implements AuthTempUploadPort {
     tempUploads = new Map<string, AuthTempUploadInfo>();
 
     get(tempId: string): AuthTempUploadInfo | undefined {

@@ -2,14 +2,15 @@ import { Inject, Injectable } from '@nestjs/common';
 import type { Response } from 'express';
 
 import {
-    AuthSocialCallbackPort,
+    AUTH_SOCIAL_CALLBACK_PORT,
+    type AuthSocialCallbackPort,
     type AuthSocialCookieDefinition,
 } from '../../application/ports/auth-social-callback.port';
 
 @Injectable()
 export class AuthHttpCookieService {
     constructor(
-        @Inject(AuthSocialCallbackPort)
+        @Inject(AUTH_SOCIAL_CALLBACK_PORT)
         private readonly authSocialCallbackPort: AuthSocialCallbackPort,
     ) {}
 

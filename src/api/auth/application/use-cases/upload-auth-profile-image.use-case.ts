@@ -1,11 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
-import { AuthTempUploadPort } from '../ports/auth-temp-upload.port';
+import { AUTH_TEMP_UPLOAD_PORT, type AuthTempUploadPort } from '../ports/auth-temp-upload.port';
 import {
-    AuthProfileImageTargetPort,
+    AUTH_PROFILE_IMAGE_TARGET_PORT,
+    type AuthProfileImageTargetPort,
     type AuthProfileImageOwnerRole,
 } from '../ports/auth-profile-image-target.port';
-import { AuthUploadFileStorePort } from '../ports/auth-upload-file-store.port';
+import { AUTH_UPLOAD_FILE_STORE_PORT, type AuthUploadFileStorePort } from '../ports/auth-upload-file-store.port';
 import { AuthProfileImageFilePolicyService } from '../../domain/services/auth-profile-image-file-policy.service';
 
 type AuthProfileImageUploadUser = {
@@ -22,8 +23,11 @@ type AuthUploadedProfileImage = {
 @Injectable()
 export class UploadAuthProfileImageUseCase {
     constructor(
+        @Inject(AUTH_UPLOAD_FILE_STORE_PORT)
         private readonly authUploadFileStorePort: AuthUploadFileStorePort,
+        @Inject(AUTH_PROFILE_IMAGE_TARGET_PORT)
         private readonly authProfileImageTargetPort: AuthProfileImageTargetPort,
+        @Inject(AUTH_TEMP_UPLOAD_PORT)
         private readonly authTempUploadPort: AuthTempUploadPort,
         private readonly authProfileImageFilePolicyService: AuthProfileImageFilePolicyService,
     ) {}

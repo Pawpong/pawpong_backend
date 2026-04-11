@@ -1,7 +1,7 @@
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 
 import {
-    AuthSocialCallbackPort,
+    type AuthSocialCallbackPort,
     type AuthSocialAuthenticatedUser,
     type AuthSocialCallbackLoginResult,
     type AuthSocialCallbackProfile,
@@ -12,7 +12,7 @@ import { AuthSocialRedirectPathService } from '../../../domain/services/auth-soc
 import { AuthSocialSignupRedirectResponseFactoryService } from '../../../domain/services/auth-social-signup-redirect-response-factory.service';
 import { ProcessSocialLoginCallbackUseCase } from '../../../application/use-cases/process-social-login-callback.use-case';
 
-class StubAuthSocialCallbackPort extends AuthSocialCallbackPort {
+class StubAuthSocialCallbackPort implements AuthSocialCallbackPort {
     profileResult: AuthSocialCallbackLoginResult = {
         needsAdditionalInfo: true,
         tempUserId: 'temp-social-id',

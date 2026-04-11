@@ -1,12 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { AnnouncementPublicReaderPort } from '../ports/announcement-public-reader.port';
+import {
+    ANNOUNCEMENT_PUBLIC_READER_PORT,
+    type AnnouncementPublicReaderPort,
+} from '../ports/announcement-public-reader.port';
 import { AnnouncementResponseMapperService } from '../../domain/services/announcement-response-mapper.service';
 import type { AnnouncementResult } from '../types/announcement-result.type';
 
 @Injectable()
 export class GetAnnouncementByIdUseCase {
     constructor(
+        @Inject(ANNOUNCEMENT_PUBLIC_READER_PORT)
         private readonly announcementPublicReaderPort: AnnouncementPublicReaderPort,
         private readonly announcementResponseMapperService: AnnouncementResponseMapperService,
     ) {}

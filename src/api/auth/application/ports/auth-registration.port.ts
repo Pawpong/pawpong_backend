@@ -1,15 +1,17 @@
 import type { AuthRegistrationRecord } from '../../types/auth-record.type';
 
-export abstract class AuthRegistrationPort {
-    abstract findAdopterByEmail(email: string): Promise<AuthRegistrationRecord | null>;
-    abstract findAdopterByNickname(nickname: string): Promise<AuthRegistrationRecord | null>;
-    abstract findAdopterBySocialAuth(provider: string, providerId: string): Promise<AuthRegistrationRecord | null>;
-    abstract createAdopter(adopterData: Record<string, unknown>): Promise<AuthRegistrationRecord>;
-    abstract saveAdopterRefreshToken(userId: string, refreshTokenHash: string): Promise<void>;
+export const AUTH_REGISTRATION_PORT = Symbol('AUTH_REGISTRATION_PORT');
 
-    abstract findBreederByEmail(email: string): Promise<AuthRegistrationRecord | null>;
-    abstract findBreederByName(breederName: string): Promise<AuthRegistrationRecord | null>;
-    abstract findBreederBySocialAuth(provider: string, providerId: string): Promise<AuthRegistrationRecord | null>;
-    abstract createBreeder(breederData: Record<string, unknown>): Promise<AuthRegistrationRecord>;
-    abstract saveBreederRefreshToken(userId: string, refreshTokenHash: string): Promise<void>;
+export interface AuthRegistrationPort {
+    findAdopterByEmail(email: string): Promise<AuthRegistrationRecord | null>;
+    findAdopterByNickname(nickname: string): Promise<AuthRegistrationRecord | null>;
+    findAdopterBySocialAuth(provider: string, providerId: string): Promise<AuthRegistrationRecord | null>;
+    createAdopter(adopterData: Record<string, unknown>): Promise<AuthRegistrationRecord>;
+    saveAdopterRefreshToken(userId: string, refreshTokenHash: string): Promise<void>;
+
+    findBreederByEmail(email: string): Promise<AuthRegistrationRecord | null>;
+    findBreederByName(breederName: string): Promise<AuthRegistrationRecord | null>;
+    findBreederBySocialAuth(provider: string, providerId: string): Promise<AuthRegistrationRecord | null>;
+    createBreeder(breederData: Record<string, unknown>): Promise<AuthRegistrationRecord>;
+    saveBreederRefreshToken(userId: string, refreshTokenHash: string): Promise<void>;
 }

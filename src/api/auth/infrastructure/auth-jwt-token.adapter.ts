@@ -4,18 +4,16 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import type { StringValue } from 'ms';
 
-import { AuthTokenPort, type AuthRefreshTokenPayload } from '../application/ports/auth-token.port';
+import type { AuthRefreshTokenPayload, AuthTokenPort } from '../application/ports/auth-token.port';
 import { type AuthSessionRole } from '../application/ports/auth-session.port';
 import { type AuthTokenSet } from '../application/types/auth-token-set.type';
 
 @Injectable()
-export class AuthJwtTokenAdapter extends AuthTokenPort {
+export class AuthJwtTokenAdapter implements AuthTokenPort {
     constructor(
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
-    ) {
-        super();
-    }
+    ) {}
 
     generateTokens(userId: string, email: string, role: AuthSessionRole): AuthTokenSet {
         const payload = {

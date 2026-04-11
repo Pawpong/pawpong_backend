@@ -92,9 +92,9 @@ import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from './application/ports/breeder
 import { BREEDER_MANAGEMENT_REVIEW_REPLY_PORT } from './application/ports/breeder-management-review-reply.port';
 import { BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT } from './application/ports/breeder-management-application-workflow.port';
 import { BREEDER_MANAGEMENT_ACCOUNT_COMMAND_PORT } from './application/ports/breeder-management-account-command.port';
-import { BreederManagementVerificationDocumentStorePort } from './application/ports/breeder-management-verification-document-store.port';
-import { BreederManagementVerificationDraftStorePort } from './application/ports/breeder-management-verification-draft-store.port';
-import { BreederManagementVerificationNotifierPort } from './application/ports/breeder-management-verification-notifier.port';
+import { BREEDER_MANAGEMENT_VERIFICATION_DOCUMENT_STORE_PORT } from './application/ports/breeder-management-verification-document-store.port';
+import { BREEDER_MANAGEMENT_VERIFICATION_DRAFT_STORE_PORT } from './application/ports/breeder-management-verification-draft-store.port';
+import { BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT } from './application/ports/breeder-management-verification-notifier.port';
 import { BREEDER_MANAGEMENT_ADMIN_BANNER_READER } from './admin/application/ports/breeder-management-admin-banner-reader.port';
 import { BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER } from './admin/application/ports/breeder-management-admin-banner-writer.port';
 import {
@@ -301,15 +301,15 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
             useExisting: BreederManagementAccountCommandAdapter,
         },
         {
-            provide: BreederManagementVerificationDocumentStorePort,
+            provide: BREEDER_MANAGEMENT_VERIFICATION_DOCUMENT_STORE_PORT,
             useExisting: BreederManagementVerificationDocumentStoreAdapter,
         },
         {
-            provide: BreederManagementVerificationDraftStorePort,
+            provide: BREEDER_MANAGEMENT_VERIFICATION_DRAFT_STORE_PORT,
             useExisting: BreederManagementVerificationDraftStoreAdapter,
         },
         {
-            provide: BreederManagementVerificationNotifierPort,
+            provide: BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT,
             useExisting: BreederManagementVerificationNotifierAdapter,
         },
         {

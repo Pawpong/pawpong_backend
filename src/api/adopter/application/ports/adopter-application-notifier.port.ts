@@ -13,7 +13,9 @@ export type AdopterApplicationConfirmationTarget = {
     breederName: string;
 };
 
-export abstract class AdopterApplicationNotifierPort {
-    abstract notifyBreederOfNewApplication(target: AdopterApplicationBreederNotificationTarget): Promise<void>;
-    abstract notifyApplicantApplicationConfirmed(target: AdopterApplicationConfirmationTarget): Promise<void>;
+export const ADOPTER_APPLICATION_NOTIFIER_PORT = Symbol('ADOPTER_APPLICATION_NOTIFIER_PORT');
+
+export interface AdopterApplicationNotifierPort {
+    notifyBreederOfNewApplication(target: AdopterApplicationBreederNotificationTarget): Promise<void>;
+    notifyApplicantApplicationConfirmed(target: AdopterApplicationConfirmationTarget): Promise<void>;
 }

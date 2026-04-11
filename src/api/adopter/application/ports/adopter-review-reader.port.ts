@@ -23,8 +23,10 @@ export type AdopterReviewDetailRecord = {
     isVisible: boolean;
 };
 
-export abstract class AdopterReviewReaderPort {
-    abstract countByAdopterId(adopterId: string): Promise<number>;
-    abstract findPagedByAdopterId(adopterId: string, page: number, limit: number): Promise<AdopterReviewListRecord[]>;
-    abstract findDetailByAdopterId(adopterId: string, reviewId: string): Promise<AdopterReviewDetailRecord | null>;
+export const ADOPTER_REVIEW_READER_PORT = Symbol('ADOPTER_REVIEW_READER_PORT');
+
+export interface AdopterReviewReaderPort {
+    countByAdopterId(adopterId: string): Promise<number>;
+    findPagedByAdopterId(adopterId: string, page: number, limit: number): Promise<AdopterReviewListRecord[]>;
+    findDetailByAdopterId(adopterId: string, reviewId: string): Promise<AdopterReviewDetailRecord | null>;
 }

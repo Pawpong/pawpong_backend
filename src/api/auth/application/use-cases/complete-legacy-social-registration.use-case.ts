@@ -3,8 +3,8 @@ import { BadRequestException, ConflictException, Inject, Injectable } from '@nes
 import { BreederPlan, UserStatus, VerificationStatus } from '../../../../common/enum/user.enum';
 import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
 import { AuthMapper } from '../../mapper/auth.mapper';
-import { AuthRegistrationPort } from '../ports/auth-registration.port';
-import { AuthTokenPort } from '../ports/auth-token.port';
+import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../ports/auth-registration.port';
+import { AUTH_TOKEN_PORT, type AuthTokenPort } from '../ports/auth-token.port';
 import { type AuthResult } from '../types/auth-response.type';
 
 type LegacySocialProfile = {
@@ -32,9 +32,9 @@ type LegacySocialAdditionalInfo = {
 @Injectable()
 export class CompleteLegacySocialRegistrationUseCase {
     constructor(
-        @Inject(AuthRegistrationPort)
+        @Inject(AUTH_REGISTRATION_PORT)
         private readonly authRegistrationPort: AuthRegistrationPort,
-        @Inject(AuthTokenPort)
+        @Inject(AUTH_TOKEN_PORT)
         private readonly authTokenPort: AuthTokenPort,
     ) {}
 

@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 
 import {
-    BreederManagementVerificationDraftStorePort,
+    type BreederManagementVerificationDraftStorePort,
     type BreederManagementVerificationDraftDocument,
 } from '../application/ports/breeder-management-verification-draft-store.port';
 
 @Injectable()
-export class BreederManagementVerificationDraftStoreAdapter extends BreederManagementVerificationDraftStorePort {
+export class BreederManagementVerificationDraftStoreAdapter implements BreederManagementVerificationDraftStorePort {
     private readonly drafts = new Map<string, BreederManagementVerificationDraftDocument[]>();
 
     async save(userId: string, documents: BreederManagementVerificationDraftDocument[]): Promise<void> {

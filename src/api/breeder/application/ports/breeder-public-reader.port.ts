@@ -1,4 +1,4 @@
-export const BREEDER_PUBLIC_READER_PORT = 'BREEDER_PUBLIC_READER_PORT';
+export const BREEDER_PUBLIC_READER_PORT = Symbol('BREEDER_PUBLIC_READER_PORT');
 
 export interface BreederPublicObjectIdLike {
     toString(): string;

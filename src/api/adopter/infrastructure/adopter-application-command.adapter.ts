@@ -3,14 +3,12 @@ import type {
     AdopterApplicationCreateCommand,
     AdopterApplicationCreatedRecord,
 } from '../application/ports/adopter-application-command.port';
-import { AdopterApplicationCommandPort } from '../application/ports/adopter-application-command.port';
+import type { AdopterApplicationCommandPort } from '../application/ports/adopter-application-command.port';
 import { AdopterApplicationRepository } from '../repository/adopter-application.repository';
 
 @Injectable()
-export class AdopterApplicationCommandAdapter extends AdopterApplicationCommandPort {
-    constructor(private readonly adopterApplicationRepository: AdopterApplicationRepository) {
-        super();
-    }
+export class AdopterApplicationCommandAdapter implements AdopterApplicationCommandPort {
+    constructor(private readonly adopterApplicationRepository: AdopterApplicationRepository) {}
 
     async findPendingByAdopterAndBreeder(
         adopterId: string,

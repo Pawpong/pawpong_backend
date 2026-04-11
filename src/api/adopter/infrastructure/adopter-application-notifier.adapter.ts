@@ -2,23 +2,24 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { RecipientType } from '../../../common/enum/user.enum';
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
-import { NotificationDispatchPort } from '../../notification/application/ports/notification-dispatch.port';
+import {
+    NOTIFICATION_DISPATCH_PORT,
+    type NotificationDispatchPort,
+} from '../../notification/application/ports/notification-dispatch.port';
 import { NotificationType } from '../../../schema/notification.schema';
-import { AdopterApplicationNotifierPort } from '../application/ports/adopter-application-notifier.port';
+import type { AdopterApplicationNotifierPort } from '../application/ports/adopter-application-notifier.port';
 import type {
     AdopterApplicationBreederNotificationTarget,
     AdopterApplicationConfirmationTarget,
 } from '../application/ports/adopter-application-notifier.port';
 
 @Injectable()
-export class AdopterApplicationNotifierAdapter extends AdopterApplicationNotifierPort {
+export class AdopterApplicationNotifierAdapter implements AdopterApplicationNotifierPort {
     constructor(
         private readonly mailTemplateService: MailTemplateService,
-        @Inject(NotificationDispatchPort)
+        @Inject(NOTIFICATION_DISPATCH_PORT)
         private readonly notificationDispatchPort: NotificationDispatchPort,
-    ) {
-        super();
-    }
+    ) {}
 
     async notifyBreederOfNewApplication(target: AdopterApplicationBreederNotificationTarget): Promise<void> {
         const breederId = target._id.toString();

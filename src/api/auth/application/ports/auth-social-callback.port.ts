@@ -59,12 +59,14 @@ export type AuthSocialCallbackResult = {
     cookies?: AuthSocialCookieDefinition[];
 };
 
-export abstract class AuthSocialCallbackPort {
-    abstract resolveFrontendUrl(referer?: string, origin?: string): string;
-    abstract resolveCookieOptions(): {
+export const AUTH_SOCIAL_CALLBACK_PORT = Symbol('AUTH_SOCIAL_CALLBACK_PORT');
+
+export interface AuthSocialCallbackPort {
+    resolveFrontendUrl(referer?: string, origin?: string): string;
+    resolveCookieOptions(): {
         isProduction: boolean;
         cookieOptions: AuthSocialCookieOptions;
     };
-    abstract handleSocialLogin(profile: AuthSocialCallbackProfile): Promise<AuthSocialCallbackLoginResult>;
-    abstract generateSocialLoginTokens(user: AuthSocialAuthenticatedUser): Promise<AuthSocialCallbackTokens>;
+    handleSocialLogin(profile: AuthSocialCallbackProfile): Promise<AuthSocialCallbackLoginResult>;
+    generateSocialLoginTokens(user: AuthSocialAuthenticatedUser): Promise<AuthSocialCallbackTokens>;
 }

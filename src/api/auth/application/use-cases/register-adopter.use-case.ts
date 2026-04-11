@@ -2,9 +2,12 @@ import { BadRequestException, ConflictException, Inject, Injectable } from '@nes
 
 import { UserStatus } from '../../../../common/enum/user.enum';
 import { AuthMapper } from '../../mapper/auth.mapper';
-import { AuthRegistrationPort } from '../ports/auth-registration.port';
-import { AuthRegistrationNotificationPort } from '../ports/auth-registration-notification.port';
-import { AuthTokenPort } from '../ports/auth-token.port';
+import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../ports/auth-registration.port';
+import {
+    AUTH_REGISTRATION_NOTIFICATION_PORT,
+    type AuthRegistrationNotificationPort,
+} from '../ports/auth-registration-notification.port';
+import { AUTH_TOKEN_PORT, type AuthTokenPort } from '../ports/auth-token.port';
 import { type RegisterAdopterAuthSignupCommand, type RegisterAdopterAuthSignupResult } from '../types/auth-signup.type';
 import { AuthSocialIdentityService } from '../../domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from '../../domain/services/auth-stored-file-name.service';
@@ -12,11 +15,11 @@ import { AuthStoredFileNameService } from '../../domain/services/auth-stored-fil
 @Injectable()
 export class RegisterAdopterUseCase {
     constructor(
-        @Inject(AuthRegistrationPort)
+        @Inject(AUTH_REGISTRATION_PORT)
         private readonly authRegistrationPort: AuthRegistrationPort,
-        @Inject(AuthRegistrationNotificationPort)
+        @Inject(AUTH_REGISTRATION_NOTIFICATION_PORT)
         private readonly authRegistrationNotificationPort: AuthRegistrationNotificationPort,
-        @Inject(AuthTokenPort)
+        @Inject(AUTH_TOKEN_PORT)
         private readonly authTokenPort: AuthTokenPort,
         private readonly authSocialIdentityService: AuthSocialIdentityService,
         private readonly authStoredFileNameService: AuthStoredFileNameService,

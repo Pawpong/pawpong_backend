@@ -11,7 +11,7 @@ import { FeedLikeModule } from '../like/feed-like.module';
 import { FeedTagModule } from '../tag/feed-tag.module';
 import { FeedCacheKeyService } from '../domain/services/feed-cache-key.service';
 import { FeedVideoSummaryPresentationService } from '../domain/services/feed-video-summary-presentation.service';
-import { FeedVideoTranscoderPort } from './application/ports/feed-video-transcoder.port';
+import { FEED_VIDEO_TRANSCODER_PORT } from './application/ports/feed-video-transcoder.port';
 import { FEED_VIDEO_FILE_STORAGE } from './application/ports/feed-video-file-storage.port';
 import { GetFeedUseCase } from './application/use-cases/get-feed.use-case';
 import { GetPopularVideosUseCase } from './application/use-cases/get-popular-videos.use-case';
@@ -157,7 +157,7 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
             useExisting: FeedVideoStorageStreamAdapter,
         },
         {
-            provide: FeedVideoTranscoderPort,
+            provide: FEED_VIDEO_TRANSCODER_PORT,
             useExisting: FeedVideoFfmpegAdapter,
         },
         {

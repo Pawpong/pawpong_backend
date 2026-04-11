@@ -4,7 +4,7 @@ import { Notification, NotificationType } from '../../../../schema/notification.
 import type { NotificationMetadata } from '../../../../schema/notification.schema';
 import { NotificationBuilder, NotificationCreateData, EmailData } from '../../builder/notification.builder';
 import { RecipientType } from '../../../../common/enum/user.enum';
-import { NotificationDispatchPort } from '../ports/notification-dispatch.port';
+import { NOTIFICATION_DISPATCH_PORT, type NotificationDispatchPort } from '../ports/notification-dispatch.port';
 import {
     CREATE_NOTIFICATION_DISPATCH_USE_CASE,
     CREATE_NOTIFICATION_FROM_BUILDER_DISPATCH_USE_CASE,
@@ -15,7 +15,7 @@ import {
 } from '../ports/notification-dispatch-use-case.port';
 
 @Injectable()
-export class NotificationDispatchService extends NotificationDispatchPort {
+export class NotificationDispatchService implements NotificationDispatchPort {
     constructor(
         @Inject(CREATE_NOTIFICATION_DISPATCH_USE_CASE)
         private readonly createNotificationUseCase: CreateNotificationDispatchUseCasePort,
@@ -23,9 +23,7 @@ export class NotificationDispatchService extends NotificationDispatchPort {
         private readonly createNotificationFromBuilderUseCase: CreateNotificationFromBuilderDispatchUseCasePort,
         @Inject(SEND_NOTIFICATION_EMAIL_DISPATCH_USE_CASE)
         private readonly sendNotificationEmailUseCase: SendNotificationEmailDispatchUseCasePort,
-    ) {
-        super();
-    }
+    ) {}
 
     async createNotification(
         userId: string,

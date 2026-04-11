@@ -5,7 +5,10 @@ import { ApplicationStatus } from '../../../common/enum/user.enum';
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
 import { MailService } from '../../../common/mail/mail.service';
 import { NotificationType } from '../../../schema/notification.schema';
-import { NotificationDispatchPort } from '../../notification/application/ports/notification-dispatch.port';
+import {
+    NOTIFICATION_DISPATCH_PORT,
+    type NotificationDispatchPort,
+} from '../../notification/application/ports/notification-dispatch.port';
 import type {
     BreederManagementApplicationRecord,
     BreederManagementApplicationWorkflowPort,
@@ -20,7 +23,7 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
     constructor(
         private readonly adoptionApplicationRepository: AdoptionApplicationRepository,
         private readonly breederRepository: BreederRepository,
-        @Inject(NotificationDispatchPort)
+        @Inject(NOTIFICATION_DISPATCH_PORT)
         private readonly notificationDispatchPort: NotificationDispatchPort,
         private readonly mailService: MailService,
         private readonly configService: ConfigService,

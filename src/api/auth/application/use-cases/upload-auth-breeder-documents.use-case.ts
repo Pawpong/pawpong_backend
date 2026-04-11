@@ -1,7 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
-import { AuthTempUploadPort, type AuthTempUploadDocument } from '../ports/auth-temp-upload.port';
-import { AuthUploadFileStorePort } from '../ports/auth-upload-file-store.port';
+import { AUTH_TEMP_UPLOAD_PORT, type AuthTempUploadDocument, type AuthTempUploadPort } from '../ports/auth-temp-upload.port';
+import { AUTH_UPLOAD_FILE_STORE_PORT, type AuthUploadFileStorePort } from '../ports/auth-upload-file-store.port';
 import { type VerificationDocumentsResult } from '../types/auth-response.type';
 import { AuthBreederDocumentFilePolicyService } from '../../domain/services/auth-breeder-document-file-policy.service';
 import { AuthBreederDocumentOriginalFileNameService } from '../../domain/services/auth-breeder-document-original-file-name.service';
@@ -14,7 +14,9 @@ type AuthBreederDocumentUploadResult = {
 @Injectable()
 export class UploadAuthBreederDocumentsUseCase {
     constructor(
+        @Inject(AUTH_UPLOAD_FILE_STORE_PORT)
         private readonly authUploadFileStorePort: AuthUploadFileStorePort,
+        @Inject(AUTH_TEMP_UPLOAD_PORT)
         private readonly authTempUploadPort: AuthTempUploadPort,
         private readonly authBreederDocumentFilePolicyService: AuthBreederDocumentFilePolicyService,
         private readonly authBreederDocumentOriginalFileNameService: AuthBreederDocumentOriginalFileNameService,

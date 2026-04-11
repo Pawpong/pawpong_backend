@@ -10,9 +10,9 @@ export type AuthBreederVerificationBreederRecord = {
     _id: { toString(): string };
 };
 
-export abstract class AuthBreederVerificationCommandPort {
-    abstract findBreederById(userId: string): Promise<AuthBreederVerificationBreederRecord | null>;
-    abstract updateVerificationDocuments(
+export interface AuthBreederVerificationCommandPort {
+    findBreederById(userId: string): Promise<AuthBreederVerificationBreederRecord | null>;
+    updateVerificationDocuments(
         userId: string,
         documents: AuthBreederVerificationDocumentRecord[],
         level: string,

@@ -7,8 +7,14 @@ import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-pro
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_SETTINGS_PORT } from '../ports/breeder-management-settings.port';
 import type { BreederManagementSettingsPort } from '../ports/breeder-management-settings.port';
-import { BreederManagementVerificationDraftStorePort } from '../ports/breeder-management-verification-draft-store.port';
-import { BreederManagementVerificationNotifierPort } from '../ports/breeder-management-verification-notifier.port';
+import {
+    BREEDER_MANAGEMENT_VERIFICATION_DRAFT_STORE_PORT,
+    type BreederManagementVerificationDraftStorePort,
+} from '../ports/breeder-management-verification-draft-store.port';
+import {
+    BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT,
+    type BreederManagementVerificationNotifierPort,
+} from '../ports/breeder-management-verification-notifier.port';
 import { BreederManagementVerificationCommandResponseService } from '../../domain/services/breeder-management-verification-command-response.service';
 import { BreederManagementVerificationDocumentPolicyService } from '../../domain/services/breeder-management-verification-document-policy.service';
 import { BreederManagementVerificationNotificationPayloadFactoryService } from '../../domain/services/breeder-management-verification-notification-payload-factory.service';
@@ -23,7 +29,9 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
         private readonly breederManagementSettingsPort: BreederManagementSettingsPort,
         @Inject(BREEDER_MANAGEMENT_FILE_URL_PORT)
         private readonly breederManagementFileUrlPort: BreederManagementFileUrlPort,
+        @Inject(BREEDER_MANAGEMENT_VERIFICATION_DRAFT_STORE_PORT)
         private readonly breederManagementVerificationDraftStorePort: BreederManagementVerificationDraftStorePort,
+        @Inject(BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT)
         private readonly breederManagementVerificationNotifierPort: BreederManagementVerificationNotifierPort,
         private readonly breederManagementVerificationCommandResponseService: BreederManagementVerificationCommandResponseService,
         private readonly breederManagementVerificationDocumentPolicyService: BreederManagementVerificationDocumentPolicyService,

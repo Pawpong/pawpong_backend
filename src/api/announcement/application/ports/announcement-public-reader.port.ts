@@ -20,7 +20,9 @@ export type AnnouncementPublicListResult = {
     limit: number;
 };
 
-export abstract class AnnouncementPublicReaderPort {
-    abstract findActiveAnnouncements(query: AnnouncementPublicListQuery): Promise<AnnouncementPublicListResult>;
-    abstract findActiveAnnouncementById(announcementId: string): Promise<AnnouncementPublicItem | null>;
+export const ANNOUNCEMENT_PUBLIC_READER_PORT = Symbol('ANNOUNCEMENT_PUBLIC_READER_PORT');
+
+export interface AnnouncementPublicReaderPort {
+    findActiveAnnouncements(query: AnnouncementPublicListQuery): Promise<AnnouncementPublicListResult>;
+    findActiveAnnouncementById(announcementId: string): Promise<AnnouncementPublicItem | null>;
 }

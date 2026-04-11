@@ -8,7 +8,7 @@ import {
 } from '../ports/auth-breeder-document-submission.port';
 import {
     AUTH_BREEDER_VERIFICATION_COMMAND_PORT,
-    AuthBreederVerificationCommandPort,
+    type AuthBreederVerificationCommandPort,
 } from '../ports/auth-breeder-verification-command.port';
 import { AuthBreederDocumentSubmissionService } from '../../domain/services/auth-breeder-document-submission.service';
 

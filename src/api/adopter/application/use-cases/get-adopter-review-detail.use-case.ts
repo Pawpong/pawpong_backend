@@ -1,12 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { AdopterReviewReaderPort } from '../ports/adopter-review-reader.port';
+import { ADOPTER_REVIEW_READER_PORT, type AdopterReviewReaderPort } from '../ports/adopter-review-reader.port';
 import { AdopterReviewDetailMapperService } from '../../domain/services/adopter-review-detail-mapper.service';
 import type { AdopterReviewDetailResult } from '../types/adopter-result.type';
 
 @Injectable()
 export class GetAdopterReviewDetailUseCase {
     constructor(
+        @Inject(ADOPTER_REVIEW_READER_PORT)
         private readonly adopterReviewReaderPort: AdopterReviewReaderPort,
         private readonly adopterReviewDetailMapperService: AdopterReviewDetailMapperService,
     ) {}

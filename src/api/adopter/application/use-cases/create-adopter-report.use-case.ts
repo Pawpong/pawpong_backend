@@ -4,7 +4,7 @@ import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
-import { AdopterReportCommandPort } from '../ports/adopter-report-command.port';
+import { ADOPTER_REPORT_COMMAND_PORT, type AdopterReportCommandPort } from '../ports/adopter-report-command.port';
 import { AdopterReportPayloadBuilderService } from '../../domain/services/adopter-report-payload-builder.service';
 import type { AdopterReportCreateCommand } from '../types/adopter-report-command.type';
 import { ADOPTER_RESPONSE_PAYLOAD_MESSAGES } from '../../constants/adopter-response-messages';
@@ -16,6 +16,7 @@ export class CreateAdopterReportUseCase {
         private readonly adopterProfilePort: AdopterProfilePort,
         @Inject(ADOPTER_BREEDER_READER_PORT)
         private readonly adopterBreederReaderPort: AdopterBreederReaderPort,
+        @Inject(ADOPTER_REPORT_COMMAND_PORT)
         private readonly adopterReportCommandPort: AdopterReportCommandPort,
         private readonly adopterReportPayloadBuilderService: AdopterReportPayloadBuilderService,
     ) {}

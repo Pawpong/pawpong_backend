@@ -1,6 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
-import { AnnouncementPublicReaderPort } from '../ports/announcement-public-reader.port';
+import {
+    ANNOUNCEMENT_PUBLIC_READER_PORT,
+    type AnnouncementPublicReaderPort,
+} from '../ports/announcement-public-reader.port';
 import { AnnouncementResponseMapperService } from '../../domain/services/announcement-response-mapper.service';
 import { PaginationRequestDto } from '../../../../common/dto/pagination/pagination-request.dto';
 import type { AnnouncementPageResult } from '../types/announcement-result.type';
@@ -8,6 +11,7 @@ import type { AnnouncementPageResult } from '../types/announcement-result.type';
 @Injectable()
 export class GetActiveAnnouncementsUseCase {
     constructor(
+        @Inject(ANNOUNCEMENT_PUBLIC_READER_PORT)
         private readonly announcementPublicReaderPort: AnnouncementPublicReaderPort,
         private readonly announcementResponseMapperService: AnnouncementResponseMapperService,
     ) {}

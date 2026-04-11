@@ -1,6 +1,6 @@
 import type { BreederManagementProfileUpdateCommand } from '../types/breeder-management-profile-command.type';
 
-export const BREEDER_MANAGEMENT_PROFILE_PORT = 'BREEDER_MANAGEMENT_PROFILE_PORT';
+export const BREEDER_MANAGEMENT_PROFILE_PORT = Symbol('BREEDER_MANAGEMENT_PROFILE_PORT');
 
 export interface BreederManagementVerificationDocumentRecord {
     type: string;

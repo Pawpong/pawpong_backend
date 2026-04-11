@@ -4,12 +4,12 @@ import type { BreederManagementFileUrlPort } from '../../../application/ports/br
 import type { BreederManagementProfilePort } from '../../../application/ports/breeder-management-profile.port';
 import type { BreederManagementSettingsPort } from '../../../application/ports/breeder-management-settings.port';
 import {
-    BreederManagementVerificationDraftStorePort,
     type BreederManagementVerificationDraftDocument,
+    type BreederManagementVerificationDraftStorePort,
 } from '../../../application/ports/breeder-management-verification-draft-store.port';
 import {
-    BreederManagementVerificationNotifierPort,
     type BreederManagementVerificationSubmissionNotification,
+    type BreederManagementVerificationNotifierPort,
 } from '../../../application/ports/breeder-management-verification-notifier.port';
 import { BreederManagementVerificationCommandResponseService } from '../../../domain/services/breeder-management-verification-command-response.service';
 import { BreederManagementVerificationDocumentPolicyService } from '../../../domain/services/breeder-management-verification-document-policy.service';
@@ -59,7 +59,7 @@ class StubFileUrlPort {
     }
 }
 
-class StubDraftStore extends BreederManagementVerificationDraftStorePort {
+class StubDraftStore implements BreederManagementVerificationDraftStorePort {
     documents: BreederManagementVerificationDraftDocument[] = [];
     deleted = false;
 
@@ -76,7 +76,7 @@ class StubDraftStore extends BreederManagementVerificationDraftStorePort {
     }
 }
 
-class StubNotifier extends BreederManagementVerificationNotifierPort {
+class StubNotifier implements BreederManagementVerificationNotifierPort {
     payload?: BreederManagementVerificationSubmissionNotification;
 
     async notifySubmission(payload: BreederManagementVerificationSubmissionNotification): Promise<void> {

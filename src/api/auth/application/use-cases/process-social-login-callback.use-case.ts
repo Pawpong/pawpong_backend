@@ -4,7 +4,8 @@ import { CustomLoggerService } from '../../../../common/logger/custom-logger.ser
 import { getErrorMessage } from '../../../../common/utils/error.util';
 
 import {
-    AuthSocialCallbackPort,
+    AUTH_SOCIAL_CALLBACK_PORT,
+    type AuthSocialCallbackPort,
     type AuthSocialCallbackProfile,
     type AuthSocialCallbackResult,
 } from '../ports/auth-social-callback.port';
@@ -15,7 +16,7 @@ import { AuthSocialSignupRedirectResponseFactoryService } from '../../domain/ser
 @Injectable()
 export class ProcessSocialLoginCallbackUseCase {
     constructor(
-        @Inject(AuthSocialCallbackPort)
+        @Inject(AUTH_SOCIAL_CALLBACK_PORT)
         private readonly authSocialCallbackPort: AuthSocialCallbackPort,
         private readonly authSocialSignupRedirectResponseFactory: AuthSocialSignupRedirectResponseFactoryService,
         private readonly authSocialLoginSuccessRedirectResponseFactory: AuthSocialLoginSuccessRedirectResponseFactoryService,

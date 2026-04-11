@@ -4,7 +4,10 @@ import { RecipientType } from '../../../../common/enum/user.enum';
 import { MailService } from '../../../../common/mail/mail.service';
 import { MailTemplateService } from '../../../../common/mail/mail-template.service';
 import { getErrorStack } from '../../../../common/utils/error.util';
-import { NotificationDispatchPort } from '../../../../api/notification/application/ports/notification-dispatch.port';
+import {
+    NOTIFICATION_DISPATCH_PORT,
+    type NotificationDispatchPort,
+} from '../../../../api/notification/application/ports/notification-dispatch.port';
 import {
     BreederAdminNotifierPort,
     BreederAdminNotificationRecipient,
@@ -18,7 +21,7 @@ export class BreederAdminNotifierAdapter implements BreederAdminNotifierPort {
     constructor(
         private readonly mailTemplateService: MailTemplateService,
         private readonly mailService: MailService,
-        @Inject(NotificationDispatchPort)
+        @Inject(NOTIFICATION_DISPATCH_PORT)
         private readonly notificationDispatchPort: NotificationDispatchPort,
     ) {}
 
