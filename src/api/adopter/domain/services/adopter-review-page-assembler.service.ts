@@ -5,15 +5,10 @@ import type { AdopterReviewItemResult, AdopterReviewPageResult } from '../../app
 import { AdopterPaginationAssemblerService } from './adopter-pagination-assembler.service';
 
 @Injectable()
-export class AdopterReviewListResponseFactoryService {
+export class AdopterReviewPageAssemblerService {
     constructor(private readonly adopterPaginationAssemblerService: AdopterPaginationAssemblerService) {}
 
-    create(
-        reviews: AdopterReviewListRecord[],
-        page: number,
-        limit: number,
-        total: number,
-    ): AdopterReviewPageResult {
+    build(reviews: AdopterReviewListRecord[], page: number, limit: number, total: number): AdopterReviewPageResult {
         const items = reviews.map((review) => this.toItem(review));
 
         return this.adopterPaginationAssemblerService.build(items, page, limit, total);

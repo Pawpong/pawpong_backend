@@ -3,7 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import { AdopterReviewReaderPort } from '../ports/adopter-review-reader.port';
-import { AdopterReviewListResponseFactoryService } from '../../domain/services/adopter-review-list-response-factory.service';
+import { AdopterReviewPageAssemblerService } from '../../domain/services/adopter-review-page-assembler.service';
 import type { AdopterReviewPageResult } from '../types/adopter-result.type';
 
 @Injectable()
@@ -12,7 +12,7 @@ export class GetAdopterReviewsUseCase {
         @Inject(ADOPTER_PROFILE_PORT)
         private readonly adopterProfilePort: AdopterProfilePort,
         private readonly adopterReviewReaderPort: AdopterReviewReaderPort,
-        private readonly adopterReviewListResponseFactoryService: AdopterReviewListResponseFactoryService,
+        private readonly adopterReviewPageAssemblerService: AdopterReviewPageAssemblerService,
     ) {}
 
     async execute(userId: string, page: number = 1, limit: number = 10): Promise<AdopterReviewPageResult> {
@@ -24,6 +24,6 @@ export class GetAdopterReviewsUseCase {
         const total = await this.adopterReviewReaderPort.countByAdopterId(userId);
         const reviews = await this.adopterReviewReaderPort.findPagedByAdopterId(userId, page, limit);
 
-        return this.adopterReviewListResponseFactoryService.create(reviews, page, limit, total);
+        return this.adopterReviewPageAssemblerService.build(reviews, page, limit, total);
     }
 }

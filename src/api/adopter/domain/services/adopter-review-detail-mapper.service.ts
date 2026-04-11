@@ -4,8 +4,8 @@ import type { AdopterReviewDetailRecord } from '../../application/ports/adopter-
 import type { AdopterReviewDetailResult } from '../../application/types/adopter-result.type';
 
 @Injectable()
-export class AdopterReviewDetailResponseFactoryService {
-    create(review: AdopterReviewDetailRecord): AdopterReviewDetailResult {
+export class AdopterReviewDetailMapperService {
+    toResult(review: AdopterReviewDetailRecord): AdopterReviewDetailResult {
         return {
             reviewId: review.reviewId,
             breederNickname: review.breederNickname || '알 수 없음',
