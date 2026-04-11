@@ -20,7 +20,6 @@ import { GetAdopterAdminApplicationDetailUseCase } from './admin/application/use
 import { AdopterAdminPolicyService } from './admin/domain/services/adopter-admin-policy.service';
 import { AdopterAdminApplicationDetailPresentationService } from './admin/domain/services/adopter-admin-application-detail-presentation.service';
 import { AdopterAdminApplicationListAssemblerService } from './admin/domain/services/adopter-admin-application-list-assembler.service';
-import { AdopterAdminPresentationService } from './admin/domain/services/adopter-admin-presentation.service';
 import { AdopterAdminActivityLogFactoryService } from './admin/domain/services/adopter-admin-activity-log-factory.service';
 import { AdopterAdminReviewReportPresentationService } from './admin/domain/services/adopter-admin-review-report-presentation.service';
 import { AdopterAdminReviewResponseService } from './admin/domain/services/adopter-admin-review-response.service';
@@ -139,7 +138,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AdopterAdminPolicyService,
         AdopterAdminApplicationDetailPresentationService,
         AdopterAdminApplicationListAssemblerService,
-        AdopterAdminPresentationService,
         AdopterAdminActivityLogFactoryService,
         AdopterAdminReviewReportPresentationService,
         AdopterAdminReviewResponseService,

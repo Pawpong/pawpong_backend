@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
-import { AdopterAdminPresentationService } from '../../domain/services/adopter-admin-presentation.service';
+import { AdopterAdminApplicationListAssemblerService } from '../../domain/services/adopter-admin-application-list-assembler.service';
 import { ADOPTER_ADMIN_READER_PORT } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminApplicationListQuery } from '../types/adopter-admin-application-query.type';
@@ -13,7 +13,7 @@ export class GetAdopterAdminApplicationListUseCase {
         @Inject(ADOPTER_ADMIN_READER_PORT)
         private readonly adopterAdminReader: AdopterAdminReaderPort,
         private readonly adopterAdminPolicyService: AdopterAdminPolicyService,
-        private readonly adopterAdminPresentationService: AdopterAdminPresentationService,
+        private readonly adopterAdminApplicationListAssemblerService: AdopterAdminApplicationListAssemblerService,
     ) {}
 
     async execute(adminId: string, filters: AdopterAdminApplicationListQuery): Promise<AdopterAdminApplicationListResult> {
@@ -29,6 +29,6 @@ export class GetAdopterAdminApplicationListUseCase {
             endDate: filters.endDate,
         });
 
-        return this.adopterAdminPresentationService.toApplicationList(snapshot);
+        return this.adopterAdminApplicationListAssemblerService.toResponse(snapshot);
     }
 }
