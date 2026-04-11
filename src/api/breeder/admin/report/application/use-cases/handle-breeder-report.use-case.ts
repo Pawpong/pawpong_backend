@@ -6,7 +6,7 @@ import type { BreederReportAdminReaderPort } from '../ports/breeder-report-admin
 import type { BreederReportAdminWriterPort } from '../ports/breeder-report-admin-writer.port';
 import { BreederReportAdminPolicyService } from '../../domain/services/breeder-report-admin-policy.service';
 import { BreederReportAdminActivityLogFactoryService } from '../../domain/services/breeder-report-admin-activity-log-factory.service';
-import { BreederReportAdminPresentationService } from '../../domain/services/breeder-report-admin-presentation.service';
+import { BreederReportAdminActionResultMapperService } from '../../domain/services/breeder-report-admin-action-result-mapper.service';
 import type { BreederReportActionCommand } from '../types/breeder-report-admin-command.type';
 import type { BreederReportAdminActionResult } from '../types/breeder-report-admin-result.type';
 
@@ -19,7 +19,7 @@ export class HandleBreederReportUseCase {
         private readonly breederReportAdminWriter: BreederReportAdminWriterPort,
         private readonly breederReportAdminPolicyService: BreederReportAdminPolicyService,
         private readonly breederReportAdminActivityLogFactoryService: BreederReportAdminActivityLogFactoryService,
-        private readonly breederReportAdminPresentationService: BreederReportAdminPresentationService,
+        private readonly breederReportAdminActionResultMapperService: BreederReportAdminActionResultMapperService,
     ) {}
 
     async execute(
@@ -63,7 +63,7 @@ export class HandleBreederReportUseCase {
             ),
         );
 
-        return this.breederReportAdminPresentationService.createReportActionResponse(
+        return this.breederReportAdminActionResultMapperService.toResult(
             reportId,
             report.breederId,
             actionData.action,

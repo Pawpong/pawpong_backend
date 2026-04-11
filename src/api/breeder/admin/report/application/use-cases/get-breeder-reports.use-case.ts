@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { BREEDER_REPORT_ADMIN_READER_PORT } from '../ports/breeder-report-admin-reader.port';
 import type { BreederReportAdminReaderPort } from '../ports/breeder-report-admin-reader.port';
 import { BreederReportAdminPolicyService } from '../../domain/services/breeder-report-admin-policy.service';
-import { BreederReportAdminPresentationService } from '../../domain/services/breeder-report-admin-presentation.service';
+import { BreederReportAdminPageAssemblerService } from '../../domain/services/breeder-report-admin-page-assembler.service';
 import type { BreederReportListQuery } from '../types/breeder-report-admin-command.type';
 import type { BreederReportAdminPageResult } from '../types/breeder-report-admin-result.type';
 
@@ -13,7 +13,7 @@ export class GetBreederReportsUseCase {
         @Inject(BREEDER_REPORT_ADMIN_READER_PORT)
         private readonly breederReportAdminReader: BreederReportAdminReaderPort,
         private readonly breederReportAdminPolicyService: BreederReportAdminPolicyService,
-        private readonly breederReportAdminPresentationService: BreederReportAdminPresentationService,
+        private readonly breederReportAdminPageAssemblerService: BreederReportAdminPageAssemblerService,
     ) {}
 
     async execute(adminId: string, filter: BreederReportListQuery): Promise<BreederReportAdminPageResult> {
@@ -29,7 +29,7 @@ export class GetBreederReportsUseCase {
             itemsPerPage,
         });
 
-        return this.breederReportAdminPresentationService.createReportListResponse(
+        return this.breederReportAdminPageAssemblerService.build(
             result,
             pageNumber,
             itemsPerPage,

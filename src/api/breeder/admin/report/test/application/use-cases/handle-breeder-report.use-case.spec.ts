@@ -1,10 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { HandleBreederReportUseCase } from '../../../application/use-cases/handle-breeder-report.use-case';
+import { BreederReportAdminActionResultMapperService } from '../../../domain/services/breeder-report-admin-action-result-mapper.service';
 import { BreederReportAdminActivityLogFactoryService } from '../../../domain/services/breeder-report-admin-activity-log-factory.service';
 import { BreederReportAdminPolicyService } from '../../../domain/services/breeder-report-admin-policy.service';
-import { BreederReportAdminPresentationService } from '../../../domain/services/breeder-report-admin-presentation.service';
-import { BreederPaginationAssemblerService } from '../../../../../domain/services/breeder-pagination-assembler.service';
 
 describe('브리더 신고 처리 유스케이스', () => {
     const reader = {
@@ -22,7 +21,7 @@ describe('브리더 신고 처리 유스케이스', () => {
         writer as any,
         new BreederReportAdminPolicyService(),
         new BreederReportAdminActivityLogFactoryService(),
-        new BreederReportAdminPresentationService(new BreederPaginationAssemblerService()),
+        new BreederReportAdminActionResultMapperService(),
     );
 
     beforeEach(() => {
