@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
+import { getErrorMessage } from '../../../../common/utils/error.util';
 
 import {
     AuthSocialCallbackPort,
@@ -57,7 +58,7 @@ export class ProcessSocialLoginCallbackUseCase {
                 logger: this.logger,
             });
         } catch (error) {
-            const errorMessage = error instanceof Error ? error.message : '로그인 처리 중 오류가 발생했습니다.';
+            const errorMessage = getErrorMessage(error, '로그인 처리 중 오류가 발생했습니다.');
             this.logger.logError('processSocialLoginCallback', '소셜 로그인 콜백 처리 실패', error);
 
             return this.authSocialErrorRedirectResponseFactory.create(frontendUrl, errorMessage);

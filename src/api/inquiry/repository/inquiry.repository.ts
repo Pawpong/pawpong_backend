@@ -5,6 +5,7 @@ import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 import { Inquiry, InquiryDocument } from '../../../schema/inquiry.schema';
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
+import { getErrorMessage } from '../../../common/utils/error.util';
 import type {
     InquiryAdopterNicknameRecord,
     InquiryAnswerDocumentRecord,
@@ -60,7 +61,7 @@ export class InquiryRepository {
                 .lean<InquiryDocumentRecord[]>()
                 .exec();
         } catch (error) {
-            throw new Error(`문의 목록 조회 실패: ${error.message}`);
+            throw new Error(`문의 목록 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -86,7 +87,7 @@ export class InquiryRepository {
                 .lean<InquiryDocumentRecord[]>()
                 .exec();
         } catch (error) {
-            throw new Error(`내 문의 목록 조회 실패: ${error.message}`);
+            throw new Error(`내 문의 목록 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -100,7 +101,7 @@ export class InquiryRepository {
         try {
             return await this.inquiryModel.findById(inquiryId).lean<InquiryDocumentRecord>().exec();
         } catch (error) {
-            throw new Error(`문의 조회 실패: ${error.message}`);
+            throw new Error(`문의 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -114,7 +115,7 @@ export class InquiryRepository {
         try {
             return await this.inquiryModel.findById(inquiryId).exec();
         } catch (error) {
-            throw new Error(`문의 문서 조회 실패: ${error.message}`);
+            throw new Error(`문의 문서 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -129,7 +130,7 @@ export class InquiryRepository {
             const inquiry = new this.inquiryModel(data);
             return await inquiry.save();
         } catch (error) {
-            throw new Error(`문의 생성 실패: ${error.message}`);
+            throw new Error(`문의 생성 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -143,7 +144,7 @@ export class InquiryRepository {
         try {
             await this.inquiryModel.findByIdAndUpdate(inquiryId, { $set: updateData }).exec();
         } catch (error) {
-            throw new Error(`문의 수정 실패: ${error.message}`);
+            throw new Error(`문의 수정 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -156,7 +157,7 @@ export class InquiryRepository {
         try {
             await this.inquiryModel.findByIdAndDelete(inquiryId).exec();
         } catch (error) {
-            throw new Error(`문의 삭제 실패: ${error.message}`);
+            throw new Error(`문의 삭제 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -203,7 +204,7 @@ export class InquiryRepository {
                 })
                 .exec();
         } catch (error) {
-            throw new Error(`답변 추가 실패: ${error.message}`);
+            throw new Error(`답변 추가 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -242,7 +243,7 @@ export class InquiryRepository {
                 .lean<InquiryDocumentRecord[]>()
                 .exec();
         } catch (error) {
-            throw new Error(`브리더 문의 목록 조회 실패: ${error.message}`);
+            throw new Error(`브리더 문의 목록 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -256,7 +257,7 @@ export class InquiryRepository {
         try {
             return await this.adopterModel.findById(userId).select('nickname').lean<InquiryAdopterNicknameRecord>().exec();
         } catch (error) {
-            throw new Error(`입양자 닉네임 조회 실패: ${error.message}`);
+            throw new Error(`입양자 닉네임 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -270,7 +271,7 @@ export class InquiryRepository {
         try {
             return await this.breederModel.findById(breederId).select('_id').lean<InquiryBreederIdRecord>().exec();
         } catch (error) {
-            throw new Error(`브리더 조회 실패: ${error.message}`);
+            throw new Error(`브리더 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -290,7 +291,7 @@ export class InquiryRepository {
                 .lean<InquiryBreederInfoRecord>()
                 .exec();
         } catch (error) {
-            throw new Error(`브리더 정보 조회 실패: ${error.message}`);
+            throw new Error(`브리더 정보 조회 실패: ${getErrorMessage(error)}`);
         }
     }
 }

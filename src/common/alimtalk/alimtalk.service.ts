@@ -8,8 +8,8 @@ import {
     AlimtalkTemplate as AlimtalkTemplateSchema,
     AlimtalkTemplateDocument,
 } from '../../schema/alimtalk-template.schema';
-
 import { AlimtalkTemplateCodeEnum } from '../../common/enum/alimtalk-template-code.enum';
+import { getErrorMessage, getErrorStack } from '../utils/error.util';
 
 /**
  * 템플릿 캐시용 인터페이스
@@ -122,7 +122,7 @@ export class AlimtalkService implements OnModuleInit {
 
             this.logger.log(`[refreshTemplateCache] 템플릿 캐시 갱신 완료: ${templates.length}개`);
         } catch (error) {
-            this.logger.error(`[refreshTemplateCache] 템플릿 캐시 갱신 실패: ${error.message}`);
+            this.logger.error(`[refreshTemplateCache] 템플릿 캐시 갱신 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -209,10 +209,10 @@ export class AlimtalkService implements OnModuleInit {
                 messageId: response.messageId || response.groupId,
             };
         } catch (error) {
-            this.logger.error(`[send] 알림톡 발송 실패: ${error.message}`, error.stack);
+            this.logger.error(`[send] 알림톡 발송 실패: ${getErrorMessage(error)}`, getErrorStack(error));
             return {
                 success: false,
-                error: error.message,
+                error: getErrorMessage(error),
             };
         }
     }
@@ -342,8 +342,8 @@ export class AlimtalkService implements OnModuleInit {
             this.logger.log(`[sendSmsDirect] SMS 발송 성공: ${normalizedPhone}`);
             return { success: true, messageId: response.messageId || response.groupId };
         } catch (error) {
-            this.logger.error(`[sendSmsDirect] SMS 발송 실패: ${error.message}`, error.stack);
-            return { success: false, error: error.message };
+            this.logger.error(`[sendSmsDirect] SMS 발송 실패: ${getErrorMessage(error)}`, getErrorStack(error));
+            return { success: false, error: getErrorMessage(error) };
         }
     }
 

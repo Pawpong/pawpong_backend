@@ -1,4 +1,5 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { hasErrorName } from '../../../../common/utils/error.util';
 
 import { AuthSessionPort, type AuthSessionRole } from '../ports/auth-session.port';
 import { AuthTokenPort } from '../ports/auth-token.port';
@@ -47,11 +48,11 @@ export class RefreshAuthTokenUseCase {
 
             return tokens;
         } catch (error) {
-            if (error.name === 'TokenExpiredError') {
+            if (hasErrorName(error, 'TokenExpiredError')) {
                 throw new UnauthorizedException('리프레시 토큰이 만료되었습니다.');
             }
 
-            if (error.name === 'JsonWebTokenError') {
+            if (hasErrorName(error, 'JsonWebTokenError')) {
                 throw new UnauthorizedException('유효하지 않은 토큰 형식입니다.');
             }
 

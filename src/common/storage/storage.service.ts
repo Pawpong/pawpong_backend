@@ -13,6 +13,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as fs from 'fs';
 import { Readable } from 'stream';
 import convert from 'heic-convert';
+import { getErrorMessage, getErrorStatusCode, hasErrorName } from '../utils/error.util';
 
 /**
  * 스마일서브 오브젝트 스토리지 서비스
@@ -96,7 +97,7 @@ export class StorageService {
             this.logger.log(`File uploaded: ${fileName}`);
             return { fileName, cdnUrl, storageUrl };
         } catch (error) {
-            this.logger.error(`Upload failed: ${error.message}`);
+            this.logger.error(`Upload failed: ${getErrorMessage(error)}`);
             throw error;
         }
     }
@@ -125,7 +126,7 @@ export class StorageService {
             await this.s3.send(command);
             this.logger.log(`File deleted: ${fileName}`);
         } catch (error) {
-            this.logger.error(`Delete failed: ${error.message}`);
+            this.logger.error(`Delete failed: ${getErrorMessage(error)}`);
             throw error;
         }
     }
@@ -143,10 +144,10 @@ export class StorageService {
             await this.s3.send(command);
             return true;
         } catch (error) {
-            if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+            if (hasErrorName(error, 'NotFound') || getErrorStatusCode(error) === 404) {
                 return false;
             }
-            this.logger.error(`Check file existence failed: ${error.message}`);
+            this.logger.error(`Check file existence failed: ${getErrorMessage(error)}`);
             return false;
         }
     }
@@ -410,7 +411,7 @@ export class StorageService {
 
             this.logger.log(`[StorageService] JPEG 변환 완료: ${file.originalname} (${file.size} bytes)`);
         } catch (error) {
-            this.logger.warn(`[StorageService] HEIC 변환 실패, 원본 업로드: ${error.message}`);
+            this.logger.warn(`[StorageService] HEIC 변환 실패, 원본 업로드: ${getErrorMessage(error)}`);
         }
 
         return file;
