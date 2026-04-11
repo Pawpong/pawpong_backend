@@ -4,7 +4,7 @@ import type { Cache } from 'cache-manager';
 
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FEED_VIDEO_READER_PORT, type FeedVideoReaderPort } from '../ports/feed-video-reader.port';
-import { FeedVideoPresentationService } from '../../domain/services/feed-video-presentation.service';
+import { FeedVideoMetaAssemblerService } from '../../domain/services/feed-video-meta-assembler.service';
 import { FeedVideoAssetUrlService } from '../../infrastructure/feed-video-asset-url.service';
 import { VideoStatus } from '../../../../../schema/video.schema';
 import type { FeedVideoMetaQueryResult } from '../types/feed-video-result.type';
@@ -14,7 +14,7 @@ export class GetVideoMetaUseCase {
     constructor(
         @Inject(FEED_VIDEO_READER_PORT)
         private readonly feedVideoReader: FeedVideoReaderPort,
-        private readonly feedVideoPresentationService: FeedVideoPresentationService,
+        private readonly feedVideoMetaAssemblerService: FeedVideoMetaAssemblerService,
         private readonly feedVideoAssetUrlService: FeedVideoAssetUrlService,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
@@ -34,10 +34,10 @@ export class GetVideoMetaUseCase {
         }
 
         if (video.status !== VideoStatus.READY) {
-            return this.feedVideoPresentationService.buildPendingMetaResponse(video);
+            return this.feedVideoMetaAssemblerService.buildPendingMetaResult(video);
         }
 
-        const result = await this.feedVideoPresentationService.buildMetaResponse(
+        const result = await this.feedVideoMetaAssemblerService.buildMetaResult(
             video,
             (fileKey) => this.feedVideoAssetUrlService.getSignedUrlWithCache(fileKey, 3000),
         );

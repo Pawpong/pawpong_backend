@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { FeedVideoPresentationService } from '../../domain/services/feed-video-presentation.service';
+import { FeedVideoLibraryAssemblerService } from '../../domain/services/feed-video-library-assembler.service';
 import { FeedVideoAssetUrlService } from '../../infrastructure/feed-video-asset-url.service';
 import { FEED_VIDEO_COMMAND_PORT, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
 import type { FeedMyVideoListResult } from '../types/feed-video-result.type';
@@ -10,7 +10,7 @@ export class GetMyVideosUseCase {
     constructor(
         @Inject(FEED_VIDEO_COMMAND_PORT)
         private readonly feedVideoCommand: FeedVideoCommandPort,
-        private readonly feedVideoPresentationService: FeedVideoPresentationService,
+        private readonly feedVideoLibraryAssemblerService: FeedVideoLibraryAssemblerService,
         private readonly feedVideoAssetUrlService: FeedVideoAssetUrlService,
     ) {}
 
@@ -21,7 +21,7 @@ export class GetMyVideosUseCase {
             this.feedVideoCommand.countMine(userId),
         ]);
 
-        return this.feedVideoPresentationService.buildMyVideosResponse(
+        return this.feedVideoLibraryAssemblerService.buildMyVideosResult(
             videos,
             page,
             limit,
