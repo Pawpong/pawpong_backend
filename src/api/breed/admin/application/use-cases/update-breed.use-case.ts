@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 
-import { BreedAdminPresentationService } from '../../../domain/services/breed-admin-presentation.service';
+import { BreedAdminResultMapperService } from '../../../domain/services/breed-admin-result-mapper.service';
 import { BREED_ADMIN_READER_PORT, type BreedAdminReaderPort } from '../ports/breed-admin-reader.port';
 import { BREED_WRITER_PORT, type BreedWriterPort } from '../ports/breed-writer.port';
 import { type UpdateBreedCommand } from '../types/breed-command.type';
@@ -13,7 +13,7 @@ export class UpdateBreedUseCase {
         private readonly breedAdminReader: BreedAdminReaderPort,
         @Inject(BREED_WRITER_PORT)
         private readonly breedWriter: BreedWriterPort,
-        private readonly breedAdminPresentationService: BreedAdminPresentationService,
+        private readonly breedAdminResultMapperService: BreedAdminResultMapperService,
     ) {}
 
     async execute(id: string, dto: UpdateBreedCommand): Promise<BreedAdminItemResult> {
@@ -37,6 +37,6 @@ export class UpdateBreedUseCase {
             throw new BadRequestException(`ID ${id}에 해당하는 품종 카테고리를 찾을 수 없습니다.`);
         }
 
-        return this.breedAdminPresentationService.toResponseDto(updated);
+        return this.breedAdminResultMapperService.toResult(updated);
     }
 }
