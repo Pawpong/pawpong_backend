@@ -8,7 +8,7 @@ import { DistrictAdminQueryController } from './admin/district-admin-query.contr
 import { GetAllDistrictsUseCase } from './application/use-cases/get-all-districts.use-case';
 import { DISTRICT_READER_PORT } from './application/ports/district-reader.port';
 import { DistrictOrderingService } from './domain/services/district-ordering.service';
-import { DistrictAdminPresentationService } from './domain/services/district-admin-presentation.service';
+import { DistrictAdminResultMapperService } from './domain/services/district-admin-result-mapper.service';
 import { DistrictMongooseReaderAdapter } from './infrastructure/district-mongoose-reader.adapter';
 import { DISTRICT_ADMIN_READER_PORT } from './admin/application/ports/district-admin-reader.port';
 import { DISTRICT_WRITER_PORT } from './admin/application/ports/district-writer.port';
@@ -34,7 +34,7 @@ import { District, DistrictSchema } from '../../schema/district.schema';
         UpdateDistrictUseCase,
         DeleteDistrictUseCase,
         DistrictOrderingService,
-        DistrictAdminPresentationService,
+        DistrictAdminResultMapperService,
         DistrictRepository,
         DistrictMongooseReaderAdapter,
         DistrictMongooseAdminReaderAdapter,
