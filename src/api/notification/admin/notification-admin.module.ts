@@ -8,9 +8,10 @@ import { CustomLoggerService } from '../../../common/logger/custom-logger.servic
 import { NOTIFICATION_ADMIN_READER_PORT } from './application/ports/notification-admin-reader.port';
 import { GetAdminNotificationsUseCase } from './application/use-cases/get-admin-notifications.use-case';
 import { GetNotificationAdminStatsUseCase } from './application/use-cases/get-notification-admin-stats.use-case';
-import { NotificationAdminListPresentationService } from './domain/services/notification-admin-list-presentation.service';
+import { NotificationAdminItemMapperService } from './domain/services/notification-admin-item-mapper.service';
+import { NotificationAdminPageAssemblerService } from './domain/services/notification-admin-page-assembler.service';
 import { NotificationAdminPaginationAssemblerService } from './domain/services/notification-admin-pagination-assembler.service';
-import { NotificationAdminStatsPresentationService } from './domain/services/notification-admin-stats-presentation.service';
+import { NotificationAdminStatsResultMapperService } from './domain/services/notification-admin-stats-result-mapper.service';
 import { NotificationAdminMongooseReaderAdapter } from './infrastructure/notification-admin-mongoose-reader.adapter';
 import { NotificationAdminRepository } from './repository/notification-admin.repository';
 
@@ -28,8 +29,9 @@ import { Notification, NotificationSchema } from '../../../schema/notification.s
         GetAdminNotificationsUseCase,
         GetNotificationAdminStatsUseCase,
         NotificationAdminPaginationAssemblerService,
-        NotificationAdminListPresentationService,
-        NotificationAdminStatsPresentationService,
+        NotificationAdminItemMapperService,
+        NotificationAdminPageAssemblerService,
+        NotificationAdminStatsResultMapperService,
         NotificationAdminRepository,
         NotificationAdminMongooseReaderAdapter,
         {

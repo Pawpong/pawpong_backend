@@ -6,8 +6,8 @@ import {
 import type { NotificationAdminStatsResult } from '../../application/types/notification-admin-result.type';
 
 @Injectable()
-export class NotificationAdminStatsPresentationService {
-    toStats(snapshot: NotificationAdminStatsSnapshot): NotificationAdminStatsResult {
+export class NotificationAdminStatsResultMapperService {
+    toResult(snapshot: NotificationAdminStatsSnapshot): NotificationAdminStatsResult {
         return {
             totalNotifications: snapshot.totalNotifications,
             unreadNotifications: snapshot.unreadNotifications,

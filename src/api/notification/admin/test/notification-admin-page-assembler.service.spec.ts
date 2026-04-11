@@ -1,13 +1,17 @@
 import { NotificationType } from '../../../../schema/notification.schema';
-import { NotificationAdminListPresentationService } from '../domain/services/notification-admin-list-presentation.service';
+import { NotificationAdminItemMapperService } from '../domain/services/notification-admin-item-mapper.service';
+import { NotificationAdminPageAssemblerService } from '../domain/services/notification-admin-page-assembler.service';
 import { NotificationAdminPaginationAssemblerService } from '../domain/services/notification-admin-pagination-assembler.service';
 
-describe('관리자 알림 목록 응답 서비스', () => {
-    const service = new NotificationAdminListPresentationService(new NotificationAdminPaginationAssemblerService());
+describe('관리자 알림 페이지 조립 서비스', () => {
+    const service = new NotificationAdminPageAssemblerService(
+        new NotificationAdminItemMapperService(),
+        new NotificationAdminPaginationAssemblerService(),
+    );
 
     it('알림 목록을 페이지 응답으로 조립한다', () => {
         expect(
-            service.toPage(
+            service.build(
                 {
                     items: [
                         {

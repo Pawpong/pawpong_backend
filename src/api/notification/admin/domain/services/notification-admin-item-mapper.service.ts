@@ -1,21 +1,14 @@
 import { Injectable } from '@nestjs/common';
 
 import {
-    NotificationAdminPageSnapshot,
     NotificationAdminRecordSnapshot,
 } from '../../application/ports/notification-admin-reader.port';
-import { NotificationAdminPaginationAssemblerService } from './notification-admin-pagination-assembler.service';
 import type {
     NotificationAdminItemResult,
-    NotificationAdminPageResult,
 } from '../../application/types/notification-admin-result.type';
 
 @Injectable()
-export class NotificationAdminListPresentationService {
-    constructor(
-        private readonly notificationAdminPaginationAssemblerService: NotificationAdminPaginationAssemblerService,
-    ) {}
-
+export class NotificationAdminItemMapperService {
     toItem(record: NotificationAdminRecordSnapshot): NotificationAdminItemResult {
         return {
             notificationId: record.notificationId,
@@ -31,18 +24,5 @@ export class NotificationAdminListPresentationService {
             createdAt: record.createdAt,
             updatedAt: record.updatedAt,
         };
-    }
-
-    toPage(
-        pageSnapshot: NotificationAdminPageSnapshot,
-        page: number,
-        limit: number,
-    ): NotificationAdminPageResult {
-        return this.notificationAdminPaginationAssemblerService.build(
-            pageSnapshot.items.map((item) => this.toItem(item)),
-            page,
-            limit,
-            pageSnapshot.totalItems,
-        );
     }
 }

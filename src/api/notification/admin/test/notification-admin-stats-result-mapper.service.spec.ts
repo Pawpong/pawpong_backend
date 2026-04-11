@@ -1,11 +1,11 @@
-import { NotificationAdminStatsPresentationService } from '../domain/services/notification-admin-stats-presentation.service';
+import { NotificationAdminStatsResultMapperService } from '../domain/services/notification-admin-stats-result-mapper.service';
 
-describe('관리자 알림 통계 응답 서비스', () => {
-    const service = new NotificationAdminStatsPresentationService();
+describe('관리자 알림 통계 결과 매퍼', () => {
+    const service = new NotificationAdminStatsResultMapperService();
 
     it('알림 통계를 그대로 응답으로 만든다', () => {
         expect(
-            service.toStats({
+            service.toResult({
                 totalNotifications: 10,
                 unreadNotifications: 3,
                 notificationsByType: {

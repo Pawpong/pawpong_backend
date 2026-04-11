@@ -3,7 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { NOTIFICATION_ADMIN_READER_PORT } from '../ports/notification-admin-reader.port';
 import type { NotificationAdminReaderPort } from '../ports/notification-admin-reader.port';
-import { NotificationAdminStatsPresentationService } from '../../domain/services/notification-admin-stats-presentation.service';
+import { NotificationAdminStatsResultMapperService } from '../../domain/services/notification-admin-stats-result-mapper.service';
 import type { NotificationAdminStatsResult } from '../types/notification-admin-result.type';
 
 @Injectable()
@@ -11,7 +11,7 @@ export class GetNotificationAdminStatsUseCase {
     constructor(
         @Inject(NOTIFICATION_ADMIN_READER_PORT)
         private readonly notificationAdminReader: NotificationAdminReaderPort,
-        private readonly notificationAdminStatsPresentationService: NotificationAdminStatsPresentationService,
+        private readonly notificationAdminStatsResultMapperService: NotificationAdminStatsResultMapperService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -20,7 +20,7 @@ export class GetNotificationAdminStatsUseCase {
 
         try {
             const result = await this.notificationAdminReader.getStats();
-            const response = this.notificationAdminStatsPresentationService.toStats(result);
+            const response = this.notificationAdminStatsResultMapperService.toResult(result);
 
             this.logger.logSuccess('getStats', '관리자 알림 통계 조회 완료', response);
 
