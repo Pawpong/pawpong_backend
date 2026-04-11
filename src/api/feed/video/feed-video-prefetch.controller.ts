@@ -6,14 +6,14 @@ import type { FeedVideoSegmentPrefetchResult } from './application/types/feed-vi
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
 import { FeedPrefetchQueryDto } from './dto/request/feed-prefetch-query.dto';
 import { SegmentPrefetchResponseDto } from './dto/response/video-response.dto';
-import { FeedVideoPrefetchPresentationService } from './infrastructure/feed-video-prefetch-presentation.service';
+import { FeedVideoPrefetchResponseBuilderService } from './infrastructure/feed-video-prefetch-response-builder.service';
 import { ApiPrefetchFeedVideoSegmentsEndpoint } from './swagger';
 
 @FeedPublicController()
 export class FeedVideoPrefetchController {
     constructor(
         private readonly prefetchAllQualitySegmentsUseCase: PrefetchAllQualitySegmentsUseCase,
-        private readonly feedVideoPrefetchPresentationService: FeedVideoPrefetchPresentationService,
+        private readonly feedVideoPrefetchResponseBuilderService: FeedVideoPrefetchResponseBuilderService,
     ) {}
 
     @Post('videos/stream/:videoId/prefetch')
@@ -25,7 +25,7 @@ export class FeedVideoPrefetchController {
         const requestedCount = query.count;
 
         await this.prefetchAllQualitySegmentsUseCase.execute(videoId, query.segment, requestedCount);
-        return this.feedVideoPrefetchPresentationService.buildResponse(requestedCount) as
+        return this.feedVideoPrefetchResponseBuilderService.build(requestedCount) as
             SegmentPrefetchResponseDto & FeedVideoSegmentPrefetchResult;
     }
 }
