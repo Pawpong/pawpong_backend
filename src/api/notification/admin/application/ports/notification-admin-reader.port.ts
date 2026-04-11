@@ -38,7 +38,7 @@ export interface NotificationAdminStatsSnapshot {
     notificationsByRole: Record<string, number>;
 }
 
-export const NOTIFICATION_ADMIN_READER = Symbol('NOTIFICATION_ADMIN_READER');
+export const NOTIFICATION_ADMIN_READER_PORT = Symbol('NOTIFICATION_ADMIN_READER_PORT');
 
 export interface NotificationAdminReaderPort {
     findPaged(filter: NotificationAdminListFilterSnapshot): Promise<NotificationAdminPageSnapshot>;

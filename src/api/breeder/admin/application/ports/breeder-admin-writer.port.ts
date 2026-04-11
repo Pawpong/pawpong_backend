@@ -18,7 +18,7 @@ export interface BreederAdminActivityLogEntry {
     performedAt: Date;
 }
 
-export const BREEDER_ADMIN_WRITER = Symbol('BREEDER_ADMIN_WRITER');
+export const BREEDER_ADMIN_WRITER_PORT = Symbol('BREEDER_ADMIN_WRITER_PORT');
 
 export interface BreederAdminWriterPort {
     updateBreeder(

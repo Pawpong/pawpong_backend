@@ -8,7 +8,7 @@ export interface BreedAdminSnapshot {
     updatedAt: Date;
 }
 
-export const BREED_ADMIN_READER = Symbol('BREED_ADMIN_READER');
+export const BREED_ADMIN_READER_PORT = Symbol('BREED_ADMIN_READER_PORT');
 
 export interface BreedAdminReaderPort {
     readAll(): Promise<BreedAdminSnapshot[]>;

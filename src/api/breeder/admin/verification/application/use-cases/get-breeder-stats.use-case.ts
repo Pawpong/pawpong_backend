@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
+import { BREEDER_VERIFICATION_ADMIN_READER_PORT } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 import { BreederVerificationAdminStatsPresentationService } from '../../domain/services/breeder-verification-admin-stats-presentation.service';
@@ -8,7 +8,7 @@ import { BreederVerificationAdminStatsPresentationService } from '../../domain/s
 @Injectable()
 export class GetBreederStatsUseCase {
     constructor(
-        @Inject(BREEDER_VERIFICATION_ADMIN_READER)
+        @Inject(BREEDER_VERIFICATION_ADMIN_READER_PORT)
         private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
         private readonly breederVerificationAdminStatsPresentationService: BreederVerificationAdminStatsPresentationService,

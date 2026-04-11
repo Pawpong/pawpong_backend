@@ -2,6 +2,7 @@ import { Module, Global } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { KafkaService } from './kafka.service';
+import { KAFKA_SERVICE_TOKEN } from './kafka.token';
 
 /**
  * Kafka 모듈
@@ -40,7 +41,13 @@ import { KafkaService } from './kafka.service';
             },
         ]),
     ],
-    providers: [KafkaService],
-    exports: [KafkaService, ClientsModule],
+    providers: [
+        KafkaService,
+        {
+            provide: KAFKA_SERVICE_TOKEN,
+            useExisting: KafkaService,
+        },
+    ],
+    exports: [KAFKA_SERVICE_TOKEN, KafkaService, ClientsModule],
 })
 export class KafkaModule {}

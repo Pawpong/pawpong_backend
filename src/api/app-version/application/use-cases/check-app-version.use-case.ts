@@ -2,14 +2,14 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../common/utils/http-exception.util';
-import { APP_VERSION_READER, type AppVersionReaderPort } from '../ports/app-version-reader.port';
+import { APP_VERSION_READER_PORT, type AppVersionReaderPort } from '../ports/app-version-reader.port';
 import { type AppVersionCheckResult } from '../types/app-version-result.type';
 import { AppVersionPolicyService } from '../../domain/services/app-version-policy.service';
 
 @Injectable()
 export class CheckAppVersionUseCase {
     constructor(
-        @Inject(APP_VERSION_READER)
+        @Inject(APP_VERSION_READER_PORT)
         private readonly appVersionReader: AppVersionReaderPort,
         private readonly appVersionPolicyService: AppVersionPolicyService,
         private readonly logger: CustomLoggerService,

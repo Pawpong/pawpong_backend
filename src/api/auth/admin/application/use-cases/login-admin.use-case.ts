@@ -3,22 +3,22 @@ import { Inject, Injectable } from '@nestjs/common';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { AuthAdminAuthenticationService } from '../../domain/services/auth-admin-authentication.service';
 import { AuthAdminPresentationService } from '../../domain/services/auth-admin-presentation.service';
-import { AUTH_ADMIN_PASSWORD } from '../ports/auth-admin-password.port';
+import { AUTH_ADMIN_PASSWORD_PORT } from '../ports/auth-admin-password.port';
 import type { AuthAdminPasswordPort } from '../ports/auth-admin-password.port';
-import { AUTH_ADMIN_READER } from '../ports/auth-admin-reader.port';
+import { AUTH_ADMIN_READER_PORT } from '../ports/auth-admin-reader.port';
 import type { AuthAdminReaderPort } from '../ports/auth-admin-reader.port';
-import { AUTH_ADMIN_TOKEN } from '../ports/auth-admin-token.port';
+import { AUTH_ADMIN_TOKEN_PORT } from '../ports/auth-admin-token.port';
 import type { AuthAdminTokenPort } from '../ports/auth-admin-token.port';
 import type { AdminLoginResult } from '../types/auth-admin-result.type';
 
 @Injectable()
 export class LoginAdminUseCase {
     constructor(
-        @Inject(AUTH_ADMIN_READER)
+        @Inject(AUTH_ADMIN_READER_PORT)
         private readonly authAdminReader: AuthAdminReaderPort,
-        @Inject(AUTH_ADMIN_PASSWORD)
+        @Inject(AUTH_ADMIN_PASSWORD_PORT)
         private readonly authAdminPassword: AuthAdminPasswordPort,
-        @Inject(AUTH_ADMIN_TOKEN)
+        @Inject(AUTH_ADMIN_TOKEN_PORT)
         private readonly authAdminToken: AuthAdminTokenPort,
         private readonly authAdminAuthenticationService: AuthAdminAuthenticationService,
         private readonly authAdminPresentationService: AuthAdminPresentationService,

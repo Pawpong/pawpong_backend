@@ -6,7 +6,7 @@ import type {
     HomeFaqUpdateCommand,
 } from '../types/home-admin-command.type';
 
-export const HOME_ADMIN_MANAGER = Symbol('HOME_ADMIN_MANAGER');
+export const HOME_ADMIN_MANAGER_PORT = Symbol('HOME_ADMIN_MANAGER_PORT');
 
 export interface HomeAdminManagerPort {
     readAllBanners(): Promise<HomeBannerSnapshot[]>;

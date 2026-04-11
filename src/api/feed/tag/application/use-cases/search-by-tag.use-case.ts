@@ -5,18 +5,18 @@ import type { Cache } from 'cache-manager';
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedTagPresentationService } from '../../domain/services/feed-tag-presentation.service';
 import { FeedTagQueryService } from '../../domain/services/feed-tag-query.service';
-import { FEED_TAG_ASSET_URL, type FeedTagAssetUrlPort } from '../ports/feed-tag-asset-url.port';
-import { FEED_TAG_READER, type FeedTagReaderPort } from '../ports/feed-tag-reader.port';
+import { FEED_TAG_ASSET_URL_PORT, type FeedTagAssetUrlPort } from '../ports/feed-tag-asset-url.port';
+import { FEED_TAG_READER_PORT, type FeedTagReaderPort } from '../ports/feed-tag-reader.port';
 import type { FeedTagSearchResult } from '../types/feed-tag-result.type';
 
 @Injectable()
 export class SearchByTagUseCase {
     constructor(
-        @Inject(FEED_TAG_READER)
+        @Inject(FEED_TAG_READER_PORT)
         private readonly feedTagReader: FeedTagReaderPort,
         private readonly feedTagQueryService: FeedTagQueryService,
         private readonly feedTagPresentationService: FeedTagPresentationService,
-        @Inject(FEED_TAG_ASSET_URL)
+        @Inject(FEED_TAG_ASSET_URL_PORT)
         private readonly feedTagAssetUrl: FeedTagAssetUrlPort,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,

@@ -1,4 +1,4 @@
-export const FEED_VIDEO_STREAM = Symbol('FEED_VIDEO_STREAM');
+export const FEED_VIDEO_STREAM_PORT = Symbol('FEED_VIDEO_STREAM_PORT');
 
 export interface FeedVideoStreamPort {
     readFile(fileKey: string): Promise<Buffer>;

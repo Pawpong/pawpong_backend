@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { BREEDER_REPORT_ADMIN_READER } from '../ports/breeder-report-admin-reader.port';
+import { BREEDER_REPORT_ADMIN_READER_PORT } from '../ports/breeder-report-admin-reader.port';
 import type { BreederReportAdminReaderPort } from '../ports/breeder-report-admin-reader.port';
 import { BreederReportAdminPolicyService } from '../../domain/services/breeder-report-admin-policy.service';
 import { BreederReportAdminPresentationService } from '../../domain/services/breeder-report-admin-presentation.service';
@@ -10,7 +10,7 @@ import type { BreederReportAdminPageResult } from '../types/breeder-report-admin
 @Injectable()
 export class GetBreederReportsUseCase {
     constructor(
-        @Inject(BREEDER_REPORT_ADMIN_READER)
+        @Inject(BREEDER_REPORT_ADMIN_READER_PORT)
         private readonly breederReportAdminReader: BreederReportAdminReaderPort,
         private readonly breederReportAdminPolicyService: BreederReportAdminPolicyService,
         private readonly breederReportAdminPresentationService: BreederReportAdminPresentationService,

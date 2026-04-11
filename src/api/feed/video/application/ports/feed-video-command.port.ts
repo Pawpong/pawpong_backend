@@ -22,7 +22,7 @@ export interface FeedVideoEncodingResult {
     height: number;
 }
 
-export const FEED_VIDEO_COMMAND = Symbol('FEED_VIDEO_COMMAND');
+export const FEED_VIDEO_COMMAND_PORT = Symbol('FEED_VIDEO_COMMAND_PORT');
 
 export interface FeedVideoCommandPort {
     createPendingVideo(data: {

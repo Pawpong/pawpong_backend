@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { BreederManagementBannerPresentationService } from '../../domain/services/breeder-management-banner-presentation.service';
 import {
-    BREEDER_MANAGEMENT_ADMIN_BANNER_READER,
+    BREEDER_MANAGEMENT_ADMIN_BANNER_READER_PORT,
     type BreederManagementAdminBannerReaderPort,
 } from '../ports/breeder-management-admin-banner-reader.port';
 import type { BreederManagementCounselBannerResult } from '../types/breeder-management-admin-banner-result.type';
@@ -10,7 +10,7 @@ import type { BreederManagementCounselBannerResult } from '../types/breeder-mana
 @Injectable()
 export class GetAllCounselBannersUseCase {
     constructor(
-        @Inject(BREEDER_MANAGEMENT_ADMIN_BANNER_READER)
+        @Inject(BREEDER_MANAGEMENT_ADMIN_BANNER_READER_PORT)
         private readonly bannerReader: BreederManagementAdminBannerReaderPort,
         private readonly breederManagementBannerPresentationService: BreederManagementBannerPresentationService,
     ) {}

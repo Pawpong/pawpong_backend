@@ -4,14 +4,14 @@ import type { Cache } from 'cache-manager';
 
 import { getErrorStack } from '../../../../../common/utils/error.util';
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
-import { FEED_VIDEO_COMMAND, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
+import { FEED_VIDEO_COMMAND_PORT, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
 
 @Injectable()
 export class IncrementViewCountUseCase {
     private readonly logger = new Logger(IncrementViewCountUseCase.name);
 
     constructor(
-        @Inject(FEED_VIDEO_COMMAND)
+        @Inject(FEED_VIDEO_COMMAND_PORT)
         private readonly feedVideoCommand: FeedVideoCommandPort,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,

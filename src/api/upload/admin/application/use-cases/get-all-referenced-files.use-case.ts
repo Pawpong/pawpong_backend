@@ -2,14 +2,14 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import {
-    UPLOAD_ADMIN_REFERENCE_READER,
+    UPLOAD_ADMIN_REFERENCE_READER_PORT,
     type UploadAdminReferenceReaderPort,
 } from '../ports/upload-admin-reference-reader.port';
 
 @Injectable()
 export class GetAllReferencedFilesUseCase {
     constructor(
-        @Inject(UPLOAD_ADMIN_REFERENCE_READER)
+        @Inject(UPLOAD_ADMIN_REFERENCE_READER_PORT)
         private readonly uploadAdminReferenceReader: UploadAdminReferenceReaderPort,
         private readonly logger: CustomLoggerService,
     ) {}

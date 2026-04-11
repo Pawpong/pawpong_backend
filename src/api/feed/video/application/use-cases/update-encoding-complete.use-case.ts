@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import {
-    FEED_VIDEO_COMMAND,
+    FEED_VIDEO_COMMAND_PORT,
     type FeedVideoCommandPort,
     type FeedVideoEncodingResult,
 } from '../ports/feed-video-command.port';
@@ -9,7 +9,7 @@ import {
 @Injectable()
 export class UpdateEncodingCompleteUseCase {
     constructor(
-        @Inject(FEED_VIDEO_COMMAND)
+        @Inject(FEED_VIDEO_COMMAND_PORT)
         private readonly feedVideoCommand: FeedVideoCommandPort,
     ) {}
 

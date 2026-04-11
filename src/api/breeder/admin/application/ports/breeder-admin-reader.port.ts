@@ -33,7 +33,7 @@ export interface BreederAdminBreederSnapshot {
     };
 }
 
-export const BREEDER_ADMIN_READER = Symbol('BREEDER_ADMIN_READER');
+export const BREEDER_ADMIN_READER_PORT = Symbol('BREEDER_ADMIN_READER_PORT');
 
 export interface BreederAdminReaderPort {
     findAdminById(adminId: string): Promise<BreederAdminAdminSnapshot | null>;

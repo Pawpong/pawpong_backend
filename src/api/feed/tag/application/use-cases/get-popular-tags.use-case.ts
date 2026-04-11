@@ -3,13 +3,13 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
-import { FEED_TAG_READER, type FeedTagReaderPort } from '../ports/feed-tag-reader.port';
+import { FEED_TAG_READER_PORT, type FeedTagReaderPort } from '../ports/feed-tag-reader.port';
 import type { FeedPopularTagResult } from '../types/feed-tag-result.type';
 
 @Injectable()
 export class GetPopularTagsUseCase {
     constructor(
-        @Inject(FEED_TAG_READER)
+        @Inject(FEED_TAG_READER_PORT)
         private readonly feedTagReader: FeedTagReaderPort,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,

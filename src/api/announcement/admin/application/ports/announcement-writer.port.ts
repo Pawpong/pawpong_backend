@@ -1,7 +1,7 @@
 import { AnnouncementPublicItem } from '../../../application/ports/announcement-public-reader.port';
 import type { AnnouncementCreateCommand, AnnouncementUpdateCommand } from '../types/announcement-command.type';
 
-export const ANNOUNCEMENT_WRITER = Symbol('ANNOUNCEMENT_WRITER');
+export const ANNOUNCEMENT_WRITER_PORT = Symbol('ANNOUNCEMENT_WRITER_PORT');
 
 export interface AnnouncementWriterPort {
     create(createData: AnnouncementCreateCommand): Promise<AnnouncementPublicItem>;

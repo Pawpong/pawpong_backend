@@ -28,7 +28,7 @@ export interface FeedTagSuggestionSnapshot {
     videoCount: number;
 }
 
-export const FEED_TAG_READER = Symbol('FEED_TAG_READER');
+export const FEED_TAG_READER_PORT = Symbol('FEED_TAG_READER_PORT');
 
 export interface FeedTagReaderPort {
     readByTag(tag: string, skip: number, limit: number): Promise<FeedTagVideoSnapshot[]>;

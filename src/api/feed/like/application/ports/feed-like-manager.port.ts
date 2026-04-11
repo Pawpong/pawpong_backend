@@ -27,7 +27,7 @@ export interface FeedLikeSnapshot {
     userId: string;
 }
 
-export const FEED_LIKE_MANAGER = Symbol('FEED_LIKE_MANAGER');
+export const FEED_LIKE_MANAGER_PORT = Symbol('FEED_LIKE_MANAGER_PORT');
 
 export interface FeedLikeManagerPort {
     findVideoCounter(videoId: string): Promise<FeedLikeVideoCounterSnapshot | null>;

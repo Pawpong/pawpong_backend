@@ -4,13 +4,13 @@ import { PaginationRequestDto } from '../../../../common/dto/pagination/paginati
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../common/utils/http-exception.util';
 import { NoticePresentationService } from '../../domain/services/notice-presentation.service';
-import { NOTICE_READER, type NoticeReaderPort, type NoticeStatus } from '../ports/notice-reader.port';
+import { NOTICE_READER_PORT, type NoticeReaderPort, type NoticeStatus } from '../ports/notice-reader.port';
 import type { NoticePageResult } from '../types/notice-result.type';
 
 @Injectable()
 export class GetNoticeListUseCase {
     constructor(
-        @Inject(NOTICE_READER)
+        @Inject(NOTICE_READER_PORT)
         private readonly noticeReader: NoticeReaderPort,
         private readonly noticePresentationService: NoticePresentationService,
         private readonly logger: CustomLoggerService,

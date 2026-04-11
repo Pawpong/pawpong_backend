@@ -122,7 +122,7 @@ export interface PlatformAdminMvpStatsSnapshot {
     breederResubmissionStats: PlatformAdminBreederResubmissionStatsSnapshot;
 }
 
-export const PLATFORM_ADMIN_READER = Symbol('PLATFORM_ADMIN_READER');
+export const PLATFORM_ADMIN_READER_PORT = Symbol('PLATFORM_ADMIN_READER_PORT');
 
 export interface PlatformAdminReaderPort {
     findAdminById(adminId: string): Promise<PlatformAdminAdminSnapshot | null>;

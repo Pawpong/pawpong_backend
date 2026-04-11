@@ -1,13 +1,13 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { BreedAdminPresentationService } from '../../../domain/services/breed-admin-presentation.service';
-import { BREED_ADMIN_READER, type BreedAdminReaderPort } from '../ports/breed-admin-reader.port';
+import { BREED_ADMIN_READER_PORT, type BreedAdminReaderPort } from '../ports/breed-admin-reader.port';
 import { type BreedAdminItemResult } from '../types/breed-result.type';
 
 @Injectable()
 export class GetBreedByIdUseCase {
     constructor(
-        @Inject(BREED_ADMIN_READER)
+        @Inject(BREED_ADMIN_READER_PORT)
         private readonly breedAdminReader: BreedAdminReaderPort,
         private readonly breedAdminPresentationService: BreedAdminPresentationService,
     ) {}

@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { UserStatus } from '../../../../../common/enum/user.enum';
-import { USER_ADMIN_READER, type UserAdminManagedUserRole, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
-import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
+import { USER_ADMIN_READER_PORT, type UserAdminManagedUserRole, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
+import { USER_ADMIN_WRITER_PORT, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
 import type { UserAdminStatusUpdateCommand } from '../types/user-admin-command.type';
@@ -10,9 +10,9 @@ import type { UserAdminStatusUpdateCommand } from '../types/user-admin-command.t
 @Injectable()
 export class UpdateUserStatusUseCase {
     constructor(
-        @Inject(USER_ADMIN_READER)
+        @Inject(USER_ADMIN_READER_PORT)
         private readonly userAdminReader: UserAdminReaderPort,
-        @Inject(USER_ADMIN_WRITER)
+        @Inject(USER_ADMIN_WRITER_PORT)
         private readonly userAdminWriter: UserAdminWriterPort,
         private readonly userAdminCommandPolicyService: UserAdminCommandPolicyService,
         private readonly userAdminActivityLogFactoryService: UserAdminActivityLogFactoryService,

@@ -91,7 +91,7 @@ export interface AdopterAdminApplicationDetailSnapshot {
     breederNotes?: string;
 }
 
-export const ADOPTER_ADMIN_READER = Symbol('ADOPTER_ADMIN_READER');
+export const ADOPTER_ADMIN_READER_PORT = Symbol('ADOPTER_ADMIN_READER_PORT');
 
 export interface AdopterAdminReaderPort {
     findAdminById(adminId: string): Promise<AdopterAdminAdminSnapshot | null>;

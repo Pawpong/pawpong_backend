@@ -1,11 +1,11 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { HOME_ADMIN_MANAGER, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
+import { HOME_ADMIN_MANAGER_PORT, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
 
 @Injectable()
 export class DeleteBannerUseCase {
     constructor(
-        @Inject(HOME_ADMIN_MANAGER)
+        @Inject(HOME_ADMIN_MANAGER_PORT)
         private readonly homeAdminManager: HomeAdminManagerPort,
     ) {}
 

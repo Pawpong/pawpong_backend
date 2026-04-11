@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { CustomLoggerService } from '../logger/custom-logger.service';
 import { DiscordWebhookService } from './discord-webhook.service';
+import { DISCORD_WEBHOOK_SERVICE_TOKEN } from './discord-webhook.token';
 
 /**
  * 디스코드 웹훅 모듈
@@ -11,7 +12,14 @@ import { DiscordWebhookService } from './discord-webhook.service';
  */
 @Module({
     imports: [ConfigModule],
-    providers: [DiscordWebhookService, CustomLoggerService],
-    exports: [DiscordWebhookService],
+    providers: [
+        DiscordWebhookService,
+        CustomLoggerService,
+        {
+            provide: DISCORD_WEBHOOK_SERVICE_TOKEN,
+            useExisting: DiscordWebhookService,
+        },
+    ],
+    exports: [DISCORD_WEBHOOK_SERVICE_TOKEN, DiscordWebhookService],
 })
 export class DiscordWebhookModule {}

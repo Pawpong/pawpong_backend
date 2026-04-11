@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminAction, UserStatus } from '../../../../../common/enum/user.enum';
-import { USER_ADMIN_READER, type UserAdminManagedUserRole, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
-import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
+import { USER_ADMIN_READER_PORT, type UserAdminManagedUserRole, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
+import { USER_ADMIN_WRITER_PORT, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
 import { UserAdminDeletedUserCommandResponseService } from '../../domain/services/user-admin-deleted-user-command-response.service';
@@ -11,9 +11,9 @@ import type { UserAdminStatusUpdateResult } from '../types/user-admin-result.typ
 @Injectable()
 export class RestoreDeletedUserUseCase {
     constructor(
-        @Inject(USER_ADMIN_READER)
+        @Inject(USER_ADMIN_READER_PORT)
         private readonly userAdminReader: UserAdminReaderPort,
-        @Inject(USER_ADMIN_WRITER)
+        @Inject(USER_ADMIN_WRITER_PORT)
         private readonly userAdminWriter: UserAdminWriterPort,
         private readonly userAdminCommandPolicyService: UserAdminCommandPolicyService,
         private readonly userAdminActivityLogFactoryService: UserAdminActivityLogFactoryService,

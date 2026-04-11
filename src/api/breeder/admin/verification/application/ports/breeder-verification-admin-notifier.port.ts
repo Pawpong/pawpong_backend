@@ -4,7 +4,7 @@ export interface BreederVerificationAdminNotificationRecipient {
     emailAddress?: string;
 }
 
-export const BREEDER_VERIFICATION_ADMIN_NOTIFIER = Symbol('BREEDER_VERIFICATION_ADMIN_NOTIFIER');
+export const BREEDER_VERIFICATION_ADMIN_NOTIFIER_PORT = Symbol('BREEDER_VERIFICATION_ADMIN_NOTIFIER_PORT');
 
 export interface BreederVerificationAdminNotifierPort {
     sendApproval(recipient: BreederVerificationAdminNotificationRecipient): Promise<void>;

@@ -4,12 +4,12 @@ import { Queue } from 'bullmq';
 
 import { VideoStatus } from '../../../../../schema/video.schema';
 import { FeedVideoCommandPolicyService } from '../../domain/services/feed-video-command-policy.service';
-import { FEED_VIDEO_COMMAND, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
+import { FEED_VIDEO_COMMAND_PORT, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
 
 @Injectable()
 export class CompleteUploadUseCase {
     constructor(
-        @Inject(FEED_VIDEO_COMMAND)
+        @Inject(FEED_VIDEO_COMMAND_PORT)
         private readonly feedVideoCommand: FeedVideoCommandPort,
         private readonly feedVideoCommandPolicyService: FeedVideoCommandPolicyService,
         @InjectQueue('video')

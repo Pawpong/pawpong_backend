@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { USER_ADMIN_READER, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
-import { USER_ADMIN_WRITER, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
+import { USER_ADMIN_READER_PORT, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
+import { USER_ADMIN_WRITER_PORT, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
 import { UserAdminPhoneWhitelistPresentationService } from '../../domain/services/user-admin-phone-whitelist-presentation.service';
 import type { UserAdminPhoneWhitelistCreateCommand } from '../types/user-admin-command.type';
@@ -10,9 +10,9 @@ import type { UserAdminPhoneWhitelistItemResult } from '../types/user-admin-resu
 @Injectable()
 export class AddPhoneWhitelistUseCase {
     constructor(
-        @Inject(USER_ADMIN_READER)
+        @Inject(USER_ADMIN_READER_PORT)
         private readonly userAdminReader: UserAdminReaderPort,
-        @Inject(USER_ADMIN_WRITER)
+        @Inject(USER_ADMIN_WRITER_PORT)
         private readonly userAdminWriter: UserAdminWriterPort,
         private readonly userAdminCommandPolicyService: UserAdminCommandPolicyService,
         private readonly userAdminPhoneWhitelistPresentationService: UserAdminPhoneWhitelistPresentationService,

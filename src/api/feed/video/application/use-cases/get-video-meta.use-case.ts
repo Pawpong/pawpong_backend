@@ -3,7 +3,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
-import { FEED_VIDEO_READER, type FeedVideoReaderPort } from '../ports/feed-video-reader.port';
+import { FEED_VIDEO_READER_PORT, type FeedVideoReaderPort } from '../ports/feed-video-reader.port';
 import { FeedVideoPresentationService } from '../../domain/services/feed-video-presentation.service';
 import { FeedVideoAssetUrlService } from '../../infrastructure/feed-video-asset-url.service';
 import { VideoStatus } from '../../../../../schema/video.schema';
@@ -12,7 +12,7 @@ import type { FeedVideoMetaQueryResult } from '../types/feed-video-result.type';
 @Injectable()
 export class GetVideoMetaUseCase {
     constructor(
-        @Inject(FEED_VIDEO_READER)
+        @Inject(FEED_VIDEO_READER_PORT)
         private readonly feedVideoReader: FeedVideoReaderPort,
         private readonly feedVideoPresentationService: FeedVideoPresentationService,
         private readonly feedVideoAssetUrlService: FeedVideoAssetUrlService,

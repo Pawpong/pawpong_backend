@@ -5,8 +5,8 @@ import { BreederReportAdminCommandController } from './breeder-report-admin-comm
 import { BreederReportAdminQueryController } from './breeder-report-admin-query.controller';
 import { GetBreederReportsUseCase } from './application/use-cases/get-breeder-reports.use-case';
 import { HandleBreederReportUseCase } from './application/use-cases/handle-breeder-report.use-case';
-import { BREEDER_REPORT_ADMIN_READER } from './application/ports/breeder-report-admin-reader.port';
-import { BREEDER_REPORT_ADMIN_WRITER } from './application/ports/breeder-report-admin-writer.port';
+import { BREEDER_REPORT_ADMIN_READER_PORT } from './application/ports/breeder-report-admin-reader.port';
+import { BREEDER_REPORT_ADMIN_WRITER_PORT } from './application/ports/breeder-report-admin-writer.port';
 import { BreederReportAdminPolicyService } from './domain/services/breeder-report-admin-policy.service';
 import { BreederReportAdminActivityLogFactoryService } from './domain/services/breeder-report-admin-activity-log-factory.service';
 import { BreederReportAdminPresentationService } from './domain/services/breeder-report-admin-presentation.service';
@@ -42,11 +42,11 @@ import { Admin, AdminSchema } from '../../../../schema/admin.schema';
         BreederReportAdminRepository,
         BreederReportAdminMongooseRepositoryAdapter,
         {
-            provide: BREEDER_REPORT_ADMIN_READER,
+            provide: BREEDER_REPORT_ADMIN_READER_PORT,
             useExisting: BreederReportAdminMongooseRepositoryAdapter,
         },
         {
-            provide: BREEDER_REPORT_ADMIN_WRITER,
+            provide: BREEDER_REPORT_ADMIN_WRITER_PORT,
             useExisting: BreederReportAdminMongooseRepositoryAdapter,
         },
     ],

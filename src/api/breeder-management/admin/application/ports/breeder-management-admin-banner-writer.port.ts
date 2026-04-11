@@ -6,7 +6,7 @@ import type {
     BreederManagementProfileBannerUpdateCommand,
 } from '../types/breeder-management-admin-banner-command.type';
 
-export const BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER = Symbol('BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER');
+export const BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER_PORT = Symbol('BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER_PORT');
 
 export interface BreederManagementAdminBannerWriterPort {
     createProfile(data: BreederManagementProfileBannerCreateCommand): Promise<ProfileBannerSnapshot>;

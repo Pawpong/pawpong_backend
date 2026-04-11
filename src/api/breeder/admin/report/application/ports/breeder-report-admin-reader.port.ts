@@ -1,4 +1,4 @@
-export const BREEDER_REPORT_ADMIN_READER = Symbol('BREEDER_REPORT_ADMIN_READER');
+export const BREEDER_REPORT_ADMIN_READER_PORT = Symbol('BREEDER_REPORT_ADMIN_READER_PORT');
 
 export interface BreederReportAdminAdminSnapshot {
     id: string;

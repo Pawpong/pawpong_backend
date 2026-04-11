@@ -114,7 +114,7 @@ export interface UserAdminPhoneWhitelistSnapshot {
     updatedAt?: Date;
 }
 
-export const USER_ADMIN_READER = Symbol('USER_ADMIN_READER');
+export const USER_ADMIN_READER_PORT = Symbol('USER_ADMIN_READER_PORT');
 
 export interface UserAdminReaderPort {
     findAdminById(adminId: string): Promise<UserAdminAdminSnapshot | null>;

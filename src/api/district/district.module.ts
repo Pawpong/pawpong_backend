@@ -6,12 +6,12 @@ import { DistrictAdminCommandController } from './admin/district-admin-command.c
 import { DistrictAdminQueryController } from './admin/district-admin-query.controller';
 
 import { GetAllDistrictsUseCase } from './application/use-cases/get-all-districts.use-case';
-import { DISTRICT_READER } from './application/ports/district-reader.port';
+import { DISTRICT_READER_PORT } from './application/ports/district-reader.port';
 import { DistrictOrderingService } from './domain/services/district-ordering.service';
 import { DistrictAdminPresentationService } from './domain/services/district-admin-presentation.service';
 import { DistrictMongooseReaderAdapter } from './infrastructure/district-mongoose-reader.adapter';
-import { DISTRICT_ADMIN_READER } from './admin/application/ports/district-admin-reader.port';
-import { DISTRICT_WRITER } from './admin/application/ports/district-writer.port';
+import { DISTRICT_ADMIN_READER_PORT } from './admin/application/ports/district-admin-reader.port';
+import { DISTRICT_WRITER_PORT } from './admin/application/ports/district-writer.port';
 import { CreateDistrictUseCase } from './admin/application/use-cases/create-district.use-case';
 import { GetAllDistrictsAdminUseCase } from './admin/application/use-cases/get-all-districts-admin.use-case';
 import { GetDistrictByIdAdminUseCase } from './admin/application/use-cases/get-district-by-id-admin.use-case';
@@ -40,15 +40,15 @@ import { District, DistrictSchema } from '../../schema/district.schema';
         DistrictMongooseAdminReaderAdapter,
         DistrictMongooseWriterAdapter,
         {
-            provide: DISTRICT_READER,
+            provide: DISTRICT_READER_PORT,
             useExisting: DistrictMongooseReaderAdapter,
         },
         {
-            provide: DISTRICT_ADMIN_READER,
+            provide: DISTRICT_ADMIN_READER_PORT,
             useExisting: DistrictMongooseAdminReaderAdapter,
         },
         {
-            provide: DISTRICT_WRITER,
+            provide: DISTRICT_WRITER_PORT,
             useExisting: DistrictMongooseWriterAdapter,
         },
     ],

@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { BREEDER_REPORT_ADMIN_READER } from '../ports/breeder-report-admin-reader.port';
-import { BREEDER_REPORT_ADMIN_WRITER } from '../ports/breeder-report-admin-writer.port';
+import { BREEDER_REPORT_ADMIN_READER_PORT } from '../ports/breeder-report-admin-reader.port';
+import { BREEDER_REPORT_ADMIN_WRITER_PORT } from '../ports/breeder-report-admin-writer.port';
 import type { BreederReportAdminReaderPort } from '../ports/breeder-report-admin-reader.port';
 import type { BreederReportAdminWriterPort } from '../ports/breeder-report-admin-writer.port';
 import { BreederReportAdminPolicyService } from '../../domain/services/breeder-report-admin-policy.service';
@@ -13,9 +13,9 @@ import type { BreederReportAdminActionResult } from '../types/breeder-report-adm
 @Injectable()
 export class HandleBreederReportUseCase {
     constructor(
-        @Inject(BREEDER_REPORT_ADMIN_READER)
+        @Inject(BREEDER_REPORT_ADMIN_READER_PORT)
         private readonly breederReportAdminReader: BreederReportAdminReaderPort,
-        @Inject(BREEDER_REPORT_ADMIN_WRITER)
+        @Inject(BREEDER_REPORT_ADMIN_WRITER_PORT)
         private readonly breederReportAdminWriter: BreederReportAdminWriterPort,
         private readonly breederReportAdminPolicyService: BreederReportAdminPolicyService,
         private readonly breederReportAdminActivityLogFactoryService: BreederReportAdminActivityLogFactoryService,

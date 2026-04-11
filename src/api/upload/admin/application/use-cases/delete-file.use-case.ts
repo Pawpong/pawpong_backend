@@ -2,12 +2,12 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { UploadAdminStoragePolicyService } from '../../domain/services/upload-admin-storage-policy.service';
-import { UPLOAD_ADMIN_STORAGE, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
+import { UPLOAD_ADMIN_STORAGE_PORT, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
 
 @Injectable()
 export class DeleteFileUseCase {
     constructor(
-        @Inject(UPLOAD_ADMIN_STORAGE)
+        @Inject(UPLOAD_ADMIN_STORAGE_PORT)
         private readonly uploadAdminStorage: UploadAdminStoragePort,
         private readonly uploadAdminStoragePolicyService: UploadAdminStoragePolicyService,
         private readonly logger: CustomLoggerService,

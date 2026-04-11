@@ -10,7 +10,7 @@ export interface UploadAdminStorageListSnapshot {
     isTruncated: boolean;
 }
 
-export const UPLOAD_ADMIN_STORAGE = Symbol('UPLOAD_ADMIN_STORAGE');
+export const UPLOAD_ADMIN_STORAGE_PORT = Symbol('UPLOAD_ADMIN_STORAGE_PORT');
 
 export interface UploadAdminStoragePort {
     list(prefix?: string, maxKeys?: number): Promise<UploadAdminStorageListSnapshot>;

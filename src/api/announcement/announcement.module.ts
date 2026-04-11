@@ -13,7 +13,7 @@ import { AnnouncementPaginationAssemblerService } from './domain/services/announ
 import { AnnouncementResponseMapperService } from './domain/services/announcement-response-mapper.service';
 import { AnnouncementMongoosePublicReaderAdapter } from './infrastructure/announcement-mongoose-public-reader.adapter';
 import { ANNOUNCEMENT_ADMIN_READER_PORT } from './admin/application/ports/announcement-admin-reader.port';
-import { ANNOUNCEMENT_WRITER } from './admin/application/ports/announcement-writer.port';
+import { ANNOUNCEMENT_WRITER_PORT } from './admin/application/ports/announcement-writer.port';
 import { GetAllAnnouncementsUseCase } from './admin/application/use-cases/get-all-announcements.use-case';
 import { CreateAnnouncementUseCase } from './admin/application/use-cases/create-announcement.use-case';
 import { UpdateAnnouncementUseCase } from './admin/application/use-cases/update-announcement.use-case';
@@ -53,7 +53,7 @@ import { Announcement, AnnouncementSchema } from '../../schema/announcement.sche
             useExisting: AnnouncementMongooseAdminReaderAdapter,
         },
         {
-            provide: ANNOUNCEMENT_WRITER,
+            provide: ANNOUNCEMENT_WRITER_PORT,
             useExisting: AnnouncementMongooseWriterAdapter,
         },
         CustomLoggerService,

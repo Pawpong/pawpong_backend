@@ -4,14 +4,14 @@ import { CustomLoggerService } from '../../../../../common/logger/custom-logger.
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AppVersionAdminCommandPolicyService } from '../../domain/services/app-version-admin-command-policy.service';
 import { AppVersionAdminItemPresentationService } from '../../domain/services/app-version-admin-item-presentation.service';
-import { APP_VERSION_WRITER, type AppVersionWriterPort } from '../ports/app-version-writer.port';
+import { APP_VERSION_WRITER_PORT, type AppVersionWriterPort } from '../ports/app-version-writer.port';
 import { type AppVersionCreateCommand } from '../types/app-version-command.type';
 import { type AppVersionAdminItemResult } from '../types/app-version-query.type';
 
 @Injectable()
 export class CreateAppVersionUseCase {
     constructor(
-        @Inject(APP_VERSION_WRITER)
+        @Inject(APP_VERSION_WRITER_PORT)
         private readonly appVersionWriter: AppVersionWriterPort,
         private readonly appVersionAdminItemPresentationService: AppVersionAdminItemPresentationService,
         private readonly appVersionAdminCommandPolicyService: AppVersionAdminCommandPolicyService,

@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { FEED_VIDEO_STREAM, type FeedVideoStreamPort } from '../ports/feed-video-stream.port';
+import { FEED_VIDEO_STREAM_PORT, type FeedVideoStreamPort } from '../ports/feed-video-stream.port';
 import { FeedVideoStreamingService } from '../../domain/services/feed-video-streaming.service';
 
 export interface FeedVideoProxyResponse {
@@ -13,7 +13,7 @@ export interface FeedVideoProxyResponse {
 @Injectable()
 export class ProxyHlsFileUseCase {
     constructor(
-        @Inject(FEED_VIDEO_STREAM)
+        @Inject(FEED_VIDEO_STREAM_PORT)
         private readonly feedVideoStream: FeedVideoStreamPort,
         private readonly feedVideoStreamingService: FeedVideoStreamingService,
     ) {}

@@ -14,9 +14,9 @@ import { SuspendBreederUseCase } from './application/use-cases/suspend-breeder.u
 import { UnsuspendBreederUseCase } from './application/use-cases/unsuspend-breeder.use-case';
 import { SendBreederRemindNotificationsUseCase } from './application/use-cases/send-breeder-remind-notifications.use-case';
 import { SetBreederTestAccountUseCase } from './application/use-cases/set-breeder-test-account.use-case';
-import { BREEDER_ADMIN_READER } from './application/ports/breeder-admin-reader.port';
-import { BREEDER_ADMIN_WRITER } from './application/ports/breeder-admin-writer.port';
-import { BREEDER_ADMIN_NOTIFIER } from './application/ports/breeder-admin-notifier.port';
+import { BREEDER_ADMIN_READER_PORT } from './application/ports/breeder-admin-reader.port';
+import { BREEDER_ADMIN_WRITER_PORT } from './application/ports/breeder-admin-writer.port';
+import { BREEDER_ADMIN_NOTIFIER_PORT } from './application/ports/breeder-admin-notifier.port';
 import { BreederAdminPolicyService } from './domain/services/breeder-admin-policy.service';
 import { BreederAdminActivityLogFactoryService } from './domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminReminderPresentationService } from './domain/services/breeder-admin-reminder-presentation.service';
@@ -73,15 +73,15 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
         BreederAdminMongooseRepositoryAdapter,
         BreederAdminNotifierAdapter,
         {
-            provide: BREEDER_ADMIN_READER,
+            provide: BREEDER_ADMIN_READER_PORT,
             useExisting: BreederAdminMongooseRepositoryAdapter,
         },
         {
-            provide: BREEDER_ADMIN_WRITER,
+            provide: BREEDER_ADMIN_WRITER_PORT,
             useExisting: BreederAdminMongooseRepositoryAdapter,
         },
         {
-            provide: BREEDER_ADMIN_NOTIFIER,
+            provide: BREEDER_ADMIN_NOTIFIER_PORT,
             useExisting: BreederAdminNotifierAdapter,
         },
     ],

@@ -86,7 +86,7 @@ export interface BreederVerificationAdminStatsSnapshot {
     eliteCount: number;
 }
 
-export const BREEDER_VERIFICATION_ADMIN_READER = Symbol('BREEDER_VERIFICATION_ADMIN_READER');
+export const BREEDER_VERIFICATION_ADMIN_READER_PORT = Symbol('BREEDER_VERIFICATION_ADMIN_READER_PORT');
 
 export interface BreederVerificationAdminReaderPort {
     findAdminById(adminId: string): Promise<BreederVerificationAdminAdminSnapshot | null>;

@@ -6,6 +6,7 @@ import { AlimtalkModule } from '../alimtalk.module';
 
 import { AlimtalkAdminController } from './alimtalk-admin.controller';
 import { AlimtalkAdminService } from './alimtalk-admin.service';
+import { ALIMTALK_ADMIN_SERVICE_TOKEN } from './alimtalk-admin.token';
 
 /**
  * 알림톡 템플릿 관리 Admin 모듈
@@ -18,7 +19,13 @@ import { AlimtalkAdminService } from './alimtalk-admin.service';
         AlimtalkModule, // AlimtalkService 사용을 위해 import
     ],
     controllers: [AlimtalkAdminController],
-    providers: [AlimtalkAdminService],
-    exports: [AlimtalkAdminService],
+    providers: [
+        AlimtalkAdminService,
+        {
+            provide: ALIMTALK_ADMIN_SERVICE_TOKEN,
+            useExisting: AlimtalkAdminService,
+        },
+    ],
+    exports: [ALIMTALK_ADMIN_SERVICE_TOKEN, AlimtalkAdminService],
 })
 export class AlimtalkAdminModule {}

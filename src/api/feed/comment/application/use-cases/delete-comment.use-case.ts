@@ -4,12 +4,12 @@ import type { Cache } from 'cache-manager';
 
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedCommentPolicyService } from '../../domain/services/feed-comment-policy.service';
-import { FEED_COMMENT_MANAGER, type FeedCommentManagerPort } from '../ports/feed-comment-manager.port';
+import { FEED_COMMENT_MANAGER_PORT, type FeedCommentManagerPort } from '../ports/feed-comment-manager.port';
 
 @Injectable()
 export class DeleteCommentUseCase {
     constructor(
-        @Inject(FEED_COMMENT_MANAGER)
+        @Inject(FEED_COMMENT_MANAGER_PORT)
         private readonly feedCommentManager: FeedCommentManagerPort,
         private readonly feedCommentPolicyService: FeedCommentPolicyService,
         @Inject(CACHE_MANAGER)

@@ -23,7 +23,7 @@ export interface FeedCommentReplyCountSnapshot {
     count: number;
 }
 
-export const FEED_COMMENT_MANAGER = Symbol('FEED_COMMENT_MANAGER');
+export const FEED_COMMENT_MANAGER_PORT = Symbol('FEED_COMMENT_MANAGER_PORT');
 
 export interface FeedCommentManagerPort {
     findVideo(videoId: string): Promise<{ id: string } | null>;

@@ -9,9 +9,9 @@ import { GetBreedsUseCase } from './application/use-cases/get-breeds.use-case';
 import { BreedCatalogService } from './domain/services/breed-catalog.service';
 import { BreedAdminPresentationService } from './domain/services/breed-admin-presentation.service';
 import { BreedMongooseReaderAdapter } from './infrastructure/breed-mongoose-reader.adapter';
-import { BREED_READER } from './application/ports/breed-reader.port';
-import { BREED_ADMIN_READER } from './admin/application/ports/breed-admin-reader.port';
-import { BREED_WRITER } from './admin/application/ports/breed-writer.port';
+import { BREED_READER_PORT } from './application/ports/breed-reader.port';
+import { BREED_ADMIN_READER_PORT } from './admin/application/ports/breed-admin-reader.port';
+import { BREED_WRITER_PORT } from './admin/application/ports/breed-writer.port';
 import { CreateBreedUseCase } from './admin/application/use-cases/create-breed.use-case';
 import { GetAllBreedsAdminUseCase } from './admin/application/use-cases/get-all-breeds-admin.use-case';
 import { GetBreedByIdUseCase } from './admin/application/use-cases/get-breed-by-id.use-case';
@@ -40,15 +40,15 @@ import { Breed, BreedSchema } from '../../schema/breed.schema';
         BreedMongooseAdminReaderAdapter,
         BreedMongooseWriterAdapter,
         {
-            provide: BREED_READER,
+            provide: BREED_READER_PORT,
             useExisting: BreedMongooseReaderAdapter,
         },
         {
-            provide: BREED_ADMIN_READER,
+            provide: BREED_ADMIN_READER_PORT,
             useExisting: BreedMongooseAdminReaderAdapter,
         },
         {
-            provide: BREED_WRITER,
+            provide: BREED_WRITER_PORT,
             useExisting: BreedMongooseWriterAdapter,
         },
     ],

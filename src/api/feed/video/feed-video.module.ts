@@ -12,7 +12,7 @@ import { FeedTagModule } from '../tag/feed-tag.module';
 import { FeedCacheKeyService } from '../domain/services/feed-cache-key.service';
 import { FeedVideoSummaryPresentationService } from '../domain/services/feed-video-summary-presentation.service';
 import { FEED_VIDEO_TRANSCODER_PORT } from './application/ports/feed-video-transcoder.port';
-import { FEED_VIDEO_FILE_STORAGE } from './application/ports/feed-video-file-storage.port';
+import { FEED_VIDEO_FILE_STORAGE_PORT } from './application/ports/feed-video-file-storage.port';
 import { GetFeedUseCase } from './application/use-cases/get-feed.use-case';
 import { GetPopularVideosUseCase } from './application/use-cases/get-popular-videos.use-case';
 import { GetVideoMetaUseCase } from './application/use-cases/get-video-meta.use-case';
@@ -38,9 +38,9 @@ import { FeedVideoStorageAdapter } from './infrastructure/feed-video-storage.ada
 import { FeedVideoStorageStreamAdapter } from './infrastructure/feed-video-storage-stream.adapter';
 import { FeedVideoStreamResponseService } from './infrastructure/feed-video-stream-response.service';
 import { FeedVideoRepository } from './repository/feed-video.repository';
-import { FEED_VIDEO_READER } from './application/ports/feed-video-reader.port';
-import { FEED_VIDEO_COMMAND } from './application/ports/feed-video-command.port';
-import { FEED_VIDEO_STREAM } from './application/ports/feed-video-stream.port';
+import { FEED_VIDEO_READER_PORT } from './application/ports/feed-video-reader.port';
+import { FEED_VIDEO_COMMAND_PORT } from './application/ports/feed-video-command.port';
+import { FEED_VIDEO_STREAM_PORT } from './application/ports/feed-video-stream.port';
 import { FeedVideoDetailController } from './feed-video-detail.controller';
 import { FeedVideoHlsStreamController } from './feed-video-hls-stream.controller';
 import { FeedVideoListController } from './feed-video-list.controller';
@@ -145,15 +145,15 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         FeedVideoStorageStreamAdapter,
         FeedVideoStreamResponseService,
         {
-            provide: FEED_VIDEO_READER,
+            provide: FEED_VIDEO_READER_PORT,
             useExisting: FeedVideoMongooseReaderAdapter,
         },
         {
-            provide: FEED_VIDEO_COMMAND,
+            provide: FEED_VIDEO_COMMAND_PORT,
             useExisting: FeedVideoMongooseCommandAdapter,
         },
         {
-            provide: FEED_VIDEO_STREAM,
+            provide: FEED_VIDEO_STREAM_PORT,
             useExisting: FeedVideoStorageStreamAdapter,
         },
         {
@@ -161,7 +161,7 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
             useExisting: FeedVideoFfmpegAdapter,
         },
         {
-            provide: FEED_VIDEO_FILE_STORAGE,
+            provide: FEED_VIDEO_FILE_STORAGE_PORT,
             useExisting: FeedVideoStorageAdapter,
         },
     ],

@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminPresentationService } from '../../domain/services/adopter-admin-presentation.service';
-import { ADOPTER_ADMIN_READER } from '../ports/adopter-admin-reader.port';
+import { ADOPTER_ADMIN_READER_PORT } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminApplicationListQuery } from '../types/adopter-admin-application-query.type';
 import type { AdopterAdminApplicationListResult } from '../types/adopter-admin-result.type';
@@ -10,7 +10,7 @@ import type { AdopterAdminApplicationListResult } from '../types/adopter-admin-r
 @Injectable()
 export class GetAdopterAdminApplicationListUseCase {
     constructor(
-        @Inject(ADOPTER_ADMIN_READER)
+        @Inject(ADOPTER_ADMIN_READER_PORT)
         private readonly adopterAdminReader: AdopterAdminReaderPort,
         private readonly adopterAdminPolicyService: AdopterAdminPolicyService,
         private readonly adopterAdminPresentationService: AdopterAdminPresentationService,

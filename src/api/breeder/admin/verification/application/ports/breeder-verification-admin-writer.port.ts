@@ -26,7 +26,7 @@ export interface BreederVerificationAdminActivityLogEntry {
     performedAt: Date;
 }
 
-export const BREEDER_VERIFICATION_ADMIN_WRITER = Symbol('BREEDER_VERIFICATION_ADMIN_WRITER');
+export const BREEDER_VERIFICATION_ADMIN_WRITER_PORT = Symbol('BREEDER_VERIFICATION_ADMIN_WRITER_PORT');
 
 export interface BreederVerificationAdminWriterPort {
     updateBreederVerification(breederId: string, command: BreederVerificationAdminUpdateVerificationCommand): Promise<void>;

@@ -1,4 +1,4 @@
-export const APP_VERSION_READER = Symbol('APP_VERSION_READER');
+export const APP_VERSION_READER_PORT = Symbol('APP_VERSION_READER_PORT');
 
 export type ActiveAppVersionSnapshot = {
     readonly latestVersion: string;

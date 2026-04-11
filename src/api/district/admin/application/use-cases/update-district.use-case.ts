@@ -2,16 +2,16 @@ import { BadRequestException, ConflictException, Inject, Injectable } from '@nes
 
 import type { DistrictAdminResult } from '../../../application/types/district-result.type';
 import { DistrictAdminPresentationService } from '../../../domain/services/district-admin-presentation.service';
-import { DISTRICT_ADMIN_READER, type DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
-import { DISTRICT_WRITER, type DistrictWriterPort } from '../ports/district-writer.port';
+import { DISTRICT_ADMIN_READER_PORT, type DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
+import { DISTRICT_WRITER_PORT, type DistrictWriterPort } from '../ports/district-writer.port';
 import { UpdateDistrictCommand } from '../types/district-command.type';
 
 @Injectable()
 export class UpdateDistrictUseCase {
     constructor(
-        @Inject(DISTRICT_ADMIN_READER)
+        @Inject(DISTRICT_ADMIN_READER_PORT)
         private readonly districtAdminReader: DistrictAdminReaderPort,
-        @Inject(DISTRICT_WRITER)
+        @Inject(DISTRICT_WRITER_PORT)
         private readonly districtWriter: DistrictWriterPort,
         private readonly districtAdminPresentationService: DistrictAdminPresentationService,
     ) {}

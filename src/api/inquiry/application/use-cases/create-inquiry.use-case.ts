@@ -2,13 +2,13 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { InquiryCommandPolicyService } from '../../domain/services/inquiry-command-policy.service';
-import { INQUIRY_COMMAND, type InquiryCommandPort } from '../ports/inquiry-command.port';
+import { INQUIRY_COMMAND_PORT, type InquiryCommandPort } from '../ports/inquiry-command.port';
 import type { InquiryCreateCommand } from '../types/inquiry-command.type';
 
 @Injectable()
 export class CreateInquiryUseCase {
     constructor(
-        @Inject(INQUIRY_COMMAND)
+        @Inject(INQUIRY_COMMAND_PORT)
         private readonly inquiryCommand: InquiryCommandPort,
         private readonly inquiryCommandPolicyService: InquiryCommandPolicyService,
         private readonly logger: CustomLoggerService,

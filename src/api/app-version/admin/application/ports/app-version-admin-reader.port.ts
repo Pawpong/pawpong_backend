@@ -17,7 +17,7 @@ export interface AppVersionAdminPage {
     totalItems: number;
 }
 
-export const APP_VERSION_ADMIN_READER = Symbol('APP_VERSION_ADMIN_READER');
+export const APP_VERSION_ADMIN_READER_PORT = Symbol('APP_VERSION_ADMIN_READER_PORT');
 
 export interface AppVersionAdminReaderPort {
     readPage(page: number, limit: number): Promise<AppVersionAdminPage>;

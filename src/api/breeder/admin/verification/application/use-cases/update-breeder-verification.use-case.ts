@@ -1,9 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminTargetType } from '../../../../../../common/enum/user.enum';
-import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
-import { BREEDER_VERIFICATION_ADMIN_WRITER } from '../ports/breeder-verification-admin-writer.port';
-import { BREEDER_VERIFICATION_ADMIN_NOTIFIER } from '../ports/breeder-verification-admin-notifier.port';
+import { BREEDER_VERIFICATION_ADMIN_READER_PORT } from '../ports/breeder-verification-admin-reader.port';
+import { BREEDER_VERIFICATION_ADMIN_WRITER_PORT } from '../ports/breeder-verification-admin-writer.port';
+import { BREEDER_VERIFICATION_ADMIN_NOTIFIER_PORT } from '../ports/breeder-verification-admin-notifier.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminWriterPort } from '../ports/breeder-verification-admin-writer.port';
 import type { BreederVerificationAdminNotifierPort } from '../ports/breeder-verification-admin-notifier.port';
@@ -14,11 +14,11 @@ import type { BreederVerificationUpdateCommand } from '../types/breeder-verifica
 @Injectable()
 export class UpdateBreederVerificationUseCase {
     constructor(
-        @Inject(BREEDER_VERIFICATION_ADMIN_READER)
+        @Inject(BREEDER_VERIFICATION_ADMIN_READER_PORT)
         private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
-        @Inject(BREEDER_VERIFICATION_ADMIN_WRITER)
+        @Inject(BREEDER_VERIFICATION_ADMIN_WRITER_PORT)
         private readonly breederVerificationAdminWriter: BreederVerificationAdminWriterPort,
-        @Inject(BREEDER_VERIFICATION_ADMIN_NOTIFIER)
+        @Inject(BREEDER_VERIFICATION_ADMIN_NOTIFIER_PORT)
         private readonly breederVerificationAdminNotifier: BreederVerificationAdminNotifierPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
         private readonly breederVerificationAdminActivityLogFactoryService: BreederVerificationAdminActivityLogFactoryService,

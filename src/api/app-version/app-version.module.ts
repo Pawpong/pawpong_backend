@@ -8,9 +8,9 @@ import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { CheckAppVersionUseCase } from './application/use-cases/check-app-version.use-case';
 import { AppVersionPolicyService } from './domain/services/app-version-policy.service';
 import { AppVersionMongooseReaderAdapter } from './infrastructure/app-version-mongoose-reader.adapter';
-import { APP_VERSION_READER } from './application/ports/app-version-reader.port';
-import { APP_VERSION_ADMIN_READER } from './admin/application/ports/app-version-admin-reader.port';
-import { APP_VERSION_WRITER } from './admin/application/ports/app-version-writer.port';
+import { APP_VERSION_READER_PORT } from './application/ports/app-version-reader.port';
+import { APP_VERSION_ADMIN_READER_PORT } from './admin/application/ports/app-version-admin-reader.port';
+import { APP_VERSION_WRITER_PORT } from './admin/application/ports/app-version-writer.port';
 import { CreateAppVersionUseCase } from './admin/application/use-cases/create-app-version.use-case';
 import { GetAppVersionListUseCase } from './admin/application/use-cases/get-app-version-list.use-case';
 import { UpdateAppVersionUseCase } from './admin/application/use-cases/update-app-version.use-case';
@@ -47,15 +47,15 @@ import { AppVersionRepository } from './repository/app-version.repository';
         AppVersionMongooseAdminReaderAdapter,
         AppVersionMongooseWriterAdapter,
         {
-            provide: APP_VERSION_READER,
+            provide: APP_VERSION_READER_PORT,
             useExisting: AppVersionMongooseReaderAdapter,
         },
         {
-            provide: APP_VERSION_ADMIN_READER,
+            provide: APP_VERSION_ADMIN_READER_PORT,
             useExisting: AppVersionMongooseAdminReaderAdapter,
         },
         {
-            provide: APP_VERSION_WRITER,
+            provide: APP_VERSION_WRITER_PORT,
             useExisting: AppVersionMongooseWriterAdapter,
         },
     ],

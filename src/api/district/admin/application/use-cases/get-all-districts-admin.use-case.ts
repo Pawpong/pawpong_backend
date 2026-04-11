@@ -2,12 +2,12 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import type { DistrictAdminResult } from '../../../application/types/district-result.type';
 import { DistrictAdminPresentationService } from '../../../domain/services/district-admin-presentation.service';
-import { DISTRICT_ADMIN_READER, type DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
+import { DISTRICT_ADMIN_READER_PORT, type DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
 
 @Injectable()
 export class GetAllDistrictsAdminUseCase {
     constructor(
-        @Inject(DISTRICT_ADMIN_READER)
+        @Inject(DISTRICT_ADMIN_READER_PORT)
         private readonly districtAdminReader: DistrictAdminReaderPort,
         private readonly districtAdminPresentationService: DistrictAdminPresentationService,
     ) {}

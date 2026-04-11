@@ -2,13 +2,13 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { UploadAdminStoragePresentationService } from '../../domain/services/upload-admin-storage-presentation.service';
-import { UPLOAD_ADMIN_STORAGE, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
+import { UPLOAD_ADMIN_STORAGE_PORT, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
 import type { UploadAdminStorageListResult } from '../types/upload-admin-result.type';
 
 @Injectable()
 export class ListAllFilesUseCase {
     constructor(
-        @Inject(UPLOAD_ADMIN_STORAGE)
+        @Inject(UPLOAD_ADMIN_STORAGE_PORT)
         private readonly uploadAdminStorage: UploadAdminStoragePort,
         private readonly uploadAdminStoragePresentationService: UploadAdminStoragePresentationService,
         private readonly logger: CustomLoggerService,

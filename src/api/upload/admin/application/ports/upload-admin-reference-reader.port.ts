@@ -4,7 +4,7 @@ export interface UploadAdminFileReferenceSnapshot {
     count: number;
 }
 
-export const UPLOAD_ADMIN_REFERENCE_READER = Symbol('UPLOAD_ADMIN_REFERENCE_READER');
+export const UPLOAD_ADMIN_REFERENCE_READER_PORT = Symbol('UPLOAD_ADMIN_REFERENCE_READER_PORT');
 
 export interface UploadAdminReferenceReaderPort {
     findReferences(fileKey: string): Promise<UploadAdminFileReferenceSnapshot[]>;

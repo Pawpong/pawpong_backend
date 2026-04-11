@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { BreederLevel } from '../../../../../../common/enum/user.enum';
-import { BREEDER_VERIFICATION_ADMIN_READER } from '../ports/breeder-verification-admin-reader.port';
-import { BREEDER_VERIFICATION_ADMIN_WRITER } from '../ports/breeder-verification-admin-writer.port';
+import { BREEDER_VERIFICATION_ADMIN_READER_PORT } from '../ports/breeder-verification-admin-reader.port';
+import { BREEDER_VERIFICATION_ADMIN_WRITER_PORT } from '../ports/breeder-verification-admin-writer.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminWriterPort } from '../ports/breeder-verification-admin-writer.port';
 import { BreederVerificationAdminCommandResponseService } from '../../domain/services/breeder-verification-admin-command-response.service';
@@ -12,9 +12,9 @@ import type { BreederLevelChangeCommand } from '../types/breeder-verification-ad
 @Injectable()
 export class ChangeBreederLevelUseCase {
     constructor(
-        @Inject(BREEDER_VERIFICATION_ADMIN_READER)
+        @Inject(BREEDER_VERIFICATION_ADMIN_READER_PORT)
         private readonly breederVerificationAdminReader: BreederVerificationAdminReaderPort,
-        @Inject(BREEDER_VERIFICATION_ADMIN_WRITER)
+        @Inject(BREEDER_VERIFICATION_ADMIN_WRITER_PORT)
         private readonly breederVerificationAdminWriter: BreederVerificationAdminWriterPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
         private readonly breederVerificationAdminCommandResponseService: BreederVerificationAdminCommandResponseService,
