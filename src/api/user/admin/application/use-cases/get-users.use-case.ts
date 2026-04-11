@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { USER_ADMIN_READER_PORT, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
-import { UserAdminPresentationService } from '../../domain/services/user-admin-presentation.service';
+import { UserAdminUserPageAssemblerService } from '../../domain/services/user-admin-user-page-assembler.service';
 import type { UserAdminUserSearchQuery } from '../types/user-admin-command.type';
 import type { UserAdminUserManagementPageResult } from '../types/user-admin-result.type';
 
@@ -12,7 +12,7 @@ export class GetUsersUseCase {
         @Inject(USER_ADMIN_READER_PORT)
         private readonly userAdminReader: UserAdminReaderPort,
         private readonly userAdminCommandPolicyService: UserAdminCommandPolicyService,
-        private readonly userAdminPresentationService: UserAdminPresentationService,
+        private readonly userAdminUserPageAssemblerService: UserAdminUserPageAssemblerService,
     ) {}
 
     async execute(
@@ -34,6 +34,6 @@ export class GetUsersUseCase {
             limit,
         });
 
-        return this.userAdminPresentationService.toUsersPaginationResponse(result, page, limit);
+        return this.userAdminUserPageAssemblerService.build(result, page, limit);
     }
 }
