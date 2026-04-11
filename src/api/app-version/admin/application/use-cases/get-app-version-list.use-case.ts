@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AppVersionAdminListPresentationService } from '../../domain/services/app-version-admin-list-presentation.service';
 import { APP_VERSION_ADMIN_READER, type AppVersionAdminReaderPort } from '../ports/app-version-admin-reader.port';
 import { type AppVersionAdminListQuery, type AppVersionAdminPageResult } from '../types/app-version-query.type';
@@ -32,6 +33,7 @@ export class GetAppVersionListUseCase {
 
             return this.appVersionAdminListPresentationService.toPaginationResponse(items, page, limit, totalItems);
         } catch (error) {
+            rethrowIfHttpException(error);
             this.logger.logError('getAppVersionList', '앱 버전 목록 조회', error);
             throw new BadRequestException('앱 버전 목록 조회에 실패했습니다.');
         }

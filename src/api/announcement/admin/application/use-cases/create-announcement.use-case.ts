@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
 import { ANNOUNCEMENT_WRITER, type AnnouncementWriterPort } from '../ports/announcement-writer.port';
 import type { AnnouncementCreateCommand } from '../types/announcement-command.type';
@@ -27,6 +28,7 @@ export class CreateAnnouncementUseCase {
 
             return this.announcementResponseMapperService.toResponse(announcement);
         } catch (error) {
+            rethrowIfHttpException(error);
             this.logger.logError('createAnnouncement', '공지사항 생성 실패', error);
             throw new BadRequestException('공지사항을 생성할 수 없습니다.');
         }

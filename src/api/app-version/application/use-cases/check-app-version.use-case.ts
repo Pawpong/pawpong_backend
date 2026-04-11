@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../common/utils/http-exception.util';
 import { APP_VERSION_READER, type AppVersionReaderPort } from '../ports/app-version-reader.port';
 import { type AppVersionCheckResult } from '../types/app-version-result.type';
 import { AppVersionPolicyService } from '../../domain/services/app-version-policy.service';
@@ -33,10 +34,7 @@ export class CheckAppVersionUseCase {
 
             return result;
         } catch (error) {
-            if (error instanceof BadRequestException) {
-                throw error;
-            }
-
+            rethrowIfHttpException(error);
             this.logger.logError('checkVersion', '앱 버전 체크', error);
             throw new BadRequestException('버전 체크에 실패했습니다.');
         }

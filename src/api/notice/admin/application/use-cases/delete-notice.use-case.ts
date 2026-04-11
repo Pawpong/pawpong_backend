@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { NOTICE_WRITER, type NoticeWriterPort } from '../ports/notice-writer.port';
 
 @Injectable()
@@ -31,10 +32,7 @@ export class DeleteNoticeUseCase {
 
             this.logger.logSuccess('deleteNotice', '공지사항 삭제 완료', { noticeId });
         } catch (error) {
-            if (error instanceof NotFoundException) {
-                throw error;
-            }
-
+            rethrowIfHttpException(error);
             this.logger.logError('deleteNotice', '공지사항 삭제', error);
             throw new BadRequestException('공지사항 삭제에 실패했습니다.');
         }

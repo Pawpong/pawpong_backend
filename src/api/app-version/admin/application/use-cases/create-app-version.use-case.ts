@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AppVersionAdminCommandPolicyService } from '../../domain/services/app-version-admin-command-policy.service';
 import { AppVersionAdminItemPresentationService } from '../../domain/services/app-version-admin-item-presentation.service';
 import { APP_VERSION_WRITER, type AppVersionWriterPort } from '../ports/app-version-writer.port';
@@ -32,6 +33,7 @@ export class CreateAppVersionUseCase {
 
             return this.appVersionAdminItemPresentationService.toResponseDto(appVersion);
         } catch (error) {
+            rethrowIfHttpException(error);
             this.logger.logError('createAppVersion', '앱 버전 생성', error);
             throw new BadRequestException('앱 버전 생성에 실패했습니다.');
         }

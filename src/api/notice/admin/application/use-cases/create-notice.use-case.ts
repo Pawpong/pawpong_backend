@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { NoticePresentationService } from '../../../domain/services/notice-presentation.service';
 import { NOTICE_WRITER, type NoticeWriterPort } from '../ports/notice-writer.port';
 import type { NoticeCreateCommand } from '../types/notice-command.type';
@@ -31,6 +32,7 @@ export class CreateNoticeUseCase {
 
             return this.noticePresentationService.toItem(notice);
         } catch (error) {
+            rethrowIfHttpException(error);
             this.logger.logError('createNotice', '공지사항 생성', error);
             throw new BadRequestException('공지사항 생성에 실패했습니다.');
         }

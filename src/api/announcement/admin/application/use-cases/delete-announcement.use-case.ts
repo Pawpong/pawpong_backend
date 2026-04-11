@@ -2,6 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { Types } from 'mongoose';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { ANNOUNCEMENT_WRITER, type AnnouncementWriterPort } from '../ports/announcement-writer.port';
 
 @Injectable()
@@ -32,10 +33,7 @@ export class DeleteAnnouncementUseCase {
                 announcementId,
             });
         } catch (error) {
-            if (error instanceof BadRequestException) {
-                throw error;
-            }
-
+            rethrowIfHttpException(error);
             this.logger.logError('deleteAnnouncement', '공지사항 삭제 실패', error);
             throw new BadRequestException('공지사항을 삭제할 수 없습니다.');
         }
