@@ -1,4 +1,4 @@
-import { BreederManagementBannerPresentationService } from '../../../domain/services/breeder-management-banner-presentation.service';
+import { BreederManagementBannerResultMapperService } from '../../../domain/services/breeder-management-banner-result-mapper.service';
 import { CreateProfileBannerUseCase } from '../../../application/use-cases/create-profile-banner.use-case';
 import { BreederManagementAdminBannerWriterPort } from '../../../application/ports/breeder-management-admin-banner-writer.port';
 import { BreederManagementFileUrlPort } from '../../../../application/ports/breeder-management-file-url.port';
@@ -30,7 +30,7 @@ describe('프로필 배너 생성 유스케이스', () => {
         };
         const useCase = new CreateProfileBannerUseCase(
             bannerWriter,
-            new BreederManagementBannerPresentationService(fileUrlPort),
+            new BreederManagementBannerResultMapperService(fileUrlPort),
         );
 
         await expect(

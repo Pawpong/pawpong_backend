@@ -14,7 +14,7 @@ import type {
 } from '../../application/types/breeder-management-admin-banner-result.type';
 
 @Injectable()
-export class BreederManagementBannerPresentationService {
+export class BreederManagementBannerResultMapperService {
     constructor(
         @Inject(BREEDER_MANAGEMENT_FILE_URL_PORT)
         private readonly fileUrlPort: BreederManagementFileUrlPort,

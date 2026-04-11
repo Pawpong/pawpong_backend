@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { BreederManagementBannerPresentationService } from '../../domain/services/breeder-management-banner-presentation.service';
+import { BreederManagementBannerResultMapperService } from '../../domain/services/breeder-management-banner-result-mapper.service';
 import {
     BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER_PORT,
     type BreederManagementAdminBannerWriterPort,
@@ -13,7 +13,7 @@ export class UpdateCounselBannerUseCase {
     constructor(
         @Inject(BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER_PORT)
         private readonly bannerWriter: BreederManagementAdminBannerWriterPort,
-        private readonly breederManagementBannerPresentationService: BreederManagementBannerPresentationService,
+        private readonly breederManagementBannerResultMapperService: BreederManagementBannerResultMapperService,
     ) {}
 
     async execute(
@@ -26,6 +26,6 @@ export class UpdateCounselBannerUseCase {
             throw new BadRequestException('상담 배너를 찾을 수 없습니다.');
         }
 
-        return this.breederManagementBannerPresentationService.toCounselResult(banner);
+        return this.breederManagementBannerResultMapperService.toCounselResult(banner);
     }
 }
