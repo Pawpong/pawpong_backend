@@ -10,9 +10,9 @@ import { AdopterApplicationCommandPort } from '../ports/adopter-application-comm
 import { AdopterApplicationNotifierPort } from '../ports/adopter-application-notifier.port';
 import { AdopterApplicationCustomResponseBuilderService } from '../../domain/services/adopter-application-custom-response-builder.service';
 import { AdopterApplicationStandardResponseBuilderService } from '../../domain/services/adopter-application-standard-response-builder.service';
-import { AdopterApplicationCreateResponseFactoryService } from '../../domain/services/adopter-application-create-response-factory.service';
 import type { AdopterApplicationCreateCommand } from '../types/adopter-application-command.type';
 import type { AdopterApplicationCreateResult } from '../types/adopter-result.type';
+import { AdopterMapper } from '../../mapper/adopter.mapper';
 
 @Injectable()
 export class CreateAdopterApplicationUseCase {
@@ -26,7 +26,6 @@ export class CreateAdopterApplicationUseCase {
         private readonly adopterApplicationNotifierPort: AdopterApplicationNotifierPort,
         private readonly adopterApplicationCustomResponseBuilderService: AdopterApplicationCustomResponseBuilderService,
         private readonly adopterApplicationStandardResponseBuilderService: AdopterApplicationStandardResponseBuilderService,
-        private readonly adopterApplicationCreateResponseFactoryService: AdopterApplicationCreateResponseFactoryService,
     ) {}
 
     async execute(
@@ -83,7 +82,7 @@ export class CreateAdopterApplicationUseCase {
             breederName: breederDisplayName,
         });
 
-        return this.adopterApplicationCreateResponseFactoryService.create(savedApplication, breederDisplayName, pet?.name);
+        return AdopterMapper.toApplicationCreateResponse(savedApplication, breederDisplayName, pet?.name);
     }
 
     private async ensureApplicantExists(userId: string, userRole?: string): Promise<void> {

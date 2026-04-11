@@ -18,3 +18,9 @@ export const ADOPTER_RESPONSE_MESSAGES = {
     adminApplicationListRetrieved: '입양 신청 리스트가 조회되었습니다.',
     adminApplicationDetailRetrieved: '입양 신청 상세 정보가 조회되었습니다.',
 } as const;
+
+export const ADOPTER_RESPONSE_PAYLOAD_MESSAGES = {
+    reportAccepted: '신고가 성공적으로 접수되었습니다. 관리자 검토 후 처리됩니다.',
+    reviewReported: '후기가 신고되었습니다. 관리자가 검토 후 처리합니다.',
+    accountDeleted: '회원 탈퇴가 성공적으로 처리되었습니다.',
+} as const;

@@ -46,14 +46,9 @@ import { AdopterFavoritePolicyService } from './domain/services/adopter-favorite
 import { AdopterPaginationAssemblerService } from './domain/services/adopter-pagination-assembler.service';
 import { AdopterApplicationCustomResponseBuilderService } from './domain/services/adopter-application-custom-response-builder.service';
 import { AdopterApplicationStandardResponseBuilderService } from './domain/services/adopter-application-standard-response-builder.service';
-import { AdopterApplicationCreateResponseFactoryService } from './domain/services/adopter-application-create-response-factory.service';
 import { AdopterReportPayloadBuilderService } from './domain/services/adopter-report-payload-builder.service';
-import { AdopterReportResponseFactoryService } from './domain/services/adopter-report-response-factory.service';
-import { AdopterReviewCreateResponseFactoryService } from './domain/services/adopter-review-create-response-factory.service';
-import { AdopterReviewReportResponseFactoryService } from './domain/services/adopter-review-report-response-factory.service';
 import { AdopterReviewListResponseFactoryService } from './domain/services/adopter-review-list-response-factory.service';
 import { AdopterReviewDetailResponseFactoryService } from './domain/services/adopter-review-detail-response-factory.service';
-import { AdopterAccountDeleteResponseFactoryService } from './domain/services/adopter-account-delete-response-factory.service';
 import { AdopterApplicationListAssemblerService } from './domain/services/adopter-application-list-assembler.service';
 import { AdopterApplicationDetailAssemblerService } from './domain/services/adopter-application-detail-assembler.service';
 import { AdopterProfileAdapter } from './infrastructure/adopter-profile.adapter';
@@ -152,14 +147,9 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AdopterPaginationAssemblerService,
         AdopterApplicationCustomResponseBuilderService,
         AdopterApplicationStandardResponseBuilderService,
-        AdopterApplicationCreateResponseFactoryService,
         AdopterReportPayloadBuilderService,
-        AdopterReportResponseFactoryService,
-        AdopterReviewCreateResponseFactoryService,
-        AdopterReviewReportResponseFactoryService,
         AdopterReviewListResponseFactoryService,
         AdopterReviewDetailResponseFactoryService,
-        AdopterAccountDeleteResponseFactoryService,
         AdopterApplicationListAssemblerService,
         AdopterApplicationDetailAssemblerService,
         AdopterProfileAdapter,
