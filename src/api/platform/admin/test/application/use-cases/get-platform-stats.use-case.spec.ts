@@ -1,7 +1,7 @@
 import { ForbiddenException } from '@nestjs/common';
 
 import { GetPlatformStatsUseCase } from '../../../application/use-cases/get-platform-stats.use-case';
-import { PlatformAdminPresentationService } from '../../../domain/services/platform-admin-presentation.service';
+import { PlatformAdminResultMapperService } from '../../../domain/services/platform-admin-result-mapper.service';
 import { PlatformAdminQueryPolicyService } from '../../../domain/services/platform-admin-query-policy.service';
 import { PlatformAdminReaderPort } from '../../../application/ports/platform-admin-reader.port';
 
@@ -72,7 +72,7 @@ describe('플랫폼 통계 조회 유스케이스', () => {
         const useCase = new GetPlatformStatsUseCase(
             reader,
             new PlatformAdminQueryPolicyService(),
-            new PlatformAdminPresentationService(),
+            new PlatformAdminResultMapperService(),
         );
 
         await expect(
@@ -98,7 +98,7 @@ describe('플랫폼 통계 조회 유스케이스', () => {
                 getMvpStats: jest.fn(),
             },
             new PlatformAdminQueryPolicyService(),
-            new PlatformAdminPresentationService(),
+            new PlatformAdminResultMapperService(),
         );
 
         await expect(

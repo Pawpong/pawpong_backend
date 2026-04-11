@@ -4,8 +4,8 @@ import { PlatformAdminMvpStatsSnapshot, PlatformAdminStatsSnapshot } from '../..
 import type { PlatformAdminMvpStatsResult, PlatformAdminStatsResult } from '../../application/types/platform-admin-result.type';
 
 @Injectable()
-export class PlatformAdminPresentationService {
-    toAdminStatsResponse(snapshot: PlatformAdminStatsSnapshot): PlatformAdminStatsResult {
+export class PlatformAdminResultMapperService {
+    toStatsResult(snapshot: PlatformAdminStatsSnapshot): PlatformAdminStatsResult {
         return {
             userStatistics: snapshot.userStatistics,
             adoptionStatistics: snapshot.adoptionStatistics,
@@ -16,7 +16,7 @@ export class PlatformAdminPresentationService {
         };
     }
 
-    toMvpStatsResponse(snapshot: PlatformAdminMvpStatsSnapshot): PlatformAdminMvpStatsResult {
+    toMvpStatsResult(snapshot: PlatformAdminMvpStatsSnapshot): PlatformAdminMvpStatsResult {
         return {
             activeUserStats: snapshot.activeUserStats,
             consultationStats: snapshot.consultationStats,

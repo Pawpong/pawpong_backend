@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { PLATFORM_ADMIN_READER_PORT, type PlatformAdminReaderPort } from '../ports/platform-admin-reader.port';
-import { PlatformAdminPresentationService } from '../../domain/services/platform-admin-presentation.service';
+import { PlatformAdminResultMapperService } from '../../domain/services/platform-admin-result-mapper.service';
 import { PlatformAdminQueryPolicyService } from '../../domain/services/platform-admin-query-policy.service';
 import type { PlatformStatsQuery } from '../types/platform-admin-query.type';
 import type { PlatformAdminStatsResult } from '../types/platform-admin-result.type';
@@ -12,7 +12,7 @@ export class GetPlatformStatsUseCase {
         @Inject(PLATFORM_ADMIN_READER_PORT)
         private readonly platformAdminReader: PlatformAdminReaderPort,
         private readonly platformAdminQueryPolicyService: PlatformAdminQueryPolicyService,
-        private readonly platformAdminPresentationService: PlatformAdminPresentationService,
+        private readonly platformAdminResultMapperService: PlatformAdminResultMapperService,
     ) {}
 
     async execute(adminId: string, filter: PlatformStatsQuery): Promise<PlatformAdminStatsResult> {
@@ -29,6 +29,6 @@ export class GetPlatformStatsUseCase {
             itemsPerPage: filter.itemsPerPage ?? 10,
         });
 
-        return this.platformAdminPresentationService.toAdminStatsResponse(snapshot);
+        return this.platformAdminResultMapperService.toStatsResult(snapshot);
     }
 }
