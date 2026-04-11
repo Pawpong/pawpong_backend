@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiQuery } from '@nestjs/swagger';
 
+import { ApplicationStatus } from '../../../../common/enum/user.enum';
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { ADOPTER_RESPONSE_MESSAGES } from '../../constants/adopter-response-messages';
@@ -13,7 +14,6 @@ import { AdminApplicationDetailResponseDto } from '../dto/response/application-d
 import { AdminApplicationListResponseDto } from '../dto/response/application-list-response.dto';
 import { ReviewDeleteResponseDto } from '../dto/response/review-delete-response.dto';
 import { ReviewReportItemDto } from '../dto/response/review-report-list.dto';
-import { ApplicationStatus } from '../../../../common/enum/user.enum';
 
 export function ApiAdopterAdminController() {
     return ApiController('입양자 관리 (Admin)');
