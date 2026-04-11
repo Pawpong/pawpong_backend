@@ -7,7 +7,7 @@ import { BreedAdminQueryController } from './admin/breed-admin-query.controller'
 
 import { GetBreedsUseCase } from './application/use-cases/get-breeds.use-case';
 import { BreedCatalogService } from './domain/services/breed-catalog.service';
-import { BreedAdminPresentationService } from './domain/services/breed-admin-presentation.service';
+import { BreedAdminResultMapperService } from './domain/services/breed-admin-result-mapper.service';
 import { BreedMongooseReaderAdapter } from './infrastructure/breed-mongoose-reader.adapter';
 import { BREED_READER_PORT } from './application/ports/breed-reader.port';
 import { BREED_ADMIN_READER_PORT } from './admin/application/ports/breed-admin-reader.port';
@@ -34,7 +34,7 @@ import { Breed, BreedSchema } from '../../schema/breed.schema';
         UpdateBreedUseCase,
         DeleteBreedUseCase,
         BreedCatalogService,
-        BreedAdminPresentationService,
+        BreedAdminResultMapperService,
         BreedRepository,
         BreedMongooseReaderAdapter,
         BreedMongooseAdminReaderAdapter,

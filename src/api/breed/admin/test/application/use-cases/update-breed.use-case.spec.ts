@@ -1,6 +1,6 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
-import { BreedAdminPresentationService } from '../../../../domain/services/breed-admin-presentation.service';
+import { BreedAdminResultMapperService } from '../../../../domain/services/breed-admin-result-mapper.service';
 import { UpdateBreedUseCase } from '../../../application/use-cases/update-breed.use-case';
 import { BreedAdminReaderPort } from '../../../application/ports/breed-admin-reader.port';
 import { BreedWriterPort } from '../../../application/ports/breed-writer.port';
@@ -33,7 +33,7 @@ describe('품종 수정 유스케이스', () => {
         const useCase = new UpdateBreedUseCase(
             breedAdminReader,
             breedWriter,
-            new BreedAdminPresentationService(),
+            new BreedAdminResultMapperService(),
         );
 
         await expect(useCase.execute('breed-1', { category: '중형견' })).resolves.toMatchObject({
@@ -54,7 +54,7 @@ describe('품종 수정 유스케이스', () => {
                 update: jest.fn(),
                 delete: jest.fn(),
             },
-            new BreedAdminPresentationService(),
+            new BreedAdminResultMapperService(),
         );
 
         await expect(useCase.execute('missing', { category: '중형견' })).rejects.toBeInstanceOf(BadRequestException);
@@ -76,7 +76,7 @@ describe('품종 수정 유스케이스', () => {
                 update: jest.fn(),
                 delete: jest.fn(),
             },
-            new BreedAdminPresentationService(),
+            new BreedAdminResultMapperService(),
         );
 
         await expect(useCase.execute('breed-1', { category: '중형견' })).rejects.toBeInstanceOf(ConflictException);

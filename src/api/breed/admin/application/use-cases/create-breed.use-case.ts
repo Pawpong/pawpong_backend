@@ -1,6 +1,6 @@
 import { ConflictException, Inject, Injectable } from '@nestjs/common';
 
-import { BreedAdminPresentationService } from '../../../domain/services/breed-admin-presentation.service';
+import { BreedAdminResultMapperService } from '../../../domain/services/breed-admin-result-mapper.service';
 import { BREED_ADMIN_READER_PORT, type BreedAdminReaderPort } from '../ports/breed-admin-reader.port';
 import { BREED_WRITER_PORT, type BreedWriterPort } from '../ports/breed-writer.port';
 import { type CreateBreedCommand } from '../types/breed-command.type';
@@ -13,7 +13,7 @@ export class CreateBreedUseCase {
         private readonly breedAdminReader: BreedAdminReaderPort,
         @Inject(BREED_WRITER_PORT)
         private readonly breedWriter: BreedWriterPort,
-        private readonly breedAdminPresentationService: BreedAdminPresentationService,
+        private readonly breedAdminResultMapperService: BreedAdminResultMapperService,
     ) {}
 
     async execute(dto: CreateBreedCommand): Promise<BreedAdminItemResult> {
@@ -24,6 +24,6 @@ export class CreateBreedUseCase {
         }
 
         const breed = await this.breedWriter.create(dto);
-        return this.breedAdminPresentationService.toResponseDto(breed);
+        return this.breedAdminResultMapperService.toResult(breed);
     }
 }

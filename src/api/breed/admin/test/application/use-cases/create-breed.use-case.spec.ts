@@ -1,6 +1,6 @@
 import { ConflictException } from '@nestjs/common';
 
-import { BreedAdminPresentationService } from '../../../../domain/services/breed-admin-presentation.service';
+import { BreedAdminResultMapperService } from '../../../../domain/services/breed-admin-result-mapper.service';
 import { CreateBreedUseCase } from '../../../application/use-cases/create-breed.use-case';
 import { BreedAdminReaderPort } from '../../../application/ports/breed-admin-reader.port';
 import { BreedWriterPort } from '../../../application/ports/breed-writer.port';
@@ -28,7 +28,7 @@ describe('품종 생성 유스케이스', () => {
         const useCase = new CreateBreedUseCase(
             breedAdminReader,
             breedWriter,
-            new BreedAdminPresentationService(),
+            new BreedAdminResultMapperService(),
         );
 
         await expect(
@@ -64,7 +64,7 @@ describe('품종 생성 유스케이스', () => {
                 update: jest.fn(),
                 delete: jest.fn(),
             },
-            new BreedAdminPresentationService(),
+            new BreedAdminResultMapperService(),
         );
 
         await expect(
