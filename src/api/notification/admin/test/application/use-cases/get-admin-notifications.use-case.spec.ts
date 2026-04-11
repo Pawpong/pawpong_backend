@@ -2,7 +2,8 @@ import { BadRequestException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { NotificationType } from '../../../../../../schema/notification.schema';
-import { NotificationAdminListPresentationService } from '../../../domain/services/notification-admin-list-presentation.service';
+import { NotificationAdminItemMapperService } from '../../../domain/services/notification-admin-item-mapper.service';
+import { NotificationAdminPageAssemblerService } from '../../../domain/services/notification-admin-page-assembler.service';
 import { NotificationAdminPaginationAssemblerService } from '../../../domain/services/notification-admin-pagination-assembler.service';
 import { NotificationAdminReaderPort } from '../../../application/ports/notification-admin-reader.port';
 import { GetAdminNotificationsUseCase } from '../../../application/use-cases/get-admin-notifications.use-case';
@@ -36,7 +37,10 @@ describe('관리자 알림 목록 조회 유스케이스', () => {
         };
         const useCase = new GetAdminNotificationsUseCase(
             reader,
-            new NotificationAdminListPresentationService(new NotificationAdminPaginationAssemblerService()),
+            new NotificationAdminPageAssemblerService(
+                new NotificationAdminItemMapperService(),
+                new NotificationAdminPaginationAssemblerService(),
+            ),
             logger,
         );
 
@@ -70,7 +74,10 @@ describe('관리자 알림 목록 조회 유스케이스', () => {
                 findPaged: jest.fn().mockRejectedValue(new Error('boom')),
                 getStats: jest.fn(),
             },
-            new NotificationAdminListPresentationService(new NotificationAdminPaginationAssemblerService()),
+            new NotificationAdminPageAssemblerService(
+                new NotificationAdminItemMapperService(),
+                new NotificationAdminPaginationAssemblerService(),
+            ),
             logger,
         );
 

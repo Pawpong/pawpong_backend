@@ -3,7 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { NOTIFICATION_ADMIN_READER_PORT } from '../ports/notification-admin-reader.port';
 import type { NotificationAdminReaderPort } from '../ports/notification-admin-reader.port';
-import { NotificationAdminListPresentationService } from '../../domain/services/notification-admin-list-presentation.service';
+import { NotificationAdminPageAssemblerService } from '../../domain/services/notification-admin-page-assembler.service';
 import type { NotificationAdminListQuery } from '../types/notification-admin-query.type';
 import type { NotificationAdminPageResult } from '../types/notification-admin-result.type';
 
@@ -12,7 +12,7 @@ export class GetAdminNotificationsUseCase {
     constructor(
         @Inject(NOTIFICATION_ADMIN_READER_PORT)
         private readonly notificationAdminReader: NotificationAdminReaderPort,
-        private readonly notificationAdminListPresentationService: NotificationAdminListPresentationService,
+        private readonly notificationAdminPageAssemblerService: NotificationAdminPageAssemblerService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -38,7 +38,7 @@ export class GetAdminNotificationsUseCase {
                 limit,
             });
 
-            const response = this.notificationAdminListPresentationService.toPage(result, page, limit);
+            const response = this.notificationAdminPageAssemblerService.build(result, page, limit);
 
             this.logger.logSuccess('getNotifications', '관리자 알림 목록 조회 완료', {
                 totalItems: result.totalItems,
