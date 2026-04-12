@@ -13,7 +13,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-cd /root/pawpong_backend
+cd /home/colding/pawpong_backend
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}Pawpong Backend Rollback${NC}"
