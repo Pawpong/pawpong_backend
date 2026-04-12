@@ -163,7 +163,7 @@ export class AlimtalkService implements OnModuleInit {
      * @returns 발송 결과
      */
     async send(options: AlimtalkOptions): Promise<AlimtalkResult> {
-        const { to, templateId, variables = {}, fallbackToSms = false } = options;
+        const { to, templateId, variables = {}, fallbackToSms = true } = options;
 
         if (!this.messageService) {
             this.logger.error('[send] CoolSMS 서비스가 초기화되지 않았습니다.');

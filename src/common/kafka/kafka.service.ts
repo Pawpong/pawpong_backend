@@ -60,12 +60,8 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
 
     async onModuleInit() {
         try {
-            // 토픽 구독 (Consumer로 받을 토픽들)
-            const topics = Object.values(KafkaTopic);
-            topics.forEach((topic) => {
-                this.kafkaClient.subscribeToResponseOf(topic);
-            });
-
+            // Producer 전용으로 사용하므로 subscribeToResponseOf 불필요
+            // (request-reply 패턴이 아닌 emit 전용)
             await this.kafkaClient.connect();
             this.isConnected = true;
             this.logger.logSuccess('KafkaService', 'Kafka 브로커 연결 성공');
@@ -94,7 +90,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
 
         try {
             this.kafkaClient.emit(topic, {
-                key: message.id || Date.now().toString(),
+                key: message.roomId || message.id || Date.now().toString(),
                 value: JSON.stringify(message),
             });
             this.logger.logDbOperation('KafkaService', 'emit', topic, { messageId: message.id });

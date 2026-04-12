@@ -48,8 +48,8 @@ export class CustomQuestionAnswerDto {
  * 입양 신청 생성 요청 DTO (Figma 디자인 기반 + 커스텀 질문)
  *
  * **구조:**
- * - 신청자 기본 정보: 이름, 휴대폰, 이메일 (프론트엔드 폼에서 입력)
- * - 표준 14개 필드: 모든 브리더 공통 (필수)
+ * - 신청자 기본 정보: 이름, 휴대폰, 이메일 (선택 — 미입력 시 계정 정보로 저장)
+ * - 표준 텍스트 일부: 자기소개, 알러지, 집 비우는 시간, 거주 공간, 반려 경험 (선택)
  * - 커스텀 응답: 해당 브리더가 추가한 질문들 (선택/필수 혼합)
  */
 export class ApplicationCreateRequestDto {
@@ -58,36 +58,39 @@ export class ApplicationCreateRequestDto {
      * @example "김철수"
      */
     @ApiProperty({
-        description: '신청자 이름',
+        description: '신청자 이름 (미입력 시 계정 닉네임/브리더명 등으로 저장)',
         example: '김철수',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    name: string;
+    name?: string;
 
     /**
      * 신청자 휴대폰 번호
      * @example "010-1234-5678"
      */
     @ApiProperty({
-        description: '신청자 휴대폰 번호',
+        description: '신청자 휴대폰 번호 (미입력 시 계정 전화번호로 저장)',
         example: '010-1234-5678',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    phone: string;
+    phone?: string;
 
     /**
      * 신청자 이메일 주소
      * @example "example@example.com"
      */
     @ApiProperty({
-        description: '신청자 이메일 주소',
+        description: '신청자 이메일 주소 (미입력 시 계정 이메일로 저장)',
         example: 'example@example.com',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    email: string;
+    email?: string;
 
     /**
      * 신청할 브리더 ID
@@ -143,11 +146,12 @@ export class ApplicationCreateRequestDto {
         example:
             '안녕하세요. 30대 남성이며 서울 강남구에 거주하고 있습니다. 재택근무를 하고 있어 반려동물과 충분한 시간을 보낼 수 있습니다.',
         maxLength: 1500,
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
     @MaxLength(1500, { message: '자기소개는 최대 1500자까지 입력 가능합니다.' })
-    selfIntroduction: string;
+    selfIntroduction?: string;
 
     /**
      * 함께 거주하는 가족 구성원 정보
@@ -187,10 +191,11 @@ export class ApplicationCreateRequestDto {
     @ApiProperty({
         description: '알러지 검사 여부와 결과(유무), 혹은 향후 계획',
         example: '본인과 배우자 모두 알러지 검사 완료했으며, 반려동물 알러지 없음',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    allergyTestInfo: string;
+    allergyTestInfo?: string;
 
     /**
      * 평균적으로 집을 비우는 시간
@@ -202,10 +207,11 @@ export class ApplicationCreateRequestDto {
     @ApiProperty({
         description: '평균적으로 집을 비우는 시간 (출퇴근·외출 시간 포함)',
         example: '주중 9시간(오전 9시~오후 6시), 주말 집에 있음',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    timeAwayFromHome: string;
+    timeAwayFromHome?: string;
 
     /**
      * 반려동물과 함께 지낼 공간 소개 (최대 1500자)
@@ -221,11 +227,12 @@ export class ApplicationCreateRequestDto {
         example:
             '거실과 안방을 자유롭게 이용할 수 있습니다. 거실은 약 20평 크기이며, 캣타워와 스크래처를 설치할 예정입니다.',
         maxLength: 1500,
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
     @MaxLength(1500, { message: '거주 공간 소개는 최대 1500자까지 입력 가능합니다.' })
-    livingSpaceDescription: string;
+    livingSpaceDescription?: string;
 
     /**
      * 현재 함께하는, 또는 이전에 함께했던 반려동물 정보 (최대 1500자)
@@ -239,11 +246,12 @@ export class ApplicationCreateRequestDto {
         example:
             '5년 전 고양이 한 마리를 키웠습니다. 러시안블루 품종이었으며, 매우 온순한 성격이었습니다. 수명을 다해 무지개다리를 건넸습니다.',
         maxLength: 1500,
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
     @MaxLength(1500, { message: '반려동물 경험은 최대 1500자까지 입력 가능합니다.' })
-    previousPetExperience: string;
+    previousPetExperience?: string;
 
     /**
      * 기본 케어 책임 가능 여부

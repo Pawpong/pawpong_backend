@@ -5,7 +5,7 @@ import { WinstonModule } from 'nest-winston';
 import { winstonConfig } from './common/config/winston.config';
 import { LoggerModule } from './common/logger/logger.module';
 import { RedisModule } from './common/redis/redis.module';
-// import { KafkaModule } from './common/kafka/kafka.module'; // 채팅 기능 구현 시 활성화
+import { KafkaModule } from './common/kafka/kafka.module';
 import { AlimtalkModule } from './common/alimtalk/alimtalk.module';
 import { AlimtalkAdminModule } from './common/alimtalk/admin/alimtalk-admin.module';
 
@@ -32,6 +32,7 @@ import { NoticeModule } from './api/notice/notice.module';
 import { AppVersionModule } from './api/app-version/app-version.module';
 import { InquiryModule } from './api/inquiry/inquiry.module';
 import { FeedModule } from './api/feed/feed.module';
+import { ChatModule } from './api/chat/chat.module';
 
 @Module({
     imports: [
@@ -42,7 +43,7 @@ import { FeedModule } from './api/feed/feed.module';
         WinstonModule.forRoot(winstonConfig),
         LoggerModule,
         RedisModule,
-        // KafkaModule, // 채팅 기능 구현 시 활성화
+        KafkaModule,
         DatabaseModule,
         AlimtalkModule,
         AlimtalkAdminModule,
@@ -68,6 +69,7 @@ import { FeedModule } from './api/feed/feed.module';
         AppVersionModule,
         InquiryModule,
         FeedModule,
+        ChatModule,
     ],
     controllers: [],
     providers: [],
