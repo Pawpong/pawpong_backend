@@ -33,17 +33,17 @@ echo -e "${BLUE}========================================${NC}"
 # 배포 시작 알림
 send_discord_notification "배포 시작\nTag: \`$IMAGE_TAG\`" 16776960
 
-cd /root/pawpong_backend
+cd /home/colding/pawpong_backend
 
 # 이전 이미지 태그 저장 (롤백용)
 LAST_IMAGE=$(docker images pawpong-backend --format "{{.Tag}}" | head -n 1)
-echo "$LAST_IMAGE" > /root/pawpong_backend/.last_deploy
+echo "$LAST_IMAGE" > /home/colding/pawpong_backend/.last_deploy
 echo -e "${YELLOW}Previous image tag saved: ${LAST_IMAGE}${NC}"
 
 # 배포 히스토리 저장 (최근 10개 유지)
-echo "$IMAGE_TAG" >> /root/pawpong_backend/.deploy_history
-tail -10 /root/pawpong_backend/.deploy_history > /root/pawpong_backend/.deploy_history.tmp
-mv /root/pawpong_backend/.deploy_history.tmp /root/pawpong_backend/.deploy_history
+echo "$IMAGE_TAG" >> /home/colding/pawpong_backend/.deploy_history
+tail -10 /home/colding/pawpong_backend/.deploy_history > /home/colding/pawpong_backend/.deploy_history.tmp
+mv /home/colding/pawpong_backend/.deploy_history.tmp /home/colding/pawpong_backend/.deploy_history
 echo -e "${YELLOW}Deployment history updated${NC}"
 
 echo -e "${BLUE}Using Docker image from Artifact Registry: pawpong-backend:latest${NC}"

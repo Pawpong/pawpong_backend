@@ -64,14 +64,14 @@ jobs:
                   COMMIT_SHA: ${{ github.sha }}
               run: |
                   echo "🚀 Starting deployment to production server..."
-                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no root@${{ secrets.PROD_SERVER_HOST }} << ENDSSH > deploy.log 2>&1
+                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no colding@${{ secrets.PROD_SERVER_HOST }} << ENDSSH > deploy.log 2>&1
                   set -e
 
                   echo "📦 Authenticating with Artifact Registry..."
-                  gcloud auth activate-service-account --key-file=/root/gcp-service-account.json
+                  gcloud auth activate-service-account --key-file=/home/colding/gcp-service-account.json
                   gcloud auth configure-docker ${GAR_LOCATION} --quiet
 
-                  cd /root/pawpong_backend || { echo "❌ Directory not found"; exit 1; }
+                  cd /home/colding/pawpong_backend || { echo "❌ Directory not found"; exit 1; }
 
                   echo "📥 Pulling latest code..."
                   git pull origin main
@@ -114,7 +114,7 @@ jobs:
                            \"description\": \"Main 브랜치가 프로덕션 서버에 성공적으로 배포되었습니다.\",
                            \"color\": 3066993,
                            \"fields\": [
-                             {\"name\": \"서버\", \"value\": \"115.68.176.129\", \"inline\": true},
+                             {\"name\": \"서버\", \"value\": \"${{ secrets.PROD_SERVER_HOST }}\", \"inline\": true},
                              {\"name\": \"배포 방식\", \"value\": \"Docker Blue-Green\", \"inline\": true},
                              {\"name\": \"활성 컨테이너\", \"value\": \"${ACTIVE_CONTAINER} (포트 ${ACTIVE_PORT})\", \"inline\": true},
                              {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
@@ -155,7 +155,7 @@ jobs:
                            \"description\": \"Main 브랜치 배포 중 오류가 발생했습니다. ${FAIL_INFO}\",
                            \"color\": 15158332,
                            \"fields\": [
-                             {\"name\": \"서버\", \"value\": \"115.68.176.129\", \"inline\": true},
+                             {\"name\": \"서버\", \"value\": \"${{ secrets.PROD_SERVER_HOST }}\", \"inline\": true},
                              {\"name\": \"배포 방식\", \"value\": \"Docker Blue-Green\", \"inline\": true},
                              {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
                              {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
