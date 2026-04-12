@@ -105,8 +105,8 @@ if [ "$HEALTHY" = true ]; then
 
     # Nginx 설정 업데이트
     if [ -f /etc/nginx/sites-available/pawpong ]; then
-        sed -i "s/localhost:[0-9]\{4\}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
-        nginx -t && systemctl reload nginx
+        sudo sed -i "s/localhost:[0-9]\{4\}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
+        sudo nginx -t && sudo systemctl reload nginx
         echo -e "${GREEN}Nginx reloaded${NC}"
     fi
 
