@@ -94,8 +94,8 @@ if [ "$HEALTHY" = true ]; then
     if [ -f /etc/nginx/sites-available/pawpong ]; then
         echo -e "${BLUE}Updating Nginx configuration...${NC}"
         # Nginx에서 upstream 포트를 새 포트로 변경
-        sed -i "s/localhost:[0-9]\{4\}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
-        nginx -t && systemctl reload nginx
+        sudo sed -i "s/localhost:[0-9]\{4\}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
+        sudo nginx -t && sudo systemctl reload nginx
         echo -e "${GREEN}Nginx reloaded with new upstream${NC}"
     fi
 
