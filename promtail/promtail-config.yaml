@@ -54,10 +54,11 @@ scrape_configs:
       - match:
           selector: '{level=""}'
           stages:
+            - template:
+                source: level
+                template: 'unknown'
             - labels:
                 level:
-              action: replace
-              replacement: 'unknown'
       # 타임스탬프 설정 (Winston의 timestamp 사용)
       - timestamp:
           source: log_timestamp
