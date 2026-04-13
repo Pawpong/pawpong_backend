@@ -3,7 +3,7 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
-import { FeedLikePresentationService } from '../../domain/services/feed-like-presentation.service';
+import { FeedLikeResultMapperService } from '../../domain/services/feed-like-result-mapper.service';
 import { FeedLikePolicyService } from '../../domain/services/feed-like-policy.service';
 import { FEED_LIKE_MANAGER_PORT, type FeedLikeManagerPort } from '../ports/feed-like-manager.port';
 
@@ -13,7 +13,7 @@ export class ToggleLikeUseCase {
         @Inject(FEED_LIKE_MANAGER_PORT)
         private readonly feedLikeManager: FeedLikeManagerPort,
         private readonly feedLikePolicyService: FeedLikePolicyService,
-        private readonly feedLikePresentationService: FeedLikePresentationService,
+        private readonly feedLikeResultMapperService: FeedLikeResultMapperService,
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
         private readonly feedCacheKeyService: FeedCacheKeyService,
@@ -29,7 +29,7 @@ export class ToggleLikeUseCase {
 
         await this.cacheManager.del(this.feedCacheKeyService.getVideoMetaKey(videoId));
 
-        return this.feedLikePresentationService.buildToggleResponse(!existingLike, likeCount);
+        return this.feedLikeResultMapperService.buildToggleResponse(!existingLike, likeCount);
     }
 
     private async addLike(videoId: string, userId: string, userModel: 'Breeder' | 'Adopter'): Promise<number> {

@@ -9,7 +9,7 @@ type FeedUploaderSummarySnapshot = {
 };
 
 @Injectable()
-export class FeedVideoSummaryPresentationService {
+export class FeedVideoSummaryMapperService {
     toUploaderResponse(uploader: FeedUploaderSummarySnapshot | null): FeedVideoUploaderResult | null {
         if (!uploader) {
             return null;

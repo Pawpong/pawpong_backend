@@ -12,8 +12,8 @@ import type {
 } from '../../application/types/feed-comment-result.type';
 
 @Injectable()
-export class FeedCommentListPresentationService {
-    buildCommentListResponse(
+export class FeedCommentPageAssemblerService {
+    buildCommentPage(
         comments: FeedCommentSnapshot[],
         totalCount: number,
         page: number,
@@ -38,7 +38,7 @@ export class FeedCommentListPresentationService {
         };
     }
 
-    buildReplyListResponse(
+    buildReplyPage(
         replies: FeedCommentSnapshot[],
         totalCount: number,
         page: number,
