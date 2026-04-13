@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 
 import { FeedVideoCommandSnapshot } from '../../application/ports/feed-video-command.port';
 import type { FeedMyVideoListResult } from '../../application/types/feed-video-result.type';
-import { FeedVideoSummaryPresentationService } from '../../../domain/services/feed-video-summary-presentation.service';
+import { FeedVideoSummaryMapperService } from '../../../domain/services/feed-video-summary-mapper.service';
 
 type SignedUrlResolver = (fileKey: string) => Promise<string>;
 
 @Injectable()
 export class FeedVideoLibraryAssemblerService {
-    constructor(private readonly feedVideoSummaryPresentationService: FeedVideoSummaryPresentationService) {}
+    constructor(private readonly feedVideoSummaryMapperService: FeedVideoSummaryMapperService) {}
 
     async buildMyVideosResult(
         videos: FeedVideoCommandSnapshot[],
@@ -33,7 +33,7 @@ export class FeedVideoLibraryAssemblerService {
 
         return {
             items,
-            pagination: this.feedVideoSummaryPresentationService.toPagination(page, limit, totalCount),
+            pagination: this.feedVideoSummaryMapperService.toPagination(page, limit, totalCount),
         };
     }
 }

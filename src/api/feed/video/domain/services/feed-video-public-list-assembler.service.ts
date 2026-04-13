@@ -2,13 +2,13 @@ import { Injectable } from '@nestjs/common';
 
 import { FeedVideoSnapshot } from '../../application/ports/feed-video-reader.port';
 import type { FeedPopularVideoItemResult, FeedVideoFeedResult } from '../../application/types/feed-video-result.type';
-import { FeedVideoSummaryPresentationService } from '../../../domain/services/feed-video-summary-presentation.service';
+import { FeedVideoSummaryMapperService } from '../../../domain/services/feed-video-summary-mapper.service';
 
 type SignedUrlResolver = (fileKey: string) => Promise<string>;
 
 @Injectable()
 export class FeedVideoPublicListAssemblerService {
-    constructor(private readonly feedVideoSummaryPresentationService: FeedVideoSummaryPresentationService) {}
+    constructor(private readonly feedVideoSummaryMapperService: FeedVideoSummaryMapperService) {}
 
     async buildFeedResult(
         videos: FeedVideoSnapshot[],
@@ -25,14 +25,14 @@ export class FeedVideoPublicListAssemblerService {
                 duration: video.duration,
                 viewCount: video.viewCount,
                 likeCount: video.likeCount,
-                uploadedBy: this.feedVideoSummaryPresentationService.toUploaderResponse(video.uploadedBy),
+                uploadedBy: this.feedVideoSummaryMapperService.toUploaderResponse(video.uploadedBy),
                 createdAt: video.createdAt,
             })),
         );
 
         return {
             items,
-            pagination: this.feedVideoSummaryPresentationService.toPagination(page, limit, totalCount),
+            pagination: this.feedVideoSummaryMapperService.toPagination(page, limit, totalCount),
         };
     }
 
@@ -47,7 +47,7 @@ export class FeedVideoPublicListAssemblerService {
                 thumbnailUrl: await resolveSignedUrl(video.thumbnailKey || ''),
                 duration: video.duration,
                 viewCount: video.viewCount,
-                uploadedBy: this.feedVideoSummaryPresentationService.toUploaderResponse(video.uploadedBy),
+                uploadedBy: this.feedVideoSummaryMapperService.toUploaderResponse(video.uploadedBy),
             })),
         );
     }

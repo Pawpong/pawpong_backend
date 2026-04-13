@@ -16,7 +16,7 @@ import {
     UPDATE_FEED_VIDEO_COMMENT_USE_CASE,
 } from './application/tokens/feed-comment-interaction.token';
 import { FeedCommentCommandResponseService } from './domain/services/feed-comment-command-response.service';
-import { FeedCommentListPresentationService } from './domain/services/feed-comment-list-presentation.service';
+import { FeedCommentPageAssemblerService } from './domain/services/feed-comment-page-assembler.service';
 import { FeedCommentPolicyService } from './domain/services/feed-comment-policy.service';
 import { FeedCommentMongooseManagerAdapter } from './infrastructure/feed-comment-mongoose-manager.adapter';
 import { FeedCommentRepository } from './repository/feed-comment.repository';
@@ -43,7 +43,7 @@ import { FEED_COMMENT_MANAGER_PORT } from './application/ports/feed-comment-mana
         FeedCacheKeyService,
         FeedCommentPolicyService,
         FeedCommentCommandResponseService,
-        FeedCommentListPresentationService,
+        FeedCommentPageAssemblerService,
         FeedCommentRepository,
         FeedCommentMongooseManagerAdapter,
         {

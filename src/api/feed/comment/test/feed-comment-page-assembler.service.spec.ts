@@ -1,10 +1,10 @@
-import { FeedCommentListPresentationService } from '../domain/services/feed-comment-list-presentation.service';
+import { FeedCommentPageAssemblerService } from '../domain/services/feed-comment-page-assembler.service';
 
 describe('피드 댓글 목록 응답 서비스', () => {
-    const service = new FeedCommentListPresentationService();
+    const service = new FeedCommentPageAssemblerService();
 
     it('댓글 목록 응답에 작성자와 대댓글 수를 조립한다', () => {
-        const result = service.buildCommentListResponse(
+        const result = service.buildCommentPage(
             [
                 {
                     id: 'comment-1',
@@ -53,7 +53,7 @@ describe('피드 댓글 목록 응답 서비스', () => {
     });
 
     it('대댓글 목록 응답을 조립한다', () => {
-        const result = service.buildReplyListResponse(
+        const result = service.buildReplyPage(
             [
                 {
                     id: 'reply-1',

@@ -4,7 +4,7 @@ import { Video, VideoSchema } from '../../../schema/video.schema';
 import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema';
 import { StorageModule } from '../../../common/storage/storage.module';
 import { FeedCacheKeyService } from '../domain/services/feed-cache-key.service';
-import { FeedVideoSummaryPresentationService } from '../domain/services/feed-video-summary-presentation.service';
+import { FeedVideoSummaryMapperService } from '../domain/services/feed-video-summary-mapper.service';
 import { FEED_LIKE_ASSET_URL_PORT } from './application/ports/feed-like-asset-url.port';
 import {
     GET_FEED_VIDEO_LIKE_STATUS_USE_CASE,
@@ -15,7 +15,7 @@ import { ToggleLikeUseCase } from './application/use-cases/toggle-like.use-case'
 import { GetLikeStatusUseCase } from './application/use-cases/get-like-status.use-case';
 import { GetMyLikedVideosUseCase } from './application/use-cases/get-my-liked-videos.use-case';
 import { FeedLikePolicyService } from './domain/services/feed-like-policy.service';
-import { FeedLikePresentationService } from './domain/services/feed-like-presentation.service';
+import { FeedLikeResultMapperService } from './domain/services/feed-like-result-mapper.service';
 import { FeedLikeMongooseManagerAdapter } from './infrastructure/feed-like-mongoose-manager.adapter';
 import { FeedLikeStorageAssetUrlAdapter } from './infrastructure/feed-like-storage-asset-url.adapter';
 import { FeedLikeRepository } from './repository/feed-like.repository';
@@ -40,9 +40,9 @@ import { FEED_LIKE_MANAGER_PORT } from './application/ports/feed-like-manager.po
         GetLikeStatusUseCase,
         GetMyLikedVideosUseCase,
         FeedCacheKeyService,
-        FeedVideoSummaryPresentationService,
+        FeedVideoSummaryMapperService,
         FeedLikePolicyService,
-        FeedLikePresentationService,
+        FeedLikeResultMapperService,
         FeedLikeRepository,
         FeedLikeMongooseManagerAdapter,
         FeedLikeStorageAssetUrlAdapter,

@@ -5,13 +5,13 @@ import type {
     FeedTagSearchResult,
     FeedTagUploaderResult,
 } from '../../application/types/feed-tag-result.type';
-import { FeedVideoSummaryPresentationService } from '../../../domain/services/feed-video-summary-presentation.service';
+import { FeedVideoSummaryMapperService } from '../../../domain/services/feed-video-summary-mapper.service';
 
 type ThumbnailUrlResolver = (fileKey?: string) => string | Promise<string | null> | null;
 
 @Injectable()
-export class FeedTagPresentationService {
-    constructor(private readonly feedVideoSummaryPresentationService: FeedVideoSummaryPresentationService) {}
+export class FeedTagSearchResultAssemblerService {
+    constructor(private readonly feedVideoSummaryMapperService: FeedVideoSummaryMapperService) {}
 
     async buildSearchResponse(
         videos: FeedTagVideoSnapshot[],
@@ -38,11 +38,11 @@ export class FeedTagPresentationService {
         return {
             videos: items,
             tag,
-            pagination: this.feedVideoSummaryPresentationService.toPagination(page, limit, totalCount),
+            pagination: this.feedVideoSummaryMapperService.toPagination(page, limit, totalCount),
         };
     }
 
     private toUploaderResponse(uploader: FeedTagUploaderSnapshot | null): FeedTagUploaderResult | null {
-        return this.feedVideoSummaryPresentationService.toUploaderResponse(uploader);
+        return this.feedVideoSummaryMapperService.toUploaderResponse(uploader);
     }
 }

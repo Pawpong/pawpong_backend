@@ -7,13 +7,13 @@ import type {
     FeedLikeUploaderResult,
     FeedMyLikedVideosResult,
 } from '../../application/types/feed-like-result.type';
-import { FeedVideoSummaryPresentationService } from '../../../domain/services/feed-video-summary-presentation.service';
+import { FeedVideoSummaryMapperService } from '../../../domain/services/feed-video-summary-mapper.service';
 
 type ThumbnailUrlResolver = (fileKey?: string) => string | Promise<string | null> | null;
 
 @Injectable()
-export class FeedLikePresentationService {
-    constructor(private readonly feedVideoSummaryPresentationService: FeedVideoSummaryPresentationService) {}
+export class FeedLikeResultMapperService {
+    constructor(private readonly feedVideoSummaryMapperService: FeedVideoSummaryMapperService) {}
 
     buildToggleResponse(isLiked: boolean, likeCount: number): FeedLikeToggleResult {
         return { isLiked, likeCount };
@@ -45,11 +45,11 @@ export class FeedLikePresentationService {
 
         return {
             videos: items,
-            pagination: this.feedVideoSummaryPresentationService.toPagination(page, limit, totalCount),
+            pagination: this.feedVideoSummaryMapperService.toPagination(page, limit, totalCount),
         };
     }
 
     private toUploaderResponse(uploader: FeedLikeUploaderSnapshot | null): FeedLikeUploaderResult | null {
-        return this.feedVideoSummaryPresentationService.toUploaderResponse(uploader);
+        return this.feedVideoSummaryMapperService.toUploaderResponse(uploader);
     }
 }

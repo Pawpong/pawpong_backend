@@ -2,10 +2,10 @@ import { BadRequestException } from '@nestjs/common';
 
 import { ToggleLikeUseCase } from '../../../../like/application/use-cases/toggle-like.use-case';
 import { FeedCacheKeyService } from '../../../../domain/services/feed-cache-key.service';
-import { FeedVideoSummaryPresentationService } from '../../../../domain/services/feed-video-summary-presentation.service';
+import { FeedVideoSummaryMapperService } from '../../../../domain/services/feed-video-summary-mapper.service';
 import { FeedLikeManagerPort } from '../../../../like/application/ports/feed-like-manager.port';
 import { FeedLikePolicyService } from '../../../../like/domain/services/feed-like-policy.service';
-import { FeedLikePresentationService } from '../../../../like/domain/services/feed-like-presentation.service';
+import { FeedLikeResultMapperService } from '../../../../like/domain/services/feed-like-result-mapper.service';
 
 describe('좋아요 전환 유스케이스', () => {
     const createManager = (): FeedLikeManagerPort => ({
@@ -27,7 +27,7 @@ describe('좋아요 전환 유스케이스', () => {
         const useCase = new ToggleLikeUseCase(
             manager,
             new FeedLikePolicyService(),
-            new FeedLikePresentationService(new FeedVideoSummaryPresentationService()),
+            new FeedLikeResultMapperService(new FeedVideoSummaryMapperService()),
             cacheManager as any,
             new FeedCacheKeyService(),
         );
@@ -51,7 +51,7 @@ describe('좋아요 전환 유스케이스', () => {
         const useCase = new ToggleLikeUseCase(
             manager,
             new FeedLikePolicyService(),
-            new FeedLikePresentationService(new FeedVideoSummaryPresentationService()),
+            new FeedLikeResultMapperService(new FeedVideoSummaryMapperService()),
             { del: jest.fn() } as any,
             new FeedCacheKeyService(),
         );

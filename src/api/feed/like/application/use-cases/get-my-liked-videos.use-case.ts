@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { FeedLikePresentationService } from '../../domain/services/feed-like-presentation.service';
+import { FeedLikeResultMapperService } from '../../domain/services/feed-like-result-mapper.service';
 import { FEED_LIKE_ASSET_URL_PORT, type FeedLikeAssetUrlPort } from '../ports/feed-like-asset-url.port';
 import { FEED_LIKE_MANAGER_PORT, type FeedLikeManagerPort } from '../ports/feed-like-manager.port';
 
@@ -9,7 +9,7 @@ export class GetMyLikedVideosUseCase {
     constructor(
         @Inject(FEED_LIKE_MANAGER_PORT)
         private readonly feedLikeManager: FeedLikeManagerPort,
-        private readonly feedLikePresentationService: FeedLikePresentationService,
+        private readonly feedLikeResultMapperService: FeedLikeResultMapperService,
         @Inject(FEED_LIKE_ASSET_URL_PORT)
         private readonly feedLikeAssetUrl: FeedLikeAssetUrlPort,
     ) {}
@@ -21,7 +21,7 @@ export class GetMyLikedVideosUseCase {
             this.feedLikeManager.countMyLikedVideos(userId),
         ]);
 
-        return this.feedLikePresentationService.buildMyLikedVideosResponse(
+        return this.feedLikeResultMapperService.buildMyLikedVideosResponse(
             videos,
             page,
             limit,
