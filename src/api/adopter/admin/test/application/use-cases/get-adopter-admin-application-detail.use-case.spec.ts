@@ -1,5 +1,5 @@
 import { ApplicationStatus } from '../../../../../../common/enum/user.enum';
-import { AdopterAdminApplicationDetailPresentationService } from '../../../domain/services/adopter-admin-application-detail-presentation.service';
+import { AdopterAdminApplicationDetailMapperService } from '../../../domain/services/adopter-admin-application-detail-mapper.service';
 import { AdopterAdminPolicyService } from '../../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminReaderPort } from '../../../application/ports/adopter-admin-reader.port';
 import { GetAdopterAdminApplicationDetailUseCase } from '../../../application/use-cases/get-adopter-admin-application-detail.use-case';
@@ -34,7 +34,7 @@ describe('입양자 관리자 입양 신청 상세 조회 유스케이스', () =
                 }),
             } as AdopterAdminReaderPort,
             new AdopterAdminPolicyService(),
-            new AdopterAdminApplicationDetailPresentationService(),
+            new AdopterAdminApplicationDetailMapperService(),
         );
 
         await expect(useCase.execute('admin-1', '507f1f77bcf86cd799439011')).resolves.toMatchObject({
@@ -61,7 +61,7 @@ describe('입양자 관리자 입양 신청 상세 조회 유스케이스', () =
                 findApplicationDetail: jest.fn(),
             } as AdopterAdminReaderPort,
             new AdopterAdminPolicyService(),
-            new AdopterAdminApplicationDetailPresentationService(),
+            new AdopterAdminApplicationDetailMapperService(),
         );
 
         await expect(useCase.execute('admin-1', '507f1f77bcf86cd799439011')).rejects.toThrow(

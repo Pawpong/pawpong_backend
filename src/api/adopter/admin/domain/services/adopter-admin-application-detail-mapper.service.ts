@@ -8,8 +8,8 @@ import type {
 } from '../../application/types/adopter-admin-result.type';
 
 @Injectable()
-export class AdopterAdminApplicationDetailPresentationService {
-    toApplicationDetail(snapshot: AdopterAdminApplicationDetailSnapshot): AdopterAdminApplicationDetailResult {
+export class AdopterAdminApplicationDetailMapperService {
+    toResult(snapshot: AdopterAdminApplicationDetailSnapshot): AdopterAdminApplicationDetailResult {
         return {
             applicationId: snapshot.applicationId,
             adopterName: snapshot.adopterName,

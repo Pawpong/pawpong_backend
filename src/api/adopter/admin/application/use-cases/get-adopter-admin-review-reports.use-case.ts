@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
-import { AdopterAdminReviewReportPresentationService } from '../../domain/services/adopter-admin-review-report-presentation.service';
+import { AdopterAdminReviewReportPageAssemblerService } from '../../domain/services/adopter-admin-review-report-page-assembler.service';
 import { ADOPTER_ADMIN_READER_PORT } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminReviewReportPageResult } from '../types/adopter-admin-result.type';
@@ -12,7 +12,7 @@ export class GetAdopterAdminReviewReportsUseCase {
         @Inject(ADOPTER_ADMIN_READER_PORT)
         private readonly adopterAdminReader: AdopterAdminReaderPort,
         private readonly adopterAdminPolicyService: AdopterAdminPolicyService,
-        private readonly adopterAdminReviewReportPresentationService: AdopterAdminReviewReportPresentationService,
+        private readonly adopterAdminReviewReportPageAssemblerService: AdopterAdminReviewReportPageAssemblerService,
     ) {}
 
     async execute(
@@ -25,6 +25,6 @@ export class GetAdopterAdminReviewReportsUseCase {
 
         const snapshot = await this.adopterAdminReader.findReportedReviews(page, limit);
 
-        return this.adopterAdminReviewReportPresentationService.toReviewReportsPage(snapshot);
+        return this.adopterAdminReviewReportPageAssemblerService.build(snapshot);
     }
 }
