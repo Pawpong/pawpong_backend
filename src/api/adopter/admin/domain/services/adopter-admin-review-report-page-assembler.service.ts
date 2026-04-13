@@ -5,8 +5,8 @@ import { buildPageResult } from '../../../../../common/types/page-result.type';
 import type { AdopterAdminReviewReportPageResult } from '../../application/types/adopter-admin-result.type';
 
 @Injectable()
-export class AdopterAdminReviewReportPresentationService {
-    toReviewReportsPage(
+export class AdopterAdminReviewReportPageAssemblerService {
+    build(
         snapshot: AdopterAdminReviewReportPageSnapshot,
     ): AdopterAdminReviewReportPageResult {
         return buildPageResult(
