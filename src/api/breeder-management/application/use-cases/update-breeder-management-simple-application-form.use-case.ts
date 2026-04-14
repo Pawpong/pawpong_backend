@@ -4,7 +4,7 @@ import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-pro
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_SETTINGS_PORT } from '../ports/breeder-management-settings.port';
 import type { BreederManagementSettingsPort } from '../ports/breeder-management-settings.port';
-import { BreederManagementApplicationCommandResponseService } from '../../domain/services/breeder-management-application-command-response.service';
+import { BreederManagementApplicationCommandResultMapperService } from '../../domain/services/breeder-management-application-command-result-mapper.service';
 import { BreederManagementSimpleApplicationFormBuilderService } from '../../domain/services/breeder-management-simple-application-form-builder.service';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class UpdateBreederManagementSimpleApplicationFormUseCase {
         @Inject(BREEDER_MANAGEMENT_SETTINGS_PORT)
         private readonly breederManagementSettingsPort: BreederManagementSettingsPort,
         private readonly breederManagementSimpleApplicationFormBuilderService: BreederManagementSimpleApplicationFormBuilderService,
-        private readonly breederManagementApplicationCommandResponseService: BreederManagementApplicationCommandResponseService,
+        private readonly breederManagementApplicationCommandResultMapperService: BreederManagementApplicationCommandResultMapperService,
     ) {}
 
     async execute(breederId: string, questions: Array<{ question: string }>) {
@@ -28,7 +28,7 @@ export class UpdateBreederManagementSimpleApplicationFormUseCase {
         const updatedBreeder = await this.breederManagementSettingsPort.updateApplicationForm(breederId, customQuestions);
         const persistedQuestions = updatedBreeder?.applicationForm ?? customQuestions;
 
-        return this.breederManagementApplicationCommandResponseService.createSimpleApplicationFormUpdated(
+        return this.breederManagementApplicationCommandResultMapperService.toSimpleApplicationFormUpdatedResult(
             persistedQuestions,
         );
     }

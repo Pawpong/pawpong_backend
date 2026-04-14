@@ -2,14 +2,14 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { BREEDER_MANAGEMENT_REVIEW_REPLY_PORT } from '../ports/breeder-management-review-reply.port';
 import type { BreederManagementReviewReplyPort } from '../ports/breeder-management-review-reply.port';
-import { BreederManagementReviewReplyResponseService } from '../../domain/services/breeder-management-review-reply-response.service';
+import { BreederManagementReviewReplyResultMapperService } from '../../domain/services/breeder-management-review-reply-result-mapper.service';
 
 @Injectable()
 export class RemoveBreederManagementReviewReplyUseCase {
     constructor(
         @Inject(BREEDER_MANAGEMENT_REVIEW_REPLY_PORT)
         private readonly breederManagementReviewReplyPort: BreederManagementReviewReplyPort,
-        private readonly breederManagementReviewReplyResponseService: BreederManagementReviewReplyResponseService,
+        private readonly breederManagementReviewReplyResultMapperService: BreederManagementReviewReplyResultMapperService,
     ) {}
 
     async execute(breederId: string, reviewId: string): Promise<{ reviewId: string; message: string }> {
@@ -24,6 +24,6 @@ export class RemoveBreederManagementReviewReplyUseCase {
 
         await this.breederManagementReviewReplyPort.deleteReply(reviewId);
 
-        return this.breederManagementReviewReplyResponseService.createReviewReplyDeleted(reviewId);
+        return this.breederManagementReviewReplyResultMapperService.toReviewReplyDeletedResult(reviewId);
     }
 }

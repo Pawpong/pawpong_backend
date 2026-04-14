@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { VideoStatus } from '../../../../../schema/video.schema';
+import { VideoStatus } from '../../../../../common/enum/video-status.enum';
 import { PageInfoDto } from '../../../../../common/dto/pagination/page-info.dto';
 
 class FeedVideoUploaderDto {

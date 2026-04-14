@@ -4,7 +4,7 @@ import type { Response } from 'express';
 import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import { ProxyHlsFileUseCase } from './application/use-cases/proxy-hls-file.use-case';
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
-import { FeedVideoStreamResponseService } from './infrastructure/feed-video-stream-response.service';
+import { FeedVideoStreamResponseService } from './presentation/services/feed-video-stream-response.service';
 import { ApiStreamFeedVideoEndpoint } from './swagger';
 
 @FeedPublicController()

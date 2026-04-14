@@ -8,7 +8,7 @@ import { NotificationMarkAllReadController } from './notification-mark-all-read.
 import { NotificationMarkReadController } from './notification-mark-read.controller';
 import { NotificationUnreadCountController } from './notification-unread-count.controller';
 import { NOTIFICATION_DISPATCH_PORT } from './application/ports/notification-dispatch.port';
-import { NotificationDispatchService } from './application/services/notification-dispatch.service';
+import { NotificationDispatchFacade } from './application/facades/notification-dispatch.facade';
 import { CreateNotificationUseCase } from './application/use-cases/create-notification.use-case';
 import { CreateNotificationFromBuilderUseCase } from './application/use-cases/create-notification-from-builder.use-case';
 import { GetNotificationsUseCase } from './application/use-cases/get-notifications.use-case';
@@ -21,7 +21,7 @@ import { NotificationItemMapperService } from './domain/services/notification-it
 import { NotificationPageAssemblerService } from './domain/services/notification-page-assembler.service';
 import { NotificationPaginationAssemblerService } from './domain/services/notification-pagination-assembler.service';
 import { NotificationMessageTemplateService } from './domain/services/notification-message-template.service';
-import { NotificationStateResponseService } from './domain/services/notification-state-response.service';
+import { NotificationStateResultMapperService } from './domain/services/notification-state-result-mapper.service';
 import { NotificationMongooseInboxAdapter } from './infrastructure/notification-mongoose-inbox.adapter';
 import { NotificationMongooseCommandAdapter } from './infrastructure/notification-mongoose-command.adapter';
 import { NotificationMailAdapter } from './infrastructure/notification-mail.adapter';
@@ -56,14 +56,14 @@ import { MailModule } from '../../common/mail/mail.module';
     ],
     providers: [
         NotificationRepository,
-        NotificationDispatchService,
+        NotificationDispatchFacade,
         CreateNotificationUseCase,
         CreateNotificationFromBuilderUseCase,
         NotificationItemMapperService,
         NotificationPageAssemblerService,
         NotificationPaginationAssemblerService,
         NotificationMessageTemplateService,
-        NotificationStateResponseService,
+        NotificationStateResultMapperService,
         NotificationMongooseInboxAdapter,
         NotificationMongooseCommandAdapter,
         NotificationMailAdapter,
@@ -99,7 +99,7 @@ import { MailModule } from '../../common/mail/mail.module';
         },
         {
             provide: NOTIFICATION_DISPATCH_PORT,
-            useExisting: NotificationDispatchService,
+            useExisting: NotificationDispatchFacade,
         },
     ],
     exports: [NOTIFICATION_DISPATCH_PORT],

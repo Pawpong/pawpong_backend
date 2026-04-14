@@ -1,16 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-
-/**
- * 동영상 처리 상태
- */
-export enum VideoStatus {
-    PENDING = 'pending', // 업로드 대기
-    UPLOADING = 'uploading', // 업로드 중
-    PROCESSING = 'processing', // 인코딩 중
-    READY = 'ready', // 재생 가능
-    FAILED = 'failed', // 인코딩 실패
-}
+import { VideoStatus } from '../common/enum/video-status.enum';
 
 /**
  * 동영상 스키마

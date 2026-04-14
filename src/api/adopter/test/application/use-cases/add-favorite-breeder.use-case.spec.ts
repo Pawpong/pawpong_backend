@@ -1,5 +1,6 @@
 import { AddFavoriteBreederUseCase } from '../../../application/use-cases/add-favorite-breeder.use-case';
 import { AdopterFavoritePolicyService } from '../../../domain/services/adopter-favorite-policy.service';
+import { AdopterFavoriteRecordMapperService } from '../../../domain/services/adopter-favorite-record-mapper.service';
 
 describe('브리더 즐겨찾기 추가 유스케이스', () => {
     const adopterProfilePort = {
@@ -17,6 +18,7 @@ describe('브리더 즐겨찾기 추가 유스케이스', () => {
         adopterProfilePort as any,
         breederReaderPort as any,
         new AdopterFavoritePolicyService(),
+        new AdopterFavoriteRecordMapperService(),
     );
 
     beforeEach(() => {

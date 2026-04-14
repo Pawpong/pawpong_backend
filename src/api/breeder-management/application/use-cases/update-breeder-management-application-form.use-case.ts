@@ -4,7 +4,7 @@ import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-pro
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_SETTINGS_PORT } from '../ports/breeder-management-settings.port';
 import type { BreederManagementSettingsPort } from '../ports/breeder-management-settings.port';
-import { BreederManagementApplicationCommandResponseService } from '../../domain/services/breeder-management-application-command-response.service';
+import { BreederManagementApplicationCommandResultMapperService } from '../../domain/services/breeder-management-application-command-result-mapper.service';
 import { BreederManagementApplicationFormValidatorService } from '../../domain/services/breeder-management-application-form-validator.service';
 import type { BreederManagementApplicationFormUpdateCommand } from '../types/breeder-management-application-command.type';
 
@@ -16,7 +16,7 @@ export class UpdateBreederManagementApplicationFormUseCase {
         @Inject(BREEDER_MANAGEMENT_SETTINGS_PORT)
         private readonly breederManagementSettingsPort: BreederManagementSettingsPort,
         private readonly breederManagementApplicationFormValidatorService: BreederManagementApplicationFormValidatorService,
-        private readonly breederManagementApplicationCommandResponseService: BreederManagementApplicationCommandResponseService,
+        private readonly breederManagementApplicationCommandResultMapperService: BreederManagementApplicationCommandResultMapperService,
     ) {}
 
     async execute(breederId: string, updateDto: BreederManagementApplicationFormUpdateCommand) {
@@ -44,7 +44,7 @@ export class UpdateBreederManagementApplicationFormUseCase {
         const customQuestions = this.breederManagementApplicationFormValidatorService.toStoredQuestions(updateDto);
         const updatedBreeder = await this.breederManagementSettingsPort.updateApplicationForm(breederId, customQuestions);
 
-        return this.breederManagementApplicationCommandResponseService.createApplicationFormUpdated(
+        return this.breederManagementApplicationCommandResultMapperService.toApplicationFormUpdatedResult(
             updatedBreeder?.applicationForm ?? customQuestions,
         );
     }

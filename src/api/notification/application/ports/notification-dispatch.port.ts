@@ -1,7 +1,8 @@
 import { NotificationBuilder } from '../../builder/notification.builder';
-import { NotificationType, Notification } from '../../../../schema/notification.schema';
-import type { NotificationMetadata } from '../../../../schema/notification.schema';
 import { RecipientType } from '../../../../common/enum/user.enum';
+import { NotificationType } from '../../../../common/enum/user.enum';
+import type { NotificationDocumentRecord } from '../../types/notification-record.type';
+import type { NotificationMetadata } from '../../types/notification-metadata.type';
 
 export const NOTIFICATION_DISPATCH_PORT = Symbol('NOTIFICATION_DISPATCH_PORT');
 
@@ -12,7 +13,7 @@ export interface NotificationDispatchPort {
         type: NotificationType,
         metadata?: NotificationMetadata,
         targetUrl?: string,
-    ): Promise<Notification>;
+    ): Promise<NotificationDocumentRecord>;
 
     to(recipientId: string, recipientType: RecipientType): NotificationBuilder;
 }

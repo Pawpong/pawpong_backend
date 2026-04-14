@@ -4,7 +4,7 @@ import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-pro
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
-import { BreederManagementAvailablePetCommandResponseService } from '../../domain/services/breeder-management-available-pet-command-response.service';
+import { BreederManagementAvailablePetCommandResultMapperService } from '../../domain/services/breeder-management-available-pet-command-result-mapper.service';
 import { BreederManagementAvailablePetCommandMapperService } from '../../domain/services/breeder-management-available-pet-command-mapper.service';
 import type { BreederManagementAvailablePetCreateCommand } from '../types/breeder-management-pet-command.type';
 
@@ -16,7 +16,7 @@ export class AddBreederManagementAvailablePetUseCase {
         @Inject(BREEDER_MANAGEMENT_PET_COMMAND_PORT)
         private readonly breederManagementPetCommandPort: BreederManagementPetCommandPort,
         private readonly breederManagementAvailablePetCommandMapperService: BreederManagementAvailablePetCommandMapperService,
-        private readonly breederManagementAvailablePetCommandResponseService: BreederManagementAvailablePetCommandResponseService,
+        private readonly breederManagementAvailablePetCommandResultMapperService: BreederManagementAvailablePetCommandResultMapperService,
     ) {}
 
     async execute(
@@ -32,6 +32,6 @@ export class AddBreederManagementAvailablePetUseCase {
             this.breederManagementAvailablePetCommandMapperService.toCreateData(userId, availablePetDto),
         );
 
-        return this.breederManagementAvailablePetCommandResponseService.createAvailablePetAdded(String(savedPet._id));
+        return this.breederManagementAvailablePetCommandResultMapperService.toAvailablePetAddedResult(String(savedPet._id));
     }
 }

@@ -13,7 +13,7 @@ import {
 import { SearchByTagUseCase } from './application/use-cases/search-by-tag.use-case';
 import { GetPopularTagsUseCase } from './application/use-cases/get-popular-tags.use-case';
 import { SuggestTagsUseCase } from './application/use-cases/suggest-tags.use-case';
-import { FeedTagQueryService } from './domain/services/feed-tag-query.service';
+import { FeedTagNormalizerService } from './domain/services/feed-tag-normalizer.service';
 import { FeedTagSearchResultAssemblerService } from './domain/services/feed-tag-search-result-assembler.service';
 import { FeedTagMongooseReaderAdapter } from './infrastructure/feed-tag-mongoose-reader.adapter';
 import { FeedTagStorageAssetUrlAdapter } from './infrastructure/feed-tag-storage-asset-url.adapter';
@@ -34,7 +34,7 @@ import { FEED_TAG_READER_PORT } from './application/ports/feed-tag-reader.port';
         SuggestTagsUseCase,
         FeedCacheKeyService,
         FeedVideoSummaryMapperService,
-        FeedTagQueryService,
+        FeedTagNormalizerService,
         FeedTagSearchResultAssemblerService,
         FeedTagRepository,
         FeedTagMongooseReaderAdapter,

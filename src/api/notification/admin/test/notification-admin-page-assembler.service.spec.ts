@@ -1,4 +1,4 @@
-import { NotificationType } from '../../../../schema/notification.schema';
+import { NotificationType } from '../../../../common/enum/user.enum';
 import { NotificationAdminItemMapperService } from '../domain/services/notification-admin-item-mapper.service';
 import { NotificationAdminPageAssemblerService } from '../domain/services/notification-admin-page-assembler.service';
 import { NotificationAdminPaginationAssemblerService } from '../domain/services/notification-admin-pagination-assembler.service';

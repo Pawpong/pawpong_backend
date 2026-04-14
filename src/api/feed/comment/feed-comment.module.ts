@@ -15,7 +15,7 @@ import {
     GET_FEED_VIDEO_REPLIES_USE_CASE,
     UPDATE_FEED_VIDEO_COMMENT_USE_CASE,
 } from './application/tokens/feed-comment-interaction.token';
-import { FeedCommentCommandResponseService } from './domain/services/feed-comment-command-response.service';
+import { FeedCommentCommandResultMapperService } from './domain/services/feed-comment-command-result-mapper.service';
 import { FeedCommentPageAssemblerService } from './domain/services/feed-comment-page-assembler.service';
 import { FeedCommentPolicyService } from './domain/services/feed-comment-policy.service';
 import { FeedCommentMongooseManagerAdapter } from './infrastructure/feed-comment-mongoose-manager.adapter';
@@ -42,7 +42,7 @@ import { FEED_COMMENT_MANAGER_PORT } from './application/ports/feed-comment-mana
         DeleteCommentUseCase,
         FeedCacheKeyService,
         FeedCommentPolicyService,
-        FeedCommentCommandResponseService,
+        FeedCommentCommandResultMapperService,
         FeedCommentPageAssemblerService,
         FeedCommentRepository,
         FeedCommentMongooseManagerAdapter,

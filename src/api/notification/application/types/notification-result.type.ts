@@ -1,6 +1,6 @@
-import { NotificationType } from '../../../../schema/notification.schema';
-import type { NotificationMetadata } from '../../../../schema/notification.schema';
 import type { PageResult } from '../../../../common/types/page-result.type';
+import { NotificationType } from '../../../../common/enum/user.enum';
+import type { NotificationMetadata } from '../../types/notification-metadata.type';
 
 export type NotificationItemResult = {
     notificationId: string;

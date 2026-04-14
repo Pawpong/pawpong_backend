@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
 
-import { VideoStatus } from '../../../../../schema/video.schema';
+import { VideoStatus } from '../../../../../common/enum/video-status.enum';
 import { FeedVideoCommandPolicyService } from '../../domain/services/feed-video-command-policy.service';
 import { FEED_VIDEO_COMMAND_PORT, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
 

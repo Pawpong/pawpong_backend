@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { FeedVideoCommandSnapshot } from '../../application/ports/feed-video-command.port';
-import { VideoStatus } from '../../../../../schema/video.schema';
+import { VideoStatus } from '../../../../../common/enum/video-status.enum';
 
 @Injectable()
 export class FeedVideoCommandPolicyService {

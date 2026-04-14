@@ -1,6 +1,8 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
 import { CompleteLegacySocialRegistrationUseCase } from '../../../application/use-cases/complete-legacy-social-registration.use-case';
+import { AuthPhoneNumberNormalizerService } from '../../../domain/services/auth-phone-number-normalizer.service';
+import { AuthSocialRegistrationResultMapperService } from '../../../domain/services/auth-social-registration-result-mapper.service';
 
 describe('레거시 소셜 가입 완료 유스케이스', () => {
     const authRegistrationPort = {
@@ -19,10 +21,14 @@ describe('레거시 소셜 가입 완료 유스케이스', () => {
         generateTokens: jest.fn(),
         hashRefreshToken: jest.fn(),
     };
+    const authPhoneNumberNormalizerService = new AuthPhoneNumberNormalizerService();
+    const authSocialRegistrationResultMapperService = new AuthSocialRegistrationResultMapperService();
 
     const useCase = new CompleteLegacySocialRegistrationUseCase(
         authRegistrationPort as any,
         authTokenService as any,
+        authPhoneNumberNormalizerService,
+        authSocialRegistrationResultMapperService,
     );
 
     beforeEach(() => {

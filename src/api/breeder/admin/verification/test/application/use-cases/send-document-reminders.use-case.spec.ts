@@ -2,7 +2,7 @@ import { ForbiddenException } from '@nestjs/common';
 
 import { SendDocumentRemindersUseCase } from '../../../application/use-cases/send-document-reminders.use-case';
 import { BreederVerificationAdminActivityLogFactoryService } from '../../../domain/services/breeder-verification-admin-activity-log-factory.service';
-import { BreederVerificationAdminCommandResponseService } from '../../../domain/services/breeder-verification-admin-command-response.service';
+import { BreederVerificationAdminCommandResultMapperService } from '../../../domain/services/breeder-verification-admin-command-result-mapper.service';
 import { BreederVerificationAdminPolicyService } from '../../../domain/services/breeder-verification-admin-policy.service';
 
 describe('문서 리마인드 발송 유스케이스', () => {
@@ -22,7 +22,7 @@ describe('문서 리마인드 발송 유스케이스', () => {
         notifier as any,
         new BreederVerificationAdminPolicyService(),
         new BreederVerificationAdminActivityLogFactoryService(),
-        new BreederVerificationAdminCommandResponseService(),
+        new BreederVerificationAdminCommandResultMapperService(),
     );
 
     beforeEach(() => {

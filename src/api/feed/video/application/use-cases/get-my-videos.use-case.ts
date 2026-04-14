@@ -1,7 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { FeedVideoLibraryAssemblerService } from '../../domain/services/feed-video-library-assembler.service';
-import { FeedVideoAssetUrlService } from '../../infrastructure/feed-video-asset-url.service';
+import { FEED_VIDEO_ASSET_URL_PORT, type FeedVideoAssetUrlPort } from '../ports/feed-video-asset-url.port';
 import { FEED_VIDEO_COMMAND_PORT, type FeedVideoCommandPort } from '../ports/feed-video-command.port';
 import type { FeedMyVideoListResult } from '../types/feed-video-result.type';
 
@@ -11,7 +11,8 @@ export class GetMyVideosUseCase {
         @Inject(FEED_VIDEO_COMMAND_PORT)
         private readonly feedVideoCommand: FeedVideoCommandPort,
         private readonly feedVideoLibraryAssemblerService: FeedVideoLibraryAssemblerService,
-        private readonly feedVideoAssetUrlService: FeedVideoAssetUrlService,
+        @Inject(FEED_VIDEO_ASSET_URL_PORT)
+        private readonly feedVideoAssetUrlPort: FeedVideoAssetUrlPort,
     ) {}
 
     async execute(userId: string, page: number = 1, limit: number = 20): Promise<FeedMyVideoListResult> {
@@ -26,7 +27,7 @@ export class GetMyVideosUseCase {
             page,
             limit,
             totalCount,
-            (fileKey) => this.feedVideoAssetUrlService.getSignedUrlWithCache(fileKey, 3000),
+            (fileKey) => this.feedVideoAssetUrlPort.getSignedUrl(fileKey, 3000),
         );
     }
 }

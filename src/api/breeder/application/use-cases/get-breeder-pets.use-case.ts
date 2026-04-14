@@ -4,7 +4,7 @@ import { BREEDER_PUBLIC_READER_PORT } from '../ports/breeder-public-reader.port'
 import { BREEDER_FILE_URL_PORT } from '../ports/breeder-file-url.port';
 import type { BreederPublicReaderPort } from '../ports/breeder-public-reader.port';
 import type { BreederFileUrlPort } from '../ports/breeder-file-url.port';
-import { BreederPublicPetListResponseMapperService } from '../../domain/services/breeder-public-pet-list-response-mapper.service';
+import { BreederPublicPetPageAssemblerService } from '../../domain/services/breeder-public-pet-page-assembler.service';
 
 @Injectable()
 export class GetBreederPetsUseCase {
@@ -13,7 +13,7 @@ export class GetBreederPetsUseCase {
         private readonly breederPublicReaderPort: BreederPublicReaderPort,
         @Inject(BREEDER_FILE_URL_PORT)
         private readonly breederFileUrlPort: BreederFileUrlPort,
-        private readonly breederPublicPetListResponseMapperService: BreederPublicPetListResponseMapperService,
+        private readonly breederPublicPetPageAssemblerService: BreederPublicPetPageAssemblerService,
     ) {}
 
     async execute(breederId: string, status?: string, page: number = 1, limit: number = 20) {
@@ -23,7 +23,7 @@ export class GetBreederPetsUseCase {
         }
 
         const pets = await this.breederPublicReaderPort.findActiveAvailablePetsByBreederId(breederId);
-        return this.breederPublicPetListResponseMapperService.toPaginationResponse(
+        return this.breederPublicPetPageAssemblerService.build(
             pets,
             status,
             page,

@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { Video, VideoDocument, VideoStatus } from '../../../../schema/video.schema';
+import { Video, VideoDocument } from '../../../../schema/video.schema';
+import { VideoStatus } from '../../../../common/enum/video-status.enum';
 import { FeedVideoEncodingResult } from '../application/ports/feed-video-command.port';
 import type { FeedVideoDocumentRecord } from '../../types/feed-document.type';
 

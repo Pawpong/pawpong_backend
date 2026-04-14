@@ -11,7 +11,7 @@ import {
     type BreederManagementVerificationSubmissionNotification,
     type BreederManagementVerificationNotifierPort,
 } from '../../../application/ports/breeder-management-verification-notifier.port';
-import { BreederManagementVerificationCommandResponseService } from '../../../domain/services/breeder-management-verification-command-response.service';
+import { BreederManagementVerificationCommandResultMapperService } from '../../../domain/services/breeder-management-verification-command-result-mapper.service';
 import { BreederManagementVerificationDocumentPolicyService } from '../../../domain/services/breeder-management-verification-document-policy.service';
 import { BreederManagementVerificationNotificationPayloadFactoryService } from '../../../domain/services/breeder-management-verification-notification-payload-factory.service';
 import { SubmitBreederManagementVerificationDocumentsUseCase } from '../../../application/use-cases/submit-breeder-management-verification-documents.use-case';
@@ -102,7 +102,7 @@ describe('브리더 관리 인증 문서 제출 유스케이스', () => {
             new StubFileUrlPort() as unknown as BreederManagementFileUrlPort,
             draftStore,
             notifier,
-            new BreederManagementVerificationCommandResponseService(),
+            new BreederManagementVerificationCommandResultMapperService(),
             new BreederManagementVerificationDocumentPolicyService(),
             new BreederManagementVerificationNotificationPayloadFactoryService(),
         );

@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-profile.port';
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
-import { BreederManagementProfileCommandResponseService } from '../../domain/services/breeder-management-profile-command-response.service';
+import { BreederManagementProfileCommandResultMapperService } from '../../domain/services/breeder-management-profile-command-result-mapper.service';
 import { BreederManagementProfileUpdateMapperService } from '../../domain/services/breeder-management-profile-update-mapper.service';
 import type { BreederManagementProfileUpdateCommand } from '../types/breeder-management-profile-command.type';
 
@@ -12,7 +12,7 @@ export class UpdateBreederManagementProfileUseCase {
         @Inject(BREEDER_MANAGEMENT_PROFILE_PORT)
         private readonly breederManagementProfilePort: BreederManagementProfilePort,
         private readonly breederManagementProfileUpdateMapperService: BreederManagementProfileUpdateMapperService,
-        private readonly breederManagementProfileCommandResponseService: BreederManagementProfileCommandResponseService,
+        private readonly breederManagementProfileCommandResultMapperService: BreederManagementProfileCommandResultMapperService,
     ) {}
 
     async execute(userId: string, updateData: BreederManagementProfileUpdateCommand): Promise<{ message: string }> {
@@ -24,6 +24,6 @@ export class UpdateBreederManagementProfileUseCase {
         const mappedUpdateData = this.breederManagementProfileUpdateMapperService.toUpdateData(breeder, updateData);
         await this.breederManagementProfilePort.updateProfile(userId, mappedUpdateData);
 
-        return this.breederManagementProfileCommandResponseService.createProfileUpdated();
+        return this.breederManagementProfileCommandResultMapperService.toProfileUpdatedResult();
     }
 }

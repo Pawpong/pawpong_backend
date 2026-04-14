@@ -1,7 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
-import { NotificationType, NOTIFICATION_MESSAGES } from '../../../../schema/notification.schema';
-import type { NotificationMetadata } from '../../../../schema/notification.schema';
+import { NotificationType } from '../../../../common/enum/user.enum';
+import { NOTIFICATION_MESSAGES } from '../../constants/notification-message.constant';
+import type { NotificationMetadata } from '../../types/notification-metadata.type';
 
 @Injectable()
 export class NotificationMessageTemplateService {

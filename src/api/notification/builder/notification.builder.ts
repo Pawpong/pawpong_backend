@@ -1,6 +1,6 @@
 import { NotificationType, RecipientType } from '../../../common/enum/user.enum';
 import type { NotificationItemResult } from '../application/types/notification-result.type';
-import type { NotificationMetadata } from '../../../schema/notification.schema';
+import type { NotificationMetadata } from '../types/notification-metadata.type';
 
 // Alias for backward compatibility
 export type NotificationItemDto = NotificationItemResult;

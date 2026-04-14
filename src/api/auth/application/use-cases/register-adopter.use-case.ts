@@ -1,7 +1,6 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 
 import { UserStatus } from '../../../../common/enum/user.enum';
-import { AuthMapper } from '../../mapper/auth.mapper';
 import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../ports/auth-registration.port';
 import {
     AUTH_REGISTRATION_NOTIFICATION_PORT,
@@ -11,6 +10,8 @@ import { AUTH_TOKEN_PORT, type AuthTokenPort } from '../ports/auth-token.port';
 import { type RegisterAdopterAuthSignupCommand, type RegisterAdopterAuthSignupResult } from '../types/auth-signup.type';
 import { AuthSocialIdentityService } from '../../domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from '../../domain/services/auth-stored-file-name.service';
+import { AuthPhoneNumberNormalizerService } from '../../domain/services/auth-phone-number-normalizer.service';
+import { AuthSignupResultMapperService } from '../../domain/services/auth-signup-result-mapper.service';
 
 @Injectable()
 export class RegisterAdopterUseCase {
@@ -23,6 +24,8 @@ export class RegisterAdopterUseCase {
         private readonly authTokenPort: AuthTokenPort,
         private readonly authSocialIdentityService: AuthSocialIdentityService,
         private readonly authStoredFileNameService: AuthStoredFileNameService,
+        private readonly authPhoneNumberNormalizerService: AuthPhoneNumberNormalizerService,
+        private readonly authSignupResultMapperService: AuthSignupResultMapperService,
     ) {}
 
     async execute(dto: RegisterAdopterAuthSignupCommand): Promise<RegisterAdopterAuthSignupResult> {
@@ -49,7 +52,7 @@ export class RegisterAdopterUseCase {
         const savedAdopter = await this.authRegistrationPort.createAdopter({
             emailAddress: dto.email,
             nickname: dto.nickname,
-            phoneNumber: AuthMapper.normalizePhoneNumber(dto.phone),
+            phoneNumber: this.authPhoneNumberNormalizerService.normalize(dto.phone),
             profileImageFileName: this.authStoredFileNameService.extract(dto.profileImage) || '',
             socialAuthInfo: {
                 authProvider: provider,
@@ -83,6 +86,6 @@ export class RegisterAdopterUseCase {
             provider,
         });
 
-        return AuthMapper.toAdopterRegisterResponse(savedAdopter, tokens);
+        return this.authSignupResultMapperService.toAdopterResult(savedAdopter, tokens);
     }
 }

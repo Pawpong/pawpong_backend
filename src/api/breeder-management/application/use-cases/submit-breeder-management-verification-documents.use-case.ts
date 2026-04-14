@@ -15,7 +15,7 @@ import {
     BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT,
     type BreederManagementVerificationNotifierPort,
 } from '../ports/breeder-management-verification-notifier.port';
-import { BreederManagementVerificationCommandResponseService } from '../../domain/services/breeder-management-verification-command-response.service';
+import { BreederManagementVerificationCommandResultMapperService } from '../../domain/services/breeder-management-verification-command-result-mapper.service';
 import { BreederManagementVerificationDocumentPolicyService } from '../../domain/services/breeder-management-verification-document-policy.service';
 import { BreederManagementVerificationNotificationPayloadFactoryService } from '../../domain/services/breeder-management-verification-notification-payload-factory.service';
 import type { BreederManagementVerificationDocumentsSubmitCommand } from '../types/breeder-management-verification-command.type';
@@ -33,7 +33,7 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
         private readonly breederManagementVerificationDraftStorePort: BreederManagementVerificationDraftStorePort,
         @Inject(BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT)
         private readonly breederManagementVerificationNotifierPort: BreederManagementVerificationNotifierPort,
-        private readonly breederManagementVerificationCommandResponseService: BreederManagementVerificationCommandResponseService,
+        private readonly breederManagementVerificationCommandResultMapperService: BreederManagementVerificationCommandResultMapperService,
         private readonly breederManagementVerificationDocumentPolicyService: BreederManagementVerificationDocumentPolicyService,
         private readonly breederManagementVerificationNotificationPayloadFactoryService: BreederManagementVerificationNotificationPayloadFactoryService,
     ) {}
@@ -78,6 +78,6 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
 
         await this.breederManagementVerificationDraftStorePort.delete(userId);
 
-        return this.breederManagementVerificationCommandResponseService.createVerificationDocumentsSubmitted();
+        return this.breederManagementVerificationCommandResultMapperService.toVerificationDocumentsSubmittedResult();
     }
 }

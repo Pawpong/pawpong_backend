@@ -18,8 +18,7 @@ import { BREEDER_VERIFICATION_ADMIN_NOTIFIER_PORT } from './application/ports/br
 import { BREEDER_VERIFICATION_ADMIN_FILE_URL_PORT } from './application/ports/breeder-verification-admin-file-url.port';
 import { BreederVerificationAdminPolicyService } from './domain/services/breeder-verification-admin-policy.service';
 import { BreederVerificationAdminActivityLogFactoryService } from './domain/services/breeder-verification-admin-activity-log-factory.service';
-import { BreederVerificationAdminCommandResponseService } from './domain/services/breeder-verification-admin-command-response.service';
-import { BreederVerificationAdminListPaginationService } from './domain/services/breeder-verification-admin-list-pagination.service';
+import { BreederVerificationAdminCommandResultMapperService } from './domain/services/breeder-verification-admin-command-result-mapper.service';
 import { BreederVerificationAdminBreederItemMapperService } from './domain/services/breeder-verification-admin-breeder-item-mapper.service';
 import { BreederVerificationAdminDetailMapperService } from './domain/services/breeder-verification-admin-detail-mapper.service';
 import { BreederVerificationAdminLevelChangeItemMapperService } from './domain/services/breeder-verification-admin-level-change-item-mapper.service';
@@ -76,8 +75,7 @@ import { NotificationModule } from '../../../notification/notification.module';
         BreederVerificationAdminPolicyService,
         BreederVerificationAdminActivityLogFactoryService,
         BreederPaginationAssemblerService,
-        BreederVerificationAdminCommandResponseService,
-        BreederVerificationAdminListPaginationService,
+        BreederVerificationAdminCommandResultMapperService,
         BreederVerificationAdminListItemMapperService,
         BreederVerificationAdminLevelChangeItemMapperService,
         BreederVerificationAdminPendingBreederItemMapperService,

@@ -2,9 +2,9 @@ import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { ApplicationStatus } from '../../../common/enum/user.enum';
+import { NotificationType } from '../../../common/enum/user.enum';
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
 import { MailService } from '../../../common/mail/mail.service';
-import { NotificationType } from '../../../schema/notification.schema';
 import {
     NOTIFICATION_DISPATCH_PORT,
     type NotificationDispatchPort,

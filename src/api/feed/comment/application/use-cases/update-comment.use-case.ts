@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { FeedCommentCommandResponseService } from '../../domain/services/feed-comment-command-response.service';
+import { FeedCommentCommandResultMapperService } from '../../domain/services/feed-comment-command-result-mapper.service';
 import { FeedCommentPolicyService } from '../../domain/services/feed-comment-policy.service';
 import { FEED_COMMENT_MANAGER_PORT, type FeedCommentManagerPort } from '../ports/feed-comment-manager.port';
 
@@ -10,7 +10,7 @@ export class UpdateCommentUseCase {
         @Inject(FEED_COMMENT_MANAGER_PORT)
         private readonly feedCommentManager: FeedCommentManagerPort,
         private readonly feedCommentPolicyService: FeedCommentPolicyService,
-        private readonly feedCommentCommandResponseService: FeedCommentCommandResponseService,
+        private readonly feedCommentCommandResultMapperService: FeedCommentCommandResultMapperService,
     ) {}
 
     async execute(commentId: string, userId: string, content: string) {
@@ -21,6 +21,6 @@ export class UpdateCommentUseCase {
             await this.feedCommentManager.updateCommentContent(commentId, content),
         );
 
-        return this.feedCommentCommandResponseService.buildUpdateResponse(updatedComment);
+        return this.feedCommentCommandResultMapperService.toUpdateResult(updatedComment);
     }
 }

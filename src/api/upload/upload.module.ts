@@ -42,6 +42,7 @@ import { DeleteUploadedFileUseCase } from './application/use-cases/delete-upload
 import { UploadFilePolicyService } from './domain/services/upload-file-policy.service';
 import { UploadStoredFilePathService } from './domain/services/upload-stored-file-path.service';
 import { UploadPhotoCollectionService } from './domain/services/upload-photo-collection.service';
+import { UploadResultMapperService } from './domain/services/upload-result-mapper.service';
 import { UploadStorageAdapter } from './infrastructure/upload-storage.adapter';
 import { UploadMongooseOwnerAdapter } from './infrastructure/upload-mongoose-owner.adapter';
 import { UploadOwnerRepository } from './repository/upload-owner.repository';
@@ -99,6 +100,7 @@ import { StorageModule } from '../../common/storage/storage.module';
         DeleteFolderUseCase,
         CheckFileReferencesUseCase,
         GetAllReferencedFilesUseCase,
+        UploadResultMapperService,
         UploadFilePolicyService,
         UploadStoredFilePathService,
         UploadPhotoCollectionService,

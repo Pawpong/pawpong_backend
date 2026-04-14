@@ -3,14 +3,14 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { PetStatus } from '../../../../common/enum/user.enum';
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
-import { BreederManagementAvailablePetStatusResponseService } from '../../domain/services/breeder-management-available-pet-status-response.service';
+import { BreederManagementAvailablePetStatusResultMapperService } from '../../domain/services/breeder-management-available-pet-status-result-mapper.service';
 
 @Injectable()
 export class UpdateBreederManagementAvailablePetStatusUseCase {
     constructor(
         @Inject(BREEDER_MANAGEMENT_PET_COMMAND_PORT)
         private readonly breederManagementPetCommandPort: BreederManagementPetCommandPort,
-        private readonly breederManagementAvailablePetStatusResponseService: BreederManagementAvailablePetStatusResponseService,
+        private readonly breederManagementAvailablePetStatusResultMapperService: BreederManagementAvailablePetStatusResultMapperService,
     ) {}
 
     async execute(userId: string, petId: string, status: PetStatus): Promise<{ message: string }> {
@@ -21,6 +21,6 @@ export class UpdateBreederManagementAvailablePetStatusUseCase {
 
         await this.breederManagementPetCommandPort.updateAvailablePetStatus(petId, status);
 
-        return this.breederManagementAvailablePetStatusResponseService.createAvailablePetStatusUpdated();
+        return this.breederManagementAvailablePetStatusResultMapperService.toAvailablePetStatusUpdatedResult();
     }
 }

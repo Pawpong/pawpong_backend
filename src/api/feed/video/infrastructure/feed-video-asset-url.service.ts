@@ -4,9 +4,10 @@ import type { Cache } from 'cache-manager';
 
 import { FeedCacheKeyService } from '../../../feed/domain/services/feed-cache-key.service';
 import { StorageService } from '../../../../common/storage/storage.service';
+import { type FeedVideoAssetUrlPort } from '../application/ports/feed-video-asset-url.port';
 
 @Injectable()
-export class FeedVideoAssetUrlService {
+export class FeedVideoAssetUrlService implements FeedVideoAssetUrlPort {
     constructor(
         @Inject(CACHE_MANAGER)
         private readonly cacheManager: Cache,
@@ -14,7 +15,7 @@ export class FeedVideoAssetUrlService {
         private readonly feedCacheKeyService: FeedCacheKeyService,
     ) {}
 
-    async getSignedUrlWithCache(fileKey: string, ttlSeconds: number): Promise<string> {
+    async getSignedUrl(fileKey: string, ttlSeconds: number): Promise<string> {
         if (!fileKey) {
             return '';
         }

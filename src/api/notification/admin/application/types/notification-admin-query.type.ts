@@ -1,4 +1,4 @@
-import { NotificationType } from '../../../../../schema/notification.schema';
+import { NotificationType } from '../../../../../common/enum/user.enum';
 
 export type NotificationAdminListQuery = {
     userId?: string;

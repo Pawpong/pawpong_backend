@@ -1,4 +1,5 @@
-import type { NotificationMetadata, NotificationType } from '../../../schema/notification.schema';
+import { NotificationType } from '../../../common/enum/user.enum';
+import type { NotificationMetadata } from './notification-metadata.type';
 
 export type NotificationObjectIdLike = {
     toString(): string;

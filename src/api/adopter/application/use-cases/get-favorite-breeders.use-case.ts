@@ -1,12 +1,12 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { AdopterMapper } from '../../mapper/adopter.mapper';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import { ADOPTER_FILE_URL_PORT } from '../ports/adopter-file-url.port';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
 import type { AdopterFileUrlPort } from '../ports/adopter-file-url.port';
 import type { AdopterProfilePort, FavoriteBreederRecord } from '../ports/adopter-profile.port';
+import { AdopterFavoriteDetailMapperService } from '../../domain/services/adopter-favorite-detail-mapper.service';
 import { AdopterPaginationAssemblerService } from '../../domain/services/adopter-pagination-assembler.service';
 import type { AdopterFavoriteBreederResult, AdopterFavoritePageResult } from '../types/adopter-result.type';
 
@@ -19,6 +19,7 @@ export class GetFavoriteBreedersUseCase {
         private readonly adopterBreederReaderPort: AdopterBreederReaderPort,
         @Inject(ADOPTER_FILE_URL_PORT)
         private readonly adopterFileUrlPort: AdopterFileUrlPort,
+        private readonly adopterFavoriteDetailMapperService: AdopterFavoriteDetailMapperService,
         private readonly adopterPaginationAssemblerService: AdopterPaginationAssemblerService,
     ) {}
 
@@ -51,14 +52,14 @@ export class GetFavoriteBreedersUseCase {
                 ? this.adopterFileUrlPort.generateMany(breeder.profile.representativePhotos)
                 : [];
 
-            return AdopterMapper.toFavoriteDetail(
+            return this.adopterFavoriteDetailMapperService.toResult(
                 favorite,
                 breeder,
                 profileImageUrl,
                 representativePhotos,
             );
         } catch {
-            return AdopterMapper.toFavoriteDetail(favorite, null, '', []);
+            return this.adopterFavoriteDetailMapperService.toResult(favorite, null, '', []);
         }
     }
 }
