@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import type { FeedVideoSegmentPrefetchResult } from '../../application/types/feed-video-result.type';
 
 @Injectable()
-export class FeedVideoPrefetchResponseBuilderService {
+export class FeedVideoPrefetchResultBuilderService {
     build(requestedCount: number): FeedVideoSegmentPrefetchResult {
         return {
             success: true,

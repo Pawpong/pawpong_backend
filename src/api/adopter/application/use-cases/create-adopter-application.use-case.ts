@@ -15,8 +15,8 @@ import {
     type AdopterApplicationNotifierPort,
 } from '../ports/adopter-application-notifier.port';
 import { AdopterApplicationCreateResultMapperService } from '../../domain/services/adopter-application-create-result-mapper.service';
-import { AdopterApplicationCustomResponseBuilderService } from '../../domain/services/adopter-application-custom-response-builder.service';
-import { AdopterApplicationStandardResponseBuilderService } from '../../domain/services/adopter-application-standard-response-builder.service';
+import { AdopterApplicationCustomAnswerBuilderService } from '../../domain/services/adopter-application-custom-answer-builder.service';
+import { AdopterApplicationStandardAnswerBuilderService } from '../../domain/services/adopter-application-standard-answer-builder.service';
 import type { AdopterApplicationCreateCommand } from '../types/adopter-application-command.type';
 import type { AdopterApplicationCreateResult } from '../types/adopter-result.type';
 
@@ -34,8 +34,8 @@ export class CreateAdopterApplicationUseCase {
         @Inject(ADOPTER_APPLICATION_NOTIFIER_PORT)
         private readonly adopterApplicationNotifierPort: AdopterApplicationNotifierPort,
         private readonly adopterApplicationCreateResultMapperService: AdopterApplicationCreateResultMapperService,
-        private readonly adopterApplicationCustomResponseBuilderService: AdopterApplicationCustomResponseBuilderService,
-        private readonly adopterApplicationStandardResponseBuilderService: AdopterApplicationStandardResponseBuilderService,
+        private readonly adopterApplicationCustomAnswerBuilderService: AdopterApplicationCustomAnswerBuilderService,
+        private readonly adopterApplicationStandardAnswerBuilderService: AdopterApplicationStandardAnswerBuilderService,
     ) {}
 
     async execute(
@@ -64,8 +64,8 @@ export class CreateAdopterApplicationUseCase {
             throw new ConflictException('해당 브리더에게 이미 대기 중인 상담 신청이 있습니다.');
         }
 
-        const standardResponses = this.adopterApplicationStandardResponseBuilderService.build(dto);
-        const customResponses = this.adopterApplicationCustomResponseBuilderService.build(dto, breeder.applicationForm || []);
+        const standardResponses = this.adopterApplicationStandardAnswerBuilderService.build(dto);
+        const customResponses = this.adopterApplicationCustomAnswerBuilderService.build(dto, breeder.applicationForm || []);
 
         const savedApplication = await this.adopterApplicationCommandPort.create({
             breederId: dto.breederId,
