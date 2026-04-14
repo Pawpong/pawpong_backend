@@ -1,4 +1,4 @@
-import { BreederVerificationAdminStatsResultMapperService } from '../domain/services/breeder-verification-admin-stats-result-mapper.service';
+import { BreederVerificationAdminStatsResultMapperService } from '../../../domain/services/breeder-verification-admin-stats-result-mapper.service';
 
 describe('브리더 인증 관리자 통계 결과 매퍼', () => {
     it('승인 브리더 통계 응답을 만든다', () => {

@@ -1,5 +1,5 @@
-import { BreederManagementAvailablePetCommandResultMapperService } from '../domain/services/breeder-management-available-pet-command-result-mapper.service';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
+import { BreederManagementAvailablePetCommandResultMapperService } from '../../../domain/services/breeder-management-available-pet-command-result-mapper.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../../../constants/breeder-management-response-messages';
 
 describe('브리더 관리 분양 개체 명령 결과 매퍼', () => {
     const service = new BreederManagementAvailablePetCommandResultMapperService();

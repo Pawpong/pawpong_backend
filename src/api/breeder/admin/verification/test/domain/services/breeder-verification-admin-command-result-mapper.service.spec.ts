@@ -1,4 +1,4 @@
-import { BreederVerificationAdminCommandResultMapperService } from '../domain/services/breeder-verification-admin-command-result-mapper.service';
+import { BreederVerificationAdminCommandResultMapperService } from '../../../domain/services/breeder-verification-admin-command-result-mapper.service';
 
 describe('브리더 인증 관리자 명령 결과 매퍼', () => {
     const service = new BreederVerificationAdminCommandResultMapperService();

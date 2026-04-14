@@ -1,4 +1,4 @@
-import { BreederPaginationAssemblerService } from '../domain/services/breeder-pagination-assembler.service';
+import { BreederPaginationAssemblerService } from '../../../domain/services/breeder-pagination-assembler.service';
 
 describe('브리더 페이지네이션 조립 서비스', () => {
     const service = new BreederPaginationAssemblerService();
