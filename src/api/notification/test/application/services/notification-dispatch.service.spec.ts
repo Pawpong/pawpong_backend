@@ -1,7 +1,7 @@
 import { NotificationType, RecipientType } from '../../../../../common/enum/user.enum';
-import { NotificationDispatchFacade } from '../../../application/facades/notification-dispatch.facade';
+import { NotificationDispatchService } from '../../../application/services/notification-dispatch.service';
 
-describe('알림 발송 파사드', () => {
+describe('알림 발송 서비스', () => {
     it('포트로 알림 생성을 위임한다', async () => {
         const createNotificationUseCase = {
             execute: jest.fn().mockResolvedValue({ _id: 'notification-1' }),
@@ -12,14 +12,14 @@ describe('알림 발송 파사드', () => {
         const sendNotificationEmailUseCase = {
             execute: jest.fn().mockReturnValue(true),
         };
-        const facade = new NotificationDispatchFacade(
+        const service = new NotificationDispatchService(
             createNotificationUseCase,
             createNotificationFromBuilderUseCase,
             sendNotificationEmailUseCase,
         );
 
         await expect(
-            facade.createNotification(
+            service.createNotification(
                 'user-1',
                 'adopter',
                 NotificationType.CONSULT_COMPLETED,
@@ -47,13 +47,13 @@ describe('알림 발송 파사드', () => {
         const sendNotificationEmailUseCase = {
             execute: jest.fn().mockReturnValue(true),
         };
-        const facade = new NotificationDispatchFacade(
+        const service = new NotificationDispatchService(
             createNotificationUseCase,
             createNotificationFromBuilderUseCase,
             sendNotificationEmailUseCase,
         );
 
-        await facade
+        await service
             .to('breeder-1', RecipientType.BREEDER)
             .type(NotificationType.CONSULT_COMPLETED)
             .title('새 후기')
