@@ -1,14 +1,14 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { Notification } from '../../../../schema/notification.schema';
-import { NotificationType } from '../../../../schema/notification.schema';
-import type { NotificationMetadata } from '../../../../schema/notification.schema';
+import { NotificationType } from '../../../../common/enum/user.enum';
 import {
     NOTIFICATION_COMMAND_PORT,
     NotificationUserRole,
 } from '../ports/notification-command.port';
 import type { NotificationCommandPort } from '../ports/notification-command.port';
 import { NotificationMessageTemplateService } from '../../domain/services/notification-message-template.service';
+import type { NotificationDocumentRecord } from '../../types/notification-record.type';
+import type { NotificationMetadata } from '../../types/notification-metadata.type';
 
 @Injectable()
 export class CreateNotificationUseCase {
@@ -24,7 +24,7 @@ export class CreateNotificationUseCase {
         type: NotificationType,
         metadata?: NotificationMetadata,
         targetUrl?: string,
-    ): Promise<Notification> {
+    ): Promise<NotificationDocumentRecord> {
         const message = this.notificationMessageTemplateService.render(type, metadata);
 
         return this.notificationCommandPort.create({

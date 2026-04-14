@@ -1,5 +1,6 @@
-import { NotificationType, Notification } from '../../../../schema/notification.schema';
-import type { NotificationMetadata } from '../../../../schema/notification.schema';
+import { NotificationType } from '../../../../common/enum/user.enum';
+import type { NotificationDocumentRecord } from '../../types/notification-record.type';
+import type { NotificationMetadata } from '../../types/notification-metadata.type';
 
 export const NOTIFICATION_COMMAND_PORT = Symbol('NOTIFICATION_COMMAND_PORT');
 
@@ -17,5 +18,5 @@ export interface NotificationCreateCommand {
 }
 
 export interface NotificationCommandPort {
-    create(command: NotificationCreateCommand): Promise<Notification>;
+    create(command: NotificationCreateCommand): Promise<NotificationDocumentRecord>;
 }

@@ -4,7 +4,7 @@ import type { Cache } from 'cache-manager';
 
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedTagSearchResultAssemblerService } from '../../domain/services/feed-tag-search-result-assembler.service';
-import { FeedTagQueryService } from '../../domain/services/feed-tag-query.service';
+import { FeedTagNormalizerService } from '../../domain/services/feed-tag-normalizer.service';
 import { FEED_TAG_ASSET_URL_PORT, type FeedTagAssetUrlPort } from '../ports/feed-tag-asset-url.port';
 import { FEED_TAG_READER_PORT, type FeedTagReaderPort } from '../ports/feed-tag-reader.port';
 import type { FeedTagSearchResult } from '../types/feed-tag-result.type';
@@ -14,7 +14,7 @@ export class SearchByTagUseCase {
     constructor(
         @Inject(FEED_TAG_READER_PORT)
         private readonly feedTagReader: FeedTagReaderPort,
-        private readonly feedTagQueryService: FeedTagQueryService,
+        private readonly feedTagNormalizerService: FeedTagNormalizerService,
         private readonly feedTagSearchResultAssemblerService: FeedTagSearchResultAssemblerService,
         @Inject(FEED_TAG_ASSET_URL_PORT)
         private readonly feedTagAssetUrl: FeedTagAssetUrlPort,
@@ -24,7 +24,7 @@ export class SearchByTagUseCase {
     ) {}
 
     async execute(tag: string, page: number = 1, limit: number = 20): Promise<FeedTagSearchResult> {
-        const cleanTag = this.feedTagQueryService.normalizeTag(tag);
+        const cleanTag = this.feedTagNormalizerService.normalizeTag(tag);
 
         if (!cleanTag) {
             throw new BadRequestException('검색할 태그를 입력해주세요.');

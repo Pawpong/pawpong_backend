@@ -102,8 +102,13 @@ import { AuthBreederDocumentFilePolicyService } from './domain/services/auth-bre
 import { AuthBreederDocumentOriginalFileNameService } from './domain/services/auth-breeder-document-original-file-name.service';
 import { AuthBreederDocumentSubmissionService } from './domain/services/auth-breeder-document-submission.service';
 import { AuthPhoneVerificationPolicyService } from './domain/services/auth-phone-verification-policy.service';
-import { AuthHttpCookieService } from './domain/services/auth-http-cookie.service';
-import { AuthSocialHttpFlowService } from './domain/services/auth-social-http-flow.service';
+import { AuthBreederDocumentTypeService } from './domain/services/auth-breeder-document-type.service';
+import { AuthPhoneNumberNormalizerService } from './domain/services/auth-phone-number-normalizer.service';
+import { AuthSignupResultMapperService } from './domain/services/auth-signup-result-mapper.service';
+import { AuthSocialRegistrationResultMapperService } from './domain/services/auth-social-registration-result-mapper.service';
+import { AuthSocialUserCheckResultMapperService } from './domain/services/auth-social-user-check-result-mapper.service';
+import { AuthHttpCookieService } from './presentation/services/auth-http-cookie.service';
+import { AuthSocialHttpFlowFacade } from './presentation/services/auth-social-http-flow.facade';
 import { AuthBreederVerificationCommandAdapter } from './infrastructure/auth-breeder-verification-command.adapter';
 import { AuthPhoneVerificationMemoryStore } from './infrastructure/auth-phone-verification-memory.store';
 import { AuthPhoneVerificationMongooseRegistryAdapter } from './infrastructure/auth-phone-verification-mongoose-registry.adapter';
@@ -209,8 +214,13 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthBreederDocumentOriginalFileNameService,
         AuthBreederDocumentSubmissionService,
         AuthPhoneVerificationPolicyService,
+        AuthPhoneNumberNormalizerService,
+        AuthBreederDocumentTypeService,
         AuthHttpCookieService,
-        AuthSocialHttpFlowService,
+        AuthSocialHttpFlowFacade,
+        AuthSignupResultMapperService,
+        AuthSocialRegistrationResultMapperService,
+        AuthSocialUserCheckResultMapperService,
         AuthBreederVerificationCommandAdapter,
         AuthPhoneVerificationMemoryStore,
         AuthPhoneVerificationMongooseRegistryAdapter,

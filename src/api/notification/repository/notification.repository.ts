@@ -11,7 +11,7 @@ import type { NotificationDocumentRecord } from '../types/notification-record.ty
 export class NotificationRepository {
     constructor(@InjectModel(Notification.name) private readonly notificationModel: Model<Notification>) {}
 
-    async create(command: NotificationCreateCommand): Promise<Notification> {
+    async create(command: NotificationCreateCommand): Promise<NotificationDocumentRecord> {
         const notification = new this.notificationModel({
             userId: command.userId,
             userRole: command.userRole,
@@ -25,7 +25,20 @@ export class NotificationRepository {
 
         await notification.save();
 
-        return notification;
+        return {
+            _id: notification._id,
+            userId: notification.userId,
+            userRole: notification.userRole as NotificationDocumentRecord['userRole'],
+            type: notification.type,
+            title: notification.title,
+            body: notification.body,
+            metadata: notification.metadata,
+            isRead: notification.isRead,
+            readAt: notification.readAt,
+            targetUrl: notification.targetUrl,
+            createdAt: notification.createdAt,
+            updatedAt: notification.updatedAt,
+        };
     }
 
     async findPagedByUser(

@@ -1,9 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
 
+import { VideoStatus } from '../../../../../../common/enum/video-status.enum';
 import { CompleteUploadUseCase } from '../../../../video/application/use-cases/complete-upload.use-case';
 import { FeedVideoCommandPort } from '../../../../video/application/ports/feed-video-command.port';
 import { FeedVideoCommandPolicyService } from '../../../../video/domain/services/feed-video-command-policy.service';
-import { VideoStatus } from '../../../../../../schema/video.schema';
 
 describe('업로드 완료 유스케이스', () => {
     const createCommand = (status: VideoStatus = VideoStatus.PENDING): FeedVideoCommandPort => ({

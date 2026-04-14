@@ -5,8 +5,7 @@ import type {
     AnnouncementPublicListResult,
     AnnouncementPublicReaderPort,
 } from '../../../application/ports/announcement-public-reader.port';
-import { AnnouncementPaginationAssemblerService } from '../../../domain/services/announcement-pagination-assembler.service';
-import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
+import { AnnouncementItemMapperService } from '../../../domain/services/announcement-item-mapper.service';
 import { GetAnnouncementByIdUseCase } from '../../../application/use-cases/get-announcement-by-id.use-case';
 
 class StubAnnouncementPublicReaderPort implements AnnouncementPublicReaderPort {
@@ -42,7 +41,7 @@ describe('공지사항 상세 조회 유스케이스', () => {
         readerPort = new StubAnnouncementPublicReaderPort();
         useCase = new GetAnnouncementByIdUseCase(
             readerPort,
-            new AnnouncementResponseMapperService(new AnnouncementPaginationAssemblerService()),
+            new AnnouncementItemMapperService(),
         );
     });
 

@@ -1,5 +1,5 @@
 import type { PageInfoResult } from '../../../../../common/types/page-result.type';
-import type { VideoStatus } from '../../../../../schema/video.schema';
+import type { VideoStatus } from '../../../../../common/enum/video-status.enum';
 
 export interface FeedVideoUploaderResult {
     _id: string;

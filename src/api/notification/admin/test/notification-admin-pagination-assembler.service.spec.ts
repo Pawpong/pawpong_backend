@@ -1,4 +1,4 @@
-import { NotificationType } from '../../../../schema/notification.schema';
+import { NotificationType } from '../../../../common/enum/user.enum';
 import { NotificationAdminPaginationAssemblerService } from '../domain/services/notification-admin-pagination-assembler.service';
 
 describe('관리자 알림 페이지네이션 조립 서비스', () => {

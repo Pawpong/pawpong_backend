@@ -2,10 +2,11 @@ import { BadRequestException, ConflictException, Inject, Injectable } from '@nes
 
 import { BreederPlan, UserStatus, VerificationStatus } from '../../../../common/enum/user.enum';
 import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
-import { AuthMapper } from '../../mapper/auth.mapper';
 import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../ports/auth-registration.port';
 import { AUTH_TOKEN_PORT, type AuthTokenPort } from '../ports/auth-token.port';
 import { type AuthResult } from '../types/auth-response.type';
+import { AuthPhoneNumberNormalizerService } from '../../domain/services/auth-phone-number-normalizer.service';
+import { AuthSocialRegistrationResultMapperService } from '../../domain/services/auth-social-registration-result-mapper.service';
 
 type LegacySocialProfile = {
     provider: string;
@@ -36,6 +37,8 @@ export class CompleteLegacySocialRegistrationUseCase {
         private readonly authRegistrationPort: AuthRegistrationPort,
         @Inject(AUTH_TOKEN_PORT)
         private readonly authTokenPort: AuthTokenPort,
+        private readonly authPhoneNumberNormalizerService: AuthPhoneNumberNormalizerService,
+        private readonly authSocialRegistrationResultMapperService: AuthSocialRegistrationResultMapperService,
     ) {}
 
     async execute(profile: LegacySocialProfile, additionalInfo: LegacySocialAdditionalInfo): Promise<AuthResult> {
@@ -48,7 +51,7 @@ export class CompleteLegacySocialRegistrationUseCase {
             const savedAdopter = await this.authRegistrationPort.createAdopter({
                 emailAddress: profile.email,
                 nickname: additionalInfo.nickname,
-                phoneNumber: AuthMapper.normalizePhoneNumber(additionalInfo.phone),
+                phoneNumber: this.authPhoneNumberNormalizerService.normalize(additionalInfo.phone),
                 profileImageFileName: profile.profileImage,
                 socialAuthInfo: {
                     authProvider: profile.provider,
@@ -73,7 +76,7 @@ export class CompleteLegacySocialRegistrationUseCase {
             const hashedRefreshToken = await this.authTokenPort.hashRefreshToken(tokens.refreshToken);
             await this.authRegistrationPort.saveAdopterRefreshToken(userId, hashedRefreshToken);
 
-            return AuthMapper.toSocialRegistrationResponse(
+            return this.authSocialRegistrationResultMapperService.toResult(
                 savedAdopter,
                 tokens,
                 'adopter',
@@ -92,7 +95,7 @@ export class CompleteLegacySocialRegistrationUseCase {
         const savedBreeder = await this.authRegistrationPort.createBreeder({
             emailAddress: profile.email,
             nickname: additionalInfo.breederName,
-            phoneNumber: AuthMapper.normalizePhoneNumber(additionalInfo.phone),
+            phoneNumber: this.authPhoneNumberNormalizerService.normalize(additionalInfo.phone),
             profileImageFileName: profile.profileImage,
             socialAuthInfo: {
                 authProvider: profile.provider,
@@ -141,7 +144,7 @@ export class CompleteLegacySocialRegistrationUseCase {
         const hashedRefreshToken = await this.authTokenPort.hashRefreshToken(tokens.refreshToken);
         await this.authRegistrationPort.saveBreederRefreshToken(userId, hashedRefreshToken);
 
-        return AuthMapper.toSocialRegistrationResponse(
+        return this.authSocialRegistrationResultMapperService.toResult(
             savedBreeder,
             tokens,
             'breeder',

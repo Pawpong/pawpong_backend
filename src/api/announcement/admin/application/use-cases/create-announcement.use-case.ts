@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
-import { AnnouncementResponseMapperService } from '../../../domain/services/announcement-response-mapper.service';
+import { AnnouncementItemMapperService } from '../../../domain/services/announcement-item-mapper.service';
 import { ANNOUNCEMENT_WRITER_PORT, type AnnouncementWriterPort } from '../ports/announcement-writer.port';
 import type { AnnouncementCreateCommand } from '../types/announcement-command.type';
 import type { AnnouncementResult } from '../../../application/types/announcement-result.type';
@@ -12,7 +12,7 @@ export class CreateAnnouncementUseCase {
     constructor(
         @Inject(ANNOUNCEMENT_WRITER_PORT)
         private readonly announcementWriter: AnnouncementWriterPort,
-        private readonly announcementResponseMapperService: AnnouncementResponseMapperService,
+        private readonly announcementItemMapperService: AnnouncementItemMapperService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -26,7 +26,7 @@ export class CreateAnnouncementUseCase {
                 announcementId: announcement.announcementId,
             });
 
-            return this.announcementResponseMapperService.toResponse(announcement);
+            return this.announcementItemMapperService.toItem(announcement);
         } catch (error) {
             rethrowIfHttpException(error);
             this.logger.logError('createAnnouncement', '공지사항 생성 실패', error);

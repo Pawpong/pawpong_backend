@@ -1,4 +1,5 @@
 import { GetFavoriteBreedersUseCase } from '../../../application/use-cases/get-favorite-breeders.use-case';
+import { AdopterFavoriteDetailMapperService } from '../../../domain/services/adopter-favorite-detail-mapper.service';
 import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
 
 describe('브리더 즐겨찾기 목록 조회 유스케이스', () => {
@@ -21,6 +22,7 @@ describe('브리더 즐겨찾기 목록 조회 유스케이스', () => {
         adopterProfilePort as any,
         breederReaderPort as any,
         fileUrlPort as any,
+        new AdopterFavoriteDetailMapperService(),
         new AdopterPaginationAssemblerService(),
     );
 

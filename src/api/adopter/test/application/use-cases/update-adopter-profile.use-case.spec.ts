@@ -1,4 +1,5 @@
 import { UpdateAdopterProfileUseCase } from '../../../application/use-cases/update-adopter-profile.use-case';
+import { AdopterProfileUpdateMapperService } from '../../../domain/services/adopter-profile-update-mapper.service';
 
 describe('입양자 프로필 수정 유스케이스', () => {
     it('프로필 수정 데이터를 변환기 형식으로 변환해 저장한다', async () => {
@@ -7,7 +8,7 @@ describe('입양자 프로필 수정 유스케이스', () => {
                 _id: { toString: () => 'adopter-1' },
             }),
         };
-        const useCase = new UpdateAdopterProfileUseCase(adopterProfilePort as any);
+        const useCase = new UpdateAdopterProfileUseCase(adopterProfilePort as any, new AdopterProfileUpdateMapperService());
 
         await expect(
             useCase.execute('adopter-1', {

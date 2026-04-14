@@ -1,5 +1,5 @@
 import { NotificationPaginationAssemblerService } from '../domain/services/notification-pagination-assembler.service';
-import { NotificationType } from '../../../schema/notification.schema';
+import { NotificationType } from '../../../common/enum/user.enum';
 
 describe('알림 페이지네이션 조립 서비스', () => {
     it('알림 목록 페이지네이션 응답 계약을 유지한다', () => {

@@ -2,14 +2,14 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { BREEDER_PUBLIC_READER_PORT } from '../ports/breeder-public-reader.port';
 import type { BreederPublicReaderPort } from '../ports/breeder-public-reader.port';
-import { BreederPublicReviewResponseMapperService } from '../../domain/services/breeder-public-review-response-mapper.service';
+import { BreederPublicReviewPageAssemblerService } from '../../domain/services/breeder-public-review-page-assembler.service';
 
 @Injectable()
 export class GetBreederReviewsUseCase {
     constructor(
         @Inject(BREEDER_PUBLIC_READER_PORT)
         private readonly breederPublicReaderPort: BreederPublicReaderPort,
-        private readonly breederPublicReviewResponseMapperService: BreederPublicReviewResponseMapperService,
+        private readonly breederPublicReviewPageAssemblerService: BreederPublicReviewPageAssemblerService,
     ) {}
 
     async execute(breederId: string, page: number = 1, limit: number = 10) {
@@ -24,6 +24,6 @@ export class GetBreederReviewsUseCase {
             limit,
         );
 
-        return this.breederPublicReviewResponseMapperService.toPaginationResponse(reviews, total, page, limit);
+        return this.breederPublicReviewPageAssemblerService.build(reviews, total, page, limit);
     }
 }

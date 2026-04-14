@@ -2,11 +2,11 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { RecipientType } from '../../../common/enum/user.enum';
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
+import { NotificationType } from '../../../common/enum/user.enum';
 import {
     NOTIFICATION_DISPATCH_PORT,
     type NotificationDispatchPort,
 } from '../../notification/application/ports/notification-dispatch.port';
-import { NotificationType } from '../../../schema/notification.schema';
 import type { AdopterApplicationNotifierPort } from '../application/ports/adopter-application-notifier.port';
 import type {
     AdopterApplicationBreederNotificationTarget,

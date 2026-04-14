@@ -3,7 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { AdminAction, AdminTargetType } from '../../../../../common/enum/user.enum';
 import { AdopterAdminActivityLogFactoryService } from '../../domain/services/adopter-admin-activity-log-factory.service';
 import { AdopterAdminPolicyService } from '../../domain/services/adopter-admin-policy.service';
-import { AdopterAdminReviewResponseService } from '../../domain/services/adopter-admin-review-response.service';
+import { AdopterAdminReviewDeleteResultMapperService } from '../../domain/services/adopter-admin-review-delete-result-mapper.service';
 import { ADOPTER_ADMIN_READER_PORT } from '../ports/adopter-admin-reader.port';
 import type { AdopterAdminReaderPort } from '../ports/adopter-admin-reader.port';
 import { ADOPTER_ADMIN_WRITER_PORT } from '../ports/adopter-admin-writer.port';
@@ -19,7 +19,7 @@ export class DeleteAdopterAdminReviewUseCase {
         private readonly adopterAdminWriter: AdopterAdminWriterPort,
         private readonly adopterAdminPolicyService: AdopterAdminPolicyService,
         private readonly adopterAdminActivityLogFactoryService: AdopterAdminActivityLogFactoryService,
-        private readonly adopterAdminReviewResponseService: AdopterAdminReviewResponseService,
+        private readonly adopterAdminReviewDeleteResultMapperService: AdopterAdminReviewDeleteResultMapperService,
     ) {}
 
     async execute(adminId: string, breederId: string, reviewId: string): Promise<AdopterAdminReviewDeleteResult> {
@@ -39,7 +39,7 @@ export class DeleteAdopterAdminReviewUseCase {
 
         await this.adopterAdminWriter.appendAdminActivity(adminId, activityLog);
 
-        return this.adopterAdminReviewResponseService.toDeleteReviewResponse(
+        return this.adopterAdminReviewDeleteResultMapperService.toDeleteReviewResult(
             reviewId,
             breederId,
             review.breederName || 'Unknown',

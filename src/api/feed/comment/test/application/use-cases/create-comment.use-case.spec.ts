@@ -3,7 +3,7 @@ import { BadRequestException } from '@nestjs/common';
 import { CreateCommentUseCase } from '../../../application/use-cases/create-comment.use-case';
 import { FeedCacheKeyService } from '../../../../domain/services/feed-cache-key.service';
 import { FeedCommentManagerPort } from '../../../application/ports/feed-comment-manager.port';
-import { FeedCommentCommandResponseService } from '../../../domain/services/feed-comment-command-response.service';
+import { FeedCommentCommandResultMapperService } from '../../../domain/services/feed-comment-command-result-mapper.service';
 import { FeedCommentPolicyService } from '../../../domain/services/feed-comment-policy.service';
 
 describe('댓글 생성 유스케이스', () => {
@@ -48,7 +48,7 @@ describe('댓글 생성 유스케이스', () => {
         const useCase = new CreateCommentUseCase(
             manager,
             new FeedCommentPolicyService(),
-            new FeedCommentCommandResponseService(),
+            new FeedCommentCommandResultMapperService(),
             { del: jest.fn() } as any,
             new FeedCacheKeyService(),
         );

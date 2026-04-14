@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 
 import { AdopterAdminActivityLogFactoryService } from '../../../domain/services/adopter-admin-activity-log-factory.service';
 import { AdopterAdminPolicyService } from '../../../domain/services/adopter-admin-policy.service';
-import { AdopterAdminReviewResponseService } from '../../../domain/services/adopter-admin-review-response.service';
+import { AdopterAdminReviewDeleteResultMapperService } from '../../../domain/services/adopter-admin-review-delete-result-mapper.service';
 import { AdopterAdminReaderPort } from '../../../application/ports/adopter-admin-reader.port';
 import { AdopterAdminWriterPort } from '../../../application/ports/adopter-admin-writer.port';
 import { DeleteAdopterAdminReviewUseCase } from '../../../application/use-cases/delete-adopter-admin-review.use-case';
@@ -33,7 +33,7 @@ describe('입양자 관리자 후기 삭제 유스케이스', () => {
             writer,
             new AdopterAdminPolicyService(),
             new AdopterAdminActivityLogFactoryService(),
-            new AdopterAdminReviewResponseService(),
+            new AdopterAdminReviewDeleteResultMapperService(),
         );
 
         await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).resolves.toMatchObject({
@@ -66,7 +66,7 @@ describe('입양자 관리자 후기 삭제 유스케이스', () => {
             },
             new AdopterAdminPolicyService(),
             new AdopterAdminActivityLogFactoryService(),
-            new AdopterAdminReviewResponseService(),
+            new AdopterAdminReviewDeleteResultMapperService(),
         );
 
         await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).rejects.toBeInstanceOf(

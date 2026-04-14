@@ -4,10 +4,10 @@ import { UPLOAD_FILE_STORE_PORT } from '../ports/upload-file-store.port';
 import { UPLOAD_OWNER_PORT } from '../ports/upload-owner.port';
 import type { UploadFileStorePort } from '../ports/upload-file-store.port';
 import type { UploadOwnerPort } from '../ports/upload-owner.port';
-import { UploadResponseMapper } from '../mappers/upload-response.mapper';
 import { UploadFilePolicyService } from '../../domain/services/upload-file-policy.service';
-import { UploadStoredFilePathService } from '../../domain/services/upload-stored-file-path.service';
 import { UploadPhotoCollectionService } from '../../domain/services/upload-photo-collection.service';
+import { UploadResultMapperService } from '../../domain/services/upload-result-mapper.service';
+import { UploadStoredFilePathService } from '../../domain/services/upload-stored-file-path.service';
 import type { UploadFileResult } from '../types/upload-result.type';
 
 @Injectable()
@@ -18,6 +18,7 @@ export class UploadAvailablePetPhotosUseCase {
         private readonly uploadFilePolicy: UploadFilePolicyService,
         private readonly uploadStoredFilePathService: UploadStoredFilePathService,
         private readonly uploadPhotoCollectionService: UploadPhotoCollectionService,
+        private readonly uploadResultMapperService: UploadResultMapperService,
     ) {}
 
     async execute(
@@ -60,6 +61,6 @@ export class UploadAvailablePetPhotosUseCase {
 
         await this.uploadOwner.replaceAvailablePetPhotos(petId, userId, allPhotoPaths);
 
-        return UploadResponseMapper.toResults(uploadedResources, files || []);
+        return this.uploadResultMapperService.toResults(uploadedResources, files || []);
     }
 }

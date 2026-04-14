@@ -26,7 +26,7 @@ import { DeletePhoneWhitelistUseCase } from './application/use-cases/delete-phon
 import { USER_ADMIN_READER_PORT } from './application/ports/user-admin-reader.port';
 import { USER_ADMIN_WRITER_PORT } from './application/ports/user-admin-writer.port';
 import { UserAdminCommandPolicyService } from './domain/services/user-admin-command-policy.service';
-import { UserAdminDeletedUserCommandResponseService } from './domain/services/user-admin-deleted-user-command-response.service';
+import { UserAdminDeletedUserCommandResultMapperService } from './domain/services/user-admin-deleted-user-command-result-mapper.service';
 import { UserAdminDeletedUserPageAssemblerService } from './domain/services/user-admin-deleted-user-page-assembler.service';
 import { UserAdminDeletedUserStatsResultMapperService } from './domain/services/user-admin-deleted-user-stats-result-mapper.service';
 import { UserAdminPaginationAssemblerService } from './domain/services/user-admin-pagination-assembler.service';
@@ -89,7 +89,7 @@ import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whit
         UserAdminCommandPolicyService,
         UserAdminDeletedUserPageAssemblerService,
         UserAdminDeletedUserStatsResultMapperService,
-        UserAdminDeletedUserCommandResponseService,
+        UserAdminDeletedUserCommandResultMapperService,
         UserAdminPaginationAssemblerService,
         UserAdminPhoneWhitelistResultMapperService,
         UserAdminAdminProfileMapperService,

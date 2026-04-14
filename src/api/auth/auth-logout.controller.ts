@@ -6,8 +6,8 @@ import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
 import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
 import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { AuthPublicController } from './decorator/auth-public-controller.decorator';
-import { AuthHttpCookieService } from './domain/services/auth-http-cookie.service';
 import { LogoutResponseDto } from './dto/response/logout-response.dto';
+import { AuthHttpCookieService } from './presentation/services/auth-http-cookie.service';
 import { ApiLogoutAuthEndpoint } from './swagger';
 
 @AuthPublicController()

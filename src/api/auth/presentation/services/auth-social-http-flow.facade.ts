@@ -1,0 +1,40 @@
+import { Inject, Injectable } from '@nestjs/common';
+import type { Response } from 'express';
+
+import type { AuthSocialCallbackProfile } from '../../application/ports/auth-social-callback.port';
+import type {
+    GetSocialLoginRedirectUrlQueryPort,
+    ProcessSocialLoginCallbackFlowPort,
+} from '../../application/ports/auth-social-flow.port';
+import {
+    GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY,
+    PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW,
+} from '../../application/tokens/auth-social-flow.token';
+import { AuthHttpCookieService } from './auth-http-cookie.service';
+
+@Injectable()
+export class AuthSocialHttpFlowFacade {
+    constructor(
+        @Inject(GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY)
+        private readonly getSocialLoginRedirectUrlUseCase: GetSocialLoginRedirectUrlQueryPort,
+        @Inject(PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW)
+        private readonly processSocialLoginCallbackUseCase: ProcessSocialLoginCallbackFlowPort,
+        private readonly authHttpCookieService: AuthHttpCookieService,
+    ) {}
+
+    getRedirectUrl(
+        provider: 'google' | 'naver' | 'kakao',
+        referer?: string,
+        origin?: string,
+        returnUrl?: string,
+    ): string {
+        return this.getSocialLoginRedirectUrlUseCase.execute(provider, referer, origin, returnUrl);
+    }
+
+    async handleCallback(user: AuthSocialCallbackProfile, response: Response): Promise<void> {
+        const originUrl = user?.originUrl || '';
+        const result = await this.processSocialLoginCallbackUseCase.execute(user, originUrl, originUrl);
+        this.authHttpCookieService.applyCookies(response, result.cookies);
+        response.redirect(result.redirectUrl);
+    }
+}

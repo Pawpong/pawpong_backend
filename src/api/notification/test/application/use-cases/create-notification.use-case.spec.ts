@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 
-import { NotificationType } from '../../../../../schema/notification.schema';
+import { NotificationType } from '../../../../../common/enum/user.enum';
 import { NotificationMessageTemplateService } from '../../../domain/services/notification-message-template.service';
 import { CreateNotificationUseCase } from '../../../application/use-cases/create-notification.use-case';
 

@@ -5,7 +5,7 @@ import { BREEDER_VERIFICATION_ADMIN_READER_PORT } from '../ports/breeder-verific
 import { BREEDER_VERIFICATION_ADMIN_WRITER_PORT } from '../ports/breeder-verification-admin-writer.port';
 import type { BreederVerificationAdminReaderPort } from '../ports/breeder-verification-admin-reader.port';
 import type { BreederVerificationAdminWriterPort } from '../ports/breeder-verification-admin-writer.port';
-import { BreederVerificationAdminCommandResponseService } from '../../domain/services/breeder-verification-admin-command-response.service';
+import { BreederVerificationAdminCommandResultMapperService } from '../../domain/services/breeder-verification-admin-command-result-mapper.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 import type { BreederLevelChangeCommand } from '../types/breeder-verification-admin-command.type';
 
@@ -17,7 +17,7 @@ export class ChangeBreederLevelUseCase {
         @Inject(BREEDER_VERIFICATION_ADMIN_WRITER_PORT)
         private readonly breederVerificationAdminWriter: BreederVerificationAdminWriterPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
-        private readonly breederVerificationAdminCommandResponseService: BreederVerificationAdminCommandResponseService,
+        private readonly breederVerificationAdminCommandResultMapperService: BreederVerificationAdminCommandResultMapperService,
     ) {}
 
     async execute(adminId: string, breederId: string, levelData: BreederLevelChangeCommand) {
@@ -35,7 +35,7 @@ export class ChangeBreederLevelUseCase {
 
         await this.breederVerificationAdminWriter.updateBreederLevel(breederId, levelData.newLevel);
 
-        return this.breederVerificationAdminCommandResponseService.toLevelChangeResponse(
+        return this.breederVerificationAdminCommandResultMapperService.toLevelChangeResult(
             breeder,
             previousLevel,
             levelData.newLevel,

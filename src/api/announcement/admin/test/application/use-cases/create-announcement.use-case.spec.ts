@@ -2,8 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 
 import { CreateAnnouncementUseCase } from '../../../application/use-cases/create-announcement.use-case';
 import { AnnouncementWriterPort } from '../../../application/ports/announcement-writer.port';
-import { AnnouncementPaginationAssemblerService } from '../../../../domain/services/announcement-pagination-assembler.service';
-import { AnnouncementResponseMapperService } from '../../../../domain/services/announcement-response-mapper.service';
+import { AnnouncementItemMapperService } from '../../../../domain/services/announcement-item-mapper.service';
 
 describe('공지사항 생성 유스케이스', () => {
     const createLogger = () => ({
@@ -28,7 +27,7 @@ describe('공지사항 생성 유스케이스', () => {
         };
         const useCase = new CreateAnnouncementUseCase(
             announcementWriter,
-            new AnnouncementResponseMapperService(new AnnouncementPaginationAssemblerService()),
+            new AnnouncementItemMapperService(),
             createLogger() as any,
         );
 
@@ -54,7 +53,7 @@ describe('공지사항 생성 유스케이스', () => {
         };
         const useCase = new CreateAnnouncementUseCase(
             announcementWriter,
-            new AnnouncementResponseMapperService(new AnnouncementPaginationAssemblerService()),
+            new AnnouncementItemMapperService(),
             createLogger() as any,
         );
 

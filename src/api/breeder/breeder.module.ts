@@ -22,9 +22,9 @@ import { BreederExploreCardMapperService } from './domain/services/breeder-explo
 import { BreederBirthDateFormatterService } from './domain/services/breeder-birth-date-formatter.service';
 import { BreederPaginationAssemblerService } from './domain/services/breeder-pagination-assembler.service';
 import { BreederPublicProfileAssemblerService } from './domain/services/breeder-public-profile-assembler.service';
-import { BreederPublicReviewResponseMapperService } from './domain/services/breeder-public-review-response-mapper.service';
-import { BreederPublicPetListResponseMapperService } from './domain/services/breeder-public-pet-list-response-mapper.service';
-import { BreederPublicParentPetListResponseMapperService } from './domain/services/breeder-public-parent-pet-list-response-mapper.service';
+import { BreederPublicReviewPageAssemblerService } from './domain/services/breeder-public-review-page-assembler.service';
+import { BreederPublicPetPageAssemblerService } from './domain/services/breeder-public-pet-page-assembler.service';
+import { BreederPublicParentPetListAssemblerService } from './domain/services/breeder-public-parent-pet-list-assembler.service';
 import { BreederPublicApplicationFormBuilderService } from './domain/services/breeder-public-application-form-builder.service';
 import { BreederPublicPetDetailAssemblerService } from './domain/services/breeder-public-pet-detail-assembler.service';
 import { BreederFileUrlAdapter } from './infrastructure/breeder-file-url.adapter';
@@ -79,9 +79,9 @@ import { StorageModule } from '../../common/storage/storage.module';
         BreederBirthDateFormatterService,
         BreederPaginationAssemblerService,
         BreederPublicProfileAssemblerService,
-        BreederPublicReviewResponseMapperService,
-        BreederPublicPetListResponseMapperService,
-        BreederPublicParentPetListResponseMapperService,
+        BreederPublicReviewPageAssemblerService,
+        BreederPublicPetPageAssemblerService,
+        BreederPublicParentPetListAssemblerService,
         BreederPublicApplicationFormBuilderService,
         BreederPublicPetDetailAssemblerService,
         BreederPublicRepository,

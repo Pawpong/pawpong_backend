@@ -1,4 +1,4 @@
-import type { VideoStatus } from '../../../schema/video.schema';
+import type { VideoStatus } from '../../../common/enum/video-status.enum';
 
 export type FeedObjectIdLike = {
     toString(): string;

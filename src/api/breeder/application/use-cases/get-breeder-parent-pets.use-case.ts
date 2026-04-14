@@ -4,7 +4,7 @@ import { BREEDER_PUBLIC_READER_PORT } from '../ports/breeder-public-reader.port'
 import { BREEDER_FILE_URL_PORT } from '../ports/breeder-file-url.port';
 import type { BreederPublicReaderPort } from '../ports/breeder-public-reader.port';
 import type { BreederFileUrlPort } from '../ports/breeder-file-url.port';
-import { BreederPublicParentPetListResponseMapperService } from '../../domain/services/breeder-public-parent-pet-list-response-mapper.service';
+import { BreederPublicParentPetListAssemblerService } from '../../domain/services/breeder-public-parent-pet-list-assembler.service';
 
 @Injectable()
 export class GetBreederParentPetsUseCase {
@@ -13,7 +13,7 @@ export class GetBreederParentPetsUseCase {
         private readonly breederPublicReaderPort: BreederPublicReaderPort,
         @Inject(BREEDER_FILE_URL_PORT)
         private readonly breederFileUrlPort: BreederFileUrlPort,
-        private readonly breederPublicParentPetListResponseMapperService: BreederPublicParentPetListResponseMapperService,
+        private readonly breederPublicParentPetListAssemblerService: BreederPublicParentPetListAssemblerService,
     ) {}
 
     async execute(breederId: string, page?: number, limit?: number) {
@@ -23,7 +23,7 @@ export class GetBreederParentPetsUseCase {
         }
 
         const parentPets = await this.breederPublicReaderPort.findActiveParentPetsByBreederId(breederId);
-        return this.breederPublicParentPetListResponseMapperService.toResponse(
+        return this.breederPublicParentPetListAssemblerService.build(
             parentPets,
             page,
             limit,

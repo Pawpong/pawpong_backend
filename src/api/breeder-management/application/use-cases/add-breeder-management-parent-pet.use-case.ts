@@ -4,7 +4,7 @@ import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-pro
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
-import { BreederManagementParentPetCommandResponseService } from '../../domain/services/breeder-management-parent-pet-command-response.service';
+import { BreederManagementParentPetCommandResultMapperService } from '../../domain/services/breeder-management-parent-pet-command-result-mapper.service';
 import { BreederManagementParentPetCommandMapperService } from '../../domain/services/breeder-management-parent-pet-command-mapper.service';
 import type { BreederManagementParentPetCreateCommand } from '../types/breeder-management-pet-command.type';
 
@@ -16,7 +16,7 @@ export class AddBreederManagementParentPetUseCase {
         @Inject(BREEDER_MANAGEMENT_PET_COMMAND_PORT)
         private readonly breederManagementPetCommandPort: BreederManagementPetCommandPort,
         private readonly breederManagementParentPetCommandMapperService: BreederManagementParentPetCommandMapperService,
-        private readonly breederManagementParentPetCommandResponseService: BreederManagementParentPetCommandResponseService,
+        private readonly breederManagementParentPetCommandResultMapperService: BreederManagementParentPetCommandResultMapperService,
     ) {}
 
     async execute(
@@ -32,6 +32,6 @@ export class AddBreederManagementParentPetUseCase {
             this.breederManagementParentPetCommandMapperService.toCreateData(userId, parentPetDto),
         );
 
-        return this.breederManagementParentPetCommandResponseService.createParentPetAdded(String(savedParentPet._id));
+        return this.breederManagementParentPetCommandResultMapperService.toParentPetAddedResult(String(savedParentPet._id));
     }
 }

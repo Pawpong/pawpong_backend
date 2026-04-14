@@ -1,8 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { RecipientType } from '../../../common/enum/user.enum';
+import { NotificationType, RecipientType } from '../../../common/enum/user.enum';
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
-import { NotificationType } from '../../../schema/notification.schema';
 import {
     NOTIFICATION_DISPATCH_PORT,
     type NotificationDispatchPort,

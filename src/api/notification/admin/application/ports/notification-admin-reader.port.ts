@@ -1,6 +1,6 @@
-import { NotificationType } from '../../../../../schema/notification.schema';
-import type { NotificationMetadata } from '../../../../../schema/notification.schema';
 import type { NotificationUserRole } from '../../../application/ports/notification-command.port';
+import { NotificationType } from '../../../../../common/enum/user.enum';
+import type { NotificationMetadata } from '../../../types/notification-metadata.type';
 
 export interface NotificationAdminListFilterSnapshot {
     userId?: string;

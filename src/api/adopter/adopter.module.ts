@@ -22,7 +22,7 @@ import { AdopterAdminApplicationDetailMapperService } from './admin/domain/servi
 import { AdopterAdminApplicationListAssemblerService } from './admin/domain/services/adopter-admin-application-list-assembler.service';
 import { AdopterAdminActivityLogFactoryService } from './admin/domain/services/adopter-admin-activity-log-factory.service';
 import { AdopterAdminReviewReportPageAssemblerService } from './admin/domain/services/adopter-admin-review-report-page-assembler.service';
-import { AdopterAdminReviewResponseService } from './admin/domain/services/adopter-admin-review-response.service';
+import { AdopterAdminReviewDeleteResultMapperService } from './admin/domain/services/adopter-admin-review-delete-result-mapper.service';
 import { ADOPTER_ADMIN_READER_PORT } from './admin/application/ports/adopter-admin-reader.port';
 import { ADOPTER_ADMIN_WRITER_PORT } from './admin/application/ports/adopter-admin-writer.port';
 import { AdopterAdminReaderAdapter } from './admin/infrastructure/adopter-admin-reader.adapter';
@@ -41,8 +41,13 @@ import { ReportAdopterReviewUseCase } from './application/use-cases/report-adopt
 import { GetAdopterReviewsUseCase } from './application/use-cases/get-adopter-reviews.use-case';
 import { GetAdopterReviewDetailUseCase } from './application/use-cases/get-adopter-review-detail.use-case';
 import { DeleteAdopterAccountUseCase } from './application/use-cases/delete-adopter-account.use-case';
+import { AdopterApplicationCreateResultMapperService } from './domain/services/adopter-application-create-result-mapper.service';
 import { AdopterFavoritePolicyService } from './domain/services/adopter-favorite-policy.service';
+import { AdopterFavoriteDetailMapperService } from './domain/services/adopter-favorite-detail-mapper.service';
+import { AdopterFavoriteRecordMapperService } from './domain/services/adopter-favorite-record-mapper.service';
 import { AdopterPaginationAssemblerService } from './domain/services/adopter-pagination-assembler.service';
+import { AdopterProfileResultMapperService } from './domain/services/adopter-profile-result-mapper.service';
+import { AdopterProfileUpdateMapperService } from './domain/services/adopter-profile-update-mapper.service';
 import { AdopterApplicationCustomResponseBuilderService } from './domain/services/adopter-application-custom-response-builder.service';
 import { AdopterApplicationStandardResponseBuilderService } from './domain/services/adopter-application-standard-response-builder.service';
 import { AdopterReportPayloadBuilderService } from './domain/services/adopter-report-payload-builder.service';
@@ -140,9 +145,14 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AdopterAdminApplicationListAssemblerService,
         AdopterAdminActivityLogFactoryService,
         AdopterAdminReviewReportPageAssemblerService,
-        AdopterAdminReviewResponseService,
+        AdopterAdminReviewDeleteResultMapperService,
+        AdopterApplicationCreateResultMapperService,
         AdopterFavoritePolicyService,
+        AdopterFavoriteDetailMapperService,
+        AdopterFavoriteRecordMapperService,
         AdopterPaginationAssemblerService,
+        AdopterProfileResultMapperService,
+        AdopterProfileUpdateMapperService,
         AdopterApplicationCustomResponseBuilderService,
         AdopterApplicationStandardResponseBuilderService,
         AdopterReportPayloadBuilderService,

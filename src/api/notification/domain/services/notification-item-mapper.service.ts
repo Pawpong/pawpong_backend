@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
-import type { NotificationMetadata } from '../../../../schema/notification.schema';
 import { NotificationInboxRecord } from '../../application/ports/notification-inbox.port';
 import type { NotificationItemResult } from '../../application/types/notification-result.type';
+import type { NotificationMetadata } from '../../types/notification-metadata.type';
 import type { NotificationObjectIdLike } from '../../types/notification-record.type';
 
 type NotificationReadableRecord = {

@@ -1,7 +1,6 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
 
 import { BreederPlan, UserStatus, VerificationStatus } from '../../../../common/enum/user.enum';
-import { AuthMapper } from '../../mapper/auth.mapper';
 import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../ports/auth-registration.port';
 import {
     AUTH_REGISTRATION_NOTIFICATION_PORT,
@@ -12,6 +11,9 @@ import { AUTH_TOKEN_PORT, type AuthTokenPort } from '../ports/auth-token.port';
 import { type RegisterBreederAuthSignupCommand, type RegisterBreederAuthSignupResult } from '../types/auth-signup.type';
 import { AuthSocialIdentityService } from '../../domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from '../../domain/services/auth-stored-file-name.service';
+import { AuthBreederDocumentTypeService } from '../../domain/services/auth-breeder-document-type.service';
+import { AuthPhoneNumberNormalizerService } from '../../domain/services/auth-phone-number-normalizer.service';
+import { AuthSignupResultMapperService } from '../../domain/services/auth-signup-result-mapper.service';
 
 @Injectable()
 export class RegisterBreederUseCase {
@@ -26,6 +28,9 @@ export class RegisterBreederUseCase {
         private readonly authTokenPort: AuthTokenPort,
         private readonly authSocialIdentityService: AuthSocialIdentityService,
         private readonly authStoredFileNameService: AuthStoredFileNameService,
+        private readonly authBreederDocumentTypeService: AuthBreederDocumentTypeService,
+        private readonly authPhoneNumberNormalizerService: AuthPhoneNumberNormalizerService,
+        private readonly authSignupResultMapperService: AuthSignupResultMapperService,
     ) {}
 
     async execute(dto: RegisterBreederAuthSignupCommand): Promise<RegisterBreederAuthSignupResult> {
@@ -71,8 +76,9 @@ export class RegisterBreederUseCase {
             finalDocumentUrls?.map((urlOrFilename, index) => {
                 const fileName = this.authStoredFileNameService.extract(urlOrFilename) || urlOrFilename;
                 const originalFileName = finalOriginalFileNames?.[index];
-                const camelCaseType = finalDocumentTypes?.[index] || AuthMapper.extractDocumentType(fileName);
-                const snakeCaseType = AuthMapper.convertDocumentTypeToSnakeCase(camelCaseType);
+                const camelCaseType =
+                    finalDocumentTypes?.[index] || this.authBreederDocumentTypeService.extractFromUrl(fileName);
+                const snakeCaseType = this.authBreederDocumentTypeService.toPersistedType(camelCaseType);
 
                 return {
                     fileName,
@@ -92,7 +98,7 @@ export class RegisterBreederUseCase {
         const savedBreeder = await this.authRegistrationPort.createBreeder({
             emailAddress: dto.email,
             nickname: dto.breederName,
-            phoneNumber: AuthMapper.normalizePhoneNumber(dto.phoneNumber),
+            phoneNumber: this.authPhoneNumberNormalizerService.normalize(dto.phoneNumber),
             profileImageFileName: this.authStoredFileNameService.extract(finalProfileImage),
             socialAuthInfo,
             userRole: 'breeder',
@@ -159,6 +165,6 @@ export class RegisterBreederUseCase {
             });
         }
 
-        return AuthMapper.toBreederRegisterResponse(savedBreeder, tokens);
+        return this.authSignupResultMapperService.toBreederResult(savedBreeder, tokens);
     }
 }

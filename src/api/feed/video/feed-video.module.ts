@@ -11,6 +11,7 @@ import { FeedLikeModule } from '../like/feed-like.module';
 import { FeedTagModule } from '../tag/feed-tag.module';
 import { FeedCacheKeyService } from '../domain/services/feed-cache-key.service';
 import { FeedVideoSummaryMapperService } from '../domain/services/feed-video-summary-mapper.service';
+import { FEED_VIDEO_ASSET_URL_PORT } from './application/ports/feed-video-asset-url.port';
 import { FEED_VIDEO_TRANSCODER_PORT } from './application/ports/feed-video-transcoder.port';
 import { FEED_VIDEO_FILE_STORAGE_PORT } from './application/ports/feed-video-file-storage.port';
 import { GetFeedUseCase } from './application/use-cases/get-feed.use-case';
@@ -35,10 +36,10 @@ import { FeedVideoAssetUrlService } from './infrastructure/feed-video-asset-url.
 import { FeedVideoFfmpegAdapter } from './infrastructure/feed-video-ffmpeg.adapter';
 import { FeedVideoMongooseReaderAdapter } from './infrastructure/feed-video-mongoose-reader.adapter';
 import { FeedVideoMongooseCommandAdapter } from './infrastructure/feed-video-mongoose-command.adapter';
-import { FeedVideoPrefetchResponseBuilderService } from './infrastructure/feed-video-prefetch-response-builder.service';
 import { FeedVideoStorageAdapter } from './infrastructure/feed-video-storage.adapter';
 import { FeedVideoStorageStreamAdapter } from './infrastructure/feed-video-storage-stream.adapter';
-import { FeedVideoStreamResponseService } from './infrastructure/feed-video-stream-response.service';
+import { FeedVideoPrefetchResponseBuilderService } from './presentation/services/feed-video-prefetch-response-builder.service';
+import { FeedVideoStreamResponseService } from './presentation/services/feed-video-stream-response.service';
 import { FeedVideoRepository } from './repository/feed-video.repository';
 import { FEED_VIDEO_READER_PORT } from './application/ports/feed-video-reader.port';
 import { FEED_VIDEO_COMMAND_PORT } from './application/ports/feed-video-command.port';
@@ -151,6 +152,10 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         {
             provide: FEED_VIDEO_READER_PORT,
             useExisting: FeedVideoMongooseReaderAdapter,
+        },
+        {
+            provide: FEED_VIDEO_ASSET_URL_PORT,
+            useExisting: FeedVideoAssetUrlService,
         },
         {
             provide: FEED_VIDEO_COMMAND_PORT,

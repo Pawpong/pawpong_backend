@@ -4,8 +4,8 @@ import {
     ANNOUNCEMENT_PUBLIC_READER_PORT,
     type AnnouncementPublicReaderPort,
 } from '../ports/announcement-public-reader.port';
-import { AnnouncementResponseMapperService } from '../../domain/services/announcement-response-mapper.service';
-import { PaginationRequestDto } from '../../../../common/dto/pagination/pagination-request.dto';
+import { AnnouncementPageAssemblerService } from '../../domain/services/announcement-page-assembler.service';
+import type { AnnouncementPageQuery } from '../types/announcement-query.type';
 import type { AnnouncementPageResult } from '../types/announcement-result.type';
 
 @Injectable()
@@ -13,12 +13,10 @@ export class GetActiveAnnouncementsUseCase {
     constructor(
         @Inject(ANNOUNCEMENT_PUBLIC_READER_PORT)
         private readonly announcementPublicReaderPort: AnnouncementPublicReaderPort,
-        private readonly announcementResponseMapperService: AnnouncementResponseMapperService,
+        private readonly announcementPageAssemblerService: AnnouncementPageAssemblerService,
     ) {}
 
-    async execute(
-        paginationDto: PaginationRequestDto,
-    ): Promise<AnnouncementPageResult> {
+    async execute(paginationDto: AnnouncementPageQuery): Promise<AnnouncementPageResult> {
         const page = paginationDto.page ?? 1;
         const limit = paginationDto.limit ?? 10;
 
@@ -27,6 +25,6 @@ export class GetActiveAnnouncementsUseCase {
             limit,
         });
 
-        return this.announcementResponseMapperService.toPaginationResponse(result);
+        return this.announcementPageAssemblerService.build(result);
     }
 }

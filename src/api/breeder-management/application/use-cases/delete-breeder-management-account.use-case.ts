@@ -3,14 +3,14 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { BREEDER_MANAGEMENT_ACCOUNT_COMMAND_PORT } from '../ports/breeder-management-account-command.port';
 import type { BreederManagementAccountCommandPort } from '../ports/breeder-management-account-command.port';
-import { BreederManagementAccountCommandResponseService } from '../../domain/services/breeder-management-account-command-response.service';
+import { BreederManagementAccountCommandResultMapperService } from '../../domain/services/breeder-management-account-command-result-mapper.service';
 
 @Injectable()
 export class DeleteBreederManagementAccountUseCase {
     constructor(
         @Inject(BREEDER_MANAGEMENT_ACCOUNT_COMMAND_PORT)
         private readonly breederManagementAccountCommandPort: BreederManagementAccountCommandPort,
-        private readonly breederManagementAccountCommandResponseService: BreederManagementAccountCommandResponseService,
+        private readonly breederManagementAccountCommandResultMapperService: BreederManagementAccountCommandResultMapperService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -62,6 +62,6 @@ export class DeleteBreederManagementAccountUseCase {
             pendingApplications,
         });
 
-        return this.breederManagementAccountCommandResponseService.createAccountDeleted(userId, deletedAt);
+        return this.breederManagementAccountCommandResultMapperService.toAccountDeletedResult(userId, deletedAt);
     }
 }

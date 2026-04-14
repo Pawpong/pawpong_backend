@@ -9,8 +9,9 @@ import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { ANNOUNCEMENT_PUBLIC_READER_PORT } from './application/ports/announcement-public-reader.port';
 import { GetActiveAnnouncementsUseCase } from './application/use-cases/get-active-announcements.use-case';
 import { GetAnnouncementByIdUseCase } from './application/use-cases/get-announcement-by-id.use-case';
+import { AnnouncementItemMapperService } from './domain/services/announcement-item-mapper.service';
+import { AnnouncementPageAssemblerService } from './domain/services/announcement-page-assembler.service';
 import { AnnouncementPaginationAssemblerService } from './domain/services/announcement-pagination-assembler.service';
-import { AnnouncementResponseMapperService } from './domain/services/announcement-response-mapper.service';
 import { AnnouncementMongoosePublicReaderAdapter } from './infrastructure/announcement-mongoose-public-reader.adapter';
 import { ANNOUNCEMENT_ADMIN_READER_PORT } from './admin/application/ports/announcement-admin-reader.port';
 import { ANNOUNCEMENT_WRITER_PORT } from './admin/application/ports/announcement-writer.port';
@@ -38,8 +39,9 @@ import { Announcement, AnnouncementSchema } from '../../schema/announcement.sche
         CreateAnnouncementUseCase,
         UpdateAnnouncementUseCase,
         DeleteAnnouncementUseCase,
+        AnnouncementItemMapperService,
+        AnnouncementPageAssemblerService,
         AnnouncementPaginationAssemblerService,
-        AnnouncementResponseMapperService,
         AnnouncementRepository,
         AnnouncementMongoosePublicReaderAdapter,
         AnnouncementMongooseAdminReaderAdapter,

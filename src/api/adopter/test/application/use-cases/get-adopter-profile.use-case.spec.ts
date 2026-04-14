@@ -1,4 +1,5 @@
 import { GetAdopterProfileUseCase } from '../../../application/use-cases/get-adopter-profile.use-case';
+import { AdopterProfileResultMapperService } from '../../../domain/services/adopter-profile-result-mapper.service';
 
 describe('입양자 프로필 조회 유스케이스', () => {
     it('입양자 프로필을 조회하고 프로필 이미지를 signed 주소로 변환한다', async () => {
@@ -18,6 +19,7 @@ describe('입양자 프로필 조회 유스케이스', () => {
             {
                 generateOneSafe: jest.fn().mockReturnValue('signed-profile'),
             } as any,
+            new AdopterProfileResultMapperService(),
         );
 
         await expect(useCase.execute('adopter-1')).resolves.toMatchObject({

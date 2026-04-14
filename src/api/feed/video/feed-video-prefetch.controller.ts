@@ -6,7 +6,7 @@ import type { FeedVideoSegmentPrefetchResult } from './application/types/feed-vi
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
 import { FeedPrefetchQueryDto } from './dto/request/feed-prefetch-query.dto';
 import { SegmentPrefetchResponseDto } from './dto/response/video-response.dto';
-import { FeedVideoPrefetchResponseBuilderService } from './infrastructure/feed-video-prefetch-response-builder.service';
+import { FeedVideoPrefetchResponseBuilderService } from './presentation/services/feed-video-prefetch-response-builder.service';
 import { ApiPrefetchFeedVideoSegmentsEndpoint } from './swagger';
 
 @FeedPublicController()

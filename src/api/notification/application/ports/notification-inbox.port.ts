@@ -1,6 +1,6 @@
-import { NotificationType } from '../../../../schema/notification.schema';
-import type { NotificationMetadata } from '../../../../schema/notification.schema';
+import { NotificationType } from '../../../../common/enum/user.enum';
 import type { NotificationObjectIdLike } from '../../types/notification-record.type';
+import type { NotificationMetadata } from '../../types/notification-metadata.type';
 
 export const NOTIFICATION_INBOX_PORT = Symbol('NOTIFICATION_INBOX_PORT');
 

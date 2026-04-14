@@ -1,7 +1,7 @@
 import { ForbiddenException } from '@nestjs/common';
 
 import { ChangeBreederLevelUseCase } from '../../../application/use-cases/change-breeder-level.use-case';
-import { BreederVerificationAdminCommandResponseService } from '../../../domain/services/breeder-verification-admin-command-response.service';
+import { BreederVerificationAdminCommandResultMapperService } from '../../../domain/services/breeder-verification-admin-command-result-mapper.service';
 import { BreederVerificationAdminPolicyService } from '../../../domain/services/breeder-verification-admin-policy.service';
 
 describe('브리더 레벨 변경 유스케이스', () => {
@@ -16,7 +16,7 @@ describe('브리더 레벨 변경 유스케이스', () => {
         reader as any,
         writer as any,
         new BreederVerificationAdminPolicyService(),
-        new BreederVerificationAdminCommandResponseService(),
+        new BreederVerificationAdminCommandResultMapperService(),
     );
 
     beforeEach(() => {
