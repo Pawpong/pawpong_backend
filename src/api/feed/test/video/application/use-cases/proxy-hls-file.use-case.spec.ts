@@ -49,4 +49,13 @@ describe('스트리밍 파일 프록시 유스케이스', () => {
 
         await expect(useCase.execute('video-1', 'malicious.mp4')).rejects.toBeInstanceOf(BadRequestException);
     });
+
+    it('저장소 조회 실패는 사용자용 잘못된 요청 예외로 변환한다', async () => {
+        const feedVideoStream = createStreamPort();
+        feedVideoStream.getTextCache.mockResolvedValue(null);
+        feedVideoStream.readFile.mockRejectedValue(new Error('s3 failed'));
+        const useCase = new ProxyHlsFileUseCase(feedVideoStream, new FeedVideoStreamingService());
+
+        await expect(useCase.execute('video-1', 'master.m3u8')).rejects.toThrow('파일을 가져올 수 없습니다.');
+    });
 });

@@ -1,28 +1,22 @@
-import { Get, Param, Res } from '@nestjs/common';
-import type { Response } from 'express';
+import { Get, Param, UseInterceptors } from '@nestjs/common';
 
 import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import { ProxyHlsFileUseCase } from './application/use-cases/proxy-hls-file.use-case';
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
-import { FeedVideoStreamResponseService } from './presentation/services/feed-video-stream-response.service';
+import { FeedVideoStreamResponseInterceptor } from './presentation/interceptors/feed-video-stream-response.interceptor';
 import { ApiStreamFeedVideoEndpoint } from './swagger';
 
 @FeedPublicController()
 export class FeedVideoHlsStreamController {
-    constructor(
-        private readonly proxyHlsFileUseCase: ProxyHlsFileUseCase,
-        private readonly feedVideoStreamResponseService: FeedVideoStreamResponseService,
-    ) {}
+    constructor(private readonly proxyHlsFileUseCase: ProxyHlsFileUseCase) {}
 
     @Get('videos/stream/:videoId/:filename')
+    @UseInterceptors(FeedVideoStreamResponseInterceptor)
     @ApiStreamFeedVideoEndpoint()
     async streamHLS(
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @Param('filename') filename: string,
-        @Res() res: Response,
     ) {
-        return this.feedVideoStreamResponseService.sendProxyResponse(res, () =>
-            this.proxyHlsFileUseCase.execute(videoId, filename),
-        );
+        return this.proxyHlsFileUseCase.execute(videoId, filename);
     }
 }
