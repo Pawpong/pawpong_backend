@@ -105,9 +105,12 @@ import { AuthSocialRegistrationResultMapperService } from './domain/services/aut
 import { AuthSocialUserCheckResultMapperService } from './domain/services/auth-social-user-check-result-mapper.service';
 import { AuthHttpCookieService } from './presentation/services/auth-http-cookie.service';
 import { AuthSocialErrorRedirectFactoryService } from './presentation/services/auth-social-error-redirect-factory.service';
-import { AuthSocialHttpFlowFacade } from './presentation/services/auth-social-http-flow.facade';
+import { AuthSocialCallbackResultFactoryService } from './presentation/services/auth-social-callback-result-factory.service';
 import { AuthSocialLoginSuccessRedirectFactoryService } from './presentation/services/auth-social-login-success-redirect-factory.service';
 import { AuthSocialSignupRedirectFactoryService } from './presentation/services/auth-social-signup-redirect-factory.service';
+import { AuthRedirectResponseInterceptor } from './presentation/interceptors/auth-redirect-response.interceptor';
+import { AuthSocialCallbackResponseInterceptor } from './presentation/interceptors/auth-social-callback-response.interceptor';
+import { AuthLogoutCookieInterceptor } from './presentation/interceptors/auth-logout-cookie.interceptor';
 import { AuthBreederVerificationCommandAdapter } from './infrastructure/auth-breeder-verification-command.adapter';
 import { AuthPhoneVerificationMemoryStore } from './infrastructure/auth-phone-verification-memory.store';
 import { AuthPhoneVerificationMongooseRegistryAdapter } from './infrastructure/auth-phone-verification-mongoose-registry.adapter';
@@ -208,10 +211,13 @@ const AUTH_DOMAIN_PROVIDERS = [
 
 const AUTH_PRESENTATION_PROVIDERS = [
     AuthHttpCookieService,
+    AuthSocialCallbackResultFactoryService,
     AuthSocialSignupRedirectFactoryService,
     AuthSocialLoginSuccessRedirectFactoryService,
     AuthSocialErrorRedirectFactoryService,
-    AuthSocialHttpFlowFacade,
+    AuthRedirectResponseInterceptor,
+    AuthSocialCallbackResponseInterceptor,
+    AuthLogoutCookieInterceptor,
 ];
 
 const AUTH_INFRASTRUCTURE_PROVIDERS = [
