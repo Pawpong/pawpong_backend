@@ -1,4 +1,4 @@
-import { HEALTH_RESPONSE_MESSAGE_EXAMPLES } from '../constants/health-response-messages';
+import { HEALTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/health-response-messages';
 
 describe('헬스 응답 메시지 상수', () => {
     it('헬스체크 메시지 계약을 유지한다', () => {
