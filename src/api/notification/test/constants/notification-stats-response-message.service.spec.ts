@@ -1,4 +1,4 @@
-import { NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/notification-response-messages';
+import { NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/notification-response-messages';
 
 describe('알림 통계 응답 메시지 상수', () => {
     it('통계 조회 메시지 계약을 유지한다', () => {

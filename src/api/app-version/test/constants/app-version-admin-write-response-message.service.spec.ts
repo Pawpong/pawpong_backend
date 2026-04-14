@@ -1,4 +1,4 @@
-import { APP_VERSION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/app-version-response-messages';
+import { APP_VERSION_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/app-version-response-messages';
 
 describe('앱 버전 관리자 쓰기 응답 메시지 상수', () => {
     it('생성과 수정 메시지 계약을 유지한다', () => {

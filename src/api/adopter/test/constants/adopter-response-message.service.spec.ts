@@ -1,4 +1,4 @@
-import { ADOPTER_RESPONSE_MESSAGES } from '../constants/adopter-response-messages';
+import { ADOPTER_RESPONSE_MESSAGES } from '../../constants/adopter-response-messages';
 
 describe('입양자 응답 메시지 서비스', () => {
     it('입양자 공개/관리자 응답 메시지 계약을 유지한다', () => {

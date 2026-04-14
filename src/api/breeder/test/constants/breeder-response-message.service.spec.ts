@@ -2,7 +2,7 @@ import {
     BREEDER_RESPONSE_MESSAGES,
     buildBreederDocumentReminderMessage,
     buildBreederTestAccountMessage,
-} from '../constants/breeder-response-messages';
+} from '../../constants/breeder-response-messages';
 
 describe('브리더 응답 메시지 상수', () => {
     it('공개 조회와 관리자 응답 메시지 계약을 유지한다', () => {

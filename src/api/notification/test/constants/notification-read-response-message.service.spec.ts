@@ -1,7 +1,7 @@
 import {
     buildAllNotificationsMarkedReadMessage,
     NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES,
-} from '../constants/notification-response-messages';
+} from '../../constants/notification-response-messages';
 
 describe('알림 읽음 응답 메시지 상수', () => {
     it('읽음 처리 메시지 계약을 유지한다', () => {
