@@ -185,7 +185,7 @@ export class EmailTestController {
         description: '모든 이메일 템플릿의 HTML을 반환합니다 (발송하지 않음).',
         isPublic: true,
     })
-    async previewAllEmails(): Promise<ApiResponseDto<any>> {
+    async previewAllEmails(): Promise<ApiResponseDto<Record<string, { subject: string; html: string }>>> {
         const templates = {
             breederApproval: this.mailTemplateService.getBreederApprovalEmail('테스트 브리더'),
             breederRejection: this.mailTemplateService.getBreederRejectionEmail('테스트 브리더', [

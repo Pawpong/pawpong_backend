@@ -6,15 +6,11 @@ import type { FeedVideoSegmentPrefetchResult } from './application/types/feed-vi
 import { FeedPublicController } from './decorator/feed-video-controller.decorator';
 import { FeedPrefetchQueryDto } from './dto/request/feed-prefetch-query.dto';
 import { SegmentPrefetchResponseDto } from './dto/response/video-response.dto';
-import { FeedVideoPrefetchResultBuilderService } from './presentation/services/feed-video-prefetch-result-builder.service';
 import { ApiPrefetchFeedVideoSegmentsEndpoint } from './swagger';
 
 @FeedPublicController()
 export class FeedVideoPrefetchController {
-    constructor(
-        private readonly prefetchAllQualitySegmentsUseCase: PrefetchAllQualitySegmentsUseCase,
-        private readonly feedVideoPrefetchResultBuilderService: FeedVideoPrefetchResultBuilderService,
-    ) {}
+    constructor(private readonly prefetchAllQualitySegmentsUseCase: PrefetchAllQualitySegmentsUseCase) {}
 
     @Post('videos/stream/:videoId/prefetch')
     @ApiPrefetchFeedVideoSegmentsEndpoint()
@@ -25,7 +21,9 @@ export class FeedVideoPrefetchController {
         const requestedCount = query.count;
 
         await this.prefetchAllQualitySegmentsUseCase.execute(videoId, query.segment, requestedCount);
-        return this.feedVideoPrefetchResultBuilderService.build(requestedCount) as
-            SegmentPrefetchResponseDto & FeedVideoSegmentPrefetchResult;
+        return {
+            success: true,
+            message: `${requestedCount}개 세그먼트 프리페치 완료`,
+        } as SegmentPrefetchResponseDto & FeedVideoSegmentPrefetchResult;
     }
 }
