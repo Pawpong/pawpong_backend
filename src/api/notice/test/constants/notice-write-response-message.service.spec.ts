@@ -1,4 +1,4 @@
-import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../constants/notice-response-messages';
+import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/notice-response-messages';
 
 describe('공지사항 쓰기 응답 메시지 상수', () => {
     it('생성과 수정 메시지 계약을 유지한다', () => {
