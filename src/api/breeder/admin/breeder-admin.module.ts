@@ -1,34 +1,11 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { MailModule } from '../../../common/mail/mail.module';
-import { StorageModule } from '../../../common/storage/storage.module';
-import { AlimtalkModule } from '../../../common/alimtalk/alimtalk.module';
-import { NotificationModule } from '../../../api/notification/notification.module';
-import { BreederReportAdminModule } from './report/breeder-report-admin.module';
-import { BreederVerificationAdminModule } from './verification/breeder-verification-admin.module';
-
-import { BreederAdminAccountController } from './breeder-admin-account.controller';
-import { BreederAdminReminderController } from './breeder-admin-reminder.controller';
-import { SuspendBreederUseCase } from './application/use-cases/suspend-breeder.use-case';
-import { UnsuspendBreederUseCase } from './application/use-cases/unsuspend-breeder.use-case';
-import { SendBreederRemindNotificationsUseCase } from './application/use-cases/send-breeder-remind-notifications.use-case';
-import { SetBreederTestAccountUseCase } from './application/use-cases/set-breeder-test-account.use-case';
-import { BREEDER_ADMIN_READER_PORT } from './application/ports/breeder-admin-reader.port';
-import { BREEDER_ADMIN_WRITER_PORT } from './application/ports/breeder-admin-writer.port';
-import { BREEDER_ADMIN_NOTIFIER_PORT } from './application/ports/breeder-admin-notifier.port';
-import { BreederAdminPolicyService } from './domain/services/breeder-admin-policy.service';
-import { BreederAdminActivityLogFactoryService } from './domain/services/breeder-admin-activity-log-factory.service';
-import { BreederAdminReminderResultMapperService } from './domain/services/breeder-admin-reminder-result-mapper.service';
-import { BreederAdminReminderPolicyService } from './domain/services/breeder-admin-reminder-policy.service';
-import { BreederAdminSuspensionResultMapperService } from './domain/services/breeder-admin-suspension-result-mapper.service';
-import { BreederAdminTestAccountResultMapperService } from './domain/services/breeder-admin-test-account-result-mapper.service';
-import { BreederAdminMongooseRepositoryAdapter } from './infrastructure/breeder-admin-mongoose.repository.adapter';
-import { BreederAdminNotifierAdapter } from './infrastructure/breeder-admin-notifier.adapter';
-import { BreederAdminRepository } from './repository/breeder-admin.repository';
-
-import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
-import { Admin, AdminSchema } from '../../../schema/admin.schema';
+import {
+    BREEDER_ADMIN_MODULE_CONTROLLERS,
+    BREEDER_ADMIN_MODULE_EXPORTS,
+    BREEDER_ADMIN_MODULE_IMPORTS,
+    BREEDER_ADMIN_MODULE_PROVIDERS,
+} from './breeder-admin.module-definition';
 
 /**
  * 브리더 관리자 모듈 (통합)
@@ -44,47 +21,9 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
  * - /api/breeder-admin/report/* - 신고 관리 (서브모듈)
  */
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: Breeder.name, schema: BreederSchema },
-            { name: Admin.name, schema: AdminSchema },
-        ]),
-        StorageModule,
-        MailModule,
-        NotificationModule,
-        AlimtalkModule,
-        // Sub-modules
-        BreederReportAdminModule,
-        BreederVerificationAdminModule,
-    ],
-    controllers: [BreederAdminAccountController, BreederAdminReminderController],
-    providers: [
-        SuspendBreederUseCase,
-        UnsuspendBreederUseCase,
-        SendBreederRemindNotificationsUseCase,
-        SetBreederTestAccountUseCase,
-        BreederAdminPolicyService,
-        BreederAdminActivityLogFactoryService,
-        BreederAdminSuspensionResultMapperService,
-        BreederAdminReminderResultMapperService,
-        BreederAdminTestAccountResultMapperService,
-        BreederAdminReminderPolicyService,
-        BreederAdminRepository,
-        BreederAdminMongooseRepositoryAdapter,
-        BreederAdminNotifierAdapter,
-        {
-            provide: BREEDER_ADMIN_READER_PORT,
-            useExisting: BreederAdminMongooseRepositoryAdapter,
-        },
-        {
-            provide: BREEDER_ADMIN_WRITER_PORT,
-            useExisting: BreederAdminMongooseRepositoryAdapter,
-        },
-        {
-            provide: BREEDER_ADMIN_NOTIFIER_PORT,
-            useExisting: BreederAdminNotifierAdapter,
-        },
-    ],
-    exports: [BreederReportAdminModule, BreederVerificationAdminModule],
+    imports: BREEDER_ADMIN_MODULE_IMPORTS,
+    controllers: BREEDER_ADMIN_MODULE_CONTROLLERS,
+    providers: BREEDER_ADMIN_MODULE_PROVIDERS,
+    exports: BREEDER_ADMIN_MODULE_EXPORTS,
 })
 export class BreederAdminModule {}
