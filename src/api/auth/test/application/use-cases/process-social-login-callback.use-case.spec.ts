@@ -6,10 +6,6 @@ import {
     type AuthSocialCallbackLoginResult,
     type AuthSocialCallbackProfile,
 } from '../../../application/ports/auth-social-callback.port';
-import { AuthSocialErrorRedirectResponseFactoryService } from '../../../domain/services/auth-social-error-redirect-response-factory.service';
-import { AuthSocialLoginSuccessRedirectResponseFactoryService } from '../../../domain/services/auth-social-login-success-redirect-response-factory.service';
-import { AuthSocialRedirectPathService } from '../../../domain/services/auth-social-redirect-path.service';
-import { AuthSocialSignupRedirectResponseFactoryService } from '../../../domain/services/auth-social-signup-redirect-response-factory.service';
 import { ProcessSocialLoginCallbackUseCase } from '../../../application/use-cases/process-social-login-callback.use-case';
 
 class StubAuthSocialCallbackPort implements AuthSocialCallbackPort {
@@ -72,14 +68,11 @@ describe('소셜 로그인 콜백 처리 유스케이스', () => {
         port = new StubAuthSocialCallbackPort();
         useCase = new ProcessSocialLoginCallbackUseCase(
             port,
-            new AuthSocialSignupRedirectResponseFactoryService(),
-            new AuthSocialLoginSuccessRedirectResponseFactoryService(new AuthSocialRedirectPathService()),
-            new AuthSocialErrorRedirectResponseFactoryService(),
             logger,
         );
     });
 
-    it('신규 사용자는 signup redirect를 유지한다', async () => {
+    it('신규 사용자는 signup 흐름 결과를 반환한다', async () => {
         const result = await useCase.execute({
             provider: 'kakao',
             providerId: 'provider-id',
@@ -89,14 +82,19 @@ describe('소셜 로그인 콜백 처리 유스케이스', () => {
             needsEmail: true,
         });
 
-        expect(result.cookies).toBeUndefined();
-        expect(result.redirectUrl).toContain('https://pawpong.kr/signup?');
-        expect(result.redirectUrl).toContain('tempId=temp-social-id');
-        expect(result.redirectUrl).toContain('provider=kakao');
-        expect(result.redirectUrl).toContain('needsEmail=true');
+        expect(result).toMatchObject({
+            kind: 'signup',
+            frontendUrl: 'https://pawpong.kr',
+            tempUserId: 'temp-social-id',
+        });
+        expect(result.kind).toBe('signup');
+        if (result.kind === 'signup') {
+            expect(result.userProfile.provider).toBe('kakao');
+            expect(result.userProfile.needsEmail).toBe(true);
+        }
     });
 
-    it('로컬 프론트엔드는 토큰을 주소 파라미터로 전달한다', async () => {
+    it('기존 사용자는 login 성공 흐름 결과를 반환한다', async () => {
         port.profileResult = {
             needsAdditionalInfo: false,
             user: {
@@ -121,13 +119,20 @@ describe('소셜 로그인 콜백 처리 유스케이스', () => {
             'http://localhost:3000',
         );
 
-        expect(result.cookies).toBeUndefined();
-        expect(result.redirectUrl).toBe(
-            'http://localhost:3000/login/success?accessToken=access-token&refreshToken=refresh-token&returnUrl=%2Fmypage',
-        );
+        expect(result).toMatchObject({
+            kind: 'login_success',
+            frontendUrl: 'http://localhost:3000',
+            originUrl: 'http://localhost:3000|/mypage',
+            role: 'adopter',
+            isProduction: true,
+        });
+        if (result.kind === 'login_success') {
+            expect(result.tokens.accessToken).toBe('access-token');
+            expect(result.cookieOptions.sameSite).toBe('none');
+        }
     });
 
-    it('프로덕션 프론트엔드는 쿠키와 redirect path 계약을 유지한다', async () => {
+    it('프로덕션 브리더 로그인은 쿠키 옵션이 포함된 흐름 결과를 반환한다', async () => {
         port.profileResult = {
             needsAdditionalInfo: false,
             user: {
@@ -151,24 +156,20 @@ describe('소셜 로그인 콜백 처리 유스케이스', () => {
             'https://pawpong.kr',
         );
 
-        expect(result.redirectUrl).toBe('https://pawpong.kr/dashboard');
-        expect(result.cookies).toHaveLength(3);
-        expect(result.cookies?.[0]).toMatchObject({
-            name: 'accessToken',
-            value: 'access-token',
+        expect(result).toMatchObject({
+            kind: 'login_success',
+            frontendUrl: 'https://pawpong.kr',
+            originUrl: 'https://pawpong.kr|/dashboard',
+            role: 'breeder',
+            isProduction: true,
         });
-        expect(result.cookies?.[1]).toMatchObject({
-            name: 'refreshToken',
-            value: 'refresh-token',
-        });
-        expect(result.cookies?.[2]).toMatchObject({
-            name: 'userRole',
-            value: 'breeder',
-        });
-        expect(result.cookies?.[2]?.options.httpOnly).toBe(false);
+        if (result.kind === 'login_success') {
+            expect(result.tokens.refreshToken).toBe('refresh-token');
+            expect(result.cookieOptions.domain).toBe('.pawpong.kr');
+        }
     });
 
-    it('오류 시 login redirect 계약을 유지한다', async () => {
+    it('오류 시 error 흐름 결과를 반환한다', async () => {
         jest.spyOn(port, 'handleSocialLogin').mockRejectedValue(new Error('탈퇴한 계정으로는 로그인할 수 없습니다.'));
 
         const result = await useCase.execute(
@@ -182,7 +183,10 @@ describe('소셜 로그인 콜백 처리 유스케이스', () => {
             'https://pawpong.kr',
         );
 
-        expect(result.redirectUrl).toContain('https://pawpong.kr/login?');
-        expect(result.redirectUrl).toContain('type=deleted_account');
+        expect(result).toEqual({
+            kind: 'error',
+            frontendUrl: 'https://pawpong.kr',
+            errorMessage: '탈퇴한 계정으로는 로그인할 수 없습니다.',
+        });
     });
 });
