@@ -2,7 +2,7 @@ import {
     AUTH_RESPONSE_MESSAGE_EXAMPLES,
     buildAuthPhoneVerificationCodeSentResult,
     buildAuthPhoneVerificationCompletedResult,
-} from '../../../constants/auth-response-messages';
+} from '../../constants/auth-response-messages';
 
 describe('전화번호 인증 응답 상수', () => {
     it('전화번호 인증코드 발송 응답을 만든다', () => {

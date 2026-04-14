@@ -1,4 +1,4 @@
-import { AUTH_RESPONSE_MESSAGE_EXAMPLES, buildAuthDuplicateCheckMessage } from '../../../constants/auth-response-messages';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES, buildAuthDuplicateCheckMessage } from '../../constants/auth-response-messages';
 
 describe('중복 체크 응답 메시지 상수', () => {
     it('중복 체크 메시지를 상황별로 반환한다', () => {

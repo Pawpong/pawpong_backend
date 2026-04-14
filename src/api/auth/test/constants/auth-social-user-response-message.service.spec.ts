@@ -1,4 +1,4 @@
-import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../../constants/auth-response-messages';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
 
 describe('소셜 유저 조회 응답 메시지 상수', () => {
     it('소셜 유저 조회 메시지를 반환한다', () => {

@@ -1,4 +1,4 @@
-import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../../constants/auth-response-messages';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
 
 describe('인증 배너 응답 메시지 상수', () => {
     it('로그인과 회원가입 배너 조회 메시지를 반환한다', () => {

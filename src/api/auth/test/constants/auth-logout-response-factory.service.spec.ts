@@ -1,4 +1,4 @@
-import { AUTH_RESPONSE_MESSAGE_EXAMPLES, buildAuthLogoutResult } from '../../../constants/auth-response-messages';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES, buildAuthLogoutResult } from '../../constants/auth-response-messages';
 
 describe('로그아웃 응답 상수', () => {
     it('로그아웃 응답을 만든다', () => {
