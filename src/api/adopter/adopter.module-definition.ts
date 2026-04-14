@@ -1,0 +1,265 @@
+import { MongooseModule } from '@nestjs/mongoose';
+
+import { AdopterAccountController } from './adopter-account.controller';
+import { AdopterAdminApplicationController } from './admin/adopter-admin-application.controller';
+import { AdopterAdminReviewController } from './admin/adopter-admin-review.controller';
+import { AdopterApplicationCommandController } from './adopter-application-command.controller';
+import { AdopterApplicationQueryController } from './adopter-application-query.controller';
+import { AdopterFavoriteCommandController } from './adopter-favorite-command.controller';
+import { AdopterFavoriteQueryController } from './adopter-favorite-query.controller';
+import { AdopterProfileController } from './adopter-profile.controller';
+import { AdopterReportController } from './adopter-report.controller';
+import { AdopterReviewCommandController } from './adopter-review-command.controller';
+import { AdopterReviewQueryController } from './adopter-review-query.controller';
+import { GetAdopterAdminReviewReportsUseCase } from './admin/application/use-cases/get-adopter-admin-review-reports.use-case';
+import { DeleteAdopterAdminReviewUseCase } from './admin/application/use-cases/delete-adopter-admin-review.use-case';
+import { GetAdopterAdminApplicationListUseCase } from './admin/application/use-cases/get-adopter-admin-application-list.use-case';
+import { GetAdopterAdminApplicationDetailUseCase } from './admin/application/use-cases/get-adopter-admin-application-detail.use-case';
+import { AdopterAdminPolicyService } from './admin/domain/services/adopter-admin-policy.service';
+import { AdopterAdminApplicationDetailMapperService } from './admin/domain/services/adopter-admin-application-detail-mapper.service';
+import { AdopterAdminApplicationListAssemblerService } from './admin/domain/services/adopter-admin-application-list-assembler.service';
+import { AdopterAdminActivityLogFactoryService } from './admin/domain/services/adopter-admin-activity-log-factory.service';
+import { AdopterAdminReviewReportPageAssemblerService } from './admin/domain/services/adopter-admin-review-report-page-assembler.service';
+import { AdopterAdminReviewDeleteResultMapperService } from './admin/domain/services/adopter-admin-review-delete-result-mapper.service';
+import { ADOPTER_ADMIN_READER_PORT } from './admin/application/ports/adopter-admin-reader.port';
+import { ADOPTER_ADMIN_WRITER_PORT } from './admin/application/ports/adopter-admin-writer.port';
+import { AdopterAdminReaderAdapter } from './admin/infrastructure/adopter-admin-reader.adapter';
+import { AdopterAdminWriterAdapter } from './admin/infrastructure/adopter-admin-writer.adapter';
+import { GetAdopterProfileUseCase } from './application/use-cases/get-adopter-profile.use-case';
+import { UpdateAdopterProfileUseCase } from './application/use-cases/update-adopter-profile.use-case';
+import { AddFavoriteBreederUseCase } from './application/use-cases/add-favorite-breeder.use-case';
+import { RemoveFavoriteBreederUseCase } from './application/use-cases/remove-favorite-breeder.use-case';
+import { GetFavoriteBreedersUseCase } from './application/use-cases/get-favorite-breeders.use-case';
+import { CreateAdopterApplicationUseCase } from './application/use-cases/create-adopter-application.use-case';
+import { CreateAdopterReportUseCase } from './application/use-cases/create-adopter-report.use-case';
+import { GetAdopterApplicationsUseCase } from './application/use-cases/get-adopter-applications.use-case';
+import { GetAdopterApplicationDetailUseCase } from './application/use-cases/get-adopter-application-detail.use-case';
+import { CreateAdopterReviewUseCase } from './application/use-cases/create-adopter-review.use-case';
+import { ReportAdopterReviewUseCase } from './application/use-cases/report-adopter-review.use-case';
+import { GetAdopterReviewsUseCase } from './application/use-cases/get-adopter-reviews.use-case';
+import { GetAdopterReviewDetailUseCase } from './application/use-cases/get-adopter-review-detail.use-case';
+import { DeleteAdopterAccountUseCase } from './application/use-cases/delete-adopter-account.use-case';
+import { AdopterApplicationCreateResultMapperService } from './domain/services/adopter-application-create-result-mapper.service';
+import { AdopterFavoritePolicyService } from './domain/services/adopter-favorite-policy.service';
+import { AdopterFavoriteDetailMapperService } from './domain/services/adopter-favorite-detail-mapper.service';
+import { AdopterFavoriteRecordMapperService } from './domain/services/adopter-favorite-record-mapper.service';
+import { AdopterPaginationAssemblerService } from './domain/services/adopter-pagination-assembler.service';
+import { AdopterProfileResultMapperService } from './domain/services/adopter-profile-result-mapper.service';
+import { AdopterProfileUpdateMapperService } from './domain/services/adopter-profile-update-mapper.service';
+import { AdopterApplicationCustomAnswerBuilderService } from './domain/services/adopter-application-custom-answer-builder.service';
+import { AdopterApplicationStandardAnswerBuilderService } from './domain/services/adopter-application-standard-answer-builder.service';
+import { AdopterReportPayloadBuilderService } from './domain/services/adopter-report-payload-builder.service';
+import { AdopterReviewPageAssemblerService } from './domain/services/adopter-review-page-assembler.service';
+import { AdopterReviewDetailMapperService } from './domain/services/adopter-review-detail-mapper.service';
+import { AdopterApplicationListAssemblerService } from './domain/services/adopter-application-list-assembler.service';
+import { AdopterApplicationDetailAssemblerService } from './domain/services/adopter-application-detail-assembler.service';
+import { AdopterProfileAdapter } from './infrastructure/adopter-profile.adapter';
+import { AdopterAdminRepository } from './admin/repository/adopter-admin.repository';
+import { AdopterApplicationRepository } from './repository/adopter-application.repository';
+import { AdopterBreederFavoriteRepository } from './repository/adopter-breeder-favorite.repository';
+import { AdopterReviewRepository } from './repository/adopter-review.repository';
+import { AdopterBreederReaderAdapter } from './infrastructure/adopter-breeder-reader.adapter';
+import { AdopterPetReaderAdapter } from './infrastructure/adopter-pet-reader.adapter';
+import { AdopterApplicationCommandAdapter } from './infrastructure/adopter-application-command.adapter';
+import { AdopterApplicationNotifierAdapter } from './infrastructure/adopter-application-notifier.adapter';
+import { AdopterReportCommandAdapter } from './infrastructure/adopter-report-command.adapter';
+import { AdopterReviewCommandAdapter } from './infrastructure/adopter-review-command.adapter';
+import { AdopterReviewNotifierAdapter } from './infrastructure/adopter-review-notifier.adapter';
+import { AdopterReviewReaderAdapter } from './infrastructure/adopter-review-reader.adapter';
+import { AdopterAccountCommandAdapter } from './infrastructure/adopter-account-command.adapter';
+import { AdopterApplicationReaderAdapter } from './infrastructure/adopter-application-reader.adapter';
+import { AdopterFileUrlAdapter } from './infrastructure/adopter-file-url.adapter';
+import { ADOPTER_PROFILE_PORT } from './application/ports/adopter-profile.port';
+import { ADOPTER_BREEDER_READER_PORT } from './application/ports/adopter-breeder-reader.port';
+import { ADOPTER_PET_READER_PORT } from './application/ports/adopter-pet-reader.port';
+import { ADOPTER_APPLICATION_COMMAND_PORT } from './application/ports/adopter-application-command.port';
+import { ADOPTER_APPLICATION_NOTIFIER_PORT } from './application/ports/adopter-application-notifier.port';
+import { ADOPTER_REPORT_COMMAND_PORT } from './application/ports/adopter-report-command.port';
+import { ADOPTER_REVIEW_COMMAND_PORT } from './application/ports/adopter-review-command.port';
+import { ADOPTER_REVIEW_NOTIFIER_PORT } from './application/ports/adopter-review-notifier.port';
+import { ADOPTER_REVIEW_READER_PORT } from './application/ports/adopter-review-reader.port';
+import { ADOPTER_ACCOUNT_COMMAND_PORT } from './application/ports/adopter-account-command.port';
+import { ADOPTER_APPLICATION_READER_PORT } from './application/ports/adopter-application-reader.port';
+import { ADOPTER_FILE_URL_PORT } from './application/ports/adopter-file-url.port';
+import { AdopterRepository } from './repository/adopter.repository';
+import { BreederRepository } from '../breeder-management/repository/breeder.repository';
+import { AvailablePetManagementRepository } from '../breeder-management/repository/available-pet-management.repository';
+import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
+import { Breeder, BreederSchema } from '../../schema/breeder.schema';
+import { Admin, AdminSchema } from '../../schema/admin.schema';
+import { BreederReview, BreederReviewSchema } from '../../schema/breeder-review.schema';
+import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
+import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
+import { StorageModule } from '../../common/storage/storage.module';
+import { NotificationModule } from '../notification/notification.module';
+import { MailModule } from '../../common/mail/mail.module';
+import { DiscordWebhookModule } from '../../common/discord/discord-webhook.module';
+
+const ADOPTER_SCHEMA_IMPORTS = MongooseModule.forFeature([
+    { name: Adopter.name, schema: AdopterSchema },
+    { name: Breeder.name, schema: BreederSchema },
+    { name: Admin.name, schema: AdminSchema },
+    { name: BreederReview.name, schema: BreederReviewSchema },
+    { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
+    { name: AvailablePet.name, schema: AvailablePetSchema },
+]);
+
+export const ADOPTER_MODULE_IMPORTS = [
+    ADOPTER_SCHEMA_IMPORTS,
+    StorageModule,
+    MailModule,
+    NotificationModule,
+    DiscordWebhookModule,
+];
+
+export const ADOPTER_MODULE_CONTROLLERS = [
+    AdopterProfileController,
+    AdopterApplicationCommandController,
+    AdopterApplicationQueryController,
+    AdopterReviewCommandController,
+    AdopterReviewQueryController,
+    AdopterFavoriteCommandController,
+    AdopterFavoriteQueryController,
+    AdopterReportController,
+    AdopterAccountController,
+    AdopterAdminReviewController,
+    AdopterAdminApplicationController,
+];
+
+const ADOPTER_ADMIN_PROVIDERS = [
+    GetAdopterAdminReviewReportsUseCase,
+    DeleteAdopterAdminReviewUseCase,
+    GetAdopterAdminApplicationListUseCase,
+    GetAdopterAdminApplicationDetailUseCase,
+    AdopterAdminPolicyService,
+    AdopterAdminApplicationDetailMapperService,
+    AdopterAdminApplicationListAssemblerService,
+    AdopterAdminActivityLogFactoryService,
+    AdopterAdminReviewReportPageAssemblerService,
+    AdopterAdminReviewDeleteResultMapperService,
+    AdopterAdminReaderAdapter,
+    AdopterAdminWriterAdapter,
+    AdopterAdminRepository,
+];
+
+const ADOPTER_APPLICATION_PROVIDERS = [
+    GetAdopterProfileUseCase,
+    UpdateAdopterProfileUseCase,
+    AddFavoriteBreederUseCase,
+    RemoveFavoriteBreederUseCase,
+    GetFavoriteBreedersUseCase,
+    CreateAdopterApplicationUseCase,
+    CreateAdopterReportUseCase,
+    CreateAdopterReviewUseCase,
+    ReportAdopterReviewUseCase,
+    GetAdopterReviewsUseCase,
+    GetAdopterReviewDetailUseCase,
+    DeleteAdopterAccountUseCase,
+    GetAdopterApplicationsUseCase,
+    GetAdopterApplicationDetailUseCase,
+];
+
+const ADOPTER_DOMAIN_PROVIDERS = [
+    AdopterApplicationCreateResultMapperService,
+    AdopterFavoritePolicyService,
+    AdopterFavoriteDetailMapperService,
+    AdopterFavoriteRecordMapperService,
+    AdopterPaginationAssemblerService,
+    AdopterProfileResultMapperService,
+    AdopterProfileUpdateMapperService,
+    AdopterApplicationCustomAnswerBuilderService,
+    AdopterApplicationStandardAnswerBuilderService,
+    AdopterReportPayloadBuilderService,
+    AdopterReviewPageAssemblerService,
+    AdopterReviewDetailMapperService,
+    AdopterApplicationListAssemblerService,
+    AdopterApplicationDetailAssemblerService,
+];
+
+const ADOPTER_INFRASTRUCTURE_PROVIDERS = [
+    AdopterRepository,
+    AdopterApplicationRepository,
+    AdopterBreederFavoriteRepository,
+    AdopterReviewRepository,
+    BreederRepository,
+    AvailablePetManagementRepository,
+    AdopterProfileAdapter,
+    AdopterBreederReaderAdapter,
+    AdopterPetReaderAdapter,
+    AdopterApplicationCommandAdapter,
+    AdopterApplicationNotifierAdapter,
+    AdopterReportCommandAdapter,
+    AdopterReviewCommandAdapter,
+    AdopterReviewNotifierAdapter,
+    AdopterReviewReaderAdapter,
+    AdopterAccountCommandAdapter,
+    AdopterApplicationReaderAdapter,
+    AdopterFileUrlAdapter,
+];
+
+const ADOPTER_PORT_BINDINGS = [
+    {
+        provide: ADOPTER_PROFILE_PORT,
+        useExisting: AdopterProfileAdapter,
+    },
+    {
+        provide: ADOPTER_ADMIN_READER_PORT,
+        useExisting: AdopterAdminReaderAdapter,
+    },
+    {
+        provide: ADOPTER_ADMIN_WRITER_PORT,
+        useExisting: AdopterAdminWriterAdapter,
+    },
+    {
+        provide: ADOPTER_BREEDER_READER_PORT,
+        useExisting: AdopterBreederReaderAdapter,
+    },
+    {
+        provide: ADOPTER_PET_READER_PORT,
+        useExisting: AdopterPetReaderAdapter,
+    },
+    {
+        provide: ADOPTER_APPLICATION_COMMAND_PORT,
+        useExisting: AdopterApplicationCommandAdapter,
+    },
+    {
+        provide: ADOPTER_APPLICATION_NOTIFIER_PORT,
+        useExisting: AdopterApplicationNotifierAdapter,
+    },
+    {
+        provide: ADOPTER_REPORT_COMMAND_PORT,
+        useExisting: AdopterReportCommandAdapter,
+    },
+    {
+        provide: ADOPTER_REVIEW_COMMAND_PORT,
+        useExisting: AdopterReviewCommandAdapter,
+    },
+    {
+        provide: ADOPTER_REVIEW_NOTIFIER_PORT,
+        useExisting: AdopterReviewNotifierAdapter,
+    },
+    {
+        provide: ADOPTER_REVIEW_READER_PORT,
+        useExisting: AdopterReviewReaderAdapter,
+    },
+    {
+        provide: ADOPTER_ACCOUNT_COMMAND_PORT,
+        useExisting: AdopterAccountCommandAdapter,
+    },
+    {
+        provide: ADOPTER_APPLICATION_READER_PORT,
+        useExisting: AdopterApplicationReaderAdapter,
+    },
+    {
+        provide: ADOPTER_FILE_URL_PORT,
+        useExisting: AdopterFileUrlAdapter,
+    },
+];
+
+export const ADOPTER_MODULE_PROVIDERS = [
+    ...ADOPTER_ADMIN_PROVIDERS,
+    ...ADOPTER_APPLICATION_PROVIDERS,
+    ...ADOPTER_DOMAIN_PROVIDERS,
+    ...ADOPTER_INFRASTRUCTURE_PROVIDERS,
+    ...ADOPTER_PORT_BINDINGS,
+];
