@@ -1,19 +1,8 @@
 import { Module } from '@nestjs/common';
-
-import { HealthController } from './health.controller';
-import { GetHealthUseCase } from './application/use-cases/get-health.use-case';
-import { SYSTEM_RUNTIME_READER_PORT } from './application/ports/system-runtime-reader.port';
-import { SystemRuntimeAdapter } from './infrastructure/system-runtime.adapter';
+import { HEALTH_MODULE_CONTROLLERS, HEALTH_MODULE_PROVIDERS } from './health.module-definition';
 
 @Module({
-    controllers: [HealthController],
-    providers: [
-        GetHealthUseCase,
-        SystemRuntimeAdapter,
-        {
-            provide: SYSTEM_RUNTIME_READER_PORT,
-            useExisting: SystemRuntimeAdapter,
-        },
-    ],
+    controllers: HEALTH_MODULE_CONTROLLERS,
+    providers: HEALTH_MODULE_PROVIDERS,
 })
 export class HealthModule {}
