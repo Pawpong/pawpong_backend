@@ -1,63 +1,18 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { AppVersion, AppVersionSchema } from '../../schema/app-version.schema';
-import { AppVersionController } from './app-version.controller';
-import { AppVersionAdminCommandController } from './admin/app-version-admin-command.controller';
-import { AppVersionAdminQueryController } from './admin/app-version-admin-query.controller';
-import { CustomLoggerService } from '../../common/logger/custom-logger.service';
-import { CheckAppVersionUseCase } from './application/use-cases/check-app-version.use-case';
-import { AppVersionPolicyService } from './domain/services/app-version-policy.service';
-import { AppVersionMongooseReaderAdapter } from './infrastructure/app-version-mongoose-reader.adapter';
-import { APP_VERSION_READER_PORT } from './application/ports/app-version-reader.port';
-import { APP_VERSION_ADMIN_READER_PORT } from './admin/application/ports/app-version-admin-reader.port';
-import { APP_VERSION_WRITER_PORT } from './admin/application/ports/app-version-writer.port';
-import { CreateAppVersionUseCase } from './admin/application/use-cases/create-app-version.use-case';
-import { GetAppVersionListUseCase } from './admin/application/use-cases/get-app-version-list.use-case';
-import { UpdateAppVersionUseCase } from './admin/application/use-cases/update-app-version.use-case';
-import { DeleteAppVersionUseCase } from './admin/application/use-cases/delete-app-version.use-case';
-import { AppVersionAdminCommandPolicyService } from './admin/domain/services/app-version-admin-command-policy.service';
-import { AppVersionAdminItemMapperService } from './admin/domain/services/app-version-admin-item-mapper.service';
-import { AppVersionAdminPageAssemblerService } from './admin/domain/services/app-version-admin-page-assembler.service';
-import { AppVersionAdminPaginationAssemblerService } from './admin/domain/services/app-version-admin-pagination-assembler.service';
-import { AppVersionMongooseAdminReaderAdapter } from './admin/infrastructure/app-version-mongoose-admin-reader.adapter';
-import { AppVersionMongooseWriterAdapter } from './admin/infrastructure/app-version-mongoose-writer.adapter';
-import { AppVersionRepository } from './repository/app-version.repository';
+
+import {
+    APP_VERSION_MODULE_CONTROLLERS,
+    APP_VERSION_MODULE_IMPORTS,
+    APP_VERSION_MODULE_PROVIDERS,
+} from './app-version.module-definition';
 
 /**
  * 앱 버전 관리 모듈
  * RN 앱의 강제/권장 업데이트 버전 정보 관리
  */
 @Module({
-    imports: [MongooseModule.forFeature([{ name: AppVersion.name, schema: AppVersionSchema }])],
-    controllers: [AppVersionController, AppVersionAdminQueryController, AppVersionAdminCommandController],
-    providers: [
-        CustomLoggerService,
-        CheckAppVersionUseCase,
-        CreateAppVersionUseCase,
-        GetAppVersionListUseCase,
-        UpdateAppVersionUseCase,
-        DeleteAppVersionUseCase,
-        AppVersionPolicyService,
-        AppVersionAdminCommandPolicyService,
-        AppVersionAdminItemMapperService,
-        AppVersionAdminPageAssemblerService,
-        AppVersionAdminPaginationAssemblerService,
-        AppVersionRepository,
-        AppVersionMongooseReaderAdapter,
-        AppVersionMongooseAdminReaderAdapter,
-        AppVersionMongooseWriterAdapter,
-        {
-            provide: APP_VERSION_READER_PORT,
-            useExisting: AppVersionMongooseReaderAdapter,
-        },
-        {
-            provide: APP_VERSION_ADMIN_READER_PORT,
-            useExisting: AppVersionMongooseAdminReaderAdapter,
-        },
-        {
-            provide: APP_VERSION_WRITER_PORT,
-            useExisting: AppVersionMongooseWriterAdapter,
-        },
-    ],
+    imports: APP_VERSION_MODULE_IMPORTS,
+    controllers: APP_VERSION_MODULE_CONTROLLERS,
+    providers: APP_VERSION_MODULE_PROVIDERS,
 })
 export class AppVersionModule {}
