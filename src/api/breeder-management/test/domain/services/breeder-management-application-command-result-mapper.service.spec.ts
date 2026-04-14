@@ -1,5 +1,5 @@
-import { BreederManagementApplicationCommandResultMapperService } from '../domain/services/breeder-management-application-command-result-mapper.service';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
+import { BreederManagementApplicationCommandResultMapperService } from '../../../domain/services/breeder-management-application-command-result-mapper.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../../../constants/breeder-management-response-messages';
 
 describe('브리더 관리 신청서 명령 결과 매퍼', () => {
     const service = new BreederManagementApplicationCommandResultMapperService();

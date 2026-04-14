@@ -1,5 +1,5 @@
-import { BreederVerificationAdminListItemMapperService } from '../domain/services/breeder-verification-admin-list-item-mapper.service';
-import { BreederVerificationAdminPendingBreederItemMapperService } from '../domain/services/breeder-verification-admin-pending-breeder-item-mapper.service';
+import { BreederVerificationAdminListItemMapperService } from '../../../domain/services/breeder-verification-admin-list-item-mapper.service';
+import { BreederVerificationAdminPendingBreederItemMapperService } from '../../../domain/services/breeder-verification-admin-pending-breeder-item-mapper.service';
 
 describe('브리더 인증 관리자 승인 대기 항목 매퍼', () => {
     it('승인 대기 브리더 응답 계약을 유지한다', () => {

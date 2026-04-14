@@ -1,5 +1,5 @@
-import { BreederManagementReviewReplyResultMapperService } from '../domain/services/breeder-management-review-reply-result-mapper.service';
-import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
+import { BreederManagementReviewReplyResultMapperService } from '../../../domain/services/breeder-management-review-reply-result-mapper.service';
+import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../../../constants/breeder-management-response-messages';
 
 describe('브리더 관리 후기 답글 결과 매퍼', () => {
     const service = new BreederManagementReviewReplyResultMapperService();
