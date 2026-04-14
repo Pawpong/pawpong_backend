@@ -1,7 +1,7 @@
-import { NotificationType } from '../../../../common/enum/user.enum';
-import { NotificationAdminItemMapperService } from '../domain/services/notification-admin-item-mapper.service';
-import { NotificationAdminPageAssemblerService } from '../domain/services/notification-admin-page-assembler.service';
-import { NotificationAdminPaginationAssemblerService } from '../domain/services/notification-admin-pagination-assembler.service';
+import { NotificationType } from '../../../../../../common/enum/user.enum';
+import { NotificationAdminItemMapperService } from '../../../domain/services/notification-admin-item-mapper.service';
+import { NotificationAdminPageAssemblerService } from '../../../domain/services/notification-admin-page-assembler.service';
+import { NotificationAdminPaginationAssemblerService } from '../../../domain/services/notification-admin-pagination-assembler.service';
 
 describe('관리자 알림 페이지 조립 서비스', () => {
     const service = new NotificationAdminPageAssemblerService(

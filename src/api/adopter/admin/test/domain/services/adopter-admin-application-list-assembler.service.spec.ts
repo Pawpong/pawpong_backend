@@ -1,5 +1,5 @@
-import { ApplicationStatus } from '../../../../common/enum/user.enum';
-import { AdopterAdminApplicationListAssemblerService } from '../domain/services/adopter-admin-application-list-assembler.service';
+import { ApplicationStatus } from '../../../../../../common/enum/user.enum';
+import { AdopterAdminApplicationListAssemblerService } from '../../../domain/services/adopter-admin-application-list-assembler.service';
 
 describe('입양자 관리자 신청 목록 조립 서비스', () => {
     it('입양 신청 목록 응답 계약을 유지한다', () => {

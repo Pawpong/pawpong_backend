@@ -1,4 +1,4 @@
-import { UserAdminPaginationAssemblerService } from '../domain/services/user-admin-pagination-assembler.service';
+import { UserAdminPaginationAssemblerService } from '../../../domain/services/user-admin-pagination-assembler.service';
 
 describe('사용자 관리자 페이지네이션 조립 서비스', () => {
     const service = new UserAdminPaginationAssemblerService();

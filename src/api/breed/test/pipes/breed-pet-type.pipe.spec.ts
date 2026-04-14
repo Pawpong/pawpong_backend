@@ -1,7 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 
-import { PetType } from '../../../common/enum/user.enum';
-import { BreedPetTypePipe } from '../pipe/breed-pet-type.pipe';
+import { PetType } from '../../../../common/enum/user.enum';
+import { BreedPetTypePipe } from '../../pipe/breed-pet-type.pipe';
 
 describe('품종 반려동물 타입 파이프', () => {
     const pipe = new BreedPetTypePipe();

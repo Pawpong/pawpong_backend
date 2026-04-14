@@ -1,4 +1,4 @@
-import { NoticePaginationAssemblerService } from '../domain/services/notice-pagination-assembler.service';
+import { NoticePaginationAssemblerService } from '../../../domain/services/notice-pagination-assembler.service';
 
 describe('공지사항 페이지네이션 조립 서비스', () => {
     it('공지사항 목록 페이지네이션 응답 계약을 유지한다', () => {

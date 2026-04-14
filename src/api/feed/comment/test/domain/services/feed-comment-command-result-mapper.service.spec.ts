@@ -1,4 +1,4 @@
-import { FeedCommentCommandResultMapperService } from '../domain/services/feed-comment-command-result-mapper.service';
+import { FeedCommentCommandResultMapperService } from '../../../domain/services/feed-comment-command-result-mapper.service';
 
 describe('피드 댓글 명령 결과 매퍼', () => {
     const service = new FeedCommentCommandResultMapperService();

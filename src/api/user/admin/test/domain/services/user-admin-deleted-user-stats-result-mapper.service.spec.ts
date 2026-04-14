@@ -1,4 +1,4 @@
-import { UserAdminDeletedUserStatsResultMapperService } from '../domain/services/user-admin-deleted-user-stats-result-mapper.service';
+import { UserAdminDeletedUserStatsResultMapperService } from '../../../domain/services/user-admin-deleted-user-stats-result-mapper.service';
 
 describe('사용자 관리자 탈퇴 사용자 통계 결과 매퍼', () => {
     it('탈퇴 사용자 통계 응답 계약을 유지한다', () => {

@@ -1,4 +1,4 @@
-import { NotificationAdminStatsResultMapperService } from '../domain/services/notification-admin-stats-result-mapper.service';
+import { NotificationAdminStatsResultMapperService } from '../../../domain/services/notification-admin-stats-result-mapper.service';
 
 describe('관리자 알림 통계 결과 매퍼', () => {
     const service = new NotificationAdminStatsResultMapperService();

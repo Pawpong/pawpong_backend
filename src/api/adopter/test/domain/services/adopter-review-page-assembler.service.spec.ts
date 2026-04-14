@@ -1,5 +1,5 @@
-import { AdopterPaginationAssemblerService } from '../domain/services/adopter-pagination-assembler.service';
-import { AdopterReviewPageAssemblerService } from '../domain/services/adopter-review-page-assembler.service';
+import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
+import { AdopterReviewPageAssemblerService } from '../../../domain/services/adopter-review-page-assembler.service';
 
 describe('입양자 후기 페이지 assembler', () => {
     const service = new AdopterReviewPageAssemblerService(new AdopterPaginationAssemblerService());

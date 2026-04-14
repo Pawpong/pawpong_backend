@@ -1,4 +1,4 @@
-import { FeedCommentPageAssemblerService } from '../domain/services/feed-comment-page-assembler.service';
+import { FeedCommentPageAssemblerService } from '../../../domain/services/feed-comment-page-assembler.service';
 
 describe('피드 댓글 목록 응답 서비스', () => {
     const service = new FeedCommentPageAssemblerService();
