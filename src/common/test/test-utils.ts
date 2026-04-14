@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
@@ -10,6 +10,12 @@ import { AppModule } from '../../app.module';
 /** 테스트용 인메모리 MongoDB 인스턴스 */
 let mongod: MongoMemoryServer;
 
+/** createTestingApp에 넘길 Provider 오버라이드 항목 */
+export interface ProviderOverride {
+    provide: any;
+    useValue: any;
+}
+
 /**
  * E2E 테스트용 NestJS 애플리케이션 생성
  *
@@ -18,8 +24,10 @@ let mongod: MongoMemoryServer;
  * MongoDBMemoryServer를 사용하여 외부 DB 의존 없이 독립 실행 가능합니다.
  * - 글로벌 프리픽스: /api
  * - 글로벌 파이프: ValidationPipe (transform, whitelist 활성화)
+ *
+ * @param overrides 특정 Provider를 Mock으로 교체할 때 사용 (기본값: 빈 배열)
  */
-export async function createTestingApp(): Promise<INestApplication> {
+export async function createTestingApp(overrides: ProviderOverride[] = []): Promise<INestApplication> {
     // 인메모리 MongoDB 서버 시작
     mongod = await MongoMemoryServer.create();
     const mongoUri = mongod.getUri();
@@ -27,9 +35,15 @@ export async function createTestingApp(): Promise<INestApplication> {
     // MONGODB_URI 환경변수를 인메모리 서버로 오버라이드
     process.env.MONGODB_URI = mongoUri;
 
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+    let builder = Test.createTestingModule({
         imports: [AppModule],
-    }).compile();
+    });
+
+    for (const override of overrides) {
+        builder = builder.overrideProvider(override.provide).useValue(override.useValue);
+    }
+
+    const moduleFixture = await builder.compile();
 
     const app = moduleFixture.createNestApplication();
 
