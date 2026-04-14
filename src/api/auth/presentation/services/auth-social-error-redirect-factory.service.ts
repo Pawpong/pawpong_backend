@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { type AuthSocialCallbackResult } from '../../application/ports/auth-social-callback.port';
 
 @Injectable()
-export class AuthSocialErrorRedirectResponseFactoryService {
+export class AuthSocialErrorRedirectFactoryService {
     create(frontendUrl: string, errorMessage: string): AuthSocialCallbackResult {
         const errorParams = new URLSearchParams({
             error: errorMessage,

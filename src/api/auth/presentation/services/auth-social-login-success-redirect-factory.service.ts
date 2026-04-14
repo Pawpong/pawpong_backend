@@ -8,7 +8,7 @@ import {
     type AuthSocialCallbackTokens,
     type AuthSocialCookieOptions,
 } from '../../application/ports/auth-social-callback.port';
-import { AuthSocialRedirectPathService } from './auth-social-redirect-path.service';
+import { AuthSocialRedirectPathService } from '../../domain/services/auth-social-redirect-path.service';
 
 type LoginSuccessInput = {
     frontendUrl: string;
@@ -17,12 +17,14 @@ type LoginSuccessInput = {
     tokens: AuthSocialCallbackTokens;
     isProduction: boolean;
     cookieOptions: AuthSocialCookieOptions;
-    logger: CustomLoggerService;
 };
 
 @Injectable()
-export class AuthSocialLoginSuccessRedirectResponseFactoryService {
-    constructor(private readonly authSocialRedirectPathService: AuthSocialRedirectPathService) {}
+export class AuthSocialLoginSuccessRedirectFactoryService {
+    constructor(
+        private readonly authSocialRedirectPathService: AuthSocialRedirectPathService,
+        private readonly logger: CustomLoggerService,
+    ) {}
 
     create(input: LoginSuccessInput): AuthSocialCallbackResult {
         const isLocalFrontend =
@@ -30,14 +32,14 @@ export class AuthSocialLoginSuccessRedirectResponseFactoryService {
             !input.frontendUrl.includes('local.pawpong.kr');
         const isVercelDev = input.frontendUrl.includes('vercel.app');
 
-        input.logger.log(
+        this.logger.log(
             `[processSocialLoginCallback] isProduction: ${input.isProduction}, isLocalFrontend: ${isLocalFrontend}, isVercelDev: ${isVercelDev}, frontendUrl: ${input.frontendUrl}`,
         );
 
         if (!input.isProduction || isLocalFrontend || isVercelDev) {
-            input.logger.log('[processSocialLoginCallback] URL 파라미터 방식으로 토큰 전달');
+            this.logger.log('[processSocialLoginCallback] URL 파라미터 방식으로 토큰 전달');
 
-            const redirectPath = this.authSocialRedirectPathService.resolve(input.originUrl, input.logger, true);
+            const redirectPath = this.authSocialRedirectPathService.resolve(input.originUrl, this.logger, true);
 
             return {
                 redirectUrl: `${input.frontendUrl}/login/success?accessToken=${encodeURIComponent(input.tokens.accessToken)}&refreshToken=${encodeURIComponent(input.tokens.refreshToken)}&returnUrl=${encodeURIComponent(redirectPath)}`,
@@ -72,7 +74,7 @@ export class AuthSocialLoginSuccessRedirectResponseFactoryService {
             },
         ];
 
-        const redirectPath = this.authSocialRedirectPathService.resolve(input.originUrl, input.logger, false);
+        const redirectPath = this.authSocialRedirectPathService.resolve(input.originUrl, this.logger, false);
 
         return {
             redirectUrl: `${input.frontendUrl}${redirectPath}`,

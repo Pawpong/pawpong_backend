@@ -6,7 +6,7 @@ import {
 } from '../../application/ports/auth-social-callback.port';
 
 @Injectable()
-export class AuthSocialSignupRedirectResponseFactoryService {
+export class AuthSocialSignupRedirectFactoryService {
     create(input: {
         frontendUrl: string;
         userProfile: AuthSocialCallbackProfile;

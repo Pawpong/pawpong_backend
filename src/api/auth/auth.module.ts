@@ -93,10 +93,7 @@ import { SubmitAuthBreederDocumentsUseCase } from './application/use-cases/submi
 import { UploadAndSubmitAuthBreederDocumentsUseCase } from './application/use-cases/upload-and-submit-auth-breeder-documents.use-case';
 import { AuthSocialIdentityService } from './domain/services/auth-social-identity.service';
 import { AuthStoredFileNameService } from './domain/services/auth-stored-file-name.service';
-import { AuthSocialErrorRedirectResponseFactoryService } from './domain/services/auth-social-error-redirect-response-factory.service';
-import { AuthSocialLoginSuccessRedirectResponseFactoryService } from './domain/services/auth-social-login-success-redirect-response-factory.service';
 import { AuthSocialRedirectPathService } from './domain/services/auth-social-redirect-path.service';
-import { AuthSocialSignupRedirectResponseFactoryService } from './domain/services/auth-social-signup-redirect-response-factory.service';
 import { AuthProfileImageFilePolicyService } from './domain/services/auth-profile-image-file-policy.service';
 import { AuthBreederDocumentFilePolicyService } from './domain/services/auth-breeder-document-file-policy.service';
 import { AuthBreederDocumentOriginalFileNameService } from './domain/services/auth-breeder-document-original-file-name.service';
@@ -108,7 +105,10 @@ import { AuthSignupResultMapperService } from './domain/services/auth-signup-res
 import { AuthSocialRegistrationResultMapperService } from './domain/services/auth-social-registration-result-mapper.service';
 import { AuthSocialUserCheckResultMapperService } from './domain/services/auth-social-user-check-result-mapper.service';
 import { AuthHttpCookieService } from './presentation/services/auth-http-cookie.service';
+import { AuthSocialErrorRedirectFactoryService } from './presentation/services/auth-social-error-redirect-factory.service';
 import { AuthSocialHttpFlowFacade } from './presentation/services/auth-social-http-flow.facade';
+import { AuthSocialLoginSuccessRedirectFactoryService } from './presentation/services/auth-social-login-success-redirect-factory.service';
+import { AuthSocialSignupRedirectFactoryService } from './presentation/services/auth-social-signup-redirect-factory.service';
 import { AuthBreederVerificationCommandAdapter } from './infrastructure/auth-breeder-verification-command.adapter';
 import { AuthPhoneVerificationMemoryStore } from './infrastructure/auth-phone-verification-memory.store';
 import { AuthPhoneVerificationMongooseRegistryAdapter } from './infrastructure/auth-phone-verification-mongoose-registry.adapter';
@@ -206,9 +206,6 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthSocialIdentityService,
         AuthStoredFileNameService,
         AuthSocialRedirectPathService,
-        AuthSocialSignupRedirectResponseFactoryService,
-        AuthSocialLoginSuccessRedirectResponseFactoryService,
-        AuthSocialErrorRedirectResponseFactoryService,
         AuthProfileImageFilePolicyService,
         AuthBreederDocumentFilePolicyService,
         AuthBreederDocumentOriginalFileNameService,
@@ -217,6 +214,9 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AuthPhoneNumberNormalizerService,
         AuthBreederDocumentTypeService,
         AuthHttpCookieService,
+        AuthSocialSignupRedirectFactoryService,
+        AuthSocialLoginSuccessRedirectFactoryService,
+        AuthSocialErrorRedirectFactoryService,
         AuthSocialHttpFlowFacade,
         AuthSignupResultMapperService,
         AuthSocialRegistrationResultMapperService,
