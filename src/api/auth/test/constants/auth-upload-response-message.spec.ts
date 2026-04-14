@@ -2,7 +2,7 @@ import {
     AUTH_RESPONSE_MESSAGE_EXAMPLES,
     buildAuthBreederDocumentsUploadMessage,
     buildAuthProfileUploadMessage,
-} from '../constants/auth-response-messages';
+} from '../../constants/auth-response-messages';
 
 describe('인증 업로드 응답 메시지 상수', () => {
     it('프로필 업로드 메시지를 상황별로 반환한다', () => {

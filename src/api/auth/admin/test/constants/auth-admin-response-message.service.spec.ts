@@ -1,4 +1,4 @@
-import { AUTH_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../constants/auth-admin-response-messages';
+import { AUTH_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-admin-response-messages';
 
 describe('관리자 인증 응답 메시지 상수', () => {
     it('관리자 인증 응답 메시지 계약을 유지한다', () => {
