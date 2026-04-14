@@ -1,10 +1,10 @@
 import { Controller, Post, Body, Get, Res, Query } from '@nestjs/common';
 import type { Response } from 'express';
 import { ApiTags } from '@nestjs/swagger';
-import { ApiEndpoint } from '../../../common/decorator/swagger.decorator';
-import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
-import { MailService } from '../../../common/mail/mail.service';
-import { MailTemplateService } from '../../../common/mail/mail-template.service';
+import { ApiEndpoint } from '../../common/decorator/swagger.decorator';
+import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
+import { MailService } from '../../common/mail/mail.service';
+import { MailTemplateService } from '../../common/mail/mail-template.service';
 
 /**
  * 이메일 테스트 컨트롤러 (개발/테스트용)
@@ -19,7 +19,7 @@ import { MailTemplateService } from '../../../common/mail/mail-template.service'
  */
 @ApiTags('이메일 테스트')
 @Controller('email-test')
-export class EmailTestController {
+export class NotificationEmailPreviewController {
     constructor(
         private readonly mailService: MailService,
         private readonly mailTemplateService: MailTemplateService,
