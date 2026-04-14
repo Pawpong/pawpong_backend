@@ -18,6 +18,7 @@ describe('브리더 회원가입 유스케이스', () => {
     };
     const authTempUploadPort = {
         get: jest.fn().mockReturnValue(undefined),
+        delete: jest.fn(),
     };
     const authTokenPort = {
         generateTokens: jest.fn(),
@@ -42,13 +43,14 @@ describe('브리더 회원가입 유스케이스', () => {
 
     const baseDto = {
         email: 'breeder@test.com',
-        name: '행복브리더',
-        phone: '01099998888',
+        breederName: '행복브리더',
+        phoneNumber: '01099998888',
         agreements: { termsOfService: true, privacyPolicy: true },
-        petType: 'dog',
+        animal: 'dog',
         breeds: ['말티즈'],
-        location: { city: '서울', district: '강남구' },
+        breederLocation: { city: '서울', district: '강남구' },
         plan: 'basic',
+        level: 'new',
         documentUrls: [],
         documentTypes: [],
     };
@@ -57,13 +59,13 @@ describe('브리더 회원가입 유스케이스', () => {
         _id: { toString: () => 'breeder-1' },
         emailAddress: 'breeder@test.com',
         name: '행복브리더',
-        nickname: undefined,
+        nickname: '행복브리더',
         phoneNumber: '01099998888',
         profileImageFileName: '',
         petType: 'dog',
         breeds: ['말티즈'],
         verification: { plan: 'basic', level: 'new', status: 'pending' },
-        profile: { location: { city: '서울', district: '강남구' } },
+        profile: { location: { city: '서울', district: '강남구' }, specialization: ['dog'] },
         accountStatus: 'active',
         createdAt: new Date('2026-04-01T00:00:00.000Z'),
     };
@@ -80,6 +82,7 @@ describe('브리더 회원가입 유스케이스', () => {
         authTokenPort.generateTokens.mockReturnValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
         authTokenPort.hashRefreshToken.mockResolvedValue('hashed-refresh-token');
         authRegistrationNotificationPort.notifyBreederRegistered.mockResolvedValue(undefined);
+        authRegistrationNotificationPort.notifyBreederDocumentsSubmitted = jest.fn().mockResolvedValue(undefined);
 
         const result = await useCase.execute(baseDto as any);
 
