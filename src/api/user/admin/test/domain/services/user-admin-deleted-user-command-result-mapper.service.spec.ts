@@ -1,4 +1,4 @@
-import { UserAdminDeletedUserCommandResultMapperService } from '../domain/services/user-admin-deleted-user-command-result-mapper.service';
+import { UserAdminDeletedUserCommandResultMapperService } from '../../../domain/services/user-admin-deleted-user-command-result-mapper.service';
 
 describe('사용자 관리자 탈퇴 사용자 명령 결과 매퍼', () => {
     const service = new UserAdminDeletedUserCommandResultMapperService();

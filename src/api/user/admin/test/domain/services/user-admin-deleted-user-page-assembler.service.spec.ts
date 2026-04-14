@@ -1,5 +1,5 @@
-import { UserAdminDeletedUserPageAssemblerService } from '../domain/services/user-admin-deleted-user-page-assembler.service';
-import { UserAdminPaginationAssemblerService } from '../domain/services/user-admin-pagination-assembler.service';
+import { UserAdminDeletedUserPageAssemblerService } from '../../../domain/services/user-admin-deleted-user-page-assembler.service';
+import { UserAdminPaginationAssemblerService } from '../../../domain/services/user-admin-pagination-assembler.service';
 
 describe('사용자 관리자 탈퇴 사용자 페이지 조립기', () => {
     it('탈퇴 사용자 목록 페이지 응답 계약을 유지한다', () => {

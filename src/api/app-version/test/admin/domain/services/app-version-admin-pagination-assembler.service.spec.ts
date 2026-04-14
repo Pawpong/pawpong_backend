@@ -1,4 +1,4 @@
-import { AppVersionAdminPaginationAssemblerService } from '../admin/domain/services/app-version-admin-pagination-assembler.service';
+import { AppVersionAdminPaginationAssemblerService } from '../../../../admin/domain/services/app-version-admin-pagination-assembler.service';
 
 describe('앱 버전 관리자 페이지네이션 조립 서비스', () => {
     it('앱 버전 목록 페이지네이션 응답 계약을 유지한다', () => {

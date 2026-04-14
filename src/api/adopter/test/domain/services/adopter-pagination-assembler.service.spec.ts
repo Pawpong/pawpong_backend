@@ -1,4 +1,4 @@
-import { AdopterPaginationAssemblerService } from '../domain/services/adopter-pagination-assembler.service';
+import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
 
 describe('입양자 페이지네이션 조립 서비스', () => {
     const service = new AdopterPaginationAssemblerService();

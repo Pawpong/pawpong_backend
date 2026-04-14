@@ -1,4 +1,4 @@
-import { AdopterReviewDetailMapperService } from '../domain/services/adopter-review-detail-mapper.service';
+import { AdopterReviewDetailMapperService } from '../../../domain/services/adopter-review-detail-mapper.service';
 
 describe('입양자 후기 상세 매퍼', () => {
     const service = new AdopterReviewDetailMapperService();
