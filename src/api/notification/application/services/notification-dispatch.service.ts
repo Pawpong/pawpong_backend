@@ -1,8 +1,8 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { NotificationBuilder, NotificationCreateData, EmailData } from '../../builder/notification.builder';
+import { EmailData, NotificationBuilder, NotificationCreateData } from '../../builder/notification.builder';
 import { NotificationType, RecipientType } from '../../../../common/enum/user.enum';
-import { NOTIFICATION_DISPATCH_PORT, type NotificationDispatchPort } from '../ports/notification-dispatch.port';
+import { type NotificationDispatchPort } from '../ports/notification-dispatch.port';
 import type {
     CreateNotificationDispatchUseCasePort,
     CreateNotificationFromBuilderDispatchUseCasePort,
@@ -17,7 +17,7 @@ import type { NotificationDocumentRecord } from '../../types/notification-record
 import type { NotificationMetadata } from '../../types/notification-metadata.type';
 
 @Injectable()
-export class NotificationDispatchFacade implements NotificationDispatchPort {
+export class NotificationDispatchService implements NotificationDispatchPort {
     constructor(
         @Inject(CREATE_NOTIFICATION_DISPATCH_USE_CASE)
         private readonly createNotificationUseCase: CreateNotificationDispatchUseCasePort,

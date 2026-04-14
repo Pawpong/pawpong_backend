@@ -8,7 +8,7 @@ import { NotificationMarkAllReadController } from './notification-mark-all-read.
 import { NotificationMarkReadController } from './notification-mark-read.controller';
 import { NotificationUnreadCountController } from './notification-unread-count.controller';
 import { NOTIFICATION_DISPATCH_PORT } from './application/ports/notification-dispatch.port';
-import { NotificationDispatchFacade } from './application/facades/notification-dispatch.facade';
+import { NotificationDispatchService } from './application/services/notification-dispatch.service';
 import { CreateNotificationUseCase } from './application/use-cases/create-notification.use-case';
 import { CreateNotificationFromBuilderUseCase } from './application/use-cases/create-notification-from-builder.use-case';
 import { GetNotificationsUseCase } from './application/use-cases/get-notifications.use-case';
@@ -56,7 +56,7 @@ import { MailModule } from '../../common/mail/mail.module';
     ],
     providers: [
         NotificationRepository,
-        NotificationDispatchFacade,
+        NotificationDispatchService,
         CreateNotificationUseCase,
         CreateNotificationFromBuilderUseCase,
         NotificationItemMapperService,
@@ -99,7 +99,7 @@ import { MailModule } from '../../common/mail/mail.module';
         },
         {
             provide: NOTIFICATION_DISPATCH_PORT,
-            useExisting: NotificationDispatchFacade,
+            useExisting: NotificationDispatchService,
         },
     ],
     exports: [NOTIFICATION_DISPATCH_PORT],
