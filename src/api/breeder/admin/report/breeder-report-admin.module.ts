@@ -1,22 +1,10 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { BreederReportAdminCommandController } from './breeder-report-admin-command.controller';
-import { BreederReportAdminQueryController } from './breeder-report-admin-query.controller';
-import { GetBreederReportsUseCase } from './application/use-cases/get-breeder-reports.use-case';
-import { HandleBreederReportUseCase } from './application/use-cases/handle-breeder-report.use-case';
-import { BREEDER_REPORT_ADMIN_READER_PORT } from './application/ports/breeder-report-admin-reader.port';
-import { BREEDER_REPORT_ADMIN_WRITER_PORT } from './application/ports/breeder-report-admin-writer.port';
-import { BreederReportAdminPolicyService } from './domain/services/breeder-report-admin-policy.service';
-import { BreederReportAdminActivityLogFactoryService } from './domain/services/breeder-report-admin-activity-log-factory.service';
-import { BreederReportAdminActionResultMapperService } from './domain/services/breeder-report-admin-action-result-mapper.service';
-import { BreederReportAdminPageAssemblerService } from './domain/services/breeder-report-admin-page-assembler.service';
-import { BreederReportAdminMongooseRepositoryAdapter } from './infrastructure/breeder-report-admin-mongoose.repository.adapter';
-import { BreederReportAdminRepository } from './repository/breeder-report-admin.repository';
-import { BreederPaginationAssemblerService } from '../../domain/services/breeder-pagination-assembler.service';
-
-import { Breeder, BreederSchema } from '../../../../schema/breeder.schema';
-import { Admin, AdminSchema } from '../../../../schema/admin.schema';
+import {
+    BREEDER_REPORT_ADMIN_MODULE_CONTROLLERS,
+    BREEDER_REPORT_ADMIN_MODULE_IMPORTS,
+    BREEDER_REPORT_ADMIN_MODULE_PROVIDERS,
+} from './breeder-report-admin.module-definition';
 
 /**
  * 브리더 신고 관리 Admin 모듈
@@ -26,31 +14,8 @@ import { Admin, AdminSchema } from '../../../../schema/admin.schema';
  * - 브리더 신고 처리 (승인/반려)
  */
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: Breeder.name, schema: BreederSchema },
-            { name: Admin.name, schema: AdminSchema },
-        ]),
-    ],
-    controllers: [BreederReportAdminQueryController, BreederReportAdminCommandController],
-    providers: [
-        GetBreederReportsUseCase,
-        HandleBreederReportUseCase,
-        BreederReportAdminPolicyService,
-        BreederReportAdminActivityLogFactoryService,
-        BreederPaginationAssemblerService,
-        BreederReportAdminPageAssemblerService,
-        BreederReportAdminActionResultMapperService,
-        BreederReportAdminRepository,
-        BreederReportAdminMongooseRepositoryAdapter,
-        {
-            provide: BREEDER_REPORT_ADMIN_READER_PORT,
-            useExisting: BreederReportAdminMongooseRepositoryAdapter,
-        },
-        {
-            provide: BREEDER_REPORT_ADMIN_WRITER_PORT,
-            useExisting: BreederReportAdminMongooseRepositoryAdapter,
-        },
-    ],
+    imports: BREEDER_REPORT_ADMIN_MODULE_IMPORTS,
+    controllers: BREEDER_REPORT_ADMIN_MODULE_CONTROLLERS,
+    providers: BREEDER_REPORT_ADMIN_MODULE_PROVIDERS,
 })
 export class BreederReportAdminModule {}
