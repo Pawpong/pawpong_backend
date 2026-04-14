@@ -5,7 +5,7 @@ import type { AdopterApplicationCreateCommand } from '../../application/types/ad
 import type { AdopterApplicationCustomQuestionRecord } from '../../types/adopter-application.type';
 
 @Injectable()
-export class AdopterApplicationCustomResponseBuilderService {
+export class AdopterApplicationCustomAnswerBuilderService {
     build(
         dto: AdopterApplicationCreateCommand,
         customQuestions: AdopterApplicationCustomQuestionRecord[] = [],

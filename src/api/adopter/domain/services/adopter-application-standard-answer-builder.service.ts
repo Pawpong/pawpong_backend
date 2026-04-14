@@ -4,7 +4,7 @@ import type { AdopterApplicationCreateCommand } from '../../application/types/ad
 import type { AdopterApplicationStandardResponsesRecord } from '../../types/adopter-application.type';
 
 @Injectable()
-export class AdopterApplicationStandardResponseBuilderService {
+export class AdopterApplicationStandardAnswerBuilderService {
     build(dto: AdopterApplicationCreateCommand): AdopterApplicationStandardResponsesRecord {
         return {
             privacyConsent: dto.privacyConsent,

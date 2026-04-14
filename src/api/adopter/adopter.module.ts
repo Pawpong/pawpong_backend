@@ -48,8 +48,8 @@ import { AdopterFavoriteRecordMapperService } from './domain/services/adopter-fa
 import { AdopterPaginationAssemblerService } from './domain/services/adopter-pagination-assembler.service';
 import { AdopterProfileResultMapperService } from './domain/services/adopter-profile-result-mapper.service';
 import { AdopterProfileUpdateMapperService } from './domain/services/adopter-profile-update-mapper.service';
-import { AdopterApplicationCustomResponseBuilderService } from './domain/services/adopter-application-custom-response-builder.service';
-import { AdopterApplicationStandardResponseBuilderService } from './domain/services/adopter-application-standard-response-builder.service';
+import { AdopterApplicationCustomAnswerBuilderService } from './domain/services/adopter-application-custom-answer-builder.service';
+import { AdopterApplicationStandardAnswerBuilderService } from './domain/services/adopter-application-standard-answer-builder.service';
 import { AdopterReportPayloadBuilderService } from './domain/services/adopter-report-payload-builder.service';
 import { AdopterReviewPageAssemblerService } from './domain/services/adopter-review-page-assembler.service';
 import { AdopterReviewDetailMapperService } from './domain/services/adopter-review-detail-mapper.service';
@@ -153,8 +153,8 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
         AdopterPaginationAssemblerService,
         AdopterProfileResultMapperService,
         AdopterProfileUpdateMapperService,
-        AdopterApplicationCustomResponseBuilderService,
-        AdopterApplicationStandardResponseBuilderService,
+        AdopterApplicationCustomAnswerBuilderService,
+        AdopterApplicationStandardAnswerBuilderService,
         AdopterReportPayloadBuilderService,
         AdopterReviewPageAssemblerService,
         AdopterReviewDetailMapperService,

@@ -38,7 +38,7 @@ import { FeedVideoMongooseReaderAdapter } from './infrastructure/feed-video-mong
 import { FeedVideoMongooseCommandAdapter } from './infrastructure/feed-video-mongoose-command.adapter';
 import { FeedVideoStorageAdapter } from './infrastructure/feed-video-storage.adapter';
 import { FeedVideoStorageStreamAdapter } from './infrastructure/feed-video-storage-stream.adapter';
-import { FeedVideoPrefetchResponseBuilderService } from './presentation/services/feed-video-prefetch-response-builder.service';
+import { FeedVideoPrefetchResultBuilderService } from './presentation/services/feed-video-prefetch-result-builder.service';
 import { FeedVideoStreamResponseService } from './presentation/services/feed-video-stream-response.service';
 import { FeedVideoRepository } from './repository/feed-video.repository';
 import { FEED_VIDEO_READER_PORT } from './application/ports/feed-video-reader.port';
@@ -145,7 +145,7 @@ import { FeedVideoTagCatalogController } from './feed-video-tag-catalog.controll
         FeedVideoRepository,
         FeedVideoMongooseReaderAdapter,
         FeedVideoMongooseCommandAdapter,
-        FeedVideoPrefetchResponseBuilderService,
+        FeedVideoPrefetchResultBuilderService,
         FeedVideoStorageAdapter,
         FeedVideoStorageStreamAdapter,
         FeedVideoStreamResponseService,
