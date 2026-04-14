@@ -1,4 +1,4 @@
-import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../../constants/auth-response-messages';
+import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
 
 describe('인증 가입 응답 메시지 상수', () => {
     it('역할별 회원가입 메시지를 반환한다', () => {
