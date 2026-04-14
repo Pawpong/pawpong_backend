@@ -6,6 +6,7 @@ import { ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 import { AppModule } from '../../app.module';
+import { HttpStatusInterceptor } from '../interceptor/http-status.interceptor';
 
 /** 테스트용 인메모리 MongoDB 인스턴스 */
 let mongod: MongoMemoryServer;
@@ -32,6 +33,13 @@ export async function createTestingApp(): Promise<INestApplication> {
     // MONGODB_URI 환경변수를 인메모리 서버로 오버라이드
     process.env.MONGODB_URI = mongoUri;
 
+    // 테스트 환경에서는 외부 알림 서비스 비활성화 (실제 채널로 알림 발송 방지)
+    process.env.DISCORD_SIGN_WEBHOOK_URL = '';
+    process.env.DISCORD_DOCUMENT_WEBHOOK_URL = '';
+    process.env.DISCORD_WITHDRAWAL_WEBHOOK_URL = '';
+    process.env.COOLSMS_API_KEY = '';
+    process.env.COOLSMS_API_SECRET = '';
+
     const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
     }).compile();
@@ -49,6 +57,9 @@ export async function createTestingApp(): Promise<INestApplication> {
             forbidNonWhitelisted: true, // DTO에 정의되지 않은 속성 있으면 에러
         }),
     );
+
+    // 실제 앱과 동일하게 POST 생성 응답을 200으로 정규화한다.
+    app.useGlobalInterceptors(new HttpStatusInterceptor());
 
     await app.init();
     return app;
