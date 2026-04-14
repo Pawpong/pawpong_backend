@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { FEED_VIDEO_STREAM_PORT, type FeedVideoStreamPort } from '../ports/feed-video-stream.port';
 import { FeedVideoStreamingService } from '../../domain/services/feed-video-streaming.service';
@@ -19,6 +19,18 @@ export class ProxyHlsFileUseCase {
     ) {}
 
     async execute(videoId: string, filename: string): Promise<FeedVideoProxyResponse> {
+        try {
+            return await this.buildProxyResponse(videoId, filename);
+        } catch (error) {
+            if (error instanceof BadRequestException) {
+                throw error;
+            }
+
+            throw new BadRequestException('파일을 가져올 수 없습니다.');
+        }
+    }
+
+    private async buildProxyResponse(videoId: string, filename: string): Promise<FeedVideoProxyResponse> {
         const target = this.feedVideoStreamingService.getProxyTarget(videoId, filename);
 
         if (target.cacheKind === 'binary') {

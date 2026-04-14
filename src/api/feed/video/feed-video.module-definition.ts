@@ -38,7 +38,7 @@ import { FeedVideoMongooseReaderAdapter } from './infrastructure/feed-video-mong
 import { FeedVideoMongooseCommandAdapter } from './infrastructure/feed-video-mongoose-command.adapter';
 import { FeedVideoStorageAdapter } from './infrastructure/feed-video-storage.adapter';
 import { FeedVideoStorageStreamAdapter } from './infrastructure/feed-video-storage-stream.adapter';
-import { FeedVideoStreamResponseService } from './presentation/services/feed-video-stream-response.service';
+import { FeedVideoStreamResponseInterceptor } from './presentation/interceptors/feed-video-stream-response.interceptor';
 import { FeedVideoRepository } from './repository/feed-video.repository';
 import { FEED_VIDEO_READER_PORT } from './application/ports/feed-video-reader.port';
 import { FEED_VIDEO_COMMAND_PORT } from './application/ports/feed-video-command.port';
@@ -135,6 +135,8 @@ const FEED_VIDEO_DOMAIN_PROVIDERS = [
     FeedVideoStreamingService,
 ];
 
+const FEED_VIDEO_PRESENTATION_PROVIDERS = [FeedVideoStreamResponseInterceptor];
+
 const FEED_VIDEO_INFRASTRUCTURE_PROVIDERS = [
     FeedVideoFfmpegAdapter,
     VideoEncodingProcessor,
@@ -144,7 +146,6 @@ const FEED_VIDEO_INFRASTRUCTURE_PROVIDERS = [
     FeedVideoMongooseCommandAdapter,
     FeedVideoStorageAdapter,
     FeedVideoStorageStreamAdapter,
-    FeedVideoStreamResponseService,
 ];
 
 const FEED_VIDEO_PORT_BINDINGS = [
@@ -177,6 +178,7 @@ const FEED_VIDEO_PORT_BINDINGS = [
 export const FEED_VIDEO_MODULE_PROVIDERS = [
     ...FEED_VIDEO_USE_CASE_PROVIDERS,
     ...FEED_VIDEO_DOMAIN_PROVIDERS,
+    ...FEED_VIDEO_PRESENTATION_PROVIDERS,
     ...FEED_VIDEO_INFRASTRUCTURE_PROVIDERS,
     ...FEED_VIDEO_PORT_BINDINGS,
 ];
