@@ -61,7 +61,7 @@ export class MailService {
 
         try {
             const fromName = this.configService.get<string>('MAIL_FROM_NAME', '포퐁');
-            const fromEmail = this.configService.get<string>('MAIL_FROM_EMAIL', 'pawriendsofficial@gmail.com');
+            const fromEmail = this.configService.get<string>('MAIL_FROM_EMAIL', 'coldingcontact@gmail.com');
 
             await this.transporter.sendMail({
                 from: `"${fromName}" <${fromEmail}>`,
