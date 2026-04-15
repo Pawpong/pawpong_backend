@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError, DomainValidationError } from '../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { InquiryCommandPolicyService } from '../../domain/services/inquiry-command-policy.service';
 import { INQUIRY_COMMAND_PORT, type InquiryCommandPort } from '../ports/inquiry-command.port';
@@ -18,19 +19,19 @@ export class CreateInquiryAnswerUseCase {
         this.logger.logStart('createAnswer', '답변 작성', { inquiryId, breederId });
 
         if (!inquiryId || !breederId) {
-            throw new BadRequestException('필수 정보가 누락되었습니다.');
+            throw new DomainValidationError('필수 정보가 누락되었습니다.');
         }
 
         const inquiry = await this.inquiryCommand.findInquiryById(inquiryId);
         if (!inquiry) {
-            throw new BadRequestException('해당 문의를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('해당 문의를 찾을 수 없습니다.');
         }
 
         this.inquiryCommandPolicyService.ensureInquiryAnswerable(inquiry, breederId);
 
         const breeder = await this.inquiryCommand.findBreederInfo(breederId);
         if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
         }
 
         const now = new Date();
