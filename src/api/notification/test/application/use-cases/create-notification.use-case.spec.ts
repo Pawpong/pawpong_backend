@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { NotificationType } from '../../../../../common/enum/user.enum';
 import { NotificationMessageTemplateService } from '../../../domain/services/notification-message-template.service';
 import { CreateNotificationUseCase } from '../../../application/use-cases/create-notification.use-case';
@@ -49,8 +48,8 @@ describe('알림 생성 유스케이스', () => {
     });
 
     it('알 수 없는 타입이면 예외를 던진다', async () => {
-        await expect(useCase.execute('user-1', 'adopter', 'unknown' as NotificationType)).rejects.toThrow(
-            new BadRequestException('알 수 없는 알림 타입: unknown'),
+        await expect(useCase.execute('user-1', 'adopter', 'unknown' as NotificationType)).rejects.toBeInstanceOf(
+            DomainValidationError,
         );
     });
 });

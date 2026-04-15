@@ -1,5 +1,6 @@
-import { BadRequestException, NotFoundException } from '@nestjs/common';
+import { NotFoundException } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { AppVersionAdminCommandPolicyService } from '../../../../admin/domain/services/app-version-admin-command-policy.service';
 import { AppVersionAdminItemMapperService } from '../../../../admin/domain/services/app-version-admin-item-mapper.service';
@@ -75,6 +76,6 @@ describe('앱 버전 수정 유스케이스', () => {
             logger,
         );
 
-        await expect(useCase.execute('version-1', '', {})).rejects.toBeInstanceOf(BadRequestException);
+        await expect(useCase.execute('version-1', '', {})).rejects.toBeInstanceOf(DomainValidationError);
     });
 });

@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../common/error/domain.error';
 import { NotificationType } from '../../../../common/enum/user.enum';
 import { NOTIFICATION_MESSAGES } from '../../constants/notification-message.constant';
 import type { NotificationMetadata } from '../../types/notification-metadata.type';
@@ -9,7 +10,7 @@ export class NotificationMessageTemplateService {
     render(type: NotificationType, metadata?: NotificationMetadata): { title: string; body: string } {
         const template = NOTIFICATION_MESSAGES[type];
         if (!template) {
-            throw new BadRequestException(`알 수 없는 알림 타입: ${type}`);
+            throw new DomainValidationError(`알 수 없는 알림 타입: ${type}`);
         }
 
         let title = template.title;
