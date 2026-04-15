@@ -2,6 +2,7 @@ import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logge
 import { Request, Response } from 'express';
 
 import { ApiResponseDto } from '../dto/response/api-response.dto';
+import { DomainError } from '../error/domain.error';
 
 type HttpExceptionResponseBody = {
     message?: string | string[];
@@ -60,7 +61,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
 
-        const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+        const status = exception instanceof DomainError
+            ? exception.statusCode
+            : exception instanceof HttpException
+                ? exception.getStatus()
+                : HttpStatus.INTERNAL_SERVER_ERROR;
 
         const message = exception instanceof Error ? exception.message : 'Internal server error';
         const stack = exception instanceof Error ? exception.stack : undefined;

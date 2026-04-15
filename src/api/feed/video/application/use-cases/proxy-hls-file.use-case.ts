@@ -1,5 +1,6 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { FEED_VIDEO_STREAM_PORT, type FeedVideoStreamPort } from '../ports/feed-video-stream.port';
 import { FeedVideoStreamingService } from '../../domain/services/feed-video-streaming.service';
 
@@ -22,10 +23,7 @@ export class ProxyHlsFileUseCase {
         try {
             return await this.buildProxyResponse(videoId, filename);
         } catch (error) {
-            if (error instanceof BadRequestException) {
-                throw error;
-            }
-
+            rethrowIfHttpException(error);
             throw new BadRequestException('파일을 가져올 수 없습니다.');
         }
     }

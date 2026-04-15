@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
 
 import { AnnouncementDocument } from '../../../../schema/announcement.schema';
+import { isMongoObjectId } from '../../../../common/utils/mongo-object-id.util';
 import { AnnouncementPublicItem } from '../../application/ports/announcement-public-reader.port';
 import { AnnouncementWriterPort } from '../application/ports/announcement-writer.port';
 import { AnnouncementRepository } from '../../repository/announcement.repository';
@@ -20,7 +20,7 @@ export class AnnouncementMongooseWriterAdapter implements AnnouncementWriterPort
         announcementId: string,
         updateData: AnnouncementUpdateCommand,
     ): Promise<AnnouncementPublicItem | null> {
-        if (!Types.ObjectId.isValid(announcementId)) {
+        if (!isMongoObjectId(announcementId)) {
             return null;
         }
 

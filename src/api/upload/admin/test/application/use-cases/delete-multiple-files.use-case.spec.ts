@@ -1,6 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
-
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { UploadAdminStoragePolicyService } from '../../../domain/services/upload-admin-storage-policy.service';
 import { UploadAdminStoragePort } from '../../../application/ports/upload-admin-storage.port';
 import { DeleteMultipleFilesUseCase } from '../../../application/use-cases/delete-multiple-files.use-case';
@@ -42,6 +41,6 @@ describe('다중 파일 삭제 유스케이스', () => {
             logger,
         );
 
-        await expect(useCase.execute([])).rejects.toBeInstanceOf(BadRequestException);
+        await expect(useCase.execute([])).rejects.toBeInstanceOf(DomainValidationError);
     });
 });

@@ -1,4 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 
 export interface FeedVideoProxyTarget {
     fileKey: string;
@@ -47,7 +49,7 @@ export class FeedVideoStreamingService {
             };
         }
 
-        throw new BadRequestException('허용되지 않은 파일 형식입니다.');
+        throw new DomainValidationError('허용되지 않은 파일 형식입니다.');
     }
 
     getPreloadTargets(videoId: string, resolutions: number[] = FeedVideoStreamingService.DEFAULT_RESOLUTIONS): FeedVideoSegmentTarget[] {
