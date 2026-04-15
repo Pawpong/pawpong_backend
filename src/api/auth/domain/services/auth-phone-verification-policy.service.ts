@@ -43,4 +43,47 @@ export class AuthPhoneVerificationPolicyService {
     getMaxAttempts(): number {
         return this.maxAttempts;
     }
+
+    ensurePhoneAvailable(isWhitelisted: boolean, hasRegisteredPhone: boolean): void {
+        if (!isWhitelisted && hasRegisteredPhone) {
+            throw new DomainValidationError('이미 등록된 전화번호입니다.');
+        }
+    }
+
+    ensureNoPendingVerification(verification?: AuthPhoneVerificationRecord): void {
+        if (verification && !this.isExpired(verification.expiresAt)) {
+            const remainingMinutes = this.getRemainingMinutes(verification.expiresAt);
+            throw new DomainValidationError(
+                `이미 발송된 인증코드가 있습니다. ${remainingMinutes}분 후에 재발송 가능합니다.`,
+            );
+        }
+    }
+
+    ensureVerificationRequested(verification?: AuthPhoneVerificationRecord): asserts verification is AuthPhoneVerificationRecord {
+        if (!verification) {
+            throw new DomainValidationError('인증번호를 먼저 요청해주세요.');
+        }
+    }
+
+    ensureNotVerified(verification: AuthPhoneVerificationRecord): void {
+        if (verification.verified) {
+            throw new DomainValidationError('이미 인증이 완료되었습니다.');
+        }
+    }
+
+    throwExpiredVerification(): never {
+        throw new DomainValidationError('인증번호가 만료되었습니다. 다시 요청해주세요.');
+    }
+
+    isWithinMaxAttempts(attempts: number): boolean {
+        return attempts <= this.maxAttempts;
+    }
+
+    throwAttemptsExceeded(): never {
+        throw new DomainValidationError('인증 시도 횟수를 초과했습니다. 다시 요청해주세요.');
+    }
+
+    throwInvalidCode(attempts: number): never {
+        throw new DomainValidationError(`인증번호가 일치하지 않습니다. (${attempts}/${this.maxAttempts})`);
+    }
 }

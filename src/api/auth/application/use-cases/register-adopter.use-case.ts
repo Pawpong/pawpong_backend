@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { UserStatus } from '../../../../common/enum/user.enum';
 import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../ports/auth-registration.port';
@@ -12,6 +12,7 @@ import { AuthSocialIdentityService } from '../../domain/services/auth-social-ide
 import { AuthStoredFileNameService } from '../../domain/services/auth-stored-file-name.service';
 import { AuthPhoneNumberNormalizerService } from '../../domain/services/auth-phone-number-normalizer.service';
 import { AuthSignupResultMapperService } from '../../domain/services/auth-signup-result-mapper.service';
+import { AuthSignupValidationService } from '../../domain/services/auth-signup-validation.service';
 
 @Injectable()
 export class RegisterAdopterUseCase {
@@ -26,28 +27,18 @@ export class RegisterAdopterUseCase {
         private readonly authStoredFileNameService: AuthStoredFileNameService,
         private readonly authPhoneNumberNormalizerService: AuthPhoneNumberNormalizerService,
         private readonly authSignupResultMapperService: AuthSignupResultMapperService,
+        private readonly authSignupValidationService: AuthSignupValidationService,
     ) {}
 
     async execute(dto: RegisterAdopterAuthSignupCommand): Promise<RegisterAdopterAuthSignupResult> {
         const { provider, providerId } = this.authSocialIdentityService.parseRequiredTempId(dto.tempId);
 
         const existingAdopter = await this.authRegistrationPort.findAdopterBySocialAuth(provider, providerId);
-        if (existingAdopter) {
-            throw new ConflictException('이미 입양자로 가입된 소셜 계정입니다.');
-        }
-
-        if (!dto.email) {
-            throw new BadRequestException('이메일 정보가 필요합니다.');
-        }
-
-        if (!dto.nickname) {
-            throw new BadRequestException('닉네임이 필요합니다.');
-        }
+        this.authSignupValidationService.assertAdopterSocialAccountAvailable(existingAdopter);
+        this.authSignupValidationService.ensureAdopterRegistrationInput(dto.email, dto.nickname);
 
         const existingNickname = await this.authRegistrationPort.findAdopterByNickname(dto.nickname);
-        if (existingNickname) {
-            throw new ConflictException('이미 사용 중인 닉네임입니다.');
-        }
+        this.authSignupValidationService.assertAdopterNicknameAvailable(existingNickname);
 
         const savedAdopter = await this.authRegistrationPort.createAdopter({
             emailAddress: dto.email,

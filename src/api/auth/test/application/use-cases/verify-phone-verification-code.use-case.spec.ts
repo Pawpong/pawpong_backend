@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { VerifyPhoneVerificationCodeUseCase } from '../../../application/use-cases/verify-phone-verification-code.use-case';
 import { AuthPhoneVerificationPolicyService } from '../../../domain/services/auth-phone-verification-policy.service';
 
@@ -54,7 +53,7 @@ describe('전화번호 인증 코드 검증 유스케이스', () => {
         });
 
         expect(() => useCase.execute('01012345678', '000000')).toThrow(
-            new BadRequestException('인증번호가 일치하지 않습니다. (1/5)'),
+            new DomainValidationError('인증번호가 일치하지 않습니다. (1/5)'),
         );
         expect(authPhoneVerificationStorePort.save).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -74,7 +73,7 @@ describe('전화번호 인증 코드 검증 유스케이스', () => {
         });
 
         expect(() => useCase.execute('01012345678', '000000')).toThrow(
-            new BadRequestException('인증 시도 횟수를 초과했습니다. 다시 요청해주세요.'),
+            new DomainValidationError('인증 시도 횟수를 초과했습니다. 다시 요청해주세요.'),
         );
         expect(authPhoneVerificationStorePort.delete).toHaveBeenCalledWith('01012345678');
     });
@@ -89,7 +88,7 @@ describe('전화번호 인증 코드 검증 유스케이스', () => {
         });
 
         expect(() => useCase.execute('01012345678', '123456')).toThrow(
-            new BadRequestException('인증번호가 만료되었습니다. 다시 요청해주세요.'),
+            new DomainValidationError('인증번호가 만료되었습니다. 다시 요청해주세요.'),
         );
         expect(authPhoneVerificationStorePort.delete).toHaveBeenCalledWith('01012345678');
     });

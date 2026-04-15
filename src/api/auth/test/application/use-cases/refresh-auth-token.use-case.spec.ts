@@ -1,8 +1,9 @@
-import { UnauthorizedException } from '@nestjs/common';
+import { DomainAuthenticationError } from '../../../../../common/error/domain.error';
 
 import { RefreshAuthTokenUseCase } from '../../../application/use-cases/refresh-auth-token.use-case';
 import { type AuthSessionPort } from '../../../application/ports/auth-session.port';
 import { type AuthTokenPort } from '../../../application/ports/auth-token.port';
+import { AuthSessionAuthenticationService } from '../../../domain/services/auth-session-authentication.service';
 
 describe('인증 토큰 재발급 유스케이스', () => {
     it('리프레시 토큰 문자열로 새 토큰을 발급한다', async () => {
@@ -33,7 +34,7 @@ describe('인증 토큰 재발급 유스케이스', () => {
             compareRefreshToken: jest.fn().mockResolvedValue(true),
         };
 
-        const useCase = new RefreshAuthTokenUseCase(authSessionPort, authTokenPort);
+        const useCase = new RefreshAuthTokenUseCase(authSessionPort, authTokenPort, new AuthSessionAuthenticationService());
 
         await expect(useCase.execute('refresh-token-value')).resolves.toEqual({
             accessToken: 'new-access',
@@ -64,8 +65,8 @@ describe('인증 토큰 재발급 유스케이스', () => {
             compareRefreshToken: jest.fn(),
         };
 
-        const useCase = new RefreshAuthTokenUseCase(authSessionPort, authTokenPort);
+        const useCase = new RefreshAuthTokenUseCase(authSessionPort, authTokenPort, new AuthSessionAuthenticationService());
 
-        await expect(useCase.execute('refresh-token-value')).rejects.toBeInstanceOf(UnauthorizedException);
+        await expect(useCase.execute('refresh-token-value')).rejects.toBeInstanceOf(DomainAuthenticationError);
     });
 });

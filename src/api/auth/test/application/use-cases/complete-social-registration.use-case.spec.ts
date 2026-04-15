@@ -1,6 +1,6 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { CompleteSocialRegistrationUseCase } from '../../../application/use-cases/complete-social-registration.use-case';
+import { AuthSignupValidationService } from '../../../domain/services/auth-signup-validation.service';
 
 describe('소셜 가입 완료 유스케이스', () => {
     const registerAdopter = {
@@ -9,7 +9,11 @@ describe('소셜 가입 완료 유스케이스', () => {
     const registerBreeder = {
         execute: jest.fn(),
     };
-    const useCase = new CompleteSocialRegistrationUseCase(registerAdopter as any, registerBreeder as any);
+    const useCase = new CompleteSocialRegistrationUseCase(
+        registerAdopter as any,
+        registerBreeder as any,
+        new AuthSignupValidationService(),
+    );
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -46,6 +50,6 @@ describe('소셜 가입 완료 유스케이스', () => {
                 name: '브리더',
                 role: 'breeder',
             } as any),
-        ).rejects.toThrow(new BadRequestException('브리더 회원가입 시 전화번호는 필수입니다.'));
+        ).rejects.toThrow(new DomainValidationError('브리더 회원가입 시 전화번호는 필수입니다.'));
     });
 });

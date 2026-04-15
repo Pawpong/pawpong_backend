@@ -1,6 +1,6 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { UploadAndSubmitAuthBreederDocumentsUseCase } from '../../../application/use-cases/upload-and-submit-auth-breeder-documents.use-case';
+import { AuthBreederDocumentSubmissionService } from '../../../domain/services/auth-breeder-document-submission.service';
 
 describe('브리더 인증 문서 업로드 및 제출 유스케이스', () => {
     const authUploadFileStorePort = {
@@ -18,6 +18,7 @@ describe('브리더 인증 문서 업로드 및 제출 유스케이스', () => {
     const useCase = new UploadAndSubmitAuthBreederDocumentsUseCase(
         authUploadFileStorePort as any,
         submitAuthBreederDocumentsUseCase as any,
+        new AuthBreederDocumentSubmissionService(),
         logger as any,
     );
 
@@ -48,6 +49,6 @@ describe('브리더 인증 문서 업로드 및 제출 유스케이스', () => {
             useCase.execute('breeder-1', 'new', {
                 animalProductionLicense: [{ originalname: 'license.png' } as Express.Multer.File],
             }),
-        ).rejects.toThrow(new BadRequestException('신분증 사본 파일이 필요합니다.'));
+        ).rejects.toThrow(new DomainValidationError('신분증 사본 파일이 필요합니다.'));
     });
 });

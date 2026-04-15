@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { BreederPlan, UserStatus, VerificationStatus } from '../../../../common/enum/user.enum';
 import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/auth-response-messages';
@@ -7,6 +7,7 @@ import { AUTH_TOKEN_PORT, type AuthTokenPort } from '../ports/auth-token.port';
 import { type AuthResult } from '../types/auth-response.type';
 import { AuthPhoneNumberNormalizerService } from '../../domain/services/auth-phone-number-normalizer.service';
 import { AuthSocialRegistrationResultMapperService } from '../../domain/services/auth-social-registration-result-mapper.service';
+import { AuthSignupValidationService } from '../../domain/services/auth-signup-validation.service';
 
 type LegacySocialProfile = {
     provider: string;
@@ -39,14 +40,13 @@ export class CompleteLegacySocialRegistrationUseCase {
         private readonly authTokenPort: AuthTokenPort,
         private readonly authPhoneNumberNormalizerService: AuthPhoneNumberNormalizerService,
         private readonly authSocialRegistrationResultMapperService: AuthSocialRegistrationResultMapperService,
+        private readonly authSignupValidationService: AuthSignupValidationService,
     ) {}
 
     async execute(profile: LegacySocialProfile, additionalInfo: LegacySocialAdditionalInfo): Promise<AuthResult> {
         if (additionalInfo.role === 'adopter') {
             const existingNickname = await this.authRegistrationPort.findAdopterByNickname(additionalInfo.nickname!);
-            if (existingNickname) {
-                throw new ConflictException('Nickname already exists');
-            }
+            this.authSignupValidationService.assertLegacyAdopterNicknameAvailable(existingNickname);
 
             const savedAdopter = await this.authRegistrationPort.createAdopter({
                 emailAddress: profile.email,
@@ -84,13 +84,11 @@ export class CompleteLegacySocialRegistrationUseCase {
             );
         }
 
-        if (!additionalInfo.breederName || !additionalInfo.district) {
-            throw new BadRequestException('브리더는 브리더명, 지역이 필요합니다.');
-        }
-
-        if (!additionalInfo.breeds || additionalInfo.breeds.length === 0) {
-            throw new BadRequestException('최소 1개의 품종이 필요합니다.');
-        }
+        this.authSignupValidationService.ensureLegacyBreederInput(
+            additionalInfo.breederName,
+            additionalInfo.district,
+            additionalInfo.breeds,
+        );
 
         const savedBreeder = await this.authRegistrationPort.createBreeder({
             emailAddress: profile.email,

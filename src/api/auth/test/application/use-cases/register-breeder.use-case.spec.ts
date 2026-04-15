@@ -1,10 +1,10 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
-
+import { DomainConflictError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { RegisterBreederUseCase } from '../../../application/use-cases/register-breeder.use-case';
 import { AuthSocialIdentityService } from '../../../domain/services/auth-social-identity.service';
 import { AuthBreederDocumentTypeService } from '../../../domain/services/auth-breeder-document-type.service';
 import { AuthPhoneNumberNormalizerService } from '../../../domain/services/auth-phone-number-normalizer.service';
 import { AuthSignupResultMapperService } from '../../../domain/services/auth-signup-result-mapper.service';
+import { AuthSignupValidationService } from '../../../domain/services/auth-signup-validation.service';
 
 describe('브리더 회원가입 유스케이스', () => {
     const authRegistrationPort = {
@@ -40,6 +40,7 @@ describe('브리더 회원가입 유스케이스', () => {
         new AuthBreederDocumentTypeService(),
         new AuthPhoneNumberNormalizerService(),
         new AuthSignupResultMapperService(),
+        new AuthSignupValidationService(),
     );
 
     const baseDto = {
@@ -92,27 +93,27 @@ describe('브리더 회원가입 유스케이스', () => {
         expect(result.accessToken).toBe('access-token');
     });
 
-    it('필수 약관 미동의 시 BadRequestException을 던진다', async () => {
+    it('필수 약관 미동의 시 도메인 검증 예외를 던진다', async () => {
         await expect(
             useCase.execute({ ...baseDto, agreements: { termsOfService: false, privacyPolicy: true } } as any),
-        ).rejects.toThrow(BadRequestException);
+        ).rejects.toThrow(DomainValidationError);
         await expect(
             useCase.execute({ ...baseDto, agreements: { termsOfService: false, privacyPolicy: true } } as any),
         ).rejects.toThrow('필수 약관에 동의해야 합니다.');
     });
 
-    it('이미 가입된 브리더 이메일이면 ConflictException을 던진다', async () => {
+    it('이미 가입된 브리더 이메일이면 도메인 충돌 예외를 던진다', async () => {
         authRegistrationPort.findBreederByEmail.mockResolvedValue({ emailAddress: 'breeder@test.com' });
 
-        await expect(useCase.execute(baseDto as any)).rejects.toThrow(ConflictException);
+        await expect(useCase.execute(baseDto as any)).rejects.toThrow(DomainConflictError);
         await expect(useCase.execute(baseDto as any)).rejects.toThrow('이미 가입된 이메일입니다.');
     });
 
-    it('이미 가입된 입양자 이메일이면 ConflictException을 던진다', async () => {
+    it('이미 가입된 입양자 이메일이면 도메인 충돌 예외를 던진다', async () => {
         authRegistrationPort.findBreederByEmail.mockResolvedValue(null);
         authRegistrationPort.findAdopterByEmail.mockResolvedValue({ emailAddress: 'breeder@test.com' });
 
-        await expect(useCase.execute(baseDto as any)).rejects.toThrow(ConflictException);
+        await expect(useCase.execute(baseDto as any)).rejects.toThrow(DomainConflictError);
         await expect(useCase.execute(baseDto as any)).rejects.toThrow(
             '해당 이메일로 입양자 계정이 이미 존재합니다.',
         );

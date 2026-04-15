@@ -91,6 +91,7 @@ import { UploadAuthBreederDocumentsUseCase } from './application/use-cases/uploa
 import { SubmitAuthBreederDocumentsUseCase } from './application/use-cases/submit-auth-breeder-documents.use-case';
 import { UploadAndSubmitAuthBreederDocumentsUseCase } from './application/use-cases/upload-and-submit-auth-breeder-documents.use-case';
 import { AuthSocialIdentityService } from './domain/services/auth-social-identity.service';
+import { AuthSessionAuthenticationService } from './domain/services/auth-session-authentication.service';
 import { AuthStoredFileNameService } from './domain/services/auth-stored-file-name.service';
 import { AuthSocialRedirectPathService } from './domain/services/auth-social-redirect-path.service';
 import { AuthProfileImageFilePolicyService } from './domain/services/auth-profile-image-file-policy.service';
@@ -100,6 +101,7 @@ import { AuthBreederDocumentSubmissionService } from './domain/services/auth-bre
 import { AuthPhoneVerificationPolicyService } from './domain/services/auth-phone-verification-policy.service';
 import { AuthBreederDocumentTypeService } from './domain/services/auth-breeder-document-type.service';
 import { AuthPhoneNumberNormalizerService } from './domain/services/auth-phone-number-normalizer.service';
+import { AuthSignupValidationService } from './domain/services/auth-signup-validation.service';
 import { AuthSignupResultMapperService } from './domain/services/auth-signup-result-mapper.service';
 import { AuthSocialRegistrationResultMapperService } from './domain/services/auth-social-registration-result-mapper.service';
 import { AuthSocialUserCheckResultMapperService } from './domain/services/auth-social-user-check-result-mapper.service';
@@ -194,6 +196,7 @@ const AUTH_DOMAIN_PROVIDERS = [
     AuthAdminAuthenticationService,
     AuthAdminLoginResultMapperService,
     AuthAdminRefreshTokenResultMapperService,
+    AuthSessionAuthenticationService,
     AuthSocialIdentityService,
     AuthStoredFileNameService,
     AuthSocialRedirectPathService,
@@ -204,6 +207,7 @@ const AUTH_DOMAIN_PROVIDERS = [
     AuthPhoneVerificationPolicyService,
     AuthPhoneNumberNormalizerService,
     AuthBreederDocumentTypeService,
+    AuthSignupValidationService,
     AuthSignupResultMapperService,
     AuthSocialRegistrationResultMapperService,
     AuthSocialUserCheckResultMapperService,

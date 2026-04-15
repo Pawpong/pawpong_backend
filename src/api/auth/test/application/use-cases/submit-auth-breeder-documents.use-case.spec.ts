@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { SubmitAuthBreederDocumentsUseCase } from '../../../application/use-cases/submit-auth-breeder-documents.use-case';
 import { AuthBreederDocumentSubmissionService } from '../../../domain/services/auth-breeder-document-submission.service';
 
@@ -68,6 +67,6 @@ describe('브리더 인증 문서 제출 유스케이스', () => {
                 idCardUrl: 'id-card-url',
                 animalProductionLicenseUrl: 'license-url',
             }),
-        ).rejects.toThrow(new BadRequestException('브리더를 찾을 수 없습니다.'));
+        ).rejects.toThrow(new DomainNotFoundError('브리더를 찾을 수 없습니다.'));
     });
 });

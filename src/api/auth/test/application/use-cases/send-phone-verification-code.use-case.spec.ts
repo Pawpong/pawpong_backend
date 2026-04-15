@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { SendPhoneVerificationCodeUseCase } from '../../../application/use-cases/send-phone-verification-code.use-case';
 import { AuthPhoneVerificationPolicyService } from '../../../domain/services/auth-phone-verification-policy.service';
 
@@ -61,7 +60,7 @@ describe('전화번호 인증 코드 발송 유스케이스', () => {
         authPhoneVerificationRegistryPort.hasRegisteredPhone.mockResolvedValue(true);
 
         await expect(useCase.execute('01012345678')).rejects.toThrow(
-            new BadRequestException('이미 등록된 전화번호입니다.'),
+            new DomainValidationError('이미 등록된 전화번호입니다.'),
         );
     });
 
@@ -78,7 +77,7 @@ describe('전화번호 인증 코드 발송 유스케이스', () => {
         });
 
         await expect(useCase.execute('01012345678')).rejects.toThrow(
-            new BadRequestException('이미 발송된 인증코드가 있습니다. 2분 후에 재발송 가능합니다.'),
+            new DomainValidationError('이미 발송된 인증코드가 있습니다. 2분 후에 재발송 가능합니다.'),
         );
     });
 });
