@@ -1,7 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
-import { rethrowIfHttpException } from '../../../../common/utils/http-exception.util';
 import { NoticePageAssemblerService } from '../../domain/services/notice-page-assembler.service';
 import { NOTICE_READER_PORT, type NoticeReaderPort, type NoticeStatus } from '../ports/notice-reader.port';
 import type { NoticePageQuery } from '../types/notice-query.type';
@@ -41,9 +40,8 @@ export class GetNoticeListUseCase {
 
             return this.noticePageAssemblerService.build(notices, page, limit, totalItems);
         } catch (error) {
-            rethrowIfHttpException(error);
             this.logger.logError('getNoticeList', '공지사항 목록 조회', error);
-            throw new BadRequestException('공지사항 목록 조회에 실패했습니다.');
+            throw error;
         }
     }
 }
