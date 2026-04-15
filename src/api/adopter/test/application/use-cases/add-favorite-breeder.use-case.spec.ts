@@ -1,3 +1,4 @@
+import { DomainConflictError } from '../../../../../common/error/domain.error';
 import { AddFavoriteBreederUseCase } from '../../../application/use-cases/add-favorite-breeder.use-case';
 import { AdopterFavoritePolicyService } from '../../../domain/services/adopter-favorite-policy.service';
 import { AdopterFavoriteRecordMapperService } from '../../../domain/services/adopter-favorite-record-mapper.service';
@@ -46,6 +47,24 @@ describe('브리더 즐겨찾기 추가 유스케이스', () => {
             'user-1',
             expect.objectContaining({ favoriteBreederId: 'breeder-1' }),
             'breeder',
+        );
+    });
+
+    it('이미 즐겨찾기된 브리더면 도메인 충돌 예외를 던진다', async () => {
+        adopterProfilePort.findById.mockResolvedValue({
+            favoriteBreederList: [{ favoriteBreederId: 'breeder-1' }],
+        });
+        breederReaderPort.findById.mockResolvedValue({
+            _id: { toString: () => 'breeder-1' },
+            name: '행복브리더',
+            nickname: '행복브리더',
+            stats: {},
+            profile: {},
+        });
+
+        await expect(useCase.execute('user-1', { breederId: 'breeder-1' })).rejects.toThrow(DomainConflictError);
+        await expect(useCase.execute('user-1', { breederId: 'breeder-1' })).rejects.toThrow(
+            '이미 즐겨찾기에 추가된 브리더입니다.',
         );
     });
 });

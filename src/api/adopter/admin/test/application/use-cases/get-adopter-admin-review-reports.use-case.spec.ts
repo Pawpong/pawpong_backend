@@ -1,5 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
-
+import { DomainAuthorizationError } from '../../../../../../common/error/domain.error';
 import { AdopterAdminPolicyService } from '../../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminReviewReportPageAssemblerService } from '../../../domain/services/adopter-admin-review-report-page-assembler.service';
 import { AdopterAdminReaderPort } from '../../../application/ports/adopter-admin-reader.port';
@@ -75,6 +74,6 @@ describe('입양자 관리자 후기 신고 목록 조회 유스케이스', () =
             new AdopterAdminReviewReportPageAssemblerService(),
         );
 
-        await expect(useCase.execute('admin-1')).rejects.toBeInstanceOf(ForbiddenException);
+        await expect(useCase.execute('admin-1')).rejects.toBeInstanceOf(DomainAuthorizationError);
     });
 });

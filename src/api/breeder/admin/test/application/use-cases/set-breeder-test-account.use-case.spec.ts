@@ -1,5 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
-
+import { DomainAuthorizationError } from '../../../../../../common/error/domain.error';
 import { SetBreederTestAccountUseCase } from '../../../application/use-cases/set-breeder-test-account.use-case';
 import { BreederAdminActivityLogFactoryService } from '../../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../../domain/services/breeder-admin-policy.service';
@@ -61,7 +60,7 @@ describe('브리더 테스트 계정 설정 유스케이스', () => {
         });
 
         await expect(useCase.execute('admin-1', 'breeder-1', true)).rejects.toThrow(
-            new ForbiddenException('브리더 관리 권한이 없습니다.'),
+            new DomainAuthorizationError('브리더 관리 권한이 없습니다.'),
         );
     });
 });

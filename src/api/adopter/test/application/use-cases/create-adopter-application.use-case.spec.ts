@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { CreateAdopterApplicationUseCase } from '../../../application/use-cases/create-adopter-application.use-case';
 import { AdopterApplicationCreateResultMapperService } from '../../../domain/services/adopter-application-create-result-mapper.service';
 import { AdopterApplicationCustomAnswerBuilderService } from '../../../domain/services/adopter-application-custom-answer-builder.service';
@@ -145,6 +146,27 @@ describe('상담 신청 생성 유스케이스', () => {
         await expect(
             useCase.execute('user-1', { ...baseDto, petId: 'pet-1' } as any),
         ).rejects.toThrow('현재 분양 신청이 불가능한 반려동물입니다.');
+    });
+
+    it('존재하지 않는 질문 ID면 도메인 검증 예외를 던진다', async () => {
+        adopterProfilePort.findById.mockResolvedValue({ userId: 'user-1' });
+        adopterBreederReaderPort.findById.mockResolvedValue({
+            ...mockBreeder,
+            applicationForm: [
+                { id: 'custom-1', label: '질문', type: 'text' },
+            ],
+        });
+        adopterApplicationCommandPort.findPendingByAdopterAndBreeder.mockResolvedValue(null);
+
+        await expect(
+            useCase.execute(
+                'user-1',
+                {
+                    ...baseDto,
+                    customResponses: [{ questionId: 'missing-question', answer: '답변' }],
+                } as any,
+            ),
+        ).rejects.toThrow(DomainValidationError);
     });
 
     it('브리더 역할로 신청하면 브리더 존재 여부를 확인한다', async () => {

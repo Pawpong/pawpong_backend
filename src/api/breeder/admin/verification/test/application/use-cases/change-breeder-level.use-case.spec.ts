@@ -1,5 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
-
+import { DomainAuthorizationError } from '../../../../../../../common/error/domain.error';
 import { ChangeBreederLevelUseCase } from '../../../application/use-cases/change-breeder-level.use-case';
 import { BreederVerificationAdminCommandResultMapperService } from '../../../domain/services/breeder-verification-admin-command-result-mapper.service';
 import { BreederVerificationAdminPolicyService } from '../../../domain/services/breeder-verification-admin-policy.service';
@@ -57,6 +56,6 @@ describe('브리더 레벨 변경 유스케이스', () => {
             useCase.execute('admin-1', 'breeder-1', {
                 newLevel: 'elite' as any,
             }),
-        ).rejects.toThrow(new ForbiddenException('Access denied'));
+        ).rejects.toThrow(new DomainAuthorizationError('Access denied'));
     });
 });

@@ -1,5 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
-
+import { DomainAuthorizationError } from '../../../../../../../common/error/domain.error';
 import { SendDocumentRemindersUseCase } from '../../../application/use-cases/send-document-reminders.use-case';
 import { BreederVerificationAdminActivityLogFactoryService } from '../../../domain/services/breeder-verification-admin-activity-log-factory.service';
 import { BreederVerificationAdminCommandResultMapperService } from '../../../domain/services/breeder-verification-admin-command-result-mapper.service';
@@ -53,7 +52,7 @@ describe('문서 리마인드 발송 유스케이스', () => {
         reader.findAdminById.mockResolvedValue(null);
 
         await expect(useCase.execute('admin-1')).rejects.toThrow(
-            new ForbiddenException('브리더 관리 권한이 없습니다.'),
+            new DomainAuthorizationError('브리더 관리 권한이 없습니다.'),
         );
     });
 });

@@ -149,7 +149,7 @@ describe('입양자 종단간 테스트', () => {
                 .post('/api/adopter/application')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send(applicationData)
-                .expect(201);
+                .expect(200);
 
             expect(response.body.success).toBe(true);
             expect(response.body.data.applicationId).toBeDefined();
@@ -212,10 +212,10 @@ describe('입양자 종단간 테스트', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send(reviewData);
 
-            // applicationId가 없거나 상태가 맞지 않으면 400/500, 성공하면 201
-            expect([200, 201, 400, 500]).toContain(response.status);
+            // applicationId가 없거나 상태가 맞지 않으면 400/500, 성공하면 200
+            expect([200, 400, 500]).toContain(response.status);
 
-            if (response.status === 201 && response.body.data?.reviewId) {
+            if (response.status === 200 && response.body.data?.reviewId) {
                 reviewId = response.body.data.reviewId;
                 console.log('후기 작성 성공:', reviewId);
             } else {
@@ -262,7 +262,7 @@ describe('입양자 종단간 테스트', () => {
                 .post('/api/adopter/favorite')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId })
-                .expect(201); // 201 Created 기대
+                .expect(200);
 
             expect(response.body.success).toBe(true);
             expect(response.body.message).toContain('즐겨찾기');
@@ -310,7 +310,7 @@ describe('입양자 종단간 테스트', () => {
                 .post('/api/adopter/report')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send(reportData)
-                .expect(201);
+                .expect(200);
 
             expect(response.body.success).toBe(true);
             expect(response.body.message).toContain('신고');

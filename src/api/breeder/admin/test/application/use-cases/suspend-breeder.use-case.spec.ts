@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { SuspendBreederUseCase } from '../../../application/use-cases/suspend-breeder.use-case';
 import { BreederAdminActivityLogFactoryService } from '../../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../../domain/services/breeder-admin-policy.service';
@@ -92,6 +91,6 @@ describe('브리더 정지 유스케이스', () => {
             useCase.execute('admin-1', 'breeder-1', {
                 reason: '운영 정책 위반',
             }),
-        ).rejects.toThrow(new BadRequestException('이미 정지된 계정입니다.'));
+        ).rejects.toThrow(new DomainValidationError('이미 정지된 계정입니다.'));
     });
 });

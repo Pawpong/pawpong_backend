@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { UnsuspendBreederUseCase } from '../../../application/use-cases/unsuspend-breeder.use-case';
 import { BreederAdminActivityLogFactoryService } from '../../../domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from '../../../domain/services/breeder-admin-policy.service';
@@ -80,7 +79,7 @@ describe('브리더 정지 해제 유스케이스', () => {
         });
 
         await expect(useCase.execute('admin-1', 'breeder-1')).rejects.toThrow(
-            new BadRequestException('정지 상태가 아닌 계정입니다.'),
+            new DomainValidationError('정지 상태가 아닌 계정입니다.'),
         );
     });
 });
