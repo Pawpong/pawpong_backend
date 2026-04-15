@@ -1,4 +1,5 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 
 import {
     BREEDER_MANAGEMENT_LIST_READER_PORT,
@@ -25,7 +26,7 @@ export class GetBreederManagementMyReviewsUseCase {
     ): Promise<BreederManagementMyReviewsPageResult> {
         const breeder = await this.breederManagementListReaderPort.findBreederSummary(userId);
         if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
         }
 
         const snapshot = await this.breederManagementListReaderPort.findMyReviewsSnapshot(userId, visibility, page, limit);

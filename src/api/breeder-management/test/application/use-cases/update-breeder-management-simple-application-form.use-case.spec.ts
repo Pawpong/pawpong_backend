@@ -1,6 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
-import { DomainValidationError } from '../../../../../common/error/domain.error';
+import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { UpdateBreederManagementSimpleApplicationFormUseCase } from '../../../application/use-cases/update-breeder-management-simple-application-form.use-case';
 import { BreederManagementSimpleApplicationFormBuilderService } from '../../../domain/services/breeder-management-simple-application-form-builder.service';
 import { BreederManagementApplicationCommandResultMapperService } from '../../../domain/services/breeder-management-application-command-result-mapper.service';
@@ -61,10 +59,10 @@ describe('브리더 간편 입양 신청 폼 수정 유스케이스', () => {
         );
     });
 
-    it('브리더를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('브리더를 찾을 수 없으면 도메인 not found 예외를 던진다', async () => {
         breederManagementProfilePort.findById.mockResolvedValue(null);
 
-        await expect(useCase.execute('unknown-id', [{ question: '질문' }])).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('unknown-id', [{ question: '질문' }])).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('unknown-id', [{ question: '질문' }])).rejects.toThrow(
             '브리더 정보를 찾을 수 없습니다.',
         );

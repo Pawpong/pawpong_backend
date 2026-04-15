@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 
 import { GetBreederManagementApplicationDetailUseCase } from '../../../application/use-cases/get-breeder-management-application-detail.use-case';
 import { BreederManagementApplicationDetailAssemblerService } from '../../../domain/services/breeder-management-application-detail-assembler.service';
@@ -47,10 +47,10 @@ describe('브리더 입양 신청 상세 조회 유스케이스', () => {
         );
     });
 
-    it('신청을 찾을 수 없거나 권한이 없으면 BadRequestException을 던진다', async () => {
+    it('신청을 찾을 수 없거나 권한이 없으면 도메인 not found 예외를 던진다', async () => {
         breederManagementApplicationWorkflowPort.findApplicationByIdAndBreeder.mockResolvedValue(null);
 
-        await expect(useCase.execute('breeder-1', 'nonexistent-app')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', 'nonexistent-app')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('breeder-1', 'nonexistent-app')).rejects.toThrow(
             '해당 입양 신청을 찾을 수 없거나 조회 권한이 없습니다.',
         );

@@ -1,4 +1,5 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 
 import { BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT } from '../ports/breeder-management-application-workflow.port';
 import type { BreederManagementApplicationWorkflowPort } from '../ports/breeder-management-application-workflow.port';
@@ -19,7 +20,7 @@ export class GetBreederManagementApplicationDetailUseCase {
         );
 
         if (!application) {
-            throw new BadRequestException('해당 입양 신청을 찾을 수 없거나 조회 권한이 없습니다.');
+            throw new DomainNotFoundError('해당 입양 신청을 찾을 수 없거나 조회 권한이 없습니다.');
         }
 
         return this.breederManagementApplicationDetailAssemblerService.toResponse(application);

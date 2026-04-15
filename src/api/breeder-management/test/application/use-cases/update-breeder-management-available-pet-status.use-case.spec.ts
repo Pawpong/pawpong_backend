@@ -1,6 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
-
 import { PetStatus } from '../../../../../common/enum/user.enum';
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { UpdateBreederManagementAvailablePetStatusUseCase } from '../../../application/use-cases/update-breeder-management-available-pet-status.use-case';
 import { BreederManagementAvailablePetStatusResultMapperService } from '../../../domain/services/breeder-management-available-pet-status-result-mapper.service';
 
@@ -32,11 +31,11 @@ describe('브리더 분양 개체 상태 변경 유스케이스', () => {
         expect(breederManagementPetCommandPort.updateAvailablePetStatus).toHaveBeenCalledWith('pet-2', PetStatus.RESERVED);
     });
 
-    it('해당 분양 개체를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('해당 분양 개체를 찾을 수 없으면 도메인 not found 예외를 던진다', async () => {
         breederManagementPetCommandPort.findAvailablePetByIdAndBreeder.mockResolvedValue(null);
 
         await expect(useCase.execute('breeder-1', 'nonexistent-pet', PetStatus.ADOPTED)).rejects.toThrow(
-            BadRequestException,
+            DomainNotFoundError,
         );
         await expect(useCase.execute('breeder-1', 'nonexistent-pet', PetStatus.ADOPTED)).rejects.toThrow(
             '해당 분양 개체를 찾을 수 없습니다.',

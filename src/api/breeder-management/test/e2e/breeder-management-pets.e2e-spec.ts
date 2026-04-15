@@ -30,7 +30,7 @@ describe('브리더 관리 개체 종단간 테스트', () => {
                     photoFileName: 'parent-pet-test.jpg',
                     description: '건강한 부모견입니다',
                 })
-                .expect(201);
+                .expect(200);
 
             const parentPetId = createResponse.body.data.petId;
             expect(parentPetId).toBeDefined();
@@ -62,7 +62,7 @@ describe('브리더 관리 개체 종단간 테스트', () => {
                     price: 1500000,
                     description: '건강하고 활발한 아이입니다',
                 })
-                .expect(201);
+                .expect(200);
 
             const availablePetId = createResponse.body.data.petId;
             expect(availablePetId).toBeDefined();

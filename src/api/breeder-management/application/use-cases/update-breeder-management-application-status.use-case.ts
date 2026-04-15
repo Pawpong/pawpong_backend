@@ -1,6 +1,7 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT } from '../ports/breeder-management-application-workflow.port';
 import type { BreederManagementApplicationWorkflowPort } from '../ports/breeder-management-application-workflow.port';
@@ -29,7 +30,7 @@ export class UpdateBreederManagementApplicationStatusUseCase {
         );
 
         if (!application) {
-            throw new BadRequestException('해당 입양 신청을 찾을 수 없습니다.');
+            throw new DomainNotFoundError('해당 입양 신청을 찾을 수 없습니다.');
         }
 
         this.logger.log(

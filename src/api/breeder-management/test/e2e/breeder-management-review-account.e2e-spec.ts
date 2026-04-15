@@ -35,7 +35,7 @@ describe('브리더 관리 후기와 계정 종단간 테스트', () => {
                 .send({
                     content: '소중한 후기 감사합니다.',
                 })
-                .expect(201);
+                .expect(200);
 
             expect(response.body.success).toBe(true);
             expect(response.body.message).toBe('답글이 등록되었습니다.');

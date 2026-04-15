@@ -1,4 +1,5 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
 import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
@@ -15,7 +16,7 @@ export class RemoveBreederManagementParentPetUseCase {
     async execute(userId: string, petId: string): Promise<{ message: string }> {
         const pet = await this.breederManagementPetCommandPort.findParentPetByIdAndBreeder(petId, userId);
         if (!pet) {
-            throw new BadRequestException('해당 부모견/부모묘를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('해당 부모견/부모묘를 찾을 수 없습니다.');
         }
 
         await this.breederManagementPetCommandPort.deleteParentPet(petId);

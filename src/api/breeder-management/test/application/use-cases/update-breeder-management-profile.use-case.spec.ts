@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 
 import { UpdateBreederManagementProfileUseCase } from '../../../application/use-cases/update-breeder-management-profile.use-case';
 import { BreederManagementProfileUpdateMapperService } from '../../../domain/services/breeder-management-profile-update-mapper.service';
@@ -46,10 +46,10 @@ describe('브리더 프로필 수정 유스케이스', () => {
         expect(breederManagementProfilePort.updateProfile).toHaveBeenCalledWith('breeder-1', expect.any(Object));
     });
 
-    it('브리더를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('브리더를 찾을 수 없으면 도메인 not found 예외를 던진다', async () => {
         breederManagementProfilePort.findByIdWithAllData.mockResolvedValue(null);
 
-        await expect(useCase.execute('unknown-id', mockUpdateData as any)).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('unknown-id', mockUpdateData as any)).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('unknown-id', mockUpdateData as any)).rejects.toThrow(
             '브리더 정보를 찾을 수 없습니다.',
         );

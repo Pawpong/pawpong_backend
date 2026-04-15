@@ -1,6 +1,7 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { VerificationStatus } from '../../../../common/enum/user.enum';
+import { DomainNotFoundError, DomainValidationError } from '../../../../common/error/domain.error';
 import { BREEDER_MANAGEMENT_FILE_URL_PORT } from '../ports/breeder-management-file-url.port';
 import type { BreederManagementFileUrlPort } from '../ports/breeder-management-file-url.port';
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-profile.port';
@@ -41,11 +42,11 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
     async execute(userId: string, dto: BreederManagementVerificationDocumentsSubmitCommand): Promise<{ message: string }> {
         const breeder = await this.breederManagementProfilePort.findById(userId);
         if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
         }
 
         if (breeder.verification?.status === VerificationStatus.APPROVED) {
-            throw new BadRequestException('이미 인증이 완료된 브리더입니다.');
+            throw new DomainValidationError('이미 인증이 완료된 브리더입니다.');
         }
 
         const draftDocuments = await this.breederManagementVerificationDraftStorePort.get(userId);

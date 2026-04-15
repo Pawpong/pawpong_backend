@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-profile.port';
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import {
@@ -39,7 +40,7 @@ export class UploadBreederManagementVerificationDocumentsUseCase {
     ): Promise<BreederManagementUploadDocumentsResult> {
         const breeder = await this.breederManagementProfilePort.findById(userId);
         if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
         }
 
         this.breederManagementVerificationDocumentPolicyService.validateUploadRequest(files, types);
