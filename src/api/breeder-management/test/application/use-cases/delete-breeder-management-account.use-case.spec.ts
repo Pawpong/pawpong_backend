@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { DeleteBreederManagementAccountUseCase } from '../../../application/use-cases/delete-breeder-management-account.use-case';
 import { BreederManagementAccountCommandResultMapperService } from '../../../domain/services/breeder-management-account-command-result-mapper.service';
 
@@ -57,18 +56,18 @@ describe('브리더 계정 탈퇴 유스케이스', () => {
         expect(breederManagementAccountCommandPort.deactivateAllAvailablePetsByBreeder).toHaveBeenCalledWith('breeder-1');
     });
 
-    it('이미 탈퇴된 계정이면 BadRequestException을 던진다', async () => {
+    it('이미 탈퇴된 계정이면 DomainValidationError를 던진다', async () => {
         breederManagementAccountCommandPort.findBreederById.mockResolvedValue(mockDeletedBreeder);
 
-        await expect(useCase.execute('breeder-1', {})).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', {})).rejects.toThrow(DomainValidationError);
         await expect(useCase.execute('breeder-1', {})).rejects.toThrow('이미 탈퇴된 계정입니다.');
         expect(breederManagementAccountCommandPort.softDeleteBreeder).not.toHaveBeenCalled();
     });
 
-    it('기타 사유를 선택했지만 otherReason이 없으면 BadRequestException을 던진다', async () => {
+    it('기타 사유를 선택했지만 otherReason이 없으면 DomainValidationError를 던진다', async () => {
         breederManagementAccountCommandPort.findBreederById.mockResolvedValue(mockBreeder);
 
-        await expect(useCase.execute('breeder-1', { reason: 'other' })).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', { reason: 'other' })).rejects.toThrow(DomainValidationError);
         await expect(useCase.execute('breeder-1', { reason: 'other' })).rejects.toThrow('기타 사유를 입력해주세요.');
         expect(breederManagementAccountCommandPort.softDeleteBreeder).not.toHaveBeenCalled();
     });
@@ -88,10 +87,10 @@ describe('브리더 계정 탈퇴 유스케이스', () => {
         );
     });
 
-    it('브리더를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('브리더를 찾을 수 없으면 DomainNotFoundError를 던진다', async () => {
         breederManagementAccountCommandPort.findBreederById.mockResolvedValue(null);
 
-        await expect(useCase.execute('unknown-id', {})).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('unknown-id', {})).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('unknown-id', {})).rejects.toThrow('브리더 정보를 찾을 수 없습니다.');
         expect(breederManagementAccountCommandPort.softDeleteBreeder).not.toHaveBeenCalled();
     });

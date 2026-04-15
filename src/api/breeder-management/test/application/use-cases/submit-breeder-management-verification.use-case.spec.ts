@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { VerificationStatus } from '../../../../../common/enum/user.enum';
 import { SubmitBreederManagementVerificationUseCase } from '../../../application/use-cases/submit-breeder-management-verification.use-case';
 import { BreederManagementVerificationSubmissionMapperService } from '../../../domain/services/breeder-management-verification-submission-mapper.service';
@@ -55,20 +54,20 @@ describe('브리더 인증 신청 제출 유스케이스', () => {
         expect(breederManagementSettingsPort.updateVerification).toHaveBeenCalledWith('breeder-1', expect.any(Object));
     });
 
-    it('이미 인증 완료된 브리더는 BadRequestException을 던진다', async () => {
+    it('이미 인증 완료된 브리더는 DomainValidationError를 던진다', async () => {
         breederManagementProfilePort.findById.mockResolvedValue(mockApprovedBreeder);
 
-        await expect(useCase.execute('breeder-1', verificationData as any)).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', verificationData as any)).rejects.toThrow(DomainValidationError);
         await expect(useCase.execute('breeder-1', verificationData as any)).rejects.toThrow(
             '이미 인증이 완료된 브리더입니다.',
         );
         expect(breederManagementSettingsPort.updateVerification).not.toHaveBeenCalled();
     });
 
-    it('브리더를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('브리더를 찾을 수 없으면 DomainNotFoundError를 던진다', async () => {
         breederManagementProfilePort.findById.mockResolvedValue(null);
 
-        await expect(useCase.execute('unknown-id', verificationData as any)).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('unknown-id', verificationData as any)).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('unknown-id', verificationData as any)).rejects.toThrow(
             '브리더 정보를 찾을 수 없습니다.',
         );

@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError, DomainValidationError } from '../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { BREEDER_MANAGEMENT_ACCOUNT_COMMAND_PORT } from '../ports/breeder-management-account-command.port';
 import type { BreederManagementAccountCommandPort } from '../ports/breeder-management-account-command.port';
@@ -20,15 +21,15 @@ export class DeleteBreederManagementAccountUseCase {
         const breeder = await this.breederManagementAccountCommandPort.findBreederById(userId);
         if (!breeder) {
             this.logger.logError('deleteBreederAccount', '브리더를 찾을 수 없음', new Error('Breeder not found'));
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
         }
 
         if (breeder.accountStatus === 'deleted') {
-            throw new BadRequestException('이미 탈퇴된 계정입니다.');
+            throw new DomainValidationError('이미 탈퇴된 계정입니다.');
         }
 
         if (deleteData?.reason === 'other' && !deleteData?.otherReason) {
-            throw new BadRequestException('기타 사유를 입력해주세요.');
+            throw new DomainValidationError('기타 사유를 입력해주세요.');
         }
 
         const pendingApplications = await this.breederManagementAccountCommandPort.countPendingApplications(userId);

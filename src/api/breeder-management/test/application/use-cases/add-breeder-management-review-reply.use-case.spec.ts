@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 
 import { AddBreederManagementReviewReplyUseCase } from '../../../application/use-cases/add-breeder-management-review-reply.use-case';
 import { BreederManagementReviewReplyResultMapperService } from '../../../domain/services/breeder-management-review-reply-result-mapper.service';
@@ -36,20 +36,20 @@ describe('브리더 후기 답글 등록 유스케이스', () => {
         );
     });
 
-    it('해당 후기를 찾을 수 없거나 권한이 없으면 BadRequestException을 던진다', async () => {
+    it('해당 후기를 찾을 수 없거나 권한이 없으면 도메인 not found 예외를 던진다', async () => {
         breederManagementReviewReplyPort.findReviewByIdAndBreeder.mockResolvedValue(null);
 
-        await expect(useCase.execute('breeder-1', 'nonexistent-review', '답글')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', 'nonexistent-review', '답글')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('breeder-1', 'nonexistent-review', '답글')).rejects.toThrow(
             '해당 후기를 찾을 수 없거나 권한이 없습니다.',
         );
         expect(breederManagementReviewReplyPort.addReply).not.toHaveBeenCalled();
     });
 
-    it('이미 답글이 있으면 BadRequestException을 던진다', async () => {
+    it('이미 답글이 있으면 도메인 검증 예외를 던진다', async () => {
         breederManagementReviewReplyPort.findReviewByIdAndBreeder.mockResolvedValue(mockReviewWithReply);
 
-        await expect(useCase.execute('breeder-1', 'review-1', '새 답글')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', 'review-1', '새 답글')).rejects.toThrow(DomainValidationError);
         await expect(useCase.execute('breeder-1', 'review-1', '새 답글')).rejects.toThrow(
             '이미 답글이 작성되어 있습니다. 수정 기능을 이용해주세요.',
         );

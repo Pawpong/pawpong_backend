@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 
 import { GetBreederManagementMyReviewsUseCase } from '../../../application/use-cases/get-breeder-management-my-reviews.use-case';
 import { BreederManagementMyReviewMapperService } from '../../../domain/services/breeder-management-my-review-mapper.service';
@@ -69,10 +69,10 @@ describe('브리더 내 후기 목록 조회 유스케이스', () => {
         expect(breederManagementListReaderPort.findMyReviewsSnapshot).toHaveBeenCalledWith('breeder-1', 'all', 1, 10);
     });
 
-    it('브리더를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('브리더를 찾을 수 없으면 도메인 not found 예외를 던진다', async () => {
         breederManagementListReaderPort.findBreederSummary.mockResolvedValue(null);
 
-        await expect(useCase.execute('unknown-id')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('unknown-id')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('unknown-id')).rejects.toThrow('브리더 정보를 찾을 수 없습니다.');
         expect(breederManagementListReaderPort.findMyReviewsSnapshot).not.toHaveBeenCalled();
     });

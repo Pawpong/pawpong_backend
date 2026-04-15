@@ -1,4 +1,5 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 
 import { BREEDER_MANAGEMENT_FILE_URL_PORT } from '../ports/breeder-management-file-url.port';
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-profile.port';
@@ -20,7 +21,7 @@ export class GetBreederManagementProfileUseCase {
     async execute(userId: string): Promise<BreederManagementProfileResult> {
         const breeder = await this.breederManagementProfilePort.findById(userId);
         if (!breeder) {
-            throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
         }
 
         const [parentPets, availablePets] = await Promise.all([

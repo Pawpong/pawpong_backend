@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 
 import { RemoveBreederManagementParentPetUseCase } from '../../../application/use-cases/remove-breeder-management-parent-pet.use-case';
 import { BreederManagementParentPetCommandResultMapperService } from '../../../domain/services/breeder-management-parent-pet-command-result-mapper.service';
@@ -31,10 +31,10 @@ describe('브리더 부모견/부모묘 삭제 유스케이스', () => {
         expect(breederManagementPetCommandPort.deleteParentPet).toHaveBeenCalledWith('pet-1');
     });
 
-    it('해당 부모견을 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('해당 부모견을 찾을 수 없으면 도메인 not found 예외를 던진다', async () => {
         breederManagementPetCommandPort.findParentPetByIdAndBreeder.mockResolvedValue(null);
 
-        await expect(useCase.execute('breeder-1', 'nonexistent-pet')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', 'nonexistent-pet')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('breeder-1', 'nonexistent-pet')).rejects.toThrow(
             '해당 부모견/부모묘를 찾을 수 없습니다.',
         );
