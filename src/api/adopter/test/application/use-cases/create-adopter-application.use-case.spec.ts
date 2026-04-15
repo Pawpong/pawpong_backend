@@ -1,6 +1,4 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
-
-import { DomainValidationError } from '../../../../../common/error/domain.error';
+import { DomainConflictError, DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { CreateAdopterApplicationUseCase } from '../../../application/use-cases/create-adopter-application.use-case';
 import { AdopterApplicationCreateResultMapperService } from '../../../domain/services/adopter-application-create-result-mapper.service';
 import { AdopterApplicationCustomAnswerBuilderService } from '../../../domain/services/adopter-application-custom-answer-builder.service';
@@ -85,38 +83,39 @@ describe('상담 신청 생성 유스케이스', () => {
         expect(adopterApplicationCommandPort.create).toHaveBeenCalled();
     });
 
-    it('개인정보 동의가 없으면 BadRequestException을 던진다', async () => {
+    it('개인정보 동의가 없으면 DomainValidationError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue({ userId: 'user-1' });
         adopterBreederReaderPort.findById.mockResolvedValue(mockBreeder);
 
         await expect(
             useCase.execute('user-1', { ...baseDto, privacyConsent: false } as any),
-        ).rejects.toThrow(BadRequestException);
+        ).rejects.toThrow(DomainValidationError);
         await expect(
             useCase.execute('user-1', { ...baseDto, privacyConsent: false } as any),
         ).rejects.toThrow('개인정보 수집 및 이용에 동의해야 신청이 가능합니다.');
     });
 
-    it('입양자 정보가 없으면 BadRequestException을 던진다', async () => {
+    it('입양자 정보가 없으면 DomainNotFoundError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue(null);
 
-        await expect(useCase.execute('user-1', baseDto as any)).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('user-1', baseDto as any)).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('user-1', baseDto as any)).rejects.toThrow('입양자 정보를 찾을 수 없습니다.');
     });
 
-    it('브리더를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('브리더를 찾을 수 없으면 DomainNotFoundError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue({ userId: 'user-1' });
         adopterBreederReaderPort.findById.mockResolvedValue(null);
 
+        await expect(useCase.execute('user-1', baseDto as any)).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('user-1', baseDto as any)).rejects.toThrow('해당 브리더를 찾을 수 없습니다.');
     });
 
-    it('이미 대기 중인 신청이 있으면 ConflictException을 던진다', async () => {
+    it('이미 대기 중인 신청이 있으면 DomainConflictError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue({ userId: 'user-1' });
         adopterBreederReaderPort.findById.mockResolvedValue(mockBreeder);
         adopterApplicationCommandPort.findPendingByAdopterAndBreeder.mockResolvedValue({ _id: 'existing-app' });
 
-        await expect(useCase.execute('user-1', baseDto as any)).rejects.toThrow(ConflictException);
+        await expect(useCase.execute('user-1', baseDto as any)).rejects.toThrow(DomainConflictError);
         await expect(useCase.execute('user-1', baseDto as any)).rejects.toThrow(
             '해당 브리더에게 이미 대기 중인 상담 신청이 있습니다.',
         );
@@ -137,12 +136,15 @@ describe('상담 신청 생성 유스케이스', () => {
         expect(result.petName).toBe('뽀삐');
     });
 
-    it('분양 신청이 불가능한 반려동물이면 BadRequestException을 던진다', async () => {
+    it('분양 신청이 불가능한 반려동물이면 DomainValidationError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue({ userId: 'user-1' });
         adopterBreederReaderPort.findById.mockResolvedValue(mockBreeder);
         adopterPetReaderPort.findByIdAndBreeder.mockResolvedValue({ _id: 'pet-1', name: '뽀삐', status: 'adopted' });
         adopterApplicationCommandPort.findPendingByAdopterAndBreeder.mockResolvedValue(null);
 
+        await expect(
+            useCase.execute('user-1', { ...baseDto, petId: 'pet-1' } as any),
+        ).rejects.toThrow(DomainValidationError);
         await expect(
             useCase.execute('user-1', { ...baseDto, petId: 'pet-1' } as any),
         ).rejects.toThrow('현재 분양 신청이 불가능한 반려동물입니다.');

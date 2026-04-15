@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { GetAdopterApplicationsUseCase } from '../../../application/use-cases/get-adopter-applications.use-case';
 import { AdopterApplicationListAssemblerService } from '../../../domain/services/adopter-application-list-assembler.service';
 import { AdopterPaginationAssemblerService } from '../../../domain/services/adopter-pagination-assembler.service';
@@ -61,10 +60,10 @@ describe('입양자 상담 신청 목록 조회 유스케이스', () => {
         expect(result.items[0].applicationId).toBe('app-1');
     });
 
-    it('입양자 정보가 없으면 BadRequestException을 던진다', async () => {
+    it('입양자 정보가 없으면 DomainNotFoundError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue(null);
 
-        await expect(useCase.execute('user-1', 1, 10)).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('user-1', 1, 10)).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('user-1', 1, 10)).rejects.toThrow('입양자 정보를 찾을 수 없습니다.');
     });
 

@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { CreateAdopterReviewUseCase } from '../../../application/use-cases/create-adopter-review.use-case';
 import { ApplicationStatus } from '../../../../../common/enum/user.enum';
 
@@ -62,27 +61,30 @@ describe('입양자 후기 작성 유스케이스', () => {
         expect(adopterReviewNotifierPort.notifyBreederOfNewReview).toHaveBeenCalledWith('breeder-1');
     });
 
-    it('입양자 정보가 없으면 BadRequestException을 던진다', async () => {
+    it('입양자 정보가 없으면 DomainNotFoundError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue(null);
 
         await expect(
             useCase.execute('user-1', { applicationId: 'app-1', reviewType: 'positive', content: '후기' }),
-        ).rejects.toThrow(BadRequestException);
+        ).rejects.toThrow(DomainNotFoundError);
         await expect(
             useCase.execute('user-1', { applicationId: 'app-1', reviewType: 'positive', content: '후기' }),
         ).rejects.toThrow('입양자 정보를 찾을 수 없습니다.');
     });
 
-    it('신청 정보가 없으면 BadRequestException을 던진다', async () => {
+    it('신청 정보가 없으면 DomainNotFoundError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue(mockAdopter);
         adopterReviewCommandPort.findApplicationById.mockResolvedValue(null);
 
         await expect(
             useCase.execute('user-1', { applicationId: 'app-1', reviewType: 'positive', content: '후기' }),
+        ).rejects.toThrow(DomainNotFoundError);
+        await expect(
+            useCase.execute('user-1', { applicationId: 'app-1', reviewType: 'positive', content: '후기' }),
         ).rejects.toThrow('해당 입양 신청을 찾을 수 없습니다.');
     });
 
-    it('다른 사람의 신청에 후기를 작성하면 BadRequestException을 던진다', async () => {
+    it('다른 사람의 신청에 후기를 작성하면 DomainValidationError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue(mockAdopter);
         adopterReviewCommandPort.findApplicationById.mockResolvedValue({
             ...mockApplication,
@@ -91,10 +93,13 @@ describe('입양자 후기 작성 유스케이스', () => {
 
         await expect(
             useCase.execute('user-1', { applicationId: 'app-1', reviewType: 'positive', content: '후기' }),
+        ).rejects.toThrow(DomainValidationError);
+        await expect(
+            useCase.execute('user-1', { applicationId: 'app-1', reviewType: 'positive', content: '후기' }),
         ).rejects.toThrow('본인의 입양 신청에 대해서만 후기를 작성할 수 있습니다.');
     });
 
-    it('상담 완료 상태가 아니면 BadRequestException을 던진다', async () => {
+    it('상담 완료 상태가 아니면 DomainValidationError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue(mockAdopter);
         adopterReviewCommandPort.findApplicationById.mockResolvedValue({
             ...mockApplication,
@@ -103,14 +108,20 @@ describe('입양자 후기 작성 유스케이스', () => {
 
         await expect(
             useCase.execute('user-1', { applicationId: 'app-1', reviewType: 'positive', content: '후기' }),
+        ).rejects.toThrow(DomainValidationError);
+        await expect(
+            useCase.execute('user-1', { applicationId: 'app-1', reviewType: 'positive', content: '후기' }),
         ).rejects.toThrow('상담이 완료된 신청에 대해서만 후기를 작성할 수 있습니다.');
     });
 
-    it('브리더 정보가 없으면 BadRequestException을 던진다', async () => {
+    it('브리더 정보가 없으면 DomainNotFoundError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue(mockAdopter);
         adopterReviewCommandPort.findApplicationById.mockResolvedValue(mockApplication);
         adopterBreederReaderPort.findById.mockResolvedValue(null);
 
+        await expect(
+            useCase.execute('user-1', { applicationId: 'app-1', reviewType: 'positive', content: '후기' }),
+        ).rejects.toThrow(DomainNotFoundError);
         await expect(
             useCase.execute('user-1', { applicationId: 'app-1', reviewType: 'positive', content: '후기' }),
         ).rejects.toThrow('해당 브리더를 찾을 수 없습니다.');

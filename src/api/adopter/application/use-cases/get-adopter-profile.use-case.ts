@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import { AdopterProfileResultMapperService } from '../../domain/services/adopter-profile-result-mapper.service';
 import { ADOPTER_FILE_URL_PORT } from '../ports/adopter-file-url.port';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
@@ -20,7 +21,7 @@ export class GetAdopterProfileUseCase {
     async execute(userId: string): Promise<AdopterProfileResult> {
         const adopter = await this.adopterProfilePort.findById(userId);
         if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('입양자 정보를 찾을 수 없습니다.');
         }
 
         const profileResponse = this.adopterProfileResultMapperService.toResult(adopter);

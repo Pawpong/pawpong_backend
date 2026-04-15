@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
@@ -25,12 +26,12 @@ export class ReportAdopterReviewUseCase {
         const breeder = await this.adopterBreederReaderPort.findById(userId);
 
         if (!adopter && !breeder) {
-            throw new BadRequestException('사용자 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('사용자 정보를 찾을 수 없습니다.');
         }
 
         const review = await this.adopterReviewCommandPort.findReviewById(dto.reviewId);
         if (!review) {
-            throw new BadRequestException('신고할 후기를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('신고할 후기를 찾을 수 없습니다.');
         }
 
         await this.adopterReviewCommandPort.markAsReported(

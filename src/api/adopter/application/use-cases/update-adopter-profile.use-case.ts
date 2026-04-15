@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import { AdopterProfileUpdateMapperService } from '../../domain/services/adopter-profile-update-mapper.service';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
@@ -21,7 +22,7 @@ export class UpdateAdopterProfileUseCase {
         const adopter = await this.adopterProfilePort.updateProfile(userId, mappedUpdateData);
 
         if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('입양자 정보를 찾을 수 없습니다.');
         }
 
         return { message: '프로필이 성공적으로 수정되었습니다.' };

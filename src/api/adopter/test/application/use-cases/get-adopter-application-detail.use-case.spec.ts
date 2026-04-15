@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { GetAdopterApplicationDetailUseCase } from '../../../application/use-cases/get-adopter-application-detail.use-case';
 import { AdopterApplicationDetailAssemblerService } from '../../../domain/services/adopter-application-detail-assembler.service';
 
@@ -53,18 +52,18 @@ describe('입양자 상담 신청 상세 조회 유스케이스', () => {
         expect(result.status).toBe('consultation_pending');
     });
 
-    it('입양자 정보가 없으면 BadRequestException을 던진다', async () => {
+    it('입양자 정보가 없으면 DomainNotFoundError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue(null);
 
-        await expect(useCase.execute('user-1', 'app-1')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('user-1', 'app-1')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('user-1', 'app-1')).rejects.toThrow('입양자 정보를 찾을 수 없습니다.');
     });
 
-    it('해당 신청이 없거나 권한이 없으면 BadRequestException을 던진다', async () => {
+    it('해당 신청이 없거나 권한이 없으면 DomainNotFoundError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue({ userId: 'user-1' });
         adopterApplicationReaderPort.findByIdForAdopter.mockResolvedValue(null);
 
-        await expect(useCase.execute('user-1', 'app-1')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('user-1', 'app-1')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('user-1', 'app-1')).rejects.toThrow(
             '해당 입양 신청을 찾을 수 없거나 조회 권한이 없습니다.',
         );

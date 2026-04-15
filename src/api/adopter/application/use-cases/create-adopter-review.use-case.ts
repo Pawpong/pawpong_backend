@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError, DomainValidationError } from '../../../../common/error/domain.error';
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
@@ -29,27 +30,27 @@ export class CreateAdopterReviewUseCase {
     async execute(userId: string, dto: AdopterReviewCreateCommand): Promise<AdopterReviewCreateResult> {
         const adopter = await this.adopterProfilePort.findById(userId);
         if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('입양자 정보를 찾을 수 없습니다.');
         }
 
         const application = await this.adopterReviewCommandPort.findApplicationById(dto.applicationId);
         if (!application) {
-            throw new BadRequestException('해당 입양 신청을 찾을 수 없습니다.');
+            throw new DomainNotFoundError('해당 입양 신청을 찾을 수 없습니다.');
         }
 
         if (application.adopterId.toString() !== userId) {
-            throw new BadRequestException('본인의 입양 신청에 대해서만 후기를 작성할 수 있습니다.');
+            throw new DomainValidationError('본인의 입양 신청에 대해서만 후기를 작성할 수 있습니다.');
         }
 
         if (application.status !== ApplicationStatus.CONSULTATION_COMPLETED) {
-            throw new BadRequestException(
+            throw new DomainValidationError(
                 '상담이 완료된 신청에 대해서만 후기를 작성할 수 있습니다. 현재 상태: ' + application.status,
             );
         }
 
         const breeder = await this.adopterBreederReaderPort.findById(application.breederId.toString());
         if (!breeder) {
-            throw new BadRequestException('해당 브리더를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('해당 브리더를 찾을 수 없습니다.');
         }
 
         const savedReview = await this.adopterReviewCommandPort.create({

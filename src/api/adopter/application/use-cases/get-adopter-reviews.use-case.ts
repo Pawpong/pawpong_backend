@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import { ADOPTER_REVIEW_READER_PORT, type AdopterReviewReaderPort } from '../ports/adopter-review-reader.port';
@@ -19,7 +20,7 @@ export class GetAdopterReviewsUseCase {
     async execute(userId: string, page: number = 1, limit: number = 10): Promise<AdopterReviewPageResult> {
         const adopter = await this.adopterProfilePort.findById(userId);
         if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('입양자 정보를 찾을 수 없습니다.');
         }
 
         const total = await this.adopterReviewReaderPort.countByAdopterId(userId);

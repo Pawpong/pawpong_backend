@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { GetAdopterReviewDetailUseCase } from '../../../application/use-cases/get-adopter-review-detail.use-case';
 import { AdopterReviewDetailMapperService } from '../../../domain/services/adopter-review-detail-mapper.service';
 
@@ -37,10 +36,10 @@ describe('입양자 후기 상세 조회 유스케이스', () => {
         expect(adopterReviewReaderPort.findDetailByAdopterId).toHaveBeenCalledWith('user-1', 'review-1');
     });
 
-    it('후기가 없으면 BadRequestException을 던진다', async () => {
+    it('후기가 없으면 DomainNotFoundError를 던진다', async () => {
         adopterReviewReaderPort.findDetailByAdopterId.mockResolvedValue(null);
 
-        await expect(useCase.execute('user-1', 'review-1')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('user-1', 'review-1')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('user-1', 'review-1')).rejects.toThrow('후기를 찾을 수 없습니다.');
     });
 
