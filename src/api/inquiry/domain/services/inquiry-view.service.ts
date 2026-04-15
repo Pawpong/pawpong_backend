@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../common/error/domain.error';
 import type {
     InquiryAnswerResult,
     InquiryDetailResult,
@@ -74,7 +75,7 @@ export class InquiryViewService {
         }
 
         if (userId !== inquiry.authorId && userId !== inquiry.targetBreederId) {
-            throw new BadRequestException('해당 문의에 대한 열람 권한이 없습니다.');
+            throw new DomainValidationError('해당 문의에 대한 열람 권한이 없습니다.');
         }
     }
 

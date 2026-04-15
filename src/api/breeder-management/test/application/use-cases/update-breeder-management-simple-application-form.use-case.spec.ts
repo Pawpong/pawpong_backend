@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { UpdateBreederManagementSimpleApplicationFormUseCase } from '../../../application/use-cases/update-breeder-management-simple-application-form.use-case';
 import { BreederManagementSimpleApplicationFormBuilderService } from '../../../domain/services/breeder-management-simple-application-form-builder.service';
 import { BreederManagementApplicationCommandResultMapperService } from '../../../domain/services/breeder-management-application-command-result-mapper.service';
@@ -40,21 +41,21 @@ describe('브리더 간편 입양 신청 폼 수정 유스케이스', () => {
         expect(breederManagementSettingsPort.updateApplicationForm).toHaveBeenCalled();
     });
 
-    it('커스텀 질문이 5개를 초과하면 BadRequestException을 던진다', async () => {
+    it('커스텀 질문이 5개를 초과하면 도메인 검증 예외를 던진다', async () => {
         breederManagementProfilePort.findById.mockResolvedValue(mockBreeder);
         const tooManyQuestions = Array.from({ length: 6 }, (_, i) => ({ question: `질문 ${i + 1}` }));
 
-        await expect(useCase.execute('breeder-1', tooManyQuestions)).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', tooManyQuestions)).rejects.toThrow(DomainValidationError);
         await expect(useCase.execute('breeder-1', tooManyQuestions)).rejects.toThrow(
             '커스텀 질문은 최대 5개까지만 추가할 수 있습니다.',
         );
     });
 
-    it('중복 질문이 있으면 BadRequestException을 던진다', async () => {
+    it('중복 질문이 있으면 도메인 검증 예외를 던진다', async () => {
         breederManagementProfilePort.findById.mockResolvedValue(mockBreeder);
         const duplicateQuestions = [{ question: '같은 질문' }, { question: '같은 질문' }];
 
-        await expect(useCase.execute('breeder-1', duplicateQuestions)).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', duplicateQuestions)).rejects.toThrow(DomainValidationError);
         await expect(useCase.execute('breeder-1', duplicateQuestions)).rejects.toThrow(
             '중복된 질문이 있습니다. 각 질문은 고유해야 합니다.',
         );

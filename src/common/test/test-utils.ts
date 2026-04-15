@@ -6,7 +6,7 @@ import { ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 import { AppModule } from '../../app.module';
-import { AllExceptionsFilter, HttpExceptionFilter } from '../filter/http-exception.filter';
+import { AllExceptionsFilter, DomainExceptionFilter, HttpExceptionFilter } from '../filter/http-exception.filter';
 import { HttpStatusInterceptor } from '../interceptor/http-status.interceptor';
 
 /** 테스트용 인메모리 MongoDB 인스턴스 */
@@ -61,6 +61,7 @@ export async function createTestingApp(): Promise<INestApplication> {
 
     // 실제 앱과 동일하게 예외 응답 형식을 통일한다.
     app.useGlobalFilters(new AllExceptionsFilter());
+    app.useGlobalFilters(new DomainExceptionFilter());
     app.useGlobalFilters(new HttpExceptionFilter());
 
     // 실제 앱과 동일하게 POST 생성 응답을 200으로 정규화한다.

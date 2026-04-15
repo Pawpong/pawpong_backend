@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { UpdateBreederManagementApplicationFormUseCase } from '../../../application/use-cases/update-breeder-management-application-form.use-case';
 import { BreederManagementApplicationFormValidatorService } from '../../../domain/services/breeder-management-application-form-validator.service';
 import { BreederManagementApplicationCommandResultMapperService } from '../../../domain/services/breeder-management-application-command-result-mapper.service';
@@ -44,7 +45,7 @@ describe('브리더 입양 신청 폼 수정 유스케이스', () => {
         expect(breederManagementSettingsPort.updateApplicationForm).toHaveBeenCalled();
     });
 
-    it('질문 ID가 중복이면 BadRequestException을 던진다', async () => {
+    it('질문 ID가 중복이면 도메인 검증 예외를 던진다', async () => {
         breederManagementProfilePort.findById.mockResolvedValue(mockBreeder);
         const duplicateDto = {
             customQuestions: [
@@ -53,17 +54,17 @@ describe('브리더 입양 신청 폼 수정 유스케이스', () => {
             ],
         };
 
-        await expect(useCase.execute('breeder-1', duplicateDto as any)).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', duplicateDto as any)).rejects.toThrow(DomainValidationError);
         await expect(useCase.execute('breeder-1', duplicateDto as any)).rejects.toThrow('질문 ID가 중복되었습니다.');
     });
 
-    it('표준 질문 ID와 충돌하면 BadRequestException을 던진다', async () => {
+    it('표준 질문 ID와 충돌하면 도메인 검증 예외를 던진다', async () => {
         breederManagementProfilePort.findById.mockResolvedValue(mockBreeder);
         const conflictDto = {
             customQuestions: [{ id: 'privacyConsent', type: 'text', label: '충돌 질문', required: false }],
         };
 
-        await expect(useCase.execute('breeder-1', conflictDto as any)).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', conflictDto as any)).rejects.toThrow(DomainValidationError);
     });
 
     it('브리더를 찾을 수 없으면 BadRequestException을 던진다', async () => {

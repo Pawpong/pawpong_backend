@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { UpdateUserStatusUseCase } from '../../../application/use-cases/update-user-status.use-case';
 import { UserAdminActivityLogFactoryService } from '../../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../../domain/services/user-admin-command-policy.service';
@@ -112,6 +113,6 @@ describe('사용자 상태 수정 유스케이스', () => {
             useCase.execute('admin-1', 'missing', 'adopter', {
                 accountStatus: 'active' as any,
             }),
-        ).rejects.toBeInstanceOf(BadRequestException);
+        ).rejects.toBeInstanceOf(DomainValidationError);
     });
 });

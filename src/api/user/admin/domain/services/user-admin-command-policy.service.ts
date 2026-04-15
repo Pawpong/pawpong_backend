@@ -1,6 +1,7 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { AdminAction, AdminLevel, AdminTargetType, UserStatus } from '../../../../../common/enum/user.enum';
+import { DomainAuthorizationError, DomainValidationError } from '../../../../../common/error/domain.error';
 import {
     UserAdminAdminSnapshot,
     UserAdminManagedUserRole,
@@ -12,7 +13,7 @@ import {
 export class UserAdminCommandPolicyService {
     assertAdminExists(admin: UserAdminAdminSnapshot | null): UserAdminAdminSnapshot {
         if (!admin) {
-            throw new BadRequestException('관리자를 찾을 수 없습니다.');
+            throw new DomainValidationError('관리자를 찾을 수 없습니다.');
         }
 
         return admin;
@@ -20,7 +21,7 @@ export class UserAdminCommandPolicyService {
 
     assertCanManageUsers(admin: UserAdminAdminSnapshot | null, message: string): UserAdminAdminSnapshot {
         if (!admin || !admin.permissions?.canManageUsers) {
-            throw new ForbiddenException(message);
+            throw new DomainAuthorizationError(message);
         }
 
         return admin;
@@ -28,7 +29,7 @@ export class UserAdminCommandPolicyService {
 
     assertSuperAdmin(admin: UserAdminAdminSnapshot | null): UserAdminAdminSnapshot {
         if (!admin || admin.adminLevel !== AdminLevel.SUPER_ADMIN) {
-            throw new ForbiddenException('super_admin 권한이 필요합니다.');
+            throw new DomainAuthorizationError('super_admin 권한이 필요합니다.');
         }
 
         return admin;
@@ -39,7 +40,7 @@ export class UserAdminCommandPolicyService {
         user: UserAdminManagedUserSnapshot | null,
     ): UserAdminManagedUserSnapshot {
         if (!user) {
-            throw new BadRequestException(this.getManagedUserNotFoundMessage(role));
+            throw new DomainValidationError(this.getManagedUserNotFoundMessage(role));
         }
 
         return user;
@@ -47,25 +48,25 @@ export class UserAdminCommandPolicyService {
 
     assertDeletedUser(user: UserAdminManagedUserSnapshot): void {
         if (user.accountStatus !== UserStatus.DELETED) {
-            throw new BadRequestException('탈퇴 상태가 아닌 사용자입니다.');
+            throw new DomainValidationError('탈퇴 상태가 아닌 사용자입니다.');
         }
     }
 
     assertHardDeleteAllowed(user: UserAdminManagedUserSnapshot): void {
         if (user.accountStatus !== UserStatus.DELETED) {
-            throw new BadRequestException('deleted 상태의 사용자만 영구 삭제할 수 있습니다.');
+            throw new DomainValidationError('deleted 상태의 사용자만 영구 삭제할 수 있습니다.');
         }
     }
 
     assertPhoneWhitelistDoesNotExist(item: UserAdminPhoneWhitelistSnapshot | null): void {
         if (item) {
-            throw new BadRequestException('이미 화이트리스트에 등록된 전화번호입니다.');
+            throw new DomainValidationError('이미 화이트리스트에 등록된 전화번호입니다.');
         }
     }
 
     assertPhoneWhitelistExists(item: UserAdminPhoneWhitelistSnapshot | null): UserAdminPhoneWhitelistSnapshot {
         if (!item) {
-            throw new BadRequestException('화이트리스트를 찾을 수 없습니다.');
+            throw new DomainValidationError('화이트리스트를 찾을 수 없습니다.');
         }
 
         return item;

@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../common/error/domain.error';
 import type { BreederManagementBreederRecord } from '../../application/ports/breeder-management-profile.port';
 import type { BreederManagementProfileUpdateCommand } from '../../application/types/breeder-management-profile-command.type';
 
@@ -32,7 +33,7 @@ export class BreederManagementProfileUpdateMapperService {
 
         if (updateData.profilePhotos) {
             if (updateData.profilePhotos.length > 3) {
-                throw new BadRequestException('프로필 사진은 최대 3장까지만 업로드할 수 있습니다.');
+                throw new DomainValidationError('프로필 사진은 최대 3장까지만 업로드할 수 있습니다.');
             }
 
             profileUpdateData['profile.representativePhotos'] = updateData.profilePhotos;

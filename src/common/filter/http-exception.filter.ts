@@ -50,6 +50,25 @@ export class HttpExceptionFilter implements ExceptionFilter {
 }
 
 /**
+ * 도메인 예외 필터
+ * DomainError를 ApiResponseDto 형식으로 변환하여 반환합니다.
+ */
+@Catch(DomainError)
+export class DomainExceptionFilter implements ExceptionFilter {
+    private readonly logger = new Logger(DomainExceptionFilter.name);
+
+    catch(exception: DomainError, host: ArgumentsHost) {
+        const ctx = host.switchToHttp();
+        const response = ctx.getResponse<Response>();
+        const request = ctx.getRequest<Request>();
+
+        this.logger.error(`[${request.method}] ${request.url} - ${exception.statusCode} - ${exception.message}`);
+
+        response.status(exception.statusCode).json(ApiResponseDto.error(exception.message, exception.statusCode));
+    }
+}
+
+/**
  * 모든 예외 필터 (500 에러 등)
  */
 @Catch()

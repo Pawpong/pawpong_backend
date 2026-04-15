@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../common/error/domain.error';
 import { VerificationStatus } from '../../../../common/enum/user.enum';
 import type { BreederManagementVerificationDraftDocument } from '../../application/ports/breeder-management-verification-draft-store.port';
 import type { BreederManagementStoredVerificationDocumentRecord } from '../../application/ports/breeder-management-settings.port';
@@ -25,11 +26,11 @@ type BreederManagementVerificationSubmissionPlan = {
 export class BreederManagementVerificationDocumentPolicyService {
     validateUploadRequest(files: Express.Multer.File[], types: string[]): void {
         if (!files || files.length === 0) {
-            throw new BadRequestException('업로드할 파일이 없습니다.');
+            throw new DomainValidationError('업로드할 파일이 없습니다.');
         }
 
         if (files.length !== types.length) {
-            throw new BadRequestException('파일 수와 타입 수가 일치하지 않습니다.');
+            throw new DomainValidationError('파일 수와 타입 수가 일치하지 않습니다.');
         }
     }
 
@@ -99,7 +100,7 @@ export class BreederManagementVerificationDocumentPolicyService {
         const missingTypes = requiredTypes.filter((type) => !documentTypes.includes(type));
 
         if (missingTypes.length > 0) {
-            throw new BadRequestException(`필수 서류가 누락되었습니다: ${missingTypes.join(', ')}`);
+            throw new DomainValidationError(`필수 서류가 누락되었습니다: ${missingTypes.join(', ')}`);
         }
 
         if (level === 'elite') {
@@ -108,7 +109,7 @@ export class BreederManagementVerificationDocumentPolicyService {
                 documentTypes.includes('breederDogCertificate');
 
             if (!hasBreederCertificate) {
-                throw new BadRequestException('Elite 레벨은 브리더 인증 서류가 필수입니다.');
+                throw new DomainValidationError('Elite 레벨은 브리더 인증 서류가 필수입니다.');
             }
         }
     }

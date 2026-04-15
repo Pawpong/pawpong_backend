@@ -1,5 +1,6 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
+import { DomainAuthenticationError } from '../../../../../common/error/domain.error';
 import { AuthAdminSnapshot } from '../../application/ports/auth-admin-reader.port';
 import {
     AuthAdminIssuedTokenPayload,
@@ -9,11 +10,11 @@ import {
 @Injectable()
 export class AuthAdminAuthenticationService {
     throwInvalidCredentials(): never {
-        throw new UnauthorizedException('이메일 또는 비밀번호가 올바르지 않습니다.');
+        throw new DomainAuthenticationError('이메일 또는 비밀번호가 올바르지 않습니다.');
     }
 
     throwInvalidToken(): never {
-        throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+        throw new DomainAuthenticationError('유효하지 않은 토큰입니다.');
     }
 
     assertAdminRole(payload: AuthAdminVerifiedTokenPayload): void {

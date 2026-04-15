@@ -1,5 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 
+import { DomainAuthenticationError } from '../../../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { AuthAdminAuthenticationService } from '../../../domain/services/auth-admin-authentication.service';
 import { AuthAdminRefreshTokenResultMapperService } from '../../../domain/services/auth-admin-refresh-token-result-mapper.service';
@@ -88,7 +89,7 @@ describe('관리자 token 재발급 유스케이스', () => {
         await expect(useCase.execute('bad-token')).rejects.toBeInstanceOf(UnauthorizedException);
     });
 
-    it('관리자 역할이 아니면 UnauthorizedException을 던진다', async () => {
+    it('관리자 역할이 아니면 도메인 인증 예외를 던진다', async () => {
         const useCase = new RefreshAdminTokenUseCase(
             {
                 findActiveByEmail: jest.fn().mockResolvedValue(adminSnapshot),
@@ -108,6 +109,6 @@ describe('관리자 token 재발급 유스케이스', () => {
             logger,
         );
 
-        await expect(useCase.execute('bad-role-token')).rejects.toBeInstanceOf(UnauthorizedException);
+        await expect(useCase.execute('bad-role-token')).rejects.toBeInstanceOf(DomainAuthenticationError);
     });
 });
