@@ -1,8 +1,8 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
-
+import { DomainConflictError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { CompleteLegacySocialRegistrationUseCase } from '../../../application/use-cases/complete-legacy-social-registration.use-case';
 import { AuthPhoneNumberNormalizerService } from '../../../domain/services/auth-phone-number-normalizer.service';
 import { AuthSocialRegistrationResultMapperService } from '../../../domain/services/auth-social-registration-result-mapper.service';
+import { AuthSignupValidationService } from '../../../domain/services/auth-signup-validation.service';
 
 describe('레거시 소셜 가입 완료 유스케이스', () => {
     const authRegistrationPort = {
@@ -29,6 +29,7 @@ describe('레거시 소셜 가입 완료 유스케이스', () => {
         authTokenService as any,
         authPhoneNumberNormalizerService,
         authSocialRegistrationResultMapperService,
+        new AuthSignupValidationService(),
     );
 
     beforeEach(() => {
@@ -98,7 +99,7 @@ describe('레거시 소셜 가입 완료 유스케이스', () => {
                     nickname: '입양자',
                 },
             ),
-        ).rejects.toThrow(new ConflictException('Nickname already exists'));
+        ).rejects.toThrow(new DomainConflictError('Nickname already exists'));
     });
 
     it('브리더 레거시 소셜 완료는 district를 city에 저장하는 기존 규칙을 유지한다', async () => {
@@ -167,6 +168,6 @@ describe('레거시 소셜 가입 완료 유스케이스', () => {
                     breeds: ['포메라니안'],
                 },
             ),
-        ).rejects.toThrow(new BadRequestException('브리더는 브리더명, 지역이 필요합니다.'));
+        ).rejects.toThrow(new DomainValidationError('브리더는 브리더명, 지역이 필요합니다.'));
     });
 });

@@ -1,4 +1,4 @@
-import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { BreederPlan, UserStatus, VerificationStatus } from '../../../../common/enum/user.enum';
 import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../ports/auth-registration.port';
@@ -14,6 +14,7 @@ import { AuthStoredFileNameService } from '../../domain/services/auth-stored-fil
 import { AuthBreederDocumentTypeService } from '../../domain/services/auth-breeder-document-type.service';
 import { AuthPhoneNumberNormalizerService } from '../../domain/services/auth-phone-number-normalizer.service';
 import { AuthSignupResultMapperService } from '../../domain/services/auth-signup-result-mapper.service';
+import { AuthSignupValidationService } from '../../domain/services/auth-signup-validation.service';
 
 @Injectable()
 export class RegisterBreederUseCase {
@@ -31,22 +32,17 @@ export class RegisterBreederUseCase {
         private readonly authBreederDocumentTypeService: AuthBreederDocumentTypeService,
         private readonly authPhoneNumberNormalizerService: AuthPhoneNumberNormalizerService,
         private readonly authSignupResultMapperService: AuthSignupResultMapperService,
+        private readonly authSignupValidationService: AuthSignupValidationService,
     ) {}
 
     async execute(dto: RegisterBreederAuthSignupCommand): Promise<RegisterBreederAuthSignupResult> {
-        if (!dto.agreements?.termsOfService || !dto.agreements?.privacyPolicy) {
-            throw new BadRequestException('필수 약관에 동의해야 합니다.');
-        }
+        this.authSignupValidationService.ensureRequiredBreederAgreements(dto.agreements);
 
         const existingBreeder = await this.authRegistrationPort.findBreederByEmail(dto.email);
-        if (existingBreeder) {
-            throw new ConflictException('이미 가입된 이메일입니다.');
-        }
+        this.authSignupValidationService.assertBreederEmailAvailable(existingBreeder);
 
         const existingAdopter = await this.authRegistrationPort.findAdopterByEmail(dto.email);
-        if (existingAdopter) {
-            throw new ConflictException('해당 이메일로 입양자 계정이 이미 존재합니다.');
-        }
+        this.authSignupValidationService.assertBreederAdopterEmailAvailable(existingAdopter);
 
         const socialAuthInfo = this.authSocialIdentityService.parseOptionalSocialAuthInfo(
             dto.tempId,

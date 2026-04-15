@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { AUTH_PHONE_VERIFICATION_REGISTRY_PORT } from '../ports/auth-phone-verification-registry.port';
 import { AUTH_PHONE_VERIFICATION_SENDER_PORT } from '../ports/auth-phone-verification-sender.port';
@@ -26,22 +26,14 @@ export class SendPhoneVerificationCodeUseCase {
         const normalizedPhone = this.authPhoneVerificationPolicyService.normalizePhoneNumber(phone);
         const isWhitelisted = await this.authPhoneVerificationRegistryPort.isPhoneWhitelisted(normalizedPhone);
 
+        let hasRegisteredPhone = false;
         if (!isWhitelisted) {
-            const hasRegisteredPhone = await this.authPhoneVerificationRegistryPort.hasRegisteredPhone(normalizedPhone);
-            if (hasRegisteredPhone) {
-                throw new BadRequestException('이미 등록된 전화번호입니다.');
-            }
+            hasRegisteredPhone = await this.authPhoneVerificationRegistryPort.hasRegisteredPhone(normalizedPhone);
         }
+        this.authPhoneVerificationPolicyService.ensurePhoneAvailable(isWhitelisted, hasRegisteredPhone);
 
         const existingVerification = this.authPhoneVerificationStorePort.get(normalizedPhone);
-        if (existingVerification && !this.authPhoneVerificationPolicyService.isExpired(existingVerification.expiresAt)) {
-            const remainingMinutes = this.authPhoneVerificationPolicyService.getRemainingMinutes(
-                existingVerification.expiresAt,
-            );
-            throw new BadRequestException(
-                `이미 발송된 인증코드가 있습니다. ${remainingMinutes}분 후에 재발송 가능합니다.`,
-            );
-        }
+        this.authPhoneVerificationPolicyService.ensureNoPendingVerification(existingVerification);
 
         const verificationCode = this.authPhoneVerificationPolicyService.generateVerificationCode();
         const verification = this.authPhoneVerificationPolicyService.createPendingVerification(
@@ -49,12 +41,8 @@ export class SendPhoneVerificationCodeUseCase {
             verificationCode,
         );
 
-        try {
-            await this.authPhoneVerificationSenderPort.sendVerificationCode(normalizedPhone, verificationCode);
-            this.authPhoneVerificationStorePort.save(verification);
-        } catch (error) {
-            throw new InternalServerErrorException('인증번호 발송에 실패했습니다. 잠시 후 다시 시도해주세요.');
-        }
+        await this.authPhoneVerificationSenderPort.sendVerificationCode(normalizedPhone, verificationCode);
+        this.authPhoneVerificationStorePort.save(verification);
 
         return buildAuthPhoneVerificationCodeSentResult();
     }

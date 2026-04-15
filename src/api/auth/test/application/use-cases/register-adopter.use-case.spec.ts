@@ -1,10 +1,9 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
-
-import { DomainValidationError } from '../../../../../common/error/domain.error';
+import { DomainConflictError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { RegisterAdopterUseCase } from '../../../application/use-cases/register-adopter.use-case';
 import { AuthSocialIdentityService } from '../../../domain/services/auth-social-identity.service';
 import { AuthPhoneNumberNormalizerService } from '../../../domain/services/auth-phone-number-normalizer.service';
 import { AuthSignupResultMapperService } from '../../../domain/services/auth-signup-result-mapper.service';
+import { AuthSignupValidationService } from '../../../domain/services/auth-signup-validation.service';
 
 describe('입양자 회원가입 유스케이스', () => {
     const authRegistrationPort = {
@@ -32,6 +31,7 @@ describe('입양자 회원가입 유스케이스', () => {
         mockStoredFileNameService as any,
         new AuthPhoneNumberNormalizerService(),
         new AuthSignupResultMapperService(),
+        new AuthSignupValidationService(),
     );
 
     const validTempId = 'temp_google_google-uid-123_ts';
@@ -84,34 +84,36 @@ describe('입양자 회원가입 유스케이스', () => {
         ).rejects.toThrow('유효하지 않은 임시 ID 형식입니다.');
     });
 
-    it('이미 가입된 소셜 계정이면 ConflictException을 던진다', async () => {
+    it('이미 가입된 소셜 계정이면 도메인 충돌 예외를 던진다', async () => {
         authRegistrationPort.findAdopterBySocialAuth.mockResolvedValue({ _id: 'existing-adopter' });
 
-        await expect(useCase.execute(baseDto as any)).rejects.toThrow(ConflictException);
+        await expect(useCase.execute(baseDto as any)).rejects.toThrow(DomainConflictError);
         await expect(useCase.execute(baseDto as any)).rejects.toThrow('이미 입양자로 가입된 소셜 계정입니다.');
     });
 
-    it('이메일이 없으면 BadRequestException을 던진다', async () => {
+    it('이메일이 없으면 도메인 검증 예외를 던진다', async () => {
         authRegistrationPort.findAdopterBySocialAuth.mockResolvedValue(null);
 
         await expect(
             useCase.execute({ ...baseDto, email: undefined } as any),
-        ).rejects.toThrow('이메일 정보가 필요합니다.');
+        ).rejects.toThrow(DomainValidationError);
+        await expect(useCase.execute({ ...baseDto, email: undefined } as any)).rejects.toThrow('이메일 정보가 필요합니다.');
     });
 
-    it('닉네임이 없으면 BadRequestException을 던진다', async () => {
+    it('닉네임이 없으면 도메인 검증 예외를 던진다', async () => {
         authRegistrationPort.findAdopterBySocialAuth.mockResolvedValue(null);
 
         await expect(
             useCase.execute({ ...baseDto, nickname: undefined } as any),
-        ).rejects.toThrow('닉네임이 필요합니다.');
+        ).rejects.toThrow(DomainValidationError);
+        await expect(useCase.execute({ ...baseDto, nickname: undefined } as any)).rejects.toThrow('닉네임이 필요합니다.');
     });
 
-    it('닉네임이 이미 사용 중이면 ConflictException을 던진다', async () => {
+    it('닉네임이 이미 사용 중이면 도메인 충돌 예외를 던진다', async () => {
         authRegistrationPort.findAdopterBySocialAuth.mockResolvedValue(null);
         authRegistrationPort.findAdopterByNickname.mockResolvedValue({ nickname: '새입양자' });
 
-        await expect(useCase.execute(baseDto as any)).rejects.toThrow(ConflictException);
+        await expect(useCase.execute(baseDto as any)).rejects.toThrow(DomainConflictError);
         await expect(useCase.execute(baseDto as any)).rejects.toThrow('이미 사용 중인 닉네임입니다.');
     });
 });

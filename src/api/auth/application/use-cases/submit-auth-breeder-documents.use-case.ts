@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import { VerificationStatus } from '../../../../common/enum/user.enum';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import {
@@ -36,7 +37,7 @@ export class SubmitAuthBreederDocumentsUseCase {
         const breeder = await this.authBreederVerificationCommandPort.findBreederById(userId);
         if (!breeder) {
             this.logger.logError('submitBreederDocuments', '브리더를 찾을 수 없음', new Error('Breeder not found'));
-            throw new BadRequestException('브리더를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('브리더를 찾을 수 없습니다.');
         }
 
         const storedDocuments = this.authBreederDocumentSubmissionService.createStoredDocuments(

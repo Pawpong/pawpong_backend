@@ -13,6 +13,19 @@ type AuthBreederSubmittedDocumentUrls = {
 
 @Injectable()
 export class AuthBreederDocumentSubmissionService {
+    assertRequiredUploadFiles(
+        idCardFiles?: Express.Multer.File[],
+        animalProductionLicenseFiles?: Express.Multer.File[],
+    ): void {
+        if (!idCardFiles || idCardFiles.length === 0) {
+            throw new DomainValidationError('신분증 사본 파일이 필요합니다.');
+        }
+
+        if (!animalProductionLicenseFiles || animalProductionLicenseFiles.length === 0) {
+            throw new DomainValidationError('동물생산업 등록증 파일이 필요합니다.');
+        }
+    }
+
     assertRequiredDocumentUrls(documents: AuthBreederSubmittedDocumentUrls): void {
         if (!documents.idCardUrl) {
             throw new DomainValidationError('신분증 사본 파일이 필요합니다.');
