@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import type {
     AnnouncementPublicItem,
     AnnouncementPublicListResult,
@@ -61,7 +60,7 @@ describe('공지사항 상세 조회 유스케이스', () => {
         readerPort.item = null;
 
         await expect(useCase.execute('507f1f77bcf86cd799439011')).rejects.toThrow(
-            new BadRequestException('공지사항을 찾을 수 없습니다.'),
+            new DomainNotFoundError('공지사항을 찾을 수 없습니다.'),
         );
     });
 });

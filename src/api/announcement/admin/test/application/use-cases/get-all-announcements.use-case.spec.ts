@@ -1,5 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
-
 import { GetAllAnnouncementsUseCase } from '../../../application/use-cases/get-all-announcements.use-case';
 import { AnnouncementPageAssemblerService } from '../../../../domain/services/announcement-page-assembler.service';
 import { AnnouncementItemMapperService } from '../../../../domain/services/announcement-item-mapper.service';
@@ -81,10 +79,9 @@ describe('공지사항 전체 목록 조회 유스케이스 (관리자)', () => 
         expect(result.items).toHaveLength(0);
     });
 
-    it('조회 중 예외가 발생하면 BadRequestException을 던진다', async () => {
+    it('조회 중 예외가 발생하면 원본 예외를 전파한다', async () => {
         announcementAdminReader.findAllAnnouncements.mockRejectedValue(new Error('DB 오류'));
 
-        await expect(useCase.execute({ page: 1, limit: 10 })).rejects.toThrow(BadRequestException);
-        await expect(useCase.execute({ page: 1, limit: 10 })).rejects.toThrow('공지사항 목록을 조회할 수 없습니다.');
+        await expect(useCase.execute({ page: 1, limit: 10 })).rejects.toThrow('DB 오류');
     });
 });

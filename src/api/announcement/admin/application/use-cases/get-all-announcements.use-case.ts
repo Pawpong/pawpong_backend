@@ -1,7 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AnnouncementPageAssemblerService } from '../../../domain/services/announcement-page-assembler.service';
 import {
     ANNOUNCEMENT_ADMIN_READER_PORT,
@@ -41,9 +40,8 @@ export class GetAllAnnouncementsUseCase {
 
             return this.announcementPageAssemblerService.build(result);
         } catch (error) {
-            rethrowIfHttpException(error);
             this.logger.logError('getAllAnnouncements', '관리자 공지사항 목록 조회 실패', error);
-            throw new BadRequestException('공지사항 목록을 조회할 수 없습니다.');
+            throw error;
         }
     }
 }
