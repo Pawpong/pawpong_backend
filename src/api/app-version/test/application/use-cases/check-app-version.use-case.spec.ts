@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { CheckAppVersionUseCase } from '../../../application/use-cases/check-app-version.use-case';
 import { AppVersionReaderPort } from '../../../application/ports/app-version-reader.port';
 import { AppVersionPolicyService } from '../../../domain/services/app-version-policy.service';
@@ -70,7 +69,7 @@ describe('앱 버전 확인 유스케이스', () => {
             logger as any,
         );
 
-        await expect(useCase.execute(undefined as any, '1.0.0')).rejects.toBeInstanceOf(BadRequestException);
-        await expect(useCase.execute('android', '')).rejects.toBeInstanceOf(BadRequestException);
+        await expect(useCase.execute(undefined as any, '1.0.0')).rejects.toBeInstanceOf(DomainValidationError);
+        await expect(useCase.execute('android', '')).rejects.toBeInstanceOf(DomainValidationError);
     });
 });

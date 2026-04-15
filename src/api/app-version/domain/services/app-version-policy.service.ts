@@ -1,9 +1,16 @@
 import { Injectable } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../common/error/domain.error';
 import { ActiveAppVersionSnapshot } from '../../application/ports/app-version-reader.port';
 
 @Injectable()
 export class AppVersionPolicyService {
+    ensureCheckRequest(platform: 'ios' | 'android', currentVersion: string): void {
+        if (!platform || !currentVersion) {
+            throw new DomainValidationError('플랫폼과 현재 버전 정보가 필요합니다.');
+        }
+    }
+
     buildCheckResponse(
         platform: 'ios' | 'android',
         currentVersion: string,

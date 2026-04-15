@@ -1,5 +1,4 @@
-import { NotFoundException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../../common/error/domain.error';
 import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { AppVersionAdminCommandPolicyService } from '../../../../admin/domain/services/app-version-admin-command-policy.service';
@@ -61,7 +60,7 @@ describe('앱 버전 수정 유스케이스', () => {
             logger,
         );
 
-        await expect(useCase.execute('missing', 'admin-1', {})).rejects.toBeInstanceOf(NotFoundException);
+        await expect(useCase.execute('missing', 'admin-1', {})).rejects.toBeInstanceOf(DomainNotFoundError);
     });
 
     it('관리자 정보가 없으면 예외을 던진다', async () => {

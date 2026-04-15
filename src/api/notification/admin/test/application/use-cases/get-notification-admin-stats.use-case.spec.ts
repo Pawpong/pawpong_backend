@@ -1,5 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
-
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { NotificationAdminStatsResultMapperService } from '../../../domain/services/notification-admin-stats-result-mapper.service';
 import { NotificationAdminReaderPort } from '../../../application/ports/notification-admin-reader.port';
@@ -46,7 +44,7 @@ describe('관리자 알림 통계 조회 유스케이스', () => {
         });
     });
 
-    it('통계 조회 실패 시 예외으로 감싼다', async () => {
+    it('통계 조회 실패 시 원본 예외를 유지한다', async () => {
         const useCase = new GetNotificationAdminStatsUseCase(
             {
                 findPaged: jest.fn(),
@@ -56,6 +54,6 @@ describe('관리자 알림 통계 조회 유스케이스', () => {
             logger,
         );
 
-        await expect(useCase.execute('admin-1')).rejects.toBeInstanceOf(BadRequestException);
+        await expect(useCase.execute('admin-1')).rejects.toThrow('boom');
     });
 });

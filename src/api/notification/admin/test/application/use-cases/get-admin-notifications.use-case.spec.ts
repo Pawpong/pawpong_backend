@@ -1,5 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
-
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { NotificationType } from '../../../../../../common/enum/user.enum';
 import { NotificationAdminItemMapperService } from '../../../domain/services/notification-admin-item-mapper.service';
@@ -68,7 +66,7 @@ describe('관리자 알림 목록 조회 유스케이스', () => {
         });
     });
 
-    it('조회 실패 시 예외으로 감싼다', async () => {
+    it('조회 실패 시 원본 예외를 유지한다', async () => {
         const useCase = new GetAdminNotificationsUseCase(
             {
                 findPaged: jest.fn().mockRejectedValue(new Error('boom')),
@@ -86,6 +84,6 @@ describe('관리자 알림 목록 조회 유스케이스', () => {
                 pageNumber: 1,
                 itemsPerPage: 20,
             }),
-        ).rejects.toBeInstanceOf(BadRequestException);
+        ).rejects.toThrow('boom');
     });
 });

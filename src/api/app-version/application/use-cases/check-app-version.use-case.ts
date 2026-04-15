@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../common/utils/http-exception.util';
@@ -18,9 +18,7 @@ export class CheckAppVersionUseCase {
     async execute(platform: 'ios' | 'android', currentVersion: string): Promise<AppVersionCheckResult> {
         this.logger.logStart('checkVersion', '앱 버전 체크', { platform, currentVersion });
 
-        if (!platform || !currentVersion) {
-            throw new BadRequestException('플랫폼과 현재 버전 정보가 필요합니다.');
-        }
+        this.appVersionPolicyService.ensureCheckRequest(platform, currentVersion);
 
         try {
             const versionInfo = await this.appVersionReader.findLatestActiveByPlatform(platform);
@@ -36,7 +34,7 @@ export class CheckAppVersionUseCase {
         } catch (error) {
             rethrowIfHttpException(error);
             this.logger.logError('checkVersion', '앱 버전 체크', error);
-            throw new BadRequestException('버전 체크에 실패했습니다.');
+            throw error;
         }
     }
 }

@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AppVersionAdminCommandPolicyService } from '../../domain/services/app-version-admin-command-policy.service';
@@ -32,7 +33,7 @@ export class UpdateAppVersionUseCase {
             const updated = await this.appVersionWriter.update(appVersionId, updateData);
 
             if (!updated) {
-                throw new NotFoundException('앱 버전 정보를 찾을 수 없습니다.');
+                throw new DomainNotFoundError('앱 버전 정보를 찾을 수 없습니다.');
             }
 
             this.logger.logSuccess('updateAppVersion', '앱 버전 수정 완료', { appVersionId });
@@ -40,7 +41,7 @@ export class UpdateAppVersionUseCase {
         } catch (error) {
             rethrowIfHttpException(error);
             this.logger.logError('updateAppVersion', '앱 버전 수정', error);
-            throw new BadRequestException('앱 버전 수정에 실패했습니다.');
+            throw error;
         }
     }
 }

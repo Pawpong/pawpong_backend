@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
@@ -35,7 +35,7 @@ export class CreateAppVersionUseCase {
         } catch (error) {
             rethrowIfHttpException(error);
             this.logger.logError('createAppVersion', '앱 버전 생성', error);
-            throw new BadRequestException('앱 버전 생성에 실패했습니다.');
+            throw error;
         }
     }
 }
