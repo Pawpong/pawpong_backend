@@ -1,6 +1,7 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { UploadAdminStorageListAssemblerService } from '../../domain/services/upload-admin-storage-list-assembler.service';
 import { UPLOAD_ADMIN_STORAGE_PORT, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
 import type { UploadAdminStorageListResult } from '../types/upload-admin-result.type';
@@ -32,7 +33,8 @@ export class ListAllFilesUseCase {
             return response;
         } catch (error) {
             this.logger.logError('listAllFiles', '파일 목록 조회 실패', error);
-            throw new BadRequestException('파일 목록을 조회할 수 없습니다.');
+            rethrowIfHttpException(error);
+            throw error;
         }
     }
 }
