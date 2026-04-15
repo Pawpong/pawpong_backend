@@ -1,5 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
-
+import { DomainAuthorizationError } from '../../../../../../common/error/domain.error';
 import { GetPlatformStatsUseCase } from '../../../application/use-cases/get-platform-stats.use-case';
 import { PlatformAdminResultMapperService } from '../../../domain/services/platform-admin-result-mapper.service';
 import { PlatformAdminQueryPolicyService } from '../../../domain/services/platform-admin-query-policy.service';
@@ -107,6 +106,6 @@ describe('플랫폼 통계 조회 유스케이스', () => {
                 pageNumber: 1,
                 itemsPerPage: 10,
             }),
-        ).rejects.toBeInstanceOf(ForbiddenException);
+        ).rejects.toBeInstanceOf(DomainAuthorizationError);
     });
 });

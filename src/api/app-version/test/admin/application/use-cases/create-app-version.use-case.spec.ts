@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { AppVersionAdminCommandPolicyService } from '../../../../admin/domain/services/app-version-admin-command-policy.service';
@@ -78,6 +78,6 @@ describe('앱 버전 생성 유스케이스', () => {
                 iosStoreUrl: 'https://apps.apple.com/app/id1',
                 androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
             }),
-        ).rejects.toBeInstanceOf(BadRequestException);
+        ).rejects.toBeInstanceOf(DomainValidationError);
     });
 });

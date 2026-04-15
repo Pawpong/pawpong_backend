@@ -1,5 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
-
+import { DomainAuthorizationError } from '../../../../../../common/error/domain.error';
 import { GetPlatformMvpStatsUseCase } from '../../../application/use-cases/get-platform-mvp-stats.use-case';
 import { PlatformAdminResultMapperService } from '../../../domain/services/platform-admin-result-mapper.service';
 import { PlatformAdminQueryPolicyService } from '../../../domain/services/platform-admin-query-policy.service';
@@ -70,6 +69,6 @@ describe('플랫폼 초기 버전 통계 조회 유스케이스', () => {
             new PlatformAdminResultMapperService(),
         );
 
-        await expect(useCase.execute('admin-1')).rejects.toBeInstanceOf(ForbiddenException);
+        await expect(useCase.execute('admin-1')).rejects.toBeInstanceOf(DomainAuthorizationError);
     });
 });
