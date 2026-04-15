@@ -15,6 +15,7 @@ describe('브리더 회원가입 유스케이스', () => {
     };
     const authRegistrationNotificationPort = {
         notifyBreederRegistered: jest.fn(),
+        notifyBreederDocumentsSubmitted: jest.fn(),
     };
     const authTempUploadPort = {
         get: jest.fn().mockReturnValue(undefined),
@@ -82,7 +83,7 @@ describe('브리더 회원가입 유스케이스', () => {
         authTokenPort.generateTokens.mockReturnValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
         authTokenPort.hashRefreshToken.mockResolvedValue('hashed-refresh-token');
         authRegistrationNotificationPort.notifyBreederRegistered.mockResolvedValue(undefined);
-        authRegistrationNotificationPort.notifyBreederDocumentsSubmitted = jest.fn().mockResolvedValue(undefined);
+        authRegistrationNotificationPort.notifyBreederDocumentsSubmitted.mockResolvedValue(undefined);
 
         const result = await useCase.execute(baseDto as any);
 

@@ -41,6 +41,7 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         breederManagementApplicationWorkflowPort.notifyConsultationCompleted.mockResolvedValue(undefined);
 
         const result = await useCase.execute('breeder-1', 'app-1', {
+            applicationId: 'app-1',
             status: ApplicationStatus.CONSULTATION_COMPLETED,
         });
 
@@ -58,7 +59,10 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         breederManagementApplicationWorkflowPort.updateStatus.mockResolvedValue(undefined);
         breederManagementApplicationWorkflowPort.incrementCompletedAdoptions.mockResolvedValue(undefined);
 
-        await useCase.execute('breeder-1', 'app-1', { status: ApplicationStatus.ADOPTION_APPROVED });
+        await useCase.execute('breeder-1', 'app-1', {
+            applicationId: 'app-1',
+            status: ApplicationStatus.ADOPTION_APPROVED,
+        });
 
         expect(breederManagementApplicationWorkflowPort.incrementCompletedAdoptions).toHaveBeenCalledWith('breeder-1');
         expect(breederManagementApplicationWorkflowPort.notifyConsultationCompleted).not.toHaveBeenCalled();
@@ -68,7 +72,10 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         breederManagementApplicationWorkflowPort.findApplicationByIdAndBreeder.mockResolvedValue(mockApplication);
         breederManagementApplicationWorkflowPort.updateStatus.mockResolvedValue(undefined);
 
-        await useCase.execute('breeder-1', 'app-1', { status: ApplicationStatus.ADOPTION_REJECTED });
+        await useCase.execute('breeder-1', 'app-1', {
+            applicationId: 'app-1',
+            status: ApplicationStatus.ADOPTION_REJECTED,
+        });
 
         expect(breederManagementApplicationWorkflowPort.incrementCompletedAdoptions).not.toHaveBeenCalled();
         expect(breederManagementApplicationWorkflowPort.notifyConsultationCompleted).not.toHaveBeenCalled();
@@ -78,10 +85,16 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         breederManagementApplicationWorkflowPort.findApplicationByIdAndBreeder.mockResolvedValue(null);
 
         await expect(
-            useCase.execute('breeder-1', 'nonexistent-app', { status: ApplicationStatus.CONSULTATION_COMPLETED }),
+            useCase.execute('breeder-1', 'nonexistent-app', {
+                applicationId: 'nonexistent-app',
+                status: ApplicationStatus.CONSULTATION_COMPLETED,
+            }),
         ).rejects.toThrow(BadRequestException);
         await expect(
-            useCase.execute('breeder-1', 'nonexistent-app', { status: ApplicationStatus.CONSULTATION_COMPLETED }),
+            useCase.execute('breeder-1', 'nonexistent-app', {
+                applicationId: 'nonexistent-app',
+                status: ApplicationStatus.CONSULTATION_COMPLETED,
+            }),
         ).rejects.toThrow('해당 입양 신청을 찾을 수 없습니다.');
     });
 });
