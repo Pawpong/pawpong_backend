@@ -1,11 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+
+import { DomainValidationError } from '../../../../common/error/domain.error';
 
 @Injectable()
 export class AuthSocialIdentityService {
     parseRequiredTempId(tempId: string): { provider: string; providerId: string } {
         const tempIdParts = tempId.split('_');
         if (tempIdParts.length < 4 || tempIdParts[0] !== 'temp') {
-            throw new BadRequestException('유효하지 않은 임시 ID 형식입니다.');
+            throw new DomainValidationError('유효하지 않은 임시 ID 형식입니다.');
         }
 
         return {

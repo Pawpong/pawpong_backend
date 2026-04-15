@@ -1,5 +1,6 @@
 import { UnauthorizedException } from '@nestjs/common';
 
+import { DomainAuthenticationError } from '../../../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { AuthAdminAuthenticationService } from '../../../domain/services/auth-admin-authentication.service';
 import { AuthAdminLoginResultMapperService } from '../../../domain/services/auth-admin-login-result-mapper.service';
@@ -64,7 +65,7 @@ describe('관리자 로그인 유스케이스', () => {
         expect(reader.updateLastLogin).toHaveBeenCalledWith('admin-1');
     });
 
-    it('존재하지 않는 관리자는 UnauthorizedException을 던진다', async () => {
+    it('존재하지 않는 관리자는 도메인 인증 예외를 던진다', async () => {
         const useCase = new LoginAdminUseCase(
             {
                 findActiveByEmail: jest.fn().mockResolvedValue(null),
@@ -84,11 +85,11 @@ describe('관리자 로그인 유스케이스', () => {
         );
 
         await expect(useCase.execute('missing@test.com', 'password')).rejects.toBeInstanceOf(
-            UnauthorizedException,
+            DomainAuthenticationError,
         );
     });
 
-    it('비밀번호가 틀리면 UnauthorizedException을 던진다', async () => {
+    it('비밀번호가 틀리면 도메인 인증 예외를 던진다', async () => {
         const useCase = new LoginAdminUseCase(
             {
                 findActiveByEmail: jest.fn().mockResolvedValue(adminSnapshot),
@@ -108,7 +109,7 @@ describe('관리자 로그인 유스케이스', () => {
         );
 
         await expect(useCase.execute('admin@test.com', 'wrong')).rejects.toBeInstanceOf(
-            UnauthorizedException,
+            DomainAuthenticationError,
         );
     });
 });

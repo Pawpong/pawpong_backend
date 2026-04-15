@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { AddPhoneWhitelistUseCase } from '../../../application/use-cases/add-phone-whitelist.use-case';
 import { UserAdminCommandPolicyService } from '../../../domain/services/user-admin-command-policy.service';
 import { UserAdminPhoneWhitelistResultMapperService } from '../../../domain/services/user-admin-phone-whitelist-result-mapper.service';
@@ -85,6 +86,6 @@ describe('전화번호 화이트리스트 추가 유스케이스', () => {
                 phoneNumber: '01012345678',
                 description: '테스트 계정',
             }),
-        ).rejects.toBeInstanceOf(BadRequestException);
+        ).rejects.toBeInstanceOf(DomainValidationError);
     });
 });

@@ -6,7 +6,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 
-import { HttpExceptionFilter, AllExceptionsFilter } from './common/filter/http-exception.filter';
+import { HttpExceptionFilter, DomainExceptionFilter, AllExceptionsFilter } from './common/filter/http-exception.filter';
 import { HttpStatusInterceptor } from './common/interceptor/http-status.interceptor';
 import { LoggingInterceptor } from './common/interceptor/logging.interceptor';
 
@@ -62,6 +62,7 @@ async function bootstrap(): Promise<void> {
 
     // 전역 예외 필터 적용 (ApiResponseDto 형식으로 에러 응답)
     app.useGlobalFilters(new AllExceptionsFilter());
+    app.useGlobalFilters(new DomainExceptionFilter());
     app.useGlobalFilters(new HttpExceptionFilter());
 
     // HTTP 상태 코드 통일 인터셉터 적용

@@ -1,5 +1,6 @@
 import { BadRequestException, ConflictException } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { RegisterAdopterUseCase } from '../../../application/use-cases/register-adopter.use-case';
 import { AuthSocialIdentityService } from '../../../domain/services/auth-social-identity.service';
 import { AuthPhoneNumberNormalizerService } from '../../../domain/services/auth-phone-number-normalizer.service';
@@ -74,10 +75,10 @@ describe('입양자 회원가입 유스케이스', () => {
         expect(result.accessToken).toBe('access-token');
     });
 
-    it('유효하지 않은 tempId 형식이면 BadRequestException을 던진다', async () => {
+    it('유효하지 않은 tempId 형식이면 도메인 검증 예외를 던진다', async () => {
         await expect(
             useCase.execute({ ...baseDto, tempId: 'invalid-format' } as any),
-        ).rejects.toThrow(BadRequestException);
+        ).rejects.toThrow(DomainValidationError);
         await expect(
             useCase.execute({ ...baseDto, tempId: 'invalid-format' } as any),
         ).rejects.toThrow('유효하지 않은 임시 ID 형식입니다.');

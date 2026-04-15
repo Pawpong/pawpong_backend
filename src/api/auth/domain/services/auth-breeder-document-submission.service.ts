@@ -1,4 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+
+import { DomainValidationError } from '../../../../common/error/domain.error';
 
 type AuthBreederSubmittedDocumentUrls = {
     idCardUrl: string;
@@ -13,11 +15,11 @@ type AuthBreederSubmittedDocumentUrls = {
 export class AuthBreederDocumentSubmissionService {
     assertRequiredDocumentUrls(documents: AuthBreederSubmittedDocumentUrls): void {
         if (!documents.idCardUrl) {
-            throw new BadRequestException('신분증 사본 파일이 필요합니다.');
+            throw new DomainValidationError('신분증 사본 파일이 필요합니다.');
         }
 
         if (!documents.animalProductionLicenseUrl) {
-            throw new BadRequestException('동물생산업 등록증 파일이 필요합니다.');
+            throw new DomainValidationError('동물생산업 등록증 파일이 필요합니다.');
         }
     }
 

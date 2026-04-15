@@ -1,6 +1,7 @@
 import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AuthAdminAuthenticationService } from '../../domain/services/auth-admin-authentication.service';
 import { AuthAdminRefreshTokenResultMapperService } from '../../domain/services/auth-admin-refresh-token-result-mapper.service';
 import { AUTH_ADMIN_READER_PORT } from '../ports/auth-admin-reader.port';
@@ -38,8 +39,6 @@ export class RefreshAdminTokenUseCase {
                 this.authAdminAuthenticationService.throwInvalidToken();
             }
 
-            this.authAdminAuthenticationService.assertAdminRole(payload);
-
             const accessToken = this.authAdminToken.createAccessToken({
                 sub: payload.sub,
                 email: payload.email,
@@ -55,6 +54,7 @@ export class RefreshAdminTokenUseCase {
             return this.authAdminRefreshTokenResultMapperService.toResult(accessToken);
         } catch (error) {
             this.logger.logError('refreshAdminToken', '토큰 갱신 실패', error);
+            rethrowIfHttpException(error);
             throw new UnauthorizedException('유효하지 않은 토큰입니다.');
         }
     }

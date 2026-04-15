@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../common/error/domain.error';
 import { AuthPhoneVerificationRecord } from '../../application/ports/auth-phone-verification-store.port';
 
 @Injectable()
@@ -11,7 +12,7 @@ export class AuthPhoneVerificationPolicyService {
         const cleaned = phone.replace(/[^0-9]/g, '');
 
         if (!cleaned.match(/^01[0-9]{8,9}$/)) {
-            throw new BadRequestException('올바른 전화번호 형식이 아닙니다.');
+            throw new DomainValidationError('올바른 전화번호 형식이 아닙니다.');
         }
 
         return cleaned;

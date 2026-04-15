@@ -1,5 +1,6 @@
 import { ForbiddenException } from '@nestjs/common';
 
+import { DomainAuthorizationError } from '../../../../../../common/error/domain.error';
 import { GetDeletedUserStatsUseCase } from '../../../application/use-cases/get-deleted-user-stats.use-case';
 import { UserAdminActivityLogFactoryService } from '../../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../../domain/services/user-admin-command-policy.service';
@@ -102,6 +103,6 @@ describe('탈퇴 사용자 통계 조회 유스케이스', () => {
             new UserAdminDeletedUserStatsResultMapperService(),
         );
 
-        await expect(useCase.execute('admin-1')).rejects.toBeInstanceOf(ForbiddenException);
+        await expect(useCase.execute('admin-1')).rejects.toBeInstanceOf(DomainAuthorizationError);
     });
 });
