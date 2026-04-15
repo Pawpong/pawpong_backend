@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { Types } from 'mongoose';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
+import { isMongoObjectId } from '../../../../../common/utils/mongo-object-id.util';
 import { ANNOUNCEMENT_WRITER_PORT, type AnnouncementWriterPort } from '../ports/announcement-writer.port';
 
 @Injectable()
@@ -18,7 +18,7 @@ export class DeleteAnnouncementUseCase {
             announcementId,
         });
 
-        if (!Types.ObjectId.isValid(announcementId)) {
+        if (!isMongoObjectId(announcementId)) {
             throw new BadRequestException('올바르지 않은 공지사항 ID입니다.');
         }
 

@@ -1,6 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
-
 import { ProxyHlsFileUseCase } from '../../../../video/application/use-cases/proxy-hls-file.use-case';
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { FeedVideoStreamPort } from '../../../../video/application/ports/feed-video-stream.port';
 import { FeedVideoStreamingService } from '../../../../video/domain/services/feed-video-streaming.service';
 
@@ -47,7 +46,7 @@ describe('스트리밍 파일 프록시 유스케이스', () => {
     it('허용되지 않은 확장자는 예외를 던진다', async () => {
         const useCase = new ProxyHlsFileUseCase(createStreamPort(), new FeedVideoStreamingService());
 
-        await expect(useCase.execute('video-1', 'malicious.mp4')).rejects.toBeInstanceOf(BadRequestException);
+        await expect(useCase.execute('video-1', 'malicious.mp4')).rejects.toBeInstanceOf(DomainValidationError);
     });
 
     it('저장소 조회 실패는 사용자용 잘못된 요청 예외로 변환한다', async () => {

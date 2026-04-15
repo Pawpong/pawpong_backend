@@ -1,6 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
-
 import { ToggleVideoVisibilityUseCase } from '../../../application/use-cases/toggle-video-visibility.use-case';
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { FeedVideoCommandPolicyService } from '../../../domain/services/feed-video-command-policy.service';
 import { FeedCacheKeyService } from '../../../../domain/services/feed-cache-key.service';
 
@@ -60,18 +59,18 @@ describe('비디오 공개/비공개 전환 유스케이스', () => {
         expect(feedVideoCommand.updateVisibility).toHaveBeenCalledWith('video-1', true);
     });
 
-    it('권한이 없는 사용자는 BadRequestException을 던진다', async () => {
+    it('권한이 없는 사용자는 도메인 검증 예외를 던진다', async () => {
         feedVideoCommand.findById.mockResolvedValue(mockPublicVideo);
 
-        await expect(useCase.execute('video-1', 'other-user')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('video-1', 'other-user')).rejects.toThrow(DomainValidationError);
         await expect(useCase.execute('video-1', 'other-user')).rejects.toThrow('권한이 없습니다.');
         expect(feedVideoCommand.updateVisibility).not.toHaveBeenCalled();
     });
 
-    it('비디오를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('비디오를 찾을 수 없으면 도메인 검증 예외를 던진다', async () => {
         feedVideoCommand.findById.mockResolvedValue(null);
 
-        await expect(useCase.execute('nonexistent-video', 'breeder-1')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('nonexistent-video', 'breeder-1')).rejects.toThrow(DomainValidationError);
         await expect(useCase.execute('nonexistent-video', 'breeder-1')).rejects.toThrow('동영상을 찾을 수 없습니다.');
     });
 });

@@ -1,4 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 
 import { DeleteFolderUseCase } from '../../../application/use-cases/delete-folder.use-case';
 
@@ -8,6 +8,11 @@ describe('폴더 삭제 유스케이스', () => {
     };
     const uploadAdminStoragePolicyService = {
         normalizeFolderPrefix: jest.fn().mockImplementation((folder: string) => `${folder}/`),
+        ensureFileNames: jest.fn().mockImplementation((fileNames: string[]) => {
+            if (fileNames.length === 0) {
+                throw new DomainValidationError('삭제할 파일이 없습니다.');
+            }
+        }),
     };
     const deleteMultipleFilesCommand = {
         execute: jest.fn(),
@@ -40,6 +45,7 @@ describe('폴더 삭제 유스케이스', () => {
     it('삭제할 파일이 없으면 예외를 던진다', async () => {
         uploadAdminStorage.list.mockResolvedValue({ files: [] });
 
-        await expect(useCase.execute('empty')).rejects.toThrow(new BadRequestException('삭제할 파일이 없습니다.'));
+        await expect(useCase.execute('empty')).rejects.toThrow(DomainValidationError);
+        await expect(useCase.execute('empty')).rejects.toThrow('삭제할 파일이 없습니다.');
     });
 });

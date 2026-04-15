@@ -1,6 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
-
 import { CreateCommentUseCase } from '../../../application/use-cases/create-comment.use-case';
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { FeedCacheKeyService } from '../../../../domain/services/feed-cache-key.service';
 import { FeedCommentManagerPort } from '../../../application/ports/feed-comment-manager.port';
 import { FeedCommentCommandResultMapperService } from '../../../domain/services/feed-comment-command-result-mapper.service';
@@ -54,7 +53,7 @@ describe('댓글 생성 유스케이스', () => {
         );
 
         await expect(useCase.execute('video-1', 'user-1', 'Adopter', 'reply', 'parent-1')).rejects.toBeInstanceOf(
-            BadRequestException,
+            DomainValidationError,
         );
     });
 });

@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 
 import { Announcement, AnnouncementDocument } from '../../../schema/announcement.schema';
+import { isMongoObjectId } from '../../../common/utils/mongo-object-id.util';
 import type {
     AnnouncementCreateCommand,
     AnnouncementUpdateCommand,
@@ -37,7 +38,7 @@ export class AnnouncementRepository {
     }
 
     findActiveById(announcementId: string): Promise<AnnouncementDocument | null> {
-        if (!Types.ObjectId.isValid(announcementId)) {
+        if (!isMongoObjectId(announcementId)) {
             return Promise.resolve(null);
         }
 
@@ -56,7 +57,7 @@ export class AnnouncementRepository {
     }
 
     async update(announcementId: string, updateData: AnnouncementUpdateCommand): Promise<AnnouncementDocument | null> {
-        if (!Types.ObjectId.isValid(announcementId)) {
+        if (!isMongoObjectId(announcementId)) {
             return null;
         }
 
@@ -75,7 +76,7 @@ export class AnnouncementRepository {
     }
 
     async deleteById(announcementId: string): Promise<boolean> {
-        if (!Types.ObjectId.isValid(announcementId)) {
+        if (!isMongoObjectId(announcementId)) {
             return false;
         }
 

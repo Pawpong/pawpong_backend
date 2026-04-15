@@ -1,6 +1,5 @@
-import { BadRequestException } from '@nestjs/common';
-
 import { ToggleLikeUseCase } from '../../../../like/application/use-cases/toggle-like.use-case';
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { FeedCacheKeyService } from '../../../../domain/services/feed-cache-key.service';
 import { FeedVideoSummaryMapperService } from '../../../../domain/services/feed-video-summary-mapper.service';
 import { FeedLikeManagerPort } from '../../../../like/application/ports/feed-like-manager.port';
@@ -56,6 +55,6 @@ describe('좋아요 전환 유스케이스', () => {
             new FeedCacheKeyService(),
         );
 
-        await expect(useCase.execute('video-1', 'user-1', 'Adopter')).rejects.toBeInstanceOf(BadRequestException);
+        await expect(useCase.execute('video-1', 'user-1', 'Adopter')).rejects.toBeInstanceOf(DomainValidationError);
     });
 });

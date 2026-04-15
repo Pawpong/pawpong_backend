@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { UploadAdminStoragePolicyService } from '../../domain/services/upload-admin-storage-policy.service';
@@ -24,13 +24,10 @@ export class DeleteFolderUseCase {
         this.logger.logStart('deleteFolder', '폴더 전체 삭제 시작', { folder });
 
         const prefix = this.uploadAdminStoragePolicyService.normalizeFolderPrefix(folder);
-        const { files } = await this.uploadAdminStorage.list(prefix, 1000);
+        const fileNames = (await this.uploadAdminStorage.list(prefix, 1000)).files.map((file) => file.key);
+        this.uploadAdminStoragePolicyService.ensureFileNames(fileNames);
 
-        if (files.length === 0) {
-            throw new BadRequestException('삭제할 파일이 없습니다.');
-        }
-
-        const result = await this.deleteMultipleFilesUseCase.execute(files.map((file) => file.key));
+        const result = await this.deleteMultipleFilesUseCase.execute(fileNames);
         this.logger.logSuccess('deleteFolder', '폴더 삭제 완료', result);
 
         return result;
