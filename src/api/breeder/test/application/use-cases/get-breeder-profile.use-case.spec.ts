@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { GetBreederProfileUseCase } from '../../../application/use-cases/get-breeder-profile.use-case';
 import { BreederBirthDateFormatterService } from '../../../domain/services/breeder-birth-date-formatter.service';
 import { BreederPublicProfileAssemblerService } from '../../../domain/services/breeder-public-profile-assembler.service';
@@ -85,20 +84,20 @@ describe('브리더 프로필 공개 조회 유스케이스', () => {
         expect(result.isFavorited).toBe(true);
     });
 
-    it('탈퇴한 브리더는 BadRequestException을 던진다', async () => {
+    it('탈퇴한 브리더는 DomainValidationError를 던진다', async () => {
         breederPublicReaderPort.findPublicBreederById.mockResolvedValue({
             ...mockBreeder,
             accountStatus: 'deleted',
         });
 
-        await expect(useCase.execute('breeder-1')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1')).rejects.toThrow(DomainValidationError);
         await expect(useCase.execute('breeder-1')).rejects.toThrow('탈퇴한 브리더의 프로필은 조회할 수 없습니다.');
     });
 
-    it('브리더를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('브리더를 찾을 수 없으면 DomainNotFoundError를 던진다', async () => {
         breederPublicReaderPort.findPublicBreederById.mockResolvedValue(null);
 
-        await expect(useCase.execute('unknown-id')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('unknown-id')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('unknown-id')).rejects.toThrow('브리더를 찾을 수 없습니다.');
     });
 });

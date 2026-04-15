@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { GetBreederPetDetailUseCase } from '../../../application/use-cases/get-breeder-pet-detail.use-case';
 import { BreederPublicPetDetailAssemblerService } from '../../../domain/services/breeder-public-pet-detail-assembler.service';
 
@@ -45,18 +44,18 @@ describe('브리더 분양 개체 상세 조회 유스케이스', () => {
         expect(result.status).toBe('available');
     });
 
-    it('해당 반려동물을 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('해당 반려동물을 찾을 수 없으면 DomainNotFoundError를 던진다', async () => {
         breederPublicReaderPort.findPublicBreederById.mockResolvedValue(mockBreeder);
         breederPublicReaderPort.findActiveAvailablePetsByBreederId.mockResolvedValue([mockPet]);
 
-        await expect(useCase.execute('breeder-1', 'nonexistent-pet')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('breeder-1', 'nonexistent-pet')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('breeder-1', 'nonexistent-pet')).rejects.toThrow('반려동물을 찾을 수 없습니다.');
     });
 
-    it('브리더를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('브리더를 찾을 수 없으면 DomainNotFoundError를 던진다', async () => {
         breederPublicReaderPort.findPublicBreederById.mockResolvedValue(null);
 
-        await expect(useCase.execute('unknown-id', 'pet-1')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('unknown-id', 'pet-1')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('unknown-id', 'pet-1')).rejects.toThrow('브리더를 찾을 수 없습니다.');
     });
 });

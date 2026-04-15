@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { GetBreederPetsUseCase } from '../../../application/use-cases/get-breeder-pets.use-case';
 import { BreederPublicPetPageAssemblerService } from '../../../domain/services/breeder-public-pet-page-assembler.service';
 import { BreederBirthDateFormatterService } from '../../../domain/services/breeder-birth-date-formatter.service';
@@ -64,10 +63,10 @@ describe('브리더 분양 개체 목록 조회 유스케이스', () => {
         expect(result.items).toHaveLength(0);
     });
 
-    it('브리더를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('브리더를 찾을 수 없으면 DomainNotFoundError를 던진다', async () => {
         breederPublicReaderPort.findPublicBreederById.mockResolvedValue(null);
 
-        await expect(useCase.execute('unknown-id')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('unknown-id')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('unknown-id')).rejects.toThrow('브리더를 찾을 수 없습니다.');
     });
 });

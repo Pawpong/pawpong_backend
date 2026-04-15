@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import { BREEDER_PUBLIC_READER_PORT } from '../ports/breeder-public-reader.port';
 import type { BreederPublicReaderPort } from '../ports/breeder-public-reader.port';
 import { BreederPublicReviewPageAssemblerService } from '../../domain/services/breeder-public-review-page-assembler.service';
@@ -15,7 +16,7 @@ export class GetBreederReviewsUseCase {
     async execute(breederId: string, page: number = 1, limit: number = 10) {
         const breeder = await this.breederPublicReaderPort.findPublicBreederById(breederId);
         if (!breeder) {
-            throw new BadRequestException('브리더를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('브리더를 찾을 수 없습니다.');
         }
 
         const { reviews, total } = await this.breederPublicReaderPort.findVisibleBreederReviewsByBreederId(
