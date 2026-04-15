@@ -1,6 +1,7 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { NotificationType, VerificationStatus } from '../../../../../common/enum/user.enum';
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import {
     BreederAdminReminderEmailTemplate,
 } from '../../application/ports/breeder-admin-notifier.port';
@@ -41,7 +42,7 @@ export class BreederAdminReminderPolicyService {
                     emailTemplate: 'profile_completion_reminder',
                 };
             default:
-                throw new BadRequestException('올바른 리마인드 타입을 선택해주세요.');
+                throw new DomainValidationError('올바른 리마인드 타입을 선택해주세요.');
         }
     }
 }

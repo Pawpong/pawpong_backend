@@ -1,5 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
-
+import { DomainAuthorizationError } from '../../../../../../../common/error/domain.error';
 import { GetBreederDetailUseCase } from '../../../application/use-cases/get-breeder-detail.use-case';
 import { BreederVerificationAdminDetailMapperService } from '../../../domain/services/breeder-verification-admin-detail-mapper.service';
 import { BreederVerificationAdminPolicyService } from '../../../domain/services/breeder-verification-admin-policy.service';
@@ -69,7 +68,7 @@ describe('브리더 상세 조회 유스케이스', () => {
         reader.findAdminById.mockResolvedValue(null);
 
         await expect(useCase.execute('admin-1', 'breeder-1')).rejects.toThrow(
-            new ForbiddenException('브리더 관리 권한이 없습니다.'),
+            new DomainAuthorizationError('브리더 관리 권한이 없습니다.'),
         );
     });
 });

@@ -1,5 +1,4 @@
-import { ForbiddenException } from '@nestjs/common';
-
+import { DomainAuthorizationError } from '../../../../../../common/error/domain.error';
 import { RemindType } from '../../../constants/breeder-remind.enum';
 import { SendBreederRemindNotificationsUseCase } from '../../../application/use-cases/send-breeder-remind-notifications.use-case';
 import { BreederAdminActivityLogFactoryService } from '../../../domain/services/breeder-admin-activity-log-factory.service';
@@ -93,6 +92,6 @@ describe('브리더 리마인드 알림 발송 유스케이스', () => {
                 breederIds: ['breeder-1'],
                 remindType: RemindType.DOCUMENT_REMINDER,
             }),
-        ).rejects.toThrow(new ForbiddenException('브리더 관리 권한이 없습니다.'));
+        ).rejects.toThrow(new DomainAuthorizationError('브리더 관리 권한이 없습니다.'));
     });
 });

@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../../../common/error/domain.error';
 import { HandleBreederReportUseCase } from '../../../application/use-cases/handle-breeder-report.use-case';
 import { BreederReportAdminActionResultMapperService } from '../../../domain/services/breeder-report-admin-action-result-mapper.service';
 import { BreederReportAdminActivityLogFactoryService } from '../../../domain/services/breeder-report-admin-activity-log-factory.service';
@@ -79,6 +78,6 @@ describe('브리더 신고 처리 유스케이스', () => {
             useCase.execute('admin-1', 'report-1', {
                 action: 'resolve',
             }),
-        ).rejects.toThrow(new BadRequestException('이미 처리된 신고입니다.'));
+        ).rejects.toThrow(new DomainValidationError('이미 처리된 신고입니다.'));
     });
 });

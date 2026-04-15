@@ -1,6 +1,7 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { AdminAction } from '../../../../../../common/enum/user.enum';
+import { DomainAuthorizationError, DomainValidationError } from '../../../../../../common/error/domain.error';
 import {
     BreederReportAdminAdminSnapshot,
     BreederReportAdminReportSnapshot,
@@ -10,7 +11,7 @@ import {
 export class BreederReportAdminPolicyService {
     assertCanManageBreeders(admin: BreederReportAdminAdminSnapshot | null): BreederReportAdminAdminSnapshot {
         if (!admin || !admin.permissions?.canManageBreeders) {
-            throw new ForbiddenException('Access denied');
+            throw new DomainAuthorizationError('Access denied');
         }
 
         return admin;
@@ -18,7 +19,7 @@ export class BreederReportAdminPolicyService {
 
     assertReportExists(report: BreederReportAdminReportSnapshot | null): BreederReportAdminReportSnapshot {
         if (!report) {
-            throw new BadRequestException('신고를 찾을 수 없습니다.');
+            throw new DomainValidationError('신고를 찾을 수 없습니다.');
         }
 
         return report;
@@ -26,7 +27,7 @@ export class BreederReportAdminPolicyService {
 
     assertPendingReport(report: BreederReportAdminReportSnapshot): BreederReportAdminReportSnapshot {
         if (report.status !== 'pending') {
-            throw new BadRequestException('이미 처리된 신고입니다.');
+            throw new DomainValidationError('이미 처리된 신고입니다.');
         }
 
         return report;

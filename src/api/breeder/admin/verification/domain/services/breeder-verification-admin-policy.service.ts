@@ -1,6 +1,7 @@
-import { BadRequestException, ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 
 import { AdminAction, VerificationStatus } from '../../../../../../common/enum/user.enum';
+import { DomainAuthorizationError, DomainValidationError } from '../../../../../../common/error/domain.error';
 import {
     BreederVerificationAdminAdminSnapshot,
     BreederVerificationAdminBreederSnapshot,
@@ -13,7 +14,7 @@ export class BreederVerificationAdminPolicyService {
         message: string,
     ): BreederVerificationAdminAdminSnapshot {
         if (!admin || !admin.permissions?.canManageBreeders) {
-            throw new ForbiddenException(message);
+            throw new DomainAuthorizationError(message);
         }
 
         return admin;
@@ -23,7 +24,7 @@ export class BreederVerificationAdminPolicyService {
         breeder: BreederVerificationAdminBreederSnapshot | null,
     ): BreederVerificationAdminBreederSnapshot {
         if (!breeder) {
-            throw new BadRequestException('브리더를 찾을 수 없습니다.');
+            throw new DomainValidationError('브리더를 찾을 수 없습니다.');
         }
 
         return breeder;
@@ -33,7 +34,7 @@ export class BreederVerificationAdminPolicyService {
         breeder: BreederVerificationAdminBreederSnapshot,
     ): BreederVerificationAdminBreederSnapshot {
         if (!breeder.verification) {
-            throw new BadRequestException('No verification request found');
+            throw new DomainValidationError('No verification request found');
         }
 
         return breeder;

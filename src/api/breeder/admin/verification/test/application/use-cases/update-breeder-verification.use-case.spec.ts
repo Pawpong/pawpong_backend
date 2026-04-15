@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../../../common/error/domain.error';
 import { UpdateBreederVerificationUseCase } from '../../../application/use-cases/update-breeder-verification.use-case';
 import { BreederVerificationAdminActivityLogFactoryService } from '../../../domain/services/breeder-verification-admin-activity-log-factory.service';
 import { BreederVerificationAdminPolicyService } from '../../../domain/services/breeder-verification-admin-policy.service';
@@ -91,6 +90,6 @@ describe('브리더 인증 수정 유스케이스', () => {
             useCase.execute('admin-1', 'breeder-1', {
                 verificationStatus: 'approved' as any,
             }),
-        ).rejects.toThrow(new BadRequestException('No verification request found'));
+        ).rejects.toThrow(new DomainValidationError('No verification request found'));
     });
 });

@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { AdopterAdminActivityLogFactoryService } from '../../../domain/services/adopter-admin-activity-log-factory.service';
 import { AdopterAdminPolicyService } from '../../../domain/services/adopter-admin-policy.service';
 import { AdopterAdminReviewDeleteResultMapperService } from '../../../domain/services/adopter-admin-review-delete-result-mapper.service';
@@ -70,7 +69,7 @@ describe('입양자 관리자 후기 삭제 유스케이스', () => {
         );
 
         await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).rejects.toBeInstanceOf(
-            BadRequestException,
+            DomainValidationError,
         );
     });
 });
