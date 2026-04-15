@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError, DomainValidationError } from '../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { InquiryCommandPolicyService } from '../../domain/services/inquiry-command-policy.service';
 import { INQUIRY_COMMAND_PORT, type InquiryCommandPort } from '../ports/inquiry-command.port';
@@ -18,12 +19,12 @@ export class CreateInquiryUseCase {
         this.logger.logStart('createInquiry', '문의 작성', { userId, type: dto.type });
 
         if (!userId) {
-            throw new BadRequestException('사용자 정보가 올바르지 않습니다.');
+            throw new DomainValidationError('사용자 정보가 올바르지 않습니다.');
         }
 
         const adopterNickname = await this.inquiryCommand.findAdopterNickname(userId);
         if (!adopterNickname) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('입양자 정보를 찾을 수 없습니다.');
         }
 
         if (dto.type === 'direct') {
@@ -31,7 +32,7 @@ export class CreateInquiryUseCase {
 
             const breederExists = await this.inquiryCommand.existsBreeder(dto.targetBreederId as string);
             if (!breederExists) {
-                throw new BadRequestException('대상 브리더를 찾을 수 없습니다.');
+                throw new DomainNotFoundError('대상 브리더를 찾을 수 없습니다.');
             }
         }
 
