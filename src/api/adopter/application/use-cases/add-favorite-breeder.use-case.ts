@@ -1,5 +1,6 @@
-import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
@@ -27,22 +28,17 @@ export class AddFavoriteBreederUseCase {
     ): Promise<AdopterFavoriteCommandResult> {
         const adopter = await this.adopterProfilePort.findById(userId, userRole);
         if (!adopter) {
-            throw new BadRequestException(userRole === 'breeder' ? '브리더 정보를 찾을 수 없습니다.' : '입양자 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError(
+                userRole === 'breeder' ? '브리더 정보를 찾을 수 없습니다.' : '입양자 정보를 찾을 수 없습니다.',
+            );
         }
 
         const targetBreeder = await this.adopterBreederReaderPort.findById(addFavoriteDto.breederId);
         if (!targetBreeder) {
-            throw new BadRequestException('해당 브리더를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('해당 브리더를 찾을 수 없습니다.');
         }
 
-        try {
-            this.adopterFavoritePolicyService.ensureCanAdd(adopter.favoriteBreederList || [], addFavoriteDto.breederId);
-        } catch (error) {
-            if (error instanceof ConflictException) {
-                throw error;
-            }
-            throw error;
-        }
+        this.adopterFavoritePolicyService.ensureCanAdd(adopter.favoriteBreederList || [], addFavoriteDto.breederId);
 
         const favorite = this.adopterFavoriteRecordMapperService.toRecord(addFavoriteDto.breederId, targetBreeder);
         await this.adopterProfilePort.addFavoriteBreeder(userId, favorite, userRole);

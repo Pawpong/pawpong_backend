@@ -118,7 +118,7 @@ describe('입양자 응답 계약 종단간 테스트', () => {
                 desiredAdoptionTiming: '즉시',
                 additionalNotes: '계약 테스트',
             })
-            .expect(201);
+            .expect(200);
 
         expect(response.body).toEqual(
             expect.objectContaining({

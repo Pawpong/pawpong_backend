@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError, DomainValidationError } from '../../../../common/error/domain.error';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
@@ -23,13 +24,13 @@ export class CreateAdopterReportUseCase {
 
     async execute(userId: string, dto: AdopterReportCreateCommand) {
         if (dto.reason === 'other' && (!dto.description || dto.description.trim() === '')) {
-            throw new BadRequestException('기타 사유를 선택한 경우 상세 내용을 입력해주세요.');
+            throw new DomainValidationError('기타 사유를 선택한 경우 상세 내용을 입력해주세요.');
         }
 
         const reporterName = await this.resolveReporterName(userId);
         const breeder = await this.adopterBreederReaderPort.findById(dto.breederId);
         if (!breeder) {
-            throw new BadRequestException('신고할 브리더를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('신고할 브리더를 찾을 수 없습니다.');
         }
 
         const { reportId, report } = this.adopterReportPayloadBuilderService.build(userId, reporterName, dto);
@@ -52,6 +53,6 @@ export class CreateAdopterReportUseCase {
             return breeder.name;
         }
 
-        throw new BadRequestException('사용자 정보를 찾을 수 없습니다.');
+        throw new DomainNotFoundError('사용자 정보를 찾을 수 없습니다.');
     }
 }

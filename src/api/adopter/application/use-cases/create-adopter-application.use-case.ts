@@ -1,5 +1,6 @@
-import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainConflictError, DomainNotFoundError, DomainValidationError } from '../../../../common/error/domain.error';
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
@@ -46,12 +47,12 @@ export class CreateAdopterApplicationUseCase {
         await this.ensureApplicantExists(userId, userRole);
 
         if (!dto.privacyConsent) {
-            throw new BadRequestException('개인정보 수집 및 이용에 동의해야 신청이 가능합니다.');
+            throw new DomainValidationError('개인정보 수집 및 이용에 동의해야 신청이 가능합니다.');
         }
 
         const breeder = await this.adopterBreederReaderPort.findById(dto.breederId);
         if (!breeder) {
-            throw new BadRequestException('해당 브리더를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('해당 브리더를 찾을 수 없습니다.');
         }
 
         const pet = await this.readRequestedPet(dto.petId, dto.breederId);
@@ -61,7 +62,7 @@ export class CreateAdopterApplicationUseCase {
             dto.breederId,
         );
         if (existingPendingApplication) {
-            throw new ConflictException('해당 브리더에게 이미 대기 중인 상담 신청이 있습니다.');
+            throw new DomainConflictError('해당 브리더에게 이미 대기 중인 상담 신청이 있습니다.');
         }
 
         const standardResponses = this.adopterApplicationStandardAnswerBuilderService.build(dto);
@@ -99,14 +100,14 @@ export class CreateAdopterApplicationUseCase {
         if (userRole === 'breeder') {
             const breeder = await this.adopterBreederReaderPort.findById(userId);
             if (!breeder) {
-                throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+                throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
             }
             return;
         }
 
         const adopter = await this.adopterProfilePort.findById(userId);
         if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('입양자 정보를 찾을 수 없습니다.');
         }
     }
 
@@ -117,11 +118,11 @@ export class CreateAdopterApplicationUseCase {
 
         const pet = await this.adopterPetReaderPort.findByIdAndBreeder(petId, breederId);
         if (!pet) {
-            throw new BadRequestException('해당 반려동물을 찾을 수 없습니다.');
+            throw new DomainNotFoundError('해당 반려동물을 찾을 수 없습니다.');
         }
 
         if (pet.status !== 'available') {
-            throw new BadRequestException('현재 분양 신청이 불가능한 반려동물입니다.');
+            throw new DomainValidationError('현재 분양 신청이 불가능한 반려동물입니다.');
         }
 
         return pet;

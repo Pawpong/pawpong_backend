@@ -212,8 +212,8 @@ describe('입양자 종단간 테스트', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send(reviewData);
 
-            // applicationId가 없거나 상태가 맞지 않으면 400/500, 성공하면 200
-            expect([200, 400, 500]).toContain(response.status);
+            // applicationId가 없거나 상태가 맞지 않으면 404/400/500, 성공하면 200
+            expect([200, 400, 404, 500]).toContain(response.status);
 
             if (response.status === 200 && response.body.data?.reviewId) {
                 reviewId = response.body.data.reviewId;

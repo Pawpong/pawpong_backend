@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-import { DomainValidationError } from '../../../../../common/error/domain.error';
+import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { RemoveFavoriteBreederUseCase } from '../../../application/use-cases/remove-favorite-breeder.use-case';
 import { AdopterFavoritePolicyService } from '../../../domain/services/adopter-favorite-policy.service';
 
@@ -30,10 +29,10 @@ describe('브리더 즐겨찾기 제거 유스케이스', () => {
         expect(adopterProfilePort.removeFavoriteBreeder).toHaveBeenCalledWith('user-1', 'breeder-1', undefined);
     });
 
-    it('입양자 정보가 없으면 BadRequestException을 던진다', async () => {
+    it('입양자 정보가 없으면 DomainNotFoundError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue(null);
 
-        await expect(useCase.execute('user-1', 'breeder-1')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('user-1', 'breeder-1')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('user-1', 'breeder-1')).rejects.toThrow('입양자 정보를 찾을 수 없습니다.');
     });
 

@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { ReportAdopterReviewUseCase } from '../../../application/use-cases/report-adopter-review.use-case';
 import { ADOPTER_RESPONSE_PAYLOAD_MESSAGES } from '../../../constants/adopter-response-messages';
 
@@ -57,26 +56,26 @@ describe('후기 신고 유스케이스', () => {
         expect(result.message).toBe(ADOPTER_RESPONSE_PAYLOAD_MESSAGES.reviewReported);
     });
 
-    it('입양자와 브리더 모두 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('입양자와 브리더 모두 찾을 수 없으면 DomainNotFoundError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue(null);
         adopterBreederReaderPort.findById.mockResolvedValue(null);
 
         await expect(
             useCase.execute('unknown-user', { reviewId: 'review-1', reason: 'inappropriate_content' }),
-        ).rejects.toThrow(BadRequestException);
+        ).rejects.toThrow(DomainNotFoundError);
         await expect(
             useCase.execute('unknown-user', { reviewId: 'review-1', reason: 'inappropriate_content' }),
         ).rejects.toThrow('사용자 정보를 찾을 수 없습니다.');
     });
 
-    it('신고할 후기가 없으면 BadRequestException을 던진다', async () => {
+    it('신고할 후기가 없으면 DomainNotFoundError를 던진다', async () => {
         adopterProfilePort.findById.mockResolvedValue({ nickname: '신고자' });
         adopterBreederReaderPort.findById.mockResolvedValue(null);
         adopterReviewCommandPort.findReviewById.mockResolvedValue(null);
 
         await expect(
             useCase.execute('user-1', { reviewId: 'nonexistent-review', reason: 'false_info' }),
-        ).rejects.toThrow(BadRequestException);
+        ).rejects.toThrow(DomainNotFoundError);
         await expect(
             useCase.execute('user-1', { reviewId: 'nonexistent-review', reason: 'false_info' }),
         ).rejects.toThrow('신고할 후기를 찾을 수 없습니다.');

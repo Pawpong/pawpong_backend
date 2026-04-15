@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import { ADOPTER_FILE_URL_PORT } from '../ports/adopter-file-url.port';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
@@ -31,7 +32,9 @@ export class GetFavoriteBreedersUseCase {
     ): Promise<AdopterFavoritePageResult> {
         const adopter = await this.adopterProfilePort.findById(userId, userRole);
         if (!adopter) {
-            throw new BadRequestException(userRole === 'breeder' ? '브리더 정보를 찾을 수 없습니다.' : '입양자 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError(
+                userRole === 'breeder' ? '브리더 정보를 찾을 수 없습니다.' : '입양자 정보를 찾을 수 없습니다.',
+            );
         }
 
         const result = await this.adopterProfilePort.findFavoriteList(userId, page, limit, userRole);

@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import { ADOPTER_APPLICATION_READER_PORT } from '../ports/adopter-application-reader.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import { ADOPTER_FILE_URL_PORT } from '../ports/adopter-file-url.port';
@@ -33,7 +34,7 @@ export class GetAdopterApplicationsUseCase {
     ): Promise<AdopterApplicationPageResult> {
         const adopter = await this.adopterProfilePort.findById(userId);
         if (!adopter) {
-            throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('입양자 정보를 찾을 수 없습니다.');
         }
 
         let breederIds: string[] | undefined;
