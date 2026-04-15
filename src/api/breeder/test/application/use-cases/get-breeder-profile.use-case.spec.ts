@@ -1,6 +1,7 @@
 import { BadRequestException } from '@nestjs/common';
 
 import { GetBreederProfileUseCase } from '../../../application/use-cases/get-breeder-profile.use-case';
+import { BreederBirthDateFormatterService } from '../../../domain/services/breeder-birth-date-formatter.service';
 import { BreederPublicProfileAssemblerService } from '../../../domain/services/breeder-public-profile-assembler.service';
 
 describe('브리더 프로필 공개 조회 유스케이스', () => {
@@ -21,7 +22,7 @@ describe('브리더 프로필 공개 조회 유스케이스', () => {
     const useCase = new GetBreederProfileUseCase(
         breederPublicReaderPort as any,
         breederFileUrlPort as any,
-        new BreederPublicProfileAssemblerService(),
+        new BreederPublicProfileAssemblerService(new BreederBirthDateFormatterService()),
     );
 
     const mockBreeder = {
