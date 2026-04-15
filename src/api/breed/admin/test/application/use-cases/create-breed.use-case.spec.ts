@@ -1,5 +1,4 @@
-import { ConflictException } from '@nestjs/common';
-
+import { DomainConflictError } from '../../../../../../common/error/domain.error';
 import { BreedAdminResultMapperService } from '../../../../domain/services/breed-admin-result-mapper.service';
 import { CreateBreedUseCase } from '../../../application/use-cases/create-breed.use-case';
 import { BreedAdminReaderPort } from '../../../application/ports/breed-admin-reader.port';
@@ -74,6 +73,6 @@ describe('품종 생성 유스케이스', () => {
                 categoryDescription: '10kg 미만',
                 breeds: ['말티즈'],
             }),
-        ).rejects.toBeInstanceOf(ConflictException);
+        ).rejects.toBeInstanceOf(DomainConflictError);
     });
 });

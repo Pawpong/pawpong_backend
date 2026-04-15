@@ -1,5 +1,6 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainConflictError } from '../../../../../common/error/domain.error';
 import type { DistrictAdminResult } from '../../../application/types/district-result.type';
 import { DistrictAdminResultMapperService } from '../../../domain/services/district-admin-result-mapper.service';
 import { DISTRICT_ADMIN_READER_PORT, type DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
@@ -20,7 +21,7 @@ export class CreateDistrictUseCase {
         const existing = await this.districtAdminReader.findByCity(dto.city);
 
         if (existing) {
-            throw new ConflictException(`이미 ${dto.city} 데이터가 존재합니다.`);
+            throw new DomainConflictError(`이미 ${dto.city} 데이터가 존재합니다.`);
         }
 
         const district = await this.districtWriter.create(dto);

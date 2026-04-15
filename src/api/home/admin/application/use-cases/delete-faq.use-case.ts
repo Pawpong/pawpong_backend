@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { HOME_ADMIN_MANAGER_PORT, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
 
 @Injectable()
@@ -13,7 +14,7 @@ export class DeleteFaqUseCase {
         const deleted = await this.homeAdminManager.deleteFaq(faqId);
 
         if (!deleted) {
-            throw new BadRequestException('FAQ를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('FAQ를 찾을 수 없습니다.');
         }
     }
 }

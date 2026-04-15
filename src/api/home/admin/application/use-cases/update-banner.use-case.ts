@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { HomeBannerCatalogService } from '../../../domain/services/home-banner-catalog.service';
 import { HOME_ASSET_URL_PORT, type HomeAssetUrlPort } from '../../../application/ports/home-asset-url.port';
 import { HOME_ADMIN_MANAGER_PORT, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
@@ -20,7 +21,7 @@ export class UpdateBannerUseCase {
         const banner = await this.homeAdminManager.updateBanner(bannerId, data);
 
         if (!banner) {
-            throw new BadRequestException('배너를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('배너를 찾을 수 없습니다.');
         }
 
         return this.homeBannerCatalogService.buildResults([banner], (fileName, expirationMinutes) =>

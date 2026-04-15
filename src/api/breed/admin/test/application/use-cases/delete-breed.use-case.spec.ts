@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../../common/error/domain.error';
 import { DeleteBreedUseCase } from '../../../application/use-cases/delete-breed.use-case';
 
 describe('품종 삭제 유스케이스', () => {
@@ -20,10 +19,10 @@ describe('품종 삭제 유스케이스', () => {
         expect(breedWriter.delete).toHaveBeenCalledWith('breed-1');
     });
 
-    it('존재하지 않는 품종 삭제 시 BadRequestException을 던진다', async () => {
+    it('존재하지 않는 품종 삭제 시 DomainNotFoundError를 던진다', async () => {
         breedWriter.delete.mockResolvedValue(false);
 
-        await expect(useCase.execute('nonexistent-id')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('nonexistent-id')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('nonexistent-id')).rejects.toThrow(
             'ID nonexistent-id에 해당하는 품종 카테고리를 찾을 수 없습니다.',
         );

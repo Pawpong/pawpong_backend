@@ -47,15 +47,18 @@ describe('홈 관리자 종단간 테스트', () => {
                 .set('Authorization', `Bearer ${adminToken}`)
                 .send({
                     title: '테스트 배너',
-                    imageUrl: 'https://example.com/banner.jpg',
+                    desktopImageFileName: 'banners/test-desktop.jpg',
+                    mobileImageFileName: 'banners/test-mobile.jpg',
+                    linkType: 'external',
                     linkUrl: 'https://example.com',
                     isActive: true,
                     order: 1,
+                    targetAudience: ['guest', 'adopter'],
                 });
 
             expect([200, 400]).toContain(response.status);
-            if (response.status === 200 && response.body.data?.id) {
-                createdBannerId = response.body.data.id;
+            if (response.status === 200) {
+                createdBannerId = response.body.data?.bannerId || response.body.data?.id;
             }
             console.log('배너 생성 검증 완료');
         });
@@ -105,14 +108,15 @@ describe('홈 관리자 종단간 테스트', () => {
                 .send({
                     question: '테스트 질문입니다?',
                     answer: '테스트 답변입니다.',
-                    category: 'general',
+                    category: 'service',
+                    userType: 'both',
                     isActive: true,
                     order: 1,
                 });
 
             expect([200, 400]).toContain(response.status);
-            if (response.status === 200 && response.body.data?.id) {
-                createdFaqId = response.body.data.id;
+            if (response.status === 200) {
+                createdFaqId = response.body.data?.faqId || response.body.data?.id;
             }
             console.log('자주 묻는 질문 생성 검증 완료');
         });

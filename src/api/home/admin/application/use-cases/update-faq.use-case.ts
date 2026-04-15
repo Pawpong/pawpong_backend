@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { HomeFaqCatalogService } from '../../../domain/services/home-faq-catalog.service';
 import { HOME_ADMIN_MANAGER_PORT, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
 import type { HomeFaqUpdateCommand } from '../types/home-admin-command.type';
@@ -17,7 +18,7 @@ export class UpdateFaqUseCase {
         const faq = await this.homeAdminManager.updateFaq(faqId, data);
 
         if (!faq) {
-            throw new BadRequestException('FAQ를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('FAQ를 찾을 수 없습니다.');
         }
 
         return this.homeFaqCatalogService.buildResults([faq])[0];

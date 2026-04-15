@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { BREED_WRITER_PORT, type BreedWriterPort } from '../ports/breed-writer.port';
 
 @Injectable()
@@ -13,7 +14,7 @@ export class DeleteBreedUseCase {
         const deleted = await this.breedWriter.delete(id);
 
         if (!deleted) {
-            throw new BadRequestException(`ID ${id}에 해당하는 품종 카테고리를 찾을 수 없습니다.`);
+            throw new DomainNotFoundError(`ID ${id}에 해당하는 품종 카테고리를 찾을 수 없습니다.`);
         }
     }
 }

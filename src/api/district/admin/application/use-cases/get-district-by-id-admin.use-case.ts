@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import type { DistrictAdminResult } from '../../../application/types/district-result.type';
 import { DistrictAdminResultMapperService } from '../../../domain/services/district-admin-result-mapper.service';
 import { DISTRICT_ADMIN_READER_PORT, type DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
@@ -16,7 +17,7 @@ export class GetDistrictByIdAdminUseCase {
         const district = await this.districtAdminReader.findById(id);
 
         if (!district) {
-            throw new BadRequestException(`ID ${id}에 해당하는 지역을 찾을 수 없습니다.`);
+            throw new DomainNotFoundError(`ID ${id}에 해당하는 지역을 찾을 수 없습니다.`);
         }
 
         return this.districtAdminResultMapperService.toResult(district);
