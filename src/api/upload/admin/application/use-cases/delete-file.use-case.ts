@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { UploadAdminStoragePolicyService } from '../../domain/services/upload-admin-storage-policy.service';
 import { UPLOAD_ADMIN_STORAGE_PORT, type UploadAdminStoragePort } from '../ports/upload-admin-storage.port';
 
@@ -23,7 +22,6 @@ export class DeleteFileUseCase {
             this.logger.logSuccess('deleteFile', '파일 삭제 완료', { fileName });
         } catch (error) {
             this.logger.logError('deleteFile', '파일 삭제 실패', error);
-            rethrowIfHttpException(error);
             throw error;
         }
     }

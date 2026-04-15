@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AppVersionAdminPageAssemblerService } from '../../domain/services/app-version-admin-page-assembler.service';
 import { APP_VERSION_ADMIN_READER_PORT, type AppVersionAdminReaderPort } from '../ports/app-version-admin-reader.port';
 import { type AppVersionAdminListQuery, type AppVersionAdminPageResult } from '../types/app-version-query.type';
@@ -33,7 +32,6 @@ export class GetAppVersionListUseCase {
 
             return this.appVersionAdminPageAssemblerService.build(items, page, limit, totalItems);
         } catch (error) {
-            rethrowIfHttpException(error);
             this.logger.logError('getAppVersionList', '앱 버전 목록 조회', error);
             throw error;
         }

@@ -1,7 +1,7 @@
 import { Injectable, Inject } from '@nestjs/common';
 
+import { DomainError } from '../../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AuthAdminAuthenticationService } from '../../domain/services/auth-admin-authentication.service';
 import { AuthAdminRefreshTokenResultMapperService } from '../../domain/services/auth-admin-refresh-token-result-mapper.service';
 import { AUTH_ADMIN_READER_PORT } from '../ports/auth-admin-reader.port';
@@ -29,7 +29,9 @@ export class RefreshAdminTokenUseCase {
             payload = this.authAdminToken.verifyRefreshToken(refreshToken);
         } catch (error) {
             this.logger.logError('refreshAdminToken', '리프레시 토큰 검증 실패', error);
-            rethrowIfHttpException(error);
+            if (error instanceof DomainError) {
+                throw error;
+            }
             this.authAdminAuthenticationService.throwInvalidToken();
         }
 
@@ -58,7 +60,6 @@ export class RefreshAdminTokenUseCase {
             return this.authAdminRefreshTokenResultMapperService.toResult(accessToken);
         } catch (error) {
             this.logger.logError('refreshAdminToken', '토큰 갱신 실패', error);
-            rethrowIfHttpException(error);
             throw error;
         }
     }
