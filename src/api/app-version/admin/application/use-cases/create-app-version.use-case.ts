@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { AppVersionAdminCommandPolicyService } from '../../domain/services/app-version-admin-command-policy.service';
 import { AppVersionAdminItemMapperService } from '../../domain/services/app-version-admin-item-mapper.service';
 import { APP_VERSION_WRITER_PORT, type AppVersionWriterPort } from '../ports/app-version-writer.port';
@@ -33,7 +32,6 @@ export class CreateAppVersionUseCase {
 
             return this.appVersionAdminItemMapperService.toResult(appVersion);
         } catch (error) {
-            rethrowIfHttpException(error);
             this.logger.logError('createAppVersion', '앱 버전 생성', error);
             throw error;
         }

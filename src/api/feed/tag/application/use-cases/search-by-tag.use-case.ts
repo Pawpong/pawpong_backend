@@ -1,7 +1,8 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { FeedTagSearchResultAssemblerService } from '../../domain/services/feed-tag-search-result-assembler.service';
 import { FeedTagNormalizerService } from '../../domain/services/feed-tag-normalizer.service';
@@ -27,7 +28,7 @@ export class SearchByTagUseCase {
         const cleanTag = this.feedTagNormalizerService.normalizeTag(tag);
 
         if (!cleanTag) {
-            throw new BadRequestException('검색할 태그를 입력해주세요.');
+            throw new DomainValidationError('검색할 태그를 입력해주세요.');
         }
 
         const cacheKey = this.feedCacheKeyService.getTagSearchKey(cleanTag, page, limit);

@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { NOTIFICATION_ADMIN_READER_PORT } from '../ports/notification-admin-reader.port';
 import type { NotificationAdminReaderPort } from '../ports/notification-admin-reader.port';
 import { NotificationAdminStatsResultMapperService } from '../../domain/services/notification-admin-stats-result-mapper.service';
@@ -27,7 +26,6 @@ export class GetNotificationAdminStatsUseCase {
 
             return response;
         } catch (error) {
-            rethrowIfHttpException(error);
             this.logger.logError('getStats', '관리자 알림 통계 조회 실패', error);
             throw error;
         }
