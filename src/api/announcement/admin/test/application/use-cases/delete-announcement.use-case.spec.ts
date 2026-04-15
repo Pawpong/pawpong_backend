@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError, DomainValidationError } from '../../../../../../common/error/domain.error';
 import { DeleteAnnouncementUseCase } from '../../../application/use-cases/delete-announcement.use-case';
 
 describe('공지사항 삭제 유스케이스', () => {
@@ -26,25 +25,24 @@ describe('공지사항 삭제 유스케이스', () => {
         expect(announcementWriter.delete).toHaveBeenCalledWith(validObjectId);
     });
 
-    it('유효하지 않은 ObjectId면 BadRequestException을 던진다', async () => {
-        await expect(useCase.execute('not-an-objectid')).rejects.toThrow(BadRequestException);
+    it('유효하지 않은 ObjectId면 DomainValidationError를 던진다', async () => {
+        await expect(useCase.execute('not-an-objectid')).rejects.toThrow(DomainValidationError);
         await expect(useCase.execute('not-an-objectid')).rejects.toThrow('올바르지 않은 공지사항 ID입니다.');
         expect(announcementWriter.delete).not.toHaveBeenCalled();
     });
 
-    it('공지사항이 존재하지 않으면 BadRequestException을 던진다', async () => {
+    it('공지사항이 존재하지 않으면 DomainNotFoundError를 던진다', async () => {
         const validObjectId = '507f1f77bcf86cd799439011';
         announcementWriter.delete.mockResolvedValue(false);
 
-        await expect(useCase.execute(validObjectId)).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute(validObjectId)).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute(validObjectId)).rejects.toThrow('공지사항을 찾을 수 없습니다.');
     });
 
-    it('삭제 중 예외가 발생하면 BadRequestException으로 변환한다', async () => {
+    it('삭제 중 예외가 발생하면 원본 예외를 전파한다', async () => {
         const validObjectId = '507f1f77bcf86cd799439011';
         announcementWriter.delete.mockRejectedValue(new Error('DB 오류'));
 
-        await expect(useCase.execute(validObjectId)).rejects.toThrow(BadRequestException);
-        await expect(useCase.execute(validObjectId)).rejects.toThrow('공지사항을 삭제할 수 없습니다.');
+        await expect(useCase.execute(validObjectId)).rejects.toThrow('DB 오류');
     });
 });

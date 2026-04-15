@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
 import {
     ANNOUNCEMENT_PUBLIC_READER_PORT,
     type AnnouncementPublicReaderPort,
@@ -19,7 +20,7 @@ export class GetAnnouncementByIdUseCase {
         const announcement = await this.announcementPublicReaderPort.findActiveAnnouncementById(announcementId);
 
         if (!announcement) {
-            throw new BadRequestException('공지사항을 찾을 수 없습니다.');
+            throw new DomainNotFoundError('공지사항을 찾을 수 없습니다.');
         }
 
         return this.announcementItemMapperService.toItem(announcement);

@@ -104,7 +104,7 @@ describe('공지사항 종단간 테스트', () => {
             const response = await request(app.getHttpServer())
                 .get('/api/announcement/000000000000000000000000');
 
-            expect([400, 404, 500]).toContain(response.status);
+            expect(response.status).toBe(404);
             console.log('존재하지 않는 공지 조회 시 에러 확인');
         });
     });

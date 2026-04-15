@@ -1,5 +1,3 @@
-import { BadRequestException } from '@nestjs/common';
-
 import { CreateAnnouncementUseCase } from '../../../application/use-cases/create-announcement.use-case';
 import { AnnouncementWriterPort } from '../../../application/ports/announcement-writer.port';
 import { AnnouncementItemMapperService } from '../../../../domain/services/announcement-item-mapper.service';
@@ -45,7 +43,7 @@ describe('공지사항 생성 유스케이스', () => {
         });
     });
 
-    it('저장 중 에러가 나면 예외을 던진다', async () => {
+    it('저장 중 에러가 나면 원본 예외를 전파한다', async () => {
         const announcementWriter: AnnouncementWriterPort = {
             create: jest.fn().mockRejectedValue(new Error('db failure')),
             update: jest.fn(),
@@ -62,6 +60,6 @@ describe('공지사항 생성 유스케이스', () => {
                 title: 'title',
                 content: 'content',
             }),
-        ).rejects.toBeInstanceOf(BadRequestException);
+        ).rejects.toThrow('db failure');
     });
 });

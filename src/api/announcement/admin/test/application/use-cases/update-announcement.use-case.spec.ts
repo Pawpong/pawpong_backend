@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { UpdateAnnouncementUseCase } from '../../../application/use-cases/update-announcement.use-case';
 import { AnnouncementWriterPort } from '../../../application/ports/announcement-writer.port';
 import { AnnouncementItemMapperService } from '../../../../domain/services/announcement-item-mapper.service';
@@ -43,7 +42,7 @@ describe('공지사항 수정 유스케이스', () => {
         });
     });
 
-    it('잘못된 ID면 예외을 던진다', async () => {
+    it('잘못된 ID면 도메인 검증 예외를 던진다', async () => {
         const useCase = new UpdateAnnouncementUseCase(
             {
                 create: jest.fn(),
@@ -55,7 +54,7 @@ describe('공지사항 수정 유스케이스', () => {
         );
 
         await expect(useCase.execute('invalid-id', { title: 'updated title' })).rejects.toBeInstanceOf(
-            BadRequestException,
+            DomainValidationError,
         );
     });
 });
