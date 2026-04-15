@@ -1,5 +1,4 @@
-import { ConflictException } from '@nestjs/common';
-
+import { DomainConflictError } from '../../../../../../common/error/domain.error';
 import { CreateDistrictUseCase } from '../../../application/use-cases/create-district.use-case';
 import { DistrictAdminResultMapperService } from '../../../../domain/services/district-admin-result-mapper.service';
 import { DistrictAdminReaderPort } from '../../../application/ports/district-admin-reader.port';
@@ -57,7 +56,7 @@ describe('지역 생성 유스케이스', () => {
         );
 
         await expect(useCase.execute({ city: '경기도', districts: ['수원시'] })).rejects.toBeInstanceOf(
-            ConflictException,
+            DomainConflictError,
         );
     });
 });

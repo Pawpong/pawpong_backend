@@ -1,5 +1,6 @@
-import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainConflictError, DomainNotFoundError } from '../../../../../common/error/domain.error';
 import type { DistrictAdminResult } from '../../../application/types/district-result.type';
 import { DistrictAdminResultMapperService } from '../../../domain/services/district-admin-result-mapper.service';
 import { DISTRICT_ADMIN_READER_PORT, type DistrictAdminReaderPort } from '../ports/district-admin-reader.port';
@@ -20,21 +21,21 @@ export class UpdateDistrictUseCase {
         const district = await this.districtAdminReader.findById(id);
 
         if (!district) {
-            throw new BadRequestException(`ID ${id}에 해당하는 지역을 찾을 수 없습니다.`);
+            throw new DomainNotFoundError(`ID ${id}에 해당하는 지역을 찾을 수 없습니다.`);
         }
 
         if (dto.city && dto.city !== district.city) {
             const duplicated = await this.districtAdminReader.findByCity(dto.city, id);
 
             if (duplicated) {
-                throw new ConflictException(`이미 ${dto.city} 데이터가 존재합니다.`);
+                throw new DomainConflictError(`이미 ${dto.city} 데이터가 존재합니다.`);
             }
         }
 
         const updated = await this.districtWriter.update(id, dto);
 
         if (!updated) {
-            throw new BadRequestException(`ID ${id}에 해당하는 지역을 찾을 수 없습니다.`);
+            throw new DomainNotFoundError(`ID ${id}에 해당하는 지역을 찾을 수 없습니다.`);
         }
 
         return this.districtAdminResultMapperService.toResult(updated);

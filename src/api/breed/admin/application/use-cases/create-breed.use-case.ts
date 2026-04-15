@@ -1,5 +1,6 @@
-import { ConflictException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainConflictError } from '../../../../../common/error/domain.error';
 import { BreedAdminResultMapperService } from '../../../domain/services/breed-admin-result-mapper.service';
 import { BREED_ADMIN_READER_PORT, type BreedAdminReaderPort } from '../ports/breed-admin-reader.port';
 import { BREED_WRITER_PORT, type BreedWriterPort } from '../ports/breed-writer.port';
@@ -20,7 +21,7 @@ export class CreateBreedUseCase {
         const existing = await this.breedAdminReader.findByPetTypeAndCategory(dto.petType, dto.category);
 
         if (existing) {
-            throw new ConflictException(`이미 ${dto.petType}의 ${dto.category} 카테고리가 존재합니다.`);
+            throw new DomainConflictError(`이미 ${dto.petType}의 ${dto.category} 카테고리가 존재합니다.`);
         }
 
         const breed = await this.breedWriter.create(dto);

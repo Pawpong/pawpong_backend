@@ -1,5 +1,4 @@
-import { BadRequestException, ConflictException } from '@nestjs/common';
-
+import { DomainConflictError, DomainNotFoundError } from '../../../../../../common/error/domain.error';
 import { BreedAdminResultMapperService } from '../../../../domain/services/breed-admin-result-mapper.service';
 import { UpdateBreedUseCase } from '../../../application/use-cases/update-breed.use-case';
 import { BreedAdminReaderPort } from '../../../application/ports/breed-admin-reader.port';
@@ -57,7 +56,9 @@ describe('품종 수정 유스케이스', () => {
             new BreedAdminResultMapperService(),
         );
 
-        await expect(useCase.execute('missing', { category: '중형견' })).rejects.toBeInstanceOf(BadRequestException);
+        await expect(useCase.execute('missing', { category: '중형견' })).rejects.toBeInstanceOf(
+            DomainNotFoundError,
+        );
     });
 
     it('중복 카테고리면 예외을 던진다', async () => {
@@ -79,6 +80,8 @@ describe('품종 수정 유스케이스', () => {
             new BreedAdminResultMapperService(),
         );
 
-        await expect(useCase.execute('breed-1', { category: '중형견' })).rejects.toBeInstanceOf(ConflictException);
+        await expect(useCase.execute('breed-1', { category: '중형견' })).rejects.toBeInstanceOf(
+            DomainConflictError,
+        );
     });
 });

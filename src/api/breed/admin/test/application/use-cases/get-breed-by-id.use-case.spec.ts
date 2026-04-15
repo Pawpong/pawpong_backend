@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../../common/error/domain.error';
 import { GetBreedByIdUseCase } from '../../../application/use-cases/get-breed-by-id.use-case';
 import { BreedAdminResultMapperService } from '../../../../domain/services/breed-admin-result-mapper.service';
 
@@ -39,10 +38,10 @@ describe('품종 ID 조회 유스케이스 (관리자)', () => {
         expect(breedAdminReader.findById).toHaveBeenCalledWith('breed-1');
     });
 
-    it('존재하지 않는 ID 조회 시 BadRequestException을 던진다', async () => {
+    it('존재하지 않는 ID 조회 시 DomainNotFoundError를 던진다', async () => {
         breedAdminReader.findById.mockResolvedValue(null);
 
-        await expect(useCase.execute('nonexistent-id')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('nonexistent-id')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('nonexistent-id')).rejects.toThrow(
             'ID nonexistent-id에 해당하는 품종 카테고리를 찾을 수 없습니다.',
         );

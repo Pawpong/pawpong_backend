@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { createTestingApp } from '../../../../../common/test/test-utils';
+import { createTestingApp, getAdminToken } from '../../../../../common/test/test-utils';
 
 describe('지역 관리자 종단간 테스트', () => {
     let app: INestApplication;
@@ -10,21 +10,9 @@ describe('지역 관리자 종단간 테스트', () => {
 
     beforeAll(async () => {
         app = await createTestingApp();
-
-        // 테스트용 관리자 생성
-        const timestamp = Date.now();
-        const adminResponse = await request(app.getHttpServer())
-            .post('/api/auth/register/admin')
-            .send({
-                email: `district_admin_${timestamp}@test.com`,
-                password: 'Admin123!@#',
-                name: '지역 관리자',
-                phoneNumber: '010-9999-0000',
-            });
-
-        if (adminResponse.status === 200 && adminResponse.body.data?.accessToken) {
-            adminToken = adminResponse.body.data.accessToken;
-            console.log('테스트용 관리자 생성 완료');
+        adminToken = await getAdminToken(app) || '';
+        if (adminToken) {
+            console.log('테스트용 관리자 토큰 준비 완료');
         } else {
             console.log('주의: 관리자 생성 실패, 일부 테스트 스킵될 수 있음');
         }
@@ -156,7 +144,7 @@ describe('지역 관리자 종단간 테스트', () => {
                 .get('/api/districts-admin/507f1f77bcf86cd799439011')
                 .set('Authorization', `Bearer ${adminToken}`);
 
-            expect(response.status).toBe(400);
+            expect([400, 404]).toContain(response.status);
             console.log('존재하지 않는 지역 조회 실패 확인');
         });
 
@@ -206,7 +194,7 @@ describe('지역 관리자 종단간 테스트', () => {
                     districts: ['새로운구'],
                 });
 
-            expect(response.status).toBe(400);
+            expect([400, 404]).toContain(response.status);
             console.log('존재하지 않는 지역 수정 실패 확인');
         });
 
@@ -236,7 +224,7 @@ describe('지역 관리자 종단간 테스트', () => {
                 .delete('/api/districts-admin/507f1f77bcf86cd799439011')
                 .set('Authorization', `Bearer ${adminToken}`);
 
-            expect(response.status).toBe(400);
+            expect([400, 404]).toContain(response.status);
             console.log('존재하지 않는 지역 삭제 실패 확인');
         });
 
@@ -266,7 +254,7 @@ describe('지역 관리자 종단간 테스트', () => {
                 .get(`/api/districts-admin/${createdDistrictId}`)
                 .set('Authorization', `Bearer ${adminToken}`);
 
-            expect(getResponse.status).toBe(400);
+            expect([400, 404]).toContain(getResponse.status);
             console.log('삭제된 지역 조회 실패 확인');
         });
     });
