@@ -1,5 +1,3 @@
-import { UnauthorizedException } from '@nestjs/common';
-
 import { DomainAuthenticationError } from '../../../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { AuthAdminAuthenticationService } from '../../../domain/services/auth-admin-authentication.service';
@@ -68,7 +66,7 @@ describe('관리자 token 재발급 유스케이스', () => {
         } satisfies AuthAdminIssuedTokenPayload);
     });
 
-    it('잘못된 토큰은 UnauthorizedException으로 감싼다', async () => {
+    it('잘못된 토큰은 도메인 인증 예외로 변환한다', async () => {
         const useCase = new RefreshAdminTokenUseCase(
             {
                 findActiveByEmail: jest.fn(),
@@ -86,7 +84,7 @@ describe('관리자 token 재발급 유스케이스', () => {
             logger,
         );
 
-        await expect(useCase.execute('bad-token')).rejects.toBeInstanceOf(UnauthorizedException);
+        await expect(useCase.execute('bad-token')).rejects.toBeInstanceOf(DomainAuthenticationError);
     });
 
     it('관리자 역할이 아니면 도메인 인증 예외를 던진다', async () => {
@@ -110,5 +108,29 @@ describe('관리자 token 재발급 유스케이스', () => {
         );
 
         await expect(useCase.execute('bad-role-token')).rejects.toBeInstanceOf(DomainAuthenticationError);
+    });
+
+    it('예상하지 못한 조회 오류는 그대로 전파한다', async () => {
+        const useCase = new RefreshAdminTokenUseCase(
+            {
+                findActiveByEmail: jest.fn().mockRejectedValue(new Error('db down')),
+                updateLastLogin: jest.fn(),
+            },
+            {
+                createAccessToken: jest.fn(),
+                createRefreshToken: jest.fn(),
+                verifyRefreshToken: jest.fn().mockReturnValue({
+                    sub: 'admin-1',
+                    email: 'admin@test.com',
+                    role: 'admin',
+                    adminLevel: 'super_admin',
+                } satisfies AuthAdminVerifiedTokenPayload),
+            },
+            new AuthAdminAuthenticationService(),
+            new AuthAdminRefreshTokenResultMapperService(),
+            logger,
+        );
+
+        await expect(useCase.execute('refresh-token')).rejects.toThrow('db down');
     });
 });

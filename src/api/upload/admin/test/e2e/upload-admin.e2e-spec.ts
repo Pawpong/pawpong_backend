@@ -29,8 +29,8 @@ describe('업로드 관리자 종단간 테스트', () => {
                 .get('/api/upload-admin/files')
                 .set('Authorization', `Bearer ${adminToken}`);
 
-            // 스토리지 미설정/오류 시 서비스가 BadRequestException(400)으로 감싼다.
-            expect([200, 400]).toContain(response.status);
+            // 스토리지 미설정/오류 시 원본 예외가 500으로 전파될 수 있다.
+            expect([200, 500]).toContain(response.status);
             if (response.status === 200) {
                 expect(response.body.success).toBe(true);
             }

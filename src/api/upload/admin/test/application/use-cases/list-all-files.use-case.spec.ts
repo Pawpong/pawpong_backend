@@ -48,4 +48,18 @@ describe('전체 파일 목록 조회 유스케이스', () => {
             },
         });
     });
+
+    it('예상하지 못한 스토리지 오류는 그대로 전파한다', async () => {
+        const uploadAdminStorage: UploadAdminStoragePort = {
+            list: jest.fn().mockRejectedValue(new Error('storage down')),
+            delete: jest.fn(),
+        };
+        const useCase = new ListAllFilesUseCase(
+            uploadAdminStorage,
+            new UploadAdminStorageListAssemblerService(),
+            logger,
+        );
+
+        await expect(useCase.execute()).rejects.toThrow('storage down');
+    });
 });

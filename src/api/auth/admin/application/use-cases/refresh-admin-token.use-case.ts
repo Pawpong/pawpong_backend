@@ -1,4 +1,4 @@
-import { Injectable, Inject, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Inject } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
@@ -7,7 +7,7 @@ import { AuthAdminRefreshTokenResultMapperService } from '../../domain/services/
 import { AUTH_ADMIN_READER_PORT } from '../ports/auth-admin-reader.port';
 import type { AuthAdminReaderPort } from '../ports/auth-admin-reader.port';
 import { AUTH_ADMIN_TOKEN_PORT } from '../ports/auth-admin-token.port';
-import type { AuthAdminTokenPort } from '../ports/auth-admin-token.port';
+import type { AuthAdminTokenPort, AuthAdminVerifiedTokenPayload } from '../ports/auth-admin-token.port';
 
 @Injectable()
 export class RefreshAdminTokenUseCase {
@@ -24,13 +24,17 @@ export class RefreshAdminTokenUseCase {
     async execute(refreshToken: string): Promise<{ accessToken: string }> {
         this.logger.logStart('refreshAdminToken', '관리자 토큰 갱신 시작');
 
+        let payload: AuthAdminVerifiedTokenPayload;
         try {
-            const payload = this.authAdminToken.verifyRefreshToken(refreshToken);
+            payload = this.authAdminToken.verifyRefreshToken(refreshToken);
+        } catch (error) {
+            this.logger.logError('refreshAdminToken', '리프레시 토큰 검증 실패', error);
+            rethrowIfHttpException(error);
+            this.authAdminAuthenticationService.throwInvalidToken();
+        }
 
-            if (payload.role !== 'admin') {
-                this.logger.logError('refreshAdminToken', '관리자 권한 없음', new Error('관리자 토큰이 아닙니다'));
-                this.authAdminAuthenticationService.throwInvalidToken();
-            }
+        try {
+            this.authAdminAuthenticationService.assertAdminRole(payload);
 
             const admin = await this.authAdminReader.findActiveByEmail(payload.email);
 
@@ -55,7 +59,7 @@ export class RefreshAdminTokenUseCase {
         } catch (error) {
             this.logger.logError('refreshAdminToken', '토큰 갱신 실패', error);
             rethrowIfHttpException(error);
-            throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+            throw error;
         }
     }
 }

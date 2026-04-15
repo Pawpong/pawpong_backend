@@ -1,4 +1,6 @@
-import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { DomainAuthorizationError, DomainNotFoundError } from '../../../../common/error/domain.error';
 
 import { UPLOAD_FILE_STORE_PORT } from '../ports/upload-file-store.port';
 import { UPLOAD_OWNER_PORT } from '../ports/upload-owner.port';
@@ -29,12 +31,12 @@ export class UploadParentPetPhotosUseCase {
         role: string,
     ): Promise<UploadFileResult[]> {
         if (role !== 'breeder') {
-            throw new ForbiddenException('브리더만 부모견/묘 사진을 업로드할 수 있습니다.');
+            throw new DomainAuthorizationError('브리더만 부모견/묘 사진을 업로드할 수 있습니다.');
         }
 
         const pet = await this.uploadOwner.findOwnedParentPet(petId, userId);
         if (!pet) {
-            throw new BadRequestException('해당 부모견/묘를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('해당 부모견/묘를 찾을 수 없습니다.');
         }
 
         const requestedPhotoPaths = this.uploadStoredFilePathService.extractStoredPaths(

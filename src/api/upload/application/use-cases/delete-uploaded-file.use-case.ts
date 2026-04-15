@@ -1,4 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { DomainValidationError } from '../../../../common/error/domain.error';
 
 import { UPLOAD_FILE_STORE_PORT } from '../ports/upload-file-store.port';
 import type { UploadFileStorePort } from '../ports/upload-file-store.port';
@@ -9,7 +11,7 @@ export class DeleteUploadedFileUseCase {
 
     async execute(fileName: string): Promise<void> {
         if (!fileName) {
-            throw new BadRequestException('파일명이 없습니다.');
+            throw new DomainValidationError('파일명이 없습니다.');
         }
 
         await this.fileStore.deleteFile(fileName);

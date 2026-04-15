@@ -1,4 +1,6 @@
-import { ForbiddenException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
+
+import { DomainAuthorizationError } from '../../../../common/error/domain.error';
 
 import { UPLOAD_FILE_STORE_PORT } from '../ports/upload-file-store.port';
 import { UPLOAD_OWNER_PORT } from '../ports/upload-owner.port';
@@ -19,7 +21,7 @@ export class UploadRepresentativePhotosUseCase {
 
     async execute(files: Express.Multer.File[], userId: string, role: string): Promise<UploadFileResult[]> {
         if (role !== 'breeder') {
-            throw new ForbiddenException('브리더만 대표 사진을 업로드할 수 있습니다.');
+            throw new DomainAuthorizationError('브리더만 대표 사진을 업로드할 수 있습니다.');
         }
 
         this.uploadFilePolicy.ensureRepresentativePhotos(files);
