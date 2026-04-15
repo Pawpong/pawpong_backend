@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { FEED_VIDEO_STREAM_PORT, type FeedVideoStreamPort } from '../ports/feed-video-stream.port';
 import { FeedVideoStreamingService } from '../../domain/services/feed-video-streaming.service';
@@ -24,7 +25,7 @@ export class ProxyHlsFileUseCase {
             return await this.buildProxyResponse(videoId, filename);
         } catch (error) {
             rethrowIfHttpException(error);
-            throw new BadRequestException('파일을 가져올 수 없습니다.');
+            throw new DomainValidationError('파일을 가져올 수 없습니다.');
         }
     }
 

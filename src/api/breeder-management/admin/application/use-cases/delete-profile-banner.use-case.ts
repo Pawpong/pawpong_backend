@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import {
     BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER_PORT,
     type BreederManagementAdminBannerWriterPort,
@@ -16,7 +17,7 @@ export class DeleteProfileBannerUseCase {
         const deleted = await this.bannerWriter.deleteProfile(bannerId);
 
         if (!deleted) {
-            throw new BadRequestException('프로필 배너를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('프로필 배너를 찾을 수 없습니다.');
         }
     }
 }

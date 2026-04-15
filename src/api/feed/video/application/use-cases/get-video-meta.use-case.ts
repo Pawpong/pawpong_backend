@@ -1,7 +1,8 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
+import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { FeedCacheKeyService } from '../../../domain/services/feed-cache-key.service';
 import { VideoStatus } from '../../../../../common/enum/video-status.enum';
 import { FEED_VIDEO_ASSET_URL_PORT, type FeedVideoAssetUrlPort } from '../ports/feed-video-asset-url.port';
@@ -31,7 +32,7 @@ export class GetVideoMetaUseCase {
 
         const video = await this.feedVideoReader.readById(videoId);
         if (!video) {
-            throw new BadRequestException('동영상을 찾을 수 없습니다.');
+            throw new DomainNotFoundError('동영상을 찾을 수 없습니다.');
         }
 
         if (video.status !== VideoStatus.READY) {

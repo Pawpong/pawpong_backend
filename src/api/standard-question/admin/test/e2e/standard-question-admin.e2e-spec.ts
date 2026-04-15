@@ -31,6 +31,18 @@ describe('기본 질문 관리자 종단간 테스트', () => {
 
         if (loginResponse.status === 200 && loginResponse.body.data?.accessToken) {
             adminToken = loginResponse.body.data.accessToken;
+
+            await request(app.getHttpServer())
+                .post('/api/standard-question-admin/reseed')
+                .set('Authorization', `Bearer ${adminToken}`);
+
+            const questionListResponse = await request(app.getHttpServer())
+                .get('/api/standard-question-admin')
+                .set('Authorization', `Bearer ${adminToken}`);
+
+            if (questionListResponse.status === 200 && questionListResponse.body.data?.length > 0) {
+                questionId = questionListResponse.body.data[0].id;
+            }
         } else {
             console.log('주의: 관리자 로그인 실패, 일부 테스트 스킵될 수 있음');
         }
@@ -58,12 +70,6 @@ describe('기본 질문 관리자 종단간 테스트', () => {
 
             expect(response.body.success).toBe(true);
             expect(Array.isArray(response.body.data)).toBe(true);
-
-            // 첫 번째 질문 ID 저장 (다른 테스트에서 사용)
-            if (response.body.data.length > 0) {
-                questionId = response.body.data[0].id;
-            }
-
             console.log('모든 표준 질문 조회 성공');
         });
 
@@ -87,7 +93,7 @@ describe('기본 질문 관리자 종단간 테스트', () => {
             const response = await request(app.getHttpServer())
                 .patch(`/api/standard-question-admin/${questionId}`)
                 .set('Authorization', `Bearer ${adminToken}`)
-                .send({ title: '수정된 질문 제목' })
+                .send({ label: '수정된 질문 제목' })
                 .expect(200);
 
             expect(response.body.success).toBe(true);
@@ -97,7 +103,7 @@ describe('기본 질문 관리자 종단간 테스트', () => {
         it('인증 없이 접근 시 401 에러', async () => {
             await request(app.getHttpServer())
                 .patch('/api/standard-question-admin/some-id')
-                .send({ title: '수정 시도' })
+                .send({ label: '수정 시도' })
                 .expect(401);
 
             console.log('인증 없이 접근 실패 확인');
