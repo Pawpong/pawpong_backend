@@ -1,7 +1,7 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { NOTICE_WRITER_PORT, type NoticeWriterPort } from '../ports/notice-writer.port';
 
 @Injectable()
@@ -16,25 +16,24 @@ export class DeleteNoticeUseCase {
         this.logger.logStart('deleteNotice', '공지사항 삭제 시작', { noticeId, adminId });
 
         if (!noticeId) {
-            throw new BadRequestException('공지사항 ID가 필요합니다.');
+            throw new DomainValidationError('공지사항 ID가 필요합니다.');
         }
 
         if (!adminId) {
-            throw new BadRequestException('관리자 정보가 올바르지 않습니다.');
+            throw new DomainValidationError('관리자 정보가 올바르지 않습니다.');
         }
 
         try {
             const deleted = await this.noticeWriter.delete(noticeId);
 
             if (!deleted) {
-                throw new NotFoundException('공지사항을 찾을 수 없습니다.');
+                throw new DomainNotFoundError('공지사항을 찾을 수 없습니다.');
             }
 
             this.logger.logSuccess('deleteNotice', '공지사항 삭제 완료', { noticeId });
         } catch (error) {
-            rethrowIfHttpException(error);
             this.logger.logError('deleteNotice', '공지사항 삭제', error);
-            throw new BadRequestException('공지사항 삭제에 실패했습니다.');
+            throw error;
         }
     }
 }

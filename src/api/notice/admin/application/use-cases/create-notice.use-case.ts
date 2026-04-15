@@ -1,7 +1,7 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainValidationError } from '../../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { NoticeItemMapperService } from '../../../domain/services/notice-item-mapper.service';
 import { NOTICE_WRITER_PORT, type NoticeWriterPort } from '../ports/notice-writer.port';
 import type { NoticeCreateCommand } from '../types/notice-command.type';
@@ -20,7 +20,7 @@ export class CreateNoticeUseCase {
         this.logger.logStart('createNotice', '공지사항 생성 시작', { adminId, createData });
 
         if (!adminId) {
-            throw new BadRequestException('관리자 정보가 올바르지 않습니다.');
+            throw new DomainValidationError('관리자 정보가 올바르지 않습니다.');
         }
 
         try {
@@ -32,9 +32,8 @@ export class CreateNoticeUseCase {
 
             return this.noticeItemMapperService.toItem(notice);
         } catch (error) {
-            rethrowIfHttpException(error);
             this.logger.logError('createNotice', '공지사항 생성', error);
-            throw new BadRequestException('공지사항 생성에 실패했습니다.');
+            throw error;
         }
     }
 }

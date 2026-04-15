@@ -1,7 +1,7 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError, DomainValidationError } from '../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
-import { rethrowIfHttpException } from '../../../../common/utils/http-exception.util';
 import { NoticeItemMapperService } from '../../domain/services/notice-item-mapper.service';
 import { NOTICE_READER_PORT, type NoticeReaderPort } from '../ports/notice-reader.port';
 import type { NoticeItemResult } from '../types/notice-result.type';
@@ -19,14 +19,14 @@ export class GetNoticeDetailUseCase {
         this.logger.logStart('getNoticeDetail', '공지사항 상세 조회 시작', { noticeId, increaseView });
 
         if (!noticeId) {
-            throw new BadRequestException('공지사항 ID가 필요합니다.');
+            throw new DomainValidationError('공지사항 ID가 필요합니다.');
         }
 
         try {
             const notice = await this.noticeReader.readById(noticeId);
 
             if (!notice) {
-                throw new NotFoundException('공지사항을 찾을 수 없습니다.');
+                throw new DomainNotFoundError('공지사항을 찾을 수 없습니다.');
             }
 
             if (increaseView) {
@@ -36,9 +36,8 @@ export class GetNoticeDetailUseCase {
             this.logger.logSuccess('getNoticeDetail', '공지사항 상세 조회 완료', { noticeId });
             return this.noticeItemMapperService.toItem(notice);
         } catch (error) {
-            rethrowIfHttpException(error);
             this.logger.logError('getNoticeDetail', '공지사항 상세 조회', error);
-            throw new BadRequestException('공지사항 조회에 실패했습니다.');
+            throw error;
         }
     }
 }
