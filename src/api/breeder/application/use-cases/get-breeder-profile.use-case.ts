@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError, DomainValidationError } from '../../../../common/error/domain.error';
 import { BREEDER_FILE_URL_PORT } from '../ports/breeder-file-url.port';
 import { BREEDER_PUBLIC_READER_PORT } from '../ports/breeder-public-reader.port';
 import type { BreederFileUrlPort } from '../ports/breeder-file-url.port';
@@ -20,11 +21,11 @@ export class GetBreederProfileUseCase {
     async execute(breederId: string, userId?: string): Promise<BreederProfileResult> {
         const breeder = await this.breederPublicReaderPort.findPublicBreederById(breederId);
         if (!breeder) {
-            throw new BadRequestException('브리더를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('브리더를 찾을 수 없습니다.');
         }
 
         if (breeder.accountStatus === 'deleted') {
-            throw new BadRequestException('탈퇴한 브리더의 프로필은 조회할 수 없습니다.');
+            throw new DomainValidationError('탈퇴한 브리더의 프로필은 조회할 수 없습니다.');
         }
 
         let isFavorited = false;
