@@ -75,7 +75,7 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
                 .send({})
                 .expect(400);
 
-            expect(response.body.message).toContain('올바르지 않은 배너 ID 형식');
+            expect(response.body.error).toContain('올바르지 않은 배너 ID 형식');
             console.log('잘못된 프로필 배너 ID 400 확인');
         });
 
@@ -87,7 +87,7 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
                 .set('Authorization', `Bearer ${adminToken}`)
                 .expect(400);
 
-            expect(response.body.message).toContain('올바르지 않은 배너 ID 형식');
+            expect(response.body.error).toContain('올바르지 않은 배너 ID 형식');
             console.log('잘못된 프로필 배너 삭제 ID 400 확인');
         });
     });
@@ -126,7 +126,7 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
                 .send({})
                 .expect(400);
 
-            expect(response.body.message).toContain('올바르지 않은 배너 ID 형식');
+            expect(response.body.error).toContain('올바르지 않은 배너 ID 형식');
             console.log('잘못된 상담 배너 ID 400 확인');
         });
 
@@ -138,7 +138,7 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
                 .set('Authorization', `Bearer ${adminToken}`)
                 .expect(400);
 
-            expect(response.body.message).toContain('올바르지 않은 배너 ID 형식');
+            expect(response.body.error).toContain('올바르지 않은 배너 ID 형식');
             console.log('잘못된 상담 배너 삭제 ID 400 확인');
         });
     });

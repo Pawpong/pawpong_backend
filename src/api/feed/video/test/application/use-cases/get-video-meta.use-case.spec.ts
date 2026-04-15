@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../../common/error/domain.error';
 import { VideoStatus } from '../../../../../../common/enum/video-status.enum';
 import { GetVideoMetaUseCase } from '../../../application/use-cases/get-video-meta.use-case';
 import { FeedVideoMetaAssemblerService } from '../../../domain/services/feed-video-meta-assembler.service';
@@ -85,10 +84,10 @@ describe('비디오 메타정보 조회 유스케이스', () => {
         expect(feedVideoReader.readById).not.toHaveBeenCalled();
     });
 
-    it('비디오를 찾을 수 없으면 BadRequestException을 던진다', async () => {
+    it('비디오를 찾을 수 없으면 DomainNotFoundError를 던진다', async () => {
         feedVideoReader.readById.mockResolvedValue(null);
 
-        await expect(useCase.execute('nonexistent-video')).rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('nonexistent-video')).rejects.toThrow(DomainNotFoundError);
         await expect(useCase.execute('nonexistent-video')).rejects.toThrow('동영상을 찾을 수 없습니다.');
     });
 });

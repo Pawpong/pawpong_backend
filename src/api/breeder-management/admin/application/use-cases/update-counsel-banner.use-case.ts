@@ -1,5 +1,6 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
+import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { BreederManagementBannerResultMapperService } from '../../domain/services/breeder-management-banner-result-mapper.service';
 import {
     BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER_PORT,
@@ -23,7 +24,7 @@ export class UpdateCounselBannerUseCase {
         const banner = await this.bannerWriter.updateCounsel(bannerId, data);
 
         if (!banner) {
-            throw new BadRequestException('상담 배너를 찾을 수 없습니다.');
+            throw new DomainNotFoundError('상담 배너를 찾을 수 없습니다.');
         }
 
         return this.breederManagementBannerResultMapperService.toCounselResult(banner);

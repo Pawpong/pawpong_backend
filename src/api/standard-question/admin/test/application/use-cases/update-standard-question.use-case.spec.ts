@@ -1,5 +1,4 @@
-import { BadRequestException } from '@nestjs/common';
-
+import { DomainNotFoundError } from '../../../../../../common/error/domain.error';
 import { UpdateStandardQuestionUseCase } from '../../../application/use-cases/update-standard-question.use-case';
 import { StandardQuestionResultMapperService } from '../../../../domain/services/standard-question-result-mapper.service';
 import { StandardQuestionWriterPort } from '../../../application/ports/standard-question-writer.port';
@@ -41,6 +40,6 @@ describe('기본 질문 수정 유스케이스', () => {
             new StandardQuestionResultMapperService(),
         );
 
-        await expect(useCase.execute('missing', { label: '수정' })).rejects.toBeInstanceOf(BadRequestException);
+        await expect(useCase.execute('missing', { label: '수정' })).rejects.toBeInstanceOf(DomainNotFoundError);
     });
 });
