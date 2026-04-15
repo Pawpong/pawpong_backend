@@ -1,6 +1,7 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { rethrowIfHttpException } from '../../../../../common/utils/http-exception.util';
 import { NOTIFICATION_ADMIN_READER_PORT } from '../ports/notification-admin-reader.port';
 import type { NotificationAdminReaderPort } from '../ports/notification-admin-reader.port';
 import { NotificationAdminPageAssemblerService } from '../../domain/services/notification-admin-page-assembler.service';
@@ -48,8 +49,9 @@ export class GetAdminNotificationsUseCase {
 
             return response;
         } catch (error) {
+            rethrowIfHttpException(error);
             this.logger.logError('getNotifications', '관리자 알림 목록 조회 실패', error);
-            throw new BadRequestException('알림 목록을 조회할 수 없습니다.');
+            throw error;
         }
     }
 }
