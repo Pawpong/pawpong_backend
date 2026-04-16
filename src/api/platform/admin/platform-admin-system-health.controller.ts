@@ -52,7 +52,8 @@ export class PlatformAdminSystemHealthController {
             },
             services: result.services,
             summary: result.summary,
-            issueGroups: result.issueGroups,
+            // groupKey는 도메인 내부 식별자이므로 API 응답에서 제외합니다.
+            issueGroups: result.issueGroups.map(({ groupKey: _, ...rest }) => rest),
         };
 
         return ApiResponseDto.success(response, '서버 현황이 조회되었습니다.');
