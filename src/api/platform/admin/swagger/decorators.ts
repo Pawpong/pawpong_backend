@@ -14,7 +14,7 @@ export function ApiGetSystemHealthEndpoint() {
 서버에서 발생한 로그를 분석하여 PM이 읽기 쉬운 형태의 시스템 상태를 반환합니다.
 
 **분류 카테고리:**
-- \`infrastructure\` — Kafka 등 인프라 연결 오류
+- \`infrastructure\` — Kafka, Redis 등 인프라 연결 오류
 - \`api_error\` — API 엔드포인트 오류
 - \`security_probe\` — 외부 봇/스캐너 스캔 (서비스 영향 없음)
 - \`application\` — 애플리케이션 내부 오류
