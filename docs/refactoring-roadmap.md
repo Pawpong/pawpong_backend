@@ -46,7 +46,7 @@ controller -> use-case -> domain
 - DTO 이름은 `행위 + RequestDto`, `행위 + ResponseDto` 패턴으로 통일한다.
 - 외부 API 입출력 계약은 `class DTO`로 표현하고, controller 경계에서만 사용한다.
 - 내부 단순 데이터 계약은 `interface` 대신 `type`을 우선 사용한다.
-- Nest DI 경계에 필요한 port는 `interface + symbol` 남발 대신 `abstract class`를 우선 사용한다.
+- Nest DI 경계는 `type/interface + symbol token` 조합을 기본으로 사용하고, 런타임 토큰은 계약 파일과 분리한다.
 - `interface`는 외부 라이브러리 타입 보강, 다중 구현이 분명한 순수 TypeScript 계약 등 꼭 필요한 곳에만 제한적으로 사용한다.
 - 비즈니스 규칙은 service가 아니라 use-case 또는 domain service로 이동한다.
 - repository는 mongoose model 직접 접근을 숨기는 thin abstraction으로 유지한다.
@@ -68,108 +68,34 @@ controller -> use-case -> domain
 
 ## Current Progress
 
-- `health` 도메인:
-  - `controller -> use-case -> port -> adapter -> domain entity` 구조로 정리
-  - 기존 응답 유지
-  - e2e 테스트 통과
-  - 타입체크 통과
-- `auth` 도메인:
-  - 토큰/세션 경계를 `use-case + port + adapter + token service`로 분리
-  - `refresh/logout` 컨트롤러가 `AuthService` 대신 use-case를 직접 호출하도록 정리
-  - 회원가입/소셜 사용자 체크 흐름을 `controller -> use-case -> port -> adapter`로 분리
-  - 이메일/닉네임/브리더명 중복 확인 흐름을 `controller -> use-case -> registration port -> adapter`로 분리
-  - 회원가입 전 임시 업로드 저장소를 별도 store로 분리하고, 프로필/서류 업로드와 가입 플로우가 같은 저장소를 공유하도록 정리
-  - 프로필 이미지 업로드와 브리더 인증 서류 업로드를 `controller -> use-case -> file-store port -> adapter` 구조로 분리
-  - 프로필 이미지 저장 대상 갱신과 임시 업로드 저장을 각각 `target port`와 `temp upload port` 뒤로 이동
-  - 업로드 파일 크기/서류 타입 검증, 원본 파일명 정규화 규칙을 domain service로 이동
-  - OAuth callback / redirect 쿠키 플로우를 `ProcessSocialLoginCallbackUseCase + social callback adapter + response factory`로 분리
-  - `auth-registration`, `auth-registration-notification`, `auth-session`, `auth-temp-upload`, `auth-upload-file-store`, `auth-profile-image-target` 포트를 `abstract class + type` 기준으로 정리
-  - 기존 응답/메시지 유지
-  - 기존 auth e2e 테스트 통과
-  - 업로드 응답 계약 e2e 테스트 추가
-  - 타입체크 통과
-- `district` 도메인:
-  - 조회 경계를 `use-case + reader port + mongoose adapter + ordering domain service`로 분리
-  - 기존 응답 유지
-  - e2e 테스트 통과
-  - 타입체크 통과
-- `upload` 도메인:
-  - 컨트롤러가 `UploadService` 대신 `use-case`를 직접 호출하도록 정리
-  - 스토리지 경계를 `file store port + storage adapter`로 분리
-  - 브리더 소유 리소스 조회/갱신을 `owner port + mongoose adapter`로 분리
-  - 파일 검증/경로 정규화/사진 병합 규칙을 domain service로 이동
-  - 기존 응답/메시지 유지
-  - upload e2e 테스트 통과
-  - 타입체크 통과
-- `notification` 도메인:
-  - 사용자 알림 inbox 조회/읽음 처리/삭제 흐름을 `controller -> use-case -> inbox port -> mongoose adapter` 구조로 분리
-  - 응답 조립 책임을 mapper/domain service로 분리
-  - 기존 `NotificationService`는 다른 도메인의 알림 생성/빌더 사용을 위해 유지하고, 사용자 inbox 메서드만 use-case 위임 형태로 얇게 정리
-  - 기존 응답/메시지 유지
-  - notification e2e 테스트 통과
-  - 타입체크 통과
-- `adopter` 도메인:
-  - 프로필/즐겨찾기 흐름을 `controller -> use-case -> port -> adapter` 구조로 분리
-  - 입양 신청 생성 명령 흐름을 `controller -> use-case -> port -> adapter` 구조로 분리
-  - 후기 작성/후기 신고 명령 흐름을 `controller -> use-case -> port -> adapter` 구조로 분리
-  - 후기 목록/상세 조회 흐름을 `controller -> use-case -> port -> adapter` 구조로 분리
-  - 입양 신청 목록/상세 조회 흐름을 `controller -> use-case -> port -> adapter` 구조로 분리
-  - 회원 탈퇴 명령 흐름을 `controller -> use-case -> port -> adapter` 구조로 분리
-  - 신청 생성의 표준 응답/커스텀 응답 조립, 생성 응답 조립 책임을 domain service로 분리
-  - 신청 생성의 개체 조회/중복 신청 검사/알림 발송을 command port와 notifier port 뒤로 이동
-  - 후기 생성 응답과 후기 신고 응답 조립 책임을 response factory/domain service로 이동
-  - 후기 생성의 신청 조회/후기 저장/브리더 통계 갱신을 review command port 뒤로 이동
-  - 후기 목록/상세 조회 응답 조립 책임을 response factory/domain service로 이동
-  - 회원 탈퇴 응답 조립 책임을 response factory/domain service로 이동
-  - 새로 추가한 adopter 내부 계약은 `DTO class + type + abstract class` 기준으로 정리
-  - 신청 목록/상세 응답 조립 책임을 assembler/domain service로 이동
-  - 즐겨찾기 추가/삭제 규칙을 domain service로 이동
-  - 프로필 이미지/브리더 이미지 signed URL 조립을 포트 뒤로 이동
-  - 기존 응답/메시지 유지
-  - adopter e2e 테스트 통과
-  - 타입체크 통과
-- `breeder-management` 도메인:
-  - `dashboard + profile` 슬라이스를 먼저 `controller -> use-case -> port -> adapter` 구조로 분리
-  - `verification status + verification submit + verification document upload/submit + application-form` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 추가 분리
-  - `received applications + my-pets + my-reviews` 조회 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
-  - `parent-pets + available-pets` 명령 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
-  - `review reply` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
-  - `application detail + application status` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
-  - 대시보드/프로필 응답 조립 책임을 assembler/domain service로 이동
-  - 프로필 수정의 중첩 update payload 구성 책임을 mapper/domain service로 이동
-  - 부모견/분양개체 DTO -> 저장 모델 변환 책임을 command mapper/domain service로 이동
-  - 답글 응답 조립 책임을 response factory/domain service로 이동
-  - 신청 상세 응답 조립과 상태 변경 응답 생성을 assembler/factory domain service로 이동
-  - verification 문서 signed URL 조립, 임시 draft 저장, 디스코드 payload 생성 책임을 domain service + port로 이동
-  - 표준 질문 카탈로그, 신청 폼 검증, 간소화 질문 빌드 책임을 domain service로 이동
-  - 기존 `BreederManagementService`는 남은 미분리 슬라이스 호환을 위해 유지하고, 분리된 메서드는 use-case 위임 형태로 얇게 정리
-  - 기존 응답/메시지 유지
-  - breeder-management e2e 테스트 통과
-  - verification 문서 upload/submit 응답 계약 e2e 테스트 추가
-  - 타입체크 통과
-- `breeder` 도메인:
-  - 공개 조회 `search + profile` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
-  - 공개 조회 `explore + popular` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
-  - 공개 조회 `reviews + pets + pet detail + parent-pets + application-form` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
-  - 검색 필터/정렬 조립 책임을 domain service로 분리
-  - 탐색 필터/정렬 조립, 찜 목록 조회, 카드 응답 조립 책임을 domain service로 분리
-  - 공개 프로필 응답 조립과 부모견 생년월일 포맷팅 책임을 assembler/domain service로 분리
-  - 기존 `BreederService`는 후기/개체/신청폼 조회 흐름 호환을 위해 유지하고, 분리된 공개 조회 메서드를 use-case 위임 형태로 얇게 정리
-  - 기존 `BreederExploreService`는 explore/popular 호환을 위해 유지하고, use-case 위임 형태로 얇게 정리
-  - 기존 응답/메시지 유지
-  - breeder e2e 테스트 통과
-  - 타입체크 통과
-- `announcement` 도메인:
-  - 공개 공지사항 `list + detail` 슬라이스를 `controller -> use-case -> port -> adapter` 구조로 분리
-  - 공지사항 응답 조립과 페이지네이션 응답 조립 책임을 response mapper/domain service로 이동
-  - 기존 `AnnouncementService`는 호환을 위해 유지하고, 분리된 조회 메서드를 use-case 위임 형태로 얇게 정리
-  - 기존 응답/상태코드 유지
-  - announcement unit/e2e 테스트 통과
-  - 타입체크 통과
-- `filter-options` 도메인:
-  - 정적 필터 옵션 조회를 `controller -> use-case -> domain service` 구조로 분리
-  - 필터 옵션 카탈로그를 domain service로 이동하고 내부 계약은 `type`으로 정리
-  - 기존 `FilterOptionsService`는 호환을 위해 유지하고, 분리된 조회 메서드를 use-case 위임 형태로 얇게 정리
-  - 기존 응답/메시지 유지
-  - filter-options unit/e2e 테스트 통과
-  - 타입체크 통과
+`refactoring` 브랜치는 초기 로드맵 기준의 큰 구조 작업을 사실상 마무리한 상태다.
+
+### Completed Snapshot
+
+- 전 도메인에서 `controller -> use-case -> port -> adapter` 의존 방향을 기본 규칙으로 맞췄다.
+- `src/api` 기준 `*.module.ts`와 `*.module-definition.ts`가 `28/28`로 일치한다.
+- production 기준 `application/use-cases` 안의 Nest HTTP 예외 참조는 `0건`이다.
+- production 기준 `presentation.service`, `response-service`, `response-mapper` 네이밍 잔량은 `0건`이다.
+- `*.spec.ts`, `*.e2e-spec.ts`가 `test/` 밖에 남아 있는 케이스는 `0건`이다.
+- 공통 provider/export 패턴은 `token + useExisting + export` 기준으로 맞췄다.
+- 전역 예외 응답은 `AllExceptionsFilter` 하나로 수렴했고, guard/pipe도 `DomainError` 기준으로 통일했다.
+
+### Domain Coverage
+
+- public/admin API 전반이 use-case 직접 호출 구조로 바뀌었다.
+- `auth`, `upload`, `notification`, `adopter`, `breeder`, `breeder-management`, `announcement`, `notice`, `inquiry`, `feed`, `app-version`, `district`, `breed`, `platform-admin`, `user-admin`, `notification-admin`, `standard-question`, `home`, `filter-options`, `health`까지 리팩토링 흐름을 반영했다.
+- 조회 응답 조립 책임은 mapper/assembler/result-mapper/builder로 재명명해 역할 단위로 쪼갰다.
+- social callback, HLS streaming, logout cookie 같은 HTTP 특화 흐름은 presentation interceptor/factory로 이동했다.
+- domain/application/infrastructure 경계에서 schema, DTO, storage, social callback, notification dispatch, signed URL 조립 같은 인프라 결합을 분리했다.
+
+### Test & Harness
+
+- 도메인별 unit/e2e 보강과 함께 공통 하네스 `src/common/test/test-utils.ts`를 기준으로 테스트 앱 구성을 통일했다.
+- `src/common/test`에는 pipe, guard, strategy, alimtalk admin 공통 스펙을 두어 cross-cutting 규칙을 고정했다.
+- 리팩토링 중 추가한 대표 보강 범위는 social callback, JWT strategy/guard, upload admin, feed video/tag, inquiry, app-version, common exception/filter 흐름이다.
+
+### Remaining Work
+
+- 구조 리팩토링 자체보다는 문서/테스트 보강, naming polish, 운영 하네스 안정화가 남은 단계다.
+- Redis/BullMQ, Discord webhook, AWS 자격증명 같은 외부 의존 경고는 테스트 환경에서 여전히 로그로 남을 수 있다.
+- strict DDD 관점의 `entities / value-objects / events` 세분화는 일부 도메인에서 여지를 남겨두고 있으며, 현재는 실용적인 헥사고날 경계 정리에 초점을 둔 상태다.
