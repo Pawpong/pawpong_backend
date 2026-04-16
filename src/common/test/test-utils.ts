@@ -12,6 +12,20 @@ import { HttpStatusInterceptor } from '../interceptor/http-status.interceptor';
 /** 테스트용 인메모리 MongoDB 인스턴스 */
 let mongod: MongoMemoryServer;
 
+function applyTestingEnvironment(): void {
+    process.env.PAWPONG_TEST_MODE = 'true';
+    process.env.PAWPONG_SUPPRESS_EXTERNAL_WARNINGS = 'true';
+
+    // 테스트 환경에서는 외부 알림 서비스 비활성화 (실제 채널로 알림 발송 방지)
+    process.env.DISCORD_SIGN_WEBHOOK_URL = '';
+    process.env.DISCORD_DOCUMENT_WEBHOOK_URL = '';
+    process.env.DISCORD_WITHDRAWAL_WEBHOOK_URL = '';
+    process.env.COOLSMS_API_KEY = '';
+    process.env.COOLSMS_API_SECRET = '';
+    process.env.MAIL_USER = '';
+    process.env.MAIL_PASSWORD = '';
+}
+
 /**
  * E2E 테스트용 NestJS 애플리케이션 생성
  *
@@ -33,13 +47,7 @@ export async function createTestingApp(): Promise<INestApplication> {
 
     // MONGODB_URI 환경변수를 인메모리 서버로 오버라이드
     process.env.MONGODB_URI = mongoUri;
-
-    // 테스트 환경에서는 외부 알림 서비스 비활성화 (실제 채널로 알림 발송 방지)
-    process.env.DISCORD_SIGN_WEBHOOK_URL = '';
-    process.env.DISCORD_DOCUMENT_WEBHOOK_URL = '';
-    process.env.DISCORD_WITHDRAWAL_WEBHOOK_URL = '';
-    process.env.COOLSMS_API_KEY = '';
-    process.env.COOLSMS_API_SECRET = '';
+    applyTestingEnvironment();
 
     const moduleFixture: TestingModule = await Test.createTestingModule({
         imports: [AppModule],
@@ -66,6 +74,24 @@ export async function createTestingApp(): Promise<INestApplication> {
     app.useGlobalInterceptors(new HttpStatusInterceptor());
 
     await app.init();
+
+    const originalClose = app.close.bind(app);
+    let closed = false;
+
+    app.close = async () => {
+        if (closed) {
+            return;
+        }
+
+        closed = true;
+        await originalClose();
+
+        if (mongod) {
+            await mongod.stop();
+            mongod = undefined as any;
+        }
+    };
+
     return app;
 }
 
@@ -77,11 +103,6 @@ export async function createTestingApp(): Promise<INestApplication> {
  */
 export async function closeTestingApp(app: INestApplication): Promise<void> {
     await app.close();
-
-    if (mongod) {
-        await mongod.stop();
-        mongod = undefined as any;
-    }
 }
 
 /**
@@ -237,9 +258,7 @@ export async function getAdminToken(app: INestApplication, password: string = 'a
     const request = require('supertest');
     const { email } = await seedAdmin(app, password);
 
-    const loginResponse = await request(app.getHttpServer())
-        .post('/api/auth-admin/login')
-        .send({ email, password });
+    const loginResponse = await request(app.getHttpServer()).post('/api/auth-admin/login').send({ email, password });
 
     if (loginResponse.status === 200 && loginResponse.body.data?.accessToken) {
         return loginResponse.body.data.accessToken;
@@ -250,9 +269,7 @@ export async function getAdminToken(app: INestApplication, password: string = 'a
 /**
  * 입양자 등록 API를 통해 토큰 반환
  */
-export async function getAdopterToken(
-    app: INestApplication,
-): Promise<{ token: string; adopterId: string } | null> {
+export async function getAdopterToken(app: INestApplication): Promise<{ token: string; adopterId: string } | null> {
     const request = require('supertest');
     const timestamp = Date.now();
     const providerId = Math.random().toString().substr(2, 10);
@@ -279,9 +296,7 @@ export async function getAdopterToken(
 /**
  * 브리더 등록 API를 통해 토큰 반환
  */
-export async function getBreederToken(
-    app: INestApplication,
-): Promise<{ token: string; breederId: string } | null> {
+export async function getBreederToken(app: INestApplication): Promise<{ token: string; breederId: string } | null> {
     const request = require('supertest');
     const timestamp = Date.now();
 

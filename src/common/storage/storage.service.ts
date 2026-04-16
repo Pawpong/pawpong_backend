@@ -25,9 +25,28 @@ export class StorageService {
     private s3: S3Client;
     private bucketName: string;
     private cdnBaseUrl: string;
+    private readonly isTestMode: boolean;
+    private readonly inMemoryObjects = new Map<
+        string,
+        {
+            body: Buffer;
+            contentType: string;
+            lastModified: Date;
+        }
+    >();
     private readonly logger = new Logger(StorageService.name);
 
     constructor(private configService: ConfigService) {
+        this.isTestMode =
+            this.configService.get<string>('PAWPONG_TEST_MODE') === 'true' || process.env.PAWPONG_TEST_MODE === 'true';
+
+        if (this.isTestMode) {
+            this.bucketName = 'pawpong-test';
+            this.cdnBaseUrl = this.configService.get<string>('SMILESERV_CDN_BASE_URL') || 'https://cdn.test';
+            this.logger.log('[StorageService] 테스트 모드 인메모리 스토리지를 사용합니다.');
+            return;
+        }
+
         try {
             this.logger.log('[StorageService] Initializing SmileServ Object Storage...');
 
@@ -79,6 +98,17 @@ export class StorageService {
 
         const fileName = this.generateFileName(file.originalname, folder);
 
+        if (this.isTestMode) {
+            this.inMemoryObjects.set(fileName, {
+                body: Buffer.from(file.buffer || []),
+                contentType: file.mimetype,
+                lastModified: new Date(),
+            });
+
+            const cdnUrl = this.getCdnUrl(fileName);
+            return { fileName, cdnUrl, storageUrl: cdnUrl };
+        }
+
         try {
             const command = new PutObjectCommand({
                 Bucket: this.bucketName,
@@ -117,6 +147,11 @@ export class StorageService {
      * 파일 삭제
      */
     async deleteFile(fileName: string): Promise<void> {
+        if (this.isTestMode) {
+            this.inMemoryObjects.delete(this.stripBucketPrefix(fileName));
+            return;
+        }
+
         try {
             const command = new DeleteObjectCommand({
                 Bucket: this.bucketName,
@@ -135,6 +170,10 @@ export class StorageService {
      * 파일 존재 여부 확인
      */
     async fileExists(fileName: string): Promise<boolean> {
+        if (this.isTestMode) {
+            return this.inMemoryObjects.has(this.stripBucketPrefix(fileName));
+        }
+
         try {
             const command = new HeadObjectCommand({
                 Bucket: this.bucketName,
@@ -244,6 +283,24 @@ export class StorageService {
      * 버킷 내 파일 목록 조회 (Admin용)
      */
     async listObjects(prefix?: string, maxKeys: number = 1000) {
+        if (this.isTestMode) {
+            const keys = [...this.inMemoryObjects.entries()]
+                .filter(([fileName]) => !prefix || fileName.startsWith(prefix))
+                .slice(0, maxKeys);
+
+            return {
+                Contents: keys.map(([fileName, object]) => ({
+                    Key: fileName,
+                    Size: object.body.length,
+                    LastModified: object.lastModified,
+                    ETag: `"${fileName}"`,
+                })),
+                IsTruncated: this.inMemoryObjects.size > maxKeys,
+                KeyCount: keys.length,
+                $metadata: {},
+            };
+        }
+
         const command = new ListObjectsV2Command({
             Bucket: this.bucketName,
             Prefix: prefix || '',
@@ -268,6 +325,10 @@ export class StorageService {
      * @returns Presigned URL
      */
     async generatePresignedUploadUrl(fileKey: string, expirationSeconds: number = 600): Promise<string> {
+        if (this.isTestMode) {
+            return `https://upload.test/${fileKey}?expiresIn=${expirationSeconds}`;
+        }
+
         const command = new PutObjectCommand({
             Bucket: this.bucketName,
             Key: fileKey,
@@ -288,6 +349,12 @@ export class StorageService {
      * @param localPath 로컬 저장 경로
      */
     async downloadFile(fileKey: string, localPath: string): Promise<void> {
+        if (this.isTestMode) {
+            const object = this.inMemoryObjects.get(this.stripBucketPrefix(fileKey));
+            fs.writeFileSync(localPath, object?.body || Buffer.alloc(0));
+            return;
+        }
+
         try {
             const command = new GetObjectCommand({
                 Bucket: this.bucketName,
@@ -325,6 +392,15 @@ export class StorageService {
         fileKey: string,
         contentType: string = 'application/octet-stream',
     ): Promise<void> {
+        if (this.isTestMode) {
+            this.inMemoryObjects.set(fileKey, {
+                body: fs.readFileSync(localPath),
+                contentType,
+                lastModified: new Date(),
+            });
+            return;
+        }
+
         try {
             const fileContent = fs.readFileSync(localPath);
 
@@ -352,6 +428,11 @@ export class StorageService {
      * @returns Readable 스트림
      */
     async getFileStream(fileKey: string): Promise<Readable> {
+        if (this.isTestMode) {
+            const object = this.inMemoryObjects.get(this.stripBucketPrefix(fileKey));
+            return Readable.from(object?.body || Buffer.alloc(0));
+        }
+
         try {
             const command = new GetObjectCommand({
                 Bucket: this.bucketName,

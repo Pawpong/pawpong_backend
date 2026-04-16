@@ -77,6 +77,7 @@ export class AlimtalkService implements OnModuleInit {
     private readonly logger = new Logger(AlimtalkService.name);
     private readonly senderPhone: string;
     private readonly pfId: string; // 카카오 채널 ID
+    private readonly suppressExternalWarnings: boolean;
 
     // 템플릿 캐시 (DB 조회 최소화)
     private templateCache: Map<string, CachedTemplate> = new Map();
@@ -86,6 +87,9 @@ export class AlimtalkService implements OnModuleInit {
         @InjectModel(AlimtalkTemplateSchema.name)
         private readonly alimtalkTemplateModel: Model<AlimtalkTemplateDocument>,
     ) {
+        this.suppressExternalWarnings =
+            this.configService.get<string>('PAWPONG_SUPPRESS_EXTERNAL_WARNINGS') === 'true' ||
+            process.env.PAWPONG_SUPPRESS_EXTERNAL_WARNINGS === 'true';
         const apiKey = this.configService.get<string>('COOLSMS_API_KEY');
         const apiSecret = this.configService.get<string>('COOLSMS_API_SECRET');
         this.senderPhone = this.configService.get<string>('COOLSMS_SENDER_PHONE') || '';
@@ -94,7 +98,7 @@ export class AlimtalkService implements OnModuleInit {
         if (apiKey && apiSecret) {
             this.messageService = new CoolsmsMessageService(apiKey, apiSecret);
             this.logger.log('[AlimtalkService] CoolSMS 서비스 초기화 완료');
-        } else {
+        } else if (!this.suppressExternalWarnings) {
             this.logger.warn('[AlimtalkService] CoolSMS API 키가 설정되지 않았습니다.');
         }
     }
