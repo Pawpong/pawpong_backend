@@ -1,5 +1,6 @@
-import { BadRequestException, Injectable, PipeTransform } from '@nestjs/common';
+import { Injectable, PipeTransform } from '@nestjs/common';
 
+import { DomainValidationError } from '../error/domain.error';
 import { isMongoObjectId } from '../utils/mongo-object-id.util';
 
 @Injectable()
@@ -11,7 +12,7 @@ export class MongoObjectIdPipe implements PipeTransform<string, string> {
 
     transform(value: string): string {
         if (!isMongoObjectId(value)) {
-            throw new BadRequestException(this.customMessage ?? `${this.resourceName} ID 형식이 올바르지 않습니다.`);
+            throw new DomainValidationError(this.customMessage ?? `${this.resourceName} ID 형식이 올바르지 않습니다.`);
         }
 
         return value;
