@@ -1,98 +1,70 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Pawpong Backend
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Pawpong 백엔드 API 서버입니다. `NestJS + MongoDB` 기반으로 구성되어 있고, 현재 코드는 `controller -> use-case -> port -> adapter` 흐름과 `DomainError + AllExceptionsFilter` 예외 응답 규칙을 기준으로 정리돼 있습니다.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+## Quick Start
 
 ```bash
-$ npm install
+yarn install
+yarn typecheck
+yarn start:dev
 ```
 
-## Compile and run the project
+프로덕션 실행:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+yarn build
+yarn start:prod
 ```
 
-## Run tests
+## Useful Commands
 
 ```bash
-# unit tests
-$ npm run test
+# 타입 검사
+yarn typecheck
 
-# e2e tests
-$ npm run test:e2e
+# unit test
+yarn test --runInBand
 
-# test coverage
-$ npm run test:cov
+# e2e test
+yarn test:e2e --runInBand --forceExit
+
+# 공통 리팩토링 하네스
+./scripts/harness/arch.sh
+./scripts/harness/contract.sh
+./scripts/harness/regression.sh
 ```
 
-## Deployment
+## Architecture Snapshot
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+- `module-definition` 패턴이 전 API 모듈에 적용돼 있습니다.
+- production 기준 `application/use-cases`의 HTTP 예외/HTTP 유틸 참조는 `0건`입니다.
+- production 기준 `application -> dto/schema/infrastructure` 직접 import는 `0건`입니다.
+- production 기준 `test/` 밖 `*.spec.ts`, `*.e2e-spec.ts`는 `0건`입니다.
+- 공통 provider/export 패턴은 `token + useExisting + export` 기준으로 통일돼 있습니다.
+- 전역 예외 응답은 [http-exception.filter.ts](/Users/kscold/Desktop/pawpong_backend/src/common/filter/http-exception.filter.ts:1)의 `AllExceptionsFilter` 하나로 수렴돼 있습니다.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+상세 진행 내역은 [refactoring-roadmap.md](/Users/kscold/Desktop/pawpong_backend/docs/refactoring-roadmap.md:1)에서 확인할 수 있습니다.
 
-```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
-```
+## Test Harness
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+공통 e2e 하네스는 [test-utils.ts](/Users/kscold/Desktop/pawpong_backend/src/common/test/test-utils.ts:1)를 기준으로 맞춰져 있습니다.
 
-## Resources
+- 인메모리 MongoDB를 사용합니다.
+- 실제 앱과 같은 `ValidationPipe`, `HttpStatusInterceptor`, `AllExceptionsFilter`를 적용합니다.
+- 테스트 환경에서는 외부 채널 발송을 막기 위해 Discord, 메일, 알림톡 경고를 줄이고, 스토리지는 인메모리 모드로 동작합니다.
+- 계약 테스트는 `src/api/**/test/contract`, e2e는 `src/api/**/test/e2e` 구조를 사용합니다.
 
-Check out a few resources that may come in handy when working with NestJS:
+하네스 스크립트 설명은 [docs/harness/README.md](/Users/kscold/Desktop/pawpong_backend/docs/harness/README.md:1)에 정리돼 있습니다.
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+## Local Notes
 
-## Support
+- 전체 앱 실행 시 Redis/BullMQ는 로컬 Redis가 없으면 연결 경고가 남을 수 있습니다.
+- e2e 하네스는 외부 스토리지/메일/디스코드에 의존하지 않도록 분리돼 있습니다.
+- 스웨거나 일부 도메인 사용 예시는 각 도메인 README와 Swagger DTO에 남아 있습니다.
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+## Key Docs
 
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- [docs/refactoring-roadmap.md](/Users/kscold/Desktop/pawpong_backend/docs/refactoring-roadmap.md:1)
+- [docs/harness/README.md](/Users/kscold/Desktop/pawpong_backend/docs/harness/README.md:1)
+- [src/common/test/test-utils.ts](/Users/kscold/Desktop/pawpong_backend/src/common/test/test-utils.ts:1)

@@ -96,6 +96,6 @@ controller -> use-case -> domain
 
 ### Remaining Work
 
-- 구조 리팩토링 자체보다는 문서/테스트 보강, naming polish, 운영 하네스 안정화가 남은 단계다.
-- Redis/BullMQ, Discord webhook, AWS 자격증명 같은 외부 의존 경고는 테스트 환경에서 여전히 로그로 남을 수 있다.
+- 구조 리팩토링 자체보다는 문서 최신화와 운영 하네스 polish 정도가 남은 단계다.
+- 테스트 하네스는 인메모리 MongoDB와 인메모리 스토리지, 외부 알림 경고 억제까지 반영됐고, 전체 앱 실행 시에는 Redis/BullMQ 경고만 로컬 환경에 따라 남을 수 있다.
 - strict DDD 관점의 `entities / value-objects / events` 세분화는 일부 도메인에서 여지를 남겨두고 있으며, 현재는 실용적인 헥사고날 경계 정리에 초점을 둔 상태다.
