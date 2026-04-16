@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../constants/upload-admin-response-messages';
@@ -7,6 +7,8 @@ import {
     UPLOAD_ADMIN_BAD_REQUEST_RESPONSE,
     UPLOAD_ADMIN_FORBIDDEN_RESPONSE,
 } from '../constants/upload-admin-swagger.constants';
+import { CheckFileReferencesRequestDto } from '../dto/request/check-file-references-request.dto';
+import { DeleteFilesRequestDto } from '../dto/request/delete-files-request.dto';
 import { DeleteFilesResponseDto } from '../dto/response/delete-files-response.dto';
 import { FileReferenceResponseDto } from '../dto/response/file-reference-response.dto';
 import { StorageListResponseDto } from '../dto/response/storage-list-response.dto';
@@ -45,23 +47,30 @@ export function ApiListFilesAdminEndpoint() {
 }
 
 export function ApiListFilesByFolderAdminEndpoint() {
-    return ApiEndpoint({
-        summary: '특정 폴더의 파일 목록 조회',
-        description: `
-            특정 폴더 경로 하위의 파일 목록만 조회합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '특정 폴더의 파일 목록 조회',
+            description: `
+                특정 폴더 경로 하위의 파일 목록만 조회합니다.
 
-            ## 주요 기능
-            - folder 파라미터를 prefix 형태로 정규화해서 조회합니다.
-            - 응답 구조는 전체 파일 목록 조회와 동일합니다.
+                ## 주요 기능
+                - folder 파라미터를 prefix 형태로 정규화해서 조회합니다.
+                - 응답 구조는 전체 파일 목록 조회와 동일합니다.
 
-            ## 권한
-            - 관리자(admin) 권한이 필요합니다.
-        `,
-        responseType: StorageListResponseDto,
-        successDescription: '폴더 파일 목록 조회 성공',
-        successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.folderFilesListed,
-        errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
-    });
+                ## 권한
+                - 관리자(admin) 권한이 필요합니다.
+            `,
+            responseType: StorageListResponseDto,
+            successDescription: '폴더 파일 목록 조회 성공',
+            successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.folderFilesListed,
+            errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
+        }),
+        ApiParam({
+            name: 'folder',
+            description: '조회할 폴더 경로',
+            example: 'profiles',
+        }),
+    );
 }
 
 export function ApiDeleteFileAdminEndpoint() {
@@ -93,23 +102,26 @@ export function ApiDeleteFileAdminEndpoint() {
 }
 
 export function ApiDeleteMultipleFilesAdminEndpoint() {
-    return ApiEndpoint({
-        summary: '다중 파일 삭제',
-        description: `
-            여러 파일을 한 번에 삭제합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '다중 파일 삭제',
+            description: `
+                여러 파일을 한 번에 삭제합니다.
 
-            ## 주요 기능
-            - 요청 body의 fileNames 배열을 순회하며 삭제를 수행합니다.
-            - 일부 실패가 발생해도 성공/실패 결과를 함께 반환합니다.
+                ## 주요 기능
+                - 요청 body의 fileNames 배열을 순회하며 삭제를 수행합니다.
+                - 일부 실패가 발생해도 성공/실패 결과를 함께 반환합니다.
 
-            ## 권한
-            - 관리자(admin) 권한이 필요합니다.
-        `,
-        responseType: DeleteFilesResponseDto,
-        successDescription: '다중 파일 삭제 성공',
-        successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.filesDeleted,
-        errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
-    });
+                ## 권한
+                - 관리자(admin) 권한이 필요합니다.
+            `,
+            responseType: DeleteFilesResponseDto,
+            successDescription: '다중 파일 삭제 성공',
+            successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.filesDeleted,
+            errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
+        }),
+        ApiBody({ type: DeleteFilesRequestDto }),
+    );
 }
 
 export function ApiDeleteFolderAdminEndpoint() {
@@ -142,23 +154,26 @@ export function ApiDeleteFolderAdminEndpoint() {
 }
 
 export function ApiCheckFileReferencesAdminEndpoint() {
-    return ApiEndpoint({
-        summary: '파일 DB 참조 확인',
-        description: `
-            전달한 파일 키들이 데이터베이스에서 실제로 참조 중인지 확인합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '파일 DB 참조 확인',
+            description: `
+                전달한 파일 키들이 데이터베이스에서 실제로 참조 중인지 확인합니다.
 
-            ## 주요 기능
-            - 각 파일별로 참조 여부와 참조 위치를 함께 반환합니다.
-            - 고아 파일(orphaned file) 후보를 찾는 관리자 점검용 API입니다.
+                ## 주요 기능
+                - 각 파일별로 참조 여부와 참조 위치를 함께 반환합니다.
+                - 고아 파일(orphaned file) 후보를 찾는 관리자 점검용 API입니다.
 
-            ## 권한
-            - 관리자(admin) 권한이 필요합니다.
-        `,
-        responseType: FileReferenceResponseDto,
-        successDescription: '파일 참조 확인 성공',
-        successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.fileReferencesChecked,
-        errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
-    });
+                ## 권한
+                - 관리자(admin) 권한이 필요합니다.
+            `,
+            responseType: FileReferenceResponseDto,
+            successDescription: '파일 참조 확인 성공',
+            successMessageExample: UPLOAD_ADMIN_RESPONSE_MESSAGE_EXAMPLES.fileReferencesChecked,
+            errorResponses: [UPLOAD_ADMIN_BAD_REQUEST_RESPONSE, UPLOAD_ADMIN_FORBIDDEN_RESPONSE],
+        }),
+        ApiBody({ type: CheckFileReferencesRequestDto }),
+    );
 }
 
 export function ApiGetAllReferencedFilesAdminEndpoint() {
