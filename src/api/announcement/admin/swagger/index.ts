@@ -1,9 +1,11 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiExtraModels, ApiOperation, ApiQuery, ApiResponse, getSchemaPath } from '@nestjs/swagger';
+import { ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 
 import { ApiController } from '../../../../common/decorator/swagger.decorator';
 import { PageInfoDto } from '../../../../common/dto/pagination/page-info.dto';
 import { ANNOUNCEMENT_ADMIN_ERROR_RESPONSES } from '../constants/announcement-admin-swagger.constants';
+import { AnnouncementCreateRequestDto } from '../../dto/request/announcement-create-request.dto';
+import { AnnouncementUpdateRequestDto } from '../../dto/request/announcement-update-request.dto';
 import { AnnouncementResponseDto } from '../../dto/response/announcement-response.dto';
 
 export function ApiAnnouncementAdminController() {
@@ -66,6 +68,7 @@ export function ApiCreateAnnouncementAdminEndpoint() {
                 - 관리자(admin) 권한이 필요합니다.
             `,
         }),
+        ApiBody({ type: AnnouncementCreateRequestDto }),
         ApiResponse({
             status: 200,
             description: '공지사항 생성 성공',
@@ -92,6 +95,12 @@ export function ApiUpdateAnnouncementAdminEndpoint() {
                 - 관리자(admin) 권한이 필요합니다.
             `,
         }),
+        ApiParam({
+            name: 'announcementId',
+            description: '수정할 공지사항 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+        ApiBody({ type: AnnouncementUpdateRequestDto }),
         ApiResponse({
             status: 200,
             description: '공지사항 수정 성공',
@@ -117,6 +126,11 @@ export function ApiDeleteAnnouncementAdminEndpoint() {
                 ## 권한
                 - 관리자(admin) 권한이 필요합니다.
             `,
+        }),
+        ApiParam({
+            name: 'announcementId',
+            description: '삭제할 공지사항 ID',
+            example: '507f1f77bcf86cd799439011',
         }),
         ApiResponse({
             status: 200,
