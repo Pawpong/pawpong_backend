@@ -43,7 +43,7 @@ export class AlimtalkAdminController {
         description: '템플릿 목록 조회 성공',
         type: TemplateListResponseDto,
     })
-    @ApiResponse({ status: 400, description: '잘못된 요청' })
+    @ApiResponse({ status: 500, description: '템플릿 목록 조회 실패' })
     @ApiResponse({ status: 401, description: '인증 실패' })
     @ApiResponse({ status: 403, description: '권한 없음 (관리자 전용)' })
     async getTemplates(): Promise<ApiResponseDto<TemplateListResponseDto>> {
@@ -73,7 +73,8 @@ export class AlimtalkAdminController {
         description: '템플릿 상세 조회 성공',
         type: TemplateDetailResponseDto,
     })
-    @ApiResponse({ status: 400, description: '잘못된 요청 또는 템플릿을 찾을 수 없음' })
+    @ApiResponse({ status: 404, description: '템플릿을 찾을 수 없음' })
+    @ApiResponse({ status: 500, description: '템플릿 조회 실패' })
     @ApiResponse({ status: 401, description: '인증 실패' })
     @ApiResponse({ status: 403, description: '권한 없음 (관리자 전용)' })
     async getTemplateByCode(
@@ -106,7 +107,8 @@ export class AlimtalkAdminController {
         description: '템플릿 수정 성공',
         type: TemplateDetailResponseDto,
     })
-    @ApiResponse({ status: 400, description: '잘못된 요청 또는 템플릿을 찾을 수 없음' })
+    @ApiResponse({ status: 404, description: '템플릿을 찾을 수 없음' })
+    @ApiResponse({ status: 500, description: '템플릿 수정 실패' })
     @ApiResponse({ status: 401, description: '인증 실패' })
     @ApiResponse({ status: 403, description: '권한 없음 (관리자 전용)' })
     async updateTemplate(
@@ -139,7 +141,8 @@ export class AlimtalkAdminController {
         description: '템플릿 생성 성공',
         type: TemplateDetailResponseDto,
     })
-    @ApiResponse({ status: 400, description: '잘못된 요청 또는 중복된 템플릿 코드' })
+    @ApiResponse({ status: 409, description: '중복된 템플릿 코드' })
+    @ApiResponse({ status: 500, description: '템플릿 생성 실패' })
     @ApiResponse({ status: 401, description: '인증 실패' })
     @ApiResponse({ status: 403, description: '권한 없음 (관리자 전용)' })
     async createTemplate(
@@ -170,7 +173,8 @@ export class AlimtalkAdminController {
         status: 200,
         description: '템플릿 삭제 성공',
     })
-    @ApiResponse({ status: 400, description: '잘못된 요청 또는 템플릿을 찾을 수 없음' })
+    @ApiResponse({ status: 404, description: '템플릿을 찾을 수 없음' })
+    @ApiResponse({ status: 500, description: '템플릿 삭제 실패' })
     @ApiResponse({ status: 401, description: '인증 실패' })
     @ApiResponse({ status: 403, description: '권한 없음 (관리자 전용)' })
     async deleteTemplate(
@@ -200,7 +204,7 @@ export class AlimtalkAdminController {
         status: 200,
         description: '캐시 갱신 성공',
     })
-    @ApiResponse({ status: 400, description: '캐시 갱신 실패' })
+    @ApiResponse({ status: 500, description: '캐시 갱신 실패' })
     @ApiResponse({ status: 401, description: '인증 실패' })
     @ApiResponse({ status: 403, description: '권한 없음 (관리자 전용)' })
     async refreshCache(): Promise<ApiResponseDto<{ success: boolean; message: string }>> {
