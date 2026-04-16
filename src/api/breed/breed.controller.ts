@@ -1,4 +1,5 @@
 import { Controller, Get, Param } from '@nestjs/common';
+import { ApiParam } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
 import { PetType } from '../../common/enum/user.enum';
@@ -16,12 +17,20 @@ export class BreedController {
     constructor(private readonly getBreedsUseCase: GetBreedsUseCase) {}
 
     @Get(':petType')
+    @ApiParam({
+        name: 'petType',
+        description: '조회할 동물 타입',
+        enum: ['dog', 'cat'],
+        example: 'dog',
+    })
     @ApiEndpoint({
         ...BreedSwaggerDocs.getBreeds,
         responseType: GetBreedsResponseDto,
         isPublic: true,
     })
-    async getBreeds(@Param('petType', BreedPetTypePipe) petType: PetType): Promise<ApiResponseDto<GetBreedsResponseDto>> {
+    async getBreeds(
+        @Param('petType', BreedPetTypePipe) petType: PetType,
+    ): Promise<ApiResponseDto<GetBreedsResponseDto>> {
         const result = await this.getBreedsUseCase.execute(petType);
         return ApiResponseDto.success(result);
     }
