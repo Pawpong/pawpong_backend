@@ -9,7 +9,11 @@ import {
     CommentUpdateResponseDto,
     ReplyListResponseDto,
 } from '../../comment/dto/response/comment-response.dto';
-import { LikeStatusResponseDto, LikeToggleResponseDto, MyLikedVideosResponseDto } from '../../like/dto/response/like-response.dto';
+import {
+    LikeStatusResponseDto,
+    LikeToggleResponseDto,
+    MyLikedVideosResponseDto,
+} from '../../like/dto/response/like-response.dto';
 import { PopularTagItemDto, TagSearchResponseDto, TagSuggestionItemDto } from '../../tag/dto/response/tag-response.dto';
 import { UploadVideoRequestDto } from '../dto/request/upload-video-request.dto';
 import {
@@ -401,9 +405,11 @@ export function ApiGetFeedVideoCommentsEndpoint() {
                 ## 주요 기능
                 - 비로그인 사용자는 읽기 전용으로 조회할 수 있습니다.
                 - 각 댓글의 대댓글 수와 내 댓글 여부를 함께 반환합니다.
+                - Authorization Bearer 토큰은 선택 사항이며, 전달하면 내 댓글 여부를 사용자 기준으로 계산합니다.
             `,
             responseType: CommentListResponseDto,
             isPublic: true,
+            supportsOptionalAuth: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentsListed,
         }),
         ApiFeedVideoIdParam(),
@@ -422,9 +428,11 @@ export function ApiGetFeedVideoRepliesEndpoint() {
                 ## 주요 기능
                 - 비로그인 사용자도 조회할 수 있습니다.
                 - 내 댓글 여부를 함께 반환합니다.
+                - Authorization Bearer 토큰은 선택 사항이며, 전달하면 내 댓글 여부를 사용자 기준으로 계산합니다.
             `,
             responseType: ReplyListResponseDto,
             isPublic: true,
+            supportsOptionalAuth: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.repliesListed,
         }),
         ApiFeedCommentIdParam(),

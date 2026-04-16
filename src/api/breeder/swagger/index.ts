@@ -117,6 +117,10 @@ export class BreederSwaggerDocs {
             ## 주요 기능
             - 로그인 시, 각 브리더에 대한 사용자의 '찜' 여부(isWished)가 포함됩니다.
             - 비로그인 시에도 사용 가능합니다.
+
+            ## 인증
+            - Authorization Bearer 토큰은 선택 사항입니다.
+            - 토큰을 보내면 사용자 맞춤 정보가 함께 계산됩니다.
         `,
     };
 
@@ -143,6 +147,10 @@ export class BreederSwaggerDocs {
             - 브리더 기본 정보, 소개, 연락처, 활동 지역 등을 포함합니다.
             - 로그인 시, 해당 브리더에 대한 사용자의 '찜' 여부(isWished)가 포함됩니다.
             - 비로그인 시에도 사용 가능합니다.
+
+            ## 인증
+            - Authorization Bearer 토큰은 선택 사항입니다.
+            - 토큰을 보내면 사용자 맞춤 정보가 함께 계산됩니다.
         `,
     };
 
@@ -158,8 +166,9 @@ export class BreederSwaggerDocs {
             ## 정렬
             - 최신 후기부터 내림차순으로 정렬됩니다.
             
-            ## 인증 불필요
-            - 공개 API로 인증 없이 호출 가능합니다.
+            ## 인증
+            - 인증 없이 호출 가능합니다.
+            - Authorization Bearer 토큰은 선택 사항이며, 전달 시 사용자 맞춤 정보가 함께 계산될 수 있습니다.
         `,
     };
 
@@ -173,8 +182,9 @@ export class BreederSwaggerDocs {
             - **page**: 페이지 번호 (기본값: 1)
             - **limit**: 페이지 당 항목 수 (기본값: 20)
             
-            ## 인증 불필요
-            - 공개 API로 인증 없이 호출 가능합니다.
+            ## 인증
+            - 인증 없이 호출 가능합니다.
+            - Authorization Bearer 토큰은 선택 사항이며, 전달 시 사용자 맞춤 정보가 함께 계산될 수 있습니다.
         `,
     };
 
@@ -189,8 +199,9 @@ export class BreederSwaggerDocs {
             - 건강 기록
             - 부모 정보 (부모견/묘)
             
-            ## 인증 불필요
-            - 공개 API로 인증 없이 호출 가능합니다.
+            ## 인증
+            - 인증 없이 호출 가능합니다.
+            - Authorization Bearer 토큰은 선택 사항이며, 전달 시 사용자 맞춤 정보가 함께 계산될 수 있습니다.
         `,
     };
 
