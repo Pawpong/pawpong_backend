@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagination-response.dto';
@@ -8,6 +8,7 @@ import {
     BREEDER_ADMIN_FORBIDDEN_RESPONSE,
     BREEDER_REPORT_ADMIN_NOT_FOUND_RESPONSE,
 } from '../../constants/breeder-admin-swagger.constants';
+import { ReportActionRequestDto } from '../dto/request/report-action-request.dto';
 import { ReportActionResponseDto } from '../dto/response/report-action-response.dto';
 import { ReportListResponseDto } from '../dto/response/report-list-response.dto';
 
@@ -32,13 +33,18 @@ export function ApiGetBreederReportsAdminEndpoint() {
 }
 
 export function ApiHandleBreederReportAdminEndpoint() {
-    return ApiEndpoint({
-        summary: '브리더 신고 처리',
-        description: '브리더 신고를 승인(제재) 또는 반려 처리합니다.',
-        responseType: ReportActionResponseDto,
-        errorResponses: [
-            BREEDER_ADMIN_FORBIDDEN_RESPONSE,
-            BREEDER_REPORT_ADMIN_NOT_FOUND_RESPONSE,
-        ],
-    });
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '브리더 신고 처리',
+            description: '브리더 신고를 승인(제재) 또는 반려 처리합니다.',
+            responseType: ReportActionResponseDto,
+            errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE, BREEDER_REPORT_ADMIN_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({
+            name: 'reportId',
+            description: '처리할 신고 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+        ApiBody({ type: ReportActionRequestDto }),
+    );
 }

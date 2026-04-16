@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
@@ -10,6 +10,11 @@ import {
     USER_ADMIN_SUPER_ADMIN_RESPONSE,
 } from '../constants/user-admin-swagger.constants';
 import { USER_ADMIN_RESPONSE_MESSAGES } from '../constants/user-admin-response-messages';
+import {
+    AddPhoneWhitelistRequestDto,
+    UpdatePhoneWhitelistRequestDto,
+} from '../dto/request/phone-whitelist-request.dto';
+import { UserManagementRequestDto } from '../dto/request/user-management-request.dto';
 import { AdminProfileResponseDto } from '../dto/response/admin-profile-response.dto';
 import { DeletedUserResponseDto } from '../dto/response/deleted-user-response.dto';
 import { DeletedUserStatsResponseDto } from '../dto/response/deleted-user-stats-response.dto';
@@ -55,9 +60,27 @@ export function ApiGetUsersAdminEndpoint() {
             successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.usersRetrieved,
             errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
         }),
-        ApiQuery({ name: 'userRole', required: false, enum: ['adopter', 'breeder'], description: '사용자 역할 필터', example: 'adopter' }),
-        ApiQuery({ name: 'accountStatus', required: false, enum: UserStatus, description: '계정 상태 필터', example: UserStatus.ACTIVE }),
-        ApiQuery({ name: 'searchKeyword', required: false, type: String, description: '이름 또는 이메일 검색어', example: '김사용자' }),
+        ApiQuery({
+            name: 'userRole',
+            required: false,
+            enum: ['adopter', 'breeder'],
+            description: '사용자 역할 필터',
+            example: 'adopter',
+        }),
+        ApiQuery({
+            name: 'accountStatus',
+            required: false,
+            enum: UserStatus,
+            description: '계정 상태 필터',
+            example: UserStatus.ACTIVE,
+        }),
+        ApiQuery({
+            name: 'searchKeyword',
+            required: false,
+            type: String,
+            description: '이름 또는 이메일 검색어',
+            example: '김사용자',
+        }),
         ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
         ApiQuery({ name: 'limit', required: false, type: Number, description: '페이지당 항목 수', example: 10 }),
     );
@@ -85,7 +108,13 @@ export function ApiUpdateUserStatusAdminEndpoint() {
             successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.userStatusUpdated,
             errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
         }),
+        ApiParam({
+            name: 'userId',
+            description: '상태를 변경할 사용자 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
         ApiQuery(USER_ADMIN_MANAGED_ROLE_QUERY_OPTIONS),
+        ApiBody({ type: UserManagementRequestDto }),
     );
 }
 
@@ -108,8 +137,20 @@ export function ApiGetDeletedUsersAdminEndpoint() {
         }),
         ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
         ApiQuery({ name: 'limit', required: false, type: Number, description: '페이지당 항목 수', example: 20 }),
-        ApiQuery({ name: 'role', required: false, enum: ['all', 'adopter', 'breeder'], description: '사용자 역할 필터', example: 'all' }),
-        ApiQuery({ name: 'deleteReason', required: false, type: String, description: '탈퇴 사유 필터', example: 'already_adopted' }),
+        ApiQuery({
+            name: 'role',
+            required: false,
+            enum: ['all', 'adopter', 'breeder'],
+            description: '사용자 역할 필터',
+            example: 'all',
+        }),
+        ApiQuery({
+            name: 'deleteReason',
+            required: false,
+            type: String,
+            description: '탈퇴 사유 필터',
+            example: 'already_adopted',
+        }),
     );
 }
 
@@ -146,6 +187,11 @@ export function ApiRestoreDeletedUserAdminEndpoint() {
             successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.deletedUserRestored,
             errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
         }),
+        ApiParam({
+            name: 'userId',
+            description: '복구할 탈퇴 사용자 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
         ApiQuery(USER_ADMIN_MANAGED_ROLE_QUERY_OPTIONS),
     );
 }
@@ -177,6 +223,11 @@ export function ApiHardDeleteUserAdminEndpoint() {
             successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.userHardDeleted,
             errorResponses: [USER_ADMIN_SUPER_ADMIN_RESPONSE],
         }),
+        ApiParam({
+            name: 'userId',
+            description: '영구 삭제할 사용자 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
         ApiQuery(USER_ADMIN_MANAGED_ROLE_QUERY_OPTIONS),
     );
 }
@@ -199,59 +250,77 @@ export function ApiGetPhoneWhitelistAdminEndpoint() {
 }
 
 export function ApiAddPhoneWhitelistAdminEndpoint() {
-    return ApiEndpoint({
-        summary: '전화번호 화이트리스트 추가',
-        description: `
-            중복 가입을 허용할 전화번호를 화이트리스트에 추가합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '전화번호 화이트리스트 추가',
+            description: `
+                중복 가입을 허용할 전화번호를 화이트리스트에 추가합니다.
 
-            ## 주요 기능
-            - 관리자 ID를 생성자 정보로 기록합니다.
-            - 이미 등록된 번호면 예외를 반환합니다.
-        `,
-        responseType: PhoneWhitelistResponseDto,
-        successStatus: 201,
-        successDescription: '화이트리스트 추가 성공',
-        successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistCreated,
-        errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
-    });
+                ## 주요 기능
+                - 관리자 ID를 생성자 정보로 기록합니다.
+                - 이미 등록된 번호면 예외를 반환합니다.
+            `,
+            responseType: PhoneWhitelistResponseDto,
+            successStatus: 201,
+            successDescription: '화이트리스트 추가 성공',
+            successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistCreated,
+            errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
+        }),
+        ApiBody({ type: AddPhoneWhitelistRequestDto }),
+    );
 }
 
 export function ApiUpdatePhoneWhitelistAdminEndpoint() {
-    return ApiEndpoint({
-        summary: '전화번호 화이트리스트 수정',
-        description: `
-            화이트리스트 항목의 설명 또는 활성 상태를 수정합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '전화번호 화이트리스트 수정',
+            description: `
+                화이트리스트 항목의 설명 또는 활성 상태를 수정합니다.
 
-            ## 주요 기능
-            - 부분 수정 형태로 동작합니다.
-            - 존재하지 않는 항목이면 예외를 반환합니다.
-        `,
-        responseType: PhoneWhitelistResponseDto,
-        successDescription: '화이트리스트 수정 성공',
-        successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistUpdated,
-        errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
-    });
+                ## 주요 기능
+                - 부분 수정 형태로 동작합니다.
+                - 존재하지 않는 항목이면 예외를 반환합니다.
+            `,
+            responseType: PhoneWhitelistResponseDto,
+            successDescription: '화이트리스트 수정 성공',
+            successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistUpdated,
+            errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
+        }),
+        ApiParam({
+            name: 'id',
+            description: '수정할 화이트리스트 항목 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+        ApiBody({ type: UpdatePhoneWhitelistRequestDto }),
+    );
 }
 
 export function ApiDeletePhoneWhitelistAdminEndpoint() {
-    return ApiEndpoint({
-        summary: '전화번호 화이트리스트 삭제',
-        description: `
-            화이트리스트에서 전화번호 항목을 삭제합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '전화번호 화이트리스트 삭제',
+            description: `
+                화이트리스트에서 전화번호 항목을 삭제합니다.
 
-            ## 주요 기능
-            - 존재하는 화이트리스트 항목만 삭제할 수 있습니다.
-            - 삭제 결과 메시지를 data 필드로 반환합니다.
-        `,
-        dataSchema: {
-            type: 'object',
-            properties: {
-                message: { type: 'string', example: '화이트리스트가 삭제되었습니다.' },
+                ## 주요 기능
+                - 존재하는 화이트리스트 항목만 삭제할 수 있습니다.
+                - 삭제 결과 메시지를 data 필드로 반환합니다.
+            `,
+            dataSchema: {
+                type: 'object',
+                properties: {
+                    message: { type: 'string', example: '화이트리스트가 삭제되었습니다.' },
+                },
+                required: ['message'],
             },
-            required: ['message'],
-        },
-        successDescription: '화이트리스트 삭제 성공',
-        successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistDeleted,
-        errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
-    });
+            successDescription: '화이트리스트 삭제 성공',
+            successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistDeleted,
+            errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
+        }),
+        ApiParam({
+            name: 'id',
+            description: '삭제할 화이트리스트 항목 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+    );
 }
