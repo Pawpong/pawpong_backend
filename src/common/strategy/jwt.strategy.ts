@@ -1,10 +1,13 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Request } from 'express';
+
+import { DomainAuthenticationError } from '../error/domain.error';
+
 import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
 import type { AuthenticatedRequestUser, JwtPayloadClaims } from '../types/authenticated-request-user.type';
@@ -46,7 +49,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     /**
      * JWT 페이로드 검증
      * 토큰이 유효할 때 호출되어 사용자 정보를 반환합니다.
-     * 탈퇴된 계정인 경우 UnauthorizedException을 발생시킵니다.
+     * 탈퇴된 계정인 경우 도메인 인증 예외를 발생시킵니다.
      */
     async validate(payload: JwtPayloadClaims): Promise<AuthenticatedRequestUser> {
         // 사용자 조회 및 탈퇴 여부 확인
@@ -62,7 +65,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         // 탈퇴된 계정인 경우 인증 실패
         if (accountStatus === 'deleted') {
             this.logger.warn(`탈퇴된 계정 접근 시도: ${payload.sub}`);
-            throw new UnauthorizedException('이미 탈퇴된 계정입니다.');
+            throw new DomainAuthenticationError('이미 탈퇴된 계정입니다.');
         }
 
         return {
