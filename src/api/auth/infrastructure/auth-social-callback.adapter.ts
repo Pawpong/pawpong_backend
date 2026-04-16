@@ -1,4 +1,4 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
@@ -12,6 +12,7 @@ import {
     type AuthSocialCallbackLoginResult,
     type AuthSocialCallbackProfile,
 } from '../application/ports/auth-social-callback.port';
+import { AuthSocialLoginPolicyService } from '../domain/services/auth-social-login-policy.service';
 
 @Injectable()
 export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
@@ -22,6 +23,7 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
         private readonly logger: CustomLoggerService,
         @Inject(AUTH_TOKEN_PORT)
         private readonly authTokenPort: AuthTokenPort,
+        private readonly authSocialLoginPolicyService: AuthSocialLoginPolicyService,
     ) {}
 
     resolveFrontendUrl(referer?: string, origin?: string): string {
@@ -92,15 +94,7 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
         }
 
         if (adopter) {
-            if (adopter.accountStatus === 'deleted') {
-                this.logger.log(`[handleSocialLogin] 탈퇴한 Adopter 로그인 시도: ${adopter.emailAddress}`);
-                throw new UnauthorizedException('탈퇴한 계정으로는 로그인할 수 없습니다.');
-            }
-
-            if (adopter.accountStatus === 'suspended') {
-                this.logger.log(`[handleSocialLogin] 정지된 Adopter 로그인 시도: ${adopter.emailAddress}`);
-                throw new UnauthorizedException('정지된 계정입니다. 자세한 내용은 이메일을 확인해주세요.');
-            }
+            this.authSocialLoginPolicyService.assertLoginAllowed(adopter.accountStatus);
 
             this.logger.log(`[handleSocialLogin] 기존 Adopter 로그인 성공: ${adopter.emailAddress}`);
             return {
@@ -121,15 +115,7 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
         );
 
         if (breeder) {
-            if (breeder.accountStatus === 'deleted') {
-                this.logger.log(`[handleSocialLogin] 탈퇴한 Breeder 로그인 시도: ${breeder.emailAddress}`);
-                throw new UnauthorizedException('탈퇴한 계정으로는 로그인할 수 없습니다.');
-            }
-
-            if (breeder.accountStatus === 'suspended') {
-                this.logger.log(`[handleSocialLogin] 정지된 Breeder 로그인 시도: ${breeder.emailAddress}`);
-                throw new UnauthorizedException('정지된 계정입니다. 자세한 내용은 이메일을 확인해주세요.');
-            }
+            this.authSocialLoginPolicyService.assertLoginAllowed(breeder.accountStatus);
 
             this.logger.log(`[handleSocialLogin] 기존 Breeder 로그인 성공: ${breeder.emailAddress}`);
             return {

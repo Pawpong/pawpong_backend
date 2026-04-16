@@ -1,7 +1,8 @@
-import { Injectable, BadRequestException, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
+import { DomainConflictError, DomainError, DomainNotFoundError } from '../../../common/error/domain.error';
 import { AlimtalkTemplate, AlimtalkTemplateDocument } from '../../../schema/alimtalk-template.schema';
 import { getErrorMessage } from '../../utils/error.util';
 import { AlimtalkService } from '../alimtalk.service';
@@ -81,6 +82,15 @@ export class AlimtalkAdminService {
         };
     }
 
+    private rethrowUnexpectedError(action: string, error: unknown): never {
+        if (error instanceof DomainError) {
+            throw error;
+        }
+
+        this.logger.error(`[${action}] ${getErrorMessage(error)}`);
+        throw error;
+    }
+
     /**
      * 전체 알림톡 템플릿 목록 조회
      */
@@ -99,8 +109,7 @@ export class AlimtalkAdminService {
                 totalCount: templateList.length,
             };
         } catch (error) {
-            this.logger.error(`[getTemplates] 템플릿 목록 조회 실패: ${getErrorMessage(error)}`);
-            throw new BadRequestException('템플릿 목록 조회에 실패했습니다.');
+            this.rethrowUnexpectedError('getTemplates', error);
         }
     }
 
@@ -115,16 +124,12 @@ export class AlimtalkAdminService {
                 .exec();
 
             if (!template) {
-                throw new BadRequestException(`템플릿을 찾을 수 없습니다: ${templateCode}`);
+                throw new DomainNotFoundError(`템플릿을 찾을 수 없습니다: ${templateCode}`);
             }
 
             return this.toTemplateDetail(template);
         } catch (error) {
-            this.logger.error(`[getTemplateByCode] 템플릿 조회 실패: ${getErrorMessage(error)}`);
-            if (error instanceof BadRequestException) {
-                throw error;
-            }
-            throw new BadRequestException('템플릿 조회에 실패했습니다.');
+            this.rethrowUnexpectedError('getTemplateByCode', error);
         }
     }
 
@@ -136,35 +141,22 @@ export class AlimtalkAdminService {
         updateData: TemplateUpdateRequestDto,
     ): Promise<TemplateDetailResponseDto> {
         try {
-            // 템플릿 존재 여부 확인
-            const existingTemplate = await this.alimtalkTemplateModel.findOne({ templateCode }).exec();
-
-            if (!existingTemplate) {
-                throw new BadRequestException(`템플릿을 찾을 수 없습니다: ${templateCode}`);
-            }
-
-            // 템플릿 업데이트
             const updatedTemplate = await this.alimtalkTemplateModel
                 .findOneAndUpdate({ templateCode }, { $set: updateData }, { new: true })
                 .lean<AlimtalkTemplateRecord | null>()
                 .exec();
 
             if (!updatedTemplate) {
-                throw new BadRequestException('템플릿 업데이트에 실패했습니다.');
+                throw new DomainNotFoundError(`템플릿을 찾을 수 없습니다: ${templateCode}`);
             }
 
             this.logger.log(`[updateTemplate] 템플릿 업데이트 성공: ${templateCode}`);
 
-            // 템플릿 캐시 갱신
             await this.alimtalkService.refreshTemplateCache();
 
             return this.toTemplateDetail(updatedTemplate);
         } catch (error) {
-            this.logger.error(`[updateTemplate] 템플릿 업데이트 실패: ${getErrorMessage(error)}`);
-            if (error instanceof BadRequestException) {
-                throw error;
-            }
-            throw new BadRequestException('템플릿 업데이트에 실패했습니다.');
+            this.rethrowUnexpectedError('updateTemplate', error);
         }
     }
 
@@ -173,16 +165,14 @@ export class AlimtalkAdminService {
      */
     async createTemplate(createData: TemplateCreateRequestDto): Promise<TemplateDetailResponseDto> {
         try {
-            // 중복 템플릿 코드 확인
             const existingTemplate = await this.alimtalkTemplateModel
                 .findOne({ templateCode: createData.templateCode })
                 .exec();
 
             if (existingTemplate) {
-                throw new BadRequestException(`이미 존재하는 템플릿 코드입니다: ${createData.templateCode}`);
+                throw new DomainConflictError(`이미 존재하는 템플릿 코드입니다: ${createData.templateCode}`);
             }
 
-            // 템플릿 생성
             const newTemplate = await this.alimtalkTemplateModel.create({
                 ...createData,
                 fallbackToSms: createData.fallbackToSms ?? false,
@@ -193,18 +183,13 @@ export class AlimtalkAdminService {
 
             this.logger.log(`[createTemplate] 템플릿 생성 성공: ${createData.templateCode}`);
 
-            // 템플릿 캐시 갱신
             await this.alimtalkService.refreshTemplateCache();
 
             const template = newTemplate.toObject<AlimtalkTemplateRecord>();
 
             return this.toTemplateDetail(template);
         } catch (error) {
-            this.logger.error(`[createTemplate] 템플릿 생성 실패: ${getErrorMessage(error)}`);
-            if (error instanceof BadRequestException) {
-                throw error;
-            }
-            throw new BadRequestException('템플릿 생성에 실패했습니다.');
+            this.rethrowUnexpectedError('createTemplate', error);
         }
     }
 
@@ -213,19 +198,16 @@ export class AlimtalkAdminService {
      */
     async deleteTemplate(templateCode: string): Promise<{ success: boolean; message: string }> {
         try {
-            // 템플릿 존재 여부 확인
             const template = await this.alimtalkTemplateModel.findOne({ templateCode }).exec();
 
             if (!template) {
-                throw new BadRequestException(`템플릿을 찾을 수 없습니다: ${templateCode}`);
+                throw new DomainNotFoundError(`템플릿을 찾을 수 없습니다: ${templateCode}`);
             }
 
-            // 템플릿 삭제
             await this.alimtalkTemplateModel.deleteOne({ templateCode }).exec();
 
             this.logger.log(`[deleteTemplate] 템플릿 삭제 성공: ${templateCode}`);
 
-            // 템플릿 캐시 갱신
             await this.alimtalkService.refreshTemplateCache();
 
             return {
@@ -233,11 +215,7 @@ export class AlimtalkAdminService {
                 message: `템플릿이 삭제되었습니다: ${templateCode}`,
             };
         } catch (error) {
-            this.logger.error(`[deleteTemplate] 템플릿 삭제 실패: ${getErrorMessage(error)}`);
-            if (error instanceof BadRequestException) {
-                throw error;
-            }
-            throw new BadRequestException('템플릿 삭제에 실패했습니다.');
+            this.rethrowUnexpectedError('deleteTemplate', error);
         }
     }
 
@@ -254,8 +232,7 @@ export class AlimtalkAdminService {
                 message: '템플릿 캐시가 성공적으로 갱신되었습니다.',
             };
         } catch (error) {
-            this.logger.error(`[refreshCache] 템플릿 캐시 갱신 실패: ${getErrorMessage(error)}`);
-            throw new BadRequestException('템플릿 캐시 갱신에 실패했습니다.');
+            this.rethrowUnexpectedError('refreshCache', error);
         }
     }
 }

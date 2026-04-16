@@ -92,6 +92,7 @@ import { SubmitAuthBreederDocumentsUseCase } from './application/use-cases/submi
 import { UploadAndSubmitAuthBreederDocumentsUseCase } from './application/use-cases/upload-and-submit-auth-breeder-documents.use-case';
 import { AuthSocialIdentityService } from './domain/services/auth-social-identity.service';
 import { AuthSessionAuthenticationService } from './domain/services/auth-session-authentication.service';
+import { AuthSocialLoginPolicyService } from './domain/services/auth-social-login-policy.service';
 import { AuthStoredFileNameService } from './domain/services/auth-stored-file-name.service';
 import { AuthSocialRedirectPathService } from './domain/services/auth-social-redirect-path.service';
 import { AuthProfileImageFilePolicyService } from './domain/services/auth-profile-image-file-policy.service';
@@ -197,6 +198,7 @@ const AUTH_DOMAIN_PROVIDERS = [
     AuthAdminLoginResultMapperService,
     AuthAdminRefreshTokenResultMapperService,
     AuthSessionAuthenticationService,
+    AuthSocialLoginPolicyService,
     AuthSocialIdentityService,
     AuthStoredFileNameService,
     AuthSocialRedirectPathService,
