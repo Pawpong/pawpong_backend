@@ -1,6 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiOperation, ApiQuery, ApiResponse } from '@nestjs/swagger';
+import { ApiExtraModels, ApiOperation, ApiQuery, ApiResponse, getSchemaPath } from '@nestjs/swagger';
 
+import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { SystemHealthResponseDto } from '../dto/response/system-health-response.dto';
 
 /**
@@ -8,6 +9,7 @@ import { SystemHealthResponseDto } from '../dto/response/system-health-response.
  */
 export function ApiGetSystemHealthEndpoint() {
     return applyDecorators(
+        ApiExtraModels(ApiResponseDto, SystemHealthResponseDto),
         ApiOperation({
             summary: '시스템 헬스 조회',
             description: `
@@ -37,7 +39,35 @@ export function ApiGetSystemHealthEndpoint() {
         ApiResponse({
             status: 200,
             description: '시스템 헬스 조회 성공',
-            type: SystemHealthResponseDto,
+            schema: {
+                allOf: [
+                    { $ref: getSchemaPath(ApiResponseDto) },
+                    {
+                        properties: {
+                            success: { type: 'boolean', example: true },
+                            code: { type: 'number', example: 200 },
+                            data: { $ref: getSchemaPath(SystemHealthResponseDto) },
+                            message: { type: 'string', example: '서버 현황이 조회되었습니다.' },
+                            timestamp: { type: 'string', example: '2026-04-16T04:33:14.082Z' },
+                        },
+                        required: ['success', 'code', 'data', 'timestamp'],
+                    },
+                ],
+            },
+        }),
+        ApiResponse({
+            status: 400,
+            description: 'periodHours 유효성 검사 실패 (1 미만 또는 168 초과)',
+            schema: {
+                type: 'object',
+                properties: {
+                    success: { type: 'boolean', example: false },
+                    code: { type: 'number', example: 400 },
+                    error: { type: 'string', example: '잘못된 요청입니다.' },
+                    timestamp: { type: 'string', example: '2026-04-16T04:33:14.082Z' },
+                },
+                required: ['success', 'code', 'error', 'timestamp'],
+            },
         }),
         ApiResponse({ status: 403, description: '통계 조회 권한 없음' }),
     );
