@@ -6,6 +6,7 @@ import request from 'supertest';
 import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../common/test/test-utils';
 import { LOKI_QUERY_PORT } from '../application/ports/loki-query.port';
 import { LogCategorizerService } from '../domain/services/log-categorizer.service';
+import type { SystemHealthResponseDto } from '../dto/response/system-health-response.dto';
 
 /**
  * Platform Admin — 시스템 헬스 E2E 테스트
@@ -195,6 +196,61 @@ describe('Platform Admin — System Health E2E', () => {
             expect(data.services.kafka.status).toBe('error');
             expect(data.overallStatus).toBe('critical');
         });
+
+        it('Redis(IoRedis) 에러가 최근 1시간 이내면 redis status가 error여야 한다', async () => {
+            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+
+            mockLokiQueryPort.queryErrorsAndWarnings.mockResolvedValue([
+                {
+                    timestamp: fiveMinutesAgo,
+                    level: 'error',
+                    context: 'IoRedis',
+                    message: 'connect ECONNREFUSED redis:6379',
+                    deployment: 'green',
+                },
+            ]);
+
+            const res = await request(app.getHttpServer())
+                .get('/api/platform-admin/system-health')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .expect(200);
+
+            const { data } = res.body as unknown as { data: SystemHealthResponseDto };
+            expect(data.services.redis.status).toBe('error');
+            expect(data.overallStatus).toBe('critical');
+        });
+
+        it('Kafka와 Redis 에러가 동시에 있으면 각각 독립적으로 추적되어야 한다', async () => {
+            const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+
+            mockLokiQueryPort.queryErrorsAndWarnings.mockResolvedValue([
+                {
+                    timestamp: fiveMinutesAgo,
+                    level: 'error',
+                    context: 'ServerKafka',
+                    message: 'ERROR [Connection] connect ECONNREFUSED kafka:29092',
+                    deployment: 'green',
+                },
+                {
+                    timestamp: fiveMinutesAgo,
+                    level: 'error',
+                    context: 'IoRedis',
+                    message: 'connect ECONNREFUSED redis:6379',
+                    deployment: 'green',
+                },
+            ]);
+
+            const res = await request(app.getHttpServer())
+                .get('/api/platform-admin/system-health')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .expect(200);
+
+            const { data } = res.body as unknown as { data: SystemHealthResponseDto };
+            expect(data.issueGroups).toHaveLength(2);
+            expect(data.services.kafka.status).toBe('error');
+            expect(data.services.redis.status).toBe('error');
+            expect(data.overallStatus).toBe('critical');
+        });
     });
 
     // ─────────────────────────────────────────────
@@ -225,6 +281,18 @@ describe('Platform Admin — System Health E2E', () => {
                 .get('/api/platform-admin/system-health?periodHours=169')
                 .set('Authorization', `Bearer ${adminToken}`)
                 .expect(400);
+        });
+
+        it('periodHours=168 요청 시 Loki 쿼리 limit이 1000보다 커야 한다', async () => {
+            mockLokiQueryPort.queryErrorsAndWarnings.mockResolvedValue([]);
+
+            await request(app.getHttpServer())
+                .get('/api/platform-admin/system-health?periodHours=168')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .expect(200);
+
+            const calls = mockLokiQueryPort.queryErrorsAndWarnings.mock.calls as Array<Array<{ limit: number }>>;
+            expect(calls[0][0].limit).toBeGreaterThan(1000);
         });
     });
 });
@@ -308,6 +376,50 @@ describe('LogCategorizerService — 단위 테스트', () => {
     it('미해결 infrastructure 에러가 있으면 overallStatus가 critical이어야 한다', () => {
         const recent = new Date(Date.now() - 5 * 60 * 1000).toISOString();
         const result = service.categorize([makeEntry({ timestamp: recent })]);
+        expect(result.overallStatus).toBe('critical');
+    });
+
+    // ── Redis 분류 ──────────────────────────────────
+
+    it('IoRedis 에러는 infrastructure로 분류되어야 한다', () => {
+        const result = service.categorize([
+            makeEntry({ context: 'IoRedis', message: 'connect ECONNREFUSED redis:6379' }),
+        ]);
+        expect(result.issueGroups[0].category).toBe('infrastructure');
+    });
+
+    it('Redis 에러의 groupKey는 infrastructure:Redis여야 한다', () => {
+        const result = service.categorize([
+            makeEntry({ context: 'IoRedis', message: 'connect ECONNREFUSED redis:6379' }),
+        ]);
+        expect(result.issueGroups[0].groupKey).toBe('infrastructure:Redis');
+    });
+
+    it('최근 1시간 이내 Redis 에러가 있으면 services.redis.status가 error여야 한다', () => {
+        const recent = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        const result = service.categorize([
+            makeEntry({ context: 'IoRedis', message: 'connect ECONNREFUSED redis:6379', timestamp: recent }),
+        ]);
+        expect(result.services.redis.status).toBe('error');
+    });
+
+    it('1시간 이상 경과한 Redis 에러는 services.redis.status가 warning이어야 한다', () => {
+        const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString();
+        const result = service.categorize([
+            makeEntry({ context: 'IoRedis', message: 'connect ECONNREFUSED redis:6379', timestamp: twoHoursAgo }),
+        ]);
+        expect(result.services.redis.status).toBe('warning');
+    });
+
+    it('Kafka와 Redis 에러가 동시에 있으면 2개의 독립 그룹이어야 한다', () => {
+        const recent = new Date(Date.now() - 5 * 60 * 1000).toISOString();
+        const result = service.categorize([
+            makeEntry({ context: 'ServerKafka', message: 'ECONNREFUSED kafka:29092', timestamp: recent }),
+            makeEntry({ context: 'IoRedis', message: 'ECONNREFUSED redis:6379', timestamp: recent }),
+        ]);
+        expect(result.issueGroups).toHaveLength(2);
+        expect(result.services.kafka.status).toBe('error');
+        expect(result.services.redis.status).toBe('error');
         expect(result.overallStatus).toBe('critical');
     });
 });

@@ -78,6 +78,19 @@ export class LogCategorizerService {
     private static readonly ACTIVE_ERROR_THRESHOLD_MS = 60 * 60 * 1000;
 
     /**
+     * Redis 관련 NestJS 컨텍스트 이름 목록.
+     * ioredis, @nestjs/cache-manager, nestjs-redis 등에서 발생하는
+     * 연결 에러 컨텍스트를 포괄합니다.
+     */
+    private static readonly REDIS_CONTEXTS = new Set([
+        'IoRedis',
+        'Redis',
+        'RedisModule',
+        'RedisService',
+        'CacheManager',
+    ]);
+
+    /**
      * 로그 항목 배열을 분류하여 시스템 헬스 요약을 반환합니다.
      *
      * @param entries Loki에서 가져온 로그 항목 배열
@@ -143,12 +156,20 @@ export class LogCategorizerService {
      *
      * 분류 규칙:
      * - ServerKafka 컨텍스트 → infrastructure
+     * - Redis 관련 컨텍스트 (IoRedis, RedisService 등) → infrastructure
      * - HttpExceptionFilter + /api/ 미포함 경로 → security_probe (봇 스캔)
      * - HttpExceptionFilter + /api/ 포함 경로 → api_error
      * - 그 외 → application
      */
     private classifyCategory(entry: LokiLogEntry): IssueCategory {
         if (entry.context === 'ServerKafka') {
+            return 'infrastructure';
+        }
+
+        if (
+            LogCategorizerService.REDIS_CONTEXTS.has(entry.context) ||
+            /redis/i.test(entry.context)
+        ) {
             return 'infrastructure';
         }
 
@@ -163,7 +184,8 @@ export class LogCategorizerService {
     /**
      * 그룹 키를 생성합니다.
      *
-     * - infrastructure: context 기준 (Kafka 에러 전체를 하나로 묶음)
+     * - infrastructure(Kafka): infrastructure:ServerKafka
+     * - infrastructure(Redis): infrastructure:Redis (컨텍스트 이름 관계없이 단일 키로 정규화)
      * - security_probe: 단일 그룹
      * - api_error: context 기준
      * - application: context 기준
@@ -171,7 +193,10 @@ export class LogCategorizerService {
     private buildGroupKey(entry: LokiLogEntry, category: IssueCategory): string {
         switch (category) {
             case 'infrastructure':
-                return `infrastructure:${entry.context}`;
+                if (entry.context === 'ServerKafka') return 'infrastructure:ServerKafka';
+                // Redis 관련 컨텍스트는 구현 라이브러리(IoRedis, RedisModule 등)가 달라도
+                // 하나의 그룹으로 묶어 서비스 단위 모니터링이 가능하도록 정규화합니다.
+                return 'infrastructure:Redis';
             case 'security_probe':
                 return 'security_probe';
             case 'api_error':
@@ -196,6 +221,7 @@ export class LogCategorizerService {
     private getTitle(groupKey: string, category: IssueCategory): string {
         const titleMap: Record<string, string> = {
             'infrastructure:ServerKafka': '채팅 서버 (Kafka) 연결 오류',
+            'infrastructure:Redis': 'Redis 캐시 서버 연결 오류',
             security_probe: '외부 자동화 스캔 감지',
         };
 
@@ -211,6 +237,7 @@ export class LogCategorizerService {
     private getDescription(groupKey: string, category: IssueCategory): string {
         const descMap: Record<string, string> = {
             'infrastructure:ServerKafka': '채팅 메시지 전송에 영향이 있을 수 있습니다.',
+            'infrastructure:Redis': '로그인 세션, 캐시 등 Redis 의존 기능에 영향이 있을 수 있습니다.',
             security_probe: '알 수 없는 외부 봇이 서버를 스캔했습니다. 서비스에는 영향이 없습니다.',
         };
 
@@ -224,8 +251,8 @@ export class LogCategorizerService {
      */
     private determineServiceHealth(groups: IssueGroup[], now: Date): ServiceHealthInfo {
         const kafkaGroup = groups.find((g) => g.groupKey === 'infrastructure:ServerKafka');
+        const redisGroup = groups.find((g) => g.groupKey === 'infrastructure:Redis');
         const apiGroup = groups.find((g) => g.category === 'api_error');
-        const redisGroup = groups.find((g) => g.groupKey.includes('Redis') || g.groupKey.includes('redis'));
 
         return {
             kafka: this.buildServiceStatus(kafkaGroup, now),

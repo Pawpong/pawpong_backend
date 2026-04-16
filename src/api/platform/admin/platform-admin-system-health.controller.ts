@@ -36,10 +36,12 @@ export class PlatformAdminSystemHealthController {
         @CurrentUser() user: any,
         @Query() filter: SystemHealthFilterRequestDto,
     ): Promise<ApiResponseDto<SystemHealthResponseDto>> {
+        // now를 컨트롤러에서 단일 생성하여 use case에 전달합니다.
+        // 이렇게 해야 응답의 period.from/to와 실제 Loki 쿼리 범위가 동일한 기준으로 계산됩니다.
         const now = new Date();
         const periodHours = filter.periodHours ?? 24;
 
-        const result = await this.getSystemHealthUseCase.execute(user.userId, filter);
+        const result = await this.getSystemHealthUseCase.execute(user.userId, filter, now);
 
         const response: SystemHealthResponseDto = {
             overallStatus: result.overallStatus,
