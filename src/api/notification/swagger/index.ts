@@ -1,10 +1,31 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiProduces, ApiQuery } from '@nestjs/swagger';
 
-import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../common/decorator/swagger.decorator';
+import {
+    ApiController,
+    ApiEndpoint,
+    ApiPaginatedEndpoint,
+    ApiRawEndpoint,
+} from '../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
+import {
+    NOTIFICATION_EMAIL_PREVIEW_RESPONSE_MESSAGES,
+    NOTIFICATION_EMAIL_PREVIEW_TYPES,
+} from '../constants/notification-email-preview.constants';
 import { NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/notification-response-messages';
 import { NOTIFICATION_NOT_FOUND_RESPONSE } from '../constants/notification-swagger.constants';
+import {
+    ApplicationConfirmationEmailPreviewRequestDto,
+    BreederApprovalEmailPreviewRequestDto,
+    BreederRejectionEmailPreviewRequestDto,
+    DocumentReminderEmailPreviewRequestDto,
+    NewApplicationEmailPreviewRequestDto,
+    NewReviewEmailPreviewRequestDto,
+} from '../dto/request/notification-email-preview-request.dto';
+import {
+    NotificationEmailPreviewCatalogResponseDto,
+    NotificationEmailPreviewResponseDto,
+} from '../dto/response/notification-email-preview-response.dto';
 import {
     MarkAllAsReadResponseDto,
     MarkAsReadResponseDto,
@@ -14,6 +35,10 @@ import {
 
 export function ApiNotificationController() {
     return ApiController('알림');
+}
+
+export function ApiNotificationEmailPreviewAdminController() {
+    return ApiController('알림 이메일 프리뷰 (Admin)');
 }
 
 export function ApiGetNotificationsEndpoint() {
@@ -102,4 +127,115 @@ export function ApiDeleteNotificationEndpoint() {
         successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.notificationDeleted,
         errorResponses: [NOTIFICATION_NOT_FOUND_RESPONSE],
     });
+}
+
+function buildNotificationEmailPreviewEndpoint(summary: string, description: string, successMessageExample: string) {
+    return ApiEndpoint({
+        summary,
+        description,
+        responseType: NotificationEmailPreviewResponseDto,
+        successDescription: '이메일 프리뷰 발송 성공',
+        successMessageExample,
+        errorResponses: [{ status: 403, description: '권한 없음', errorExample: '관리자 권한이 필요합니다.' }],
+    });
+}
+
+export function ApiPreviewBreederApprovalEmailEndpoint() {
+    return applyDecorators(
+        buildNotificationEmailPreviewEndpoint(
+            '브리더 승인 이메일 테스트',
+            '브리더 입점 승인 이메일 템플릿을 테스트 발송합니다.',
+            NOTIFICATION_EMAIL_PREVIEW_RESPONSE_MESSAGES.breederApprovalSent,
+        ),
+        ApiBody({ type: BreederApprovalEmailPreviewRequestDto }),
+    );
+}
+
+export function ApiPreviewBreederRejectionEmailEndpoint() {
+    return applyDecorators(
+        buildNotificationEmailPreviewEndpoint(
+            '브리더 반려 이메일 테스트',
+            '브리더 입점 반려 이메일 템플릿을 테스트 발송합니다.',
+            NOTIFICATION_EMAIL_PREVIEW_RESPONSE_MESSAGES.breederRejectionSent,
+        ),
+        ApiBody({ type: BreederRejectionEmailPreviewRequestDto }),
+    );
+}
+
+export function ApiPreviewNewApplicationEmailEndpoint() {
+    return applyDecorators(
+        buildNotificationEmailPreviewEndpoint(
+            '새 상담 신청 알림 이메일 테스트',
+            '브리더에게 새 입양 상담 신청이 왔을 때 발송되는 이메일을 테스트합니다.',
+            NOTIFICATION_EMAIL_PREVIEW_RESPONSE_MESSAGES.newApplicationSent,
+        ),
+        ApiBody({ type: NewApplicationEmailPreviewRequestDto }),
+    );
+}
+
+export function ApiPreviewDocumentReminderEmailEndpoint() {
+    return applyDecorators(
+        buildNotificationEmailPreviewEndpoint(
+            '서류 미제출 리마인드 이메일 테스트',
+            '브리더 서류 미제출 리마인드 이메일을 테스트합니다.',
+            NOTIFICATION_EMAIL_PREVIEW_RESPONSE_MESSAGES.documentReminderSent,
+        ),
+        ApiBody({ type: DocumentReminderEmailPreviewRequestDto }),
+    );
+}
+
+export function ApiPreviewApplicationConfirmationEmailEndpoint() {
+    return applyDecorators(
+        buildNotificationEmailPreviewEndpoint(
+            '상담 신청 확인 이메일 테스트',
+            '입양자가 상담 신청 후 받는 확인 이메일을 테스트합니다.',
+            NOTIFICATION_EMAIL_PREVIEW_RESPONSE_MESSAGES.applicationConfirmationSent,
+        ),
+        ApiBody({ type: ApplicationConfirmationEmailPreviewRequestDto }),
+    );
+}
+
+export function ApiPreviewNewReviewEmailEndpoint() {
+    return applyDecorators(
+        buildNotificationEmailPreviewEndpoint(
+            '신규 후기 이메일 테스트',
+            '브리더에게 새 후기가 등록되었을 때 발송되는 이메일을 테스트합니다.',
+            NOTIFICATION_EMAIL_PREVIEW_RESPONSE_MESSAGES.newReviewSent,
+        ),
+        ApiBody({ type: NewReviewEmailPreviewRequestDto }),
+    );
+}
+
+export function ApiGetNotificationEmailPreviewCatalogEndpoint() {
+    return ApiEndpoint({
+        summary: '모든 이메일 템플릿 미리보기',
+        description: '모든 이메일 템플릿의 제목과 HTML을 반환합니다.',
+        responseType: NotificationEmailPreviewCatalogResponseDto,
+        successDescription: '이메일 프리뷰 목록 조회 성공',
+        successMessageExample: NOTIFICATION_EMAIL_PREVIEW_RESPONSE_MESSAGES.previewCatalogRetrieved,
+        errorResponses: [{ status: 403, description: '권한 없음', errorExample: '관리자 권한이 필요합니다.' }],
+    });
+}
+
+export function ApiRenderNotificationEmailPreviewEndpoint() {
+    return applyDecorators(
+        ApiRawEndpoint({
+            summary: '이메일 HTML 렌더링 미리보기',
+            description: '선택한 이메일 템플릿을 raw HTML로 렌더링합니다. type이 없으면 선택 화면을 반환합니다.',
+            successDescription: '이메일 HTML 렌더링 성공',
+            responseSchema: {
+                type: 'string',
+                example: '<html><body>...</body></html>',
+            },
+            errorResponses: [{ status: 403, description: '권한 없음', errorExample: '관리자 권한이 필요합니다.' }],
+        }),
+        ApiProduces('text/html'),
+        ApiQuery({
+            name: 'type',
+            required: false,
+            enum: NOTIFICATION_EMAIL_PREVIEW_TYPES,
+            description: '렌더링할 이메일 템플릿 타입',
+            example: 'breeder-approval',
+        }),
+    );
 }
