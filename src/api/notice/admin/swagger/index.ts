@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
@@ -9,6 +9,8 @@ import {
     NOTICE_ADMIN_NOT_FOUND_RESPONSE,
     NOTICE_ADMIN_STATUS_VALUES,
 } from '../../constants/notice-swagger.constants';
+import { NoticeCreateRequestDto } from '../../dto/request/notice-create-request.dto';
+import { NoticeUpdateRequestDto } from '../../dto/request/notice-update-request.dto';
 import { NoticeResponseDto } from '../../dto/response/notice-response.dto';
 
 export function ApiNoticeAdminController() {
@@ -35,6 +37,7 @@ export function ApiCreateNoticeAdminEndpoint() {
             successMessageExample: NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeCreated,
             errorResponses: [NOTICE_ADMIN_FORBIDDEN_RESPONSE],
         }),
+        ApiBody({ type: NoticeCreateRequestDto }),
     );
 }
 
@@ -60,7 +63,13 @@ export function ApiGetNoticeListAdminEndpoint() {
             errorResponses: [NOTICE_ADMIN_FORBIDDEN_RESPONSE],
         }),
         ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
-        ApiQuery({ name: 'limit', required: false, type: Number, description: '페이지 크기 (기본값 10, 최대 100)', example: 10 }),
+        ApiQuery({
+            name: 'limit',
+            required: false,
+            type: Number,
+            description: '페이지 크기 (기본값 10, 최대 100)',
+            example: 10,
+        }),
         ApiQuery({
             name: 'pageSize',
             required: false,
@@ -97,6 +106,11 @@ export function ApiGetNoticeDetailAdminEndpoint() {
             successMessageExample: NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeDetailRetrieved,
             errorResponses: [NOTICE_ADMIN_FORBIDDEN_RESPONSE, NOTICE_ADMIN_NOT_FOUND_RESPONSE],
         }),
+        ApiParam({
+            name: 'noticeId',
+            description: '조회할 공지사항 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
     );
 }
 
@@ -123,6 +137,12 @@ export function ApiUpdateNoticeAdminEndpoint() {
             successMessageExample: NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeUpdated,
             errorResponses: [NOTICE_ADMIN_FORBIDDEN_RESPONSE, NOTICE_ADMIN_NOT_FOUND_RESPONSE],
         }),
+        ApiParam({
+            name: 'noticeId',
+            description: '수정할 공지사항 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+        ApiBody({ type: NoticeUpdateRequestDto }),
     );
 }
 
@@ -143,6 +163,11 @@ export function ApiDeleteNoticeAdminEndpoint() {
             successMessageExample: NOTICE_RESPONSE_MESSAGE_EXAMPLES.noticeDeleted,
             nullableData: true,
             errorResponses: [NOTICE_ADMIN_FORBIDDEN_RESPONSE, NOTICE_ADMIN_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({
+            name: 'noticeId',
+            description: '삭제할 공지사항 ID',
+            example: '507f1f77bcf86cd799439011',
         }),
     );
 }
