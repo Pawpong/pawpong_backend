@@ -355,9 +355,11 @@ export function ApiUploadProfileEndpoint() {
                 - 응답의 filename을 회원가입 API의 profileImage 값으로 사용하는 계약입니다.
                 - tempId가 있으면 임시 업로드 저장소에 보관됩니다.
                 - 로그인된 사용자는 업로드 즉시 프로필에 반영됩니다.
+                - Authorization Bearer 토큰은 선택 사항이며, 전달하면 현재 계정 프로필에 즉시 반영됩니다.
             `,
             responseType: UploadResponseDto,
             isPublic: true,
+            supportsOptionalAuth: true,
             successDescription: '프로필 이미지 업로드 성공',
             successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.profileImageUploaded,
         }),

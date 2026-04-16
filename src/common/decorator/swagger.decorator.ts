@@ -17,6 +17,7 @@ type ApiEndpointOptions = {
     responseType?: Type<unknown> | [Type<unknown>];
     dataSchema?: ApiSchema;
     isPublic?: boolean;
+    supportsOptionalAuth?: boolean;
     successStatus?: number;
     successDescription?: string;
     successMessageExample?: string;
@@ -31,6 +32,7 @@ type ApiPaginatedEndpointOptions = {
     responseType: Type<unknown>;
     itemType?: Type<unknown>;
     isPublic?: boolean;
+    supportsOptionalAuth?: boolean;
     successStatus?: number;
     successDescription?: string;
     successMessageExample?: string;
@@ -44,6 +46,7 @@ type ApiRawEndpointOptions = {
     responseType?: Type<unknown> | [Type<unknown>];
     responseSchema?: ApiSchema;
     isPublic?: boolean;
+    supportsOptionalAuth?: boolean;
     successStatus?: number;
     successDescription?: string;
     errorResponses?: readonly ApiErrorResponseOption[];
@@ -52,6 +55,7 @@ type ApiRawEndpointOptions = {
 
 function buildErrorResponses(
     isPublic?: boolean,
+    supportsOptionalAuth?: boolean,
     customErrorResponses: readonly ApiErrorResponseOption[] = [],
 ): ApiErrorResponseOption[] {
     const errorResponses = new Map<number, ApiErrorResponseOption>();
@@ -62,7 +66,7 @@ function buildErrorResponses(
         errorExample: '잘못된 요청입니다.',
     });
 
-    if (!isPublic) {
+    if (!isPublic && !supportsOptionalAuth) {
         errorResponses.set(401, {
             status: 401,
             description: '인증 실패',
@@ -101,6 +105,20 @@ function buildRawErrorResponseDecorator(errorResponse: ApiErrorResponseOption) {
     });
 }
 
+function buildOperationOptions(summary: string, description?: string, supportsOptionalAuth?: boolean) {
+    const optionalSecurity = [{ 'JWT-Auth': [] as string[] }, {} as Record<string, string[]>];
+
+    return {
+        summary,
+        description: description || summary,
+        ...(supportsOptionalAuth
+            ? {
+                  security: optionalSecurity,
+              }
+            : {}),
+    };
+}
+
 /**
  * API 엔드포인트 스웨거 데코레이터
  * 공통 스웨거 설정을 한번에 적용하고, ApiResponseDto<T> 형식의 응답을 올바르게 표시합니다.
@@ -110,10 +128,7 @@ export function ApiEndpoint(options: ApiEndpointOptions) {
     const successDescription = options.successDescription ?? '성공';
     const successMessageExample = options.successMessageExample ?? '요청이 성공적으로 처리되었습니다.';
     const decorators = [
-        ApiOperation({
-            summary: options.summary,
-            description: options.description || options.summary,
-        }),
+        ApiOperation(buildOperationOptions(options.summary, options.description, options.supportsOptionalAuth)),
     ];
 
     // responseType이 있을 경우 ApiResponseDto<T> 형식으로 Swagger 스키마 생성
@@ -180,13 +195,15 @@ export function ApiEndpoint(options: ApiEndpointOptions) {
         );
     }
 
-    if (!options.isPublic) {
+    if (!options.isPublic && !options.supportsOptionalAuth) {
         decorators.push(ApiBearerAuth('JWT-Auth'));
     }
 
-    buildErrorResponses(options.isPublic, options.errorResponses).forEach((errorResponse) => {
-        decorators.push(buildErrorResponseDecorator(errorResponse));
-    });
+    buildErrorResponses(options.isPublic, options.supportsOptionalAuth, options.errorResponses).forEach(
+        (errorResponse) => {
+            decorators.push(buildErrorResponseDecorator(errorResponse));
+        },
+    );
 
     return applyDecorators(...decorators);
 }
@@ -200,10 +217,7 @@ export function ApiPaginatedEndpoint(options: ApiPaginatedEndpointOptions) {
     const successDescription = options.successDescription ?? '성공 (페이지네이션)';
     const successMessageExample = options.successMessageExample ?? '데이터 조회가 완료되었습니다.';
     const decorators = [
-        ApiOperation({
-            summary: options.summary,
-            description: options.description || options.summary,
-        }),
+        ApiOperation(buildOperationOptions(options.summary, options.description, options.supportsOptionalAuth)),
     ];
 
     // responseType이 있을 경우 ApiResponseDto<PaginationResponseDto<T>> 형식으로 Swagger 스키마 생성
@@ -260,13 +274,15 @@ export function ApiPaginatedEndpoint(options: ApiPaginatedEndpointOptions) {
         );
     }
 
-    if (!options.isPublic) {
+    if (!options.isPublic && !options.supportsOptionalAuth) {
         decorators.push(ApiBearerAuth('JWT-Auth'));
     }
 
-    buildErrorResponses(options.isPublic, options.errorResponses).forEach((errorResponse) => {
-        decorators.push(buildErrorResponseDecorator(errorResponse));
-    });
+    buildErrorResponses(options.isPublic, options.supportsOptionalAuth, options.errorResponses).forEach(
+        (errorResponse) => {
+            decorators.push(buildErrorResponseDecorator(errorResponse));
+        },
+    );
 
     return applyDecorators(...decorators);
 }
@@ -286,10 +302,7 @@ export function ApiRawEndpoint(options: ApiRawEndpointOptions) {
     const successStatus = options.successStatus ?? 200;
     const successDescription = options.successDescription ?? '성공';
     const decorators = [
-        ApiOperation({
-            summary: options.summary,
-            description: options.description || options.summary,
-        }),
+        ApiOperation(buildOperationOptions(options.summary, options.description, options.supportsOptionalAuth)),
     ];
 
     if (options.responseType) {
@@ -325,13 +338,15 @@ export function ApiRawEndpoint(options: ApiRawEndpointOptions) {
         );
     }
 
-    if (!options.isPublic) {
+    if (!options.isPublic && !options.supportsOptionalAuth) {
         decorators.push(ApiBearerAuth('JWT-Auth'));
     }
 
-    buildErrorResponses(options.isPublic, options.errorResponses).forEach((errorResponse) => {
-        decorators.push(buildRawErrorResponseDecorator(errorResponse));
-    });
+    buildErrorResponses(options.isPublic, options.supportsOptionalAuth, options.errorResponses).forEach(
+        (errorResponse) => {
+            decorators.push(buildRawErrorResponseDecorator(errorResponse));
+        },
+    );
 
     return applyDecorators(...decorators);
 }

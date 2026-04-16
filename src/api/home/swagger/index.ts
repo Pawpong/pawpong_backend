@@ -66,9 +66,11 @@ export function ApiGetHomeAvailablePetsEndpoint() {
                 - 비로그인 사용자는 가격 정보 없이 공개용 목록을 조회합니다.
                 - 로그인 사용자는 노출 규칙에 맞는 추가 정보를 함께 조회합니다.
                 - limit는 기본 10, 최대 50까지 지원합니다.
+                - Authorization Bearer 토큰은 선택 사항이며, 전달하면 로그인 사용자 기준 데이터를 반환합니다.
             `,
             responseType: [AvailablePetResponseDto],
             isPublic: true,
+            supportsOptionalAuth: true,
             successDescription: '분양 가능한 반려동물 목록 조회 성공',
             successMessageExample: HOME_RESPONSE_MESSAGE_EXAMPLES.availablePetsRetrieved,
         }),
