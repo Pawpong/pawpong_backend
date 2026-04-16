@@ -2,6 +2,7 @@ import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logge
 import { Request, Response } from 'express';
 
 import { ApiResponseDto } from '../dto/response/api-response.dto';
+import { NotifyCriticalErrorUseCase } from '../discord/application/use-cases/notify-critical-error.use-case';
 
 /**
  * HTTP 예외 필터
@@ -10,6 +11,8 @@ import { ApiResponseDto } from '../dto/response/api-response.dto';
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
     private readonly logger = new Logger(HttpExceptionFilter.name);
+
+    constructor(private readonly notifyCriticalErrorUseCase?: NotifyCriticalErrorUseCase) {}
 
     catch(exception: HttpException, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
@@ -38,11 +41,38 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
         // 에러 로깅
         this.logger.error(`[${request.method}] ${request.url} - ${status} - ${errorMessage}`);
+        this.notifyCriticalError(exception, request, status, errorMessage);
 
         // ApiResponseDto 형식으로 응답
         const errorResponse = ApiResponseDto.error(errorMessage, status);
 
         response.status(status).json(errorResponse);
+    }
+
+    /**
+     * 5xx HTTP 예외만 Discord critical 에러 알림으로 전달합니다.
+     */
+    private notifyCriticalError(exception: HttpException, request: Request, status: number, message: string): void {
+        if (!this.notifyCriticalErrorUseCase || status < 500) {
+            return;
+        }
+
+        const requestUser = (request as Request & { user?: { userId?: string; sub?: string } }).user;
+
+        void this.notifyCriticalErrorUseCase
+            .execute({
+                severity: 'critical',
+                context: HttpExceptionFilter.name,
+                message,
+                statusCode: status,
+                method: request.method,
+                path: request.originalUrl ?? request.url,
+                stack: exception.stack,
+                userId: requestUser?.userId ?? requestUser?.sub,
+            })
+            .catch((error) => {
+                this.logger.error('[notifyCriticalError] Discord 에러 알림 실패', error.stack);
+            });
     }
 }
 
@@ -52,6 +82,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
     private readonly logger = new Logger(AllExceptionsFilter.name);
+
+    constructor(private readonly notifyCriticalErrorUseCase?: NotifyCriticalErrorUseCase) {}
 
     catch(exception: any, host: ArgumentsHost) {
         const ctx = host.switchToHttp();
@@ -64,10 +96,37 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
         // 에러 로깅
         this.logger.error(`[${request.method}] ${request.url} - ${status} - ${message}`, exception.stack);
+        this.notifyCriticalError(exception, request, status, message);
 
         // ApiResponseDto 형식으로 응답
         const errorResponse = ApiResponseDto.error(message, status);
 
         response.status(status).json(errorResponse);
+    }
+
+    /**
+     * 예상하지 못한 5xx 예외를 Discord critical 에러 알림으로 전달합니다.
+     */
+    private notifyCriticalError(exception: any, request: Request, status: number, message: string): void {
+        if (!this.notifyCriticalErrorUseCase || status < 500) {
+            return;
+        }
+
+        const requestUser = (request as Request & { user?: { userId?: string; sub?: string } }).user;
+
+        void this.notifyCriticalErrorUseCase
+            .execute({
+                severity: 'critical',
+                context: AllExceptionsFilter.name,
+                message,
+                statusCode: status,
+                method: request.method,
+                path: request.originalUrl ?? request.url,
+                stack: exception instanceof Error ? exception.stack : undefined,
+                userId: requestUser?.userId ?? requestUser?.sub,
+            })
+            .catch((error) => {
+                this.logger.error('[notifyCriticalError] Discord 에러 알림 실패', error.stack);
+            });
     }
 }

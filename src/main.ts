@@ -12,6 +12,7 @@ import { HttpStatusInterceptor } from './common/interceptor/http-status.intercep
 import { LoggingInterceptor } from './common/interceptor/logging.interceptor';
 
 import { CustomLoggerService } from './common/logger/custom-logger.service';
+import { NotifyCriticalErrorUseCase } from './common/discord/application/use-cases/notify-critical-error.use-case';
 
 import { AppModule } from './app.module';
 
@@ -61,9 +62,10 @@ async function bootstrap(): Promise<void> {
         }),
     );
 
-    // 전역 예외 필터 적용 (ApiResponseDto 형식으로 에러 응답)
-    app.useGlobalFilters(new AllExceptionsFilter());
-    app.useGlobalFilters(new HttpExceptionFilter());
+    // 전역 예외 필터 적용 (ApiResponseDto 형식 응답 + critical 에러 Discord 알림)
+    const notifyCriticalErrorUseCase = app.get(NotifyCriticalErrorUseCase);
+    app.useGlobalFilters(new AllExceptionsFilter(notifyCriticalErrorUseCase));
+    app.useGlobalFilters(new HttpExceptionFilter(notifyCriticalErrorUseCase));
 
     // HTTP 상태 코드 통일 인터셉터 적용
     app.useGlobalInterceptors(new HttpStatusInterceptor());

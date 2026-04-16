@@ -8,6 +8,7 @@ import { RedisModule } from './common/redis/redis.module';
 import { KafkaModule } from './common/kafka/kafka.module';
 import { AlimtalkModule } from './common/alimtalk/alimtalk.module';
 import { AlimtalkAdminModule } from './common/alimtalk/admin/alimtalk-admin.module';
+import { DiscordWebhookModule } from './common/discord/discord-webhook.module';
 
 import { AuthModule } from './api/auth/auth.module';
 import { HomeModule } from './api/home/home.module';
@@ -42,6 +43,7 @@ import { ChatModule } from './api/chat/chat.module';
         }),
         WinstonModule.forRoot(winstonConfig),
         LoggerModule,
+        DiscordWebhookModule,
         RedisModule,
         KafkaModule,
         DatabaseModule,
