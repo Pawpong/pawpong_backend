@@ -31,21 +31,25 @@ export class GetSystemHealthUseCase {
      *
      * @param adminId 요청한 관리자 ID
      * @param filter 기간 필터 (기본 24시간)
+     * @param now 기준 시각 — 컨트롤러에서 주입하여 응답의 period와 Loki 쿼리 범위를 일치시킵니다.
      * @returns 분류된 시스템 헬스 요약
      */
-    async execute(adminId: string, filter: SystemHealthFilterRequestDto): Promise<CategorizationResult> {
+    async execute(
+        adminId: string,
+        filter: SystemHealthFilterRequestDto,
+        now: Date = new Date(),
+    ): Promise<CategorizationResult> {
         await this.verifyAdminPermission(adminId);
 
-        const now = new Date();
         const periodHours = filter.periodHours ?? 24;
         const from = new Date(now.getTime() - periodHours * 60 * 60 * 1000).toISOString();
         const to = now.toISOString();
 
-        const entries = await this.lokiQueryPort.queryErrorsAndWarnings({
-            from,
-            to,
-            limit: 1000,
-        });
+        // 조회 기간이 길수록 더 많은 로그가 필요하므로 limit을 동적으로 산정합니다.
+        // 최소 1000건 / 최대 5000건 (Loki 부하 고려)
+        const limit = Math.min(5000, Math.max(1000, periodHours * 100));
+
+        const entries = await this.lokiQueryPort.queryErrorsAndWarnings({ from, to, limit });
 
         return this.logCategorizerService.categorize(entries, now);
     }
