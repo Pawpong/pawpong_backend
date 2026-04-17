@@ -10,7 +10,10 @@ import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-manage
 import { SubmitDocumentsRequestDto } from './dto/request/submit-documents-request.dto';
 import { VerificationSubmitRequestDto } from './dto/request/verification-submit-request.dto';
 import { VerificationSubmitResponseDto } from './dto/response/verification-submit-response.dto';
-import { BreederManagementSwaggerDocs } from './swagger';
+import {
+    ApiSubmitBreederManagementVerificationDocumentsEndpoint,
+    ApiSubmitBreederManagementVerificationEndpoint,
+} from './swagger';
 
 @BreederManagementProtectedController()
 export class BreederManagementVerificationCommandController {
@@ -20,7 +23,7 @@ export class BreederManagementVerificationCommandController {
     ) {}
 
     @Post('verification')
-    @ApiEndpoint(BreederManagementSwaggerDocs.submitVerification)
+    @ApiSubmitBreederManagementVerificationEndpoint()
     async submitVerification(
         @CurrentUser('userId') userId: string,
         @Body() verificationData: VerificationSubmitRequestDto,
@@ -31,7 +34,7 @@ export class BreederManagementVerificationCommandController {
 
     @Post('verification/submit')
     @HttpCode(HttpStatus.OK)
-    @ApiEndpoint(BreederManagementSwaggerDocs.submitVerificationDocuments)
+    @ApiSubmitBreederManagementVerificationDocumentsEndpoint()
     async submitVerificationDocuments(
         @CurrentUser('userId') userId: string,
         @Body() dto: SubmitDocumentsRequestDto,

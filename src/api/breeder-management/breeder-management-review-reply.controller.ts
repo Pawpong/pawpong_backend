@@ -10,7 +10,11 @@ import { BreederManagementProtectedController } from './decorator/breeder-manage
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { ReviewReplyRequestDto } from './dto/request/review-reply-request.dto';
 import { ReviewReplyDeleteResponseDto, ReviewReplyResponseDto } from './dto/response/review-reply-response.dto';
-import { BreederManagementSwaggerDocs } from './swagger';
+import {
+    ApiAddBreederManagementReviewReplyEndpoint,
+    ApiDeleteBreederManagementReviewReplyEndpoint,
+    ApiUpdateBreederManagementReviewReplyEndpoint,
+} from './swagger';
 
 @BreederManagementProtectedController()
 export class BreederManagementReviewReplyController {
@@ -21,7 +25,7 @@ export class BreederManagementReviewReplyController {
     ) {}
 
     @Post('reviews/:reviewId/reply')
-    @ApiEndpoint(BreederManagementSwaggerDocs.addReviewReply)
+    @ApiAddBreederManagementReviewReplyEndpoint()
     async addReviewReply(
         @CurrentUser('userId') userId: string,
         @Param('reviewId') reviewId: string,
@@ -32,7 +36,7 @@ export class BreederManagementReviewReplyController {
     }
 
     @Patch('reviews/:reviewId/reply')
-    @ApiEndpoint(BreederManagementSwaggerDocs.updateReviewReply)
+    @ApiUpdateBreederManagementReviewReplyEndpoint()
     async updateReviewReply(
         @CurrentUser('userId') userId: string,
         @Param('reviewId') reviewId: string,
@@ -43,7 +47,7 @@ export class BreederManagementReviewReplyController {
     }
 
     @Delete('reviews/:reviewId/reply')
-    @ApiEndpoint(BreederManagementSwaggerDocs.deleteReviewReply)
+    @ApiDeleteBreederManagementReviewReplyEndpoint()
     async deleteReviewReply(
         @CurrentUser('userId') userId: string,
         @Param('reviewId') reviewId: string,

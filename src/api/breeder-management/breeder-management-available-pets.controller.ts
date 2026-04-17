@@ -15,7 +15,12 @@ import { PetAddResponseDto } from './dto/response/pet-add-response.dto';
 import { PetRemoveResponseDto } from './dto/response/pet-remove-response.dto';
 import { PetStatusUpdateResponseDto } from './dto/response/pet-status-update-response.dto';
 import { PetUpdateResponseDto } from './dto/response/pet-update-response.dto';
-import { BreederManagementSwaggerDocs } from './swagger';
+import {
+    ApiAddBreederManagementAvailablePetEndpoint,
+    ApiRemoveBreederManagementAvailablePetEndpoint,
+    ApiUpdateBreederManagementAvailablePetEndpoint,
+    ApiUpdateBreederManagementPetStatusEndpoint,
+} from './swagger';
 
 @BreederManagementProtectedController()
 export class BreederManagementAvailablePetsController {
@@ -27,7 +32,7 @@ export class BreederManagementAvailablePetsController {
     ) {}
 
     @Post('available-pets')
-    @ApiEndpoint(BreederManagementSwaggerDocs.addAvailablePet)
+    @ApiAddBreederManagementAvailablePetEndpoint()
     async addAvailablePet(
         @CurrentUser('userId') userId: string,
         @Body() availablePetDto: AvailablePetAddDto,
@@ -37,7 +42,7 @@ export class BreederManagementAvailablePetsController {
     }
 
     @Patch('available-pets/:petId')
-    @ApiEndpoint(BreederManagementSwaggerDocs.updateAvailablePet)
+    @ApiUpdateBreederManagementAvailablePetEndpoint()
     async updateAvailablePet(
         @CurrentUser('userId') userId: string,
         @Param('petId') petId: string,
@@ -48,7 +53,7 @@ export class BreederManagementAvailablePetsController {
     }
 
     @Patch('available-pets/:petId/status')
-    @ApiEndpoint(BreederManagementSwaggerDocs.updatePetStatus)
+    @ApiUpdateBreederManagementPetStatusEndpoint()
     async updatePetStatus(
         @CurrentUser('userId') userId: string,
         @Param('petId') petId: string,
@@ -64,7 +69,7 @@ export class BreederManagementAvailablePetsController {
     }
 
     @Delete('available-pets/:petId')
-    @ApiEndpoint(BreederManagementSwaggerDocs.removeAvailablePet)
+    @ApiRemoveBreederManagementAvailablePetEndpoint()
     async removeAvailablePet(
         @CurrentUser('userId') userId: string,
         @Param('petId') petId: string,

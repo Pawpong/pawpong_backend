@@ -10,14 +10,14 @@ import { BreederManagementProtectedController } from './decorator/breeder-manage
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { MyReviewsQueryRequestDto } from './dto/request/my-reviews-query-request.dto';
 import { MyReviewsListResponseDto } from './dto/response/my-reviews-list-response.dto';
-import { BreederManagementSwaggerDocs } from './swagger';
+import { ApiGetBreederManagementMyReviewsEndpoint } from './swagger';
 
 @BreederManagementProtectedController()
 export class BreederManagementReviewsQueryController {
     constructor(private readonly getBreederManagementMyReviewsUseCase: GetBreederManagementMyReviewsUseCase) {}
 
     @Get('my-reviews')
-    @ApiPaginatedEndpoint(BreederManagementSwaggerDocs.myReviews)
+    @ApiGetBreederManagementMyReviewsEndpoint()
     async getMyReviews(
         @CurrentUser('userId') userId: string,
         @Query() query: MyReviewsQueryRequestDto,

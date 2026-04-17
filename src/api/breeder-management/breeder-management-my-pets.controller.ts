@@ -10,14 +10,14 @@ import { BreederManagementProtectedController } from './decorator/breeder-manage
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { MyPetsQueryRequestDto } from './dto/request/my-pets-query-request.dto';
 import { MyPetsListResponseDto } from './dto/response/my-pets-list-response.dto';
-import { BreederManagementSwaggerDocs } from './swagger';
+import { ApiGetBreederManagementMyPetsEndpoint } from './swagger';
 
 @BreederManagementProtectedController()
 export class BreederManagementMyPetsController {
     constructor(private readonly getBreederManagementMyPetsUseCase: GetBreederManagementMyPetsUseCase) {}
 
     @Get('my-pets')
-    @ApiPaginatedEndpoint(BreederManagementSwaggerDocs.myPets)
+    @ApiGetBreederManagementMyPetsEndpoint()
     async getMyPets(
         @CurrentUser('userId') userId: string,
         @Query() query: MyPetsQueryRequestDto,

@@ -9,7 +9,7 @@ import { BreederManagementProtectedController } from './decorator/breeder-manage
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { ApplicationStatusUpdateRequestDto } from './dto/request/application-status-update-request.dto';
 import { ApplicationStatusUpdateResponseDto } from './dto/response/application-status-update-response.dto';
-import { BreederManagementSwaggerDocs } from './swagger';
+import { ApiUpdateBreederManagementApplicationStatusEndpoint } from './swagger';
 
 @BreederManagementProtectedController()
 export class BreederManagementApplicationStatusController {
@@ -18,14 +18,18 @@ export class BreederManagementApplicationStatusController {
     ) {}
 
     @Patch('applications/:applicationId')
-    @ApiEndpoint(BreederManagementSwaggerDocs.updateApplicationStatus)
+    @ApiUpdateBreederManagementApplicationStatusEndpoint()
     async updateApplicationStatus(
         @CurrentUser('userId') userId: string,
         @Param('applicationId', new MongoObjectIdPipe('입양 신청', '올바르지 않은 입양 신청 ID 형식입니다.'))
         applicationId: string,
         @Body() updateData: ApplicationStatusUpdateRequestDto,
     ): Promise<ApiResponseDto<ApplicationStatusUpdateResponseDto>> {
-        const result = await this.updateBreederManagementApplicationStatusUseCase.execute(userId, applicationId, updateData);
+        const result = await this.updateBreederManagementApplicationStatusUseCase.execute(
+            userId,
+            applicationId,
+            updateData,
+        );
         return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationStatusUpdated);
     }
 }

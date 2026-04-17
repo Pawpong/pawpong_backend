@@ -13,7 +13,11 @@ import { ParentPetUpdateDto } from './dto/request/parent-pet-update-request.dto'
 import { PetAddResponseDto } from './dto/response/pet-add-response.dto';
 import { PetRemoveResponseDto } from './dto/response/pet-remove-response.dto';
 import { PetUpdateResponseDto } from './dto/response/pet-update-response.dto';
-import { BreederManagementSwaggerDocs } from './swagger';
+import {
+    ApiAddBreederManagementParentPetEndpoint,
+    ApiRemoveBreederManagementParentPetEndpoint,
+    ApiUpdateBreederManagementParentPetEndpoint,
+} from './swagger';
 
 @BreederManagementProtectedController()
 export class BreederManagementParentPetsController {
@@ -24,7 +28,7 @@ export class BreederManagementParentPetsController {
     ) {}
 
     @Post('parent-pets')
-    @ApiEndpoint(BreederManagementSwaggerDocs.addParentPet)
+    @ApiAddBreederManagementParentPetEndpoint()
     async addParentPet(
         @CurrentUser('userId') userId: string,
         @Body() parentPetDto: ParentPetAddDto,
@@ -34,7 +38,7 @@ export class BreederManagementParentPetsController {
     }
 
     @Patch('parent-pets/:petId')
-    @ApiEndpoint(BreederManagementSwaggerDocs.updateParentPet)
+    @ApiUpdateBreederManagementParentPetEndpoint()
     async updateParentPet(
         @CurrentUser('userId') userId: string,
         @Param('petId') petId: string,
@@ -45,7 +49,7 @@ export class BreederManagementParentPetsController {
     }
 
     @Delete('parent-pets/:petId')
-    @ApiEndpoint(BreederManagementSwaggerDocs.removeParentPet)
+    @ApiRemoveBreederManagementParentPetEndpoint()
     async removeParentPet(
         @CurrentUser('userId') userId: string,
         @Param('petId') petId: string,

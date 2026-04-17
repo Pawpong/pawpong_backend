@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiParam, ApiQuery } from '@nestjs/swagger';
 
-import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
+import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../common/decorator/swagger.decorator';
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
 import {
     BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE,
@@ -425,3 +425,219 @@ export const BreederManagementRequestBodyDtos = {
     breederAccountDelete: BreederAccountDeleteRequestDto,
     reviewReply: ReviewReplyRequestDto,
 };
+
+function ApiBreederManagementPetIdParam() {
+    return ApiParam({
+        name: 'petId',
+        description: '관리할 반려동물 ID',
+        example: '507f1f77bcf86cd799439011',
+    });
+}
+
+function ApiBreederManagementApplicationIdParam() {
+    return ApiParam({
+        name: 'applicationId',
+        description: '조회 또는 변경할 입양 신청 ID',
+        example: '507f1f77bcf86cd799439011',
+    });
+}
+
+function ApiBreederManagementReviewIdParam() {
+    return ApiParam({
+        name: 'reviewId',
+        description: '답글을 관리할 후기 ID',
+        example: '507f1f77bcf86cd799439011',
+    });
+}
+
+export function ApiUpdateBreederManagementProfileEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.updateProfile),
+        ApiBody({ type: ProfileUpdateRequestDto }),
+    );
+}
+
+export function ApiSubmitBreederManagementVerificationEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.submitVerification),
+        ApiBody({ type: VerificationSubmitRequestDto }),
+    );
+}
+
+export function ApiSubmitBreederManagementVerificationDocumentsEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.submitVerificationDocuments),
+        ApiBody({ type: SubmitDocumentsRequestDto }),
+    );
+}
+
+export function ApiAddBreederManagementParentPetEndpoint() {
+    return applyDecorators(ApiEndpoint(BreederManagementSwaggerDocs.addParentPet), ApiBody({ type: ParentPetAddDto }));
+}
+
+export function ApiUpdateBreederManagementParentPetEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.updateParentPet),
+        ApiBreederManagementPetIdParam(),
+        ApiBody({ type: ParentPetUpdateDto }),
+    );
+}
+
+export function ApiRemoveBreederManagementParentPetEndpoint() {
+    return applyDecorators(ApiEndpoint(BreederManagementSwaggerDocs.removeParentPet), ApiBreederManagementPetIdParam());
+}
+
+export function ApiAddBreederManagementAvailablePetEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.addAvailablePet),
+        ApiBody({ type: AvailablePetAddDto }),
+    );
+}
+
+export function ApiUpdateBreederManagementAvailablePetEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.updateAvailablePet),
+        ApiBreederManagementPetIdParam(),
+        ApiBody({ type: AvailablePetAddDto }),
+    );
+}
+
+export function ApiUpdateBreederManagementPetStatusEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.updatePetStatus),
+        ApiBreederManagementPetIdParam(),
+        ApiBody({ type: PetStatusUpdateRequestDto }),
+    );
+}
+
+export function ApiRemoveBreederManagementAvailablePetEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.removeAvailablePet),
+        ApiBreederManagementPetIdParam(),
+    );
+}
+
+export function ApiGetBreederManagementReceivedApplicationsEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.receivedApplications),
+        ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
+        ApiQuery({ name: 'limit', required: false, type: Number, description: '페이지당 항목 수', example: 10 }),
+        ApiQuery({
+            name: 'status',
+            required: false,
+            enum: ['consultation_pending', 'consultation_completed', 'adoption_approved', 'adoption_rejected'],
+            description: '입양 신청 상태 필터',
+            example: 'consultation_pending',
+        }),
+        ApiQuery({
+            name: 'petType',
+            required: false,
+            enum: ['dog', 'cat'],
+            description: '반려동물 종류 필터',
+            example: 'dog',
+        }),
+        ApiQuery({
+            name: 'recentDays',
+            required: false,
+            type: Number,
+            description: '최근 N일 이내 신청만 조회',
+            example: 30,
+        }),
+    );
+}
+
+export function ApiGetBreederManagementApplicationDetailEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.applicationDetail),
+        ApiBreederManagementApplicationIdParam(),
+    );
+}
+
+export function ApiUpdateBreederManagementApplicationStatusEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.updateApplicationStatus),
+        ApiBreederManagementApplicationIdParam(),
+        ApiBody({ type: ApplicationStatusUpdateRequestDto }),
+    );
+}
+
+export function ApiGetBreederManagementMyPetsEndpoint() {
+    return applyDecorators(
+        ApiPaginatedEndpoint(BreederManagementSwaggerDocs.myPets),
+        ApiQuery({
+            name: 'status',
+            required: false,
+            type: String,
+            description: '개체 상태 필터',
+            example: 'available',
+        }),
+        ApiQuery({
+            name: 'includeInactive',
+            required: false,
+            type: Boolean,
+            description: '비활성 개체 포함 여부',
+            example: false,
+        }),
+        ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
+        ApiQuery({ name: 'limit', required: false, type: Number, description: '페이지당 항목 수', example: 20 }),
+    );
+}
+
+export function ApiGetBreederManagementMyReviewsEndpoint() {
+    return applyDecorators(
+        ApiPaginatedEndpoint(BreederManagementSwaggerDocs.myReviews),
+        ApiQuery({
+            name: 'visibility',
+            required: false,
+            type: String,
+            description: '후기 공개 상태 필터',
+            example: 'public',
+        }),
+        ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
+        ApiQuery({ name: 'limit', required: false, type: Number, description: '페이지당 항목 수', example: 10 }),
+    );
+}
+
+export function ApiUpdateBreederManagementApplicationFormEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.updateApplicationForm),
+        ApiBody({ type: ApplicationFormUpdateRequestDto }),
+    );
+}
+
+export function ApiUpdateBreederManagementApplicationFormSimpleEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.updateApplicationFormSimple),
+        ApiBody({ type: SimpleApplicationFormUpdateRequestDto }),
+    );
+}
+
+export function ApiDeleteBreederManagementAccountEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.deleteAccount),
+        ApiBody({ type: BreederAccountDeleteRequestDto }),
+    );
+}
+
+export function ApiAddBreederManagementReviewReplyEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.addReviewReply),
+        ApiBreederManagementReviewIdParam(),
+        ApiBody({ type: ReviewReplyRequestDto }),
+    );
+}
+
+export function ApiUpdateBreederManagementReviewReplyEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.updateReviewReply),
+        ApiBreederManagementReviewIdParam(),
+        ApiBody({ type: ReviewReplyRequestDto }),
+    );
+}
+
+export function ApiDeleteBreederManagementReviewReplyEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.deleteReviewReply),
+        ApiBreederManagementReviewIdParam(),
+    );
+}

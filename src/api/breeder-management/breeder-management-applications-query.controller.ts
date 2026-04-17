@@ -16,7 +16,10 @@ import { BreederManagementProtectedController } from './decorator/breeder-manage
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { ApplicationsGetRequestDto } from './dto/request/applications-fetch-request.dto';
 import { BreederManagementApplicationDetailResponseDto } from './dto/response/application-detail-response.dto';
-import { BreederManagementSwaggerDocs } from './swagger';
+import {
+    ApiGetBreederManagementApplicationDetailEndpoint,
+    ApiGetBreederManagementReceivedApplicationsEndpoint,
+} from './swagger';
 
 @BreederManagementProtectedController()
 export class BreederManagementApplicationsQueryController {
@@ -26,7 +29,7 @@ export class BreederManagementApplicationsQueryController {
     ) {}
 
     @Get('applications')
-    @ApiEndpoint(BreederManagementSwaggerDocs.receivedApplications)
+    @ApiGetBreederManagementReceivedApplicationsEndpoint()
     async getReceivedApplications(
         @CurrentUser('userId') userId: string,
         @Query() queryParams: ApplicationsGetRequestDto,
@@ -37,13 +40,14 @@ export class BreederManagementApplicationsQueryController {
             queryParams.limit || 10,
         );
         return ApiResponseDto.success(
-            PaginationResponseDto.fromPageResult(result) as ReceivedApplicationListResponseDto & BreederManagementReceivedApplicationsPageResult,
+            PaginationResponseDto.fromPageResult(result) as ReceivedApplicationListResponseDto &
+                BreederManagementReceivedApplicationsPageResult,
             BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationListRetrieved,
         );
     }
 
     @Get('applications/:applicationId')
-    @ApiEndpoint(BreederManagementSwaggerDocs.applicationDetail)
+    @ApiGetBreederManagementApplicationDetailEndpoint()
     async getApplicationDetail(
         @CurrentUser('userId') userId: string,
         @Param('applicationId', new MongoObjectIdPipe('입양 신청', '올바르지 않은 입양 신청 ID 형식입니다.'))

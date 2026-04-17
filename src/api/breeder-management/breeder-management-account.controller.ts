@@ -8,14 +8,14 @@ import { BreederManagementProtectedController } from './decorator/breeder-manage
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { BreederAccountDeleteRequestDto } from './dto/request/breeder-account-delete-request.dto';
 import { BreederAccountDeleteResponseDto } from './dto/response/breeder-account-delete-response.dto';
-import { BreederManagementSwaggerDocs } from './swagger';
+import { ApiDeleteBreederManagementAccountEndpoint } from './swagger';
 
 @BreederManagementProtectedController()
 export class BreederManagementAccountController {
     constructor(private readonly deleteBreederManagementAccountUseCase: DeleteBreederManagementAccountUseCase) {}
 
     @Delete('account')
-    @ApiEndpoint(BreederManagementSwaggerDocs.deleteAccount)
+    @ApiDeleteBreederManagementAccountEndpoint()
     async deleteAccount(
         @CurrentUser('userId') userId: string,
         @Body() deleteData?: BreederAccountDeleteRequestDto,

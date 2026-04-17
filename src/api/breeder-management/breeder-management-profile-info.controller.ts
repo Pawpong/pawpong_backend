@@ -11,7 +11,7 @@ import { BreederManagementProtectedController } from './decorator/breeder-manage
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from './constants/breeder-management-response-messages';
 import { ProfileUpdateRequestDto } from './dto/request/profile-update-request.dto';
 import { BreederProfileUpdateResponseDto } from './dto/response/profile-update-response.dto';
-import { BreederManagementSwaggerDocs } from './swagger';
+import { ApiUpdateBreederManagementProfileEndpoint, BreederManagementSwaggerDocs } from './swagger';
 
 @BreederManagementProtectedController()
 export class BreederManagementProfileInfoController {
@@ -31,7 +31,7 @@ export class BreederManagementProfileInfoController {
     }
 
     @Patch('profile')
-    @ApiEndpoint(BreederManagementSwaggerDocs.updateProfile)
+    @ApiUpdateBreederManagementProfileEndpoint()
     async updateProfile(
         @CurrentUser('userId') userId: string,
         @Body() updateData: ProfileUpdateRequestDto,
