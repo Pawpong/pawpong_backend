@@ -1,8 +1,9 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import { ApiEndpoint, ApiPaginatedEndpoint, ApiPublicController } from '../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
+import { PetType } from '../../../common/enum/user.enum';
 import { BreederSearchResponseDto } from '../dto/response/breeder-search-response.dto';
 import { BreederExploreResponseDto } from '../dto/response/breeder-explore-response.dto';
 import { BreederCardResponseDto } from '../dto/response/breeder-card-response.dto';
@@ -13,6 +14,8 @@ import { PetDetailResponseDto } from '../dto/response/pet-detail-response.dto';
 import { ParentPetListResponseDto } from '../dto/response/parent-pet-list.dto';
 import { PublicApplicationFormResponseDto } from '../dto/response/public-application-form.dto';
 import { BREEDER_RESPONSE_MESSAGES } from '../constants/breeder-response-messages';
+import { SortCriteria } from '../constants/breeder-search.enum';
+import { SearchBreederRequestDto } from '../dto/request/search-breeder-request.dto';
 import { BreederSwaggerDocs } from './index';
 
 function ApiBreederIdParam() {
@@ -56,23 +59,98 @@ export function ApiBreederController() {
 }
 
 export function ApiSearchBreedersEndpoint() {
-    return ApiEndpoint({
-        ...BreederSwaggerDocs.searchBreeders,
-        responseType: BreederSearchResponseDto,
-        isPublic: true,
-        successMessageExample: BREEDER_RESPONSE_MESSAGES.searchCompleted,
-    });
+    return applyDecorators(
+        ApiEndpoint({
+            ...BreederSwaggerDocs.searchBreeders,
+            responseType: BreederSearchResponseDto,
+            isPublic: true,
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.searchCompleted,
+        }),
+        ApiQuery({
+            name: 'petType',
+            required: false,
+            enum: PetType,
+            description: '반려동물 타입',
+            example: 'dog',
+        }),
+        ApiQuery({
+            name: 'breedName',
+            required: false,
+            type: String,
+            description: '품종 이름',
+            example: '골든리트리버',
+        }),
+        ApiQuery({
+            name: 'cityName',
+            required: false,
+            type: String,
+            description: '도시명',
+            example: '서울',
+        }),
+        ApiQuery({
+            name: 'districtName',
+            required: false,
+            type: String,
+            description: '구/군명',
+            example: '강남구',
+        }),
+        ApiQuery({
+            name: 'isImmediatelyAvailable',
+            required: false,
+            type: Boolean,
+            description: '즉시 분양 가능 여부',
+            example: true,
+        }),
+        ApiQuery({
+            name: 'minPrice',
+            required: false,
+            type: Number,
+            description: '최소 가격 (원)',
+            example: 500000,
+        }),
+        ApiQuery({
+            name: 'maxPrice',
+            required: false,
+            type: Number,
+            description: '최대 가격 (원)',
+            example: 2000000,
+        }),
+        ApiQuery({
+            name: 'page',
+            required: false,
+            type: Number,
+            description: '페이지 번호',
+            example: 1,
+        }),
+        ApiQuery({
+            name: 'limit',
+            required: false,
+            type: Number,
+            description: '페이지당 항목 수',
+            example: 10,
+        }),
+        ApiQuery({
+            name: 'sortCriteria',
+            required: false,
+            enum: SortCriteria,
+            description: '정렬 기준',
+            example: 'rating',
+        }),
+    );
 }
 
 export function ApiExploreBreedersEndpoint() {
-    return ApiPaginatedEndpoint({
-        ...BreederSwaggerDocs.exploreBreeders,
-        responseType: BreederExploreResponseDto,
-        itemType: BreederCardResponseDto,
-        isPublic: true,
-        supportsOptionalAuth: true,
-        successMessageExample: BREEDER_RESPONSE_MESSAGES.breederListRetrieved,
-    });
+    return applyDecorators(
+        ApiPaginatedEndpoint({
+            ...BreederSwaggerDocs.exploreBreeders,
+            responseType: BreederExploreResponseDto,
+            itemType: BreederCardResponseDto,
+            isPublic: true,
+            supportsOptionalAuth: true,
+            successMessageExample: BREEDER_RESPONSE_MESSAGES.breederListRetrieved,
+        }),
+        ApiBody({ type: SearchBreederRequestDto }),
+    );
 }
 
 export function ApiGetPopularBreedersEndpoint() {

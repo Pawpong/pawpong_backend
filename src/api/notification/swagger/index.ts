@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiProduces, ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiProduces, ApiQuery } from '@nestjs/swagger';
 
 import {
     ApiController,
@@ -80,20 +80,27 @@ export function ApiGetUnreadNotificationCountEndpoint() {
 }
 
 export function ApiMarkNotificationReadEndpoint() {
-    return ApiEndpoint({
-        summary: '알림 읽음 처리',
-        description: `
-            특정 알림을 읽음 상태로 변경합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '알림 읽음 처리',
+            description: `
+                특정 알림을 읽음 상태로 변경합니다.
 
-            ## 주요 기능
-            - 본인 소유 알림만 읽음 처리할 수 있습니다.
-            - 이미 읽은 알림도 동일한 계약으로 응답합니다.
-        `,
-        responseType: MarkAsReadResponseDto,
-        successDescription: '알림 읽음 처리 성공',
-        successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.notificationMarkedRead,
-        errorResponses: [NOTIFICATION_NOT_FOUND_RESPONSE],
-    });
+                ## 주요 기능
+                - 본인 소유 알림만 읽음 처리할 수 있습니다.
+                - 이미 읽은 알림도 동일한 계약으로 응답합니다.
+            `,
+            responseType: MarkAsReadResponseDto,
+            successDescription: '알림 읽음 처리 성공',
+            successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.notificationMarkedRead,
+            errorResponses: [NOTIFICATION_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({
+            name: 'id',
+            description: '읽음 처리할 알림 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+    );
 }
 
 export function ApiMarkAllNotificationsReadEndpoint() {
@@ -113,20 +120,27 @@ export function ApiMarkAllNotificationsReadEndpoint() {
 }
 
 export function ApiDeleteNotificationEndpoint() {
-    return ApiEndpoint({
-        summary: '알림 삭제',
-        description: `
-            특정 알림을 삭제합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '알림 삭제',
+            description: `
+                특정 알림을 삭제합니다.
 
-            ## 주요 기능
-            - 본인 소유 알림만 삭제할 수 있습니다.
-            - 성공 시 data는 null로 반환합니다.
-        `,
-        nullableData: true,
-        successDescription: '알림 삭제 성공',
-        successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.notificationDeleted,
-        errorResponses: [NOTIFICATION_NOT_FOUND_RESPONSE],
-    });
+                ## 주요 기능
+                - 본인 소유 알림만 삭제할 수 있습니다.
+                - 성공 시 data는 null로 반환합니다.
+            `,
+            nullableData: true,
+            successDescription: '알림 삭제 성공',
+            successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.notificationDeleted,
+            errorResponses: [NOTIFICATION_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({
+            name: 'id',
+            description: '삭제할 알림 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+    );
 }
 
 function buildNotificationEmailPreviewEndpoint(summary: string, description: string, successMessageExample: string) {
