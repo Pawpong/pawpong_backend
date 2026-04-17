@@ -1,10 +1,14 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import { ApiEndpoint, ApiPublicController } from '../../../common/decorator/swagger.decorator';
 import { INQUIRY_RESPONSE_MESSAGE_EXAMPLES } from '../constants/inquiry-response-messages';
 import { INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE } from '../constants/inquiry-swagger.constants';
-import { InquiryCreateRequestDto, InquiryAnswerCreateRequestDto, InquiryUpdateRequestDto } from '../dto/request/inquiry-create-request.dto';
+import {
+    InquiryCreateRequestDto,
+    InquiryAnswerCreateRequestDto,
+    InquiryUpdateRequestDto,
+} from '../dto/request/inquiry-create-request.dto';
 import { InquiryCreateResponseDto } from '../dto/response/inquiry-create-response.dto';
 import { InquiryDetailResponseDto } from '../dto/response/inquiry-detail-response.dto';
 import { InquiryListResponseDto } from '../dto/response/inquiry-list-response.dto';
@@ -126,6 +130,11 @@ export function ApiGetInquiryDetailEndpoint() {
             successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryDetailRetrieved,
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE],
         }),
+        ApiParam({
+            name: 'inquiryId',
+            description: '조회할 문의 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
     );
 }
 
@@ -144,9 +153,9 @@ export function ApiCreateInquiryEndpoint() {
             responseType: InquiryCreateResponseDto,
             successDescription: '문의 작성 성공',
             successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryCreated,
-            additionalModels: [InquiryCreateRequestDto],
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE],
         }),
+        ApiBody({ type: InquiryCreateRequestDto }),
     );
 }
 
@@ -164,9 +173,14 @@ export function ApiUpdateInquiryEndpoint() {
             successDescription: '문의 수정 성공',
             successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryUpdated,
             nullableData: true,
-            additionalModels: [InquiryUpdateRequestDto],
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE],
         }),
+        ApiParam({
+            name: 'inquiryId',
+            description: '수정할 문의 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+        ApiBody({ type: InquiryUpdateRequestDto }),
     );
 }
 
@@ -186,6 +200,11 @@ export function ApiDeleteInquiryEndpoint() {
             nullableData: true,
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE],
         }),
+        ApiParam({
+            name: 'inquiryId',
+            description: '삭제할 문의 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
     );
 }
 
@@ -204,8 +223,13 @@ export function ApiCreateInquiryAnswerEndpoint() {
             successDescription: '답변 작성 성공',
             successMessageExample: INQUIRY_RESPONSE_MESSAGE_EXAMPLES.inquiryAnswerCreated,
             nullableData: true,
-            additionalModels: [InquiryAnswerCreateRequestDto],
             errorResponses: [INQUIRY_FORBIDDEN_RESPONSE, INQUIRY_NOT_FOUND_RESPONSE],
         }),
+        ApiParam({
+            name: 'inquiryId',
+            description: '답변할 문의 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+        ApiBody({ type: InquiryAnswerCreateRequestDto }),
     );
 }

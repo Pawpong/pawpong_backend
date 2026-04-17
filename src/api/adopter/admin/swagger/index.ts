@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
@@ -23,7 +23,8 @@ export function ApiGetAdopterAdminReviewReportsEndpoint() {
     return applyDecorators(
         ApiPaginatedEndpoint({
             summary: '후기 신고 목록 조회',
-            description: '신고된 후기 목록을 조회합니다. 입양자가 신고한 부적절한 후기들을 관리자가 검토할 수 있습니다.',
+            description:
+                '신고된 후기 목록을 조회합니다. 입양자가 신고한 부적절한 후기들을 관리자가 검토할 수 있습니다.',
             responseType: PaginationResponseDto,
             itemType: ReviewReportItemDto,
             errorResponses: [ADOPTER_ADMIN_FORBIDDEN_RESPONSE],
@@ -35,16 +36,25 @@ export function ApiGetAdopterAdminReviewReportsEndpoint() {
 }
 
 export function ApiDeleteAdopterAdminReviewEndpoint() {
-    return ApiEndpoint({
-        summary: '부적절한 후기 삭제',
-        description: '신고된 부적절한 후기를 삭제합니다.',
-        responseType: ReviewDeleteResponseDto,
-        errorResponses: [
-            ADOPTER_ADMIN_FORBIDDEN_RESPONSE,
-            ADOPTER_ADMIN_REVIEW_NOT_FOUND_RESPONSE,
-        ],
-        successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminReviewDeleted,
-    });
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '부적절한 후기 삭제',
+            description: '신고된 부적절한 후기를 삭제합니다.',
+            responseType: ReviewDeleteResponseDto,
+            errorResponses: [ADOPTER_ADMIN_FORBIDDEN_RESPONSE, ADOPTER_ADMIN_REVIEW_NOT_FOUND_RESPONSE],
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminReviewDeleted,
+        }),
+        ApiParam({
+            name: 'breederId',
+            description: '후기 소유 브리더 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+        ApiParam({
+            name: 'reviewId',
+            description: '삭제할 후기 ID',
+            example: '507f1f77bcf86cd799439012',
+        }),
+    );
 }
 
 export function ApiGetAdopterAdminApplicationListEndpoint() {
@@ -71,14 +81,19 @@ export function ApiGetAdopterAdminApplicationListEndpoint() {
 }
 
 export function ApiGetAdopterAdminApplicationDetailEndpoint() {
-    return ApiEndpoint({
-        summary: '입양 신청 상세 조회',
-        description: '특정 입양 신청의 상세 정보를 조회합니다. 표준 신청 응답, 커스텀 질문 응답 등 전체 정보를 제공합니다.',
-        responseType: AdminApplicationDetailResponseDto,
-        errorResponses: [
-            ADOPTER_ADMIN_FORBIDDEN_RESPONSE,
-            ADOPTER_ADMIN_APPLICATION_NOT_FOUND_RESPONSE,
-        ],
-        successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminApplicationDetailRetrieved,
-    });
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '입양 신청 상세 조회',
+            description:
+                '특정 입양 신청의 상세 정보를 조회합니다. 표준 신청 응답, 커스텀 질문 응답 등 전체 정보를 제공합니다.',
+            responseType: AdminApplicationDetailResponseDto,
+            errorResponses: [ADOPTER_ADMIN_FORBIDDEN_RESPONSE, ADOPTER_ADMIN_APPLICATION_NOT_FOUND_RESPONSE],
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminApplicationDetailRetrieved,
+        }),
+        ApiParam({
+            name: 'applicationId',
+            description: '조회할 입양 신청 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+    );
 }
