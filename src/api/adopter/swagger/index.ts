@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
@@ -79,13 +79,20 @@ export function ApiGetAdopterApplicationsEndpoint() {
 }
 
 export function ApiGetAdopterApplicationDetailEndpoint() {
-    return ApiEndpoint({
-        summary: '내가 보낸 입양 신청 상세 조회',
-        description: '입양자가 제출한 특정 입양 신청의 상세 정보를 조회합니다.',
-        responseType: ApplicationDetailResponseDto,
-        errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-        successMessageExample: ADOPTER_RESPONSE_MESSAGES.applicationDetailRetrieved,
-    });
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '내가 보낸 입양 신청 상세 조회',
+            description: '입양자가 제출한 특정 입양 신청의 상세 정보를 조회합니다.',
+            responseType: ApplicationDetailResponseDto,
+            errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.applicationDetailRetrieved,
+        }),
+        ApiParam({
+            name: 'id',
+            description: '조회할 입양 신청 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+    );
 }
 
 export function ApiCreateAdopterReviewEndpoint() {
@@ -137,13 +144,20 @@ export function ApiGetAdopterReviewsEndpoint() {
 }
 
 export function ApiGetAdopterReviewDetailEndpoint() {
-    return ApiEndpoint({
-        summary: '후기 세부 조회',
-        description: '후기 ID로 특정 후기의 세부 정보를 조회합니다.',
-        responseType: MyReviewDetailDto,
-        errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-        successMessageExample: ADOPTER_RESPONSE_MESSAGES.reviewDetailRetrieved,
-    });
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '후기 세부 조회',
+            description: '후기 ID로 특정 후기의 세부 정보를 조회합니다.',
+            responseType: MyReviewDetailDto,
+            errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.reviewDetailRetrieved,
+        }),
+        ApiParam({
+            name: 'id',
+            description: '조회할 후기 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+    );
 }
 
 export function ApiAddAdopterFavoriteEndpoint() {
@@ -160,13 +174,20 @@ export function ApiAddAdopterFavoriteEndpoint() {
 }
 
 export function ApiRemoveAdopterFavoriteEndpoint() {
-    return ApiEndpoint({
-        summary: '즐겨찾기 브리더 삭제',
-        description: '즐겨찾기에서 브리더를 삭제합니다.',
-        responseType: FavoriteRemoveResponseDto,
-        errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-        successMessageExample: ADOPTER_RESPONSE_MESSAGES.favoriteRemoved,
-    });
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '즐겨찾기 브리더 삭제',
+            description: '즐겨찾기에서 브리더를 삭제합니다.',
+            responseType: FavoriteRemoveResponseDto,
+            errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.favoriteRemoved,
+        }),
+        ApiParam({
+            name: 'breederId',
+            description: '즐겨찾기에서 제거할 브리더 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+    );
 }
 
 export function ApiGetAdopterFavoritesEndpoint() {
