@@ -1,9 +1,13 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiExtraModels, ApiOperation, ApiParam, ApiQuery, ApiResponse, getSchemaPath } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiQuery, getSchemaPath } from '@nestjs/swagger';
 
-import { ApiController } from '../../../../common/decorator/swagger.decorator';
+import { ApiController, ApiEndpoint, ApiRawEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PageInfoDto } from '../../../../common/dto/pagination/page-info.dto';
-import { ANNOUNCEMENT_ADMIN_ERROR_RESPONSES } from '../constants/announcement-admin-swagger.constants';
+import {
+    ANNOUNCEMENT_ADMIN_FORBIDDEN_RESPONSE,
+    ANNOUNCEMENT_ADMIN_NOT_FOUND_RESPONSE,
+} from '../constants/announcement-admin-swagger.constants';
+import { ANNOUNCEMENT_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../constants/announcement-admin-response-messages';
 import { AnnouncementCreateRequestDto } from '../../dto/request/announcement-create-request.dto';
 import { AnnouncementUpdateRequestDto } from '../../dto/request/announcement-update-request.dto';
 import { AnnouncementResponseDto } from '../../dto/response/announcement-response.dto';
@@ -14,7 +18,7 @@ export function ApiAnnouncementAdminController() {
 
 export function ApiGetAllAnnouncementsAdminEndpoint() {
     return applyDecorators(
-        ApiOperation({
+        ApiRawEndpoint({
             summary: '공지사항 목록 조회 (관리자)',
             description: `
                 모든 공지사항 목록을 조회합니다.
@@ -26,14 +30,8 @@ export function ApiGetAllAnnouncementsAdminEndpoint() {
                 ## 권한
                 - 관리자(admin) 권한이 필요합니다.
             `,
-        }),
-        ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
-        ApiQuery({ name: 'pageSize', required: false, type: Number, description: '페이지 크기', example: 10 }),
-        ApiExtraModels(PageInfoDto, AnnouncementResponseDto),
-        ApiResponse({
-            status: 200,
-            description: '공지사항 목록 조회 성공',
-            schema: {
+            successDescription: '공지사항 목록 조회 성공',
+            responseSchema: {
                 type: 'object',
                 properties: {
                     items: {
@@ -46,16 +44,17 @@ export function ApiGetAllAnnouncementsAdminEndpoint() {
                 },
                 required: ['items', 'pagination'],
             },
+            additionalModels: [AnnouncementResponseDto, PageInfoDto],
+            errorResponses: [ANNOUNCEMENT_ADMIN_FORBIDDEN_RESPONSE],
         }),
-        ...ANNOUNCEMENT_ADMIN_ERROR_RESPONSES.map((response) =>
-            ApiResponse({ status: response.status, description: response.description }),
-        ),
+        ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
+        ApiQuery({ name: 'pageSize', required: false, type: Number, description: '페이지 크기', example: 10 }),
     );
 }
 
 export function ApiCreateAnnouncementAdminEndpoint() {
     return applyDecorators(
-        ApiOperation({
+        ApiEndpoint({
             summary: '공지사항 생성',
             description: `
                 새로운 공지사항을 생성합니다.
@@ -67,33 +66,36 @@ export function ApiCreateAnnouncementAdminEndpoint() {
                 ## 권한
                 - 관리자(admin) 권한이 필요합니다.
             `,
+            responseType: AnnouncementResponseDto,
+            successDescription: '공지사항 생성 성공',
+            successMessageExample: ANNOUNCEMENT_ADMIN_RESPONSE_MESSAGE_EXAMPLES.announcementCreated,
+            errorResponses: [ANNOUNCEMENT_ADMIN_FORBIDDEN_RESPONSE],
         }),
         ApiBody({ type: AnnouncementCreateRequestDto }),
-        ApiResponse({
-            status: 200,
-            description: '공지사항 생성 성공',
-            type: AnnouncementResponseDto,
-        }),
-        ...ANNOUNCEMENT_ADMIN_ERROR_RESPONSES.map((response) =>
-            ApiResponse({ status: response.status, description: response.description }),
-        ),
     );
 }
 
 export function ApiUpdateAnnouncementAdminEndpoint() {
     return applyDecorators(
-        ApiOperation({
+        ApiEndpoint({
             summary: '공지사항 수정',
             description: `
                 기존 공지사항을 수정합니다.
 
-                ## 주요 기능
-                - 제목, 내용, 노출 기간, 활성 여부를 수정할 수 있습니다.
-                - 잘못된 ID이거나 존재하지 않는 공지사항이면 예외를 반환합니다.
+                ## 수정 가능 필드
+                - title: 제목
+                - content: 내용
+                - isActive: 활성 여부
+                - startAt: 노출 시작일
+                - endAt: 노출 종료일
 
                 ## 권한
                 - 관리자(admin) 권한이 필요합니다.
             `,
+            responseType: AnnouncementResponseDto,
+            successDescription: '공지사항 수정 성공',
+            successMessageExample: ANNOUNCEMENT_ADMIN_RESPONSE_MESSAGE_EXAMPLES.announcementUpdated,
+            errorResponses: [ANNOUNCEMENT_ADMIN_FORBIDDEN_RESPONSE, ANNOUNCEMENT_ADMIN_NOT_FOUND_RESPONSE],
         }),
         ApiParam({
             name: 'announcementId',
@@ -101,43 +103,32 @@ export function ApiUpdateAnnouncementAdminEndpoint() {
             example: '507f1f77bcf86cd799439011',
         }),
         ApiBody({ type: AnnouncementUpdateRequestDto }),
-        ApiResponse({
-            status: 200,
-            description: '공지사항 수정 성공',
-            type: AnnouncementResponseDto,
-        }),
-        ...ANNOUNCEMENT_ADMIN_ERROR_RESPONSES.map((response) =>
-            ApiResponse({ status: response.status, description: response.description }),
-        ),
     );
 }
 
 export function ApiDeleteAnnouncementAdminEndpoint() {
     return applyDecorators(
-        ApiOperation({
+        ApiEndpoint({
             summary: '공지사항 삭제',
             description: `
                 공지사항을 삭제합니다.
 
                 ## 주의사항
                 - 삭제된 공지사항은 복구할 수 없습니다.
-                - 잘못된 ID이거나 존재하지 않는 공지사항이면 예외를 반환합니다.
+                - 존재하지 않는 공지사항이면 404 예외를 반환합니다.
 
                 ## 권한
                 - 관리자(admin) 권한이 필요합니다.
             `,
+            nullableData: true,
+            successDescription: '공지사항 삭제 성공',
+            successMessageExample: ANNOUNCEMENT_ADMIN_RESPONSE_MESSAGE_EXAMPLES.announcementDeleted,
+            errorResponses: [ANNOUNCEMENT_ADMIN_FORBIDDEN_RESPONSE, ANNOUNCEMENT_ADMIN_NOT_FOUND_RESPONSE],
         }),
         ApiParam({
             name: 'announcementId',
             description: '삭제할 공지사항 ID',
             example: '507f1f77bcf86cd799439011',
         }),
-        ApiResponse({
-            status: 200,
-            description: '공지사항 삭제 성공',
-        }),
-        ...ANNOUNCEMENT_ADMIN_ERROR_RESPONSES.map((response) =>
-            ApiResponse({ status: response.status, description: response.description }),
-        ),
     );
 }

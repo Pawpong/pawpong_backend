@@ -24,8 +24,13 @@ export function ApiCreateBreedAdminEndpoint() {
                 - category: 품종 카테고리
                 - categoryDescription: 카테고리 설명
                 - breeds: 품종 목록
+
+                ## 권한
+                - 관리자(admin) 권한이 필요합니다.
             `,
             responseType: BreedResponseDto,
+            successDescription: '품종 생성 성공',
+            successMessageExample: BREED_ADMIN_RESPONSE_MESSAGE_EXAMPLES.breedCreated,
         }),
         ApiBody({
             type: CreateBreedRequestDto,
@@ -41,8 +46,14 @@ export function ApiGetAllBreedsAdminEndpoint() {
 
             ## 주요 기능
             - 비공개 상태의 품종도 함께 반환됩니다.
+            - 동물 타입(dog/cat)과 카테고리별로 묶어 반환합니다.
+
+            ## 권한
+            - 관리자(admin) 권한이 필요합니다.
         `,
         responseType: [BreedResponseDto],
+        successDescription: '품종 목록 조회 성공',
+        successMessageExample: BREED_ADMIN_RESPONSE_MESSAGE_EXAMPLES.breedsRetrieved,
     });
 }
 
@@ -52,8 +63,13 @@ export function ApiGetBreedByIdAdminEndpoint() {
             summary: '특정 품종 조회 (관리자)',
             description: `
                 ID를 사용하여 특정 품종의 상세 정보를 조회합니다.
+
+                ## 권한
+                - 관리자(admin) 권한이 필요합니다.
             `,
             responseType: BreedResponseDto,
+            successDescription: '품종 조회 성공',
+            successMessageExample: BREED_ADMIN_RESPONSE_MESSAGE_EXAMPLES.breedRetrieved,
             errorResponses: [BREED_ADMIN_NOT_FOUND_RESPONSE],
         }),
         ApiParam({
@@ -75,8 +91,13 @@ export function ApiUpdateBreedAdminEndpoint() {
                 - category: 품종 카테고리
                 - categoryDescription: 카테고리 설명
                 - breeds: 품종 목록
+
+                ## 권한
+                - 관리자(admin) 권한이 필요합니다.
             `,
             responseType: BreedResponseDto,
+            successDescription: '품종 수정 성공',
+            successMessageExample: BREED_ADMIN_RESPONSE_MESSAGE_EXAMPLES.breedUpdated,
             errorResponses: [BREED_ADMIN_NOT_FOUND_RESPONSE],
         }),
         ApiParam({
@@ -100,7 +121,11 @@ export function ApiDeleteBreedAdminEndpoint() {
                 ## 주의사항
                 - 이 작업은 되돌릴 수 없습니다.
                 - 해당 품종과 연결된 데이터가 있을 경우 문제가 발생할 수 있습니다.
+
+                ## 권한
+                - 관리자(admin) 권한이 필요합니다.
             `,
+            successDescription: '품종 삭제 성공',
             successMessageExample: BREED_ADMIN_RESPONSE_MESSAGE_EXAMPLES.breedDeleted,
             nullableData: true,
             errorResponses: [BREED_ADMIN_NOT_FOUND_RESPONSE],
