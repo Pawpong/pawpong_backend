@@ -23,6 +23,7 @@ export function ApiGetAllStandardQuestionsAdminEndpoint() {
         - 비활성화된 질문을 포함한 모든 표준 질문을 반환합니다.
         `,
         responseType: [StandardQuestionResponseDto],
+        successDescription: '표준 질문 목록 조회 성공',
         successMessageExample: STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsRetrieved,
     });
 }
@@ -46,6 +47,7 @@ export function ApiUpdateStandardQuestionAdminEndpoint() {
             - 'id'와 'order' 필드는 수정할 수 없습니다.
             `,
             responseType: StandardQuestionResponseDto,
+            successDescription: '표준 질문 수정 성공',
             successMessageExample: STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionUpdated,
             errorResponses: [STANDARD_QUESTION_ADMIN_NOT_FOUND_RESPONSE],
         }),
@@ -69,6 +71,7 @@ export function ApiToggleStandardQuestionStatusAdminEndpoint() {
             - isActive: true면 활성화, false면 비활성화됩니다.
             `,
             responseType: StandardQuestionResponseDto,
+            successDescription: '표준 질문 상태 변경 성공',
             successMessageExample: STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionStatusUpdated,
             errorResponses: [STANDARD_QUESTION_ADMIN_NOT_FOUND_RESPONSE],
         }),
@@ -95,6 +98,7 @@ export function ApiReorderStandardQuestionsAdminEndpoint() {
                 type: 'boolean',
                 example: true,
             },
+            successDescription: '표준 질문 순서 변경 성공',
             successMessageExample: STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsReordered,
         }),
         ApiBody({ type: ReorderStandardQuestionsDto }),
@@ -115,6 +119,7 @@ export function ApiReseedStandardQuestionsAdminEndpoint() {
             type: 'boolean',
             example: true,
         },
+        successDescription: '표준 질문 초기화 성공',
         successMessageExample: STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsReseeded,
     });
 }

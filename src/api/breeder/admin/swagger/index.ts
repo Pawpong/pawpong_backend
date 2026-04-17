@@ -29,6 +29,7 @@ export function ApiSuspendBreederAdminEndpoint() {
             description: '브리더 계정을 영구정지 처리하고 알림을 발송합니다.',
             responseType: BreederSuspendResponseDto,
             errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE, BREEDER_ADMIN_NOT_FOUND_RESPONSE],
+            successDescription: '브리더 영구정지 성공',
             successMessageExample: BREEDER_RESPONSE_MESSAGES.accountSuspended,
         }),
         ApiParam({
@@ -47,6 +48,7 @@ export function ApiUnsuspendBreederAdminEndpoint() {
             description: '정지된 브리더 계정을 활성화하고 알림을 발송합니다.',
             responseType: BreederSuspendResponseDto,
             errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE, BREEDER_ADMIN_NOT_FOUND_RESPONSE],
+            successDescription: '브리더 정지 해제 성공',
             successMessageExample: BREEDER_RESPONSE_MESSAGES.accountUnsuspended,
         }),
         ApiParam({
@@ -63,6 +65,7 @@ export function ApiSendBreederRemindNotificationsAdminEndpoint() {
             summary: '리마인드 알림 발송',
             description: '서류 미제출 브리더들에게 리마인드 알림을 발송합니다. (서비스 알림 + 이메일 알림)',
             responseType: BreederRemindResponseDto,
+            successDescription: '리마인드 알림 발송 성공',
             successMessageExample: buildBreederDocumentReminderMessage(3),
             errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
         }),
@@ -77,6 +80,7 @@ export function ApiSetBreederTestAccountAdminEndpoint() {
             description:
                 '브리더를 테스트 계정으로 설정하거나 해제합니다. 테스트 계정은 탐색 페이지와 홈 화면에 노출되지 않습니다.',
             responseType: SetTestAccountResponseDto,
+            successDescription: '테스트 계정 설정 성공',
             successMessageExample: buildBreederTestAccountMessage(true),
             errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE, BREEDER_ADMIN_NOT_FOUND_RESPONSE],
         }),

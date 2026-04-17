@@ -24,6 +24,7 @@ export function ApiGetBreederReportsAdminEndpoint() {
             responseType: PaginationResponseDto,
             itemType: ReportListResponseDto,
             errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
+            successDescription: '브리더 신고 목록 조회 성공',
             successMessageExample: BREEDER_RESPONSE_MESSAGES.breederReportListRetrieved,
         }),
         ApiQuery({ name: 'status', required: false, type: String, description: '신고 상태 필터' }),
@@ -38,6 +39,7 @@ export function ApiHandleBreederReportAdminEndpoint() {
             summary: '브리더 신고 처리',
             description: '브리더 신고를 승인(제재) 또는 반려 처리합니다.',
             responseType: ReportActionResponseDto,
+            successDescription: '신고 처리 성공',
             errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE, BREEDER_REPORT_ADMIN_NOT_FOUND_RESPONSE],
         }),
         ApiParam({

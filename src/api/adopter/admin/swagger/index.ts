@@ -28,6 +28,7 @@ export function ApiGetAdopterAdminReviewReportsEndpoint() {
             responseType: PaginationResponseDto,
             itemType: ReviewReportItemDto,
             errorResponses: [ADOPTER_ADMIN_FORBIDDEN_RESPONSE],
+            successDescription: '후기 신고 목록 조회 성공',
             successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminReviewReportListRetrieved,
         }),
         ApiQuery({ name: 'page', required: false, type: String, example: '1', description: '페이지 번호' }),
@@ -42,6 +43,7 @@ export function ApiDeleteAdopterAdminReviewEndpoint() {
             description: '신고된 부적절한 후기를 삭제합니다.',
             responseType: ReviewDeleteResponseDto,
             errorResponses: [ADOPTER_ADMIN_FORBIDDEN_RESPONSE, ADOPTER_ADMIN_REVIEW_NOT_FOUND_RESPONSE],
+            successDescription: '후기 삭제 성공',
             successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminReviewDeleted,
         }),
         ApiParam({
@@ -64,6 +66,7 @@ export function ApiGetAdopterAdminApplicationListEndpoint() {
             description: '전체 입양 신청 내역을 조회합니다. 페이지네이션, 필터링, 통계 정보를 함께 제공합니다.',
             responseType: AdminApplicationListResponseDto,
             errorResponses: [ADOPTER_ADMIN_FORBIDDEN_RESPONSE],
+            successDescription: '입양 신청 목록 조회 성공',
             successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminApplicationListRetrieved,
         }),
         ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: '페이지 번호' }),
@@ -88,6 +91,7 @@ export function ApiGetAdopterAdminApplicationDetailEndpoint() {
                 '특정 입양 신청의 상세 정보를 조회합니다. 표준 신청 응답, 커스텀 질문 응답 등 전체 정보를 제공합니다.',
             responseType: AdminApplicationDetailResponseDto,
             errorResponses: [ADOPTER_ADMIN_FORBIDDEN_RESPONSE, ADOPTER_ADMIN_APPLICATION_NOT_FOUND_RESPONSE],
+            successDescription: '입양 신청 상세 조회 성공',
             successMessageExample: ADOPTER_RESPONSE_MESSAGES.adminApplicationDetailRetrieved,
         }),
         ApiParam({
