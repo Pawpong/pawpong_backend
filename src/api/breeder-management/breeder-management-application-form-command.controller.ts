@@ -13,7 +13,10 @@ import {
     ApplicationFormUpdateResponseDto,
     SimpleApplicationFormUpdateResponseDto,
 } from './dto/response/application-form-update-response.dto';
-import { BreederManagementSwaggerDocs } from './swagger';
+import {
+    ApiUpdateBreederManagementApplicationFormEndpoint,
+    ApiUpdateBreederManagementApplicationFormSimpleEndpoint,
+} from './swagger';
 
 @BreederManagementProtectedController()
 export class BreederManagementApplicationFormCommandController {
@@ -23,7 +26,7 @@ export class BreederManagementApplicationFormCommandController {
     ) {}
 
     @Patch('application-form')
-    @ApiEndpoint(BreederManagementSwaggerDocs.updateApplicationForm)
+    @ApiUpdateBreederManagementApplicationFormEndpoint()
     async updateApplicationForm(
         @CurrentUser('userId') userId: string,
         @Body() updateDto: ApplicationFormUpdateRequestDto,
@@ -33,12 +36,15 @@ export class BreederManagementApplicationFormCommandController {
     }
 
     @Patch('application-form/simple')
-    @ApiEndpoint(BreederManagementSwaggerDocs.updateApplicationFormSimple)
+    @ApiUpdateBreederManagementApplicationFormSimpleEndpoint()
     async updateApplicationFormSimple(
         @CurrentUser('userId') userId: string,
         @Body() updateDto: SimpleApplicationFormUpdateRequestDto,
     ): Promise<ApiResponseDto<SimpleApplicationFormUpdateResponseDto>> {
-        const result = await this.updateBreederManagementSimpleApplicationFormUseCase.execute(userId, updateDto.questions);
+        const result = await this.updateBreederManagementSimpleApplicationFormUseCase.execute(
+            userId,
+            updateDto.questions,
+        );
         return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormUpdated);
     }
 }
