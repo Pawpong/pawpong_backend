@@ -14,6 +14,7 @@ import { CheckNicknameRequestDto } from '../dto/request/check-nickname-request.d
 import { CheckEmailRequestDto } from '../dto/request/check-email-request.dto';
 import { CheckBreederNameRequestDto } from '../dto/request/check-breeder-name-request.dto';
 import { CheckSocialUserRequestDto } from '../dto/request/check-social-user-request.dto';
+import { SendVerificationCodeRequestDto, VerifyCodeRequestDto } from '../dto/request/phone-verification-request.dto';
 import { SocialCompleteRequestDto } from '../dto/request/social-complete-request.dto';
 import { RegisterAdopterRequestDto } from '../dto/request/register-adopter-request.dto';
 import { RegisterBreederRequestDto } from '../dto/request/register-breeder-request.dto';
@@ -122,38 +123,44 @@ export function ApiLogoutAuthEndpoint() {
 }
 
 export function ApiSendPhoneVerificationCodeEndpoint() {
-    return ApiEndpoint({
-        summary: '전화번호 인증코드 발송',
-        description: `
-            전화번호로 6자리 인증코드를 발송합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '전화번호 인증코드 발송',
+            description: `
+                전화번호로 6자리 인증코드를 발송합니다.
 
-            ## 주요 기능
-            - 이미 가입된 전화번호는 화이트리스트가 아니면 차단합니다.
-            - 유효 기간 안에 기존 코드가 있으면 재발송을 막습니다.
-        `,
-        responseType: PhoneVerificationResponseDto,
-        isPublic: true,
-        successDescription: '인증번호 발송 성공',
-        successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.phoneVerificationCodeSent,
-        errorResponses: [AUTH_PHONE_SEND_FAILURE_RESPONSE],
-    });
+                ## 주요 기능
+                - 이미 가입된 전화번호는 화이트리스트가 아니면 차단합니다.
+                - 유효 기간 안에 기존 코드가 있으면 재발송을 막습니다.
+            `,
+            responseType: PhoneVerificationResponseDto,
+            isPublic: true,
+            successDescription: '인증번호 발송 성공',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.phoneVerificationCodeSent,
+            errorResponses: [AUTH_PHONE_SEND_FAILURE_RESPONSE],
+        }),
+        ApiBody({ type: SendVerificationCodeRequestDto }),
+    );
 }
 
 export function ApiVerifyPhoneVerificationCodeEndpoint() {
-    return ApiEndpoint({
-        summary: '전화번호 인증코드 확인',
-        description: `
-            발송된 인증코드를 검증합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '전화번호 인증코드 확인',
+            description: `
+                발송된 인증코드를 검증합니다.
 
-            ## 주요 기능
-            - 전화번호를 정규화한 뒤 저장된 인증 정보를 조회합니다.
-            - 만료, 시도 횟수 초과, 코드 불일치 여부를 검증합니다.
-        `,
-        responseType: PhoneVerificationResponseDto,
-        isPublic: true,
-        successDescription: '전화번호 인증 성공',
-        successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.phoneVerificationCompleted,
-    });
+                ## 주요 기능
+                - 전화번호를 정규화한 뒤 저장된 인증 정보를 조회합니다.
+                - 만료, 시도 횟수 초과, 코드 불일치 여부를 검증합니다.
+            `,
+            responseType: PhoneVerificationResponseDto,
+            isPublic: true,
+            successDescription: '전화번호 인증 성공',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.phoneVerificationCompleted,
+        }),
+        ApiBody({ type: VerifyCodeRequestDto }),
+    );
 }
 
 export function ApiGoogleLoginEndpoint() {
