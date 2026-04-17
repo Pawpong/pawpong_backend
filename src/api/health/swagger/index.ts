@@ -12,6 +12,7 @@ export function ApiGetHealthEndpoint() {
         description: '시스템 상태를 확인합니다.',
         responseType: HealthCheckResponseDto,
         isPublic: true,
+        successDescription: '헬스체크 성공',
         successMessageExample: HEALTH_RESPONSE_MESSAGE_EXAMPLES.healthChecked,
     });
 }
