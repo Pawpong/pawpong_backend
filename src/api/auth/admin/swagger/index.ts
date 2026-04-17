@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiTags } from '@nestjs/swagger';
 
 import { ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { AUTH_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../constants/auth-admin-response-messages';
@@ -7,6 +7,8 @@ import {
     AUTH_ADMIN_INVALID_TOKEN_RESPONSE,
     AUTH_ADMIN_UNAUTHORIZED_RESPONSE,
 } from '../constants/auth-admin-swagger.constants';
+import { AdminLoginRequestDto } from '../../dto/request/admin-login-request.dto';
+import { RefreshTokenRequestDto } from '../../dto/request/refresh-token-request.dto';
 import { AdminLoginResponseDto } from '../../dto/response/admin-login-response.dto';
 
 export function ApiAuthAdminController() {
@@ -14,46 +16,52 @@ export function ApiAuthAdminController() {
 }
 
 export function ApiAdminLoginEndpoint() {
-    return ApiEndpoint({
-        summary: '관리자 로그인',
-        description: `
-            이메일과 비밀번호로 관리자 인증 후 JWT 토큰을 발급합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '관리자 로그인',
+            description: `
+                이메일과 비밀번호로 관리자 인증 후 JWT 토큰을 발급합니다.
 
-            ## 주요 기능
-            - Access Token과 Refresh Token을 함께 반환합니다.
-            - 관리자 등급 및 권한 정보도 함께 제공합니다.
-        `,
-        responseType: AdminLoginResponseDto,
-        isPublic: true,
-        successDescription: '관리자 로그인 성공',
-        successMessageExample: AUTH_ADMIN_RESPONSE_MESSAGE_EXAMPLES.adminLoginCompleted,
-        errorResponses: [AUTH_ADMIN_UNAUTHORIZED_RESPONSE],
-    });
+                ## 주요 기능
+                - Access Token과 Refresh Token을 함께 반환합니다.
+                - 관리자 등급 및 권한 정보도 함께 제공합니다.
+            `,
+            responseType: AdminLoginResponseDto,
+            isPublic: true,
+            successDescription: '관리자 로그인 성공',
+            successMessageExample: AUTH_ADMIN_RESPONSE_MESSAGE_EXAMPLES.adminLoginCompleted,
+            errorResponses: [AUTH_ADMIN_UNAUTHORIZED_RESPONSE],
+        }),
+        ApiBody({ type: AdminLoginRequestDto }),
+    );
 }
 
 export function ApiRefreshAdminTokenEndpoint() {
-    return ApiEndpoint({
-        summary: '관리자 토큰 갱신',
-        description: `
-            Refresh Token을 사용해 새로운 관리자 Access Token을 발급합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '관리자 토큰 갱신',
+            description: `
+                Refresh Token을 사용해 새로운 관리자 Access Token을 발급합니다.
 
-            ## 주요 기능
-            - 만료된 Access Token을 교체할 때 사용합니다.
-            - 응답에는 새 Access Token만 포함됩니다.
-        `,
-        isPublic: true,
-        successDescription: '관리자 토큰 갱신 성공',
-        successMessageExample: AUTH_ADMIN_RESPONSE_MESSAGE_EXAMPLES.adminTokenRefreshed,
-        dataSchema: {
-            type: 'object',
-            properties: {
-                accessToken: {
-                    type: 'string',
-                    example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                ## 주요 기능
+                - 만료된 Access Token을 교체할 때 사용합니다.
+                - 응답에는 새 Access Token만 포함됩니다.
+            `,
+            isPublic: true,
+            successDescription: '관리자 토큰 갱신 성공',
+            successMessageExample: AUTH_ADMIN_RESPONSE_MESSAGE_EXAMPLES.adminTokenRefreshed,
+            dataSchema: {
+                type: 'object',
+                properties: {
+                    accessToken: {
+                        type: 'string',
+                        example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+                    },
                 },
+                required: ['accessToken'],
             },
-            required: ['accessToken'],
-        },
-        errorResponses: [AUTH_ADMIN_INVALID_TOKEN_RESPONSE],
-    });
+            errorResponses: [AUTH_ADMIN_INVALID_TOKEN_RESPONSE],
+        }),
+        ApiBody({ type: RefreshTokenRequestDto }),
+    );
 }
