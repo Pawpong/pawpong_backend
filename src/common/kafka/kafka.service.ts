@@ -1,6 +1,7 @@
-import { Injectable, Inject, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import { Injectable, Inject, OnModuleInit, OnModuleDestroy, Optional } from '@nestjs/common';
 import { ClientKafka } from '@nestjs/microservices';
 import { CustomLoggerService } from '../logger/custom-logger.service';
+import { NotifyCriticalErrorUseCase } from '../discord/application/use-cases/notify-critical-error.use-case';
 
 /**
  * Kafka 토픽 정의
@@ -30,7 +31,7 @@ export interface UserEvent {
     userId?: string;
     sessionId?: string;
     eventType: string;
-    eventData: Record<string, unknown>;
+    eventData: Record<string, any>;
     timestamp: Date;
     userAgent?: string;
     ip?: string;
@@ -56,23 +57,21 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     constructor(
         @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
         private readonly logger: CustomLoggerService,
+        @Optional() private readonly notifyCriticalErrorUseCase?: NotifyCriticalErrorUseCase,
     ) {}
 
     async onModuleInit() {
         try {
-            // 토픽 구독 (Consumer로 받을 토픽들)
-            const topics = Object.values(KafkaTopic);
-            topics.forEach((topic) => {
-                this.kafkaClient.subscribeToResponseOf(topic);
-            });
-
+            // Producer 전용으로 사용하므로 subscribeToResponseOf 불필요
+            // (request-reply 패턴이 아닌 emit 전용)
             await this.kafkaClient.connect();
             this.isConnected = true;
             this.logger.logSuccess('KafkaService', 'Kafka 브로커 연결 성공');
-        } catch {
+        } catch (error) {
             // Kafka 미연결 시 간단한 경고만 출력 (선택적 기능이므로 앱은 계속 동작)
             this.logger.warn('Kafka 미연결 - 채팅/이벤트 로깅 비활성화 (docker compose up kafka 필요)', 'KafkaService');
             this.isConnected = false;
+            this.notifyKafkaCriticalError('Kafka 브로커 연결 실패', error);
         }
     }
 
@@ -86,7 +85,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
     /**
      * 메시지 발행 (Producer)
      */
-    async emit<T extends { id?: string } & Record<string, unknown>>(topic: KafkaTopic, message: T): Promise<void> {
+    async emit(topic: KafkaTopic, message: any): Promise<void> {
         if (!this.isConnected) {
             this.logger.logWarning('KafkaService', `Kafka 미연결 상태 - 메시지 스킵: ${topic}`, null);
             return;
@@ -94,13 +93,36 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
 
         try {
             this.kafkaClient.emit(topic, {
-                key: message.id || Date.now().toString(),
+                key: message.roomId || message.id || Date.now().toString(),
                 value: JSON.stringify(message),
             });
             this.logger.logDbOperation('KafkaService', 'emit', topic, { messageId: message.id });
         } catch (error) {
             this.logger.logError('KafkaService', `메시지 발행 실패: ${topic}`, error);
+            this.notifyKafkaCriticalError(`Kafka 메시지 발행 실패: ${topic}`, error, { topic });
         }
+    }
+
+    /**
+     * 운영 환경 Kafka 장애를 Discord critical 에러 알림으로 전달합니다.
+     *
+     * 로컬/테스트 환경에서는 Kafka를 일부러 끄는 경우가 많아 알림을 보내지 않습니다.
+     */
+    private notifyKafkaCriticalError(description: string, error: unknown, metadata?: Record<string, unknown>): void {
+        if (process.env.NODE_ENV !== 'production' || !this.notifyCriticalErrorUseCase) {
+            return;
+        }
+
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        const stack = error instanceof Error ? error.stack : undefined;
+
+        void this.notifyCriticalErrorUseCase.execute({
+            severity: 'critical',
+            context: KafkaService.name,
+            message: `${description}: ${errorMessage}`,
+            stack,
+            metadata,
+        });
     }
 
     /**
