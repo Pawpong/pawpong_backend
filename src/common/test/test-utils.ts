@@ -1,4 +1,4 @@
-import { Test, TestingModule } from '@nestjs/testing';
+import { Test } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
@@ -11,6 +11,12 @@ import { HttpStatusInterceptor } from '../interceptor/http-status.interceptor';
 
 /** 테스트용 인메모리 MongoDB 인스턴스 */
 let mongod: MongoMemoryServer;
+
+/** createTestingApp에 넘길 Provider 오버라이드 항목 */
+export interface ProviderOverride {
+    provide: any;
+    useValue: any;
+}
 
 function applyTestingEnvironment(): void {
     process.env.PAWPONG_TEST_MODE = 'true';
@@ -35,7 +41,7 @@ function applyTestingEnvironment(): void {
  * - 글로벌 프리픽스: /api
  * - 글로벌 파이프: ValidationPipe (transform, whitelist 활성화)
  */
-export async function createTestingApp(): Promise<INestApplication> {
+export async function createTestingApp(overrides: ProviderOverride[] = []): Promise<INestApplication> {
     if (mongod) {
         await mongod.stop();
         mongod = undefined as any;
@@ -49,9 +55,15 @@ export async function createTestingApp(): Promise<INestApplication> {
     process.env.MONGODB_URI = mongoUri;
     applyTestingEnvironment();
 
-    const moduleFixture: TestingModule = await Test.createTestingModule({
+    let builder = Test.createTestingModule({
         imports: [AppModule],
-    }).compile();
+    });
+
+    for (const override of overrides) {
+        builder = builder.overrideProvider(override.provide).useValue(override.useValue);
+    }
+
+    const moduleFixture = await builder.compile();
 
     const app = moduleFixture.createNestApplication();
 
