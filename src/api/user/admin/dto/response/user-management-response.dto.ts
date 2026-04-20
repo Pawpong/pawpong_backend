@@ -1,4 +1,33 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { UserAdminManagedUserRole } from '../../application/ports/user-admin-reader.port';
+
+export class UserManagementStatisticsResponseDto {
+    @ApiProperty({ description: '총 입양 신청 수', example: 10, required: false })
+    totalApplications?: number;
+
+    @ApiProperty({ description: '총 찜 수', example: 25, required: false })
+    totalFavorites?: number;
+
+    @ApiProperty({ description: '완료된 입양 수', example: 4, required: false })
+    completedAdoptions?: number;
+
+    @ApiProperty({ description: '평균 평점', example: 4.8, required: false })
+    averageRating?: number;
+
+    @ApiProperty({ description: '총 후기 수', example: 12, required: false })
+    totalReviews?: number;
+
+    @ApiProperty({ description: '프로필 조회 수', example: 320, required: false })
+    profileViews?: number;
+
+    @ApiProperty({
+        description: '통계 마지막 업데이트 시각',
+        example: '2024-01-15T10:30:00.000Z',
+        format: 'date-time',
+        required: false,
+    })
+    lastUpdated?: Date;
+}
 
 /**
  * 사용자 관리 정보 응답 DTO
@@ -44,7 +73,7 @@ export class UserManagementResponseDto {
         example: 'adopter',
         enum: ['adopter', 'breeder'],
     })
-    userRole: string;
+    userRole: UserAdminManagedUserRole;
 
     /**
      * 계정 상태
@@ -85,6 +114,7 @@ export class UserManagementResponseDto {
     @ApiProperty({
         description: '사용자 통계 정보',
         required: false,
+        type: () => UserManagementStatisticsResponseDto,
     })
-    statisticsInfo?: any;
+    statisticsInfo?: UserManagementStatisticsResponseDto;
 }

@@ -1,13 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsEnum, IsNotEmpty } from 'class-validator';
-
-/**
- * 리마인드 알림 타입
- */
-export enum RemindType {
-    DOCUMENT_REMINDER = 'document_reminder', // [4] 입점 심사 독촉 알림
-    PROFILE_COMPLETION_REMINDER = 'profile_completion_reminder', // [6] 프로필 완성 독려 알림
-}
+import { RemindType } from '../../constants/breeder-remind.enum';
 
 /**
  * 브리더 리마인드 알림 요청 DTO

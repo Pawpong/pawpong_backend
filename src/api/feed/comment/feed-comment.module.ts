@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Video, VideoSchema } from '../../../schema/video.schema';
-import { VideoComment, VideoCommentSchema } from '../../../schema/video-comment.schema';
-import { FeedCommentService } from './feed-comment.service';
+
+import {
+    FEED_COMMENT_MODULE_EXPORTS,
+    FEED_COMMENT_MODULE_IMPORTS,
+    FEED_COMMENT_MODULE_PROVIDERS,
+} from './feed-comment.module-definition';
 
 /**
  * 피드 댓글 모듈
@@ -10,13 +12,8 @@ import { FeedCommentService } from './feed-comment.service';
  * - 대댓글 기능
  */
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: Video.name, schema: VideoSchema },
-            { name: VideoComment.name, schema: VideoCommentSchema },
-        ]),
-    ],
-    providers: [FeedCommentService],
-    exports: [FeedCommentService],
+    imports: FEED_COMMENT_MODULE_IMPORTS,
+    providers: FEED_COMMENT_MODULE_PROVIDERS,
+    exports: FEED_COMMENT_MODULE_EXPORTS,
 })
 export class FeedCommentModule {}

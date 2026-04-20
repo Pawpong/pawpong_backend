@@ -3,7 +3,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 /**
  * 댓글 작성자 정보
  */
-class CommentAuthorDto {
+export class CommentAuthorDto {
     @ApiProperty({ description: '사용자 ID' })
     _id: string;
 
@@ -58,4 +58,57 @@ export class CommentListResponseDto {
 
     @ApiProperty({ description: '다음 페이지 존재 여부' })
     hasNextPage: boolean;
+}
+
+export class ReplyResponseDto {
+    @ApiProperty({ description: '댓글 ID' })
+    commentId: string;
+
+    @ApiProperty({ description: '댓글 내용' })
+    content: string;
+
+    @ApiProperty({ description: '작성자 정보', type: CommentAuthorDto })
+    author: CommentAuthorDto;
+
+    @ApiProperty({ description: '좋아요 수' })
+    likeCount: number;
+
+    @ApiProperty({ description: '작성일' })
+    createdAt: Date;
+
+    @ApiProperty({ description: '내가 작성한 댓글인지 여부' })
+    isOwner: boolean;
+}
+
+export class ReplyListResponseDto {
+    @ApiProperty({ description: '대댓글 목록', type: [ReplyResponseDto] })
+    replies: ReplyResponseDto[];
+
+    @ApiProperty({ description: '전체 대댓글 수' })
+    totalCount: number;
+
+    @ApiProperty({ description: '다음 페이지 존재 여부' })
+    hasNextPage: boolean;
+}
+
+export class CommentCreateResponseDto {
+    @ApiProperty({ description: '댓글 ID' })
+    commentId: string;
+
+    @ApiProperty({ description: '댓글 내용' })
+    content: string;
+
+    @ApiProperty({ description: '작성일' })
+    createdAt: Date;
+}
+
+export class CommentUpdateResponseDto {
+    @ApiProperty({ description: '댓글 ID' })
+    commentId: string;
+
+    @ApiProperty({ description: '댓글 내용' })
+    content: string;
+
+    @ApiPropertyOptional({ description: '수정일' })
+    updatedAt?: Date;
 }

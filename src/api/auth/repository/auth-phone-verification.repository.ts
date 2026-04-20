@@ -1,0 +1,32 @@
+import { Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { FilterQuery, Model } from 'mongoose';
+
+import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
+import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
+import { PhoneWhitelist, PhoneWhitelistDocument } from '../../../schema/phone-whitelist.schema';
+
+@Injectable()
+export class AuthPhoneVerificationRepository {
+    constructor(
+        @InjectModel(Adopter.name) private readonly adopterModel: Model<AdopterDocument>,
+        @InjectModel(Breeder.name) private readonly breederModel: Model<BreederDocument>,
+        @InjectModel(PhoneWhitelist.name) private readonly phoneWhitelistModel: Model<PhoneWhitelistDocument>,
+    ) {}
+
+    isPhoneWhitelisted(phoneNumber: string) {
+        return this.phoneWhitelistModel.exists({ phoneNumber, isActive: true }).exec();
+    }
+
+    async hasRegisteredPhone(phoneNumber: string): Promise<boolean> {
+        const breederPhoneQuery: FilterQuery<BreederDocument> = {
+            $or: [{ phoneNumber }, { phone: phoneNumber }],
+        };
+        const [adopter, breeder] = await Promise.all([
+            this.adopterModel.exists({ phoneNumber }).exec(),
+            this.breederModel.exists(breederPhoneQuery).exec(),
+        ]);
+
+        return !!adopter || !!breeder;
+    }
+}

@@ -15,45 +15,9 @@ export class PetAddResponseDto {
     })
     petId: string;
 
-    /**
-     * 반려동물 이름
-     * @example "골든베이비"
-     */
     @ApiProperty({
-        description: '반려동물 이름',
-        example: '골든베이비',
+        description: '등록 완료 메시지',
+        example: '부모견/부모묘가 성공적으로 등록되었습니다.',
     })
-    petName: string;
-
-    /**
-     * 반려동물 종류
-     * @example "dog"
-     */
-    @ApiProperty({
-        description: '반려동물 종류',
-        example: 'dog',
-        enum: ['dog', 'cat'],
-    })
-    petType: string;
-
-    /**
-     * 반려동물 등록 완료 메시지
-     * @example "반려동물이 성공적으로 등록되었습니다."
-     */
-    @ApiProperty({
-        description: '반려동물 등록 완료 메시지',
-        example: '반려동물이 성공적으로 등록되었습니다.',
-    })
-    registrationMessage: string;
-
-    /**
-     * 등록 일시
-     * @example "2024-01-15T10:30:00.000Z"
-     */
-    @ApiProperty({
-        description: '등록 일시',
-        example: '2024-01-15T10:30:00.000Z',
-        format: 'date-time',
-    })
-    registeredAt: string;
+    message: string;
 }

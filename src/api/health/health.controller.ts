@@ -1,26 +1,24 @@
 import { Controller, Get } from '@nestjs/common';
 
-import { ApiController, ApiEndpoint } from '../../common/decorator/swagger.decorator';
-
-import { HealthService } from './health.service';
-
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
+import { GetHealthUseCase } from './application/use-cases/get-health.use-case';
+import type { HealthResult } from './application/types/health-result.type';
+import { HEALTH_RESPONSE_MESSAGE_EXAMPLES } from './constants/health-response-messages';
 import { HealthCheckResponseDto } from './dto/response/health-check-response.dto';
+import { ApiGetHealthEndpoint, ApiHealthController } from './swagger';
 
-@ApiController('시스템')
+@ApiHealthController()
 @Controller('health')
 export class HealthController {
-    constructor(private readonly healthService: HealthService) {}
+    constructor(private readonly getHealthUseCase: GetHealthUseCase) {}
 
     @Get()
-    @ApiEndpoint({
-        summary: '헬스체크',
-        description: '시스템 상태를 확인합니다.',
-        responseType: HealthCheckResponseDto,
-        isPublic: true,
-    })
+    @ApiGetHealthEndpoint()
     getHealth(): ApiResponseDto<HealthCheckResponseDto> {
-        const healthData = this.healthService.getHealth();
-        return ApiResponseDto.success(healthData, '시스템이 정상 작동 중입니다.');
+        const healthData = this.getHealthUseCase.execute();
+        return ApiResponseDto.success(
+            healthData as HealthCheckResponseDto & HealthResult,
+            HEALTH_RESPONSE_MESSAGE_EXAMPLES.healthChecked,
+        );
     }
 }

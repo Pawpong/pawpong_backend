@@ -1,15 +1,10 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { BreederVerificationAdminController } from './breeder-verification-admin.controller';
-
-import { BreederVerificationAdminService } from './breeder-verification-admin.service';
-
-import { Admin, AdminSchema } from '../../../../schema/admin.schema';
-import { Breeder, BreederSchema } from '../../../../schema/breeder.schema';
-
-import { StorageModule } from '../../../../common/storage/storage.module';
-import { NotificationModule } from '../../../notification/notification.module';
+import {
+    BREEDER_VERIFICATION_ADMIN_MODULE_CONTROLLERS,
+    BREEDER_VERIFICATION_ADMIN_MODULE_IMPORTS,
+    BREEDER_VERIFICATION_ADMIN_MODULE_PROVIDERS,
+} from './breeder-verification-admin.module-definition';
 
 /**
  * 브리더 인증 관리자 모듈
@@ -19,19 +14,11 @@ import { NotificationModule } from '../../../notification/notification.module';
  * - 브리더 목록 조회
  * - 승인 대기 브리더 목록 조회
  *
- * Note: MailTemplateService는 NotificationModule을 통해 제공받습니다.
+ * Note: NotificationDispatchPort는 NotificationModule, MailTemplateService는 MailModule을 통해 제공받습니다.
  */
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: Breeder.name, schema: BreederSchema },
-            { name: Admin.name, schema: AdminSchema },
-        ]),
-        NotificationModule, // MailTemplateService도 여기서 제공됨
-        StorageModule, // StorageService 제공
-    ],
-    controllers: [BreederVerificationAdminController],
-    providers: [BreederVerificationAdminService],
-    exports: [BreederVerificationAdminService],
+    imports: BREEDER_VERIFICATION_ADMIN_MODULE_IMPORTS,
+    controllers: BREEDER_VERIFICATION_ADMIN_MODULE_CONTROLLERS,
+    providers: BREEDER_VERIFICATION_ADMIN_MODULE_PROVIDERS,
 })
 export class BreederVerificationAdminModule {}

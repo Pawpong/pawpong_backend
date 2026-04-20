@@ -1,92 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * 백신 접종 정보 DTO
- */
-export class VaccinationDto {
-    /**
-     * 백신 이름
-     * @example "DHPPL"
-     */
-    @ApiProperty({
-        description: '백신 이름',
-        example: 'DHPPL',
-    })
-    name: string;
-
-    /**
-     * 접종 일자
-     * @example "2024-01-15"
-     */
-    @ApiProperty({
-        description: '접종 일자',
-        example: '2024-01-15',
-        format: 'date',
-    })
-    date: Date;
-
-    /**
-     * 다음 접종 예정일
-     * @example "2024-04-15"
-     */
-    @ApiProperty({
-        description: '다음 접종 예정일',
-        example: '2024-04-15',
-        format: 'date',
-        required: false,
-    })
-    nextDate?: Date;
-}
-
-/**
- * 건강 기록 DTO
- */
-export class HealthRecordDto {
-    /**
-     * 기록 타입
-     * @example "checkup"
-     */
-    @ApiProperty({
-        description: '기록 타입 (checkup: 건강검진, treatment: 치료)',
-        example: 'checkup',
-        enum: ['checkup', 'treatment', 'vaccination'],
-    })
-    type: string;
-
-    /**
-     * 기록 내용
-     * @example "정기 건강검진 완료"
-     */
-    @ApiProperty({
-        description: '기록 내용',
-        example: '정기 건강검진 완료',
-    })
-    description: string;
-
-    /**
-     * 기록 일자
-     * @example "2024-01-15"
-     */
-    @ApiProperty({
-        description: '기록 일자',
-        example: '2024-01-15',
-        format: 'date',
-    })
-    date: Date;
-
-    /**
-     * 수의사 이름
-     * @example "김수의사"
-     */
-    @ApiProperty({
-        description: '수의사 이름',
-        example: '김수의사',
-        required: false,
-    })
-    veterinarian?: string;
-}
-
-/**
  * 부모 정보 DTO
  */
 export class ParentInfoDto {
@@ -236,20 +150,22 @@ export class PetDetailResponseDto {
      */
     @ApiProperty({
         description: '백신 접종 기록',
-        type: [VaccinationDto],
+        type: [String],
+        example: ['1차 접종 완료', '2차 접종 완료'],
         required: false,
     })
-    vaccinations?: VaccinationDto[];
+    vaccinations?: string[];
 
     /**
      * 건강 기록
      */
     @ApiProperty({
         description: '건강 기록',
-        type: [HealthRecordDto],
+        type: [String],
+        example: ['정기 건강검진 완료', '유전질환 검사 완료'],
         required: false,
     })
-    healthRecords?: HealthRecordDto[];
+    healthRecords?: string[];
 
     /**
      * 부모견/부모묘 정보

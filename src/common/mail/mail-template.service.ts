@@ -8,7 +8,7 @@ import { Injectable } from '@nestjs/common';
 @Injectable()
 export class MailTemplateService {
     private readonly baseUrl = 'https://pawpong.kr/';
-    private readonly contactEmail = 'pawriendsofficial@gmail.com';
+    private readonly contactEmail = 'coldingcontact@gmail.com';
     private readonly kakaoChannelUrl = 'https://pf.kakao.com/_Wqxekn';
 
     /**

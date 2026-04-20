@@ -3,6 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-kakao';
 
+import type {
+    KakaoOAuthProfile,
+    OAuthStateRequest,
+    SocialAuthDoneCallback,
+    SocialOAuthUser,
+} from '../types/social-oauth.type';
+
 @Injectable()
 export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
     constructor(private readonly configService: ConfigService) {
@@ -14,7 +21,13 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
         });
     }
 
-    async validate(req: any, accessToken: string, refreshToken: string, profile: any, done: any): Promise<any> {
+    async validate(
+        req: OAuthStateRequest,
+        accessToken: string,
+        refreshToken: string,
+        profile: KakaoOAuthProfile,
+        done: SocialAuthDoneCallback,
+    ): Promise<void> {
         const { id, username, _json } = profile;
         const kakaoAccount = _json?.kakao_account;
 
@@ -25,16 +38,18 @@ export class KakaoStrategy extends PassportStrategy(Strategy, 'kakao') {
         // state 파라미터에서 origin 정보 추출 (OAuth 시작 시 전달됨)
         const originFromState = req.query?.state || '';
 
-        const user = {
+        const user: SocialOAuthUser = {
             provider: 'kakao',
             providerId: id.toString(),
-            email: email,
+            email,
             name: nickname,
             profileImage: kakaoAccount?.profile?.profile_image_url,
             needsEmail: !kakaoAccount?.email, // 이메일 제공 여부 플래그
             originUrl: originFromState, // 원래 origin 정보 전달
         };
 
+        void accessToken;
+        void refreshToken;
         done(null, user);
     }
 }

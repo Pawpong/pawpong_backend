@@ -2,7 +2,6 @@
  * 강아지와 고양이 품종 데이터
  */
 export const KOREA_BREEDS = [
-    // ========== 강아지 ==========
     {
         petType: 'dog',
         category: '소형견',
@@ -67,8 +66,6 @@ export const KOREA_BREEDS = [
             '아프간하운드',
         ],
     },
-
-    // ========== 고양이 ==========
     {
         petType: 'cat',
         category: '장모',

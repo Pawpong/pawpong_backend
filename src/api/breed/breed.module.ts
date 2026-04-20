@@ -1,18 +1,14 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { BreedController } from './service/breed.controller';
-import { AdminBreedController } from './admin/admin-breed.controller';
-
-import { BreedService } from './service/breed.service';
-import { AdminBreedService } from './admin/admin-breed.service';
-
-import { Breed, BreedSchema } from '../../schema/breed.schema';
+import {
+    BREED_MODULE_CONTROLLERS,
+    BREED_MODULE_IMPORTS,
+    BREED_MODULE_PROVIDERS,
+} from './breed.module-definition';
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: Breed.name, schema: BreedSchema }])],
-    controllers: [BreedController, AdminBreedController],
-    providers: [BreedService, AdminBreedService],
-    exports: [BreedService, AdminBreedService],
+    imports: BREED_MODULE_IMPORTS,
+    controllers: BREED_MODULE_CONTROLLERS,
+    providers: BREED_MODULE_PROVIDERS,
 })
 export class BreedModule {}

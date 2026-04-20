@@ -1,11 +1,16 @@
 import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
-import { Logger } from '@nestjs/common';
+import { Inject, Logger } from '@nestjs/common';
 import * as fs from 'fs/promises';
 import * as path from 'path';
-import { FfmpegService } from '../services/ffmpeg.service';
-import { FeedVideoService } from '../services/feed-video.service';
+import { getErrorMessage } from '../../../../common/utils/error.util';
 import { StorageService } from '../../../../common/storage/storage.service';
+import { UpdateEncodingCompleteUseCase } from '../application/use-cases/update-encoding-complete.use-case';
+import { UpdateEncodingFailedUseCase } from '../application/use-cases/update-encoding-failed.use-case';
+import {
+    FEED_VIDEO_TRANSCODER_PORT,
+    type FeedVideoTranscoderPort,
+} from '../application/ports/feed-video-transcoder.port';
 
 /**
  * 동영상 인코딩 Worker
@@ -18,8 +23,10 @@ export class VideoEncodingProcessor extends WorkerHost {
     private readonly logger = new Logger(VideoEncodingProcessor.name);
 
     constructor(
-        private readonly ffmpegService: FfmpegService,
-        private readonly feedVideoService: FeedVideoService,
+        @Inject(FEED_VIDEO_TRANSCODER_PORT)
+        private readonly feedVideoTranscoderPort: FeedVideoTranscoderPort,
+        private readonly updateEncodingCompleteUseCase: UpdateEncodingCompleteUseCase,
+        private readonly updateEncodingFailedUseCase: UpdateEncodingFailedUseCase,
         private readonly storageService: StorageService,
     ) {
         super();
@@ -49,7 +56,7 @@ export class VideoEncodingProcessor extends WorkerHost {
             this.logger.log(`[${videoId}] 원본 다운로드 완료`);
 
             // 3. 동영상 메타데이터 추출
-            const metadata = await this.ffmpegService.getVideoMetadata(originalFile);
+            const metadata = await this.feedVideoTranscoderPort.getVideoMetadata(originalFile);
             this.logger.log(`[${videoId}] 메타데이터: ${JSON.stringify(metadata)}`);
             await job.updateProgress(20);
 
@@ -61,13 +68,13 @@ export class VideoEncodingProcessor extends WorkerHost {
             const resolutions = this.getResolutionsForVideo(metadata.height);
             this.logger.log(`[${videoId}] HLS 변환 시작 (해상도: ${resolutions.join(', ')}p)`);
 
-            await this.ffmpegService.convertToHLS(originalFile, hlsDir, resolutions);
+            await this.feedVideoTranscoderPort.convertToHLS(originalFile, hlsDir, resolutions);
             await job.updateProgress(70);
             this.logger.log(`[${videoId}] HLS 변환 완료`);
 
             // 5. 썸네일 생성
             const thumbnailFile = path.join(tempDir, 'thumbnail.jpg');
-            await this.ffmpegService.generateThumbnail(originalFile, thumbnailFile);
+            await this.feedVideoTranscoderPort.generateThumbnail(originalFile, thumbnailFile);
             await job.updateProgress(80);
             this.logger.log(`[${videoId}] 썸네일 생성 완료`);
 
@@ -103,7 +110,7 @@ export class VideoEncodingProcessor extends WorkerHost {
             this.logger.log(`[${videoId}] S3 업로드 완료`);
 
             // 7. DB 업데이트
-            await this.feedVideoService.updateEncodingComplete(videoId, {
+            await this.updateEncodingCompleteUseCase.execute(videoId, {
                 hlsManifestKey: `videos/hls/${videoId}/master.m3u8`,
                 thumbnailKey,
                 duration: metadata.duration,
@@ -122,7 +129,7 @@ export class VideoEncodingProcessor extends WorkerHost {
             this.logger.error(`[${videoId}] 인코딩 작업 실패:`, error);
 
             // DB 상태 업데이트
-            await this.feedVideoService.updateEncodingFailed(videoId, error.message || '알 수 없는 오류');
+            await this.updateEncodingFailedUseCase.execute(videoId, getErrorMessage(error));
 
             // 임시 파일 정리
             try {
@@ -164,7 +171,7 @@ export class VideoEncodingProcessor extends WorkerHost {
      */
     @OnWorkerEvent('failed')
     onFailed(job: Job, error: Error) {
-        this.logger.error(`[${job.data.videoId}] 작업 실패 (ID: ${job.id}): ${error.message}`);
+        this.logger.error(`[${job.data.videoId}] 작업 실패 (ID: ${job.id}): ${getErrorMessage(error)}`);
     }
 
     /**

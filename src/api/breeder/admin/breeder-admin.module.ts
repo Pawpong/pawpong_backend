@@ -1,24 +1,17 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { MailModule } from '../../../common/mail/mail.module';
-import { StorageModule } from '../../../common/storage/storage.module';
-import { AlimtalkModule } from '../../../common/alimtalk/alimtalk.module';
-import { NotificationModule } from '../../../api/notification/notification.module';
-import { BreederReportAdminModule } from './report/breeder-report-admin.module';
-import { BreederVerificationAdminModule } from './verification/breeder-verification-admin.module';
-
-import { BreederAdminController } from './breeder-admin.controller';
-import { BreederAdminService } from './breeder-admin.service';
-
-import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
-import { Admin, AdminSchema } from '../../../schema/admin.schema';
+import {
+    BREEDER_ADMIN_MODULE_CONTROLLERS,
+    BREEDER_ADMIN_MODULE_EXPORTS,
+    BREEDER_ADMIN_MODULE_IMPORTS,
+    BREEDER_ADMIN_MODULE_PROVIDERS,
+} from './breeder-admin.module-definition';
 
 /**
  * 브리더 관리자 모듈 (통합)
  *
  * 관리자가 브리더를 관리하는 모든 기능을 통합 제공합니다:
- * - 브리더 계정 관리 (정지/해제) - BreederAdminController
+ * - 브리더 계정 관리 (정지/해제/테스트 계정/리마인드)
  * - 브리더 인증 관리 - BreederVerificationAdminModule
  * - 브리더 신고 관리 - BreederReportAdminModule
  *
@@ -28,21 +21,9 @@ import { Admin, AdminSchema } from '../../../schema/admin.schema';
  * - /api/breeder-admin/report/* - 신고 관리 (서브모듈)
  */
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: Breeder.name, schema: BreederSchema },
-            { name: Admin.name, schema: AdminSchema },
-        ]),
-        StorageModule,
-        MailModule,
-        NotificationModule,
-        AlimtalkModule,
-        // Sub-modules
-        BreederReportAdminModule,
-        BreederVerificationAdminModule,
-    ],
-    controllers: [BreederAdminController],
-    providers: [BreederAdminService],
-    exports: [BreederAdminService, BreederReportAdminModule, BreederVerificationAdminModule],
+    imports: BREEDER_ADMIN_MODULE_IMPORTS,
+    controllers: BREEDER_ADMIN_MODULE_CONTROLLERS,
+    providers: BREEDER_ADMIN_MODULE_PROVIDERS,
+    exports: BREEDER_ADMIN_MODULE_EXPORTS,
 })
 export class BreederAdminModule {}

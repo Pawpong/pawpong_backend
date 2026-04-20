@@ -23,47 +23,55 @@ export class AvailablePetResponseDto {
     breed: string;
 
     @ApiProperty({
-        description: '성별',
-        example: 'male',
-        enum: ['male', 'female'],
+        description: '브리더 ID',
+        example: '507f1f77bcf86cd799439012',
     })
-    gender: string;
+    breederId: string;
+
+    @ApiProperty({
+        description: '브리더 이름',
+        example: '행복 브리더',
+    })
+    breederName: string;
+
+    @ApiProperty({
+        description: '가격',
+        example: 1500000,
+        nullable: true,
+        required: false,
+    })
+    price: number | null;
+
+    @ApiProperty({
+        description: '대표 사진 URL',
+        example: 'https://cdn.pawpong.kr/pets/uuid.jpg?Expires=...',
+    })
+    mainPhoto: string;
 
     @ApiProperty({
         description: '생년월일',
-        example: '2024-12-01',
+        example: '2024-12-01T00:00:00.000Z',
+        nullable: true,
+        required: false,
     })
-    birthDate: string;
+    birthDate: string | null;
 
     @ApiProperty({
-        description: '사진 URL (Signed URL, 대표 사진)',
-        example: 'https://cdn.pawpong.kr/pets/uuid.jpg?Expires=...',
+        description: '개월 수',
+        example: 4,
     })
-    photoUrl: string;
+    ageInMonths: number;
 
     @ApiProperty({
-        description: '브리더 정보',
+        description: '지역 정보',
         type: 'object',
         properties: {
-            breederId: { type: 'string', example: '507f1f77bcf86cd799439012' },
-            breederName: { type: 'string', example: '행복 브리더' },
+            city: { type: 'string', example: '서울' },
+            district: { type: 'string', example: '강남구' },
         },
     })
-    breeder: {
-        breederId: string;
-        breederName: string;
+    location: {
+        city: string;
+        district: string;
     };
-
-    @ApiProperty({
-        description: '분양 상태',
-        example: 'available',
-        enum: ['available', 'reserved', 'adopted'],
-    })
-    status: string;
-
-    @ApiProperty({
-        description: '등록일',
-        example: '2025-01-26T10:30:00.000Z',
-    })
-    createdAt: string;
 }
