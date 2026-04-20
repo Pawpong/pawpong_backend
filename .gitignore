@@ -70,3 +70,8 @@ docs/
 
 # Serena MCP (로컬 AI 코딩 어시스턴트 도구, 머신별 설정)
 .serena/
+
+# scripts/ 빌드 산출물 (TS 원본만 유지)
+scripts/*.js
+scripts/*.js.map
+scripts/*.d.ts
