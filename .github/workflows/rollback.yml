@@ -13,10 +13,6 @@ on:
                 required: true
                 type: string
 
-env:
-    PROD_SERVER_USER: ${{ vars.PROD_SERVER_USER }}
-    PROD_APP_DIR: ${{ vars.PROD_APP_DIR }}
-
 jobs:
     rollback:
         name: Rollback to Previous Version
@@ -38,8 +34,8 @@ jobs:
               id: check_history
               run: |
                   echo "Checking deployment history..."
-                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no ${{ env.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << 'ENDSSH'
-                  cd ${{ env.PROD_APP_DIR }}
+                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no root@${{ secrets.PROD_SERVER_HOST }} << 'ENDSSH'
+                  cd /root/pawpong_backend
                   if [ -f .deploy_history ]; then
                       echo "=== Available versions ==="
                       cat -n .deploy_history
@@ -54,8 +50,8 @@ jobs:
                   VERSION: ${{ github.event.inputs.version }}
               run: |
                   echo "Starting rollback to version $VERSION..."
-                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no ${{ env.PROD_SERVER_USER }}@${{ secrets.PROD_SERVER_HOST }} << ENDSSH > rollback.log 2>&1
-                  cd ${{ env.PROD_APP_DIR }}
+                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no root@${{ secrets.PROD_SERVER_HOST }} << ENDSSH > rollback.log 2>&1
+                  cd /root/pawpong_backend
                   bash rollback.sh ${VERSION}
                   ENDSSH
                   cat rollback.log

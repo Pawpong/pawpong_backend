@@ -300,15 +300,16 @@ services:
             KAFKA_CLUSTERS_0_NAME: pawpong-kafka
             KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
             KAFKA_CLUSTERS_0_ZOOKEEPER: zookeeper:2181
+            JAVA_OPTS: "-Xmx192m -Xms128m"
         restart: unless-stopped
         networks:
             - pawpong_network
         deploy:
             resources:
                 limits:
-                    memory: 128M
+                    memory: 256M
                 reservations:
-                    memory: 64M
+                    memory: 128M
 
 networks:
     pawpong_network:

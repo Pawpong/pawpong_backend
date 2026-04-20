@@ -5,6 +5,9 @@ import axios from 'axios';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { ILokiQueryPort, LokiLogEntry, LokiQueryOptions } from '../application/ports/loki-query.port';
 
+/**
+ * Loki HTTP API 응답 타입 (내부 파싱용)
+ */
 interface LokiStream {
     stream: {
         level?: string;
@@ -12,7 +15,7 @@ interface LokiStream {
         deployment?: string;
         [key: string]: string | undefined;
     };
-    values: [string, string][];
+    values: [string, string][]; // [nanosecond_timestamp, log_message]
 }
 
 interface LokiQueryRangeResponse {
@@ -27,6 +30,8 @@ interface LokiQueryRangeResponse {
  * Loki Query Adapter
  *
  * Loki의 query_range HTTP API를 호출하여 로그를 가져옵니다.
+ * Promtail이 파싱한 level, context, deployment 라벨을 활용합니다.
+ *
  * LogQL: {app="pawpong-backend", level=~"error|warn"}
  */
 @Injectable()
@@ -42,7 +47,8 @@ export class LokiQueryAdapter implements ILokiQueryPort {
 
     /**
      * error/warn 레벨 로그를 조회합니다.
-     * Loki에 접근할 수 없는 경우 빈 배열을 반환합니다.
+     *
+     * Loki에 접근할 수 없는 경우 빈 배열을 반환하여 상위 레이어가 graceful하게 처리할 수 있도록 합니다.
      */
     async queryErrorsAndWarnings(options: LokiQueryOptions): Promise<LokiLogEntry[]> {
         const query = `{app="pawpong-backend", level=~"error|warn"}`;
@@ -86,9 +92,18 @@ export class LokiQueryAdapter implements ILokiQueryPort {
         }
     }
 
+    // ─────────────────────────────────────────────
+    // Private helpers
+    // ─────────────────────────────────────────────
+
     /**
      * Loki stream 배열을 LokiLogEntry 배열로 파싱합니다.
-     * nanoTs는 나노초 단위 — 앞 13자리를 잘라 밀리초로 변환합니다.
+     *
+     * Loki 응답 형식:
+     * result = [{ stream: { level, context, deployment, ... }, values: [[nanoTs, message], ...] }]
+     *
+     * nanoTs는 나노초 단위 Unix timestamp 문자열입니다.
+     * 앞 13자리를 잘라 밀리초로 변환합니다.
      */
     private parseStreams(streams: LokiStream[]): LokiLogEntry[] {
         const entries: LokiLogEntry[] = [];
@@ -108,6 +123,7 @@ export class LokiQueryAdapter implements ILokiQueryPort {
             }
         }
 
+        // 최신순 정렬
         return entries.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
     }
 }

@@ -15,6 +15,7 @@ import { ApiGetSystemHealthEndpoint } from './swagger/decorators';
 /**
  * 플랫폼 Admin — 시스템 헬스 컨트롤러
  *
+ * 관리자 대시보드의 "서버 현황" 페이지에 데이터를 제공합니다.
  * Loki 로그를 분석하여 PM이 읽기 쉬운 형태로 반환합니다.
  */
 @ApiController('플랫폼 관리자 — 서버 현황')
@@ -26,6 +27,8 @@ export class PlatformAdminSystemHealthController {
 
     /**
      * GET /api/platform-admin/system-health
+     *
+     * 서버 현황을 조회합니다.
      */
     @Get('system-health')
     @ApiGetSystemHealthEndpoint()
@@ -33,7 +36,8 @@ export class PlatformAdminSystemHealthController {
         @CurrentUser() user: any,
         @Query() filter: SystemHealthFilterRequestDto,
     ): Promise<ApiResponseDto<SystemHealthResponseDto>> {
-        // now를 컨트롤러에서 단일 생성하여 응답 period와 Loki 쿼리 범위를 일치시킵니다.
+        // now를 컨트롤러에서 단일 생성하여 use case에 전달합니다.
+        // 이렇게 해야 응답의 period.from/to와 실제 Loki 쿼리 범위가 동일한 기준으로 계산됩니다.
         const now = new Date();
         const periodHours = filter.periodHours ?? 24;
 

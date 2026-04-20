@@ -25,7 +25,6 @@ send_discord_notification() {
 
 # 이미지 태그 (GitHub SHA 또는 timestamp)
 IMAGE_TAG=${1:-$(date +%Y%m%d_%H%M%S)}
-APP_DIR=${APP_DIR:-$(pwd)}
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}Starting Deployment: ${IMAGE_TAG}${NC}"
@@ -34,17 +33,17 @@ echo -e "${BLUE}========================================${NC}"
 # 배포 시작 알림
 send_discord_notification "배포 시작\nTag: \`$IMAGE_TAG\`" 16776960
 
-cd "${APP_DIR}"
+cd /home/colding/pawpong_backend
 
 # 이전 이미지 태그 저장 (롤백용)
 LAST_IMAGE=$(docker images pawpong-backend --format "{{.Tag}}" | head -n 1)
-echo "$LAST_IMAGE" > "${APP_DIR}/.last_deploy"
+echo "$LAST_IMAGE" > /home/colding/pawpong_backend/.last_deploy
 echo -e "${YELLOW}Previous image tag saved: ${LAST_IMAGE}${NC}"
 
 # 배포 히스토리 저장 (최근 10개 유지)
-echo "$IMAGE_TAG" >> "${APP_DIR}/.deploy_history"
-tail -10 "${APP_DIR}/.deploy_history" > "${APP_DIR}/.deploy_history.tmp"
-mv "${APP_DIR}/.deploy_history.tmp" "${APP_DIR}/.deploy_history"
+echo "$IMAGE_TAG" >> /home/colding/pawpong_backend/.deploy_history
+tail -10 /home/colding/pawpong_backend/.deploy_history > /home/colding/pawpong_backend/.deploy_history.tmp
+mv /home/colding/pawpong_backend/.deploy_history.tmp /home/colding/pawpong_backend/.deploy_history
 echo -e "${YELLOW}Deployment history updated${NC}"
 
 echo -e "${BLUE}Using Docker image from Artifact Registry: pawpong-backend:latest${NC}"
@@ -95,8 +94,8 @@ if [ "$HEALTHY" = true ]; then
     if [ -f /etc/nginx/sites-available/pawpong ]; then
         echo -e "${BLUE}Updating Nginx configuration...${NC}"
         # Nginx에서 upstream 포트를 새 포트로 변경
-        sed -i "s/localhost:[0-9]\{4\}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
-        nginx -t && systemctl reload nginx
+        sudo sed -i "s/localhost:[0-9]\{4\}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
+        sudo nginx -t && sudo systemctl reload nginx
         echo -e "${GREEN}Nginx reloaded with new upstream${NC}"
     fi
 
@@ -147,3 +146,4 @@ fi
 echo -e "${BLUE}Ensuring monitoring stack is running...${NC}"
 docker compose up -d grafana loki promtail
 # docker compose up -d zookeeper kafka kafka-ui  # 채팅 기능 구현 시 활성화
+

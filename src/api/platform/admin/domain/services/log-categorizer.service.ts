@@ -109,6 +109,9 @@ export class LogCategorizerService {
     // Private helpers
     // ─────────────────────────────────────────────
 
+    /**
+     * 로그 항목을 카테고리별로 그룹핑합니다.
+     */
     private buildIssueGroups(entries: LokiLogEntry[], now: Date): IssueGroup[] {
         const groupMap = new Map<string, { entries: LokiLogEntry[]; category: IssueCategory }>();
 
@@ -144,13 +147,16 @@ export class LogCategorizerService {
             });
         }
 
+        // 최근 발생 순 정렬
         return groups.sort((a, b) => new Date(b.lastAt).getTime() - new Date(a.lastAt).getTime());
     }
 
     /**
+     * 로그 항목 하나를 카테고리로 분류합니다.
+     *
      * 분류 규칙:
      * - ServerKafka 컨텍스트 → infrastructure
-     * - Redis 관련 컨텍스트 → infrastructure
+     * - Redis 관련 컨텍스트 (IoRedis, RedisService 등) → infrastructure
      * - HttpExceptionFilter + /api/ 미포함 경로 → security_probe (봇 스캔)
      * - HttpExceptionFilter + /api/ 포함 경로 → api_error
      * - 그 외 → application
@@ -176,12 +182,20 @@ export class LogCategorizerService {
     }
 
     /**
-     * Redis 관련 컨텍스트는 구현 라이브러리가 달라도 하나의 그룹으로 정규화합니다.
+     * 그룹 키를 생성합니다.
+     *
+     * - infrastructure(Kafka): infrastructure:ServerKafka
+     * - infrastructure(Redis): infrastructure:Redis (컨텍스트 이름 관계없이 단일 키로 정규화)
+     * - security_probe: 단일 그룹
+     * - api_error: context 기준
+     * - application: context 기준
      */
     private buildGroupKey(entry: LokiLogEntry, category: IssueCategory): string {
         switch (category) {
             case 'infrastructure':
                 if (entry.context === 'ServerKafka') return 'infrastructure:ServerKafka';
+                // Redis 관련 컨텍스트는 구현 라이브러리(IoRedis, RedisModule 등)가 달라도
+                // 하나의 그룹으로 묶어 서비스 단위 모니터링이 가능하도록 정규화합니다.
                 return 'infrastructure:Redis';
             case 'security_probe':
                 return 'security_probe';
@@ -192,12 +206,18 @@ export class LogCategorizerService {
         }
     }
 
+    /**
+     * 카테고리와 해결 여부로 심각도를 결정합니다.
+     */
     private determineSeverity(category: IssueCategory, isResolved: boolean): IssueSeverity {
         if (category === 'security_probe') return 'info';
         if (category === 'infrastructure') return isResolved ? 'warning' : 'critical';
         return 'warning';
     }
 
+    /**
+     * PM용 한국어 제목을 반환합니다.
+     */
     private getTitle(groupKey: string, category: IssueCategory): string {
         const titleMap: Record<string, string> = {
             'infrastructure:ServerKafka': '채팅 서버 (Kafka) 연결 오류',
@@ -211,6 +231,9 @@ export class LogCategorizerService {
         return '알 수 없는 오류';
     }
 
+    /**
+     * PM용 한국어 설명을 반환합니다.
+     */
     private getDescription(groupKey: string, category: IssueCategory): string {
         const descMap: Record<string, string> = {
             'infrastructure:ServerKafka': '채팅 메시지 전송에 영향이 있을 수 있습니다.',
@@ -223,6 +246,9 @@ export class LogCategorizerService {
         return '애플리케이션 내부에서 예상치 못한 오류가 발생했습니다.';
     }
 
+    /**
+     * 이슈 그룹을 기반으로 서비스별 상태를 판단합니다.
+     */
     private determineServiceHealth(groups: IssueGroup[], now: Date): ServiceHealthInfo {
         const kafkaGroup = groups.find((g) => g.groupKey === 'infrastructure:ServerKafka');
         const redisGroup = groups.find((g) => g.groupKey === 'infrastructure:Redis');
@@ -235,6 +261,13 @@ export class LogCategorizerService {
         };
     }
 
+    /**
+     * 단일 이슈 그룹으로 서비스 상태 객체를 빌드합니다.
+     *
+     * - 그룹 없음 → healthy
+     * - 마지막 에러 1시간 이내 → error
+     * - 마지막 에러 1시간 초과 → warning (과거 이슈 있음)
+     */
     private buildServiceStatus(
         group: IssueGroup | undefined,
         now: Date,
@@ -250,6 +283,13 @@ export class LogCategorizerService {
         return { status, lastErrorAt: group.lastAt };
     }
 
+    /**
+     * 전체 시스템 상태를 판단합니다.
+     *
+     * - 미해결 critical 그룹 존재 → critical
+     * - 미해결 warning 그룹 존재 → warning
+     * - 모두 해결됐거나 info만 → healthy
+     */
     private determineOverallStatus(groups: IssueGroup[]): OverallStatus {
         const hasUnresolvedCritical = groups.some((g) => g.severity === 'critical' && !g.isResolved);
         if (hasUnresolvedCritical) return 'critical';
@@ -260,6 +300,9 @@ export class LogCategorizerService {
         return 'healthy';
     }
 
+    /**
+     * 심각도별 카운트 요약을 빌드합니다.
+     */
     private buildSummary(groups: IssueGroup[]): { critical: number; warning: number; info: number } {
         return {
             critical: groups.filter((g) => g.severity === 'critical' && !g.isResolved).length,

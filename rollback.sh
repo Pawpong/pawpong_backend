@@ -13,9 +13,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
 
-APP_DIR=${APP_DIR:-$(pwd)}
-
-cd "${APP_DIR}"
+cd /home/colding/pawpong_backend
 
 echo -e "${BLUE}========================================${NC}"
 echo -e "${BLUE}Pawpong Backend Rollback${NC}"
@@ -107,8 +105,8 @@ if [ "$HEALTHY" = true ]; then
 
     # Nginx 설정 업데이트
     if [ -f /etc/nginx/sites-available/pawpong ]; then
-        sed -i "s/localhost:[0-9]\{4\}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
-        nginx -t && systemctl reload nginx
+        sudo sed -i "s/localhost:[0-9]\{4\}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
+        sudo nginx -t && sudo systemctl reload nginx
         echo -e "${GREEN}Nginx reloaded${NC}"
     fi
 
