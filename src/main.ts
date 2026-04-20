@@ -7,7 +7,7 @@ import express from 'express';
 import cookieParser from 'cookie-parser';
 import path from 'path';
 
-import { AllExceptionsFilter } from './common/filter/http-exception.filter';
+import { HttpExceptionFilter, AllExceptionsFilter } from './common/filter/http-exception.filter';
 import { HttpStatusInterceptor } from './common/interceptor/http-status.interceptor';
 import { LoggingInterceptor } from './common/interceptor/logging.interceptor';
 
@@ -65,6 +65,7 @@ async function bootstrap(): Promise<void> {
     // 전역 예외 필터 적용 (ApiResponseDto 형식 응답 + critical 에러 Discord 알림)
     const notifyCriticalErrorUseCase = app.get(NotifyCriticalErrorUseCase);
     app.useGlobalFilters(new AllExceptionsFilter(notifyCriticalErrorUseCase));
+    app.useGlobalFilters(new HttpExceptionFilter(notifyCriticalErrorUseCase));
 
     // HTTP 상태 코드 통일 인터셉터 적용
     app.useGlobalInterceptors(new HttpStatusInterceptor());
@@ -167,6 +168,7 @@ async function bootstrap(): Promise<void> {
     const configService: ConfigService = app.get(ConfigService);
 
     // Kafka Consumer 마이크로서비스 연결 (채팅 메시지 broadcast용)
+    // Kafka가 없어도 앱은 정상 동작 (startAllMicroservices는 별도 try-catch)
     const kafkaBroker = configService.get<string>('KAFKA_BROKER', 'kafka:29092');
     app.connectMicroservice<MicroserviceOptions>({
         transport: Transport.KAFKA,
