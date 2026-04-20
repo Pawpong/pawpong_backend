@@ -168,28 +168,36 @@ async function bootstrap(): Promise<void> {
     const configService: ConfigService = app.get(ConfigService);
 
     // Kafka Consumer 마이크로서비스 연결 (채팅 메시지 broadcast용)
-    // Kafka가 없어도 앱은 정상 동작 (startAllMicroservices는 별도 try-catch)
-    const kafkaBroker = configService.get<string>('KAFKA_BROKER', 'kafka:29092');
-    app.connectMicroservice<MicroserviceOptions>({
-        transport: Transport.KAFKA,
-        options: {
-            client: {
-                clientId: 'pawpong-chat-consumer',
-                brokers: [kafkaBroker],
-                requestTimeout: 30000,
-                retry: {
-                    initialRetryTime: 300,
-                    retries: 10,
+    // KAFKA_ENABLED=true && KAFKA_BROKER 지정된 경우에만 연결 시도함
+    // 그 외에는 Kafka 관련 bootstrap을 skip하여 부팅 지연(최대 ~2분)을 방지함
+    const kafkaBroker = configService.get<string>('KAFKA_BROKER', '');
+    const kafkaEnabled = configService.get<string>('KAFKA_ENABLED', 'false').toLowerCase() === 'true';
+    const shouldConnectKafka = kafkaEnabled && kafkaBroker.length > 0;
+
+    if (shouldConnectKafka) {
+        app.connectMicroservice<MicroserviceOptions>({
+            transport: Transport.KAFKA,
+            options: {
+                client: {
+                    clientId: 'pawpong-chat-consumer',
+                    brokers: [kafkaBroker],
+                    requestTimeout: 30000,
+                    retry: {
+                        initialRetryTime: 300,
+                        retries: 3,
+                    },
+                },
+                consumer: {
+                    groupId: 'pawpong-chat-consumer-group',
+                    allowAutoTopicCreation: true,
+                    sessionTimeout: 30000,
+                    heartbeatInterval: 3000,
                 },
             },
-            consumer: {
-                groupId: 'pawpong-chat-consumer-group',
-                allowAutoTopicCreation: true,
-                sessionTimeout: 30000,
-                heartbeatInterval: 3000,
-            },
-        },
-    });
+        });
+    } else {
+        logger.warn('[bootstrap] Kafka microservice 연결 건너뜀 - 활성화하려면 KAFKA_ENABLED=true 와 KAFKA_BROKER 값을 지정');
+    }
 
     // 프로덕션 환경 체크
     const isProduction = process.env.NODE_ENV === 'production';
@@ -215,12 +223,14 @@ async function bootstrap(): Promise<void> {
 
     let isShuttingDown = false;
 
-    // Kafka Consumer 시작 (실패해도 HTTP 서버는 계속 동작)
-    try {
-        await app.startAllMicroservices();
-        logger.log('[bootstrap] Kafka chat consumer started');
-    } catch {
-        logger.warn('[bootstrap] Kafka consumer failed to start - messages will be skipped until Kafka is available');
+    // Kafka Consumer 시작 (연결 설정이 있었을 때만)
+    if (shouldConnectKafka) {
+        try {
+            await app.startAllMicroservices();
+            logger.log('[bootstrap] Kafka chat consumer started');
+        } catch {
+            logger.warn('[bootstrap] Kafka consumer failed to start - messages will be skipped until Kafka is available');
+        }
     }
 
     // 서버 시작
