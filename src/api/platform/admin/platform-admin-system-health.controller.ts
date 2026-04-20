@@ -18,7 +18,7 @@ import { ApiGetSystemHealthEndpoint } from './swagger/decorators';
  * 관리자 대시보드의 "서버 현황" 페이지에 데이터를 제공합니다.
  * Loki 로그를 분석하여 PM이 읽기 쉬운 형태로 반환합니다.
  */
-@ApiController('플랫폼 관리자 — 서버 현황')
+@ApiController('플랫폼 관리 (Admin) — 서버 현황')
 @Controller('platform-admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')

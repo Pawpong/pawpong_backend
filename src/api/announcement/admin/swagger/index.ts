@@ -13,7 +13,7 @@ import { AnnouncementUpdateRequestDto } from '../../dto/request/announcement-upd
 import { AnnouncementResponseDto } from '../../dto/response/announcement-response.dto';
 
 export function ApiAnnouncementAdminController() {
-    return ApiController('공지사항 관리');
+    return ApiController('공지사항 관리 (Admin)');
 }
 
 export function ApiGetAllAnnouncementsAdminEndpoint() {

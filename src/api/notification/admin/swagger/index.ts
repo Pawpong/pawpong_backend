@@ -11,7 +11,7 @@ import {
 } from '../dto/response/notification-admin-response.dto';
 
 export function ApiNotificationAdminController() {
-    return ApiController('관리자 알림 관리');
+    return ApiController('알림 관리 (Admin)');
 }
 
 export function ApiGetAdminNotificationsEndpoint() {

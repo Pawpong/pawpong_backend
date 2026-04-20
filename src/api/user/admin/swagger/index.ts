@@ -23,7 +23,7 @@ import { UserManagementResponseDto } from '../dto/response/user-management-respo
 import { UserStatusUpdateResponseDto } from '../dto/response/user-status-update-response.dto';
 
 export function ApiUserAdminController() {
-    return ApiController('사용자 관리 관리자');
+    return ApiController('사용자 관리 (Admin)');
 }
 
 export function ApiGetUserAdminProfileEndpoint() {

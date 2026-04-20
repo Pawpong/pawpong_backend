@@ -17,7 +17,7 @@ import { BannerResponseDto } from '../../dto/response/banner-response.dto';
 import { FaqResponseDto } from '../../dto/response/faq-response.dto';
 
 export function ApiHomeAdminController() {
-    return ApiController('홈페이지 관리 (관리자)');
+    return ApiController('홈페이지 관리 (Admin)');
 }
 
 export function ApiGetAllBannersAdminEndpoint() {

@@ -13,7 +13,7 @@ import { AppVersionUpdateRequestDto } from '../../dto/request/app-version-update
 import { AppVersionResponseDto } from '../../dto/response/app-version-response.dto';
 
 export function ApiAppVersionAdminController() {
-    return ApiController('앱 버전 관리 (관리자)');
+    return ApiController('앱 버전 관리 (Admin)');
 }
 
 export function ApiCreateAppVersionAdminEndpoint() {
