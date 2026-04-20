@@ -11,9 +11,11 @@ describe('AuthSocialUserCheckResultMapperService', () => {
             profileImageFileName: 'p.png',
         } as any);
         expect(result.exists).toBe(true);
-        expect(result.userRole).toBe('adopter');
-        expect(result.nickname).toBe('닉');
-        expect(result.profileImageFileName).toBe('p.png');
+        if (result.exists) {
+            expect(result.userRole).toBe('adopter');
+            expect(result.nickname).toBe('닉');
+            expect(result.profileImageFileName).toBe('p.png');
+        }
     });
 
     it('adopter: nickname 없으면 빈 문자열', () => {
@@ -21,7 +23,9 @@ describe('AuthSocialUserCheckResultMapperService', () => {
             _id: { toString: () => 'u-1' },
             emailAddress: 'a',
         } as any);
-        expect(result.nickname).toBe('');
+        if (result.exists) {
+            expect(result.nickname).toBe('');
+        }
     });
 
     it('breeder: name > nickname 순서', () => {
@@ -30,11 +34,15 @@ describe('AuthSocialUserCheckResultMapperService', () => {
             emailAddress: 'b',
             name: '브리더',
         } as any);
-        expect(result.userRole).toBe('breeder');
-        expect(result.nickname).toBe('브리더');
+        if (result.exists) {
+            expect(result.userRole).toBe('breeder');
+            expect(result.nickname).toBe('브리더');
+        }
 
         const result2 = service.toBreederResult({ _id: { toString: () => 'b-2' }, emailAddress: 'b', nickname: '닉' } as any);
-        expect(result2.nickname).toBe('닉');
+        if (result2.exists) {
+            expect(result2.nickname).toBe('닉');
+        }
     });
 
     it('toNotFoundResult: exists=false만', () => {

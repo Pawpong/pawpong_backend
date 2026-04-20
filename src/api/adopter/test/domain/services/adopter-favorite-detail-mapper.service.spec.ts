@@ -16,7 +16,7 @@ describe('AdopterFavoriteDetailMapperService', () => {
         const result = service.toResult(favorite, null, '', []);
         expect(result.breederId).toBe('b-1');
         expect(result.isActive).toBe(false);
-        expect(result.priceRange.display).toBe(PriceDisplayType.CONSULTATION);
+        expect(result.priceRange!.display).toBe(PriceDisplayType.CONSULTATION);
         expect(result.availablePets).toBe(0);
     });
 
@@ -45,7 +45,7 @@ describe('AdopterFavoriteDetailMapperService', () => {
         expect(result.representativePhotos).toEqual(['rep1.png']);
         expect(result.availablePets).toBe(1);
         expect(result.location).toBe('서울 강남구');
-        expect(result.priceRange.display).toBe('range');
+        expect(result.priceRange!.display).toBe('range');
     });
 
     it('가격 범위가 미설정이면 not_set을 사용한다', () => {
@@ -55,6 +55,6 @@ describe('AdopterFavoriteDetailMapperService', () => {
             profile: { priceRange: { min: 0, max: 0 } },
         } as any;
         const result = service.toResult(favorite, breeder, '', []);
-        expect(result.priceRange.display).toBe('not_set');
+        expect(result.priceRange!.display).toBe('not_set');
     });
 });

@@ -38,8 +38,8 @@ describe('BreederVerificationAdminDetailMapperService', () => {
         const result = service.toResult(breeder);
         expect(result.breederId).toBe('b-1');
         expect(result.verificationInfo.verificationStatus).toBe('approved');
-        expect(result.verificationInfo.documents[0].fileUrl).toBe('https://cdn/id.pdf');
-        expect(result.profileInfo.location).toBe('서울');
+        expect(result.verificationInfo.documents![0].fileUrl).toBe('https://cdn/id.pdf');
+        expect(result.profileInfo!.location).toBe('서울');
     });
 
     it('verification이 없으면 기본값을 사용한다', () => {
