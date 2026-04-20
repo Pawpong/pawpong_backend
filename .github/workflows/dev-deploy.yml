@@ -33,19 +33,32 @@ jobs:
                   chmod 600 ~/.ssh/deploy_key
                   ssh-keyscan -p ${{ secrets.DEV_SERVER_PORT }} -H ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
-            - name: Rsync artifacts to Mac Mini
+            - name: Verify remote prerequisites (rsync·pm2·yarn)
+              run: |
+                  SERVER="${{ secrets.DEV_SERVER_USER }}@${{ secrets.DEV_SERVER_HOST }}"
+                  PORT="${{ secrets.DEV_SERVER_PORT }}"
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${PORT} ${SERVER} \
+                    "command -v rsync >/dev/null || sudo apt-get install -y rsync; \
+                     command -v pm2 >/dev/null || sudo npm install -g pm2; \
+                     command -v yarn >/dev/null || sudo npm install -g yarn; \
+                     rsync --version | head -1; pm2 --version; yarn --version"
+
+            - name: Transfer artifacts to Mac Mini (rsync with tar fallback)
               run: |
                   SERVER="${{ secrets.DEV_SERVER_USER }}@${{ secrets.DEV_SERVER_HOST }}"
                   PORT="${{ secrets.DEV_SERVER_PORT }}"
                   SSH_OPTS="-i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${PORT}"
+                  REMOTE_DIR="/home/colding/pawpong_backend"
 
-                  rsync -avz --delete \
-                    -e "ssh ${SSH_OPTS}" \
-                    dist/ "${SERVER}:/home/colding/pawpong_backend/dist/"
-
-                  rsync -avz \
-                    -e "ssh ${SSH_OPTS}" \
-                    package.json yarn.lock "${SERVER}:/home/colding/pawpong_backend/"
+                  if rsync -avz --delete -e "ssh ${SSH_OPTS}" dist/ "${SERVER}:${REMOTE_DIR}/dist/" \
+                     && rsync -avz -e "ssh ${SSH_OPTS}" package.json yarn.lock "${SERVER}:${REMOTE_DIR}/"; then
+                    echo "✅ rsync 전송 성공"
+                  else
+                    echo "⚠️ rsync 실패 → tar+ssh fallback 시도"
+                    tar czf - dist package.json yarn.lock | \
+                      ssh ${SSH_OPTS% -p*} -p ${PORT} ${SERVER} \
+                        "cd ${REMOTE_DIR} && rm -rf dist && tar xzf -"
+                  fi
 
             - name: Install & Restart on Mac Mini
               run: |
