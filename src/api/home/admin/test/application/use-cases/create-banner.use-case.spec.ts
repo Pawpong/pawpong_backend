@@ -43,6 +43,7 @@ describe('배너 생성 유스케이스 (Admin)', () => {
 
         const result = await useCase.execute({
             desktopImageFileName: 'new-desktop.jpg',
+            mobileImageFileName: 'new-mobile.jpg',
             linkType: 'internal',
             linkUrl: '/breeder/abc',
             order: 1,
