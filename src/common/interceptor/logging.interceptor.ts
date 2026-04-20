@@ -12,7 +12,7 @@ import { CustomLoggerService } from '../logger/custom-logger.service';
 export class LoggingInterceptor implements NestInterceptor {
     constructor(private readonly logger: CustomLoggerService) {}
 
-    intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
         if (context.getType() !== 'http') {
             return next.handle();
         }

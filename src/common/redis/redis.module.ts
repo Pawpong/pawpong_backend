@@ -4,6 +4,8 @@ import { redisStore } from 'cache-manager-ioredis-yet';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import { getErrorMessage } from '../utils/error.util';
+import { REDIS_SERVICE_TOKEN } from './redis.token';
 
 /**
  * 직접 ioredis를 사용하는 Redis 서비스
@@ -172,7 +174,7 @@ export class RedisService implements OnModuleDestroy {
                     logger.log(`[Redis] 캐시 연결 성공 - ${host}:${port}`);
                     return { store };
                 } catch (error) {
-                    logger.error(`[Redis] 캐시 연결 실패 - ${host}:${port}:`, error.message);
+                    logger.error(`[Redis] 캐시 연결 실패 - ${host}:${port}:`, getErrorMessage(error));
                     logger.warn('[Redis] 인메모리 캐시로 폴백합니다 (개발 환경)');
 
                     // 로컬 개발 환경에서 Redis 없이도 동작 (인메모리 캐시)
@@ -218,7 +220,13 @@ export class RedisService implements OnModuleDestroy {
             inject: [ConfigService],
         }),
     ],
-    providers: [RedisService],
-    exports: [CacheModule, BullModule, RedisService],
+    providers: [
+        RedisService,
+        {
+            provide: REDIS_SERVICE_TOKEN,
+            useExisting: RedisService,
+        },
+    ],
+    exports: [CacheModule, BullModule, REDIS_SERVICE_TOKEN, RedisService],
 })
 export class RedisModule {}

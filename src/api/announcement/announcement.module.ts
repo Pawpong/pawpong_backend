@@ -1,23 +1,18 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { AnnouncementController } from './announcement.controller';
-import { AnnouncementAdminController } from './admin/announcement-admin.controller';
-
-import { CustomLoggerService } from '../../common/logger/custom-logger.service';
-import { AnnouncementService } from './announcement.service';
-import { AnnouncementAdminService } from './admin/announcement-admin.service';
-
-import { Announcement, AnnouncementSchema } from '../../schema/announcement.schema';
+import {
+    ANNOUNCEMENT_MODULE_CONTROLLERS,
+    ANNOUNCEMENT_MODULE_IMPORTS,
+    ANNOUNCEMENT_MODULE_PROVIDERS,
+} from './announcement.module-definition';
 
 /**
  * 공지사항 모듈
  * 공개 API 및 관리자 API 제공
  */
 @Module({
-    imports: [MongooseModule.forFeature([{ name: Announcement.name, schema: AnnouncementSchema }])],
-    controllers: [AnnouncementController, AnnouncementAdminController],
-    providers: [AnnouncementService, AnnouncementAdminService, CustomLoggerService],
-    exports: [AnnouncementService, AnnouncementAdminService],
+    imports: ANNOUNCEMENT_MODULE_IMPORTS,
+    controllers: ANNOUNCEMENT_MODULE_CONTROLLERS,
+    providers: ANNOUNCEMENT_MODULE_PROVIDERS,
 })
 export class AnnouncementModule {}

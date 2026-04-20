@@ -1,5 +1,6 @@
 import { BreederCardResponseDto } from '../dto/response/breeder-card-response.dto';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
+import { BREEDER_CARD_EXAMPLE, BREEDER_EXPLORE_EXAMPLES } from '../constants/breeder-swagger-examples';
 
 /**
  * 브리더 탐색 API 스웨거 문서
@@ -78,71 +79,7 @@ export class BreederExploreSwaggerDocs {
     };
 }
 
-/**
- * 브리더 탐색 요청 파라미터 예시
- */
-export const BREEDER_EXPLORE_EXAMPLES = {
-    dogSearch: {
-        petType: 'dog',
-        dogSize: ['small', 'medium'],
-        province: ['경기도', '서울특별시'],
-        city: ['파주시', '강남구'],
-        isAdoptionAvailable: true,
-        breederLevel: ['new'],
-        sortBy: 'latest',
-        page: 1,
-        take: 20,
-    },
-    catSearch: {
-        petType: 'cat',
-        catFurLength: ['short', 'long'],
-        province: ['서울특별시'],
-        city: ['강남구', '서초구'],
-        breederLevel: ['new', 'elite'],
-        sortBy: 'favorite',
-        page: 1,
-        take: 20,
-    },
-    multipleFilters: {
-        petType: 'dog',
-        dogSize: ['small', 'medium', 'large'],
-        province: ['경기도', '서울특별시', '인천광역시'],
-        city: ['파주시', '강남구', '연수구'],
-        isAdoptionAvailable: true,
-        breederLevel: ['new', 'elite'],
-        sortBy: 'review',
-        page: 1,
-        take: 20,
-    },
-};
-
-/**
- * 브리더 카드 응답 예시
- */
-export const BREEDER_CARD_EXAMPLE = {
-    breederId: '507f1f77bcf86cd799439011',
-    breederName: '해피독 브리더',
-    breederLevel: 'new',
-    location: '경기도 파주시',
-    mainBreed: '말티즈',
-    isAdoptionAvailable: true,
-    priceRange: {
-        min: 1000000,
-        max: 2000000,
-        display: 'range',
-    },
-    favoriteCount: 42,
-    isFavorited: false,
-    representativePhotos: [
-        'https://example.com/photo1.jpg',
-        'https://example.com/photo2.jpg',
-        'https://example.com/photo3.jpg',
-    ],
-    profileImage: 'https://example.com/profile.jpg',
-    totalReviews: 15,
-    averageRating: 4.5,
-    createdAt: new Date('2024-01-15T09:00:00.000Z'),
-};
+export { BREEDER_EXPLORE_EXAMPLES, BREEDER_CARD_EXAMPLE } from '../constants/breeder-swagger-examples';
 
 /**
  * Breeder 도메인 스웨거 문서
@@ -180,6 +117,10 @@ export class BreederSwaggerDocs {
             ## 주요 기능
             - 로그인 시, 각 브리더에 대한 사용자의 '찜' 여부(isWished)가 포함됩니다.
             - 비로그인 시에도 사용 가능합니다.
+
+            ## 인증
+            - Authorization Bearer 토큰은 선택 사항입니다.
+            - 토큰을 보내면 사용자 맞춤 정보가 함께 계산됩니다.
         `,
     };
 
@@ -206,6 +147,10 @@ export class BreederSwaggerDocs {
             - 브리더 기본 정보, 소개, 연락처, 활동 지역 등을 포함합니다.
             - 로그인 시, 해당 브리더에 대한 사용자의 '찜' 여부(isWished)가 포함됩니다.
             - 비로그인 시에도 사용 가능합니다.
+
+            ## 인증
+            - Authorization Bearer 토큰은 선택 사항입니다.
+            - 토큰을 보내면 사용자 맞춤 정보가 함께 계산됩니다.
         `,
     };
 
@@ -221,8 +166,9 @@ export class BreederSwaggerDocs {
             ## 정렬
             - 최신 후기부터 내림차순으로 정렬됩니다.
             
-            ## 인증 불필요
-            - 공개 API로 인증 없이 호출 가능합니다.
+            ## 인증
+            - 인증 없이 호출 가능합니다.
+            - Authorization Bearer 토큰은 선택 사항이며, 전달 시 사용자 맞춤 정보가 함께 계산될 수 있습니다.
         `,
     };
 
@@ -236,8 +182,9 @@ export class BreederSwaggerDocs {
             - **page**: 페이지 번호 (기본값: 1)
             - **limit**: 페이지 당 항목 수 (기본값: 20)
             
-            ## 인증 불필요
-            - 공개 API로 인증 없이 호출 가능합니다.
+            ## 인증
+            - 인증 없이 호출 가능합니다.
+            - Authorization Bearer 토큰은 선택 사항이며, 전달 시 사용자 맞춤 정보가 함께 계산될 수 있습니다.
         `,
     };
 
@@ -252,8 +199,9 @@ export class BreederSwaggerDocs {
             - 건강 기록
             - 부모 정보 (부모견/묘)
             
-            ## 인증 불필요
-            - 공개 API로 인증 없이 호출 가능합니다.
+            ## 인증
+            - 인증 없이 호출 가능합니다.
+            - Authorization Bearer 토큰은 선택 사항이며, 전달 시 사용자 맞춤 정보가 함께 계산될 수 있습니다.
         `,
     };
 

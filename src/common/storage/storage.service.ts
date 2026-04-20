@@ -13,6 +13,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as fs from 'fs';
 import { Readable } from 'stream';
 import convert from 'heic-convert';
+import { getErrorMessage, getErrorStatusCode, hasErrorName } from '../utils/error.util';
 
 /**
  * 스마일서브 오브젝트 스토리지 서비스
@@ -20,12 +21,32 @@ import convert from 'heic-convert';
  */
 @Injectable()
 export class StorageService {
+    private static readonly LEGACY_BUCKET_NAMES = ['pawpong_bucket', 'pawpong_s3'];
     private s3: S3Client;
     private bucketName: string;
     private cdnBaseUrl: string;
+    private readonly isTestMode: boolean;
+    private readonly inMemoryObjects = new Map<
+        string,
+        {
+            body: Buffer;
+            contentType: string;
+            lastModified: Date;
+        }
+    >();
     private readonly logger = new Logger(StorageService.name);
 
     constructor(private configService: ConfigService) {
+        this.isTestMode =
+            this.configService.get<string>('PAWPONG_TEST_MODE') === 'true' || process.env.PAWPONG_TEST_MODE === 'true';
+
+        if (this.isTestMode) {
+            this.bucketName = 'pawpong-test';
+            this.cdnBaseUrl = this.configService.get<string>('SMILESERV_CDN_BASE_URL') || 'https://cdn.test';
+            this.logger.log('[StorageService] 테스트 모드 인메모리 스토리지를 사용합니다.');
+            return;
+        }
+
         try {
             this.logger.log('[StorageService] Initializing SmileServ Object Storage...');
 
@@ -77,6 +98,17 @@ export class StorageService {
 
         const fileName = this.generateFileName(file.originalname, folder);
 
+        if (this.isTestMode) {
+            this.inMemoryObjects.set(fileName, {
+                body: Buffer.from(file.buffer || []),
+                contentType: file.mimetype,
+                lastModified: new Date(),
+            });
+
+            const cdnUrl = this.getCdnUrl(fileName);
+            return { fileName, cdnUrl, storageUrl: cdnUrl };
+        }
+
         try {
             const command = new PutObjectCommand({
                 Bucket: this.bucketName,
@@ -95,7 +127,7 @@ export class StorageService {
             this.logger.log(`File uploaded: ${fileName}`);
             return { fileName, cdnUrl, storageUrl };
         } catch (error) {
-            this.logger.error(`Upload failed: ${error.message}`);
+            this.logger.error(`Upload failed: ${getErrorMessage(error)}`);
             throw error;
         }
     }
@@ -115,6 +147,11 @@ export class StorageService {
      * 파일 삭제
      */
     async deleteFile(fileName: string): Promise<void> {
+        if (this.isTestMode) {
+            this.inMemoryObjects.delete(this.stripBucketPrefix(fileName));
+            return;
+        }
+
         try {
             const command = new DeleteObjectCommand({
                 Bucket: this.bucketName,
@@ -124,7 +161,7 @@ export class StorageService {
             await this.s3.send(command);
             this.logger.log(`File deleted: ${fileName}`);
         } catch (error) {
-            this.logger.error(`Delete failed: ${error.message}`);
+            this.logger.error(`Delete failed: ${getErrorMessage(error)}`);
             throw error;
         }
     }
@@ -133,6 +170,10 @@ export class StorageService {
      * 파일 존재 여부 확인
      */
     async fileExists(fileName: string): Promise<boolean> {
+        if (this.isTestMode) {
+            return this.inMemoryObjects.has(this.stripBucketPrefix(fileName));
+        }
+
         try {
             const command = new HeadObjectCommand({
                 Bucket: this.bucketName,
@@ -142,10 +183,10 @@ export class StorageService {
             await this.s3.send(command);
             return true;
         } catch (error) {
-            if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+            if (hasErrorName(error, 'NotFound') || getErrorStatusCode(error) === 404) {
                 return false;
             }
-            this.logger.error(`Check file existence failed: ${error.message}`);
+            this.logger.error(`Check file existence failed: ${getErrorMessage(error)}`);
             return false;
         }
     }
@@ -166,6 +207,18 @@ export class StorageService {
         return `${this.cdnBaseUrl}/${fileName}`;
     }
 
+    private stripBucketPrefix(filePath: string): string {
+        const bucketNames = new Set([this.bucketName, ...StorageService.LEGACY_BUCKET_NAMES].filter(Boolean));
+
+        for (const bucketName of bucketNames) {
+            if (filePath.startsWith(`${bucketName}/`)) {
+                return filePath.slice(`${bucketName}/`.length);
+            }
+        }
+
+        return filePath;
+    }
+
     /**
      * Signed URL 생성 (스마일서브는 공개 파일이므로 일반 URL 반환)
      * 기존 GCP CDN Signed URL 호환을 위해 메서드 유지
@@ -181,7 +234,7 @@ export class StorageService {
                 if (urlObj.hostname.includes('object.iwinv.kr')) {
                     // pathname에서 버킷 이름 제거: /pawpong_bucket/path/file.jpg -> path/file.jpg
                     const pathParts = urlObj.pathname.split('/').filter((p) => p);
-                    if (pathParts[0] === this.bucketName) {
+                    if (pathParts[0] && this.stripBucketPrefix(`${pathParts[0]}/x`) !== `${pathParts[0]}/x`) {
                         pathParts.shift(); // 버킷 이름 제거
                     }
                     filePath = pathParts.join('/');
@@ -197,9 +250,7 @@ export class StorageService {
 
         // 방어 로직: 파일 경로에 버킷 이름이 접두사로 포함된 경우 제거
         // (이전 버그로 인해 DB에 pawpong_bucket/representative/uuid.jpg 형태로 저장된 데이터 대응)
-        if (filePath.startsWith(`${this.bucketName}/`)) {
-            filePath = filePath.slice(`${this.bucketName}/`.length);
-        }
+        filePath = this.stripBucketPrefix(filePath);
 
         // 스마일서브는 공개 버킷이므로 만료 시간 없이 URL 반환
         // 민감한 파일의 경우 향후 Pre-signed URL 구현 가능
@@ -232,6 +283,24 @@ export class StorageService {
      * 버킷 내 파일 목록 조회 (Admin용)
      */
     async listObjects(prefix?: string, maxKeys: number = 1000) {
+        if (this.isTestMode) {
+            const keys = [...this.inMemoryObjects.entries()]
+                .filter(([fileName]) => !prefix || fileName.startsWith(prefix))
+                .slice(0, maxKeys);
+
+            return {
+                Contents: keys.map(([fileName, object]) => ({
+                    Key: fileName,
+                    Size: object.body.length,
+                    LastModified: object.lastModified,
+                    ETag: `"${fileName}"`,
+                })),
+                IsTruncated: this.inMemoryObjects.size > maxKeys,
+                KeyCount: keys.length,
+                $metadata: {},
+            };
+        }
+
         const command = new ListObjectsV2Command({
             Bucket: this.bucketName,
             Prefix: prefix || '',
@@ -256,6 +325,10 @@ export class StorageService {
      * @returns Presigned URL
      */
     async generatePresignedUploadUrl(fileKey: string, expirationSeconds: number = 600): Promise<string> {
+        if (this.isTestMode) {
+            return `https://upload.test/${fileKey}?expiresIn=${expirationSeconds}`;
+        }
+
         const command = new PutObjectCommand({
             Bucket: this.bucketName,
             Key: fileKey,
@@ -276,6 +349,12 @@ export class StorageService {
      * @param localPath 로컬 저장 경로
      */
     async downloadFile(fileKey: string, localPath: string): Promise<void> {
+        if (this.isTestMode) {
+            const object = this.inMemoryObjects.get(this.stripBucketPrefix(fileKey));
+            fs.writeFileSync(localPath, object?.body || Buffer.alloc(0));
+            return;
+        }
+
         try {
             const command = new GetObjectCommand({
                 Bucket: this.bucketName,
@@ -313,6 +392,15 @@ export class StorageService {
         fileKey: string,
         contentType: string = 'application/octet-stream',
     ): Promise<void> {
+        if (this.isTestMode) {
+            this.inMemoryObjects.set(fileKey, {
+                body: fs.readFileSync(localPath),
+                contentType,
+                lastModified: new Date(),
+            });
+            return;
+        }
+
         try {
             const fileContent = fs.readFileSync(localPath);
 
@@ -340,6 +428,11 @@ export class StorageService {
      * @returns Readable 스트림
      */
     async getFileStream(fileKey: string): Promise<Readable> {
+        if (this.isTestMode) {
+            const object = this.inMemoryObjects.get(this.stripBucketPrefix(fileKey));
+            return Readable.from(object?.body || Buffer.alloc(0));
+        }
+
         try {
             const command = new GetObjectCommand({
                 Bucket: this.bucketName,
@@ -399,7 +492,7 @@ export class StorageService {
 
             this.logger.log(`[StorageService] JPEG 변환 완료: ${file.originalname} (${file.size} bytes)`);
         } catch (error) {
-            this.logger.warn(`[StorageService] HEIC 변환 실패, 원본 업로드: ${error.message}`);
+            this.logger.warn(`[StorageService] HEIC 변환 실패, 원본 업로드: ${getErrorMessage(error)}`);
         }
 
         return file;

@@ -1,8 +1,10 @@
-import { ExecutionContext, Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { ExecutionContext, Injectable, Logger } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 
 import { IS_PUBLIC_KEY } from '../decorator/public.decorator';
+import { DomainAuthenticationError } from '../error/domain.error';
+import type { AuthGuardInfo, AuthenticatedRequestUser } from '../types/authenticated-request-user.type';
 
 /**
  * JWT 인증 가드
@@ -31,18 +33,26 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
         return super.canActivate(context);
     }
 
-    handleRequest(err: any, user: any, info: any) {
+    handleRequest<TUser = AuthenticatedRequestUser>(
+        err: unknown,
+        user: AuthenticatedRequestUser | false | null,
+        info: AuthGuardInfo | undefined,
+        context: ExecutionContext,
+        status?: unknown,
+    ): TUser {
+        void context;
+        void status;
         // 에러가 있거나 user가 없으면 인증 실패
         if (err || !user) {
             if (info) {
                 if (info.name === 'TokenExpiredError') {
-                    throw new UnauthorizedException('토큰이 만료되었습니다. 다시 로그인해주세요.');
+                    throw new DomainAuthenticationError('토큰이 만료되었습니다. 다시 로그인해주세요.');
                 } else if (info.name === 'JsonWebTokenError') {
-                    throw new UnauthorizedException('유효하지 않은 토큰입니다.');
+                    throw new DomainAuthenticationError('유효하지 않은 토큰입니다.');
                 } else if (info.name === 'NotBeforeError') {
-                    throw new UnauthorizedException('토큰이 아직 유효하지 않습니다.');
+                    throw new DomainAuthenticationError('토큰이 아직 유효하지 않습니다.');
                 } else if (info.message === 'No auth token') {
-                    throw new UnauthorizedException('인증 토큰이 필요합니다.');
+                    throw new DomainAuthenticationError('인증 토큰이 필요합니다.');
                 }
             }
 
@@ -50,9 +60,9 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
                 throw err;
             }
 
-            throw new UnauthorizedException('인증에 실패했습니다.');
+            throw new DomainAuthenticationError('인증에 실패했습니다.');
         }
 
-        return user;
+        return user as TUser;
     }
 }

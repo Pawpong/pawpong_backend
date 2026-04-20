@@ -128,7 +128,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         try {
-            await this.sendMessageUseCase.execute(user.userId, user.role, dto);
+            await this.sendMessageUseCase.execute(user.userId, user.role, {
+                roomId: dto.roomId,
+                content: dto.content,
+                messageType: dto.messageType,
+            });
         } catch (error) {
             client.emit('error', { message: error.message });
         }
@@ -164,7 +168,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         try {
-            await this.getMessagesUseCase.execute(user.userId, payload.roomId);
+            await this.getMessagesUseCase.execute(user.userId, { roomId: payload.roomId });
             this.server.to(payload.roomId).emit('messages_read', {
                 roomId: payload.roomId,
                 readBy: user.userId,

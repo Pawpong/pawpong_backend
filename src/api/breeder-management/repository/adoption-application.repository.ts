@@ -5,6 +5,11 @@ import { Model } from 'mongoose';
 import { ApplicationStatus } from '../../../common/enum/user.enum';
 
 import { AdoptionApplication, AdoptionApplicationDocument } from '../../../schema/adoption-application.schema';
+import type {
+    BreederManagementApplicationDocumentRecord,
+    BreederManagementPetCountAggregateRecord,
+    BreederManagementRecentApplicationDocumentRecord,
+} from '../types/breeder-management-document.type';
 
 /**
  * AdoptionApplication Repository
@@ -22,7 +27,7 @@ export class AdoptionApplicationRepository {
      * @returns AdoptionApplication 또는 null
      */
     async findById(id: string): Promise<AdoptionApplicationDocument | null> {
-        return this.adoptionApplicationModel.findById(id).exec() as any;
+        return this.adoptionApplicationModel.findById(id).exec();
     }
 
     /**
@@ -32,7 +37,7 @@ export class AdoptionApplicationRepository {
      * @returns AdoptionApplication 또는 null
      */
     async findByIdAndBreeder(id: string, breederId: string): Promise<AdoptionApplicationDocument | null> {
-        return this.adoptionApplicationModel.findOne({ _id: id, breederId }).exec() as any;
+        return this.adoptionApplicationModel.findOne({ _id: id, breederId }).exec();
     }
 
     /**
@@ -46,7 +51,7 @@ export class AdoptionApplicationRepository {
         breederId: string,
         page: number = 1,
         limit: number = 10,
-    ): Promise<{ applications: AdoptionApplicationDocument[]; total: number }> {
+    ): Promise<{ applications: BreederManagementApplicationDocumentRecord[]; total: number }> {
         const skip = (page - 1) * limit;
 
         const [applications, total] = await Promise.all([
@@ -56,7 +61,8 @@ export class AdoptionApplicationRepository {
                 .sort({ appliedAt: -1 })
                 .skip(skip)
                 .limit(limit)
-                .lean() as any,
+                .lean()
+                .exec() as Promise<BreederManagementApplicationDocumentRecord[]>,
             this.adoptionApplicationModel.countDocuments({ breederId }),
         ]);
 
@@ -79,8 +85,16 @@ export class AdoptionApplicationRepository {
      * @param limit 조회할 개수
      * @returns 최근 입양 신청 목록
      */
-    async findRecentByBreeder(breederId: string, limit: number = 5): Promise<AdoptionApplicationDocument[]> {
-        return this.adoptionApplicationModel.find({ breederId }).sort({ appliedAt: -1 }).limit(limit).lean() as any;
+    async findRecentByBreeder(
+        breederId: string,
+        limit: number = 5,
+    ): Promise<BreederManagementRecentApplicationDocumentRecord[]> {
+        return this.adoptionApplicationModel
+            .find({ breederId })
+            .sort({ appliedAt: -1 })
+            .limit(limit)
+            .lean<BreederManagementRecentApplicationDocumentRecord[]>()
+            .exec();
     }
 
     /**
@@ -89,12 +103,12 @@ export class AdoptionApplicationRepository {
      * @returns 반려동물별 입양 신청 수 맵
      */
     async countByPetIds(petIds: string[]): Promise<Map<string, number>> {
-        const result = await this.adoptionApplicationModel.aggregate([
+        const result = (await this.adoptionApplicationModel.aggregate([
             { $match: { petId: { $in: petIds } } },
             { $group: { _id: '$petId', count: { $sum: 1 } } },
-        ]);
+        ])) as BreederManagementPetCountAggregateRecord[];
 
-        return new Map(result.map((item: any) => [item._id, item.count]));
+        return new Map(result.map((item) => [String(item._id), item.count]));
     }
 
     /**
@@ -104,7 +118,7 @@ export class AdoptionApplicationRepository {
      * @returns 업데이트된 AdoptionApplication 또는 null
      */
     async updateStatus(id: string, status: ApplicationStatus): Promise<AdoptionApplicationDocument | null> {
-        return this.adoptionApplicationModel.findByIdAndUpdate(id, { status }, { new: true }).exec() as any;
+        return this.adoptionApplicationModel.findByIdAndUpdate(id, { status }, { new: true }).exec();
     }
 
     /**
@@ -114,7 +128,7 @@ export class AdoptionApplicationRepository {
      */
     async create(data: Partial<AdoptionApplication>): Promise<AdoptionApplicationDocument> {
         const application = new this.adoptionApplicationModel(data);
-        return application.save() as any;
+        return application.save();
     }
 
     /**
@@ -124,6 +138,6 @@ export class AdoptionApplicationRepository {
      * @returns 업데이트된 AdoptionApplication 또는 null
      */
     async update(id: string, updateData: Partial<AdoptionApplication>): Promise<AdoptionApplicationDocument | null> {
-        return this.adoptionApplicationModel.findByIdAndUpdate(id, { $set: updateData }, { new: true }).exec() as any;
+        return this.adoptionApplicationModel.findByIdAndUpdate(id, { $set: updateData }, { new: true }).exec();
     }
 }

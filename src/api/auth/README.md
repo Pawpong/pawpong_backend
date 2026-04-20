@@ -98,7 +98,6 @@ auth/
 │   │   ├── check-nickname-request.dto.ts
 │   │   └── breeder-document-upload-request.dto.ts
 │   └── response/
-│       ├── auth-response.dto.ts
 │       ├── token-response.dto.ts
 │       ├── phone-verification-response.dto.ts
 │       └── breeder-document-upload-response.dto.ts

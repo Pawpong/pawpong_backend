@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
+import type { AuthRegistrationRecord } from '../types/auth-record.type';
 
 /**
  * Auth 도메인용 Adopter Repository
@@ -24,42 +25,42 @@ export class AuthAdopterRepository {
     /**
      * ID로 입양자 조회
      */
-    async findById(id: string): Promise<AdopterDocument | null> {
-        return this.adopterModel.findById(id).exec() as Promise<AdopterDocument | null>;
+    async findById(id: string): Promise<AuthRegistrationRecord | null> {
+        return this.adopterModel.findById(id).exec();
     }
 
     /**
      * 이메일로 입양자 조회
      */
-    async findByEmail(email: string): Promise<AdopterDocument | null> {
-        return this.adopterModel.findOne({ emailAddress: email }).exec() as Promise<AdopterDocument | null>;
+    async findByEmail(email: string): Promise<AuthRegistrationRecord | null> {
+        return this.adopterModel.findOne({ emailAddress: email }).exec();
     }
 
     /**
      * 닉네임으로 입양자 조회
      */
-    async findByNickname(nickname: string): Promise<AdopterDocument | null> {
-        return this.adopterModel.findOne({ nickname }).exec() as Promise<AdopterDocument | null>;
+    async findByNickname(nickname: string): Promise<AuthRegistrationRecord | null> {
+        return this.adopterModel.findOne({ nickname }).exec();
     }
 
     /**
      * 소셜 인증 정보로 입양자 조회
      */
-    async findBySocialAuth(provider: string, providerId: string): Promise<AdopterDocument | null> {
+    async findBySocialAuth(provider: string, providerId: string): Promise<AuthRegistrationRecord | null> {
         return this.adopterModel
             .findOne({
                 'socialAuthInfo.authProvider': provider,
                 'socialAuthInfo.providerUserId': providerId,
             })
-            .exec() as Promise<AdopterDocument | null>;
+            .exec();
     }
 
     /**
      * 입양자 생성
      */
-    async create(adopterData: Partial<Adopter>): Promise<AdopterDocument> {
+    async create(adopterData: Record<string, unknown>): Promise<AuthRegistrationRecord> {
         const adopter = new this.adopterModel(adopterData);
-        return adopter.save() as any;
+        return adopter.save();
     }
 
     /**

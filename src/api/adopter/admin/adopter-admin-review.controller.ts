@@ -1,0 +1,45 @@
+import { Delete, Get, Param, Query } from '@nestjs/common';
+
+import { CurrentUser } from '../../../common/decorator/user.decorator';
+import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
+import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
+import { DeleteAdopterAdminReviewUseCase } from './application/use-cases/delete-adopter-admin-review.use-case';
+import { GetAdopterAdminReviewReportsUseCase } from './application/use-cases/get-adopter-admin-review-reports.use-case';
+import { AdopterAdminProtectedController } from './decorator/adopter-admin-controller.decorator';
+import { ReviewReportListQueryRequestDto } from './dto/request/review-report-list-query-request.dto';
+import { ReviewDeleteResponseDto } from './dto/response/review-delete-response.dto';
+import { ReviewReportItemDto } from './dto/response/review-report-list.dto';
+import { ADOPTER_RESPONSE_MESSAGES } from '../constants/adopter-response-messages';
+import { ApiDeleteAdopterAdminReviewEndpoint, ApiGetAdopterAdminReviewReportsEndpoint } from './swagger';
+
+@AdopterAdminProtectedController()
+export class AdopterAdminReviewController {
+    constructor(
+        private readonly getAdopterAdminReviewReportsUseCase: GetAdopterAdminReviewReportsUseCase,
+        private readonly deleteAdopterAdminReviewUseCase: DeleteAdopterAdminReviewUseCase,
+    ) {}
+
+    @Get('reviews/reports')
+    @ApiGetAdopterAdminReviewReportsEndpoint()
+    async getReviewReports(
+        @CurrentUser('userId') adminId: string,
+        @Query() query: ReviewReportListQueryRequestDto,
+    ): Promise<ApiResponseDto<PaginationResponseDto<ReviewReportItemDto>>> {
+        const result = await this.getAdopterAdminReviewReportsUseCase.execute(adminId, query.page, query.limit);
+        return ApiResponseDto.success(
+            PaginationResponseDto.fromPageResult(result),
+            ADOPTER_RESPONSE_MESSAGES.adminReviewReportListRetrieved,
+        );
+    }
+
+    @Delete('reviews/:breederId/:reviewId')
+    @ApiDeleteAdopterAdminReviewEndpoint()
+    async deleteReview(
+        @CurrentUser('userId') adminId: string,
+        @Param('breederId') breederId: string,
+        @Param('reviewId') reviewId: string,
+    ): Promise<ApiResponseDto<ReviewDeleteResponseDto>> {
+        const result = await this.deleteAdopterAdminReviewUseCase.execute(adminId, breederId, reviewId);
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.adminReviewDeleted);
+    }
+}
