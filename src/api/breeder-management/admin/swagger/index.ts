@@ -15,7 +15,7 @@ import { CounselBannerResponseDto } from '../dto/response/counsel-banner-respons
 import { ProfileBannerResponseDto } from '../dto/response/profile-banner-response.dto';
 
 export function ApiBreederManagementAdminController() {
-    return ApiController('브리더 관리 어드민');
+    return ApiController('브리더 관리 배너 (Admin)');
 }
 
 export function ApiGetAllProfileBannersAdminEndpoint() {

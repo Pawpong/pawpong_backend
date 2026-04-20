@@ -14,7 +14,7 @@ import { NoticeUpdateRequestDto } from '../../dto/request/notice-update-request.
 import { NoticeResponseDto } from '../../dto/response/notice-response.dto';
 
 export function ApiNoticeAdminController() {
-    return ApiController('공지사항 관리 (관리자)');
+    return ApiController('공지사항 관리 (Admin)');
 }
 
 export function ApiCreateNoticeAdminEndpoint() {

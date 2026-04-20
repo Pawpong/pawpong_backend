@@ -9,7 +9,7 @@ import { AdminStatsResponseDto } from '../dto/response/admin-stats-response.dto'
 import { MvpStatsResponseDto } from '../dto/response/mvp-stats-response.dto';
 
 export function ApiPlatformAdminController() {
-    return ApiController('플랫폼 관리자');
+    return ApiController('플랫폼 관리 (Admin)');
 }
 
 export function ApiGetPlatformStatsEndpoint() {
