@@ -2,7 +2,6 @@
 /dist
 /node_modules
 /build
-*.tsbuildinfo
 
 # Logs
 logs
@@ -60,10 +59,14 @@ pids
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
+CLAUDE.md
 swagger.json
+
+# MCP server config (local dev tool, machine-specific)
+.mcp.json
 package-lock.json
 yarn.lock
-docs/scripts/
-# Local-only operating notes. Never commit this file.
-CLAUDE.md
-AGENTS.md
+docs/
+
+# Serena MCP (로컬 AI 코딩 어시스턴트 도구, 머신별 설정)
+.serena/
