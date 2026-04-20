@@ -1,4 +1,4 @@
-import { BreedAdminResultMapperService } from '../../../../domain/services/breed-admin-result-mapper.service';
+import { BreedAdminResultMapperService } from '../../../domain/services/breed-admin-result-mapper.service';
 
 describe('BreedAdminResultMapperService', () => {
     const service = new BreedAdminResultMapperService();
