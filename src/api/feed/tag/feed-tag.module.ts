@@ -1,8 +1,10 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
-import { Video, VideoSchema } from '../../../schema/video.schema';
-import { FeedTagService } from './feed-tag.service';
-import { StorageModule } from '../../../common/storage/storage.module';
+
+import {
+    FEED_TAG_MODULE_EXPORTS,
+    FEED_TAG_MODULE_IMPORTS,
+    FEED_TAG_MODULE_PROVIDERS,
+} from './feed-tag.module-definition';
 
 /**
  * 피드 태그 모듈
@@ -11,8 +13,8 @@ import { StorageModule } from '../../../common/storage/storage.module';
  * - 태그 자동완성
  */
 @Module({
-    imports: [MongooseModule.forFeature([{ name: Video.name, schema: VideoSchema }]), StorageModule],
-    providers: [FeedTagService],
-    exports: [FeedTagService],
+    imports: FEED_TAG_MODULE_IMPORTS,
+    providers: FEED_TAG_MODULE_PROVIDERS,
+    exports: FEED_TAG_MODULE_EXPORTS,
 })
 export class FeedTagModule {}

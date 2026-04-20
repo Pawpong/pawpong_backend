@@ -260,6 +260,18 @@ export class ReceivedApplicationResponseDto {
     applicationData: ApplicationFormDataDto;
 
     /**
+     * 신청자가 선호한다고 적은 반려동물 정보 요약
+     * @example "건강하고 사람을 잘 따르는 아이"
+     */
+    @ApiProperty({
+        description: '신청자가 작성한 선호 반려동물 정보 요약',
+        example: '건강하고 사람을 잘 따르는 아이',
+        required: false,
+        nullable: true,
+    })
+    preferredPetInfo?: string | null;
+
+    /**
      * 신청 접수 일시
      * @example "2024-01-15T10:30:00.000Z"
      */

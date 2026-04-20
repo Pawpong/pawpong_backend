@@ -1,12 +1,11 @@
 import { Module } from '@nestjs/common';
-
-import { FilterOptionsController } from './filter-options.controller';
-
-import { FilterOptionsService } from './filter-options.service';
+import {
+    FILTER_OPTIONS_MODULE_CONTROLLERS,
+    FILTER_OPTIONS_MODULE_PROVIDERS,
+} from './filter-options.module-definition';
 
 @Module({
-    controllers: [FilterOptionsController],
-    providers: [FilterOptionsService],
-    exports: [FilterOptionsService],
+    controllers: FILTER_OPTIONS_MODULE_CONTROLLERS,
+    providers: FILTER_OPTIONS_MODULE_PROVIDERS,
 })
 export class FilterOptionsModule {}

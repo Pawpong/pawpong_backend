@@ -1,0 +1,343 @@
+import { JwtModule, type JwtModuleOptions } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { ConfigService } from '@nestjs/config';
+import { WinstonModule } from 'nest-winston';
+import { MongooseModule } from '@nestjs/mongoose';
+import type { StringValue } from 'ms';
+
+import { winstonConfig } from '../../common/config/winston.config';
+import { JwtStrategy } from '../../common/strategy/jwt.strategy';
+import { NaverStrategy } from '../../common/strategy/naver.strategy';
+import { KakaoStrategy } from '../../common/strategy/kakao.strategy';
+import { GoogleStrategy } from '../../common/strategy/google.strategy';
+import { CustomLoggerService } from '../../common/logger/custom-logger.service';
+import { StorageModule } from '../../common/storage/storage.module';
+import { DiscordWebhookModule } from '../../common/discord/discord-webhook.module';
+
+import { AuthBannerController } from './auth-banner.controller';
+import { AuthDuplicateCheckController } from './auth-duplicate-check.controller';
+import { AuthPhoneController } from './auth-phone.controller';
+import { AuthAdminLoginController } from './admin/auth-admin-login.controller';
+import { AuthAdminTokenController } from './admin/auth-admin-token.controller';
+import { AuthRefreshTokenController } from './auth-refresh-token.controller';
+import { AuthSignupController } from './auth-signup.controller';
+import { AuthGoogleLoginController } from './auth-google-login.controller';
+import { AuthKakaoLoginController } from './auth-kakao-login.controller';
+import { AuthNaverLoginController } from './auth-naver-login.controller';
+import { AuthSocialCheckUserController } from './auth-social-check-user.controller';
+import { AuthSocialCompleteRegistrationController } from './auth-social-complete-registration.controller';
+import { AuthProfileUploadController } from './auth-profile-upload.controller';
+import { AuthBreederDocumentsUploadController } from './auth-breeder-documents-upload.controller';
+import { AuthLogoutController } from './auth-logout.controller';
+import { LoginAdminUseCase } from './admin/application/use-cases/login-admin.use-case';
+import { RefreshAdminTokenUseCase } from './admin/application/use-cases/refresh-admin-token.use-case';
+import { AuthAdminAuthenticationService } from './admin/domain/services/auth-admin-authentication.service';
+import { AuthAdminLoginResultMapperService } from './admin/domain/services/auth-admin-login-result-mapper.service';
+import { AuthAdminRefreshTokenResultMapperService } from './admin/domain/services/auth-admin-refresh-token-result-mapper.service';
+import { AuthAdminRepositoryAdapter } from './admin/infrastructure/auth-admin-repository.adapter';
+import { AuthAdminBcryptAdapter } from './admin/infrastructure/auth-admin-bcrypt.adapter';
+import { AuthAdminJwtAdapter } from './admin/infrastructure/auth-admin-jwt.adapter';
+import { AUTH_ADMIN_READER_PORT } from './admin/application/ports/auth-admin-reader.port';
+import { AUTH_ADMIN_PASSWORD_PORT } from './admin/application/ports/auth-admin-password.port';
+import { AUTH_ADMIN_TOKEN_PORT } from './admin/application/ports/auth-admin-token.port';
+import { AUTH_TOKEN_PORT } from './application/ports/auth-token.port';
+import { AuthAdminRepository } from './repository/auth-admin.repository';
+import { AuthPhoneVerificationRepository } from './repository/auth-phone-verification.repository';
+import { AuthRegistrationAdapter } from './infrastructure/auth-registration.adapter';
+import { AuthRegistrationNotificationAdapter } from './infrastructure/auth-registration-notification.adapter';
+import { AuthAdopterRepository } from './repository/auth-adopter.repository';
+import { AuthBreederRepository } from './repository/auth-breeder.repository';
+import { AuthSessionAdapter } from './infrastructure/auth-session.adapter';
+import { AuthSocialCallbackAdapter } from './infrastructure/auth-social-callback.adapter';
+import { AuthTempUploadStore } from './infrastructure/auth-temp-upload.store';
+import { AuthJwtTokenAdapter } from './infrastructure/auth-jwt-token.adapter';
+import { AuthUploadFileStoreAdapter } from './infrastructure/auth-upload-file-store.adapter';
+import { AuthProfileImageTargetAdapter } from './infrastructure/auth-profile-image-target.adapter';
+import { AUTH_REGISTRATION_PORT } from './application/ports/auth-registration.port';
+import { AUTH_REGISTRATION_NOTIFICATION_PORT } from './application/ports/auth-registration-notification.port';
+import { AUTH_SESSION_PORT } from './application/ports/auth-session.port';
+import { AUTH_TEMP_UPLOAD_PORT } from './application/ports/auth-temp-upload.port';
+import { AUTH_SOCIAL_CALLBACK_PORT } from './application/ports/auth-social-callback.port';
+import { AUTH_UPLOAD_FILE_STORE_PORT } from './application/ports/auth-upload-file-store.port';
+import { AUTH_PROFILE_IMAGE_TARGET_PORT } from './application/ports/auth-profile-image-target.port';
+import { AUTH_PHONE_VERIFICATION_REGISTRY_PORT } from './application/ports/auth-phone-verification-registry.port';
+import { AUTH_PHONE_VERIFICATION_SENDER_PORT } from './application/ports/auth-phone-verification-sender.port';
+import { AUTH_PHONE_VERIFICATION_STORE_PORT } from './application/ports/auth-phone-verification-store.port';
+import {
+    GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY,
+    PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW,
+} from './application/tokens/auth-social-flow.token';
+import {
+    REGISTER_ADOPTER_AUTH_SIGNUP,
+    REGISTER_BREEDER_AUTH_SIGNUP,
+} from './application/tokens/auth-signup-completion.token';
+import { SUBMIT_AUTH_BREEDER_DOCUMENTS_USE_CASE } from './application/tokens/auth-breeder-document-submission.token';
+import { CheckSocialUserUseCase } from './application/use-cases/check-social-user.use-case';
+import { CheckEmailDuplicateUseCase } from './application/use-cases/check-email-duplicate.use-case';
+import { CheckNicknameDuplicateUseCase } from './application/use-cases/check-nickname-duplicate.use-case';
+import { CheckBreederNameDuplicateUseCase } from './application/use-cases/check-breeder-name-duplicate.use-case';
+import { CompleteSocialRegistrationUseCase } from './application/use-cases/complete-social-registration.use-case';
+import { CompleteLegacySocialRegistrationUseCase } from './application/use-cases/complete-legacy-social-registration.use-case';
+import { GetSocialLoginRedirectUrlUseCase } from './application/use-cases/get-social-login-redirect-url.use-case';
+import { SendPhoneVerificationCodeUseCase } from './application/use-cases/send-phone-verification-code.use-case';
+import { VerifyPhoneVerificationCodeUseCase } from './application/use-cases/verify-phone-verification-code.use-case';
+import { RefreshAuthTokenUseCase } from './application/use-cases/refresh-auth-token.use-case';
+import { LogoutUseCase } from './application/use-cases/logout.use-case';
+import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
+import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
+import { ProcessSocialLoginCallbackUseCase } from './application/use-cases/process-social-login-callback.use-case';
+import { UploadAuthProfileImageUseCase } from './application/use-cases/upload-auth-profile-image.use-case';
+import { UploadAuthBreederDocumentsUseCase } from './application/use-cases/upload-auth-breeder-documents.use-case';
+import { SubmitAuthBreederDocumentsUseCase } from './application/use-cases/submit-auth-breeder-documents.use-case';
+import { UploadAndSubmitAuthBreederDocumentsUseCase } from './application/use-cases/upload-and-submit-auth-breeder-documents.use-case';
+import { AuthSocialIdentityService } from './domain/services/auth-social-identity.service';
+import { AuthSessionAuthenticationService } from './domain/services/auth-session-authentication.service';
+import { AuthSocialLoginPolicyService } from './domain/services/auth-social-login-policy.service';
+import { AuthStoredFileNameService } from './domain/services/auth-stored-file-name.service';
+import { AuthSocialRedirectPathService } from './domain/services/auth-social-redirect-path.service';
+import { AuthProfileImageFilePolicyService } from './domain/services/auth-profile-image-file-policy.service';
+import { AuthBreederDocumentFilePolicyService } from './domain/services/auth-breeder-document-file-policy.service';
+import { AuthBreederDocumentOriginalFileNameService } from './domain/services/auth-breeder-document-original-file-name.service';
+import { AuthBreederDocumentSubmissionService } from './domain/services/auth-breeder-document-submission.service';
+import { AuthPhoneVerificationPolicyService } from './domain/services/auth-phone-verification-policy.service';
+import { AuthBreederDocumentTypeService } from './domain/services/auth-breeder-document-type.service';
+import { AuthPhoneNumberNormalizerService } from './domain/services/auth-phone-number-normalizer.service';
+import { AuthSignupValidationService } from './domain/services/auth-signup-validation.service';
+import { AuthSignupResultMapperService } from './domain/services/auth-signup-result-mapper.service';
+import { AuthSocialRegistrationResultMapperService } from './domain/services/auth-social-registration-result-mapper.service';
+import { AuthSocialUserCheckResultMapperService } from './domain/services/auth-social-user-check-result-mapper.service';
+import { AuthHttpCookieService } from './presentation/services/auth-http-cookie.service';
+import { AuthSocialErrorRedirectFactoryService } from './presentation/services/auth-social-error-redirect-factory.service';
+import { AuthSocialCallbackResultFactoryService } from './presentation/services/auth-social-callback-result-factory.service';
+import { AuthSocialLoginSuccessRedirectFactoryService } from './presentation/services/auth-social-login-success-redirect-factory.service';
+import { AuthSocialSignupRedirectFactoryService } from './presentation/services/auth-social-signup-redirect-factory.service';
+import { AuthRedirectResponseInterceptor } from './presentation/interceptors/auth-redirect-response.interceptor';
+import { AuthSocialCallbackResponseInterceptor } from './presentation/interceptors/auth-social-callback-response.interceptor';
+import { AuthLogoutCookieInterceptor } from './presentation/interceptors/auth-logout-cookie.interceptor';
+import { AuthBreederVerificationCommandAdapter } from './infrastructure/auth-breeder-verification-command.adapter';
+import { AuthPhoneVerificationMemoryStore } from './infrastructure/auth-phone-verification-memory.store';
+import { AuthPhoneVerificationMongooseRegistryAdapter } from './infrastructure/auth-phone-verification-mongoose-registry.adapter';
+import { AuthPhoneVerificationAlimtalkAdapter } from './infrastructure/auth-phone-verification-alimtalk.adapter';
+import { AUTH_BREEDER_VERIFICATION_COMMAND_PORT } from './application/ports/auth-breeder-verification-command.port';
+import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
+import { Breeder, BreederSchema } from '../../schema/breeder.schema';
+import { Admin, AdminSchema } from '../../schema/admin.schema';
+import { PhoneWhitelist, PhoneWhitelistSchema } from '../../schema/phone-whitelist.schema';
+import { BreederManagementModule } from '../breeder-management/breeder-management.module';
+
+const AUTH_SCHEMA_IMPORTS = MongooseModule.forFeature([
+    { name: Adopter.name, schema: AdopterSchema },
+    { name: Breeder.name, schema: BreederSchema },
+    { name: Admin.name, schema: AdminSchema },
+    { name: PhoneWhitelist.name, schema: PhoneWhitelistSchema },
+]);
+
+const AUTH_JWT_IMPORT = JwtModule.registerAsync({
+    useFactory: (configService: ConfigService): JwtModuleOptions => ({
+        secret: configService.get<string>('JWT_SECRET') || '',
+        signOptions: {
+            expiresIn: (configService.get<string>('JWT_EXPIRATION') || '24h') as StringValue,
+        },
+    }),
+    inject: [ConfigService],
+});
+
+export const AUTH_MODULE_IMPORTS = [
+    AUTH_SCHEMA_IMPORTS,
+    StorageModule,
+    BreederManagementModule,
+    DiscordWebhookModule,
+    PassportModule,
+    WinstonModule.forRoot(winstonConfig),
+    AUTH_JWT_IMPORT,
+];
+
+export const AUTH_MODULE_CONTROLLERS = [
+    AuthRefreshTokenController,
+    AuthLogoutController,
+    AuthPhoneController,
+    AuthGoogleLoginController,
+    AuthNaverLoginController,
+    AuthKakaoLoginController,
+    AuthSocialCheckUserController,
+    AuthSocialCompleteRegistrationController,
+    AuthDuplicateCheckController,
+    AuthSignupController,
+    AuthBannerController,
+    AuthProfileUploadController,
+    AuthBreederDocumentsUploadController,
+    AuthAdminLoginController,
+    AuthAdminTokenController,
+];
+
+const AUTH_USE_CASE_PROVIDERS = [
+    CheckSocialUserUseCase,
+    CheckEmailDuplicateUseCase,
+    CheckNicknameDuplicateUseCase,
+    CheckBreederNameDuplicateUseCase,
+    CompleteSocialRegistrationUseCase,
+    CompleteLegacySocialRegistrationUseCase,
+    GetSocialLoginRedirectUrlUseCase,
+    SendPhoneVerificationCodeUseCase,
+    VerifyPhoneVerificationCodeUseCase,
+    RefreshAuthTokenUseCase,
+    LogoutUseCase,
+    RegisterAdopterUseCase,
+    RegisterBreederUseCase,
+    ProcessSocialLoginCallbackUseCase,
+    UploadAuthProfileImageUseCase,
+    UploadAuthBreederDocumentsUseCase,
+    SubmitAuthBreederDocumentsUseCase,
+    UploadAndSubmitAuthBreederDocumentsUseCase,
+    LoginAdminUseCase,
+    RefreshAdminTokenUseCase,
+];
+
+const AUTH_DOMAIN_PROVIDERS = [
+    AuthAdminAuthenticationService,
+    AuthAdminLoginResultMapperService,
+    AuthAdminRefreshTokenResultMapperService,
+    AuthSessionAuthenticationService,
+    AuthSocialLoginPolicyService,
+    AuthSocialIdentityService,
+    AuthStoredFileNameService,
+    AuthSocialRedirectPathService,
+    AuthProfileImageFilePolicyService,
+    AuthBreederDocumentFilePolicyService,
+    AuthBreederDocumentOriginalFileNameService,
+    AuthBreederDocumentSubmissionService,
+    AuthPhoneVerificationPolicyService,
+    AuthPhoneNumberNormalizerService,
+    AuthBreederDocumentTypeService,
+    AuthSignupValidationService,
+    AuthSignupResultMapperService,
+    AuthSocialRegistrationResultMapperService,
+    AuthSocialUserCheckResultMapperService,
+];
+
+const AUTH_PRESENTATION_PROVIDERS = [
+    AuthHttpCookieService,
+    AuthSocialCallbackResultFactoryService,
+    AuthSocialSignupRedirectFactoryService,
+    AuthSocialLoginSuccessRedirectFactoryService,
+    AuthSocialErrorRedirectFactoryService,
+    AuthRedirectResponseInterceptor,
+    AuthSocialCallbackResponseInterceptor,
+    AuthLogoutCookieInterceptor,
+];
+
+const AUTH_INFRASTRUCTURE_PROVIDERS = [
+    AuthJwtTokenAdapter,
+    AuthAdopterRepository,
+    AuthBreederRepository,
+    AuthAdminRepository,
+    AuthPhoneVerificationRepository,
+    AuthAdminRepositoryAdapter,
+    AuthAdminBcryptAdapter,
+    AuthAdminJwtAdapter,
+    AuthRegistrationAdapter,
+    AuthRegistrationNotificationAdapter,
+    AuthSessionAdapter,
+    AuthSocialCallbackAdapter,
+    AuthTempUploadStore,
+    AuthUploadFileStoreAdapter,
+    AuthProfileImageTargetAdapter,
+    AuthBreederVerificationCommandAdapter,
+    AuthPhoneVerificationMemoryStore,
+    AuthPhoneVerificationMongooseRegistryAdapter,
+    AuthPhoneVerificationAlimtalkAdapter,
+];
+
+const AUTH_PORT_BINDINGS = [
+    {
+        provide: AUTH_REGISTRATION_PORT,
+        useExisting: AuthRegistrationAdapter,
+    },
+    {
+        provide: AUTH_PHONE_VERIFICATION_REGISTRY_PORT,
+        useExisting: AuthPhoneVerificationMongooseRegistryAdapter,
+    },
+    {
+        provide: AUTH_PHONE_VERIFICATION_STORE_PORT,
+        useExisting: AuthPhoneVerificationMemoryStore,
+    },
+    {
+        provide: AUTH_PHONE_VERIFICATION_SENDER_PORT,
+        useExisting: AuthPhoneVerificationAlimtalkAdapter,
+    },
+    {
+        provide: AUTH_BREEDER_VERIFICATION_COMMAND_PORT,
+        useExisting: AuthBreederVerificationCommandAdapter,
+    },
+    {
+        provide: AUTH_ADMIN_READER_PORT,
+        useExisting: AuthAdminRepositoryAdapter,
+    },
+    {
+        provide: AUTH_ADMIN_PASSWORD_PORT,
+        useExisting: AuthAdminBcryptAdapter,
+    },
+    {
+        provide: AUTH_ADMIN_TOKEN_PORT,
+        useExisting: AuthAdminJwtAdapter,
+    },
+    {
+        provide: AUTH_REGISTRATION_NOTIFICATION_PORT,
+        useExisting: AuthRegistrationNotificationAdapter,
+    },
+    {
+        provide: AUTH_TOKEN_PORT,
+        useExisting: AuthJwtTokenAdapter,
+    },
+    {
+        provide: AUTH_SESSION_PORT,
+        useExisting: AuthSessionAdapter,
+    },
+    {
+        provide: AUTH_SOCIAL_CALLBACK_PORT,
+        useExisting: AuthSocialCallbackAdapter,
+    },
+    {
+        provide: AUTH_TEMP_UPLOAD_PORT,
+        useExisting: AuthTempUploadStore,
+    },
+    {
+        provide: AUTH_UPLOAD_FILE_STORE_PORT,
+        useExisting: AuthUploadFileStoreAdapter,
+    },
+    {
+        provide: AUTH_PROFILE_IMAGE_TARGET_PORT,
+        useExisting: AuthProfileImageTargetAdapter,
+    },
+    {
+        provide: GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY,
+        useExisting: GetSocialLoginRedirectUrlUseCase,
+    },
+    {
+        provide: PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW,
+        useExisting: ProcessSocialLoginCallbackUseCase,
+    },
+    {
+        provide: REGISTER_ADOPTER_AUTH_SIGNUP,
+        useExisting: RegisterAdopterUseCase,
+    },
+    {
+        provide: REGISTER_BREEDER_AUTH_SIGNUP,
+        useExisting: RegisterBreederUseCase,
+    },
+    {
+        provide: SUBMIT_AUTH_BREEDER_DOCUMENTS_USE_CASE,
+        useExisting: SubmitAuthBreederDocumentsUseCase,
+    },
+];
+
+const AUTH_STRATEGY_PROVIDERS = [JwtStrategy, GoogleStrategy, NaverStrategy, KakaoStrategy, CustomLoggerService];
+
+export const AUTH_MODULE_PROVIDERS = [
+    ...AUTH_USE_CASE_PROVIDERS,
+    ...AUTH_DOMAIN_PROVIDERS,
+    ...AUTH_PRESENTATION_PROVIDERS,
+    ...AUTH_INFRASTRUCTURE_PROVIDERS,
+    ...AUTH_PORT_BINDINGS,
+    ...AUTH_STRATEGY_PROVIDERS,
+];

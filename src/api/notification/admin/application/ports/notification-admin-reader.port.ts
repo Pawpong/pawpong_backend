@@ -1,0 +1,46 @@
+import type { NotificationUserRole } from '../../../application/ports/notification-command.port';
+import { NotificationType } from '../../../../../common/enum/user.enum';
+import type { NotificationMetadata } from '../../../types/notification-metadata.type';
+
+export interface NotificationAdminListFilterSnapshot {
+    userId?: string;
+    userRole?: 'adopter' | 'breeder';
+    type?: NotificationType;
+    isRead?: boolean;
+    page: number;
+    limit: number;
+}
+
+export interface NotificationAdminRecordSnapshot {
+    notificationId: string;
+    userId: string;
+    userRole: NotificationUserRole;
+    type: NotificationType;
+    title: string;
+    body: string;
+    metadata?: NotificationMetadata;
+    isRead: boolean;
+    readAt?: Date;
+    targetUrl?: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+export interface NotificationAdminPageSnapshot {
+    items: NotificationAdminRecordSnapshot[];
+    totalItems: number;
+}
+
+export interface NotificationAdminStatsSnapshot {
+    totalNotifications: number;
+    unreadNotifications: number;
+    notificationsByType: Record<string, number>;
+    notificationsByRole: Record<string, number>;
+}
+
+export const NOTIFICATION_ADMIN_READER_PORT = Symbol('NOTIFICATION_ADMIN_READER_PORT');
+
+export interface NotificationAdminReaderPort {
+    findPaged(filter: NotificationAdminListFilterSnapshot): Promise<NotificationAdminPageSnapshot>;
+    getStats(): Promise<NotificationAdminStatsSnapshot>;
+}

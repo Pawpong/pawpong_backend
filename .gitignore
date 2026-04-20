@@ -67,3 +67,6 @@ swagger.json
 package-lock.json
 yarn.lock
 docs/
+
+# Serena MCP (로컬 AI 코딩 어시스턴트 도구, 머신별 설정)
+.serena/

@@ -1,15 +1,10 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { UserAdminController } from './user-admin.controller';
-import { UserAdminService } from './user-admin.service';
-
-import { Admin, AdminSchema } from '../../../schema/admin.schema';
-import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
-import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
-import { AuthBanner, AuthBannerSchema } from '../../../schema/auth-banner.schema';
-import { PhoneWhitelist, PhoneWhitelistSchema } from '../../../schema/phone-whitelist.schema';
-import { StorageModule } from '../../../common/storage/storage.module';
+import {
+    USER_ADMIN_MODULE_CONTROLLERS,
+    USER_ADMIN_MODULE_IMPORTS,
+    USER_ADMIN_MODULE_PROVIDERS,
+} from './user-admin.module-definition';
 
 /**
  * 사용자 관리 Admin 모듈
@@ -22,18 +17,8 @@ import { StorageModule } from '../../../common/storage/storage.module';
  * - 전화번호 화이트리스트 관리
  */
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: Admin.name, schema: AdminSchema },
-            { name: Breeder.name, schema: BreederSchema },
-            { name: Adopter.name, schema: AdopterSchema },
-            { name: AuthBanner.name, schema: AuthBannerSchema },
-            { name: PhoneWhitelist.name, schema: PhoneWhitelistSchema },
-        ]),
-        StorageModule,
-    ],
-    controllers: [UserAdminController],
-    providers: [UserAdminService],
-    exports: [UserAdminService],
+    imports: USER_ADMIN_MODULE_IMPORTS,
+    controllers: USER_ADMIN_MODULE_CONTROLLERS,
+    providers: USER_ADMIN_MODULE_PROVIDERS,
 })
 export class UserAdminModule {}

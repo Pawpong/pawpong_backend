@@ -1,0 +1,43 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { DomainNotFoundError, DomainValidationError } from '../../../../common/error/domain.error';
+
+import { BREEDER_MANAGEMENT_REVIEW_REPLY_PORT } from '../ports/breeder-management-review-reply.port';
+import type { BreederManagementReviewReplyPort } from '../ports/breeder-management-review-reply.port';
+import { BreederManagementReviewReplyResultMapperService } from '../../domain/services/breeder-management-review-reply-result-mapper.service';
+
+@Injectable()
+export class UpdateBreederManagementReviewReplyUseCase {
+    constructor(
+        @Inject(BREEDER_MANAGEMENT_REVIEW_REPLY_PORT)
+        private readonly breederManagementReviewReplyPort: BreederManagementReviewReplyPort,
+        private readonly breederManagementReviewReplyResultMapperService: BreederManagementReviewReplyResultMapperService,
+    ) {}
+
+    async execute(
+        breederId: string,
+        reviewId: string,
+        content: string,
+    ): Promise<{ reviewId: string; replyContent: string; replyWrittenAt?: string; replyUpdatedAt?: string }> {
+        const review = await this.breederManagementReviewReplyPort.findReviewByIdAndBreeder(reviewId, breederId);
+        if (!review) {
+            throw new DomainNotFoundError('해당 후기를 찾을 수 없거나 권한이 없습니다.');
+        }
+
+        if (!review.replyContent) {
+            throw new DomainValidationError('수정할 답글이 없습니다. 먼저 답글을 작성해주세요.');
+        }
+
+        const now = new Date();
+        await this.breederManagementReviewReplyPort.updateReply(reviewId, {
+            replyContent: content,
+            replyUpdatedAt: now,
+        });
+
+        return this.breederManagementReviewReplyResultMapperService.toReviewReplyUpdatedResult(
+            reviewId,
+            content,
+            review.replyWrittenAt,
+            now,
+        );
+    }
+}

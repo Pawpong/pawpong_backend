@@ -1,17 +1,14 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { StandardQuestionAdminController } from './admin/standard-question-admin.controller';
-
-import { StandardQuestionService } from './standard-question.service';
-import { StandardQuestionAdminService } from './admin/standard-question-admin.service';
-
-import { StandardQuestion, StandardQuestionSchema } from '../../schema/standard-question.schema';
+import {
+    STANDARD_QUESTION_MODULE_CONTROLLERS,
+    STANDARD_QUESTION_MODULE_IMPORTS,
+    STANDARD_QUESTION_MODULE_PROVIDERS,
+} from './standard-question.module-definition';
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: StandardQuestion.name, schema: StandardQuestionSchema }])],
-    controllers: [StandardQuestionAdminController],
-    providers: [StandardQuestionService, StandardQuestionAdminService],
-    exports: [StandardQuestionService, StandardQuestionAdminService],
+    imports: STANDARD_QUESTION_MODULE_IMPORTS,
+    controllers: STANDARD_QUESTION_MODULE_CONTROLLERS,
+    providers: STANDARD_QUESTION_MODULE_PROVIDERS,
 })
 export class StandardQuestionModule {}

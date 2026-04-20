@@ -1,0 +1,37 @@
+import { Inject, Injectable } from '@nestjs/common';
+
+import { DomainAuthorizationError } from '../../../../common/error/domain.error';
+
+import { UPLOAD_FILE_STORE_PORT } from '../ports/upload-file-store.port';
+import { UPLOAD_OWNER_PORT } from '../ports/upload-owner.port';
+import type { UploadFileStorePort } from '../ports/upload-file-store.port';
+import type { UploadOwnerPort } from '../ports/upload-owner.port';
+import { UploadFilePolicyService } from '../../domain/services/upload-file-policy.service';
+import { UploadResultMapperService } from '../../domain/services/upload-result-mapper.service';
+import type { UploadFileResult } from '../types/upload-result.type';
+
+@Injectable()
+export class UploadRepresentativePhotosUseCase {
+    constructor(
+        @Inject(UPLOAD_FILE_STORE_PORT) private readonly fileStore: UploadFileStorePort,
+        @Inject(UPLOAD_OWNER_PORT) private readonly uploadOwner: UploadOwnerPort,
+        private readonly uploadFilePolicy: UploadFilePolicyService,
+        private readonly uploadResultMapperService: UploadResultMapperService,
+    ) {}
+
+    async execute(files: Express.Multer.File[], userId: string, role: string): Promise<UploadFileResult[]> {
+        if (role !== 'breeder') {
+            throw new DomainAuthorizationError('브리더만 대표 사진을 업로드할 수 있습니다.');
+        }
+
+        this.uploadFilePolicy.ensureRepresentativePhotos(files);
+
+        const resources = await this.fileStore.uploadFiles(files, 'representative');
+        await this.uploadOwner.replaceRepresentativePhotos(
+            userId,
+            resources.map((resource) => resource.fileName),
+        );
+
+        return this.uploadResultMapperService.toResults(resources, files);
+    }
+}

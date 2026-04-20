@@ -2094,10 +2094,10 @@
     path-to-regexp "8.3.0"
     tslib "2.8.1"
 
-"@nestjs/platform-socket.io@^11.1.18":
-  version "11.1.18"
-  resolved "https://registry.yarnpkg.com/@nestjs/platform-socket.io/-/platform-socket.io-11.1.18.tgz#63779494928222bc0971ecf39e255fc97d81ca20"
-  integrity sha512-DiFRpMIdFaHqZQFwqLqGHMdNurrKVkRkMHxIrecjooPHJNNIMgrbpYZ+oJW8hpwifUyZUL4r4uXXRy4+yFEMjA==
+"@nestjs/platform-socket.io@^11.1.19":
+  version "11.1.19"
+  resolved "https://registry.yarnpkg.com/@nestjs/platform-socket.io/-/platform-socket.io-11.1.19.tgz#2dfe5c1f9d59416630fa66d37bc5e1cd2e32713b"
+  integrity sha512-gu1nPIEaP5Qjjg/Cl8wXyvwGpdZGzgbtK4KcH65YRAA+GTKUkIHb4BNpLJ27Ymq/wqLJKNEbCjajfzD0BEjMGA==
   dependencies:
     socket.io "4.8.3"
     tslib "2.8.1"
@@ -2132,10 +2132,10 @@
   dependencies:
     tslib "2.8.1"
 
-"@nestjs/websockets@^11.1.18":
-  version "11.1.18"
-  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-11.1.18.tgz#65605299ce7d2dfade08771d3eaf644743931d41"
-  integrity sha512-HLO/QGlJoJaMMDphgjbcIwW7/8EA8nnFQjf+qPvA+wWLLfPKoiFPUezc5m9YgN2A7jmzwo6YmEAXeHyqO9tvTw==
+"@nestjs/websockets@^11.1.19":
+  version "11.1.19"
+  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-11.1.19.tgz#37f8c413fc80d9e19fa31ef9d586576b7b02c8c3"
+  integrity sha512-2qo8jtIwwwgkqAI1BtnJ02EaFLrRkKA39eYXS8IhZCHilhBHCWdjnJ5cLcFq4oF+s+KZ7LcLGD/3stxJy8ijzg==
   dependencies:
     iterare "1.2.1"
     object-hash "3.0.0"
@@ -2956,11 +2956,11 @@
     undici-types "~7.16.0"
 
 "@types/node@>=10.0.0":
-  version "25.5.2"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.5.2.tgz#94861e32f9ffd8de10b52bbec403465c84fff762"
-  integrity sha512-tO4ZIRKNC+MDWV4qKVZe3Ql/woTnmHDr5JD8UI5hn2pwBrHEwOEMZK7WlNb5RKB6EoJ02gwmQS9OrjuFnZYdpg==
+  version "25.6.0"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-25.6.0.tgz#4e09bad9b469871f2d0f68140198cbd714f4edca"
+  integrity sha512-+qIYRKdNYJwY3vRCZMdJbPLJAtGjQBudzZzdzwQYkEPQd+PJGixUL5QfvCLDaULoLv+RhT3LDkwEfKaAkgSmNQ==
   dependencies:
-    undici-types "~7.18.0"
+    undici-types "~7.19.0"
 
 "@types/node@^22.10.7":
   version "22.19.5"
@@ -7882,10 +7882,10 @@ undici-types@~7.16.0:
   resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-7.16.0.tgz#ffccdff36aea4884cbfce9a750a0580224f58a46"
   integrity sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==
 
-undici-types@~7.18.0:
-  version "7.18.2"
-  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-7.18.2.tgz#29357a89e7b7ca4aef3bf0fd3fd0cd73884229e9"
-  integrity sha512-AsuCzffGHJybSaRrmr5eHr81mwJU3kjw6M+uprWvCXiNeN9SOGwQ3Jn8jb8m3Z6izVgknn1R0FTCEAP2QrLY/w==
+undici-types@~7.19.0:
+  version "7.19.2"
+  resolved "https://registry.yarnpkg.com/undici-types/-/undici-types-7.19.2.tgz#1b67fc26d0f157a0cba3a58a5b5c1e2276b8ba2a"
+  integrity sha512-qYVnV5OEm2AW8cJMCpdV20CDyaN3g0AjDlOGf1OW4iaDEx8MwdtChUp4zu4H0VP3nDRF/8RKWH+IPp9uW0YGZg==
 
 universalify@^2.0.0:
   version "2.0.1"

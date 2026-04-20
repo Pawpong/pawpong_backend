@@ -1,25 +1,14 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { HomeAdminController } from './home-admin.controller';
-
-import { HomeAdminService } from './home-admin.service';
-
-import { Faq, FaqSchema } from '../../../schema/faq.schema';
-import { Banner, BannerSchema } from '../../../schema/banner.schema';
-
-import { StorageModule } from '../../../common/storage/storage.module';
+import {
+    HOME_ADMIN_MODULE_CONTROLLERS,
+    HOME_ADMIN_MODULE_IMPORTS,
+    HOME_ADMIN_MODULE_PROVIDERS,
+} from './home-admin.module-definition';
 
 @Module({
-    imports: [
-        MongooseModule.forFeature([
-            { name: Banner.name, schema: BannerSchema },
-            { name: Faq.name, schema: FaqSchema },
-        ]),
-        StorageModule,
-    ],
-    controllers: [HomeAdminController],
-    providers: [HomeAdminService],
-    exports: [HomeAdminService],
+    imports: HOME_ADMIN_MODULE_IMPORTS,
+    controllers: HOME_ADMIN_MODULE_CONTROLLERS,
+    providers: HOME_ADMIN_MODULE_PROVIDERS,
 })
 export class HomeAdminModule {}

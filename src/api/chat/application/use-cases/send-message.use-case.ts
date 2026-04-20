@@ -2,10 +2,12 @@ import { Injectable, Inject } from '@nestjs/common';
 
 import { CHAT_ROOM_MANAGER, type ChatRoomManagerPort } from '../ports/chat-room-manager.port';
 import { CHAT_MESSAGE_MANAGER, type ChatMessageManagerPort, type ChatMessageSnapshot } from '../ports/chat-message-manager.port';
+import { CHAT_MESSAGE_BROKER, type ChatMessageBrokerPort } from '../ports/chat-message-broker.port';
 import { ChatPolicyService } from '../../domain/services/chat-policy.service';
-import { KafkaService, KafkaTopic } from '../../../../common/kafka/kafka.service';
+import { ChatMessageMapperService } from '../../domain/services/chat-message-mapper.service';
+import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { SenderRole, MessageType } from '../../../../schema/chat-message.schema';
-import { SendMessageRequestDto } from '../../dto/request/send-message-request.dto';
+import type { SendMessageCommand } from '../types/chat-command.type';
 
 @Injectable()
 export class SendMessageUseCase {
@@ -14,46 +16,46 @@ export class SendMessageUseCase {
         private readonly chatRoomManager: ChatRoomManagerPort,
         @Inject(CHAT_MESSAGE_MANAGER)
         private readonly chatMessageManager: ChatMessageManagerPort,
+        @Inject(CHAT_MESSAGE_BROKER)
+        private readonly chatMessageBroker: ChatMessageBrokerPort,
         private readonly chatPolicyService: ChatPolicyService,
-        private readonly kafkaService: KafkaService,
+        private readonly chatMessageMapperService: ChatMessageMapperService,
+        private readonly logger: CustomLoggerService,
     ) {}
 
     async execute(
         senderId: string,
         senderRole: SenderRole,
-        dto: SendMessageRequestDto,
+        command: SendMessageCommand,
     ): Promise<ChatMessageSnapshot> {
-        const room = this.chatPolicyService.requireRoom(
-            await this.chatRoomManager.findRoomById(dto.roomId),
-        );
-        this.chatPolicyService.requireParticipant(room, senderId);
+        this.logger.logStart('sendMessage', '채팅 메시지 전송 시작', { roomId: command.roomId, senderId });
 
-        const receiverId = senderRole === SenderRole.ADOPTER ? room.breederId : room.adopterId;
-        const messageType = dto.messageType ?? MessageType.TEXT;
+        try {
+            const room = this.chatPolicyService.requireRoom(
+                await this.chatRoomManager.findRoomById(command.roomId),
+            );
+            this.chatPolicyService.requireParticipant(room, senderId);
 
-        const message = await this.chatMessageManager.createMessage({
-            roomId: dto.roomId,
-            senderId,
-            senderRole,
-            receiverId,
-            content: dto.content,
-            messageType,
-        });
+            const receiverId = this.chatPolicyService.resolveReceiverId(room, senderId);
+            const messageType = command.messageType ?? MessageType.TEXT;
 
-        await this.chatRoomManager.updateRoomLastMessage(dto.roomId, dto.content);
+            const message = await this.chatMessageManager.createMessage({
+                roomId: command.roomId,
+                senderId,
+                senderRole,
+                receiverId,
+                content: command.content,
+                messageType,
+            });
 
-        await this.kafkaService.emit(KafkaTopic.CHAT_MESSAGE, {
-            messageId: message.id,
-            roomId: dto.roomId,
-            senderId,
-            senderRole,
-            receiverId,
-            content: dto.content,
-            messageType,
-            isRead: message.isRead,
-            createdAt: message.createdAt,
-        });
+            await this.chatRoomManager.updateRoomLastMessage(command.roomId, command.content);
+            await this.chatMessageBroker.publishMessage(this.chatMessageMapperService.toBroadcastPayload(message));
 
-        return message;
+            this.logger.logSuccess('sendMessage', '채팅 메시지 전송 완료', { messageId: message.id });
+            return message;
+        } catch (error) {
+            this.logger.logError('sendMessage', '채팅 메시지 전송', error);
+            throw error;
+        }
     }
 }

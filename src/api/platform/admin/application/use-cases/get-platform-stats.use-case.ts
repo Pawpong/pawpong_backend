@@ -1,0 +1,34 @@
+import { Inject, Injectable } from '@nestjs/common';
+
+import { PLATFORM_ADMIN_READER_PORT, type PlatformAdminReaderPort } from '../ports/platform-admin-reader.port';
+import { PlatformAdminResultMapperService } from '../../domain/services/platform-admin-result-mapper.service';
+import { PlatformAdminQueryPolicyService } from '../../domain/services/platform-admin-query-policy.service';
+import type { PlatformStatsQuery } from '../types/platform-admin-query.type';
+import type { PlatformAdminStatsResult } from '../types/platform-admin-result.type';
+
+@Injectable()
+export class GetPlatformStatsUseCase {
+    constructor(
+        @Inject(PLATFORM_ADMIN_READER_PORT)
+        private readonly platformAdminReader: PlatformAdminReaderPort,
+        private readonly platformAdminQueryPolicyService: PlatformAdminQueryPolicyService,
+        private readonly platformAdminResultMapperService: PlatformAdminResultMapperService,
+    ) {}
+
+    async execute(adminId: string, filter: PlatformStatsQuery): Promise<PlatformAdminStatsResult> {
+        this.platformAdminQueryPolicyService.assertCanViewStatistics(
+            await this.platformAdminReader.findAdminById(adminId),
+            'Access denied',
+        );
+
+        const snapshot = await this.platformAdminReader.getStats({
+            statsType: filter.statsType,
+            startDate: filter.startDate,
+            endDate: filter.endDate,
+            pageNumber: filter.pageNumber ?? 1,
+            itemsPerPage: filter.itemsPerPage ?? 10,
+        });
+
+        return this.platformAdminResultMapperService.toStatsResult(snapshot);
+    }
+}

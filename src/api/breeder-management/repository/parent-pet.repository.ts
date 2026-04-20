@@ -1,8 +1,10 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types } from 'mongoose';
 
 import { ParentPet, ParentPetDocument } from '../../../schema/parent-pet.schema';
+import type { BreederManagementParentPetRecord } from '../application/ports/breeder-management-profile.port';
+import type { BreederManagementParentPetPersistencePayload } from '../types/breeder-management-document.type';
 
 /**
  * ParentPet Repository
@@ -18,7 +20,7 @@ export class ParentPetRepository {
      * @returns ParentPet 또는 null
      */
     async findById(id: string): Promise<ParentPetDocument | null> {
-        return this.parentPetModel.findById(id).exec() as any;
+        return this.parentPetModel.findById(id).exec();
     }
 
     /**
@@ -33,7 +35,7 @@ export class ParentPetRepository {
                 _id: new Types.ObjectId(id),
                 breederId: new Types.ObjectId(breederId),
             })
-            .exec() as any;
+            .exec();
     }
 
     /**
@@ -42,12 +44,14 @@ export class ParentPetRepository {
      * @param isActive 활성화 여부 필터 (선택)
      * @returns ParentPet 배열
      */
-    async findByBreederId(breederId: string, isActive?: boolean): Promise<ParentPetDocument[]> {
-        const query: any = { breederId: new Types.ObjectId(breederId) };
+    async findByBreederId(breederId: string, isActive?: boolean): Promise<BreederManagementParentPetRecord[]> {
+        const query: FilterQuery<ParentPetDocument> = { breederId: new Types.ObjectId(breederId) };
         if (isActive !== undefined) {
             query.isActive = isActive;
         }
-        return this.parentPetModel.find(query).sort({ createdAt: 1 }).exec() as any;
+        return this.parentPetModel.find(query).sort({ createdAt: 1 }).lean().exec() as Promise<
+            BreederManagementParentPetRecord[]
+        >;
     }
 
     /**
@@ -55,9 +59,9 @@ export class ParentPetRepository {
      * @param data 생성할 데이터
      * @returns 생성된 ParentPet
      */
-    async create(data: Partial<ParentPet>): Promise<ParentPetDocument> {
+    async create(data: BreederManagementParentPetPersistencePayload): Promise<ParentPetDocument> {
         const parentPet = new this.parentPetModel(data);
-        return parentPet.save() as any;
+        return parentPet.save();
     }
 
     /**
@@ -67,7 +71,7 @@ export class ParentPetRepository {
      * @returns 업데이트된 ParentPet 또는 null
      */
     async update(id: string, updateData: Partial<ParentPet>): Promise<ParentPetDocument | null> {
-        return this.parentPetModel.findByIdAndUpdate(id, { $set: updateData }, { new: true }).exec() as any;
+        return this.parentPetModel.findByIdAndUpdate(id, { $set: updateData }, { new: true }).exec();
     }
 
     /**
@@ -76,7 +80,7 @@ export class ParentPetRepository {
      * @returns 삭제된 ParentPet 또는 null
      */
     async delete(id: string): Promise<ParentPetDocument | null> {
-        return this.parentPetModel.findByIdAndDelete(id).exec() as any;
+        return this.parentPetModel.findByIdAndDelete(id).exec();
     }
 
     /**

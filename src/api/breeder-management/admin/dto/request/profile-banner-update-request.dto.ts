@@ -26,7 +26,7 @@ export class ProfileBannerUpdateRequestDto {
     })
     @IsEnum(['login', 'signup'])
     @IsOptional()
-    bannerType?: string;
+    bannerType?: 'login' | 'signup';
 
     /**
      * 링크 타입
@@ -40,7 +40,7 @@ export class ProfileBannerUpdateRequestDto {
     })
     @IsEnum(['internal', 'external'])
     @IsOptional()
-    linkType?: string;
+    linkType?: 'internal' | 'external';
 
     /**
      * 링크 URL

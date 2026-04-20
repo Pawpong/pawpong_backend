@@ -1,18 +1,14 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { DistrictController } from './district.controller';
-import { DistrictAdminController } from './admin/district-admin.controller';
-
-import { DistrictService } from './district.service';
-import { DistrictAdminService } from './admin/district-admin.service';
-
-import { District, DistrictSchema } from '../../schema/district.schema';
+import {
+    DISTRICT_MODULE_CONTROLLERS,
+    DISTRICT_MODULE_IMPORTS,
+    DISTRICT_MODULE_PROVIDERS,
+} from './district.module-definition';
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: District.name, schema: DistrictSchema }])],
-    controllers: [DistrictController, DistrictAdminController],
-    providers: [DistrictService, DistrictAdminService],
-    exports: [DistrictService, DistrictAdminService],
+    imports: DISTRICT_MODULE_IMPORTS,
+    controllers: DISTRICT_MODULE_CONTROLLERS,
+    providers: DISTRICT_MODULE_PROVIDERS,
 })
 export class DistrictModule {}

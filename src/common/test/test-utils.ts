@@ -6,6 +6,8 @@ import { ObjectId } from 'mongodb';
 import { MongoMemoryServer } from 'mongodb-memory-server';
 
 import { AppModule } from '../../app.module';
+import { AllExceptionsFilter } from '../filter/http-exception.filter';
+import { HttpStatusInterceptor } from '../interceptor/http-status.interceptor';
 
 /** 테스트용 인메모리 MongoDB 인스턴스 */
 let mongod: MongoMemoryServer;
@@ -16,6 +18,20 @@ export interface ProviderOverride {
     useValue: any;
 }
 
+function applyTestingEnvironment(): void {
+    process.env.PAWPONG_TEST_MODE = 'true';
+    process.env.PAWPONG_SUPPRESS_EXTERNAL_WARNINGS = 'true';
+
+    // 테스트 환경에서는 외부 알림 서비스 비활성화 (실제 채널로 알림 발송 방지)
+    process.env.DISCORD_SIGN_WEBHOOK_URL = '';
+    process.env.DISCORD_DOCUMENT_WEBHOOK_URL = '';
+    process.env.DISCORD_WITHDRAWAL_WEBHOOK_URL = '';
+    process.env.COOLSMS_API_KEY = '';
+    process.env.COOLSMS_API_SECRET = '';
+    process.env.MAIL_USER = '';
+    process.env.MAIL_PASSWORD = '';
+}
+
 /**
  * E2E 테스트용 NestJS 애플리케이션 생성
  *
@@ -24,16 +40,20 @@ export interface ProviderOverride {
  * MongoDBMemoryServer를 사용하여 외부 DB 의존 없이 독립 실행 가능합니다.
  * - 글로벌 프리픽스: /api
  * - 글로벌 파이프: ValidationPipe (transform, whitelist 활성화)
- *
- * @param overrides 특정 Provider를 Mock으로 교체할 때 사용 (기본값: 빈 배열)
  */
 export async function createTestingApp(overrides: ProviderOverride[] = []): Promise<INestApplication> {
+    if (mongod) {
+        await mongod.stop();
+        mongod = undefined as any;
+    }
+
     // 인메모리 MongoDB 서버 시작
     mongod = await MongoMemoryServer.create();
     const mongoUri = mongod.getUri();
 
     // MONGODB_URI 환경변수를 인메모리 서버로 오버라이드
     process.env.MONGODB_URI = mongoUri;
+    applyTestingEnvironment();
 
     let builder = Test.createTestingModule({
         imports: [AppModule],
@@ -59,8 +79,42 @@ export async function createTestingApp(overrides: ProviderOverride[] = []): Prom
         }),
     );
 
+    // 실제 앱과 동일하게 예외 응답 형식을 통일한다.
+    app.useGlobalFilters(new AllExceptionsFilter());
+
+    // 실제 앱과 동일하게 POST 생성 응답을 200으로 정규화한다.
+    app.useGlobalInterceptors(new HttpStatusInterceptor());
+
     await app.init();
+
+    const originalClose = app.close.bind(app);
+    let closed = false;
+
+    app.close = async () => {
+        if (closed) {
+            return;
+        }
+
+        closed = true;
+        await originalClose();
+
+        if (mongod) {
+            await mongod.stop();
+            mongod = undefined as any;
+        }
+    };
+
     return app;
+}
+
+/**
+ * E2E 테스트용 NestJS 애플리케이션 종료
+ *
+ * @description
+ * createTestingApp으로 생성한 앱과 인메모리 MongoDB를 함께 종료합니다.
+ */
+export async function closeTestingApp(app: INestApplication): Promise<void> {
+    await app.close();
 }
 
 /**
@@ -96,12 +150,6 @@ export async function cleanupDatabase(app: INestApplication): Promise<void> {
         }
     } catch {
         // 연결이 이미 닫힌 경우 무시
-    }
-
-    // 인메모리 MongoDB 서버 정리
-    if (mongod) {
-        await mongod.stop();
-        mongod = undefined as any;
     }
 }
 
@@ -222,9 +270,7 @@ export async function getAdminToken(app: INestApplication, password: string = 'a
     const request = require('supertest');
     const { email } = await seedAdmin(app, password);
 
-    const loginResponse = await request(app.getHttpServer())
-        .post('/api/auth-admin/login')
-        .send({ email, password });
+    const loginResponse = await request(app.getHttpServer()).post('/api/auth-admin/login').send({ email, password });
 
     if (loginResponse.status === 200 && loginResponse.body.data?.accessToken) {
         return loginResponse.body.data.accessToken;
@@ -235,9 +281,7 @@ export async function getAdminToken(app: INestApplication, password: string = 'a
 /**
  * 입양자 등록 API를 통해 토큰 반환
  */
-export async function getAdopterToken(
-    app: INestApplication,
-): Promise<{ token: string; adopterId: string } | null> {
+export async function getAdopterToken(app: INestApplication): Promise<{ token: string; adopterId: string } | null> {
     const request = require('supertest');
     const timestamp = Date.now();
     const providerId = Math.random().toString().substr(2, 10);
@@ -264,9 +308,7 @@ export async function getAdopterToken(
 /**
  * 브리더 등록 API를 통해 토큰 반환
  */
-export async function getBreederToken(
-    app: INestApplication,
-): Promise<{ token: string; breederId: string } | null> {
+export async function getBreederToken(app: INestApplication): Promise<{ token: string; breederId: string } | null> {
     const request = require('supertest');
     const timestamp = Date.now();
 

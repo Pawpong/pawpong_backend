@@ -4,7 +4,7 @@ import { ApiProperty } from '@nestjs/swagger';
  * 전역 API 응답 표준 DTO
  * 모든 API 응답은 이 형식을 따릅니다.
  */
-export class ApiResponseDto<T = any> {
+export class ApiResponseDto<T = unknown> {
     /**
      * 요청 성공 여부
      * @example true
@@ -66,7 +66,7 @@ export class ApiResponseDto<T = any> {
     /**
      * 실패 응답 생성 헬퍼 메서드
      */
-    static error(error: string, code: number = 400): ApiResponseDto {
+    static error(error: string, code: number = 400): ApiResponseDto<undefined> {
         return new ApiResponseDto(false, code, undefined, undefined, error);
     }
 }

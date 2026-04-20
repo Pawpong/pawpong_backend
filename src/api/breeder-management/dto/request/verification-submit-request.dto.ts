@@ -41,7 +41,7 @@ export class VerificationSubmitRequestDto {
         enum: ['basic', 'premium', 'enterprise'],
     })
     @IsEnum(['basic', 'premium', 'enterprise'])
-    plan: string;
+    plan: 'basic' | 'premium' | 'enterprise';
 
     /**
      * 제출 서류 URL 배열

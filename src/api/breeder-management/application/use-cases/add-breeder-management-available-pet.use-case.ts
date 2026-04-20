@@ -1,0 +1,38 @@
+import { Inject, Injectable } from '@nestjs/common';
+import { DomainNotFoundError } from '../../../../common/error/domain.error';
+
+import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-profile.port';
+import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
+import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../ports/breeder-management-pet-command.port';
+import type { BreederManagementPetCommandPort } from '../ports/breeder-management-pet-command.port';
+import { BreederManagementAvailablePetCommandResultMapperService } from '../../domain/services/breeder-management-available-pet-command-result-mapper.service';
+import { BreederManagementAvailablePetCommandMapperService } from '../../domain/services/breeder-management-available-pet-command-mapper.service';
+import type { BreederManagementAvailablePetCreateCommand } from '../types/breeder-management-pet-command.type';
+
+@Injectable()
+export class AddBreederManagementAvailablePetUseCase {
+    constructor(
+        @Inject(BREEDER_MANAGEMENT_PROFILE_PORT)
+        private readonly breederManagementProfilePort: BreederManagementProfilePort,
+        @Inject(BREEDER_MANAGEMENT_PET_COMMAND_PORT)
+        private readonly breederManagementPetCommandPort: BreederManagementPetCommandPort,
+        private readonly breederManagementAvailablePetCommandMapperService: BreederManagementAvailablePetCommandMapperService,
+        private readonly breederManagementAvailablePetCommandResultMapperService: BreederManagementAvailablePetCommandResultMapperService,
+    ) {}
+
+    async execute(
+        userId: string,
+        availablePetDto: BreederManagementAvailablePetCreateCommand,
+    ): Promise<{ petId: string; message: string }> {
+        const breeder = await this.breederManagementProfilePort.findById(userId);
+        if (!breeder) {
+            throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
+        }
+
+        const savedPet = await this.breederManagementPetCommandPort.createAvailablePet(
+            this.breederManagementAvailablePetCommandMapperService.toCreateData(userId, availablePetDto),
+        );
+
+        return this.breederManagementAvailablePetCommandResultMapperService.toAvailablePetAddedResult(String(savedPet._id));
+    }
+}

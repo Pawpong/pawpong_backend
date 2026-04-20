@@ -1,10 +1,21 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { FilterQuery, Model } from 'mongoose';
 
 import { VerificationStatus } from '../../../common/enum/user.enum';
 
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
+import type {
+    BreederManagementApplicationFormRecord,
+    BreederManagementBreederStatsRecord,
+} from '../application/ports/breeder-management-profile.port';
+import type { BreederManagementVerificationRecord } from '../application/ports/breeder-management-settings.port';
+import type {
+    BreederManagementBreederDocumentRecord,
+    BreederManagementBreederFilterRecord,
+    BreederManagementPaginationRecord,
+    BreederManagementVerificationStatusCountRecord,
+} from '../types/breeder-management-document.type';
 
 /**
  * Breeder Repository
@@ -25,8 +36,8 @@ export class BreederRepository {
      * @param breederId 조회할 브리더 고유 ID
      * @returns 브리더 정보 또는 null
      */
-    async findById(breederId: string): Promise<BreederDocument | null> {
-        return this.breederModel.findById(breederId).select('-password').lean().exec() as any;
+    async findById(breederId: string): Promise<BreederManagementBreederDocumentRecord | null> {
+        return this.breederModel.findById(breederId).select('-password').lean<BreederManagementBreederDocumentRecord>().exec();
     }
 
     /**
@@ -43,8 +54,8 @@ export class BreederRepository {
      * @param breederId 조회할 브리더 고유 ID
      * @returns 브리더 전체 정보 또는 null
      */
-    async findByIdWithAllData(breederId: string): Promise<BreederDocument | null> {
-        return this.breederModel.findById(breederId).select('-password').lean().exec() as any;
+    async findByIdWithAllData(breederId: string): Promise<BreederManagementBreederDocumentRecord | null> {
+        return this.breederModel.findById(breederId).select('-password').lean<BreederManagementBreederDocumentRecord>().exec();
     }
 
     /**
@@ -80,7 +91,7 @@ export class BreederRepository {
             createdAt: new Date(),
             updatedAt: new Date(),
         });
-        return breeder.save() as any;
+        return breeder.save();
     }
 
     /**
@@ -89,7 +100,10 @@ export class BreederRepository {
      * @param updateData 수정할 데이터
      * @returns 수정된 브리더 정보 또는 null
      */
-    async updateProfile(breederId: string, updateData: any): Promise<BreederDocument | null> {
+    async updateProfile(
+        breederId: string,
+        updateData: Record<string, unknown>,
+    ): Promise<BreederManagementBreederDocumentRecord | null> {
         return this.breederModel
             .findByIdAndUpdate(
                 breederId,
@@ -102,7 +116,8 @@ export class BreederRepository {
                 { new: true, runValidators: true },
             )
             .select('-password')
-            .exec() as any;
+            .lean<BreederManagementBreederDocumentRecord>()
+            .exec();
     }
 
     /**
@@ -110,7 +125,7 @@ export class BreederRepository {
      * @param breederId 브리더 ID
      * @param verificationData 인증 정보
      */
-    async updateVerification(breederId: string, verificationData: any): Promise<void> {
+    async updateVerification(breederId: string, verificationData: BreederManagementVerificationRecord): Promise<void> {
         await this.breederModel
             .findByIdAndUpdate(breederId, {
                 $set: {
@@ -118,6 +133,26 @@ export class BreederRepository {
                     updatedAt: new Date(),
                 },
             })
+            .exec();
+    }
+
+    async updateApplicationForm(
+        breederId: string,
+        applicationForm: BreederManagementApplicationFormRecord[],
+    ): Promise<BreederManagementBreederDocumentRecord | null> {
+        return this.breederModel
+            .findByIdAndUpdate(
+                breederId,
+                {
+                    $set: {
+                        applicationForm,
+                        updatedAt: new Date(),
+                    },
+                },
+                { new: true, runValidators: true },
+            )
+            .select('-password')
+            .lean<BreederManagementBreederDocumentRecord>()
             .exec();
     }
 
@@ -168,7 +203,7 @@ export class BreederRepository {
      * @param breederId 브리더 ID
      * @param reportData 신고 데이터
      */
-    async addReport(breederId: string, reportData: any): Promise<void> {
+    async addReport(breederId: string, reportData: Record<string, unknown>): Promise<void> {
         await this.breederModel
             .findByIdAndUpdate(breederId, {
                 $push: { reports: reportData },
@@ -184,8 +219,12 @@ export class BreederRepository {
      * @param limit 페이지당 항목 수
      * @returns 페이지네이션된 브리더 목록
      */
-    async findWithFilters(filters: any, page: number = 1, limit: number = 10): Promise<any> {
-        const query: any = {
+    async findWithFilters(
+        filters: BreederManagementBreederFilterRecord,
+        page: number = 1,
+        limit: number = 10,
+    ): Promise<{ breeders: BreederManagementBreederDocumentRecord[]; pagination: BreederManagementPaginationRecord }> {
+        const query: FilterQuery<BreederDocument> = {
             accountStatus: 'active',
             'verification.status': VerificationStatus.APPROVED,
         };
@@ -198,7 +237,7 @@ export class BreederRepository {
             query['profile.specialization'] = new RegExp(filters.breed, 'i');
         }
         if (filters.priceMin || filters.priceMax) {
-            const priceQuery: any = {};
+            const priceQuery: { $gte?: number; $lte?: number } = {};
             if (filters.priceMin) priceQuery.$gte = filters.priceMin;
             if (filters.priceMax) priceQuery.$lte = filters.priceMax;
             query['profile.priceRange.min'] = priceQuery;
@@ -213,21 +252,14 @@ export class BreederRepository {
                 .sort({ 'stats.averageRating': -1, createdAt: -1 })
                 .skip(skip)
                 .limit(limit)
-                .lean()
+                .lean<BreederManagementBreederDocumentRecord[]>()
                 .exec(),
             this.breederModel.countDocuments(query).exec(),
         ]);
 
         return {
             breeders,
-            pagination: {
-                currentPage: page,
-                totalPages: Math.ceil(total / limit),
-                totalItems: total,
-                itemsPerPage: limit,
-                hasNextPage: skip + limit < total,
-                hasPrevPage: page > 1,
-            },
+            pagination: this.buildPagination(page, limit, total),
         };
     }
 
@@ -259,7 +291,10 @@ export class BreederRepository {
      * @param limit 페이지당 항목 수
      * @returns 페이지네이션된 대기 브리더 목록
      */
-    async findPendingVerification(page: number = 1, limit: number = 10): Promise<any> {
+    async findPendingVerification(
+        page: number = 1,
+        limit: number = 10,
+    ): Promise<{ breeders: BreederManagementBreederDocumentRecord[]; pagination: BreederManagementPaginationRecord }> {
         const query = { 'verification.status': VerificationStatus.REVIEWING };
         const skip = (page - 1) * limit;
 
@@ -270,21 +305,27 @@ export class BreederRepository {
                 .sort({ 'verification.submittedAt': 1 })
                 .skip(skip)
                 .limit(limit)
-                .lean()
+                .lean<BreederManagementBreederDocumentRecord[]>()
                 .exec(),
             this.breederModel.countDocuments(query).exec(),
         ]);
 
         return {
             breeders,
-            pagination: {
-                currentPage: page,
-                totalPages: Math.ceil(total / limit),
-                totalItems: total,
-                itemsPerPage: limit,
-                hasNextPage: skip + limit < total,
-                hasPrevPage: page > 1,
-            },
+            pagination: this.buildPagination(page, limit, total),
+        };
+    }
+
+    private buildPagination(page: number, limit: number, totalItems: number): BreederManagementPaginationRecord {
+        const totalPages = Math.ceil(totalItems / limit);
+
+        return {
+            currentPage: page,
+            totalPages,
+            totalItems,
+            itemsPerPage: limit,
+            hasNextPage: page < totalPages,
+            hasPrevPage: page > 1,
         };
     }
 
@@ -293,7 +334,7 @@ export class BreederRepository {
      * @param filters 필터 조건
      * @returns 브리더 수
      */
-    async countBreeders(filters?: any): Promise<{ [key: string]: number }> {
+    async countBreeders(filters?: FilterQuery<BreederDocument>): Promise<Record<string, number>> {
         const pipeline = [
             { $match: filters || {} },
             {
@@ -304,9 +345,9 @@ export class BreederRepository {
             },
         ];
 
-        const results = await this.breederModel.aggregate(pipeline).exec();
+        const results = await this.breederModel.aggregate<BreederManagementVerificationStatusCountRecord>(pipeline).exec();
 
-        const stats: { [key: string]: number } = {
+        const stats: Record<string, number> = {
             total: 0,
             pending: 0,
             reviewing: 0,
@@ -314,7 +355,7 @@ export class BreederRepository {
             rejected: 0,
         };
 
-        results.forEach((result: any) => {
+        results.forEach((result) => {
             stats[result._id] = result.count;
             stats.total += result.count;
         });
@@ -335,7 +376,7 @@ export class BreederRepository {
      * @param breederId 브리더 ID
      * @param statsData 업데이트할 통계 데이터
      */
-    async updateStats(breederId: string, statsData: any): Promise<void> {
+    async updateStats(breederId: string, statsData: Partial<BreederManagementBreederStatsRecord>): Promise<void> {
         await this.breederModel
             .findByIdAndUpdate(breederId, {
                 $set: {

@@ -1,25 +1,21 @@
 import { Module } from '@nestjs/common';
-import { MongooseModule } from '@nestjs/mongoose';
 
-import { EmailTestController } from './test/email-test.controller';
-import { NotificationController } from './notification.controller';
-
-import { NotificationService } from './notification.service';
-
-import { Notification, NotificationSchema } from '../../schema/notification.schema';
-
-import { MailModule } from '../../common/mail/mail.module';
+import {
+    NOTIFICATION_MODULE_CONTROLLERS,
+    NOTIFICATION_MODULE_EXPORTS,
+    NOTIFICATION_MODULE_IMPORTS,
+    NOTIFICATION_MODULE_PROVIDERS,
+} from './notification.module-definition';
 
 /**
  * 알림 모듈
  *
  * 서비스 알림 및 이메일 발송 기능을 통합 제공합니다.
- * MailModule을 re-export하여 다른 모듈이 MailService와 MailTemplateService를 사용할 수 있도록 합니다.
  */
 @Module({
-    imports: [MongooseModule.forFeature([{ name: Notification.name, schema: NotificationSchema }]), MailModule],
-    controllers: [NotificationController, EmailTestController],
-    providers: [NotificationService],
-    exports: [NotificationService, MailModule], // MailModule re-export
+    imports: NOTIFICATION_MODULE_IMPORTS,
+    controllers: NOTIFICATION_MODULE_CONTROLLERS,
+    providers: NOTIFICATION_MODULE_PROVIDERS,
+    exports: NOTIFICATION_MODULE_EXPORTS,
 })
 export class NotificationModule {}

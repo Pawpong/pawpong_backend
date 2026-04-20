@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import type { PageResult } from '../../types/page-result.type';
 import { PageInfoDto } from './page-info.dto';
 import { PaginationBuilder } from './pagination-builder.dto';
 
@@ -33,6 +34,15 @@ export class PaginationResponseDto<T> {
             ),
             hasPrevPage: paginationBuilder._page > 1,
         };
+    }
+
+    static fromPageResult<T>(pageResult: PageResult<T>): PaginationResponseDto<T> {
+        return new PaginationBuilder<T>()
+            .setItems(pageResult.items)
+            .setPage(pageResult.pagination.currentPage)
+            .setLimit(pageResult.pagination.pageSize)
+            .setTotalCount(pageResult.pagination.totalItems)
+            .build();
     }
 
     /**
