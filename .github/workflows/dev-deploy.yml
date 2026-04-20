@@ -77,22 +77,32 @@ jobs:
                       --output /home/colding/pawpong.log --error /home/colding/pawpong.log --merge-logs --time
                     pm2 save --force
 
-                    echo "[deploy] 부팅 대기 (Kafka retry 포함 ~40초)"
-                    sleep 45
-
-                    echo "[deploy] 헬스체크"
-                    curl -sf http://localhost:8080/api/health > /dev/null && echo "✅ 헬스체크 통과" || (echo "❌ 헬스체크 실패"; exit 1)
+                    echo "[deploy] 앱 부팅 대기 + 헬스체크 (최대 150초 - Kafka retry 포함)"
+                    HEALTH_OK=0
+                    for i in $(seq 1 75); do
+                      if curl -sf http://localhost:8080/api/health > /dev/null 2>&1; then
+                        echo "✅ 헬스체크 통과 ($((i * 2))초 경과)"
+                        HEALTH_OK=1
+                        break
+                      fi
+                      sleep 2
+                    done
+                    if [ "$HEALTH_OK" != "1" ]; then
+                      echo "❌ 150초 내에 헬스체크 응답 없음 - 최근 pm2 로그 40줄:"
+                      pm2 logs pawpong-backend --lines 40 --nostream 2>&1 | tail -40
+                      exit 1
+                    fi
                   EOF
 
             - name: Remote health check (external HTTPS)
               run: |
-                  for i in 1 2 3; do
+                  for i in $(seq 1 12); do
                     RESP=$(curl -sf -o /dev/null -w "%{http_code}" https://dev-api.pawpong.kr/api/health || echo "fail")
                     if [ "$RESP" = "200" ]; then
                       echo "✅ 외부 헬스체크 성공 (HTTPS 200)"
                       exit 0
                     fi
-                    echo "재시도 ($i/3)..."
+                    echo "재시도 ($i/12) - response: $RESP"
                     sleep 5
                   done
                   echo "❌ 외부 헬스체크 실패"
