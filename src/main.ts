@@ -1,5 +1,6 @@
 import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import express from 'express';
@@ -11,6 +12,7 @@ import { HttpStatusInterceptor } from './common/interceptor/http-status.intercep
 import { LoggingInterceptor } from './common/interceptor/logging.interceptor';
 
 import { CustomLoggerService } from './common/logger/custom-logger.service';
+import { NotifyCriticalErrorUseCase } from './common/discord/application/use-cases/notify-critical-error.use-case';
 
 import { AppModule } from './app.module';
 
@@ -60,8 +62,9 @@ async function bootstrap(): Promise<void> {
         }),
     );
 
-    // 전역 예외 필터 적용 (ApiResponseDto 형식으로 에러 응답)
-    app.useGlobalFilters(new AllExceptionsFilter());
+    // 전역 예외 필터 적용 (ApiResponseDto 형식 응답 + critical 에러 Discord 알림)
+    const notifyCriticalErrorUseCase = app.get(NotifyCriticalErrorUseCase);
+    app.useGlobalFilters(new AllExceptionsFilter(notifyCriticalErrorUseCase));
 
     // HTTP 상태 코드 통일 인터셉터 적용
     app.useGlobalInterceptors(new HttpStatusInterceptor());
@@ -163,6 +166,29 @@ async function bootstrap(): Promise<void> {
     // ConfigService 주입
     const configService: ConfigService = app.get(ConfigService);
 
+    // Kafka Consumer 마이크로서비스 연결 (채팅 메시지 broadcast용)
+    const kafkaBroker = configService.get<string>('KAFKA_BROKER', 'kafka:29092');
+    app.connectMicroservice<MicroserviceOptions>({
+        transport: Transport.KAFKA,
+        options: {
+            client: {
+                clientId: 'pawpong-chat-consumer',
+                brokers: [kafkaBroker],
+                requestTimeout: 30000,
+                retry: {
+                    initialRetryTime: 300,
+                    retries: 10,
+                },
+            },
+            consumer: {
+                groupId: 'pawpong-chat-consumer-group',
+                allowAutoTopicCreation: true,
+                sessionTimeout: 30000,
+                heartbeatInterval: 3000,
+            },
+        },
+    });
+
     // 프로덕션 환경 체크
     const isProduction = process.env.NODE_ENV === 'production';
 
@@ -186,6 +212,14 @@ async function bootstrap(): Promise<void> {
     app.enableShutdownHooks();
 
     let isShuttingDown = false;
+
+    // Kafka Consumer 시작 (실패해도 HTTP 서버는 계속 동작)
+    try {
+        await app.startAllMicroservices();
+        logger.log('[bootstrap] Kafka chat consumer started');
+    } catch {
+        logger.warn('[bootstrap] Kafka consumer failed to start - messages will be skipped until Kafka is available');
+    }
 
     // 서버 시작
     const server = await app.listen(port);
