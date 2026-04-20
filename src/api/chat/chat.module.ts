@@ -13,7 +13,10 @@ import { ChatKafkaConsumer } from './chat-kafka.consumer';
 
 import { ChatRepository } from './repository/chat.repository';
 import { ChatMongooseManagerAdapter } from './infrastructure/chat-mongoose-manager.adapter';
+import { KafkaChatMessageBrokerAdapter } from './infrastructure/kafka-chat-message-broker.adapter';
 import { ChatPolicyService } from './domain/services/chat-policy.service';
+import { ChatRoomMapperService } from './domain/services/chat-room-mapper.service';
+import { ChatMessageMapperService } from './domain/services/chat-message-mapper.service';
 
 import { CreateOrGetRoomUseCase } from './application/use-cases/create-or-get-room.use-case';
 import { GetMyRoomsUseCase } from './application/use-cases/get-my-rooms.use-case';
@@ -23,13 +26,14 @@ import { CloseRoomUseCase } from './application/use-cases/close-room.use-case';
 
 import { CHAT_ROOM_MANAGER } from './application/ports/chat-room-manager.port';
 import { CHAT_MESSAGE_MANAGER } from './application/ports/chat-message-manager.port';
+import { CHAT_MESSAGE_BROKER } from './application/ports/chat-message-broker.port';
 import {
     CREATE_OR_GET_ROOM_USE_CASE,
     GET_MY_ROOMS_USE_CASE,
     SEND_MESSAGE_USE_CASE,
     GET_MESSAGES_USE_CASE,
     CLOSE_ROOM_USE_CASE,
-} from './application/ports/chat-interaction.port';
+} from './application/tokens/chat-interaction.token';
 
 @Module({
     imports: [
@@ -48,12 +52,20 @@ import {
     providers: [
         ChatGateway,
         ChatRepository,
+
+        // Domain services
         ChatPolicyService,
+        ChatRoomMapperService,
+        ChatMessageMapperService,
+
+        // Adapters
         ChatMongooseManagerAdapter,
+        KafkaChatMessageBrokerAdapter,
 
         // Port → Adapter 바인딩
         { provide: CHAT_ROOM_MANAGER, useExisting: ChatMongooseManagerAdapter },
         { provide: CHAT_MESSAGE_MANAGER, useExisting: ChatMongooseManagerAdapter },
+        { provide: CHAT_MESSAGE_BROKER, useExisting: KafkaChatMessageBrokerAdapter },
 
         // Use Cases
         CreateOrGetRoomUseCase,

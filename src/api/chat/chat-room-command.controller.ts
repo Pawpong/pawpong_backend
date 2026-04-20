@@ -1,4 +1,4 @@
-import { Controller, Post, Delete, Body, Param, UseGuards, HttpCode, ForbiddenException } from '@nestjs/common';
+import { Controller, Post, Delete, Body, Param, UseGuards, HttpCode } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 
 import { JwtAuthGuard } from '../../common/guard/jwt-auth.guard';
@@ -8,6 +8,7 @@ import { CurrentUser } from '../../common/decorator/user.decorator';
 
 import { CreateOrGetRoomUseCase } from './application/use-cases/create-or-get-room.use-case';
 import { CloseRoomUseCase } from './application/use-cases/close-room.use-case';
+import { ChatPolicyService } from './domain/services/chat-policy.service';
 import { CreateRoomRequestDto } from './dto/request/create-room-request.dto';
 import { ApiCreateOrGetRoomEndpoint, ApiCloseRoomEndpoint } from './swagger';
 
@@ -18,6 +19,7 @@ export class ChatRoomCommandController {
     constructor(
         private readonly createOrGetRoomUseCase: CreateOrGetRoomUseCase,
         private readonly closeRoomUseCase: CloseRoomUseCase,
+        private readonly chatPolicyService: ChatPolicyService,
     ) {}
 
     @Post('rooms')
@@ -28,10 +30,11 @@ export class ChatRoomCommandController {
         @CurrentUser() user: { userId: string; role: string },
         @Body() dto: CreateRoomRequestDto,
     ) {
-        if (user.role !== 'adopter') {
-            throw new ForbiddenException('채팅방은 입양자만 생성할 수 있습니다.');
-        }
-        const room = await this.createOrGetRoomUseCase.execute(user.userId, dto);
+        this.chatPolicyService.ensureAdopterRole(user.role);
+        const room = await this.createOrGetRoomUseCase.execute(user.userId, {
+            breederId: dto.breederId,
+            applicationId: dto.applicationId,
+        });
         return room;
     }
 
