@@ -1,4 +1,4 @@
-name: Deploy to Development Server
+name: Deploy to Development Server (Mac Mini)
 
 on:
     push:
@@ -9,141 +9,126 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v3
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-            - name: Configure SSH Connection
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '20'
+                  cache: 'yarn'
+
+            - name: Install dependencies
+              run: yarn install --frozen-lockfile --network-timeout 1000000
+
+            - name: Build
+              env:
+                  NODE_OPTIONS: '--max-old-space-size=3072'
+              run: yarn build
+
+            - name: Configure SSH
               run: |
-                  # Secrets 확인
-                  if [ -z "${{ secrets.DEV_SERVER_HOST }}" ]; then
-                    echo "Error: DEV_SERVER_HOST secret is not set"
-                    exit 1
-                  fi
-                  # Dev와 Prod가 같은 SSH 키를 사용하므로 PROD_SSH_KEY 사용
-                  if [ -z "${{ secrets.PROD_SSH_KEY }}" ]; then
-                    echo "Error: PROD_SSH_KEY secret is not set"
-                    exit 1
-                  fi
-
-                  mkdir -p ~/.ssh/
-                  echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/deploy_key
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.DEV_SSH_KEY }}" > ~/.ssh/deploy_key
                   chmod 600 ~/.ssh/deploy_key
-                  ssh-keyscan -H ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts
+                  ssh-keyscan -p ${{ secrets.DEV_SERVER_PORT }} -H ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
-                  echo "=== SSH Configuration Complete ==="
-                  echo "Target host: ${{ secrets.DEV_SERVER_HOST }}"
-                  echo "SSH key configured successfully"
-
-            - name: Test SSH Connection
+            - name: Rsync artifacts to Mac Mini
               run: |
-                  echo "=== Testing SSH Connection ==="
-                  ssh -v -i ~/.ssh/deploy_key root@${{ secrets.DEV_SERVER_HOST }} 'echo "SSH connection successful!"' 2>&1 | tee ssh_test.log
+                  SERVER="${{ secrets.DEV_SERVER_USER }}@${{ secrets.DEV_SERVER_HOST }}"
+                  PORT="${{ secrets.DEV_SERVER_PORT }}"
+                  SSH_OPTS="-i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${PORT}"
 
-            - name: Deploy to Development Server
+                  rsync -avz --delete \
+                    -e "ssh ${SSH_OPTS}" \
+                    dist/ "${SERVER}:/home/colding/pawpong_backend/dist/"
+
+                  rsync -avz \
+                    -e "ssh ${SSH_OPTS}" \
+                    package.json yarn.lock "${SERVER}:/home/colding/pawpong_backend/"
+
+            - name: Install & Restart on Mac Mini
               run: |
-                  echo "=== Starting Deployment ==="
-                  ssh -v -i ~/.ssh/deploy_key root@${{ secrets.DEV_SERVER_HOST }} << 'EOF'
-                    echo "Connected to server as: $(whoami)"
-                    echo "Current directory: $(pwd)"
-                    echo "Home directory: $HOME"
+                  SERVER="${{ secrets.DEV_SERVER_USER }}@${{ secrets.DEV_SERVER_HOST }}"
+                  PORT="${{ secrets.DEV_SERVER_PORT }}"
 
-                    export NVM_DIR="$HOME/.nvm"
-                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-                    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${PORT} ${SERVER} << 'EOF'
+                    set -e
+                    cd /home/colding/pawpong_backend
 
-                    echo "Node.js version: $(node --version)"
-                    echo "npm version: $(npm --version)"
-                    echo "yarn version: $(yarn --version)"
+                    echo "[deploy] yarn install (프로덕션 의존성, 플랫폼 바이너리 포함)"
+                    yarn install --production --frozen-lockfile --network-timeout 1000000
 
-                    cd /root/pawpong_backend/ || { echo "❌ Directory not found"; exit 1; }
-                    echo "Changed to project directory: $(pwd)"
+                    echo "[deploy] pm2 restart pawpong-backend"
+                    pm2 restart pawpong-backend --update-env || pm2 start dist/main.js --name pawpong-backend \
+                      --output /home/colding/pawpong.log --error /home/colding/pawpong.log --merge-logs --time
+                    pm2 save --force
 
-                    git checkout dev
-                    git pull origin dev
-                    echo "Git checkout and pull completed"
+                    echo "[deploy] 부팅 대기 (Kafka retry 포함 ~40초)"
+                    sleep 45
 
-                    yarn install
-                    echo "Dependencies installed"
-
-                    yarn build
-                    echo "Build completed"
-
-                    pm2 delete pawpong-api || echo "No PM2 process to delete"
-                    echo "PM2 process deleted"
-
-                    pm2 restart ecosystem.config.js --env production || pm2 start ecosystem.config.js --env production
-                    echo "PM2 restart/start completed"
-
-                    pm2 save
-                    echo "PM2 configuration saved"
+                    echo "[deploy] 헬스체크"
+                    curl -sf http://localhost:8080/api/health > /dev/null && echo "✅ 헬스체크 통과" || (echo "❌ 헬스체크 실패"; exit 1)
                   EOF
-                  2>&1 | tee deployment.log
 
-            - name: Send Discord Notification (Success)
+            - name: Remote health check (external HTTPS)
+              run: |
+                  for i in 1 2 3; do
+                    RESP=$(curl -sf -o /dev/null -w "%{http_code}" https://dev-api.pawpong.kr/api/health || echo "fail")
+                    if [ "$RESP" = "200" ]; then
+                      echo "✅ 외부 헬스체크 성공 (HTTPS 200)"
+                      exit 0
+                    fi
+                    echo "재시도 ($i/3)..."
+                    sleep 5
+                  done
+                  echo "❌ 외부 헬스체크 실패"
+                  exit 1
+
+            - name: Discord Notification (Success)
               if: success()
               run: |
-                  COMMIT_MSG=$(git log -1 --pretty=%B)
+                  COMMIT_MSG=$(git log -1 --pretty=%B | head -1)
                   COMMIT_AUTHOR=$(git log -1 --pretty=%an)
                   COMMIT_SHA=$(git rev-parse --short HEAD)
 
-                  curl -H "Content-Type: application/json" \
-                       -X POST \
-                       -d "{
-                         \"embeds\": [{
-                           \"title\": \"개발 서버 배포 성공\",
-                           \"description\": \"Dev 브랜치가 개발 서버에 성공적으로 배포되었습니다.\",
-                           \"color\": 5763719,
-                           \"fields\": [
-                             {\"name\": \"서버\", \"value\": \"115.68.179.77\", \"inline\": true},
-                             {\"name\": \"배포 방식\", \"value\": \"PM2\", \"inline\": true},
-                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
-                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
-                             {\"name\": \"커밋 메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false}
-                           ],
-                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                         }]
-                       }" \
-                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+                  curl -H "Content-Type: application/json" -X POST \
+                    -d "{
+                      \"embeds\": [{
+                        \"title\": \"✅ Dev 서버 배포 성공\",
+                        \"description\": \"Dev 브랜치가 Mac Mini(ubuntu-pawpong)에 배포되었습니다.\",
+                        \"color\": 5763719,
+                        \"fields\": [
+                          {\"name\": \"URL\", \"value\": \"https://dev-api.pawpong.kr\", \"inline\": true},
+                          {\"name\": \"서버\", \"value\": \"Mac Mini (colding)\", \"inline\": true},
+                          {\"name\": \"커밋\", \"value\": \"\`$COMMIT_SHA\` by $COMMIT_AUTHOR\", \"inline\": false},
+                          {\"name\": \"메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false}
+                        ],
+                        \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                      }]
+                    }" \
+                    ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
 
-            - name: Send Discord Notification (Failure)
+            - name: Discord Notification (Failure)
               if: failure()
               run: |
-                  COMMIT_MSG=$(git log -1 --pretty=%B)
+                  COMMIT_MSG=$(git log -1 --pretty=%B | head -1)
                   COMMIT_AUTHOR=$(git log -1 --pretty=%an)
                   COMMIT_SHA=$(git rev-parse --short HEAD)
 
-                  curl -H "Content-Type: application/json" \
-                       -X POST \
-                       -d "{
-                         \"embeds\": [{
-                           \"title\": \"개발 서버 배포 실패\",
-                           \"description\": \"Dev 브랜치 배포 중 오류가 발생했습니다.\",
-                           \"color\": 15158332,
-                           \"fields\": [
-                             {\"name\": \"서버\", \"value\": \"115.68.179.77\", \"inline\": true},
-                             {\"name\": \"배포 방식\", \"value\": \"PM2\", \"inline\": true},
-                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
-                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
-                             {\"name\": \"커밋 메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false},
-                             {\"name\": \"로그 확인\", \"value\": \"[GitHub Actions 로그 보기](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
-                           ],
-                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                         }]
-                       }" \
-                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
-
-            - name: Check deployment status
-              if: failure()
-              run: |
-                  echo "=== Deployment Failed - Debug Info ==="
-                  echo "SSH test log:"
-                  if [ -f ssh_test.log ]; then
-                    cat ssh_test.log
-                  else
-                    echo "No ssh_test.log file found"
-                  fi
-                  echo "Deployment log:"
-                  if [ -f deployment.log ]; then
-                    cat deployment.log
-                  else
-                    echo "No deployment.log file found"
-                  fi
+                  curl -H "Content-Type: application/json" -X POST \
+                    -d "{
+                      \"embeds\": [{
+                        \"title\": \"❌ Dev 서버 배포 실패\",
+                        \"description\": \"Dev 브랜치 배포 중 오류 발생.\",
+                        \"color\": 15158332,
+                        \"fields\": [
+                          {\"name\": \"서버\", \"value\": \"Mac Mini (colding)\", \"inline\": true},
+                          {\"name\": \"커밋\", \"value\": \"\`$COMMIT_SHA\` by $COMMIT_AUTHOR\", \"inline\": false},
+                          {\"name\": \"메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false},
+                          {\"name\": \"Actions 로그\", \"value\": \"[보기](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
+                        ],
+                        \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                      }]
+                    }" \
+                    ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
