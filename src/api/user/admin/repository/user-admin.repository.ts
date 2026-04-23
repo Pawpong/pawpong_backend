@@ -142,7 +142,7 @@ export class UserAdminRepository {
         const { role, deleteReason, page, limit } = criteria;
         const skip = (page - 1) * limit;
 
-        let items: UserAdminDeletedUserListItemRecord[] = [];
+        const items: UserAdminDeletedUserListItemRecord[] = [];
         let total = 0;
 
         if (role === 'all' || role === 'adopter') {
