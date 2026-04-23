@@ -39,10 +39,7 @@ export class NotificationFirebasePushAdapter implements NotificationPushPort, On
         this.tryInitialize();
     }
 
-    async sendToTokens(
-        tokens: string[],
-        message: NotificationPushMessage,
-    ): Promise<NotificationPushDeliveryResult[]> {
+    async sendToTokens(tokens: string[], message: NotificationPushMessage): Promise<NotificationPushDeliveryResult[]> {
         if (tokens.length === 0) {
             return [];
         }
@@ -139,11 +136,7 @@ export class NotificationFirebasePushAdapter implements NotificationPushPort, On
         }
 
         if (!credential) {
-            this.logger.logWarning(
-                'firebasePush',
-                'FCM 자격 증명 없음 - 푸시 비활성 (로컬 개발 모드)',
-                {},
-            );
+            this.logger.logWarning('firebasePush', 'FCM 자격 증명 없음 - 푸시 비활성 (로컬 개발 모드)', {});
             this.initialized = true;
             return;
         }
