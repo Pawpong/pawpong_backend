@@ -58,11 +58,9 @@ describe('업로드 완료 유스케이스', () => {
 
     it('대기 상태가 아니면 예외를 던진다', async () => {
         const feedVideoCommand = createCommand(VideoStatus.READY);
-        const useCase = new CompleteUploadUseCase(
-            feedVideoCommand,
-            new FeedVideoCommandPolicyService(),
-            { add: jest.fn() } as any,
-        );
+        const useCase = new CompleteUploadUseCase(feedVideoCommand, new FeedVideoCommandPolicyService(), {
+            add: jest.fn(),
+        } as any);
 
         await expect(useCase.execute('video-1', 'user-1')).rejects.toBeInstanceOf(DomainValidationError);
     });

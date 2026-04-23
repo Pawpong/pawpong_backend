@@ -54,8 +54,7 @@ export class BreederManagementProfileUpdateMapperService {
         if (updateData.priceRangeInfo) {
             const min = updateData.priceRangeInfo.minimumPrice;
             const max = updateData.priceRangeInfo.maximumPrice;
-            const display =
-                min === 0 && max === 0 ? updateData.priceRangeInfo.display || 'not_set' : 'range';
+            const display = min === 0 && max === 0 ? updateData.priceRangeInfo.display || 'not_set' : 'range';
 
             profileUpdateData['profile.priceRange'] = {
                 min,

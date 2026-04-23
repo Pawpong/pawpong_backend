@@ -11,11 +11,7 @@ describe('문의 상세 조회 유스케이스', () => {
         generateSignedUrl: jest.fn((fileName: string) => `signed:${fileName}`),
     };
 
-    const useCase = new GetInquiryDetailUseCase(
-        inquiryReader as any,
-        new InquiryViewService(),
-        inquiryAssetUrl as any,
-    );
+    const useCase = new GetInquiryDetailUseCase(inquiryReader as any, new InquiryViewService(), inquiryAssetUrl as any);
 
     const mockInquiry = {
         id: 'inquiry-1',

@@ -5,7 +5,10 @@ import {
     UPLOAD_ADMIN_REFERENCE_READER_PORT,
     type UploadAdminReferenceReaderPort,
 } from '../ports/upload-admin-reference-reader.port';
-import type { UploadAdminFileReferenceItemResult, UploadAdminFileReferenceResult } from '../types/upload-admin-result.type';
+import type {
+    UploadAdminFileReferenceItemResult,
+    UploadAdminFileReferenceResult,
+} from '../types/upload-admin-result.type';
 
 @Injectable()
 export class CheckFileReferencesUseCase {

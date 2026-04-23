@@ -52,13 +52,25 @@ describe('BreederVerificationAdminPolicyService', () => {
 
     describe('shouldClearLevelChangeRequest', () => {
         it('APPROVED이면서 요청 있으면 true', () => {
-            expect(policy.shouldClearLevelChangeRequest({ verification: { isLevelChangeRequested: true } } as any, VerificationStatus.APPROVED)).toBe(true);
+            expect(
+                policy.shouldClearLevelChangeRequest(
+                    { verification: { isLevelChangeRequested: true } } as any,
+                    VerificationStatus.APPROVED,
+                ),
+            ).toBe(true);
         });
         it('REJECTED여도 true', () => {
-            expect(policy.shouldClearLevelChangeRequest({ verification: { isLevelChangeRequested: true } } as any, VerificationStatus.REJECTED)).toBe(true);
+            expect(
+                policy.shouldClearLevelChangeRequest(
+                    { verification: { isLevelChangeRequested: true } } as any,
+                    VerificationStatus.REJECTED,
+                ),
+            ).toBe(true);
         });
         it('요청 없으면 false', () => {
-            expect(policy.shouldClearLevelChangeRequest({ verification: {} } as any, VerificationStatus.APPROVED)).toBe(false);
+            expect(policy.shouldClearLevelChangeRequest({ verification: {} } as any, VerificationStatus.APPROVED)).toBe(
+                false,
+            );
         });
     });
 

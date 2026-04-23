@@ -1,7 +1,10 @@
 import { DomainValidationError } from '../../../../../../common/error/domain.error';
 import { DeletePhoneWhitelistUseCase } from '../../../application/use-cases/delete-phone-whitelist.use-case';
 import { UserAdminCommandPolicyService } from '../../../domain/services/user-admin-command-policy.service';
-import { UserAdminReaderPort, UserAdminPhoneWhitelistSnapshot } from '../../../application/ports/user-admin-reader.port';
+import {
+    UserAdminReaderPort,
+    UserAdminPhoneWhitelistSnapshot,
+} from '../../../application/ports/user-admin-reader.port';
 import { UserAdminWriterPort } from '../../../application/ports/user-admin-writer.port';
 
 function makeReader(item: UserAdminPhoneWhitelistSnapshot | null): UserAdminReaderPort {

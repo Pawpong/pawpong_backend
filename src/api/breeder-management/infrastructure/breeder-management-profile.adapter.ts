@@ -54,10 +54,7 @@ export class BreederManagementProfileAdapter implements BreederManagementProfile
         return this.adoptionApplicationRepository.countByStatus(breederId, ApplicationStatus.CONSULTATION_PENDING);
     }
 
-    findRecentApplications(
-        breederId: string,
-        limit: number,
-    ): Promise<BreederManagementRecentApplicationRecord[]> {
+    findRecentApplications(breederId: string, limit: number): Promise<BreederManagementRecentApplicationRecord[]> {
         return this.adoptionApplicationRepository.findRecentByBreeder(breederId, limit);
     }
 

@@ -1,8 +1,6 @@
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
 
-export const BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT = Symbol(
-    'BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT',
-);
+export const BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT = Symbol('BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT');
 
 export interface BreederManagementApplicationRecord {
     _id: { toString(): string };
@@ -33,7 +31,5 @@ export interface BreederManagementApplicationWorkflowPort {
     ): Promise<BreederManagementApplicationRecord | null>;
     updateStatus(applicationId: string, status: ApplicationStatus): Promise<void>;
     incrementCompletedAdoptions(breederId: string): Promise<void>;
-    notifyConsultationCompleted(
-        command: BreederManagementConsultationCompletedNotificationCommand,
-    ): Promise<void>;
+    notifyConsultationCompleted(command: BreederManagementConsultationCompletedNotificationCommand): Promise<void>;
 }

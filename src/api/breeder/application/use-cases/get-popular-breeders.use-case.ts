@@ -26,11 +26,7 @@ export class GetPopularBreedersUseCase {
         const availableBreederIdSet = new Set(availableBreederIds);
 
         return breeders.map((breeder) =>
-            this.breederExploreCardMapperService.toPopularCard(
-                breeder,
-                this.breederFileUrlPort,
-                availableBreederIdSet,
-            ),
+            this.breederExploreCardMapperService.toPopularCard(breeder, this.breederFileUrlPort, availableBreederIdSet),
         );
     }
 }

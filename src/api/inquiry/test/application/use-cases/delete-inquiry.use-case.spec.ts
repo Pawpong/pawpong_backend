@@ -13,11 +13,7 @@ describe('문의 삭제 유스케이스', () => {
         logError: jest.fn(),
     };
 
-    const useCase = new DeleteInquiryUseCase(
-        inquiryCommand as any,
-        new InquiryCommandPolicyService(),
-        logger as any,
-    );
+    const useCase = new DeleteInquiryUseCase(inquiryCommand as any, new InquiryCommandPolicyService(), logger as any);
 
     const mockInquiry = {
         id: 'inquiry-1',

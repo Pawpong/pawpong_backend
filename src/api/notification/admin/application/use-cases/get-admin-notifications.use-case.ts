@@ -16,10 +16,7 @@ export class GetAdminNotificationsUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(
-        adminUserId: string,
-        filter: NotificationAdminListQuery,
-    ): Promise<NotificationAdminPageResult> {
+    async execute(adminUserId: string, filter: NotificationAdminListQuery): Promise<NotificationAdminPageResult> {
         this.logger.logStart('getNotifications', '관리자 알림 목록 조회 시작', {
             adminUserId,
             filter,

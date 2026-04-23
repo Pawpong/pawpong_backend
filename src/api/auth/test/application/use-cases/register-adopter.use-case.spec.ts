@@ -76,12 +76,12 @@ describe('입양자 회원가입 유스케이스', () => {
     });
 
     it('유효하지 않은 tempId 형식이면 도메인 검증 예외를 던진다', async () => {
-        await expect(
-            useCase.execute({ ...baseDto, tempId: 'invalid-format' } as any),
-        ).rejects.toThrow(DomainValidationError);
-        await expect(
-            useCase.execute({ ...baseDto, tempId: 'invalid-format' } as any),
-        ).rejects.toThrow('유효하지 않은 임시 ID 형식입니다.');
+        await expect(useCase.execute({ ...baseDto, tempId: 'invalid-format' } as any)).rejects.toThrow(
+            DomainValidationError,
+        );
+        await expect(useCase.execute({ ...baseDto, tempId: 'invalid-format' } as any)).rejects.toThrow(
+            '유효하지 않은 임시 ID 형식입니다.',
+        );
     });
 
     it('이미 가입된 소셜 계정이면 도메인 충돌 예외를 던진다', async () => {
@@ -94,19 +94,21 @@ describe('입양자 회원가입 유스케이스', () => {
     it('이메일이 없으면 도메인 검증 예외를 던진다', async () => {
         authRegistrationPort.findAdopterBySocialAuth.mockResolvedValue(null);
 
-        await expect(
-            useCase.execute({ ...baseDto, email: undefined } as any),
-        ).rejects.toThrow(DomainValidationError);
-        await expect(useCase.execute({ ...baseDto, email: undefined } as any)).rejects.toThrow('이메일 정보가 필요합니다.');
+        await expect(useCase.execute({ ...baseDto, email: undefined } as any)).rejects.toThrow(DomainValidationError);
+        await expect(useCase.execute({ ...baseDto, email: undefined } as any)).rejects.toThrow(
+            '이메일 정보가 필요합니다.',
+        );
     });
 
     it('닉네임이 없으면 도메인 검증 예외를 던진다', async () => {
         authRegistrationPort.findAdopterBySocialAuth.mockResolvedValue(null);
 
-        await expect(
-            useCase.execute({ ...baseDto, nickname: undefined } as any),
-        ).rejects.toThrow(DomainValidationError);
-        await expect(useCase.execute({ ...baseDto, nickname: undefined } as any)).rejects.toThrow('닉네임이 필요합니다.');
+        await expect(useCase.execute({ ...baseDto, nickname: undefined } as any)).rejects.toThrow(
+            DomainValidationError,
+        );
+        await expect(useCase.execute({ ...baseDto, nickname: undefined } as any)).rejects.toThrow(
+            '닉네임이 필요합니다.',
+        );
     });
 
     it('닉네임이 이미 사용 중이면 도메인 충돌 예외를 던진다', async () => {

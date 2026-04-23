@@ -59,7 +59,12 @@ describe('푸시 알림 발송 유스케이스', () => {
             { token: 'valid-1', success: true, invalidToken: false },
             { token: 'invalid-2', success: false, invalidToken: true, error: 'messaging/invalid-registration-token' },
             { token: 'valid-3', success: true, invalidToken: false },
-            { token: 'invalid-4', success: false, invalidToken: true, error: 'messaging/registration-token-not-registered' },
+            {
+                token: 'invalid-4',
+                success: false,
+                invalidToken: true,
+                error: 'messaging/registration-token-not-registered',
+            },
         ];
         pushPort.sendToTokens.mockResolvedValueOnce(results);
 

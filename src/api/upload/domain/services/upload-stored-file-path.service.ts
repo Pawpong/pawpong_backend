@@ -32,7 +32,9 @@ export class UploadStoredFilePathService {
     }
 
     private stripBucketPrefix(filePath: string, activeBucketName: string): string {
-        const bucketNames = new Set([activeBucketName, ...UploadStoredFilePathService.legacyBucketNames].filter(Boolean));
+        const bucketNames = new Set(
+            [activeBucketName, ...UploadStoredFilePathService.legacyBucketNames].filter(Boolean),
+        );
 
         for (const bucketName of bucketNames) {
             if (filePath.startsWith(`${bucketName}/`)) {

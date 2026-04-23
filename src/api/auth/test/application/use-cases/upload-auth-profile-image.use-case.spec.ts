@@ -1,6 +1,16 @@
-import type { AuthProfileImageOwnerRole, AuthProfileImageTargetPort } from '../../../application/ports/auth-profile-image-target.port';
-import type { AuthTempUploadDocument, AuthTempUploadInfo, AuthTempUploadPort } from '../../../application/ports/auth-temp-upload.port';
-import type { AuthUploadFileStorePort, AuthUploadedStorageFile } from '../../../application/ports/auth-upload-file-store.port';
+import type {
+    AuthProfileImageOwnerRole,
+    AuthProfileImageTargetPort,
+} from '../../../application/ports/auth-profile-image-target.port';
+import type {
+    AuthTempUploadDocument,
+    AuthTempUploadInfo,
+    AuthTempUploadPort,
+} from '../../../application/ports/auth-temp-upload.port';
+import type {
+    AuthUploadFileStorePort,
+    AuthUploadedStorageFile,
+} from '../../../application/ports/auth-upload-file-store.port';
 import { AuthProfileImageFilePolicyService } from '../../../domain/services/auth-profile-image-file-policy.service';
 import { UploadAuthProfileImageUseCase } from '../../../application/use-cases/upload-auth-profile-image.use-case';
 

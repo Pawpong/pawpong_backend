@@ -18,7 +18,10 @@ function makeSnapshot(id: string): NoticeSnapshot {
 }
 
 describe('NoticePageAssemblerService', () => {
-    const service = new NoticePageAssemblerService(new NoticeItemMapperService(), new NoticePaginationAssemblerService());
+    const service = new NoticePageAssemblerService(
+        new NoticeItemMapperService(),
+        new NoticePaginationAssemblerService(),
+    );
 
     it('snapshot 배열을 매핑하여 페이지네이션 구조로 반환한다', () => {
         const result = service.build([makeSnapshot('n-1'), makeSnapshot('n-2')], 1, 10, 2);

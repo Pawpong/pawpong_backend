@@ -63,7 +63,12 @@ describe('BreederManagementProfileAssemblerService', () => {
     });
 
     it('parentPets의 photoFileName은 photos에서 제외한다', () => {
-        const parentPet = { _id: 'p-1', name: '엄마', photoFileName: 'main.jpg', photos: ['main.jpg', 'extra.jpg'] } as any;
+        const parentPet = {
+            _id: 'p-1',
+            name: '엄마',
+            photoFileName: 'main.jpg',
+            photos: ['main.jpg', 'extra.jpg'],
+        } as any;
         const result = service.toResponse(makeBreeder(), [parentPet], [], fileUrlPort);
         expect((result.parentPetInfo as any)?.[0].photos).toEqual(['https://cdn/extra.jpg']);
     });

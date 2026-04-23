@@ -26,10 +26,7 @@ export class ChatRoomCommandController {
     @Roles('adopter')
     @HttpCode(200)
     @ApiCreateOrGetRoomEndpoint()
-    async createOrGetRoom(
-        @CurrentUser() user: { userId: string; role: string },
-        @Body() dto: CreateRoomRequestDto,
-    ) {
+    async createOrGetRoom(@CurrentUser() user: { userId: string; role: string }, @Body() dto: CreateRoomRequestDto) {
         this.chatPolicyService.ensureAdopterRole(user.role);
         const room = await this.createOrGetRoomUseCase.execute(user.userId, {
             breederId: dto.breederId,
@@ -41,10 +38,7 @@ export class ChatRoomCommandController {
     @Delete('rooms/:roomId')
     @Roles('adopter', 'breeder')
     @ApiCloseRoomEndpoint()
-    async closeRoom(
-        @CurrentUser() user: { userId: string },
-        @Param('roomId') roomId: string,
-    ) {
+    async closeRoom(@CurrentUser() user: { userId: string }, @Param('roomId') roomId: string) {
         await this.closeRoomUseCase.execute(user.userId, roomId);
         return { success: true };
     }

@@ -60,7 +60,10 @@ export class BreederVerificationAdminPolicyService {
         );
     }
 
-    shouldClearLevelChangeRequest(breeder: BreederVerificationAdminBreederSnapshot, verificationStatus: string): boolean {
+    shouldClearLevelChangeRequest(
+        breeder: BreederVerificationAdminBreederSnapshot,
+        verificationStatus: string,
+    ): boolean {
         return (
             !!breeder.verification?.isLevelChangeRequested &&
             (verificationStatus === VerificationStatus.APPROVED || verificationStatus === VerificationStatus.REJECTED)

@@ -10,7 +10,10 @@ describe('AdopterApplicationCustomAnswerBuilderService', () => {
     ] as any[];
 
     it('각 응답에 questionLabel과 questionType을 포함한다', () => {
-        const result = service.build({ customResponses: [{ questionId: 'q1', answer: '답변' }] } as any, customQuestions);
+        const result = service.build(
+            { customResponses: [{ questionId: 'q1', answer: '답변' }] } as any,
+            customQuestions,
+        );
         expect(result).toHaveLength(1);
         expect(result[0].questionLabel).toBe('질문1');
         expect(result[0].questionType).toBe('text');

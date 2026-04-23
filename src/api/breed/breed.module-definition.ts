@@ -25,11 +25,7 @@ const BREED_SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: Breed.name, sche
 
 export const BREED_MODULE_IMPORTS = [BREED_SCHEMA_IMPORTS];
 
-export const BREED_MODULE_CONTROLLERS = [
-    BreedController,
-    BreedAdminQueryController,
-    BreedAdminCommandController,
-];
+export const BREED_MODULE_CONTROLLERS = [BreedController, BreedAdminQueryController, BreedAdminCommandController];
 
 const BREED_USE_CASE_PROVIDERS = [
     GetBreedsUseCase,

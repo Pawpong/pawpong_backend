@@ -1,10 +1,7 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
-import {
-    AdoptionApplication,
-    AdoptionApplicationSchema,
-} from '../../../schema/adoption-application.schema';
+import { AdoptionApplication, AdoptionApplicationSchema } from '../../../schema/adoption-application.schema';
 import { Admin, AdminSchema } from '../../../schema/admin.schema';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 import { SystemStats, SystemStatsSchema } from '../../../schema/system-stats.schema';

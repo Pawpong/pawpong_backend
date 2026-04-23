@@ -15,9 +15,7 @@ describe('브리더 입양 신청 폼 공개 조회 유스케이스', () => {
     const mockBreeder = { _id: 'breeder-1', applicationForm: [] };
     const mockBreederWithCustomForm = {
         _id: 'breeder-1',
-        applicationForm: [
-            { id: 'custom-1', type: 'text', label: '반려동물 경험을 알려주세요.', required: false },
-        ],
+        applicationForm: [{ id: 'custom-1', type: 'text', label: '반려동물 경험을 알려주세요.', required: false }],
     };
 
     beforeEach(() => {

@@ -15,12 +15,7 @@ export class AuthSignupValidationService {
         }
     }
 
-    ensureRequiredBreederAgreements(
-        agreements?: {
-            termsOfService?: boolean;
-            privacyPolicy?: boolean;
-        },
-    ): void {
+    ensureRequiredBreederAgreements(agreements?: { termsOfService?: boolean; privacyPolicy?: boolean }): void {
         if (!agreements?.termsOfService || !agreements?.privacyPolicy) {
             throw new DomainValidationError('필수 약관에 동의해야 합니다.');
         }

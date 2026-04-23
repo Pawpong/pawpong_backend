@@ -7,16 +7,9 @@ import { DeleteInquiryUseCase } from './application/use-cases/delete-inquiry.use
 import { UpdateInquiryUseCase } from './application/use-cases/update-inquiry.use-case';
 import { INQUIRY_RESPONSE_MESSAGE_EXAMPLES } from './constants/inquiry-response-messages';
 import { InquiryProtectedController } from './decorator/inquiry-controller.decorator';
-import {
-    InquiryCreateRequestDto,
-    InquiryUpdateRequestDto,
-} from './dto/request/inquiry-create-request.dto';
+import { InquiryCreateRequestDto, InquiryUpdateRequestDto } from './dto/request/inquiry-create-request.dto';
 import { InquiryCreateResponseDto } from './dto/response/inquiry-create-response.dto';
-import {
-    ApiCreateInquiryEndpoint,
-    ApiDeleteInquiryEndpoint,
-    ApiUpdateInquiryEndpoint,
-} from './swagger';
+import { ApiCreateInquiryEndpoint, ApiDeleteInquiryEndpoint, ApiUpdateInquiryEndpoint } from './swagger';
 
 @InquiryProtectedController('adopter')
 export class InquiryAdopterCommandController {

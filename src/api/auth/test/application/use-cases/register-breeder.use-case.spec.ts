@@ -114,8 +114,6 @@ describe('브리더 회원가입 유스케이스', () => {
         authRegistrationPort.findAdopterByEmail.mockResolvedValue({ emailAddress: 'breeder@test.com' });
 
         await expect(useCase.execute(baseDto as any)).rejects.toThrow(DomainConflictError);
-        await expect(useCase.execute(baseDto as any)).rejects.toThrow(
-            '해당 이메일로 입양자 계정이 이미 존재합니다.',
-        );
+        await expect(useCase.execute(baseDto as any)).rejects.toThrow('해당 이메일로 입양자 계정이 이미 존재합니다.');
     });
 });

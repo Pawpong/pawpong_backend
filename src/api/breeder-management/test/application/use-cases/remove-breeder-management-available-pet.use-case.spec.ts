@@ -27,7 +27,10 @@ describe('브리더 분양 개체 삭제 유스케이스', () => {
         const result = await useCase.execute('breeder-1', 'pet-2');
 
         expect(result.message).toBeDefined();
-        expect(breederManagementPetCommandPort.findAvailablePetByIdAndBreeder).toHaveBeenCalledWith('pet-2', 'breeder-1');
+        expect(breederManagementPetCommandPort.findAvailablePetByIdAndBreeder).toHaveBeenCalledWith(
+            'pet-2',
+            'breeder-1',
+        );
         expect(breederManagementPetCommandPort.deleteAvailablePet).toHaveBeenCalledWith('pet-2');
     });
 

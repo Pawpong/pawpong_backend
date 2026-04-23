@@ -12,7 +12,10 @@ export class AuthPhoneVerificationAlimtalkAdapter implements AuthPhoneVerificati
 
     constructor(private readonly alimtalkService: AlimtalkService) {}
 
-    async sendVerificationCode(phoneNumber: string, verificationCode: string): Promise<AuthPhoneVerificationSendResult> {
+    async sendVerificationCode(
+        phoneNumber: string,
+        verificationCode: string,
+    ): Promise<AuthPhoneVerificationSendResult> {
         const result = await this.alimtalkService.sendVerificationCode(phoneNumber, verificationCode);
 
         if (result.success) {

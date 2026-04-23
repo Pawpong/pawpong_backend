@@ -255,7 +255,11 @@ export class InquiryRepository {
      */
     async findAdopterNickname(userId: string): Promise<InquiryAdopterNicknameRecord | null> {
         try {
-            return await this.adopterModel.findById(userId).select('nickname').lean<InquiryAdopterNicknameRecord>().exec();
+            return await this.adopterModel
+                .findById(userId)
+                .select('nickname')
+                .lean<InquiryAdopterNicknameRecord>()
+                .exec();
         } catch (error) {
             throw new Error(`입양자 닉네임 조회 실패: ${getErrorMessage(error)}`);
         }
@@ -281,9 +285,7 @@ export class InquiryRepository {
      * @param breederId 브리더 ID
      * @returns name, profileImageFileName 또는 null
      */
-    async findBreederInfo(
-        breederId: string,
-    ): Promise<InquiryBreederInfoRecord | null> {
+    async findBreederInfo(breederId: string): Promise<InquiryBreederInfoRecord | null> {
         try {
             return await this.breederModel
                 .findById(breederId)

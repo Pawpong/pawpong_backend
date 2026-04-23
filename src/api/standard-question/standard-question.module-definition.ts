@@ -40,10 +40,7 @@ const STANDARD_QUESTION_USE_CASE_PROVIDERS = [
     ReseedStandardQuestionsUseCase,
 ];
 
-const STANDARD_QUESTION_DOMAIN_PROVIDERS = [
-    StandardQuestionResultMapperService,
-    StandardQuestionSeedCatalogService,
-];
+const STANDARD_QUESTION_DOMAIN_PROVIDERS = [StandardQuestionResultMapperService, StandardQuestionSeedCatalogService];
 
 const STANDARD_QUESTION_INFRASTRUCTURE_PROVIDERS = [
     StandardQuestionRepository,

@@ -4,7 +4,10 @@ import { BreederVerificationAdminPolicyService } from '../../../domain/services/
 import { BreederVerificationAdminLevelChangeItemMapperService } from '../../../domain/services/breeder-verification-admin-level-change-item-mapper.service';
 import { BreederVerificationAdminListItemMapperService } from '../../../domain/services/breeder-verification-admin-list-item-mapper.service';
 import { BreederPaginationAssemblerService } from '../../../../../domain/services/breeder-pagination-assembler.service';
-import { BreederVerificationAdminReaderPort, BreederVerificationAdminBreederSnapshot } from '../../../application/ports/breeder-verification-admin-reader.port';
+import {
+    BreederVerificationAdminReaderPort,
+    BreederVerificationAdminBreederSnapshot,
+} from '../../../application/ports/breeder-verification-admin-reader.port';
 
 const adminWithPermission = { id: 'admin-1', name: '관리자', permissions: { canManageBreeders: true } };
 
@@ -25,7 +28,11 @@ function makeBreederSnapshot(): BreederVerificationAdminBreederSnapshot {
     };
 }
 
-function makeReader(items: BreederVerificationAdminBreederSnapshot[] = [], total = 0, admin: any = adminWithPermission): BreederVerificationAdminReaderPort {
+function makeReader(
+    items: BreederVerificationAdminBreederSnapshot[] = [],
+    total = 0,
+    admin: any = adminWithPermission,
+): BreederVerificationAdminReaderPort {
     return {
         findAdminById: jest.fn().mockResolvedValue(admin),
         getLevelChangeRequests: jest.fn().mockResolvedValue({ items, total }),
@@ -44,7 +51,12 @@ describe('레벨 변경 요청 목록 조회 유스케이스', () => {
     const paginationAssembler = new BreederPaginationAssemblerService();
 
     it('레벨 변경 요청 목록을 반환한다', async () => {
-        const useCase = new GetLevelChangeRequestsUseCase(makeReader([makeBreederSnapshot()], 1), policy, levelChangeMapper, paginationAssembler);
+        const useCase = new GetLevelChangeRequestsUseCase(
+            makeReader([makeBreederSnapshot()], 1),
+            policy,
+            levelChangeMapper,
+            paginationAssembler,
+        );
 
         const result = await useCase.execute('admin-1', { pageNumber: 1, itemsPerPage: 10 });
 
@@ -53,7 +65,12 @@ describe('레벨 변경 요청 목록 조회 유스케이스', () => {
     });
 
     it('요청이 없으면 빈 목록을 반환한다', async () => {
-        const useCase = new GetLevelChangeRequestsUseCase(makeReader([], 0), policy, levelChangeMapper, paginationAssembler);
+        const useCase = new GetLevelChangeRequestsUseCase(
+            makeReader([], 0),
+            policy,
+            levelChangeMapper,
+            paginationAssembler,
+        );
 
         const result = await useCase.execute('admin-1', {});
 

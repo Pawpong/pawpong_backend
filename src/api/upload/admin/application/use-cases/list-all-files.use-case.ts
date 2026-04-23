@@ -19,10 +19,7 @@ export class ListAllFilesUseCase {
 
         try {
             const result = await this.uploadAdminStorage.list(prefix, 1000);
-            const response = this.uploadAdminStorageListAssemblerService.build(
-                result.files,
-                result.isTruncated,
-            );
+            const response = this.uploadAdminStorageListAssemblerService.build(result.files, result.isTruncated);
 
             this.logger.logSuccess('listAllFiles', '파일 목록 조회 완료', {
                 totalFiles: response.totalFiles,

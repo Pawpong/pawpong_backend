@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import type { AdminDocument } from '../../../../schema/admin.schema';
 import { AuthAdminRepository } from '../../repository/auth-admin.repository';
-import {
-    AuthAdminReaderPort,
-    AuthAdminSnapshot,
-} from '../application/ports/auth-admin-reader.port';
+import { AuthAdminReaderPort, AuthAdminSnapshot } from '../application/ports/auth-admin-reader.port';
 
 @Injectable()
 export class AuthAdminRepositoryAdapter implements AuthAdminReaderPort {

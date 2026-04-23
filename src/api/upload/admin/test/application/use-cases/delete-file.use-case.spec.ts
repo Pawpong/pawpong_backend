@@ -19,11 +19,7 @@ describe('관리자 파일 삭제 유스케이스', () => {
             list: jest.fn(),
             delete: jest.fn().mockResolvedValue(undefined),
         };
-        const useCase = new DeleteFileUseCase(
-            uploadAdminStorage,
-            new UploadAdminStoragePolicyService(),
-            logger,
-        );
+        const useCase = new DeleteFileUseCase(uploadAdminStorage, new UploadAdminStoragePolicyService(), logger);
 
         await expect(useCase.execute('folder/file.jpg')).resolves.toBeUndefined();
         expect(uploadAdminStorage.delete).toHaveBeenCalledWith('folder/file.jpg');
@@ -34,11 +30,7 @@ describe('관리자 파일 삭제 유스케이스', () => {
             list: jest.fn(),
             delete: jest.fn().mockRejectedValue(new Error('storage down')),
         };
-        const useCase = new DeleteFileUseCase(
-            uploadAdminStorage,
-            new UploadAdminStoragePolicyService(),
-            logger,
-        );
+        const useCase = new DeleteFileUseCase(uploadAdminStorage, new UploadAdminStoragePolicyService(), logger);
 
         await expect(useCase.execute('folder/file.jpg')).rejects.toThrow('storage down');
     });

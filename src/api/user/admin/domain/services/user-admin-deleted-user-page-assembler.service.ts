@@ -11,11 +11,7 @@ import type {
 export class UserAdminDeletedUserPageAssemblerService {
     constructor(private readonly userAdminPaginationAssemblerService: UserAdminPaginationAssemblerService) {}
 
-    build(
-        result: UserAdminDeletedUserListResultSnapshot,
-        page: number,
-        limit: number,
-    ): UserAdminDeletedUserPageResult {
+    build(result: UserAdminDeletedUserListResultSnapshot, page: number, limit: number): UserAdminDeletedUserPageResult {
         const items = result.items.map(
             (user): UserAdminDeletedUserItemResult => ({
                 userId: user.id,

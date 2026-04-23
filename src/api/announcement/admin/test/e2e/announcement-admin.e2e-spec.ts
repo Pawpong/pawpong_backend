@@ -13,7 +13,7 @@ describe('공지사항 관리자 종단간 테스트', () => {
 
     beforeAll(async () => {
         app = await createTestingApp();
-        adminToken = await getAdminToken(app) || '';
+        adminToken = (await getAdminToken(app)) || '';
         if (!adminToken) console.log('주의: 관리자 토큰 획득 실패');
     }, 30000);
 
@@ -24,7 +24,10 @@ describe('공지사항 관리자 종단간 테스트', () => {
 
     describe('POST /api/announcement-관리자/announcement', () => {
         it('공지사항(팝업) 생성 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .post('/api/announcement-admin/announcement')
@@ -56,7 +59,10 @@ describe('공지사항 관리자 종단간 테스트', () => {
 
     describe('GET /api/announcement-관리자/announcements', () => {
         it('공지사항 목록 조회 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get('/api/announcement-admin/announcements')
@@ -70,7 +76,10 @@ describe('공지사항 관리자 종단간 테스트', () => {
 
     describe('DELETE /api/announcement-관리자/announcement/:id', () => {
         it('공지사항 삭제 성공', async () => {
-            if (!adminToken || !createdAnnouncementId) { console.log('주의: 스킵'); return; }
+            if (!adminToken || !createdAnnouncementId) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .delete(`/api/announcement-admin/announcement/${createdAnnouncementId}`)

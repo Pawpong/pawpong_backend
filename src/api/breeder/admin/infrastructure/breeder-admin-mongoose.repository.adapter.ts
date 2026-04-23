@@ -10,7 +10,10 @@ import {
     BreederAdminWriterPort,
 } from '../application/ports/breeder-admin-writer.port';
 import { BreederAdminRepository } from '../repository/breeder-admin.repository';
-import type { BreederAdminAdminDocumentRecord, BreederAdminBreederDocumentRecord } from '../types/breeder-admin-record.type';
+import type {
+    BreederAdminAdminDocumentRecord,
+    BreederAdminBreederDocumentRecord,
+} from '../types/breeder-admin-record.type';
 
 @Injectable()
 export class BreederAdminMongooseRepositoryAdapter implements BreederAdminReaderPort, BreederAdminWriterPort {

@@ -5,7 +5,10 @@ import { isMongoObjectId } from '../../../../common/utils/mongo-object-id.util';
 import { AnnouncementPublicItem } from '../../application/ports/announcement-public-reader.port';
 import { AnnouncementWriterPort } from '../application/ports/announcement-writer.port';
 import { AnnouncementRepository } from '../../repository/announcement.repository';
-import type { AnnouncementCreateCommand, AnnouncementUpdateCommand } from '../application/types/announcement-command.type';
+import type {
+    AnnouncementCreateCommand,
+    AnnouncementUpdateCommand,
+} from '../application/types/announcement-command.type';
 
 @Injectable()
 export class AnnouncementMongooseWriterAdapter implements AnnouncementWriterPort {

@@ -52,7 +52,10 @@ export class FeedVideoStreamingService {
         throw new DomainValidationError('허용되지 않은 파일 형식입니다.');
     }
 
-    getPreloadTargets(videoId: string, resolutions: number[] = FeedVideoStreamingService.DEFAULT_RESOLUTIONS): FeedVideoSegmentTarget[] {
+    getPreloadTargets(
+        videoId: string,
+        resolutions: number[] = FeedVideoStreamingService.DEFAULT_RESOLUTIONS,
+    ): FeedVideoSegmentTarget[] {
         return resolutions.flatMap((height) =>
             Array.from({ length: 3 }, (_, index) => this.createSegmentTarget(videoId, height, index)),
         );
@@ -65,7 +68,9 @@ export class FeedVideoStreamingService {
         resolutions: number[] = FeedVideoStreamingService.DEFAULT_RESOLUTIONS,
     ): FeedVideoSegmentTarget[] {
         return resolutions.flatMap((height) =>
-            Array.from({ length: count }, (_, index) => this.createSegmentTarget(videoId, height, currentSegment + index)),
+            Array.from({ length: count }, (_, index) =>
+                this.createSegmentTarget(videoId, height, currentSegment + index),
+            ),
         );
     }
 

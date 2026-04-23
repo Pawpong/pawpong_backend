@@ -26,10 +26,7 @@ export const NOTIFICATION_ADMIN_MODULE_CONTROLLERS = [
     NotificationAdminStatsController,
 ];
 
-const NOTIFICATION_ADMIN_USE_CASE_PROVIDERS = [
-    GetAdminNotificationsUseCase,
-    GetNotificationAdminStatsUseCase,
-];
+const NOTIFICATION_ADMIN_USE_CASE_PROVIDERS = [GetAdminNotificationsUseCase, GetNotificationAdminStatsUseCase];
 
 const NOTIFICATION_ADMIN_DOMAIN_PROVIDERS = [
     NotificationAdminPaginationAssemblerService,

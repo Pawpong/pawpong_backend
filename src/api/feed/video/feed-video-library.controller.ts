@@ -18,7 +18,7 @@ export class FeedVideoLibraryController {
         @CurrentUser('userId') userId: string,
         @Query() query: FeedPaginationQueryDto,
     ): Promise<MyVideoListResponseDto> {
-        return (await this.getMyVideosUseCase.execute(userId, query.page, query.limit)) as
-            MyVideoListResponseDto & FeedMyVideoListResult;
+        return (await this.getMyVideosUseCase.execute(userId, query.page, query.limit)) as MyVideoListResponseDto &
+            FeedMyVideoListResult;
     }
 }

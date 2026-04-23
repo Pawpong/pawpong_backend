@@ -1,8 +1,4 @@
-import type {
-    FeedPopularTagResult,
-    FeedTagSearchResult,
-    FeedTagSuggestionResult,
-} from '../types/feed-tag-result.type';
+import type { FeedPopularTagResult, FeedTagSearchResult, FeedTagSuggestionResult } from '../types/feed-tag-result.type';
 
 export interface SearchFeedVideosByTagUseCasePort {
     execute(tag: string, page?: number, limit?: number): Promise<FeedTagSearchResult>;

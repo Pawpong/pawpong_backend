@@ -7,10 +7,7 @@ describe('품종 ID 조회 유스케이스 (관리자)', () => {
         findById: jest.fn(),
     };
 
-    const useCase = new GetBreedByIdUseCase(
-        breedAdminReader as any,
-        new BreedAdminResultMapperService(),
-    );
+    const useCase = new GetBreedByIdUseCase(breedAdminReader as any, new BreedAdminResultMapperService());
 
     const mockBreed = {
         id: 'breed-1',

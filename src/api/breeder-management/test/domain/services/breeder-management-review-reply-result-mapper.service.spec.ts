@@ -14,9 +14,7 @@ describe('브리더 관리 후기 답글 결과 매퍼', () => {
             replyWrittenAt: replyWrittenAt.toISOString(),
         });
 
-        expect(
-            service.toReviewReplyUpdatedResult('review-id', '수정된 답글', replyWrittenAt, replyUpdatedAt),
-        ).toEqual({
+        expect(service.toReviewReplyUpdatedResult('review-id', '수정된 답글', replyWrittenAt, replyUpdatedAt)).toEqual({
             reviewId: 'review-id',
             replyContent: '수정된 답글',
             replyWrittenAt: replyWrittenAt.toISOString(),

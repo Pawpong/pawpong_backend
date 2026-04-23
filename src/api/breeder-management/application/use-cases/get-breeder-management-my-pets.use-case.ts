@@ -39,7 +39,12 @@ export class GetBreederManagementMyPetsUseCase {
         const items = snapshot.pets.map((pet) =>
             this.breederManagementMyPetMapperService.toItem(pet, snapshot.applicationCountMap),
         );
-        const paginationResponse = this.breederManagementPaginationAssemblerService.toPage(items, page, limit, snapshot.total);
+        const paginationResponse = this.breederManagementPaginationAssemblerService.toPage(
+            items,
+            page,
+            limit,
+            snapshot.total,
+        );
 
         return {
             ...paginationResponse,

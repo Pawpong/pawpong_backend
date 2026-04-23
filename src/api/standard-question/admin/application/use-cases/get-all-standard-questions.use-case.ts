@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { STANDARD_QUESTION_READER_PORT, type StandardQuestionReaderPort } from '../../../application/ports/standard-question-reader.port';
+import {
+    STANDARD_QUESTION_READER_PORT,
+    type StandardQuestionReaderPort,
+} from '../../../application/ports/standard-question-reader.port';
 import { StandardQuestionResultMapperService } from '../../../domain/services/standard-question-result-mapper.service';
 import type { StandardQuestionResult } from '../types/standard-question-result.type';
 

@@ -24,13 +24,15 @@ export class AdopterProfileResultMapperService {
                 breederProfileImageUrl: fav.breederProfileImageUrl,
                 breederLocation: fav.breederLocation,
             })),
-            adoptionApplicationList: (adopter.adoptionApplicationList || []).map((app: AdopterApplicationEmbeddedRecord) => ({
-                applicationId: app.applicationId,
-                breederId: app.targetBreederId,
-                petId: app.targetPetId,
-                applicationStatus: app.applicationStatus,
-                appliedAt: app.appliedAt,
-            })),
+            adoptionApplicationList: (adopter.adoptionApplicationList || []).map(
+                (app: AdopterApplicationEmbeddedRecord) => ({
+                    applicationId: app.applicationId,
+                    breederId: app.targetBreederId,
+                    petId: app.targetPetId,
+                    applicationStatus: app.applicationStatus,
+                    appliedAt: app.appliedAt,
+                }),
+            ),
             writtenReviewList: (adopter.writtenReviewList || []).map((review: AdopterWrittenReviewEmbeddedRecord) => ({
                 reviewId: review.reviewId,
                 breederId: review.targetBreederId,

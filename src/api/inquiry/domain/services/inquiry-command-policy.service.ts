@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { DomainValidationError } from '../../../../common/error/domain.error';
-import {
-    InquiryBreederInfoSnapshot,
-    InquiryCommandSnapshot,
-} from '../../application/ports/inquiry-command.port';
+import { InquiryBreederInfoSnapshot, InquiryCommandSnapshot } from '../../application/ports/inquiry-command.port';
 import type { InquiryAnswerCreateCommand } from '../../application/types/inquiry-command.type';
 
 @Injectable()

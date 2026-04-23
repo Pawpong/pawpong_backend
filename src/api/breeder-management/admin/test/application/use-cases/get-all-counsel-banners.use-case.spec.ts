@@ -1,6 +1,9 @@
 import { BreederManagementBannerResultMapperService } from '../../../domain/services/breeder-management-banner-result-mapper.service';
 import { GetAllCounselBannersUseCase } from '../../../application/use-cases/get-all-counsel-banners.use-case';
-import { BreederManagementAdminBannerReaderPort, CounselBannerSnapshot } from '../../../application/ports/breeder-management-admin-banner-reader.port';
+import {
+    BreederManagementAdminBannerReaderPort,
+    CounselBannerSnapshot,
+} from '../../../application/ports/breeder-management-admin-banner-reader.port';
 import { BreederManagementFileUrlPort } from '../../../../application/ports/breeder-management-file-url.port';
 
 function makeCounselBanner(overrides: Partial<CounselBannerSnapshot> = {}): CounselBannerSnapshot {

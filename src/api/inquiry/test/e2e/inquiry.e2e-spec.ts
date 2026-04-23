@@ -42,9 +42,7 @@ describe('문의 종단간 테스트', () => {
 
     describe('GET /api/inquiry (공개)', () => {
         it('공개 문의 목록 조회 성공', async () => {
-            const response = await request(app.getHttpServer())
-                .get('/api/inquiry')
-                .expect(200);
+            const response = await request(app.getHttpServer()).get('/api/inquiry').expect(200);
 
             expect(response.body.success).toBe(true);
             expect(response.body.data).toBeDefined();

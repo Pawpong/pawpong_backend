@@ -55,9 +55,7 @@ describe('지역 수정 유스케이스', () => {
             new DistrictAdminResultMapperService(),
         );
 
-        await expect(useCase.execute('missing', { districts: ['구'] })).rejects.toBeInstanceOf(
-            DomainNotFoundError,
-        );
+        await expect(useCase.execute('missing', { districts: ['구'] })).rejects.toBeInstanceOf(DomainNotFoundError);
     });
 
     it('변경하려는 city가 중복이면 예외을 던진다', async () => {
@@ -88,8 +86,6 @@ describe('지역 수정 유스케이스', () => {
             new DistrictAdminResultMapperService(),
         );
 
-        await expect(useCase.execute('district-1', { city: '서울특별시' })).rejects.toBeInstanceOf(
-            DomainConflictError,
-        );
+        await expect(useCase.execute('district-1', { city: '서울특별시' })).rejects.toBeInstanceOf(DomainConflictError);
     });
 });

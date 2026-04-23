@@ -68,8 +68,6 @@ describe('입양자 관리자 후기 삭제 유스케이스', () => {
             new AdopterAdminReviewDeleteResultMapperService(),
         );
 
-        await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).rejects.toBeInstanceOf(
-            DomainValidationError,
-        );
+        await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).rejects.toBeInstanceOf(DomainValidationError);
     });
 });

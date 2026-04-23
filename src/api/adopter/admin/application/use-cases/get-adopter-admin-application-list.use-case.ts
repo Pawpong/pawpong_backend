@@ -16,7 +16,10 @@ export class GetAdopterAdminApplicationListUseCase {
         private readonly adopterAdminApplicationListAssemblerService: AdopterAdminApplicationListAssemblerService,
     ) {}
 
-    async execute(adminId: string, filters: AdopterAdminApplicationListQuery): Promise<AdopterAdminApplicationListResult> {
+    async execute(
+        adminId: string,
+        filters: AdopterAdminApplicationListQuery,
+    ): Promise<AdopterAdminApplicationListResult> {
         const admin = await this.adopterAdminReader.findAdminById(adminId);
         this.adopterAdminPolicyService.assertCanViewStatistics(admin);
 

@@ -6,10 +6,7 @@ describe('품종 전체 목록 조회 유스케이스 (관리자)', () => {
         readAll: jest.fn(),
     };
 
-    const useCase = new GetAllBreedsAdminUseCase(
-        breedAdminReader as any,
-        new BreedAdminResultMapperService(),
-    );
+    const useCase = new GetAllBreedsAdminUseCase(breedAdminReader as any, new BreedAdminResultMapperService());
 
     const mockBreeds = [
         {

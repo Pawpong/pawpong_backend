@@ -21,10 +21,7 @@ describe('AlimtalkAdminService', () => {
             refreshTemplateCache: jest.fn(),
         };
 
-        const service = new AlimtalkAdminService(
-            alimtalkTemplateModel as never,
-            alimtalkService as never,
-        );
+        const service = new AlimtalkAdminService(alimtalkTemplateModel as never, alimtalkService as never);
 
         return {
             service,
@@ -55,9 +52,7 @@ describe('AlimtalkAdminService', () => {
                 requiredVariables: [],
                 buttons: [],
             }),
-        ).rejects.toThrow(
-            new DomainConflictError('이미 존재하는 템플릿 코드입니다: WELCOME'),
-        );
+        ).rejects.toThrow(new DomainConflictError('이미 존재하는 템플릿 코드입니다: WELCOME'));
     });
 
     it('캐시 갱신 실패는 원본 오류를 그대로 전파한다', async () => {

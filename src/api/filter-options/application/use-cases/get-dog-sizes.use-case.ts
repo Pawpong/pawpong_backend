@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import {
-    DogSizeFilterOption,
-    FilterOptionsCatalogService,
-} from '../../domain/services/filter-options-catalog.service';
+import { DogSizeFilterOption, FilterOptionsCatalogService } from '../../domain/services/filter-options-catalog.service';
 
 @Injectable()
 export class GetDogSizesUseCase {

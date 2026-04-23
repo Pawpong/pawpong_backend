@@ -11,11 +11,7 @@ import type {
 export class UserAdminUserPageAssemblerService {
     constructor(private readonly userAdminPaginationAssemblerService: UserAdminPaginationAssemblerService) {}
 
-    build(
-        result: UserAdminUserListResultSnapshot,
-        page: number,
-        limit: number,
-    ): UserAdminUserManagementPageResult {
+    build(result: UserAdminUserListResultSnapshot, page: number, limit: number): UserAdminUserManagementPageResult {
         const items = result.items.map(
             (user): UserAdminUserManagementItemResult => ({
                 userId: user.id,

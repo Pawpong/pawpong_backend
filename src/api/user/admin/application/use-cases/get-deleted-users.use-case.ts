@@ -21,10 +21,7 @@ export class GetDeletedUsersUseCase {
         private readonly userAdminDeletedUserPageAssemblerService: UserAdminDeletedUserPageAssemblerService,
     ) {}
 
-    async execute(
-        adminId: string,
-        filter: UserAdminDeletedUserSearchQuery,
-    ): Promise<UserAdminDeletedUserPageResult> {
+    async execute(adminId: string, filter: UserAdminDeletedUserSearchQuery): Promise<UserAdminDeletedUserPageResult> {
         this.userAdminCommandPolicyService.assertCanManageUsers(
             await this.userAdminReader.findAdminById(adminId),
             '사용자 관리 권한이 없습니다.',

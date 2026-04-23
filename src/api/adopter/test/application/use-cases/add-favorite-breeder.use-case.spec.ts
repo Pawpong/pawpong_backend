@@ -38,9 +38,9 @@ describe('브리더 즐겨찾기 추가 유스케이스', () => {
             profile: {},
         });
 
-        await expect(
-            useCase.execute('user-1', { breederId: 'breeder-1' }, 'breeder'),
-        ).resolves.toEqual({ message: '브리더를 즐겨찾기에 추가했습니다.' });
+        await expect(useCase.execute('user-1', { breederId: 'breeder-1' }, 'breeder')).resolves.toEqual({
+            message: '브리더를 즐겨찾기에 추가했습니다.',
+        });
 
         expect(adopterProfilePort.findById).toHaveBeenCalledWith('user-1', 'breeder');
         expect(adopterProfilePort.addFavoriteBreeder).toHaveBeenCalledWith(

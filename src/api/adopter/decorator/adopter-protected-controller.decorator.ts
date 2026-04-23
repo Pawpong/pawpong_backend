@@ -6,5 +6,10 @@ import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { ApiAdopterController } from '../swagger';
 
 export function AdopterProtectedController() {
-    return applyDecorators(ApiAdopterController(), Controller('adopter'), UseGuards(JwtAuthGuard, RolesGuard), Roles('adopter'));
+    return applyDecorators(
+        ApiAdopterController(),
+        Controller('adopter'),
+        UseGuards(JwtAuthGuard, RolesGuard),
+        Roles('adopter'),
+    );
 }

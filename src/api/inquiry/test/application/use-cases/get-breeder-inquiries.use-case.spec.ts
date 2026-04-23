@@ -64,16 +64,12 @@ describe('브리더 문의 목록 조회 유스케이스', () => {
 
         await useCase.execute('breeder-1', false, 3, 10);
 
-        expect(inquiryReader.readBreederList).toHaveBeenCalledWith(
-            expect.objectContaining({ skip: 20, limit: 11 }),
-        );
+        expect(inquiryReader.readBreederList).toHaveBeenCalledWith(expect.objectContaining({ skip: 20, limit: 11 }));
     });
 
     it('limit + 1개보다 많은 데이터가 있으면 hasMore가 true다', async () => {
         const limit = 5;
-        const snapshots = Array.from({ length: limit + 1 }, (_, i) =>
-            makeInquirySnapshot({ id: `inquiry-${i}` }),
-        );
+        const snapshots = Array.from({ length: limit + 1 }, (_, i) => makeInquirySnapshot({ id: `inquiry-${i}` }));
         inquiryReader.readBreederList.mockResolvedValue(snapshots);
 
         const result = await useCase.execute('breeder-1', false, 1, limit);

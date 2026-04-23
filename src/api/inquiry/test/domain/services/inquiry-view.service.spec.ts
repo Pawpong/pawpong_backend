@@ -45,8 +45,22 @@ describe('InquiryViewService', () => {
                 [
                     makeInquiry({
                         answers: [
-                            { id: 'a-1', breederName: '브리더A', content: '답1', answeredAt: new Date(), imageUrls: [], helpfulCount: 0 },
-                            { id: 'a-2', breederName: '브리더B', content: '답2', answeredAt: new Date(), imageUrls: [], helpfulCount: 0 },
+                            {
+                                id: 'a-1',
+                                breederName: '브리더A',
+                                content: '답1',
+                                answeredAt: new Date(),
+                                imageUrls: [],
+                                helpfulCount: 0,
+                            },
+                            {
+                                id: 'a-2',
+                                breederName: '브리더B',
+                                content: '답2',
+                                answeredAt: new Date(),
+                                imageUrls: [],
+                                helpfulCount: 0,
+                            },
                         ],
                     }),
                 ],
@@ -69,14 +83,28 @@ describe('InquiryViewService', () => {
         });
 
         it('빈 imageUrls를 필터링한다', () => {
-            const result = service.buildDetailResponse(makeInquiry({ imageUrls: ['', '  ', 'ok.jpg'] }), undefined, signedUrl);
+            const result = service.buildDetailResponse(
+                makeInquiry({ imageUrls: ['', '  ', 'ok.jpg'] }),
+                undefined,
+                signedUrl,
+            );
             expect(result.imageUrls).toHaveLength(1);
             expect(result.imageUrls[0]).toContain('ok.jpg');
         });
 
         it('currentUserHasAnswered를 판별한다', () => {
             const inquiry = makeInquiry({
-                answers: [{ id: 'a-1', breederId: 'user-1', breederName: '나', content: 'x', answeredAt: new Date(), imageUrls: [], helpfulCount: 0 }],
+                answers: [
+                    {
+                        id: 'a-1',
+                        breederId: 'user-1',
+                        breederName: '나',
+                        content: 'x',
+                        answeredAt: new Date(),
+                        imageUrls: [],
+                        helpfulCount: 0,
+                    },
+                ],
             });
             const result = service.buildDetailResponse(inquiry, 'user-1', signedUrl);
             expect(result.currentUserHasAnswered).toBe(true);

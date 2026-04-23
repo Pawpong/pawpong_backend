@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import { UploadAdminStoredObjectSnapshot } from '../../application/ports/upload-admin-storage.port';
-import type { UploadAdminStorageFileResult, UploadAdminStorageListResult } from '../../application/types/upload-admin-result.type';
+import type {
+    UploadAdminStorageFileResult,
+    UploadAdminStorageListResult,
+} from '../../application/types/upload-admin-result.type';
 
 @Injectable()
 export class UploadAdminStorageListAssemblerService {

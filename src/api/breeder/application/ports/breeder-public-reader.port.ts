@@ -128,11 +128,10 @@ export interface BreederPublicReviewRecord {
         petName?: string;
         toString(): string;
     };
-    adopterId?:
-        | {
-              nickname?: string;
-              toString(): string;
-          }
+    adopterId?: {
+        nickname?: string;
+        toString(): string;
+    };
     content: string;
     writtenAt: Date;
     type: string;

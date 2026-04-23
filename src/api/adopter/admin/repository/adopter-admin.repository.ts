@@ -4,10 +4,7 @@ import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 
 import { Admin, AdminDocument } from '../../../../schema/admin.schema';
 import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
-import {
-    AdoptionApplication,
-    AdoptionApplicationDocument,
-} from '../../../../schema/adoption-application.schema';
+import { AdoptionApplication, AdoptionApplicationDocument } from '../../../../schema/adoption-application.schema';
 import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
 import { BreederReview, BreederReviewDocument } from '../../../../schema/breeder-review.schema';
 import { AdopterAdminActivityLogEntry } from '../application/ports/adopter-admin-writer.port';
@@ -92,9 +89,11 @@ export class AdopterAdminRepository {
             return Promise.resolve([]);
         }
 
-        return this.adopterModel.find({ _id: { $in: adopterIds } }).select('nickname').lean().exec() as Promise<
-            AdopterAdminNamedRecord[]
-        >;
+        return this.adopterModel
+            .find({ _id: { $in: adopterIds } })
+            .select('nickname')
+            .lean()
+            .exec() as Promise<AdopterAdminNamedRecord[]>;
     }
 
     findBreedersByIds(breederIds: Types.ObjectId[]): Promise<AdopterAdminNamedRecord[]> {
@@ -102,9 +101,11 @@ export class AdopterAdminRepository {
             return Promise.resolve([]);
         }
 
-        return this.breederModel.find({ _id: { $in: breederIds } }).select('name').lean().exec() as Promise<
-            AdopterAdminNamedRecord[]
-        >;
+        return this.breederModel
+            .find({ _id: { $in: breederIds } })
+            .select('name')
+            .lean()
+            .exec() as Promise<AdopterAdminNamedRecord[]>;
     }
 
     findBreedersByName(name: string): Promise<Array<{ _id: Types.ObjectId }>> {
@@ -171,14 +172,11 @@ export class AdopterAdminRepository {
 
     async appendAdminActivity(adminId: string, logEntry: AdopterAdminActivityLogEntry): Promise<void> {
         await this.adminModel
-            .updateOne(
-                { _id: adminId },
-                {
-                    $push: {
-                        activityLogs: logEntry,
-                    },
-                } as UpdateQuery<AdminDocument>,
-            )
+            .updateOne({ _id: adminId }, {
+                $push: {
+                    activityLogs: logEntry,
+                },
+            } as UpdateQuery<AdminDocument>)
             .exec();
     }
 }

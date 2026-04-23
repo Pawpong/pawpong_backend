@@ -59,8 +59,24 @@ describe('BreederPublicProfileAssemblerService', () => {
     it('hidden 리뷰는 제외한다', () => {
         const breeder = makeBreeder({
             reviews: [
-                { reviewId: 'r1', writtenAt: new Date(), type: 't', adopterName: 'x', rating: 5, content: 'c', isVisible: false },
-                { reviewId: 'r2', writtenAt: new Date(), type: 't', adopterName: 'x', rating: 5, content: 'c', isVisible: true },
+                {
+                    reviewId: 'r1',
+                    writtenAt: new Date(),
+                    type: 't',
+                    adopterName: 'x',
+                    rating: 5,
+                    content: 'c',
+                    isVisible: false,
+                },
+                {
+                    reviewId: 'r2',
+                    writtenAt: new Date(),
+                    type: 't',
+                    adopterName: 'x',
+                    rating: 5,
+                    content: 'c',
+                    isVisible: true,
+                },
             ],
         });
         const result = service.toResponse(breeder, false, [], [], fileUrlPort);

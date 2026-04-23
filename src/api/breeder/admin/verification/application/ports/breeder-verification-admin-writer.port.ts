@@ -29,7 +29,10 @@ export interface BreederVerificationAdminActivityLogEntry {
 export const BREEDER_VERIFICATION_ADMIN_WRITER_PORT = Symbol('BREEDER_VERIFICATION_ADMIN_WRITER_PORT');
 
 export interface BreederVerificationAdminWriterPort {
-    updateBreederVerification(breederId: string, command: BreederVerificationAdminUpdateVerificationCommand): Promise<void>;
+    updateBreederVerification(
+        breederId: string,
+        command: BreederVerificationAdminUpdateVerificationCommand,
+    ): Promise<void>;
     updateBreederLevel(breederId: string, newLevel: string): Promise<void>;
     appendAdminActivityLog(adminId: string, logEntry: BreederVerificationAdminActivityLogEntry): Promise<void>;
 }

@@ -105,8 +105,7 @@ export class BreederManagementVerificationDocumentPolicyService {
 
         if (level === 'elite') {
             const hasBreederCertificate =
-                documentTypes.includes('breederCatCertificate') ||
-                documentTypes.includes('breederDogCertificate');
+                documentTypes.includes('breederCatCertificate') || documentTypes.includes('breederDogCertificate');
 
             if (!hasBreederCertificate) {
                 throw new DomainValidationError('Elite 레벨은 브리더 인증 서류가 필수입니다.');
