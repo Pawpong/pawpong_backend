@@ -42,6 +42,8 @@ export class AdopterReviewNotifierAdapter implements AdopterReviewNotifierPort {
             });
         }
 
+        builder.withPush();
+
         await builder.send();
     }
 }
