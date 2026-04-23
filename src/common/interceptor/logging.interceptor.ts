@@ -38,11 +38,14 @@ export class LoggingInterceptor implements NestInterceptor {
             this.logger.log(`  ├─ Role: ${cookies.userRole}`, 'HTTP');
         }
 
-        // Body 로깅 (POST, PUT, PATCH만)
-        if (['POST', 'PUT', 'PATCH'].includes(method) && body && Object.keys(body).length > 0) {
-            const safeBody = { ...body };
+        // Body 로깅 (POST, PUT, PATCH, DELETE) — 민감 필드 마스킹
+        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && body && Object.keys(body).length > 0) {
+            const safeBody: Record<string, unknown> = { ...(body as Record<string, unknown>) };
             if (safeBody.password) safeBody.password = '***';
-            if (safeBody.refreshToken) safeBody.refreshToken = safeBody.refreshToken.substring(0, 20) + '...';
+            if (typeof safeBody.refreshToken === 'string')
+                safeBody.refreshToken = safeBody.refreshToken.substring(0, 12) + '...';
+            // FCM 푸시 디바이스 토큰은 영구 재사용되므로 앞자리만 남기고 마스킹
+            if (typeof safeBody.token === 'string') safeBody.token = safeBody.token.substring(0, 8) + '...';
             this.logger.log(`  └─ Body: ${JSON.stringify(safeBody)}`, 'HTTP');
         } else {
             this.logger.log(`  └─ Body: (none)`, 'HTTP');
