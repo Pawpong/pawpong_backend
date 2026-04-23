@@ -38,8 +38,9 @@ export class LoggingInterceptor implements NestInterceptor {
             this.logger.log(`  ├─ Role: ${cookies.userRole}`, 'HTTP');
         }
 
-        // Body 로깅 (POST, PUT, PATCH, DELETE) — 민감 필드 마스킹
-        if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && body && Object.keys(body).length > 0) {
+        // Body 로깅 (POST, PUT, PATCH) — 민감 필드 마스킹
+        // DELETE 는 기존대로 body 로깅 대상에서 제외한다 (기존 DELETE 엔드포인트들의 프라이버시 계약 유지).
+        if (['POST', 'PUT', 'PATCH'].includes(method) && body && Object.keys(body).length > 0) {
             const safeBody: Record<string, unknown> = { ...(body as Record<string, unknown>) };
             if (safeBody.password) safeBody.password = '***';
             if (typeof safeBody.refreshToken === 'string')
