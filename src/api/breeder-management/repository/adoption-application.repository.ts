@@ -103,10 +103,10 @@ export class AdoptionApplicationRepository {
      * @returns 반려동물별 입양 신청 수 맵
      */
     async countByPetIds(petIds: string[]): Promise<Map<string, number>> {
-        const result = (await this.adoptionApplicationModel.aggregate([
+        const result = await this.adoptionApplicationModel.aggregate([
             { $match: { petId: { $in: petIds } } },
             { $group: { _id: '$petId', count: { $sum: 1 } } },
-        ])) as BreederManagementPetCountAggregateRecord[];
+        ]);
 
         return new Map(result.map((item) => [String(item._id), item.count]));
     }
