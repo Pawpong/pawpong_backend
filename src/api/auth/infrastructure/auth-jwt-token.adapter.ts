@@ -44,7 +44,7 @@ export class AuthJwtTokenAdapter implements AuthTokenPort {
     }
 
     verifyRefreshToken(refreshToken: string): AuthRefreshTokenPayload {
-        return this.jwtService.verify(refreshToken) as AuthRefreshTokenPayload;
+        return this.jwtService.verify(refreshToken);
     }
 
     hashRefreshToken(refreshToken: string): Promise<string> {

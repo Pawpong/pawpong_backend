@@ -27,7 +27,7 @@ export class AuthBreederDocumentFilePolicyService {
 
         const validTypes = allowedTypes[level] as readonly string[];
         for (const type of types) {
-            if (!validTypes.includes(type as (typeof validTypes)[number])) {
+            if (!validTypes.includes(type)) {
                 throw new DomainValidationError(
                     `${level} 레벨에서 유효하지 않은 서류 타입입니다: ${type}. 허용된 타입: ${validTypes.join(', ')}`,
                 );
