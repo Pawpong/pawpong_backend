@@ -1,5 +1,7 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
+import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 import { Notification, NotificationSchema } from '../../schema/notification.schema';
 import { MailModule } from '../../common/mail/mail.module';
 
@@ -8,11 +10,14 @@ import { NotificationEmailPreviewController } from './notification-email-preview
 import { NotificationListController } from './notification-list.controller';
 import { NotificationMarkAllReadController } from './notification-mark-all-read.controller';
 import { NotificationMarkReadController } from './notification-mark-read.controller';
+import { NotificationPushTokenController } from './notification-push-token.controller';
 import { NotificationUnreadCountController } from './notification-unread-count.controller';
 import { NOTIFICATION_COMMAND_PORT } from './application/ports/notification-command.port';
 import { NOTIFICATION_DISPATCH_PORT } from './application/ports/notification-dispatch.port';
 import { NOTIFICATION_EMAIL_PORT } from './application/ports/notification-email.port';
 import { NOTIFICATION_INBOX_PORT } from './application/ports/notification-inbox.port';
+import { NOTIFICATION_PUSH_PORT } from './application/ports/notification-push.port';
+import { NOTIFICATION_PUSH_TOKEN_STORE_PORT } from './application/ports/notification-push-token-store.port';
 import { NotificationEmailPreviewTemplateService } from './application/services/notification-email-preview-template.service';
 import { NotificationDispatchService } from './application/services/notification-dispatch.service';
 import {
@@ -34,20 +39,27 @@ import { PreviewBreederRejectionEmailUseCase } from './application/use-cases/pre
 import { PreviewDocumentReminderEmailUseCase } from './application/use-cases/preview-document-reminder-email.use-case';
 import { PreviewNewApplicationEmailUseCase } from './application/use-cases/preview-new-application-email.use-case';
 import { PreviewNewReviewEmailUseCase } from './application/use-cases/preview-new-review-email.use-case';
+import { RegisterPushDeviceTokenUseCase } from './application/use-cases/register-push-device-token.use-case';
 import { RenderNotificationEmailPreviewUseCase } from './application/use-cases/render-notification-email-preview.use-case';
 import { SendNotificationEmailUseCase } from './application/use-cases/send-notification-email.use-case';
+import { SendNotificationPushUseCase } from './application/use-cases/send-notification-push.use-case';
+import { UnregisterPushDeviceTokenUseCase } from './application/use-cases/unregister-push-device-token.use-case';
 import { NotificationItemMapperService } from './domain/services/notification-item-mapper.service';
 import { NotificationMessageTemplateService } from './domain/services/notification-message-template.service';
 import { NotificationPageAssemblerService } from './domain/services/notification-page-assembler.service';
 import { NotificationPaginationAssemblerService } from './domain/services/notification-pagination-assembler.service';
 import { NotificationStateResultMapperService } from './domain/services/notification-state-result-mapper.service';
+import { NotificationFirebasePushAdapter } from './infrastructure/notification-firebase-push.adapter';
 import { NotificationMailAdapter } from './infrastructure/notification-mail.adapter';
 import { NotificationMongooseCommandAdapter } from './infrastructure/notification-mongoose-command.adapter';
 import { NotificationMongooseInboxAdapter } from './infrastructure/notification-mongoose-inbox.adapter';
+import { NotificationPushTokenMongooseAdapter } from './infrastructure/notification-push-token-mongoose.adapter';
 import { NotificationRepository } from './repository/notification.repository';
 
 const NOTIFICATION_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Notification.name, schema: NotificationSchema },
+    { name: Adopter.name, schema: AdopterSchema },
+    { name: Breeder.name, schema: BreederSchema },
 ]);
 
 export const NOTIFICATION_MODULE_IMPORTS = [NOTIFICATION_SCHEMA_IMPORTS, MailModule];
@@ -59,6 +71,7 @@ export const NOTIFICATION_MODULE_CONTROLLERS = [
     NotificationMarkAllReadController,
     NotificationDeleteController,
     NotificationEmailPreviewController,
+    NotificationPushTokenController,
 ];
 
 const NOTIFICATION_USE_CASE_PROVIDERS = [
@@ -78,6 +91,9 @@ const NOTIFICATION_USE_CASE_PROVIDERS = [
     PreviewNewReviewEmailUseCase,
     GetNotificationEmailPreviewCatalogUseCase,
     RenderNotificationEmailPreviewUseCase,
+    RegisterPushDeviceTokenUseCase,
+    UnregisterPushDeviceTokenUseCase,
+    SendNotificationPushUseCase,
 ];
 
 const NOTIFICATION_APPLICATION_PROVIDERS = [NotificationDispatchService, NotificationEmailPreviewTemplateService];
@@ -95,6 +111,8 @@ const NOTIFICATION_INFRASTRUCTURE_PROVIDERS = [
     NotificationMongooseInboxAdapter,
     NotificationMongooseCommandAdapter,
     NotificationMailAdapter,
+    NotificationFirebasePushAdapter,
+    NotificationPushTokenMongooseAdapter,
 ];
 
 const NOTIFICATION_PORT_BINDINGS = [
@@ -125,6 +143,14 @@ const NOTIFICATION_PORT_BINDINGS = [
     {
         provide: NOTIFICATION_DISPATCH_PORT,
         useExisting: NotificationDispatchService,
+    },
+    {
+        provide: NOTIFICATION_PUSH_PORT,
+        useExisting: NotificationFirebasePushAdapter,
+    },
+    {
+        provide: NOTIFICATION_PUSH_TOKEN_STORE_PORT,
+        useExisting: NotificationPushTokenMongooseAdapter,
     },
 ];
 
