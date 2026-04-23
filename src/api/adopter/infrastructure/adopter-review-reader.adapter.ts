@@ -56,7 +56,7 @@ export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {
             return null;
         }
 
-        const breeder = review.breederId as AdopterReviewRepositoryBreederRecord | null | undefined;
+        const breeder = review.breederId;
 
         return {
             reviewId: review._id.toString(),
