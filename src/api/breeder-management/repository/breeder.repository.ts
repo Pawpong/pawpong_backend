@@ -37,7 +37,11 @@ export class BreederRepository {
      * @returns 브리더 정보 또는 null
      */
     async findById(breederId: string): Promise<BreederManagementBreederDocumentRecord | null> {
-        return this.breederModel.findById(breederId).select('-password').lean<BreederManagementBreederDocumentRecord>().exec();
+        return this.breederModel
+            .findById(breederId)
+            .select('-password')
+            .lean<BreederManagementBreederDocumentRecord>()
+            .exec();
     }
 
     /**
@@ -55,7 +59,11 @@ export class BreederRepository {
      * @returns 브리더 전체 정보 또는 null
      */
     async findByIdWithAllData(breederId: string): Promise<BreederManagementBreederDocumentRecord | null> {
-        return this.breederModel.findById(breederId).select('-password').lean<BreederManagementBreederDocumentRecord>().exec();
+        return this.breederModel
+            .findById(breederId)
+            .select('-password')
+            .lean<BreederManagementBreederDocumentRecord>()
+            .exec();
     }
 
     /**
@@ -345,7 +353,9 @@ export class BreederRepository {
             },
         ];
 
-        const results = await this.breederModel.aggregate<BreederManagementVerificationStatusCountRecord>(pipeline).exec();
+        const results = await this.breederModel
+            .aggregate<BreederManagementVerificationStatusCountRecord>(pipeline)
+            .exec();
 
         const stats: Record<string, number> = {
             total: 0,
@@ -369,6 +379,67 @@ export class BreederRepository {
      */
     async incrementProfileViews(breederId: string): Promise<void> {
         await this.breederModel.findByIdAndUpdate(breederId, { $inc: { 'stats.profileViews': 1 } }).exec();
+    }
+
+    /**
+     * 디바이스 푸시 토큰 추가 (동일 토큰이 있으면 갱신을 위해 먼저 제거).
+     *
+     * @param breederId 브리더 ID
+     * @param token FCM 디바이스 토큰
+     * @param platform 디바이스 플랫폼
+     * @param appVersion 선택적 앱 버전 (디버깅용)
+     */
+    async upsertPushDeviceToken(
+        breederId: string,
+        token: string,
+        platform: 'ios' | 'android',
+        appVersion?: string,
+    ): Promise<void> {
+        await this.breederModel.updateOne({ _id: breederId }, { $pull: { pushDeviceTokens: { token } } }).exec();
+        await this.breederModel
+            .updateOne(
+                { _id: breederId },
+                {
+                    $push: {
+                        pushDeviceTokens: {
+                            token,
+                            platform,
+                            registeredAt: new Date(),
+                            appVersion,
+                        },
+                    },
+                },
+            )
+            .exec();
+    }
+
+    /**
+     * 디바이스 푸시 토큰 제거 (여러 토큰 일괄 제거 가능).
+     *
+     * @param breederId 브리더 ID
+     * @param tokens 제거할 토큰 목록
+     */
+    async removePushDeviceTokens(breederId: string, tokens: string[]): Promise<void> {
+        if (tokens.length === 0) return;
+        await this.breederModel
+            .updateOne({ _id: breederId }, { $pull: { pushDeviceTokens: { token: { $in: tokens } } } })
+            .exec();
+    }
+
+    /**
+     * 브리더의 활성 디바이스 푸시 토큰 문자열 목록 조회.
+     *
+     * @param breederId 브리더 ID
+     */
+    async findPushDeviceTokens(breederId: string): Promise<string[]> {
+        const doc = await this.breederModel
+            .findById(breederId)
+            .select('pushDeviceTokens')
+            .lean<{ pushDeviceTokens?: Array<{ token?: string }> }>()
+            .exec();
+        const entries = doc?.pushDeviceTokens ?? [];
+        const tokens = entries.map((entry) => entry.token).filter((value): value is string => !!value);
+        return Array.from(new Set(tokens));
     }
 
     /**
