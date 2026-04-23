@@ -36,7 +36,7 @@ export class AnnouncementController {
         @Query() paginationDto: PaginationRequestDto,
     ): Promise<PaginationResponseDto<AnnouncementResponseDto>> {
         const result = await this.getActiveAnnouncementsUseCase.execute(paginationDto);
-        return PaginationResponseDto.fromPageResult(result as AnnouncementPageResult);
+        return PaginationResponseDto.fromPageResult(result);
     }
 
     /**
