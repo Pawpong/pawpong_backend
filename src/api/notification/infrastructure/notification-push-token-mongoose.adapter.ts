@@ -1,101 +1,72 @@
 import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
-import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
+import { AdopterRepository } from '../../adopter/repository/adopter.repository';
+import { BreederRepository } from '../../breeder-management/repository/breeder.repository';
+import type { NotificationUserRole } from '../application/ports/notification-command.port';
 import type {
     NotificationPushTokenStorePort,
     RegisterPushDeviceTokenCommand,
     UnregisterPushDeviceTokenCommand,
     UserPushDeviceTokens,
 } from '../application/ports/notification-push-token-store.port';
-import type { NotificationUserRole } from '../application/ports/notification-command.port';
-
-interface StoredPushDeviceToken {
-    token: string;
-    platform: string;
-    registeredAt?: Date;
-    appVersion?: string;
-}
-
-interface PushTokenOwnerDocument {
-    pushDeviceTokens?: StoredPushDeviceToken[];
-}
 
 /**
- * adopter/breeder 모델의 pushDeviceTokens 배열을 다루는 어댑터.
+ * 푸시 토큰 스토어 어댑터.
  *
- * - 등록: 동일 토큰이 있으면 pull 후 재삽입해 registeredAt 갱신
- * - 해제: 토큰 배열에서 pull
- * - 무효 정리: FCM 발송 실패 시 배열에서 pull (여러 토큰 일괄)
- * - 조회: 토큰 문자열만 꺼내 반환 (중복 제거)
+ * 알림 도메인은 adopter/breeder persistence 경계를 직접 건드리지 않고,
+ * 각 도메인의 Repository에 푸시 토큰 CRUD를 위임한다.
  *
- * adopter/breeder 두 구체 모델을 공통 Model 타입으로 묶기 위해
- * pushDeviceTokens 필드만 알고 있는 PushTokenOwnerDocument 로 캐스트한다.
+ * - adopter: AdopterRepository.{upsert,remove,find}PushDeviceToken(s)
+ * - breeder: BreederRepository.{upsert,remove,find}PushDeviceToken(s)
  */
 @Injectable()
 export class NotificationPushTokenMongooseAdapter implements NotificationPushTokenStorePort {
     constructor(
-        @InjectModel(Adopter.name) private readonly adopterModel: Model<AdopterDocument>,
-        @InjectModel(Breeder.name) private readonly breederModel: Model<BreederDocument>,
+        private readonly adopterRepository: AdopterRepository,
+        private readonly breederRepository: BreederRepository,
     ) {}
 
     async register(command: RegisterPushDeviceTokenCommand): Promise<void> {
-        const now = new Date();
-        const model = this.resolveModel(command.userRole);
-
-        // 같은 토큰이 있으면 제거 후 재삽입해 registeredAt 갱신
-        await model
-            .updateOne({ _id: command.userId }, { $pull: { pushDeviceTokens: { token: command.token } } })
-            .exec();
-
-        await model
-            .updateOne(
-                { _id: command.userId },
-                {
-                    $push: {
-                        pushDeviceTokens: {
-                            token: command.token,
-                            platform: command.platform,
-                            registeredAt: now,
-                            appVersion: command.appVersion,
-                        },
-                    },
-                },
-            )
-            .exec();
+        if (command.userRole === 'adopter') {
+            await this.adopterRepository.upsertPushDeviceToken(
+                command.userId,
+                command.token,
+                command.platform,
+                command.appVersion,
+            );
+            return;
+        }
+        await this.breederRepository.upsertPushDeviceToken(
+            command.userId,
+            command.token,
+            command.platform,
+            command.appVersion,
+        );
     }
 
     async unregister(command: UnregisterPushDeviceTokenCommand): Promise<void> {
-        const model = this.resolveModel(command.userRole);
-        await model
-            .updateOne({ _id: command.userId }, { $pull: { pushDeviceTokens: { token: command.token } } })
-            .exec();
+        if (command.userRole === 'adopter') {
+            await this.adopterRepository.removePushDeviceTokens(command.userId, [command.token]);
+            return;
+        }
+        await this.breederRepository.removePushDeviceTokens(command.userId, [command.token]);
     }
 
     async purgeInvalidTokens(userId: string, userRole: NotificationUserRole, tokens: string[]): Promise<void> {
         if (tokens.length === 0) return;
-        const model = this.resolveModel(userRole);
-        await model
-            .updateOne({ _id: userId }, { $pull: { pushDeviceTokens: { token: { $in: tokens } } } })
-            .exec();
+        if (userRole === 'adopter') {
+            await this.adopterRepository.removePushDeviceTokens(userId, tokens);
+            return;
+        }
+        await this.breederRepository.removePushDeviceTokens(userId, tokens);
     }
 
     async findTokensByUser(userId: string, userRole: NotificationUserRole): Promise<UserPushDeviceTokens> {
-        const model = this.resolveModel(userRole);
-        const doc = await model.findById(userId).select('pushDeviceTokens').lean<PushTokenOwnerDocument | null>().exec();
-
-        const raw = doc?.pushDeviceTokens ?? [];
-        const tokens = Array.from(
-            new Set(raw.map((entry) => entry.token).filter((token): token is string => !!token)),
-        );
+        const tokens =
+            userRole === 'adopter'
+                ? await this.adopterRepository.findPushDeviceTokens(userId)
+                : await this.breederRepository.findPushDeviceTokens(userId);
 
         return { userId, userRole, tokens };
-    }
-
-    private resolveModel(role: NotificationUserRole): Model<PushTokenOwnerDocument> {
-        const model = role === 'adopter' ? this.adopterModel : this.breederModel;
-        return model as unknown as Model<PushTokenOwnerDocument>;
     }
 }

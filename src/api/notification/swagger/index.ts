@@ -22,6 +22,8 @@ import {
     NewApplicationEmailPreviewRequestDto,
     NewReviewEmailPreviewRequestDto,
 } from '../dto/request/notification-email-preview-request.dto';
+import { RegisterPushDeviceTokenRequestDto } from '../dto/request/register-push-device-token-request.dto';
+import { UnregisterPushDeviceTokenRequestDto } from '../dto/request/unregister-push-device-token-request.dto';
 import {
     NotificationEmailPreviewCatalogResponseDto,
     NotificationEmailPreviewResponseDto,
@@ -120,35 +122,42 @@ export function ApiMarkAllNotificationsReadEndpoint() {
 }
 
 export function ApiRegisterPushDeviceTokenEndpoint() {
-    return ApiEndpoint({
-        summary: '디바이스 푸시 토큰 등록',
-        description: `
-            RN 앱에서 발급받은 FCM 디바이스 토큰을 현재 로그인한 사용자 계정에 등록합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '디바이스 푸시 토큰 등록',
+            description: `
+                RN 앱에서 발급받은 FCM 디바이스 토큰을 현재 로그인한 사용자 계정에 등록합니다.
 
-            ## 주요 기능
-            - 같은 토큰이 이미 등록되어 있으면 등록 시각만 갱신합니다.
-            - 한 사용자는 여러 디바이스(iOS/Android)를 동시에 등록할 수 있습니다.
-        `,
-        nullableData: true,
-        successDescription: '푸시 토큰 등록 성공',
-        successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.pushDeviceTokenRegistered,
-    });
+                ## 주요 기능
+                - 같은 토큰이 이미 등록되어 있으면 등록 시각만 갱신합니다.
+                - 한 사용자는 여러 디바이스(iOS/Android)를 동시에 등록할 수 있습니다.
+            `,
+            nullableData: true,
+            successDescription: '푸시 토큰 등록 성공',
+            successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.pushDeviceTokenRegistered,
+        }),
+        ApiBody({ type: RegisterPushDeviceTokenRequestDto }),
+    );
 }
 
 export function ApiUnregisterPushDeviceTokenEndpoint() {
-    return ApiEndpoint({
-        summary: '디바이스 푸시 토큰 해제',
-        description: `
-            지정한 디바이스 토큰을 사용자 계정에서 제거합니다.
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '디바이스 푸시 토큰 해제',
+            description: `
+                지정한 디바이스 토큰을 사용자 계정에서 제거합니다.
+                토큰은 body로 전달해 HTTP 접근 로그에 노출되지 않습니다.
 
-            ## 주요 기능
-            - 로그아웃, 알림 거부, 앱 삭제 전에 호출해 잔여 토큰을 정리합니다.
-            - 등록되지 않은 토큰을 요청해도 성공 응답(멱등) 합니다.
-        `,
-        nullableData: true,
-        successDescription: '푸시 토큰 해제 성공',
-        successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.pushDeviceTokenUnregistered,
-    });
+                ## 주요 기능
+                - 로그아웃, 알림 거부, 앱 삭제 전에 호출해 잔여 토큰을 정리합니다.
+                - 등록되지 않은 토큰을 요청해도 성공 응답(멱등) 합니다.
+            `,
+            nullableData: true,
+            successDescription: '푸시 토큰 해제 성공',
+            successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.pushDeviceTokenUnregistered,
+        }),
+        ApiBody({ type: UnregisterPushDeviceTokenRequestDto }),
+    );
 }
 
 export function ApiDeleteNotificationEndpoint() {
