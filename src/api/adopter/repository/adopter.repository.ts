@@ -296,6 +296,67 @@ export class AdopterRepository {
     }
 
     /**
+     * 디바이스 푸시 토큰 추가 (동일 토큰이 있으면 갱신을 위해 먼저 제거).
+     *
+     * @param adopterId 입양자 ID
+     * @param token FCM 디바이스 토큰
+     * @param platform 디바이스 플랫폼 (ios/android)
+     * @param appVersion 선택적 앱 버전 (디버깅용)
+     */
+    async upsertPushDeviceToken(
+        adopterId: string,
+        token: string,
+        platform: 'ios' | 'android',
+        appVersion?: string,
+    ): Promise<void> {
+        await this.adopterModel.updateOne({ _id: adopterId }, { $pull: { pushDeviceTokens: { token } } }).exec();
+        await this.adopterModel
+            .updateOne(
+                { _id: adopterId },
+                {
+                    $push: {
+                        pushDeviceTokens: {
+                            token,
+                            platform,
+                            registeredAt: new Date(),
+                            appVersion,
+                        },
+                    },
+                },
+            )
+            .exec();
+    }
+
+    /**
+     * 디바이스 푸시 토큰 제거 (여러 토큰 일괄 제거 가능).
+     *
+     * @param adopterId 입양자 ID
+     * @param tokens 제거할 토큰 목록
+     */
+    async removePushDeviceTokens(adopterId: string, tokens: string[]): Promise<void> {
+        if (tokens.length === 0) return;
+        await this.adopterModel
+            .updateOne({ _id: adopterId }, { $pull: { pushDeviceTokens: { token: { $in: tokens } } } })
+            .exec();
+    }
+
+    /**
+     * 입양자의 활성 디바이스 푸시 토큰 문자열 목록 조회.
+     *
+     * @param adopterId 입양자 ID
+     */
+    async findPushDeviceTokens(adopterId: string): Promise<string[]> {
+        const doc = await this.adopterModel
+            .findById(adopterId)
+            .select('pushDeviceTokens')
+            .lean<{ pushDeviceTokens?: Array<{ token?: string }> }>()
+            .exec();
+        const entries = doc?.pushDeviceTokens ?? [];
+        const tokens = entries.map((entry) => entry.token).filter((value): value is string => !!value);
+        return Array.from(new Set(tokens));
+    }
+
+    /**
      * 입양자 검색 (관리자용)
      * 페이지네이션 및 필터링 지원
      *
