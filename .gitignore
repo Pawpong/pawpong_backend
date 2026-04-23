@@ -66,7 +66,14 @@ swagger.json
 .mcp.json
 package-lock.json
 yarn.lock
-docs/
+docs/*
+!docs/fcm-setup-guide.md
+
+# Firebase/FCM 자격 증명 (로컬 개발 + 프로덕션 환경변수)
+secrets/
+*-firebase-adminsdk-*.json
+google-services.json
+GoogleService-Info.plist
 
 # Serena MCP (로컬 AI 코딩 어시스턴트 도구, 머신별 설정)
 .serena/
