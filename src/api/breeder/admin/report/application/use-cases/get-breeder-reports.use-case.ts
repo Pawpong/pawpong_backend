@@ -29,10 +29,6 @@ export class GetBreederReportsUseCase {
             itemsPerPage,
         });
 
-        return this.breederReportAdminPageAssemblerService.build(
-            result,
-            pageNumber,
-            itemsPerPage,
-        );
+        return this.breederReportAdminPageAssemblerService.build(result, pageNumber, itemsPerPage);
     }
 }

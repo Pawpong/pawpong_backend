@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AUTH_TEMP_UPLOAD_PORT, type AuthTempUploadDocument, type AuthTempUploadPort } from '../ports/auth-temp-upload.port';
+import {
+    AUTH_TEMP_UPLOAD_PORT,
+    type AuthTempUploadDocument,
+    type AuthTempUploadPort,
+} from '../ports/auth-temp-upload.port';
 import { AUTH_UPLOAD_FILE_STORE_PORT, type AuthUploadFileStorePort } from '../ports/auth-upload-file-store.port';
 import { type VerificationDocumentsResult } from '../types/auth-response.type';
 import { AuthBreederDocumentFilePolicyService } from '../../domain/services/auth-breeder-document-file-policy.service';

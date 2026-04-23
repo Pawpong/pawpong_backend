@@ -55,7 +55,9 @@ export class UserAdminMongooseRepositoryAdapter implements UserAdminReaderPort, 
         return user ? this.toManagedUserSnapshot(user) : null;
     }
 
-    async getDeletedUsers(criteria: UserAdminDeletedUserSearchCriteria): Promise<UserAdminDeletedUserListResultSnapshot> {
+    async getDeletedUsers(
+        criteria: UserAdminDeletedUserSearchCriteria,
+    ): Promise<UserAdminDeletedUserListResultSnapshot> {
         const { items, total } = await this.userAdminRepository.getDeletedUsers(criteria);
         return {
             items: items.map((user) => ({

@@ -31,7 +31,9 @@ describe('BreederAdminPolicyService', () => {
             expect(() => policy.assertSuspendable({ accountStatus: 'active' } as any)).not.toThrow();
         });
         it('Suspendable: suspended면 예외', () => {
-            expect(() => policy.assertSuspendable({ accountStatus: 'suspended' } as any)).toThrow(DomainValidationError);
+            expect(() => policy.assertSuspendable({ accountStatus: 'suspended' } as any)).toThrow(
+                DomainValidationError,
+            );
         });
         it('Unsuspendable: suspended면 통과', () => {
             expect(() => policy.assertUnsuspendable({ accountStatus: 'suspended' } as any)).not.toThrow();
@@ -43,10 +45,20 @@ describe('BreederAdminPolicyService', () => {
 
     describe('canSendReminder', () => {
         it('verification.status가 필수 상태와 일치하면 true', () => {
-            expect(policy.canSendReminder({ verification: { status: VerificationStatus.PENDING } } as any, VerificationStatus.PENDING)).toBe(true);
+            expect(
+                policy.canSendReminder(
+                    { verification: { status: VerificationStatus.PENDING } } as any,
+                    VerificationStatus.PENDING,
+                ),
+            ).toBe(true);
         });
         it('다르면 false', () => {
-            expect(policy.canSendReminder({ verification: { status: VerificationStatus.APPROVED } } as any, VerificationStatus.PENDING)).toBe(false);
+            expect(
+                policy.canSendReminder(
+                    { verification: { status: VerificationStatus.APPROVED } } as any,
+                    VerificationStatus.PENDING,
+                ),
+            ).toBe(false);
         });
     });
 

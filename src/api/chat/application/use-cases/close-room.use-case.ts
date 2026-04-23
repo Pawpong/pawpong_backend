@@ -20,9 +20,7 @@ export class CloseRoomUseCase {
         this.logger.logStart('closeRoom', '채팅방 종료 시작', { userId, roomId });
 
         try {
-            const room = this.chatPolicyService.requireRoom(
-                await this.chatRoomManager.findRoomById(roomId),
-            );
+            const room = this.chatPolicyService.requireRoom(await this.chatRoomManager.findRoomById(roomId));
             this.chatPolicyService.requireParticipant(room, userId);
 
             await this.chatRoomManager.closeRoom(roomId);

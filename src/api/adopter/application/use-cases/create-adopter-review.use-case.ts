@@ -7,10 +7,7 @@ import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.por
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
 import { ADOPTER_REVIEW_COMMAND_PORT, type AdopterReviewCommandPort } from '../ports/adopter-review-command.port';
-import {
-    ADOPTER_REVIEW_NOTIFIER_PORT,
-    type AdopterReviewNotifierPort,
-} from '../ports/adopter-review-notifier.port';
+import { ADOPTER_REVIEW_NOTIFIER_PORT, type AdopterReviewNotifierPort } from '../ports/adopter-review-notifier.port';
 import type { AdopterReviewCreateCommand } from '../types/adopter-review-command.type';
 import type { AdopterReviewCreateResult } from '../types/adopter-result.type';
 

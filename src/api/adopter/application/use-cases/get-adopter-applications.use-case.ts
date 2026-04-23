@@ -46,7 +46,12 @@ export class GetAdopterApplicationsUseCase {
         }
 
         const totalItems = await this.adopterApplicationReaderPort.countByAdopterId(userId, breederIds);
-        const applications = await this.adopterApplicationReaderPort.findPagedByAdopterId(userId, page, limit, breederIds);
+        const applications = await this.adopterApplicationReaderPort.findPagedByAdopterId(
+            userId,
+            page,
+            limit,
+            breederIds,
+        );
 
         const items = await Promise.all(
             applications.map(async (application) => {

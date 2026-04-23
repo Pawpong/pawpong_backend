@@ -6,9 +6,7 @@ import type { AdopterAdminReviewReportPageResult } from '../../application/types
 
 @Injectable()
 export class AdopterAdminReviewReportPageAssemblerService {
-    build(
-        snapshot: AdopterAdminReviewReportPageSnapshot,
-    ): AdopterAdminReviewReportPageResult {
+    build(snapshot: AdopterAdminReviewReportPageSnapshot): AdopterAdminReviewReportPageResult {
         return buildPageResult(
             snapshot.items.map((item) => ({
                 reviewId: item.reviewId,

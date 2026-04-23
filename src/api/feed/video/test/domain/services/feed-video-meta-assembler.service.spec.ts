@@ -14,7 +14,12 @@ describe('FeedVideoMetaAssemblerService', () => {
                 status: VideoStatus.FAILED,
                 failureReason: 'encoding error',
             } as any);
-            expect(result).toEqual({ videoId: 'v-1', status: VideoStatus.FAILED, title: '제목', failureReason: 'encoding error' });
+            expect(result).toEqual({
+                videoId: 'v-1',
+                status: VideoStatus.FAILED,
+                title: '제목',
+                failureReason: 'encoding error',
+            });
         });
     });
 

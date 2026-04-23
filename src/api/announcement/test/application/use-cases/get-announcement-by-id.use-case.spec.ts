@@ -38,10 +38,7 @@ describe('공지사항 상세 조회 유스케이스', () => {
 
     beforeEach(() => {
         readerPort = new StubAnnouncementPublicReaderPort();
-        useCase = new GetAnnouncementByIdUseCase(
-            readerPort,
-            new AnnouncementItemMapperService(),
-        );
+        useCase = new GetAnnouncementByIdUseCase(readerPort, new AnnouncementItemMapperService());
     });
 
     it('공지사항 상세 응답 계약을 유지한다', async () => {

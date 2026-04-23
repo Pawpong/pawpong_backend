@@ -1,7 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminAction, UserStatus } from '../../../../../common/enum/user.enum';
-import { USER_ADMIN_READER_PORT, type UserAdminManagedUserRole, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
+import {
+    USER_ADMIN_READER_PORT,
+    type UserAdminManagedUserRole,
+    type UserAdminReaderPort,
+} from '../ports/user-admin-reader.port';
 import { USER_ADMIN_WRITER_PORT, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
@@ -20,7 +24,11 @@ export class RestoreDeletedUserUseCase {
         private readonly userAdminDeletedUserCommandResultMapperService: UserAdminDeletedUserCommandResultMapperService,
     ) {}
 
-    async execute(adminId: string, userId: string, role: UserAdminManagedUserRole): Promise<UserAdminStatusUpdateResult> {
+    async execute(
+        adminId: string,
+        userId: string,
+        role: UserAdminManagedUserRole,
+    ): Promise<UserAdminStatusUpdateResult> {
         this.userAdminCommandPolicyService.assertCanManageUsers(
             await this.userAdminReader.findAdminById(adminId),
             '사용자 관리 권한이 없습니다.',

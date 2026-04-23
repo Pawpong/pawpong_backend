@@ -7,7 +7,11 @@ import { AnnouncementResponseDto } from './dto/response/announcement-response.dt
 import { GetActiveAnnouncementsUseCase } from './application/use-cases/get-active-announcements.use-case';
 import { GetAnnouncementByIdUseCase } from './application/use-cases/get-announcement-by-id.use-case';
 import type { AnnouncementPageResult, AnnouncementResult } from './application/types/announcement-result.type';
-import { ApiAnnouncementController, ApiGetActiveAnnouncementsEndpoint, ApiGetAnnouncementByIdEndpoint } from './swagger';
+import {
+    ApiAnnouncementController,
+    ApiGetActiveAnnouncementsEndpoint,
+    ApiGetAnnouncementByIdEndpoint,
+} from './swagger';
 
 /**
  * 공지사항 컨트롤러 (공개 API)

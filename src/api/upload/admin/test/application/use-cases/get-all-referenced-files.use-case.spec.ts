@@ -9,7 +9,14 @@ function makeReader(files: string[] = []): UploadAdminReferenceReaderPort {
 }
 
 function makeLogger() {
-    return { logStart: jest.fn(), logSuccess: jest.fn(), logError: jest.fn(), log: jest.fn(), error: jest.fn(), warn: jest.fn() };
+    return {
+        logStart: jest.fn(),
+        logSuccess: jest.fn(),
+        logError: jest.fn(),
+        log: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+    };
 }
 
 describe('DB 참조 파일 전체 조회 유스케이스', () => {

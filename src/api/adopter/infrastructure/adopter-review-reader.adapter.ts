@@ -7,10 +7,7 @@ import type {
 } from '../application/ports/adopter-review-reader.port';
 import type { AdopterReviewReaderPort } from '../application/ports/adopter-review-reader.port';
 import { AdopterReviewRepository } from '../repository/adopter-review.repository';
-import type {
-    AdopterReviewRepositoryBreederRecord,
-    AdopterReviewRepositoryRecord,
-} from '../types/adopter-review.type';
+import type { AdopterReviewRepositoryBreederRecord, AdopterReviewRepositoryRecord } from '../types/adopter-review.type';
 
 @Injectable()
 export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {

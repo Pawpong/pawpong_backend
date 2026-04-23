@@ -12,11 +12,7 @@ export class NotificationAdminPageAssemblerService {
         private readonly notificationAdminPaginationAssemblerService: NotificationAdminPaginationAssemblerService,
     ) {}
 
-    build(
-        pageSnapshot: NotificationAdminPageSnapshot,
-        page: number,
-        limit: number,
-    ): NotificationAdminPageResult {
+    build(pageSnapshot: NotificationAdminPageSnapshot, page: number, limit: number): NotificationAdminPageResult {
         return this.notificationAdminPaginationAssemblerService.build(
             pageSnapshot.items.map((item) => this.notificationAdminItemMapperService.toItem(item)),
             page,

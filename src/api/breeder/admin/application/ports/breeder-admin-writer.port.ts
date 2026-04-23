@@ -21,9 +21,6 @@ export interface BreederAdminActivityLogEntry {
 export const BREEDER_ADMIN_WRITER_PORT = Symbol('BREEDER_ADMIN_WRITER_PORT');
 
 export interface BreederAdminWriterPort {
-    updateBreeder(
-        breederId: string,
-        patch: BreederAdminBreederPatch,
-    ): Promise<BreederAdminBreederSnapshot | null>;
+    updateBreeder(breederId: string, patch: BreederAdminBreederPatch): Promise<BreederAdminBreederSnapshot | null>;
     appendAdminActivityLog(adminId: string, logEntry: BreederAdminActivityLogEntry): Promise<void>;
 }

@@ -15,7 +15,10 @@ const existingComment: FeedCommentSnapshot = {
     author: null,
 };
 
-function makeManager(comment: FeedCommentSnapshot | null = existingComment, updated: FeedCommentSnapshot | null = { ...existingComment, content: '수정된 댓글' }): FeedCommentManagerPort {
+function makeManager(
+    comment: FeedCommentSnapshot | null = existingComment,
+    updated: FeedCommentSnapshot | null = { ...existingComment, content: '수정된 댓글' },
+): FeedCommentManagerPort {
     return {
         findVideo: jest.fn(),
         findComment: jest.fn().mockResolvedValue(comment),

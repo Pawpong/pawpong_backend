@@ -30,10 +30,12 @@ export type BreederManagementBannerDocumentRecord = {
 
 export type BreederManagementApplicationDocumentRecord = BreederManagementReceivedApplicationRecord & {
     _id: BreederManagementObjectIdLike;
-    adopterId?: {
-        _id?: BreederManagementObjectIdLike;
-        toString(): string;
-    } | BreederManagementObjectIdLike;
+    adopterId?:
+        | {
+              _id?: BreederManagementObjectIdLike;
+              toString(): string;
+          }
+        | BreederManagementObjectIdLike;
     status?: string;
     appliedAt?: Date;
 };

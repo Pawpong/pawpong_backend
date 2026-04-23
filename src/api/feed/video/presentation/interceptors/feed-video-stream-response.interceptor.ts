@@ -7,10 +7,7 @@ import type { FeedVideoProxyResponse } from '../../application/use-cases/proxy-h
 
 @Injectable()
 export class FeedVideoStreamResponseInterceptor implements NestInterceptor<FeedVideoProxyResponse, Buffer | string> {
-    intercept(
-        context: ExecutionContext,
-        next: CallHandler<FeedVideoProxyResponse>,
-    ): Observable<Buffer | string> {
+    intercept(context: ExecutionContext, next: CallHandler<FeedVideoProxyResponse>): Observable<Buffer | string> {
         const response = context.switchToHttp().getResponse<Response>();
         this.applyCorsHeaders(response);
 

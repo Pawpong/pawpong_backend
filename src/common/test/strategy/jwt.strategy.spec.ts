@@ -21,11 +21,7 @@ describe('JwtStrategy', () => {
             findById: jest.fn(),
         };
 
-        const strategy = new JwtStrategy(
-            configService as never,
-            adopterModel as never,
-            breederModel as never,
-        );
+        const strategy = new JwtStrategy(configService as never, adopterModel as never, breederModel as never);
 
         return {
             strategy,

@@ -43,7 +43,10 @@ export class UpdateBreederManagementApplicationFormUseCase {
         ]);
 
         const customQuestions = this.breederManagementApplicationFormValidatorService.toStoredQuestions(updateDto);
-        const updatedBreeder = await this.breederManagementSettingsPort.updateApplicationForm(breederId, customQuestions);
+        const updatedBreeder = await this.breederManagementSettingsPort.updateApplicationForm(
+            breederId,
+            customQuestions,
+        );
 
         return this.breederManagementApplicationCommandResultMapperService.toApplicationFormUpdatedResult(
             updatedBreeder?.applicationForm ?? customQuestions,

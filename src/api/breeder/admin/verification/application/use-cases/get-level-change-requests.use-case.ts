@@ -34,7 +34,9 @@ export class GetLevelChangeRequestsUseCase {
         });
 
         return this.breederPaginationAssemblerService.build(
-            result.items.map((breeder) => this.breederVerificationAdminLevelChangeItemMapperService.toResponse(breeder)),
+            result.items.map((breeder) =>
+                this.breederVerificationAdminLevelChangeItemMapperService.toResponse(breeder),
+            ),
             pageNumber,
             itemsPerPage,
             result.total,

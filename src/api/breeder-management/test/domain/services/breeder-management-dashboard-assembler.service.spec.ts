@@ -7,7 +7,13 @@ describe('BreederManagementDashboardAssemblerService', () => {
         const result = service.toResponse(
             {
                 verification: { status: 'approved', plan: 'pro' },
-                stats: { totalApplications: 10, completedAdoptions: 3, averageRating: 4.5, totalReviews: 8, profileViews: 100 },
+                stats: {
+                    totalApplications: 10,
+                    completedAdoptions: 3,
+                    averageRating: 4.5,
+                    totalReviews: 8,
+                    profileViews: 100,
+                },
             } as any,
             2,
             [],
@@ -37,12 +43,7 @@ describe('BreederManagementDashboardAssemblerService', () => {
     });
 
     it('필드가 없으면 Unknown 기본값', () => {
-        const result = service.toResponse(
-            {} as any,
-            0,
-            [{ _id: 'a-1', appliedAt: new Date() } as any],
-            0,
-        );
+        const result = service.toResponse({} as any, 0, [{ _id: 'a-1', appliedAt: new Date() } as any], 0);
         expect(result.recentApplicationList[0].adopterName).toBe('Unknown');
         expect(result.recentApplicationList[0].petName).toBe('Unknown');
     });

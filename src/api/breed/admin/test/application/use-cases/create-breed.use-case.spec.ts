@@ -24,11 +24,7 @@ describe('품종 생성 유스케이스', () => {
             update: jest.fn(),
             delete: jest.fn(),
         };
-        const useCase = new CreateBreedUseCase(
-            breedAdminReader,
-            breedWriter,
-            new BreedAdminResultMapperService(),
-        );
+        const useCase = new CreateBreedUseCase(breedAdminReader, breedWriter, new BreedAdminResultMapperService());
 
         await expect(
             useCase.execute({

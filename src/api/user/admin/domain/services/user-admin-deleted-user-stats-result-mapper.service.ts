@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
-import { UserAdminDeletedReasonStatSnapshot, UserAdminDeletedUserStatsSnapshot } from '../../application/ports/user-admin-reader.port';
+import {
+    UserAdminDeletedReasonStatSnapshot,
+    UserAdminDeletedUserStatsSnapshot,
+} from '../../application/ports/user-admin-reader.port';
 import type { UserAdminDeletedUserStatsResult } from '../../application/types/user-admin-result.type';
 
 @Injectable()
@@ -48,11 +51,7 @@ export class UserAdminDeletedUserStatsResultMapperService {
         };
     }
 
-    private toReasonStats(
-        stats: UserAdminDeletedReasonStatSnapshot[],
-        total: number,
-        labels: Record<string, string>,
-    ) {
+    private toReasonStats(stats: UserAdminDeletedReasonStatSnapshot[], total: number, labels: Record<string, string>) {
         return stats
             .map((stat) => ({
                 reason: stat.reason,

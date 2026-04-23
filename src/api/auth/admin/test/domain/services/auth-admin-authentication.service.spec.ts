@@ -23,7 +23,11 @@ describe('AuthAdminAuthenticationService', () => {
 
     describe('toTokenPayload', () => {
         it('sub/email/role/adminLevel 필드를 구성한다', () => {
-            const result = service.toTokenPayload({ adminId: 'a-1', email: 'a@b.com', adminLevel: 'super_admin' } as any);
+            const result = service.toTokenPayload({
+                adminId: 'a-1',
+                email: 'a@b.com',
+                adminLevel: 'super_admin',
+            } as any);
             expect(result).toEqual({ sub: 'a-1', email: 'a@b.com', role: 'admin', adminLevel: 'super_admin' });
         });
     });

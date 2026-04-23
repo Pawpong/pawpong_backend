@@ -15,7 +15,9 @@ describe('AuthBreederDocumentSubmissionService', () => {
 
     describe('assertRequiredDocumentUrls', () => {
         it('idCardUrl 없으면 예외', () => {
-            expect(() => service.assertRequiredDocumentUrls({ idCardUrl: '', animalProductionLicenseUrl: 'a' } as any)).toThrow(DomainValidationError);
+            expect(() =>
+                service.assertRequiredDocumentUrls({ idCardUrl: '', animalProductionLicenseUrl: 'a' } as any),
+            ).toThrow(DomainValidationError);
         });
     });
 
@@ -53,12 +55,18 @@ describe('AuthBreederDocumentSubmissionService', () => {
 
     describe('createUploadedDocuments', () => {
         it('elite 레벨은 optional 필드들을 포함 (undefined 포함)', () => {
-            const result = service.createUploadedDocuments('elite', { idCardUrl: 'id', animalProductionLicenseUrl: 'ap' });
+            const result = service.createUploadedDocuments('elite', {
+                idCardUrl: 'id',
+                animalProductionLicenseUrl: 'ap',
+            });
             expect(result).toHaveProperty('adoptionContractSample');
             expect(result).toHaveProperty('ticaCfaDocument');
         });
         it('new 레벨은 기본 두 개만', () => {
-            const result = service.createUploadedDocuments('new', { idCardUrl: 'id', animalProductionLicenseUrl: 'ap' });
+            const result = service.createUploadedDocuments('new', {
+                idCardUrl: 'id',
+                animalProductionLicenseUrl: 'ap',
+            });
             expect(Object.keys(result)).toEqual(['idCard', 'animalProductionLicense']);
         });
     });

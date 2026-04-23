@@ -31,11 +31,7 @@ describe('공개 문의 목록 조회 유스케이스', () => {
         generateSignedUrl: jest.fn((fileName: string) => `signed:${fileName}`),
     };
 
-    const useCase = new GetInquiryListUseCase(
-        inquiryReader as any,
-        new InquiryViewService(),
-        inquiryAssetUrl as any,
-    );
+    const useCase = new GetInquiryListUseCase(inquiryReader as any, new InquiryViewService(), inquiryAssetUrl as any);
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -63,9 +59,7 @@ describe('공개 문의 목록 조회 유스케이스', () => {
 
         await useCase.execute();
 
-        expect(inquiryReader.readPublicList).toHaveBeenCalledWith(
-            expect.objectContaining({ sort: 'latest_answer' }),
-        );
+        expect(inquiryReader.readPublicList).toHaveBeenCalledWith(expect.objectContaining({ sort: 'latest_answer' }));
     });
 
     it('animalType 필터를 리더에게 전달한다', async () => {
@@ -73,9 +67,7 @@ describe('공개 문의 목록 조회 유스케이스', () => {
 
         await useCase.execute(1, 15, 'cat');
 
-        expect(inquiryReader.readPublicList).toHaveBeenCalledWith(
-            expect.objectContaining({ animalType: 'cat' }),
-        );
+        expect(inquiryReader.readPublicList).toHaveBeenCalledWith(expect.objectContaining({ animalType: 'cat' }));
     });
 
     it('페이지 2는 올바른 skip 값을 계산한다', async () => {
@@ -83,9 +75,7 @@ describe('공개 문의 목록 조회 유스케이스', () => {
 
         await useCase.execute(2, 15);
 
-        expect(inquiryReader.readPublicList).toHaveBeenCalledWith(
-            expect.objectContaining({ skip: 15, limit: 16 }),
-        );
+        expect(inquiryReader.readPublicList).toHaveBeenCalledWith(expect.objectContaining({ skip: 15, limit: 16 }));
     });
 
     it('다음 페이지가 있으면 hasMore가 true다', async () => {

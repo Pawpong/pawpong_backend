@@ -24,12 +24,6 @@ export class GetBreederPetsUseCase {
         }
 
         const pets = await this.breederPublicReaderPort.findActiveAvailablePetsByBreederId(breederId);
-        return this.breederPublicPetPageAssemblerService.build(
-            pets,
-            status,
-            page,
-            limit,
-            this.breederFileUrlPort,
-        );
+        return this.breederPublicPetPageAssemblerService.build(pets, status, page, limit, this.breederFileUrlPort);
     }
 }

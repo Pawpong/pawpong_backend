@@ -56,9 +56,10 @@ export class BreederManagementAdminBannerRepository {
         bannerId: string,
         data: BreederManagementProfileBannerUpdateCommand,
     ): Promise<BreederManagementBannerDocumentRecord | null> {
-        return this.authBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec() as Promise<
-            BreederManagementBannerDocumentRecord | null
-        >;
+        return this.authBannerModel
+            .findByIdAndUpdate(bannerId, data, { new: true })
+            .lean()
+            .exec() as Promise<BreederManagementBannerDocumentRecord | null>;
     }
 
     async deleteProfile(bannerId: string): Promise<boolean> {
@@ -74,9 +75,10 @@ export class BreederManagementAdminBannerRepository {
         bannerId: string,
         data: BreederManagementCounselBannerUpdateCommand,
     ): Promise<BreederManagementBannerDocumentRecord | null> {
-        return this.counselBannerModel.findByIdAndUpdate(bannerId, data, { new: true }).lean().exec() as Promise<
-            BreederManagementBannerDocumentRecord | null
-        >;
+        return this.counselBannerModel
+            .findByIdAndUpdate(bannerId, data, { new: true })
+            .lean()
+            .exec() as Promise<BreederManagementBannerDocumentRecord | null>;
     }
 
     async deleteCounsel(bannerId: string): Promise<boolean> {

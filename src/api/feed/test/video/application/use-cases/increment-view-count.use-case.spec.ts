@@ -19,11 +19,7 @@ describe('조회수 증가 유스케이스', () => {
         const cacheManager = {
             del: jest.fn().mockResolvedValue(undefined),
         };
-        const useCase = new IncrementViewCountUseCase(
-            feedVideoCommand,
-            cacheManager as any,
-            new FeedCacheKeyService(),
-        );
+        const useCase = new IncrementViewCountUseCase(feedVideoCommand, cacheManager as any, new FeedCacheKeyService());
 
         await useCase.execute('video-1');
 

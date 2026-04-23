@@ -31,11 +31,15 @@ describe('UploadFilePolicyService', () => {
         });
 
         it('4장 이상이면 DomainValidationError를 던진다', () => {
-            expect(() => policy.ensureRepresentativePhotos([makeImage(), makeImage(), makeImage(), makeImage()])).toThrow('최대 3장');
+            expect(() =>
+                policy.ensureRepresentativePhotos([makeImage(), makeImage(), makeImage(), makeImage()]),
+            ).toThrow('최대 3장');
         });
 
         it('허용되지 않은 mimetype은 DomainValidationError를 던진다', () => {
-            expect(() => policy.ensureRepresentativePhotos([makeImage({ mimetype: 'application/pdf' })])).toThrow(DomainValidationError);
+            expect(() => policy.ensureRepresentativePhotos([makeImage({ mimetype: 'application/pdf' })])).toThrow(
+                DomainValidationError,
+            );
         });
 
         it('영상 파일도 허용한다', () => {
@@ -81,7 +85,9 @@ describe('UploadFilePolicyService', () => {
 
     describe('validatePetPhotoFiles', () => {
         it('첫 업로드의 첫 번째는 이미지만 허용한다', () => {
-            expect(() => policy.validatePetPhotoFiles([makeImage({ mimetype: 'video/mp4' })], 0)).toThrow('이미지 파일만');
+            expect(() => policy.validatePetPhotoFiles([makeImage({ mimetype: 'video/mp4' })], 0)).toThrow(
+                '이미지 파일만',
+            );
         });
 
         it('첫 업로드의 첫 번째가 이미지면 통과한다', () => {

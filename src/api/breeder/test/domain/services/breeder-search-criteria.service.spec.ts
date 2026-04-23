@@ -32,9 +32,13 @@ describe('BreederSearchCriteriaService', () => {
     });
 
     it('sortCriteria에 따라 정렬이 달라진다', () => {
-        expect(service.build({ sortCriteria: 'experience' } as any).sortOrder).toEqual({ 'profile.experienceYears': -1 });
+        expect(service.build({ sortCriteria: 'experience' } as any).sortOrder).toEqual({
+            'profile.experienceYears': -1,
+        });
         expect(service.build({ sortCriteria: 'recent' } as any).sortOrder).toEqual({ createdAt: -1 });
-        expect(service.build({ sortCriteria: 'applications' } as any).sortOrder).toEqual({ 'stats.totalApplications': -1 });
+        expect(service.build({ sortCriteria: 'applications' } as any).sortOrder).toEqual({
+            'stats.totalApplications': -1,
+        });
         expect(service.build({} as any).sortOrder).toEqual({ 'stats.averageRating': -1 });
     });
 });

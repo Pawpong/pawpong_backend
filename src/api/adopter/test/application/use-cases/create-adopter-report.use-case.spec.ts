@@ -34,7 +34,10 @@ describe('브리더 신고 유스케이스', () => {
 
         expect(result.reportId).toBeDefined();
         expect(result.message).toBe(ADOPTER_RESPONSE_PAYLOAD_MESSAGES.reportAccepted);
-        expect(adopterReportCommandPort.addReport).toHaveBeenCalledWith('breeder-target', expect.objectContaining({ reporterId: 'user-1', reporterName: '입양자1' }));
+        expect(adopterReportCommandPort.addReport).toHaveBeenCalledWith(
+            'breeder-target',
+            expect.objectContaining({ reporterId: 'user-1', reporterName: '입양자1' }),
+        );
     });
 
     it("reason이 'other'이고 description이 없으면 DomainValidationError를 던진다", async () => {

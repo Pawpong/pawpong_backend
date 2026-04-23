@@ -93,7 +93,9 @@ export interface BreederVerificationAdminReaderPort {
     getLevelChangeRequests(
         criteria: BreederVerificationAdminSearchCriteria,
     ): Promise<BreederVerificationAdminListResultSnapshot>;
-    getPendingBreeders(criteria: BreederVerificationAdminSearchCriteria): Promise<BreederVerificationAdminListResultSnapshot>;
+    getPendingBreeders(
+        criteria: BreederVerificationAdminSearchCriteria,
+    ): Promise<BreederVerificationAdminListResultSnapshot>;
     getBreeders(criteria: BreederVerificationAdminSearchCriteria): Promise<BreederVerificationAdminListResultSnapshot>;
     findBreederById(breederId: string): Promise<BreederVerificationAdminBreederSnapshot | null>;
     getApprovedBreederStats(): Promise<BreederVerificationAdminStatsSnapshot>;

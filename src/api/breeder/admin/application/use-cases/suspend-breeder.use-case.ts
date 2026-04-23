@@ -32,9 +32,7 @@ export class SuspendBreederUseCase {
         breederId: string,
         suspendData: BreederSuspendCommand,
     ): Promise<BreederAdminSuspensionResult> {
-        this.breederAdminPolicyService.assertCanManageBreeders(
-            await this.breederAdminReader.findAdminById(adminId),
-        );
+        this.breederAdminPolicyService.assertCanManageBreeders(await this.breederAdminReader.findAdminById(adminId));
 
         const breeder = this.breederAdminPolicyService.assertSuspendable(
             this.breederAdminPolicyService.assertBreederExists(

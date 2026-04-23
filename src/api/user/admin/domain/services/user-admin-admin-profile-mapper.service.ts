@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import {
-    UserAdminAdminSnapshot,
-} from '../../application/ports/user-admin-reader.port';
-import type {
-    UserAdminAdminProfileResult,
-} from '../../application/types/user-admin-result.type';
+import { UserAdminAdminSnapshot } from '../../application/ports/user-admin-reader.port';
+import type { UserAdminAdminProfileResult } from '../../application/types/user-admin-result.type';
 
 @Injectable()
 export class UserAdminAdminProfileMapperService {

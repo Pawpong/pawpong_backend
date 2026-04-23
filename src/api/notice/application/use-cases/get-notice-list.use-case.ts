@@ -15,10 +15,7 @@ export class GetNoticeListUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(
-        paginationData: NoticePageQuery,
-        status?: NoticeStatus,
-    ): Promise<NoticePageResult> {
+    async execute(paginationData: NoticePageQuery, status?: NoticeStatus): Promise<NoticePageResult> {
         this.logger.logStart('getNoticeList', '공지사항 목록 조회 시작', {
             ...paginationData,
             status,

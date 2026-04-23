@@ -13,7 +13,7 @@ describe('공지 관리자 종단간 테스트', () => {
 
     beforeAll(async () => {
         app = await createTestingApp();
-        adminToken = await getAdminToken(app) || '';
+        adminToken = (await getAdminToken(app)) || '';
         if (!adminToken) console.log('주의: 관리자 토큰 획득 실패');
     }, 30000);
 
@@ -24,7 +24,10 @@ describe('공지 관리자 종단간 테스트', () => {
 
     describe('POST /api/notice-관리자', () => {
         it('공지 생성 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .post('/api/notice-admin')
@@ -54,7 +57,10 @@ describe('공지 관리자 종단간 테스트', () => {
 
     describe('GET /api/notice-관리자', () => {
         it('공지 목록 조회 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get('/api/notice-admin')
@@ -66,7 +72,10 @@ describe('공지 관리자 종단간 테스트', () => {
         });
 
         it('잘못된 공지 ID 형식으로 상세 조회 시 400', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get('/api/notice-admin/invalid-notice-id')
@@ -80,7 +89,10 @@ describe('공지 관리자 종단간 테스트', () => {
 
     describe('PATCH /api/notice-관리자/:noticeId', () => {
         it('공지 수정 성공', async () => {
-            if (!adminToken || !createdNoticeId) { console.log('주의: 스킵'); return; }
+            if (!adminToken || !createdNoticeId) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .patch(`/api/notice-admin/${createdNoticeId}`)
@@ -93,7 +105,10 @@ describe('공지 관리자 종단간 테스트', () => {
         });
 
         it('잘못된 공지 ID 형식으로 수정 시 400', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .patch('/api/notice-admin/invalid-notice-id')
@@ -108,7 +123,10 @@ describe('공지 관리자 종단간 테스트', () => {
 
     describe('DELETE /api/notice-관리자/:noticeId', () => {
         it('공지 삭제 성공', async () => {
-            if (!adminToken || !createdNoticeId) { console.log('주의: 스킵'); return; }
+            if (!adminToken || !createdNoticeId) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .delete(`/api/notice-admin/${createdNoticeId}`)
@@ -120,7 +138,10 @@ describe('공지 관리자 종단간 테스트', () => {
         });
 
         it('잘못된 공지 ID 형식으로 삭제 시 400', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .delete('/api/notice-admin/invalid-notice-id')

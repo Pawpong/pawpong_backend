@@ -10,10 +10,7 @@ import { NoticeStatus } from '../application/ports/notice-reader.port';
 import { NoticeAdminProtectedController } from './decorator/notice-admin-controller.decorator';
 import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../constants/notice-response-messages';
 import { NoticeResponseDto } from '../dto/response/notice-response.dto';
-import {
-    ApiGetNoticeDetailAdminEndpoint,
-    ApiGetNoticeListAdminEndpoint,
-} from './swagger';
+import { ApiGetNoticeDetailAdminEndpoint, ApiGetNoticeListAdminEndpoint } from './swagger';
 
 @NoticeAdminProtectedController()
 export class NoticeAdminQueryController {

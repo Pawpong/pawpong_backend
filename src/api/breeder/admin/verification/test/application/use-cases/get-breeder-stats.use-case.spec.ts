@@ -6,10 +6,12 @@ import { BreederVerificationAdminReaderPort } from '../../../application/ports/b
 
 const adminWithPermission = { id: 'admin-1', name: '관리자', permissions: { canManageBreeders: true } };
 
-function makeReader(overrides: Partial<{
-    admin: any;
-    stats: any;
-}> = {}): BreederVerificationAdminReaderPort {
+function makeReader(
+    overrides: Partial<{
+        admin: any;
+        stats: any;
+    }> = {},
+): BreederVerificationAdminReaderPort {
     const { admin = adminWithPermission, stats = { totalApproved: 100, eliteCount: 20 } } = overrides;
     return {
         findAdminById: jest.fn().mockResolvedValue(admin),

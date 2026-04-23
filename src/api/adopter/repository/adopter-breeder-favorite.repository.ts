@@ -11,7 +11,11 @@ export class AdopterBreederFavoriteRepository {
     constructor(@InjectModel(Breeder.name) private readonly breederModel: Model<BreederDocument>) {}
 
     findById(breederId: string): Promise<AdopterBreederRecord | null> {
-        return this.breederModel.findById(breederId).select('-password').lean().exec() as Promise<AdopterBreederRecord | null>;
+        return this.breederModel
+            .findById(breederId)
+            .select('-password')
+            .lean()
+            .exec() as Promise<AdopterBreederRecord | null>;
     }
 
     async findFavoriteList(

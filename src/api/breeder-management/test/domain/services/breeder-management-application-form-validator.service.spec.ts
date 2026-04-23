@@ -16,19 +16,15 @@ describe('BreederManagementApplicationFormValidatorService', () => {
 
         it('표준 질문 id와 충돌하면 예외', () => {
             expect(() =>
-                service.validateCustomQuestions(
-                    { customQuestions: [{ id: 'privacyConsent' } as any] } as any,
-                    ['privacyConsent'],
-                ),
+                service.validateCustomQuestions({ customQuestions: [{ id: 'privacyConsent' } as any] } as any, [
+                    'privacyConsent',
+                ]),
             ).toThrow(/표준 질문과 중복/);
         });
 
         it('문제 없으면 통과', () => {
             expect(() =>
-                service.validateCustomQuestions(
-                    { customQuestions: [{ id: 'custom1' } as any] } as any,
-                    ['std1'],
-                ),
+                service.validateCustomQuestions({ customQuestions: [{ id: 'custom1' } as any] } as any, ['std1']),
             ).not.toThrow();
         });
     });
@@ -36,9 +32,27 @@ describe('BreederManagementApplicationFormValidatorService', () => {
     describe('toStoredQuestions', () => {
         it('모든 필드를 포함하여 변환', () => {
             const result = service.toStoredQuestions({
-                customQuestions: [{ id: 'c1', type: 'text', label: 'l', required: true, options: ['a'], placeholder: 'p', order: 1 } as any],
+                customQuestions: [
+                    {
+                        id: 'c1',
+                        type: 'text',
+                        label: 'l',
+                        required: true,
+                        options: ['a'],
+                        placeholder: 'p',
+                        order: 1,
+                    } as any,
+                ],
             } as any);
-            expect(result[0]).toEqual({ id: 'c1', type: 'text', label: 'l', required: true, options: ['a'], placeholder: 'p', order: 1 });
+            expect(result[0]).toEqual({
+                id: 'c1',
+                type: 'text',
+                label: 'l',
+                required: true,
+                options: ['a'],
+                placeholder: 'p',
+                order: 1,
+            });
         });
     });
 });

@@ -1,6 +1,9 @@
 import { GetAllStandardQuestionsUseCase } from '../../../application/use-cases/get-all-standard-questions.use-case';
 import { StandardQuestionResultMapperService } from '../../../../domain/services/standard-question-result-mapper.service';
-import { StandardQuestionReaderPort, StandardQuestionSnapshot } from '../../../../application/ports/standard-question-reader.port';
+import {
+    StandardQuestionReaderPort,
+    StandardQuestionSnapshot,
+} from '../../../../application/ports/standard-question-reader.port';
 
 function makeSnapshot(overrides: Partial<StandardQuestionSnapshot> = {}): StandardQuestionSnapshot {
     return {
@@ -26,7 +29,10 @@ describe('어드민 표준 질문 전체 조회 유스케이스', () => {
     const resultMapper = new StandardQuestionResultMapperService();
 
     it('전체 질문 목록을 반환한다', async () => {
-        const questions = [makeSnapshot({ id: 'q-1', order: 1 }), makeSnapshot({ id: 'q-2', order: 2, isActive: false })];
+        const questions = [
+            makeSnapshot({ id: 'q-1', order: 1 }),
+            makeSnapshot({ id: 'q-2', order: 2, isActive: false }),
+        ];
         const useCase = new GetAllStandardQuestionsUseCase(makeReader(questions), resultMapper);
 
         const result = await useCase.execute();

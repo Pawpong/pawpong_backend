@@ -3,9 +3,7 @@ import { Get, Inject, Param } from '@nestjs/common';
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import type { GetFeedVideoLikeStatusUseCasePort } from '../like/application/ports/feed-like-interaction.port';
-import {
-    GET_FEED_VIDEO_LIKE_STATUS_USE_CASE,
-} from '../like/application/tokens/feed-like-interaction.token';
+import { GET_FEED_VIDEO_LIKE_STATUS_USE_CASE } from '../like/application/tokens/feed-like-interaction.token';
 import type { FeedLikeStatusResult } from '../like/application/types/feed-like-result.type';
 import { LikeStatusResponseDto } from '../like/dto/response/like-response.dto';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
@@ -24,7 +22,7 @@ export class FeedVideoLikeStatusController {
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
     ): Promise<LikeStatusResponseDto> {
-        return (await this.getLikeStatusUseCase.execute(videoId, userId)) as
-            LikeStatusResponseDto & FeedLikeStatusResult;
+        return (await this.getLikeStatusUseCase.execute(videoId, userId)) as LikeStatusResponseDto &
+            FeedLikeStatusResult;
     }
 }

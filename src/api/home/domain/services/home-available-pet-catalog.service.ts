@@ -24,8 +24,7 @@ export class HomeAvailablePetCatalogService {
             breederId: pet.breederId,
             breederName: pet.breederName || '브리더 정보 없음',
             price: isAuthenticated ? pet.price || 0 : null,
-            mainPhoto:
-                pet.photos.length > 0 ? generateSignedUrl(pet.photos[0], 60) : 'https://via.placeholder.com/300',
+            mainPhoto: pet.photos.length > 0 ? generateSignedUrl(pet.photos[0], 60) : 'https://via.placeholder.com/300',
             birthDate: pet.birthDate ? new Date(pet.birthDate).toISOString() : null,
             ageInMonths: this.calculateAgeInMonths(pet.birthDate),
             location: {

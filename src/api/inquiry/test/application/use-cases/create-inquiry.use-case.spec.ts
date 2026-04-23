@@ -14,11 +14,7 @@ describe('문의 작성 유스케이스', () => {
         logError: jest.fn(),
     };
 
-    const useCase = new CreateInquiryUseCase(
-        inquiryCommand as any,
-        new InquiryCommandPolicyService(),
-        logger as any,
-    );
+    const useCase = new CreateInquiryUseCase(inquiryCommand as any, new InquiryCommandPolicyService(), logger as any);
 
     beforeEach(() => {
         jest.clearAllMocks();

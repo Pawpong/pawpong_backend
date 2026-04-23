@@ -37,7 +37,8 @@ export class SendDocumentRemindersUseCase {
         const reviewedBefore = new Date();
         reviewedBefore.setDate(reviewedBefore.getDate() - 28);
 
-        const candidates = await this.breederVerificationAdminReader.findApprovedBreedersMissingDocuments(reviewedBefore);
+        const candidates =
+            await this.breederVerificationAdminReader.findApprovedBreedersMissingDocuments(reviewedBefore);
         const breederIds: string[] = [];
         let sentCount = 0;
 

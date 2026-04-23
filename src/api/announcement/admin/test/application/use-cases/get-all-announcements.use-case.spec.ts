@@ -18,11 +18,7 @@ describe('공지사항 전체 목록 조회 유스케이스 (관리자)', () => 
         new AnnouncementPaginationAssemblerService(),
     );
 
-    const useCase = new GetAllAnnouncementsUseCase(
-        announcementAdminReader as any,
-        assemblerService,
-        logger as any,
-    );
+    const useCase = new GetAllAnnouncementsUseCase(announcementAdminReader as any, assemblerService, logger as any);
 
     const mockAnnouncement = {
         announcementId: 'ann-1',

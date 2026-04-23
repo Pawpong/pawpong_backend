@@ -31,11 +31,7 @@ describe('내 문의 목록 조회 유스케이스', () => {
         generateSignedUrl: jest.fn((fileName: string) => `signed:${fileName}`),
     };
 
-    const useCase = new GetMyInquiriesUseCase(
-        inquiryReader as any,
-        new InquiryViewService(),
-        inquiryAssetUrl as any,
-    );
+    const useCase = new GetMyInquiriesUseCase(inquiryReader as any, new InquiryViewService(), inquiryAssetUrl as any);
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -63,9 +59,7 @@ describe('내 문의 목록 조회 유스케이스', () => {
 
         await useCase.execute('user-xyz');
 
-        expect(inquiryReader.readMyList).toHaveBeenCalledWith(
-            expect.objectContaining({ authorId: 'user-xyz' }),
-        );
+        expect(inquiryReader.readMyList).toHaveBeenCalledWith(expect.objectContaining({ authorId: 'user-xyz' }));
     });
 
     it('animalType 필터를 리더에게 전달한다', async () => {
@@ -73,9 +67,7 @@ describe('내 문의 목록 조회 유스케이스', () => {
 
         await useCase.execute('user-abc', 1, 15, 'dog');
 
-        expect(inquiryReader.readMyList).toHaveBeenCalledWith(
-            expect.objectContaining({ animalType: 'dog' }),
-        );
+        expect(inquiryReader.readMyList).toHaveBeenCalledWith(expect.objectContaining({ animalType: 'dog' }));
     });
 
     it('다음 페이지가 있으면 hasMore가 true다', async () => {

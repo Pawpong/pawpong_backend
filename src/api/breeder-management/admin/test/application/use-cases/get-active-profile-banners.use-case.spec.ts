@@ -1,6 +1,9 @@
 import { BreederManagementBannerResultMapperService } from '../../../domain/services/breeder-management-banner-result-mapper.service';
 import { GetActiveProfileBannersUseCase } from '../../../application/use-cases/get-active-profile-banners.use-case';
-import { BreederManagementAdminBannerReaderPort, ProfileBannerSnapshot } from '../../../application/ports/breeder-management-admin-banner-reader.port';
+import {
+    BreederManagementAdminBannerReaderPort,
+    ProfileBannerSnapshot,
+} from '../../../application/ports/breeder-management-admin-banner-reader.port';
 import { BreederManagementFileUrlPort } from '../../../../application/ports/breeder-management-file-url.port';
 
 function makeProfileBanner(overrides: Partial<ProfileBannerSnapshot> = {}): ProfileBannerSnapshot {
@@ -46,7 +49,10 @@ describe('활성 프로필 배너 목록 조회 유스케이스', () => {
 
     it('bannerType 필터를 전달한다', async () => {
         const reader = makeReader([makeProfileBanner({ bannerType: 'signup' })]);
-        const useCase = new GetActiveProfileBannersUseCase(reader, new BreederManagementBannerResultMapperService(makeFileUrlPort()));
+        const useCase = new GetActiveProfileBannersUseCase(
+            reader,
+            new BreederManagementBannerResultMapperService(makeFileUrlPort()),
+        );
 
         await useCase.execute('signup');
 

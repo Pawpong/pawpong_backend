@@ -39,7 +39,9 @@ describe('InquiryCommandPolicyService', () => {
         });
 
         it('1 이상이면 예외를 던진다', () => {
-            expect(() => policy.ensureNoAnswers({ ...baseInquiry, answerCount: 1 }, 'has answers')).toThrow(DomainValidationError);
+            expect(() => policy.ensureNoAnswers({ ...baseInquiry, answerCount: 1 }, 'has answers')).toThrow(
+                DomainValidationError,
+            );
         });
     });
 
@@ -57,7 +59,9 @@ describe('InquiryCommandPolicyService', () => {
         });
 
         it('general 타입은 누구나 답변 가능하다', () => {
-            expect(() => policy.ensureInquiryAnswerable({ ...baseInquiry, type: 'general' }, 'any-breeder')).not.toThrow();
+            expect(() =>
+                policy.ensureInquiryAnswerable({ ...baseInquiry, type: 'general' }, 'any-breeder'),
+            ).not.toThrow();
         });
     });
 

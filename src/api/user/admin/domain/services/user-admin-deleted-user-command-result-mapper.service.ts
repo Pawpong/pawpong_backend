@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import { UserAdminManagedUserRole } from '../../application/ports/user-admin-reader.port';
-import type { UserAdminHardDeleteResult, UserAdminStatusUpdateResult } from '../../application/types/user-admin-result.type';
+import type {
+    UserAdminHardDeleteResult,
+    UserAdminStatusUpdateResult,
+} from '../../application/types/user-admin-result.type';
 
 @Injectable()
 export class UserAdminDeletedUserCommandResultMapperService {

@@ -6,7 +6,10 @@ import type { AdopterBreederRecord } from '../../types/adopter-breeder.type';
 
 @Injectable()
 export class AdopterApplicationDetailAssemblerService {
-    toResponse(application: AdopterApplicationRecord, breeder: AdopterBreederRecord | null): AdopterApplicationDetailResult {
+    toResponse(
+        application: AdopterApplicationRecord,
+        breeder: AdopterBreederRecord | null,
+    ): AdopterApplicationDetailResult {
         return {
             applicationId: application._id.toString(),
             breederId: application.breederId.toString(),

@@ -96,7 +96,9 @@ export class BreederManagementPetCommandAdapter implements BreederManagementPetC
                 : undefined,
         };
 
-        return this.availablePetManagementRepository.create(createData) as Promise<BreederManagementAvailablePetCommandRecord>;
+        return this.availablePetManagementRepository.create(
+            createData,
+        ) as Promise<BreederManagementAvailablePetCommandRecord>;
     }
 
     updateAvailablePet(

@@ -67,14 +67,7 @@ describe('SendMessageUseCase', () => {
     it('메시지를 저장하고 브로커로 발행한다 (adopter→breeder)', async () => {
         const messageManager = makeMessageManager();
         const broker = makeBroker();
-        const useCase = new SendMessageUseCase(
-            makeRoomManager(),
-            messageManager,
-            broker,
-            policy,
-            mapper,
-            makeLogger(),
-        );
+        const useCase = new SendMessageUseCase(makeRoomManager(), messageManager, broker, policy, mapper, makeLogger());
         const result = await useCase.execute('adopter-1', SenderRole.ADOPTER, { roomId: 'room-1', content: '안녕' });
         expect(result.id).toBe('msg-1');
         expect(messageManager.createMessage).toHaveBeenCalledWith(

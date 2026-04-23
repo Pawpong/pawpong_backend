@@ -39,7 +39,11 @@ describe('AuthSocialUserCheckResultMapperService', () => {
             expect(result.nickname).toBe('브리더');
         }
 
-        const result2 = service.toBreederResult({ _id: { toString: () => 'b-2' }, emailAddress: 'b', nickname: '닉' } as any);
+        const result2 = service.toBreederResult({
+            _id: { toString: () => 'b-2' },
+            emailAddress: 'b',
+            nickname: '닉',
+        } as any);
         if (result2.exists) {
             expect(result2.nickname).toBe('닉');
         }

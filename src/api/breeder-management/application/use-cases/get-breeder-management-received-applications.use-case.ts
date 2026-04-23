@@ -17,7 +17,11 @@ export class GetBreederManagementReceivedApplicationsUseCase {
         private readonly breederManagementPaginationAssemblerService: BreederManagementPaginationAssemblerService,
     ) {}
 
-    async execute(userId: string, page: number = 1, limit: number = 10): Promise<BreederManagementReceivedApplicationsPageResult> {
+    async execute(
+        userId: string,
+        page: number = 1,
+        limit: number = 10,
+    ): Promise<BreederManagementReceivedApplicationsPageResult> {
         const result = await this.breederManagementListReaderPort.findReceivedApplications(userId, page, limit);
         const items = result.applications.map((application) =>
             this.breederManagementReceivedApplicationMapperService.toItem(application),

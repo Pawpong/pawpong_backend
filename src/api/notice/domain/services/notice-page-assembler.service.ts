@@ -12,12 +12,7 @@ export class NoticePageAssemblerService {
         private readonly noticePaginationAssemblerService: NoticePaginationAssemblerService,
     ) {}
 
-    build(
-        notices: NoticeSnapshot[],
-        page: number,
-        limit: number,
-        totalItems: number,
-    ): NoticePageResult {
+    build(notices: NoticeSnapshot[], page: number, limit: number, totalItems: number): NoticePageResult {
         return this.noticePaginationAssemblerService.build(
             notices.map((notice) => this.noticeItemMapperService.toItem(notice)),
             page,

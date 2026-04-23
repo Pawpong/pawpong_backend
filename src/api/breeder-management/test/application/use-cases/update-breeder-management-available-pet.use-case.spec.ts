@@ -30,7 +30,10 @@ describe('브리더 분양 개체 수정 유스케이스', () => {
         const result = await useCase.execute('breeder-1', 'pet-2', mockUpdateData as any);
 
         expect(result.message).toBeDefined();
-        expect(breederManagementPetCommandPort.findAvailablePetByIdAndBreeder).toHaveBeenCalledWith('pet-2', 'breeder-1');
+        expect(breederManagementPetCommandPort.findAvailablePetByIdAndBreeder).toHaveBeenCalledWith(
+            'pet-2',
+            'breeder-1',
+        );
         expect(breederManagementPetCommandPort.updateAvailablePet).toHaveBeenCalledWith('pet-2', expect.any(Object));
     });
 

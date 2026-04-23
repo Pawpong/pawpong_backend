@@ -38,7 +38,8 @@ export class BreederManagementProfileAssemblerService {
                       : {
                             min: priceRangeMin,
                             max: priceRangeMax,
-                            display: priceRange.display || (priceRangeMin > 0 || priceRangeMax > 0 ? 'range' : 'not_set'),
+                            display:
+                                priceRange.display || (priceRangeMin > 0 || priceRangeMax > 0 ? 'range' : 'not_set'),
                         },
               }
             : breeder.profile;

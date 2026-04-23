@@ -33,6 +33,8 @@ export class AddBreederManagementParentPetUseCase {
             this.breederManagementParentPetCommandMapperService.toCreateData(userId, parentPetDto),
         );
 
-        return this.breederManagementParentPetCommandResultMapperService.toParentPetAddedResult(String(savedParentPet._id));
+        return this.breederManagementParentPetCommandResultMapperService.toParentPetAddedResult(
+            String(savedParentPet._id),
+        );
     }
 }

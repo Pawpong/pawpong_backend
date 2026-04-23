@@ -66,7 +66,10 @@ export class CreateAdopterApplicationUseCase {
         }
 
         const standardResponses = this.adopterApplicationStandardAnswerBuilderService.build(dto);
-        const customResponses = this.adopterApplicationCustomAnswerBuilderService.build(dto, breeder.applicationForm || []);
+        const customResponses = this.adopterApplicationCustomAnswerBuilderService.build(
+            dto,
+            breeder.applicationForm || [],
+        );
 
         const savedApplication = await this.adopterApplicationCommandPort.create({
             breederId: dto.breederId,
@@ -93,7 +96,11 @@ export class CreateAdopterApplicationUseCase {
             breederName: breederDisplayName,
         });
 
-        return this.adopterApplicationCreateResultMapperService.toResult(savedApplication, breederDisplayName, pet?.name);
+        return this.adopterApplicationCreateResultMapperService.toResult(
+            savedApplication,
+            breederDisplayName,
+            pet?.name,
+        );
     }
 
     private async ensureApplicantExists(userId: string, userRole?: string): Promise<void> {

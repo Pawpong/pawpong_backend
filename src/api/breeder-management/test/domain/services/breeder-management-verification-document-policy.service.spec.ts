@@ -10,7 +10,9 @@ describe('BreederManagementVerificationDocumentPolicyService', () => {
             expect(() => service.validateUploadRequest([], [])).toThrow(DomainValidationError);
         });
         it('files 수와 types 수 불일치는 예외', () => {
-            expect(() => service.validateUploadRequest([{ originalname: 'a' } as any], [])).toThrow(DomainValidationError);
+            expect(() => service.validateUploadRequest([{ originalname: 'a' } as any], [])).toThrow(
+                DomainValidationError,
+            );
         });
         it('개수가 일치하면 통과', () => {
             expect(() => service.validateUploadRequest([{ originalname: 'a' } as any], ['idCard'])).not.toThrow();

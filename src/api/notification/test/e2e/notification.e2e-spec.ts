@@ -42,9 +42,7 @@ describe('알림 종단간 테스트', () => {
         });
 
         it('인증 없이 접근 시 401', async () => {
-            await request(app.getHttpServer())
-                .get('/api/notification')
-                .expect(401);
+            await request(app.getHttpServer()).get('/api/notification').expect(401);
 
             console.log('인증 없이 접근 401 확인');
         });

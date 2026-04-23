@@ -4,7 +4,10 @@ import {
     BreederVerificationAdminBreederSnapshot,
     BreederVerificationAdminVerificationSnapshot,
 } from '../../application/ports/breeder-verification-admin-reader.port';
-import type { BreederVerificationInfoResult, BreederVerificationListItemResult } from '../../application/types/breeder-verification-admin-result.type';
+import type {
+    BreederVerificationInfoResult,
+    BreederVerificationListItemResult,
+} from '../../application/types/breeder-verification-admin-result.type';
 
 @Injectable()
 export class BreederVerificationAdminListItemMapperService {

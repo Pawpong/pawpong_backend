@@ -50,9 +50,9 @@ describe('문의 답변 작성 유스케이스', () => {
     });
 
     it('필수 정보가 누락되면 DomainValidationError를 던진다', async () => {
-        await expect(
-            useCase.execute('', 'breeder-1', { content: '답변 내용', imageUrls: [] }),
-        ).rejects.toThrow(DomainValidationError);
+        await expect(useCase.execute('', 'breeder-1', { content: '답변 내용', imageUrls: [] })).rejects.toThrow(
+            DomainValidationError,
+        );
     });
 
     it('문의가 없으면 DomainNotFoundError를 던진다', async () => {

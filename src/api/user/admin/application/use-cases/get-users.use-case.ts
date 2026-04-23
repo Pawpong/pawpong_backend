@@ -15,10 +15,7 @@ export class GetUsersUseCase {
         private readonly userAdminUserPageAssemblerService: UserAdminUserPageAssemblerService,
     ) {}
 
-    async execute(
-        adminId: string,
-        filter: UserAdminUserSearchQuery,
-    ): Promise<UserAdminUserManagementPageResult> {
+    async execute(adminId: string, filter: UserAdminUserSearchQuery): Promise<UserAdminUserManagementPageResult> {
         this.userAdminCommandPolicyService.assertCanManageUsers(
             await this.userAdminReader.findAdminById(adminId),
             'Access denied',

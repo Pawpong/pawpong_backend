@@ -36,7 +36,9 @@ export class BreederManagementAdminProfileBannersController {
 
     @Post('profile-banner')
     @ApiCreateProfileBannerAdminEndpoint()
-    async createProfileBanner(@Body() data: ProfileBannerCreateRequestDto): Promise<ApiResponseDto<ProfileBannerResponseDto>> {
+    async createProfileBanner(
+        @Body() data: ProfileBannerCreateRequestDto,
+    ): Promise<ApiResponseDto<ProfileBannerResponseDto>> {
         const banner = await this.createProfileBannerUseCase.execute(data);
         return ApiResponseDto.success(banner, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerCreated);
     }

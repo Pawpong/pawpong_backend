@@ -6,7 +6,9 @@ describe('KafkaService', () => {
     const originalNodeEnv = process.env.NODE_ENV;
 
     let kafkaClient: { connect: jest.Mock; close: jest.Mock; emit: jest.Mock };
-    let logger: jest.Mocked<Pick<CustomLoggerService, 'logSuccess' | 'warn' | 'logWarning' | 'logDbOperation' | 'logError'>>;
+    let logger: jest.Mocked<
+        Pick<CustomLoggerService, 'logSuccess' | 'warn' | 'logWarning' | 'logDbOperation' | 'logError'>
+    >;
     let notifyCriticalErrorUseCase: jest.Mocked<Pick<NotifyCriticalErrorUseCase, 'execute'>>;
 
     beforeEach(() => {

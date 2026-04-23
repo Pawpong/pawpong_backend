@@ -15,7 +15,10 @@ describe('PlatformAdminQueryPolicyService', () => {
 
     it('canViewStatistics 권한이 없으면 DomainAuthorizationError를 던진다', () => {
         expect(() =>
-            policy.assertCanViewStatistics({ id: 'a-1', permissions: { canViewStatistics: false } } as any, '권한 없음'),
+            policy.assertCanViewStatistics(
+                { id: 'a-1', permissions: { canViewStatistics: false } } as any,
+                '권한 없음',
+            ),
         ).toThrow(DomainAuthorizationError);
     });
 });

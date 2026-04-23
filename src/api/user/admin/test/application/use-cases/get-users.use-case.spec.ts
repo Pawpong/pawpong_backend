@@ -56,11 +56,7 @@ describe('사용자 목록 조회 유스케이스', () => {
     });
 
     it('관리자가 없으면 DomainAuthorizationError를 던진다', async () => {
-        const useCase = new GetUsersUseCase(
-            makeReader(null),
-            new UserAdminCommandPolicyService(),
-            pageAssembler,
-        );
+        const useCase = new GetUsersUseCase(makeReader(null), new UserAdminCommandPolicyService(), pageAssembler);
 
         await expect(useCase.execute('not-found', {})).rejects.toBeInstanceOf(DomainAuthorizationError);
     });

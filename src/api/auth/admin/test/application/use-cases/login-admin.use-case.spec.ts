@@ -84,9 +84,7 @@ describe('관리자 로그인 유스케이스', () => {
             logger,
         );
 
-        await expect(useCase.execute('missing@test.com', 'password')).rejects.toBeInstanceOf(
-            DomainAuthenticationError,
-        );
+        await expect(useCase.execute('missing@test.com', 'password')).rejects.toBeInstanceOf(DomainAuthenticationError);
     });
 
     it('비밀번호가 틀리면 도메인 인증 예외를 던진다', async () => {
@@ -108,8 +106,6 @@ describe('관리자 로그인 유스케이스', () => {
             logger,
         );
 
-        await expect(useCase.execute('admin@test.com', 'wrong')).rejects.toBeInstanceOf(
-            DomainAuthenticationError,
-        );
+        await expect(useCase.execute('admin@test.com', 'wrong')).rejects.toBeInstanceOf(DomainAuthenticationError);
     });
 });

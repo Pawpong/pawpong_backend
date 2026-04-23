@@ -71,11 +71,7 @@ export class ChatRepository {
         return message.save();
     }
 
-    async findMessagesByRoomId(
-        roomId: string,
-        limit: number = 50,
-        before?: Date,
-    ): Promise<ChatMessageDocument[]> {
+    async findMessagesByRoomId(roomId: string, limit: number = 50, before?: Date): Promise<ChatMessageDocument[]> {
         const query: Record<string, any> = { roomId };
         if (before) {
             query.createdAt = { $lt: before };

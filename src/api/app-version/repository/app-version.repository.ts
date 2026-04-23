@@ -3,7 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { AppVersion } from '../../../schema/app-version.schema';
-import { type AppVersionCreateCommand, type AppVersionUpdateCommand } from '../admin/application/types/app-version-command.type';
+import {
+    type AppVersionCreateCommand,
+    type AppVersionUpdateCommand,
+} from '../admin/application/types/app-version-command.type';
 
 @Injectable()
 export class AppVersionRepository {

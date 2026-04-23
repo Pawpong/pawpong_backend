@@ -14,10 +14,7 @@ describe('다중 파일 삭제 유스케이스', () => {
     it('실패한 파일만 실패 파일 목록에 모은다', async () => {
         const uploadAdminStorage: UploadAdminStoragePort = {
             list: jest.fn(),
-            delete: jest
-                .fn()
-                .mockResolvedValueOnce(undefined)
-                .mockRejectedValueOnce(new Error('fail')),
+            delete: jest.fn().mockResolvedValueOnce(undefined).mockRejectedValueOnce(new Error('fail')),
         };
         const useCase = new DeleteMultipleFilesUseCase(
             uploadAdminStorage,

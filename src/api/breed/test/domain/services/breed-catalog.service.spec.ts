@@ -10,7 +10,11 @@ describe('BreedCatalogService', () => {
         ]);
         expect(result.petType).toBe('dog');
         expect(result.categories).toHaveLength(2);
-        expect(result.categories[0]).toEqual({ category: 'large', categoryDescription: '대형견', breeds: ['리트리버'] });
+        expect(result.categories[0]).toEqual({
+            category: 'large',
+            categoryDescription: '대형견',
+            breeds: ['리트리버'],
+        });
     });
 
     it('빈 카테고리 배열도 처리한다', () => {

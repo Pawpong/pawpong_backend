@@ -9,11 +9,13 @@ import { FeedLikeManagerPort } from '../../../application/ports/feed-like-manage
 const counter = { id: 'counter-1', likeCount: 10 };
 const existingLike = { id: 'like-1', videoId: 'video-1', userId: 'user-1' };
 
-function makeManager(overrides: Partial<{
-    counter: any;
-    like: any;
-    updatedCount: number;
-}> = {}): FeedLikeManagerPort {
+function makeManager(
+    overrides: Partial<{
+        counter: any;
+        like: any;
+        updatedCount: number;
+    }> = {},
+): FeedLikeManagerPort {
     const { counter: c = counter, like = null, updatedCount = 9 } = overrides;
     return {
         findVideoCounter: jest.fn().mockResolvedValue(c),
@@ -36,7 +38,13 @@ describe('좋아요 토글 유스케이스', () => {
     const cacheKeyService = new FeedCacheKeyService();
 
     it('좋아요가 없으면 좋아요를 추가하고 isLiked: true를 반환한다', async () => {
-        const useCase = new ToggleLikeUseCase(makeManager({ like: null, updatedCount: 11 }), policy, resultMapper, makeCache() as any, cacheKeyService);
+        const useCase = new ToggleLikeUseCase(
+            makeManager({ like: null, updatedCount: 11 }),
+            policy,
+            resultMapper,
+            makeCache() as any,
+            cacheKeyService,
+        );
 
         const result = await useCase.execute('video-1', 'user-1', 'Adopter');
 
@@ -45,7 +53,13 @@ describe('좋아요 토글 유스케이스', () => {
     });
 
     it('좋아요가 있으면 좋아요를 취소하고 isLiked: false를 반환한다', async () => {
-        const useCase = new ToggleLikeUseCase(makeManager({ like: existingLike, updatedCount: 9 }), policy, resultMapper, makeCache() as any, cacheKeyService);
+        const useCase = new ToggleLikeUseCase(
+            makeManager({ like: existingLike, updatedCount: 9 }),
+            policy,
+            resultMapper,
+            makeCache() as any,
+            cacheKeyService,
+        );
 
         const result = await useCase.execute('video-1', 'user-1', 'Adopter');
 
@@ -54,7 +68,13 @@ describe('좋아요 토글 유스케이스', () => {
     });
 
     it('비디오 카운터가 없으면 DomainValidationError를 던진다', async () => {
-        const useCase = new ToggleLikeUseCase(makeManager({ counter: null }), policy, resultMapper, makeCache() as any, cacheKeyService);
+        const useCase = new ToggleLikeUseCase(
+            makeManager({ counter: null }),
+            policy,
+            resultMapper,
+            makeCache() as any,
+            cacheKeyService,
+        );
 
         await expect(useCase.execute('not-found', 'user-1', 'Adopter')).rejects.toBeInstanceOf(DomainValidationError);
     });

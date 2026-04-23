@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 
-import {
-    AdoptionApplication,
-    AdoptionApplicationDocument,
-} from '../../../schema/adoption-application.schema';
+import { AdoptionApplication, AdoptionApplicationDocument } from '../../../schema/adoption-application.schema';
 import { Breeder, BreederDocument } from '../../../schema/breeder.schema';
 import type { AdopterApplicationCreateCommand } from '../application/ports/adopter-application-command.port';
 import type { AdopterObjectIdLike } from '../types/adopter-application.type';
