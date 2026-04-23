@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Delete, Param, Post } from '@nestjs/common';
+import { BadRequestException, Body, Delete, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../common/dto/response/api-response.dto';
@@ -7,10 +7,8 @@ import { UnregisterPushDeviceTokenUseCase } from './application/use-cases/unregi
 import { NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES } from './constants/notification-response-messages';
 import { NotificationProtectedController } from './decorator/notification-controller.decorator';
 import { RegisterPushDeviceTokenRequestDto } from './dto/request/register-push-device-token-request.dto';
-import {
-    ApiRegisterPushDeviceTokenEndpoint,
-    ApiUnregisterPushDeviceTokenEndpoint,
-} from './swagger';
+import { UnregisterPushDeviceTokenRequestDto } from './dto/request/unregister-push-device-token-request.dto';
+import { ApiRegisterPushDeviceTokenEndpoint, ApiUnregisterPushDeviceTokenEndpoint } from './swagger';
 
 /**
  * 디바이스 푸시 토큰 등록/해제 컨트롤러
@@ -41,18 +39,19 @@ export class NotificationPushTokenController {
         return ApiResponseDto.success(null, NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.pushDeviceTokenRegistered);
     }
 
-    @Delete('push-token/:token')
+    @Delete('push-token')
+    @HttpCode(HttpStatus.OK)
     @ApiUnregisterPushDeviceTokenEndpoint()
     async unregisterPushToken(
         @CurrentUser('userId') userId: string,
         @CurrentUser('role') userRole: string,
-        @Param('token') token: string,
+        @Body() body: UnregisterPushDeviceTokenRequestDto,
     ): Promise<ApiResponseDto<null>> {
         const normalizedRole = this.normalizeRole(userRole);
         await this.unregisterPushDeviceTokenUseCase.execute({
             userId,
             userRole: normalizedRole,
-            token,
+            token: body.token,
         });
         return ApiResponseDto.success(null, NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.pushDeviceTokenUnregistered);
     }

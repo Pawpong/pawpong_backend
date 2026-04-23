@@ -4,6 +4,8 @@ import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 import { Notification, NotificationSchema } from '../../schema/notification.schema';
 import { MailModule } from '../../common/mail/mail.module';
+import { AdopterRepository } from '../adopter/repository/adopter.repository';
+import { BreederRepository } from '../breeder-management/repository/breeder.repository';
 
 import { NotificationDeleteController } from './notification-delete.controller';
 import { NotificationEmailPreviewController } from './notification-email-preview.controller';
@@ -113,6 +115,8 @@ const NOTIFICATION_INFRASTRUCTURE_PROVIDERS = [
     NotificationMailAdapter,
     NotificationFirebasePushAdapter,
     NotificationPushTokenMongooseAdapter,
+    AdopterRepository,
+    BreederRepository,
 ];
 
 const NOTIFICATION_PORT_BINDINGS = [
