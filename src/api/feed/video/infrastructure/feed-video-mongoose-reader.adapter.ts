@@ -33,7 +33,7 @@ export class FeedVideoMongooseReaderAdapter implements FeedVideoReaderPort {
     private toSnapshot(video: FeedVideoDocumentRecord): FeedVideoSnapshot {
         const uploader =
             video.uploadedBy && typeof video.uploadedBy === 'object' && '_id' in video.uploadedBy
-                ? (video.uploadedBy as FeedUploaderDocumentRecord)
+                ? video.uploadedBy
                 : null;
 
         return {

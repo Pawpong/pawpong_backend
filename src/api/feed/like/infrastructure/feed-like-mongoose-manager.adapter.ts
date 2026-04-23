@@ -61,7 +61,7 @@ export class FeedLikeMongooseManagerAdapter implements FeedLikeManagerPort {
             return [];
         }
 
-        const videos = await this.feedLikeRepository.findReadyVideosByIds(videoIds as Types.ObjectId[]);
+        const videos = await this.feedLikeRepository.findReadyVideosByIds(videoIds);
 
         const videosById = new Map(videos.map((video) => [video._id.toString(), this.toVideoSnapshot(video)]));
         return likes
@@ -76,7 +76,7 @@ export class FeedLikeMongooseManagerAdapter implements FeedLikeManagerPort {
     private toVideoSnapshot(video: FeedVideoDocumentRecord): FeedLikeVideoSnapshot {
         const uploader =
             video.uploadedBy && typeof video.uploadedBy === 'object' && '_id' in video.uploadedBy
-                ? (video.uploadedBy as FeedUploaderDocumentRecord)
+                ? video.uploadedBy
                 : null;
 
         return {

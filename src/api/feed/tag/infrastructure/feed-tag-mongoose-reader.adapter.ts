@@ -47,7 +47,7 @@ export class FeedTagMongooseReaderAdapter implements FeedTagReaderPort {
     private toVideoSnapshot(video: FeedVideoDocumentRecord): FeedTagVideoSnapshot {
         const uploader =
             video.uploadedBy && typeof video.uploadedBy === 'object' && '_id' in video.uploadedBy
-                ? (video.uploadedBy as FeedUploaderDocumentRecord)
+                ? video.uploadedBy
                 : null;
 
         return {
