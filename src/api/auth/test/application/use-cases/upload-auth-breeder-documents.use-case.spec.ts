@@ -1,5 +1,12 @@
-import type { AuthTempUploadDocument, AuthTempUploadInfo, AuthTempUploadPort } from '../../../application/ports/auth-temp-upload.port';
-import type { AuthUploadFileStorePort, AuthUploadedStorageFile } from '../../../application/ports/auth-upload-file-store.port';
+import type {
+    AuthTempUploadDocument,
+    AuthTempUploadInfo,
+    AuthTempUploadPort,
+} from '../../../application/ports/auth-temp-upload.port';
+import type {
+    AuthUploadFileStorePort,
+    AuthUploadedStorageFile,
+} from '../../../application/ports/auth-upload-file-store.port';
 import { AuthBreederDocumentFilePolicyService } from '../../../domain/services/auth-breeder-document-file-policy.service';
 import { AuthBreederDocumentOriginalFileNameService } from '../../../domain/services/auth-breeder-document-original-file-name.service';
 import { UploadAuthBreederDocumentsUseCase } from '../../../application/use-cases/upload-auth-breeder-documents.use-case';
@@ -63,12 +70,7 @@ describe('브리더 인증 문서 업로드 유스케이스', () => {
             { originalname: '등록증.jpg', size: 2048, mimetype: 'image/jpeg' } as Express.Multer.File,
         ];
 
-        const result = await useCase.execute(
-            files,
-            ['idCard', 'animalProductionLicense'],
-            'new',
-            'temp-docs',
-        );
+        const result = await useCase.execute(files, ['idCard', 'animalProductionLicense'], 'new', 'temp-docs');
 
         expect(result.count).toBe(2);
         expect(result.response.uploadedDocuments).toHaveLength(2);

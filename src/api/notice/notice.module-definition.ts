@@ -24,11 +24,7 @@ const NOTICE_SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: Notice.name, sc
 
 export const NOTICE_MODULE_IMPORTS = [NOTICE_SCHEMA_IMPORTS];
 
-export const NOTICE_MODULE_CONTROLLERS = [
-    NoticeController,
-    NoticeAdminQueryController,
-    NoticeAdminCommandController,
-];
+export const NOTICE_MODULE_CONTROLLERS = [NoticeController, NoticeAdminQueryController, NoticeAdminCommandController];
 
 const NOTICE_USE_CASE_PROVIDERS = [
     GetNoticeListUseCase,
@@ -38,11 +34,7 @@ const NOTICE_USE_CASE_PROVIDERS = [
     DeleteNoticeUseCase,
 ];
 
-const NOTICE_DOMAIN_PROVIDERS = [
-    NoticePaginationAssemblerService,
-    NoticeItemMapperService,
-    NoticePageAssemblerService,
-];
+const NOTICE_DOMAIN_PROVIDERS = [NoticePaginationAssemblerService, NoticeItemMapperService, NoticePageAssemblerService];
 
 const NOTICE_INFRASTRUCTURE_PROVIDERS = [
     CustomLoggerService,

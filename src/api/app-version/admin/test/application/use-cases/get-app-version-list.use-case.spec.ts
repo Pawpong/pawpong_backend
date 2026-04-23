@@ -2,7 +2,10 @@ import { GetAppVersionListUseCase } from '../../../application/use-cases/get-app
 import { AppVersionAdminPageAssemblerService } from '../../../domain/services/app-version-admin-page-assembler.service';
 import { AppVersionAdminPaginationAssemblerService } from '../../../domain/services/app-version-admin-pagination-assembler.service';
 import { AppVersionAdminItemMapperService } from '../../../domain/services/app-version-admin-item-mapper.service';
-import { AppVersionAdminReaderPort, AppVersionAdminSnapshot } from '../../../application/ports/app-version-admin-reader.port';
+import {
+    AppVersionAdminReaderPort,
+    AppVersionAdminSnapshot,
+} from '../../../application/ports/app-version-admin-reader.port';
 
 function makeSnapshot(overrides: Partial<AppVersionAdminSnapshot> = {}): AppVersionAdminSnapshot {
     return {
@@ -47,7 +50,11 @@ describe('앱 버전 목록 조회 유스케이스', () => {
     );
 
     it('앱 버전 목록을 반환한다', async () => {
-        const useCase = new GetAppVersionListUseCase(makeReader([makeSnapshot()], 1), pageAssembler, makeLogger() as any);
+        const useCase = new GetAppVersionListUseCase(
+            makeReader([makeSnapshot()], 1),
+            pageAssembler,
+            makeLogger() as any,
+        );
 
         const result = await useCase.execute({ page: 1, limit: 10 });
 

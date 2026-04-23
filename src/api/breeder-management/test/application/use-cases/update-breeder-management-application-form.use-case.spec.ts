@@ -20,9 +20,7 @@ describe('브리더 입양 신청 폼 수정 유스케이스', () => {
 
     const mockBreeder = { _id: 'breeder-1', applicationForm: [] };
     const validUpdateDto = {
-        customQuestions: [
-            { id: 'custom-1', type: 'text', label: '반려동물 경험', required: false },
-        ],
+        customQuestions: [{ id: 'custom-1', type: 'text', label: '반려동물 경험', required: false }],
     };
 
     beforeEach(() => {

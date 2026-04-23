@@ -58,8 +58,22 @@ describe('BreederPublicPetPageAssemblerService', () => {
     it('parents 정보가 있으면 mother/father 카드를 구성한다', () => {
         const pet = makePet({
             parentInfo: {
-                mother: { _id: { toString: () => 'm-1' }, name: '엄마', breed: '푸들', gender: 'F', birthDate: new Date('2020-01-01'), photos: ['m.jpg'] },
-                father: { _id: { toString: () => 'f-1' }, name: '아빠', breed: '푸들', gender: 'M', birthDate: new Date('2020-01-01'), photos: [] },
+                mother: {
+                    _id: { toString: () => 'm-1' },
+                    name: '엄마',
+                    breed: '푸들',
+                    gender: 'F',
+                    birthDate: new Date('2020-01-01'),
+                    photos: ['m.jpg'],
+                },
+                father: {
+                    _id: { toString: () => 'f-1' },
+                    name: '아빠',
+                    breed: '푸들',
+                    gender: 'M',
+                    birthDate: new Date('2020-01-01'),
+                    photos: [],
+                },
             },
         });
         const result = service.build([pet], undefined, 1, 10, fileUrlPort);

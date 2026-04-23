@@ -11,7 +11,15 @@ describe('AnnouncementPageAssemblerService', () => {
     it('AnnouncementPublicListResult를 페이지네이션 결과로 변환한다', () => {
         const result = service.build({
             items: [
-                { announcementId: 'a-1', title: 't', content: 'c', isActive: true, order: 1, createdAt: new Date(), updatedAt: new Date() },
+                {
+                    announcementId: 'a-1',
+                    title: 't',
+                    content: 'c',
+                    isActive: true,
+                    order: 1,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                },
             ],
             totalCount: 1,
             page: 1,

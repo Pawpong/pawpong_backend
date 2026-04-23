@@ -17,12 +17,7 @@ export class NoticeRepository {
 
     findPage(skip: number, limit: number, status?: NoticeStatus): Promise<Notice[]> {
         const filter = status ? { status } : {};
-        return this.noticeModel
-            .find(filter)
-            .sort({ isPinned: -1, createdAt: -1 })
-            .skip(skip)
-            .limit(limit)
-            .exec();
+        return this.noticeModel.find(filter).sort({ isPinned: -1, createdAt: -1 }).skip(skip).limit(limit).exec();
     }
 
     findById(noticeId: string): Promise<Notice | null> {

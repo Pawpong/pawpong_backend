@@ -26,7 +26,10 @@ describe('표준 질문 순서 변경 유스케이스', () => {
     it('순서 변경 데이터를 포트에 전달한다', async () => {
         const writer = makeWriter();
         const useCase = new ReorderStandardQuestionsUseCase(writer);
-        const reorderData = [{ id: 'q-1', order: 3 }, { id: 'q-2', order: 1 }];
+        const reorderData = [
+            { id: 'q-1', order: 3 },
+            { id: 'q-2', order: 1 },
+        ];
 
         await useCase.execute(reorderData);
 

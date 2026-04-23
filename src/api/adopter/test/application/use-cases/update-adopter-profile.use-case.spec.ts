@@ -8,7 +8,10 @@ describe('입양자 프로필 수정 유스케이스', () => {
                 _id: { toString: () => 'adopter-1' },
             }),
         };
-        const useCase = new UpdateAdopterProfileUseCase(adopterProfilePort as any, new AdopterProfileUpdateMapperService());
+        const useCase = new UpdateAdopterProfileUseCase(
+            adopterProfilePort as any,
+            new AdopterProfileUpdateMapperService(),
+        );
 
         await expect(
             useCase.execute('adopter-1', {

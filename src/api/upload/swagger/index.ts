@@ -92,21 +92,18 @@ export function ApiUploadAvailablePetPhotosEndpoint() {
             example: '507f1f77bcf86cd799439011',
         }),
         ApiBody({
-            schema: buildMultipartFileBodySchema(
-                'files',
-                {
-                    existingPhotos: {
-                        oneOf: [
-                            { type: 'string', example: 'pets/available/photo-1.jpg' },
-                            {
-                                type: 'array',
-                                items: { type: 'string' },
-                                example: ['pets/available/photo-1.jpg', 'pets/available/photo-2.jpg'],
-                            },
-                        ],
-                    },
+            schema: buildMultipartFileBodySchema('files', {
+                existingPhotos: {
+                    oneOf: [
+                        { type: 'string', example: 'pets/available/photo-1.jpg' },
+                        {
+                            type: 'array',
+                            items: { type: 'string' },
+                            example: ['pets/available/photo-1.jpg', 'pets/available/photo-2.jpg'],
+                        },
+                    ],
                 },
-            ),
+            }),
         }),
     );
 }
@@ -135,21 +132,18 @@ export function ApiUploadParentPetPhotosEndpoint() {
             example: '507f1f77bcf86cd799439011',
         }),
         ApiBody({
-            schema: buildMultipartFileBodySchema(
-                'files',
-                {
-                    existingPhotos: {
-                        oneOf: [
-                            { type: 'string', example: 'pets/parent/photo-1.jpg' },
-                            {
-                                type: 'array',
-                                items: { type: 'string' },
-                                example: ['pets/parent/photo-1.jpg', 'pets/parent/photo-2.jpg'],
-                            },
-                        ],
-                    },
+            schema: buildMultipartFileBodySchema('files', {
+                existingPhotos: {
+                    oneOf: [
+                        { type: 'string', example: 'pets/parent/photo-1.jpg' },
+                        {
+                            type: 'array',
+                            items: { type: 'string' },
+                            example: ['pets/parent/photo-1.jpg', 'pets/parent/photo-2.jpg'],
+                        },
+                    ],
                 },
-            ),
+            }),
         }),
     );
 }
@@ -174,15 +168,12 @@ export function ApiUploadSingleFileEndpoint() {
         }),
         ApiBody({
             type: UploadFolderRequestDto,
-            schema: buildMultipartFileBodySchema(
-                'file',
-                {
-                    folder: {
-                        type: 'string',
-                        example: 'profiles',
-                    },
+            schema: buildMultipartFileBodySchema('file', {
+                folder: {
+                    type: 'string',
+                    example: 'profiles',
                 },
-            ),
+            }),
         }),
     );
 }
@@ -208,15 +199,12 @@ export function ApiUploadMultipleFilesEndpoint() {
         }),
         ApiBody({
             type: UploadFolderRequestDto,
-            schema: buildMultipartFileBodySchema(
-                'files',
-                {
-                    folder: {
-                        type: 'string',
-                        example: 'profiles',
-                    },
+            schema: buildMultipartFileBodySchema('files', {
+                folder: {
+                    type: 'string',
+                    example: 'profiles',
                 },
-            ),
+            }),
         }),
     );
 }

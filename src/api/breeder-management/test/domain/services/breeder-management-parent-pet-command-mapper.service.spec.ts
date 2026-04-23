@@ -4,7 +4,12 @@ describe('BreederManagementParentPetCommandMapperService', () => {
     const service = new BreederManagementParentPetCommandMapperService();
 
     it('create: breederId=userId, isActive=true, 기본값 적용', () => {
-        const result = service.toCreateData('u-1', { name: '엄마', breed: '푸들', gender: 'F', birthDate: '2020-01-01' } as any);
+        const result = service.toCreateData('u-1', {
+            name: '엄마',
+            breed: '푸들',
+            gender: 'F',
+            birthDate: '2020-01-01',
+        } as any);
         expect(result.breederId).toBe('u-1');
         expect(result.isActive).toBe(true);
         expect(result.photos).toEqual([]);

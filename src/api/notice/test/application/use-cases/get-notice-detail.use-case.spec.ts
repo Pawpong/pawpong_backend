@@ -13,11 +13,7 @@ describe('공지사항 상세 조회 유스케이스', () => {
         logError: jest.fn(),
     };
 
-    const useCase = new GetNoticeDetailUseCase(
-        noticeReader as any,
-        new NoticeItemMapperService(),
-        logger as any,
-    );
+    const useCase = new GetNoticeDetailUseCase(noticeReader as any, new NoticeItemMapperService(), logger as any);
 
     const mockNotice = {
         id: 'notice-1',

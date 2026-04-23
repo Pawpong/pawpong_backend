@@ -56,4 +56,3 @@ export type NaverOAuthProfile = {
         profile_image?: string;
     };
 };
-

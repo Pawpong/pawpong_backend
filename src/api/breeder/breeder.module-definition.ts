@@ -87,11 +87,7 @@ const BREEDER_DOMAIN_PROVIDERS = [
     BreederPublicPetDetailAssemblerService,
 ];
 
-const BREEDER_INFRASTRUCTURE_PROVIDERS = [
-    BreederPublicRepository,
-    BreederFileUrlAdapter,
-    BreederPublicReaderAdapter,
-];
+const BREEDER_INFRASTRUCTURE_PROVIDERS = [BreederPublicRepository, BreederFileUrlAdapter, BreederPublicReaderAdapter];
 
 const BREEDER_PORT_BINDINGS = [
     {

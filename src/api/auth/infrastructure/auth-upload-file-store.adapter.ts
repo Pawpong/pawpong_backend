@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import { StorageService } from '../../../common/storage/storage.service';
-import type { AuthUploadFileStorePort, AuthUploadedStorageFile } from '../application/ports/auth-upload-file-store.port';
+import type {
+    AuthUploadFileStorePort,
+    AuthUploadedStorageFile,
+} from '../application/ports/auth-upload-file-store.port';
 
 @Injectable()
 export class AuthUploadFileStoreAdapter implements AuthUploadFileStorePort {

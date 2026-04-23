@@ -39,7 +39,11 @@ describe('내가 좋아요한 영상 목록 유스케이스', () => {
     const resultMapper = new FeedLikeResultMapperService(new FeedVideoSummaryMapperService());
 
     it('좋아요한 영상 목록을 반환한다', async () => {
-        const useCase = new GetMyLikedVideosUseCase(makeManager([makeVideoSnapshot()], 1), resultMapper, makeAssetUrl() as any);
+        const useCase = new GetMyLikedVideosUseCase(
+            makeManager([makeVideoSnapshot()], 1),
+            resultMapper,
+            makeAssetUrl() as any,
+        );
 
         const result = await useCase.execute('user-1');
 
@@ -48,7 +52,11 @@ describe('내가 좋아요한 영상 목록 유스케이스', () => {
     });
 
     it('페이지네이션 정보를 포함한다', async () => {
-        const useCase = new GetMyLikedVideosUseCase(makeManager([makeVideoSnapshot()], 25), resultMapper, makeAssetUrl() as any);
+        const useCase = new GetMyLikedVideosUseCase(
+            makeManager([makeVideoSnapshot()], 25),
+            resultMapper,
+            makeAssetUrl() as any,
+        );
 
         const result = await useCase.execute('user-1', 2, 10);
 

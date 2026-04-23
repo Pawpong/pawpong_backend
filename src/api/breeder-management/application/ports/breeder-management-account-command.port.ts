@@ -19,5 +19,8 @@ export interface BreederManagementAccountCommandPort {
     countPendingApplications(userId: string): Promise<number>;
     softDeleteBreeder(command: BreederManagementDeleteAccountCommand): Promise<void>;
     deactivateAllAvailablePetsByBreeder(userId: string): Promise<number>;
-    notifyBreederWithdrawal(command: BreederManagementDeleteAccountCommand, breeder: BreederManagementAccountRecord): Promise<void>;
+    notifyBreederWithdrawal(
+        command: BreederManagementDeleteAccountCommand,
+        breeder: BreederManagementAccountRecord,
+    ): Promise<void>;
 }

@@ -34,10 +34,7 @@ export interface AdopterProfilePort {
     findById(adopterId: string): Promise<AdopterProfileRecord | null>;
     findById(adopterId: string, userRole: string): Promise<AdopterProfileRecord | AdopterBreederRecord | null>;
     findById(adopterId: string, userRole?: string): Promise<AdopterProfileRecord | AdopterBreederRecord | null>;
-    updateProfile(
-        adopterId: string,
-        updateData: AdopterProfileUpdateRecord,
-    ): Promise<AdopterProfileRecord | null>;
+    updateProfile(adopterId: string, updateData: AdopterProfileUpdateRecord): Promise<AdopterProfileRecord | null>;
     updateProfile(
         adopterId: string,
         updateData: AdopterProfileUpdateRecord,

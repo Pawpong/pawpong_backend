@@ -32,19 +32,11 @@ const HOME_SCHEMA_IMPORTS = MongooseModule.forFeature([
 
 export const HOME_MODULE_IMPORTS = [HOME_SCHEMA_IMPORTS, StorageModule];
 
-export const HOME_MODULE_CONTROLLERS = [
-    HomeBannersController,
-    HomeFaqsController,
-    HomeAvailablePetsController,
-];
+export const HOME_MODULE_CONTROLLERS = [HomeBannersController, HomeFaqsController, HomeAvailablePetsController];
 
 const HOME_USE_CASE_PROVIDERS = [GetActiveBannersUseCase, GetFaqsUseCase, GetAvailablePetsUseCase];
 
-const HOME_DOMAIN_PROVIDERS = [
-    HomeBannerCatalogService,
-    HomeFaqCatalogService,
-    HomeAvailablePetCatalogService,
-];
+const HOME_DOMAIN_PROVIDERS = [HomeBannerCatalogService, HomeFaqCatalogService, HomeAvailablePetCatalogService];
 
 const HOME_INFRASTRUCTURE_PROVIDERS = [
     AvailablePetRepository,

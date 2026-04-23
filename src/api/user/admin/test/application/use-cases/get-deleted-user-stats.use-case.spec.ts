@@ -27,7 +27,9 @@ describe('탈퇴 사용자 통계 조회 유스케이스', () => {
                 totalDeletedBreeders: 1,
                 adopterReasonStats: [{ reason: 'already_adopted', count: 2 }],
                 breederReasonStats: [{ reason: 'no_inquiry', count: 1 }],
-                otherReasonDetails: [{ userType: 'adopter', reason: '직접 입양함', deletedAt: '2026-04-06T00:00:00.000Z' }],
+                otherReasonDetails: [
+                    { userType: 'adopter', reason: '직접 입양함', deletedAt: '2026-04-06T00:00:00.000Z' },
+                ],
                 last7DaysCount: 2,
                 last30DaysCount: 3,
             }),
@@ -55,8 +57,12 @@ describe('탈퇴 사용자 통계 조회 유스케이스', () => {
             totalDeletedUsers: 3,
             totalDeletedAdopters: 2,
             totalDeletedBreeders: 1,
-            adopterReasonStats: [{ reason: 'already_adopted', reasonLabel: '이미 입양을 마쳤어요', count: 2, percentage: 100 }],
-            breederReasonStats: [{ reason: 'no_inquiry', reasonLabel: '입양 문의가 잘 오지 않았어요', count: 1, percentage: 100 }],
+            adopterReasonStats: [
+                { reason: 'already_adopted', reasonLabel: '이미 입양을 마쳤어요', count: 2, percentage: 100 },
+            ],
+            breederReasonStats: [
+                { reason: 'no_inquiry', reasonLabel: '입양 문의가 잘 오지 않았어요', count: 1, percentage: 100 },
+            ],
             last7DaysCount: 2,
             last30DaysCount: 3,
         });

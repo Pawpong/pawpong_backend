@@ -18,7 +18,12 @@ export class BreederPublicReaderAdapter implements BreederPublicReaderPort {
         page: number,
         limit: number,
     ): Promise<{ breeders: BreederPublicBreederRecord[]; total: number }> {
-        const [breeders, total] = await this.breederPublicRepository.searchPublicBreeders(filter, sortOrder, page, limit);
+        const [breeders, total] = await this.breederPublicRepository.searchPublicBreeders(
+            filter,
+            sortOrder,
+            page,
+            limit,
+        );
 
         return { breeders, total };
     }

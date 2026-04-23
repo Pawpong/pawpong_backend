@@ -15,7 +15,9 @@ export class GetAdminProfileUseCase {
     ) {}
 
     async execute(adminId: string): Promise<UserAdminAdminProfileResult> {
-        const admin = this.userAdminCommandPolicyService.assertAdminExists(await this.userAdminReader.findAdminById(adminId));
+        const admin = this.userAdminCommandPolicyService.assertAdminExists(
+            await this.userAdminReader.findAdminById(adminId),
+        );
         return this.userAdminAdminProfileMapperService.toResult(admin);
     }
 }

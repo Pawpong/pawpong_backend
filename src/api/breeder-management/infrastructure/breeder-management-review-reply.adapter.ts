@@ -7,9 +7,7 @@ import { BreederManagementBreederReviewRepository } from '../repository/breeder-
 
 @Injectable()
 export class BreederManagementReviewReplyAdapter implements BreederManagementReviewReplyPort {
-    constructor(
-        private readonly breederManagementBreederReviewRepository: BreederManagementBreederReviewRepository,
-    ) {}
+    constructor(private readonly breederManagementBreederReviewRepository: BreederManagementBreederReviewRepository) {}
 
     async findReviewByIdAndBreeder(
         reviewId: string,

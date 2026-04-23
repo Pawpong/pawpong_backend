@@ -27,9 +27,7 @@ export class UnsuspendBreederUseCase {
     ) {}
 
     async execute(adminId: string, breederId: string): Promise<BreederAdminSuspensionResult> {
-        this.breederAdminPolicyService.assertCanManageBreeders(
-            await this.breederAdminReader.findAdminById(adminId),
-        );
+        this.breederAdminPolicyService.assertCanManageBreeders(await this.breederAdminReader.findAdminById(adminId));
 
         const breeder = this.breederAdminPolicyService.assertUnsuspendable(
             this.breederAdminPolicyService.assertBreederExists(
@@ -60,11 +58,6 @@ export class UnsuspendBreederUseCase {
             emailAddress: breeder.emailAddress,
         });
 
-        return this.breederAdminSuspensionResultMapperService.toResult(
-            breederId,
-            undefined,
-            undefined,
-            true,
-        );
+        return this.breederAdminSuspensionResultMapperService.toResult(breederId, undefined, undefined, true);
     }
 }

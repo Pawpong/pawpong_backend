@@ -29,7 +29,12 @@ export class GetBreederManagementMyReviewsUseCase {
             throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
         }
 
-        const snapshot = await this.breederManagementListReaderPort.findMyReviewsSnapshot(userId, visibility, page, limit);
+        const snapshot = await this.breederManagementListReaderPort.findMyReviewsSnapshot(
+            userId,
+            visibility,
+            page,
+            limit,
+        );
         const items = snapshot.reviews.map((review) => this.breederManagementMyReviewMapperService.toItem(review));
         const paginationResponse = this.breederManagementPaginationAssemblerService.toPage(
             items,

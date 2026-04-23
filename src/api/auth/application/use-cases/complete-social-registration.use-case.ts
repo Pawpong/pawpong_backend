@@ -4,10 +4,7 @@ import type {
     RegisterAdopterAuthSignupPort,
     RegisterBreederAuthSignupPort,
 } from '../ports/auth-signup-completion.port';
-import {
-    REGISTER_ADOPTER_AUTH_SIGNUP,
-    REGISTER_BREEDER_AUTH_SIGNUP,
-} from '../tokens/auth-signup-completion.token';
+import { REGISTER_ADOPTER_AUTH_SIGNUP, REGISTER_BREEDER_AUTH_SIGNUP } from '../tokens/auth-signup-completion.token';
 import {
     type CompleteSocialRegistrationCommand,
     type RegisterAdopterAuthSignupCommand,

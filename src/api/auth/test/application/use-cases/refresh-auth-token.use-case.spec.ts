@@ -34,7 +34,11 @@ describe('인증 토큰 재발급 유스케이스', () => {
             compareRefreshToken: jest.fn().mockResolvedValue(true),
         };
 
-        const useCase = new RefreshAuthTokenUseCase(authSessionPort, authTokenPort, new AuthSessionAuthenticationService());
+        const useCase = new RefreshAuthTokenUseCase(
+            authSessionPort,
+            authTokenPort,
+            new AuthSessionAuthenticationService(),
+        );
 
         await expect(useCase.execute('refresh-token-value')).resolves.toEqual({
             accessToken: 'new-access',
@@ -65,7 +69,11 @@ describe('인증 토큰 재발급 유스케이스', () => {
             compareRefreshToken: jest.fn(),
         };
 
-        const useCase = new RefreshAuthTokenUseCase(authSessionPort, authTokenPort, new AuthSessionAuthenticationService());
+        const useCase = new RefreshAuthTokenUseCase(
+            authSessionPort,
+            authTokenPort,
+            new AuthSessionAuthenticationService(),
+        );
 
         await expect(useCase.execute('refresh-token-value')).rejects.toBeInstanceOf(DomainAuthenticationError);
     });

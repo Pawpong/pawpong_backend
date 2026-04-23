@@ -14,7 +14,9 @@ export class UserAdminDeletedUserStatsController {
 
     @Get('deleted-users/stats')
     @ApiGetDeletedUserStatsAdminEndpoint()
-    async getDeletedUserStats(@CurrentUser('userId') adminId: string): Promise<ApiResponseDto<DeletedUserStatsResponseDto>> {
+    async getDeletedUserStats(
+        @CurrentUser('userId') adminId: string,
+    ): Promise<ApiResponseDto<DeletedUserStatsResponseDto>> {
         const result = await this.getDeletedUserStatsUseCase.execute(adminId);
         return ApiResponseDto.success(result, USER_ADMIN_RESPONSE_MESSAGES.deletedUserStatsRetrieved);
     }

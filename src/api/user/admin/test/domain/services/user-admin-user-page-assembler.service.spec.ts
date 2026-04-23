@@ -33,7 +33,15 @@ describe('UserAdminUserPageAssemblerService', () => {
     it('nickname이 없으면 name을 사용한다', () => {
         const result = service.build(
             {
-                items: [{ id: 'u-2', name: '이름', emailAddress: 'b@c.com', accountStatus: 'active', role: 'breeder' } as any],
+                items: [
+                    {
+                        id: 'u-2',
+                        name: '이름',
+                        emailAddress: 'b@c.com',
+                        accountStatus: 'active',
+                        role: 'breeder',
+                    } as any,
+                ],
                 total: 1,
             },
             1,

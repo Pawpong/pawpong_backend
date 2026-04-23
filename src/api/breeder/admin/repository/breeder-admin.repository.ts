@@ -4,11 +4,11 @@ import { Model } from 'mongoose';
 
 import { Admin, AdminDocument } from '../../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
-import {
-    BreederAdminActivityLogEntry,
-    BreederAdminBreederPatch,
-} from '../application/ports/breeder-admin-writer.port';
-import type { BreederAdminAdminDocumentRecord, BreederAdminBreederDocumentRecord } from '../types/breeder-admin-record.type';
+import { BreederAdminActivityLogEntry, BreederAdminBreederPatch } from '../application/ports/breeder-admin-writer.port';
+import type {
+    BreederAdminAdminDocumentRecord,
+    BreederAdminBreederDocumentRecord,
+} from '../types/breeder-admin-record.type';
 
 @Injectable()
 export class BreederAdminRepository {
@@ -18,7 +18,11 @@ export class BreederAdminRepository {
     ) {}
 
     findAdminById(adminId: string): Promise<BreederAdminAdminDocumentRecord | null> {
-        return this.adminModel.findById(adminId).select('name permissions activityLogs').lean<BreederAdminAdminDocumentRecord>().exec();
+        return this.adminModel
+            .findById(adminId)
+            .select('name permissions activityLogs')
+            .lean<BreederAdminAdminDocumentRecord>()
+            .exec();
     }
 
     findBreederById(breederId: string): Promise<BreederAdminBreederDocumentRecord | null> {
@@ -29,7 +33,10 @@ export class BreederAdminRepository {
             .exec();
     }
 
-    updateBreeder(breederId: string, patch: BreederAdminBreederPatch): Promise<BreederAdminBreederDocumentRecord | null> {
+    updateBreeder(
+        breederId: string,
+        patch: BreederAdminBreederPatch,
+    ): Promise<BreederAdminBreederDocumentRecord | null> {
         const $set: Record<string, unknown> = {};
         const $unset: Record<string, ''> = {};
 

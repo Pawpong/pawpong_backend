@@ -1,7 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { AdminAction } from '../../../../../common/enum/user.enum';
-import { USER_ADMIN_READER_PORT, type UserAdminManagedUserRole, type UserAdminReaderPort } from '../ports/user-admin-reader.port';
+import {
+    USER_ADMIN_READER_PORT,
+    type UserAdminManagedUserRole,
+    type UserAdminReaderPort,
+} from '../ports/user-admin-reader.port';
 import { USER_ADMIN_WRITER_PORT, type UserAdminWriterPort } from '../ports/user-admin-writer.port';
 import { UserAdminActivityLogFactoryService } from '../../domain/services/user-admin-activity-log-factory.service';
 import { UserAdminCommandPolicyService } from '../../domain/services/user-admin-command-policy.service';
@@ -46,6 +50,11 @@ export class HardDeleteUserUseCase {
 
         await this.userAdminWriter.deleteManagedUser(role, userId);
 
-        return this.userAdminDeletedUserCommandResultMapperService.toHardDeleteUserResult(userId, role, userName, userEmail);
+        return this.userAdminDeletedUserCommandResultMapperService.toHardDeleteUserResult(
+            userId,
+            role,
+            userName,
+            userEmail,
+        );
     }
 }

@@ -6,5 +6,9 @@ export interface GetSocialLoginRedirectUrlQueryPort {
 }
 
 export interface ProcessSocialLoginCallbackFlowPort {
-    execute(userProfile: AuthSocialCallbackProfile, referer?: string, origin?: string): Promise<AuthSocialCallbackFlowResult>;
+    execute(
+        userProfile: AuthSocialCallbackProfile,
+        referer?: string,
+        origin?: string,
+    ): Promise<AuthSocialCallbackFlowResult>;
 }

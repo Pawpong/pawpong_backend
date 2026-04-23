@@ -32,8 +32,12 @@ export class FeedVideoCommentQueryController {
         @Query() query: FeedPaginationQueryDto,
         @CurrentUser('userId') userId?: string,
     ): Promise<CommentListResponseDto> {
-        return (await this.getCommentsUseCase.execute(videoId, userId, query.page, query.limit)) as
-            CommentListResponseDto & FeedCommentListResult;
+        return (await this.getCommentsUseCase.execute(
+            videoId,
+            userId,
+            query.page,
+            query.limit,
+        )) as CommentListResponseDto & FeedCommentListResult;
     }
 
     @Get('comment/:commentId/replies')
@@ -43,7 +47,11 @@ export class FeedVideoCommentQueryController {
         @Query() query: FeedPaginationQueryDto,
         @CurrentUser('userId') userId?: string,
     ): Promise<ReplyListResponseDto> {
-        return (await this.getRepliesUseCase.execute(commentId, userId, query.page, query.limit)) as
-            ReplyListResponseDto & FeedReplyListResult;
+        return (await this.getRepliesUseCase.execute(
+            commentId,
+            userId,
+            query.page,
+            query.limit,
+        )) as ReplyListResponseDto & FeedReplyListResult;
     }
 }

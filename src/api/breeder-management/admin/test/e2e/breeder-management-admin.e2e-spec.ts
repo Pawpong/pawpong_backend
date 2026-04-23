@@ -1,6 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestingApp, cleanupDatabase, getAdminToken, getAdopterToken } from '../../../../../common/test/test-utils';
+import {
+    createTestingApp,
+    cleanupDatabase,
+    getAdminToken,
+    getAdopterToken,
+} from '../../../../../common/test/test-utils';
 
 /**
  * 브리더 관리 관리자 종단간 테스트
@@ -13,7 +18,7 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
 
     beforeAll(async () => {
         app = await createTestingApp();
-        adminToken = await getAdminToken(app) || '';
+        adminToken = (await getAdminToken(app)) || '';
         const adopter = await getAdopterToken(app);
         adopterToken = adopter?.token || '';
         if (!adminToken) console.log('주의: 관리자 토큰 획득 실패');
@@ -38,7 +43,10 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
         });
 
         it('전체 프로필 배너 조회 (Admin)', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get('/api/breeder-management-admin/profile-banners')
@@ -50,14 +58,15 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
         });
 
         it('인증 없이 전체 프로필 배너 접근 시 401', async () => {
-            await request(app.getHttpServer())
-                .get('/api/breeder-management-admin/profile-banners')
-                .expect(401);
+            await request(app.getHttpServer()).get('/api/breeder-management-admin/profile-banners').expect(401);
             console.log('인증 없이 접근 401 확인');
         });
 
         it('일반 사용자의 전체 프로필 배너 접근 시 403', async () => {
-            if (!adopterToken) { console.log('주의: 스킵'); return; }
+            if (!adopterToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             await request(app.getHttpServer())
                 .get('/api/breeder-management-admin/profile-banners')
@@ -67,7 +76,10 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
         });
 
         it('잘못된 프로필 배너 ID 형식으로 수정 시 400', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .put('/api/breeder-management-admin/profile-banner/invalid-banner-id')
@@ -80,7 +92,10 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
         });
 
         it('잘못된 프로필 배너 ID 형식으로 삭제 시 400', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .delete('/api/breeder-management-admin/profile-banner/invalid-banner-id')
@@ -106,7 +121,10 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
         });
 
         it('전체 상담 배너 조회 (Admin)', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get('/api/breeder-management-admin/counsel-banners')
@@ -118,7 +136,10 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
         });
 
         it('잘못된 상담 배너 ID 형식으로 수정 시 400', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .put('/api/breeder-management-admin/counsel-banner/invalid-banner-id')
@@ -131,7 +152,10 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
         });
 
         it('잘못된 상담 배너 ID 형식으로 삭제 시 400', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .delete('/api/breeder-management-admin/counsel-banner/invalid-banner-id')

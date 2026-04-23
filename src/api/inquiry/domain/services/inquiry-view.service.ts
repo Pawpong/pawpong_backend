@@ -49,9 +49,7 @@ export class InquiryViewService {
             .filter((url) => url && url.trim() !== '')
             .map((url) => generateSignedUrl(url, 60));
 
-        const currentUserHasAnswered = userId
-            ? inquiry.answers.some((answer) => answer.breederId === userId)
-            : false;
+        const currentUserHasAnswered = userId ? inquiry.answers.some((answer) => answer.breederId === userId) : false;
 
         return {
             id: inquiry.id,

@@ -25,7 +25,8 @@ export class ExploreBreedersUseCase {
     ) {}
 
     async execute(searchDto: BreederExploreQuery, userId?: string): Promise<BreederExplorePageResult> {
-        const { filter, sortOrder, page, limit, isAdoptionAvailable } = this.breederExploreCriteriaService.build(searchDto);
+        const { filter, sortOrder, page, limit, isAdoptionAvailable } =
+            this.breederExploreCriteriaService.build(searchDto);
         const availableBreederIds = await this.breederPublicReaderPort.findBreederIdsWithAvailablePets();
         const availableBreederIdSet = new Set(availableBreederIds);
 

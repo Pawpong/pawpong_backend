@@ -48,7 +48,9 @@ describe('FeedVideoCommandPolicyService', () => {
         });
 
         it('PROCESSING 상태면 DomainValidationError를 던진다', () => {
-            expect(() => policy.ensurePending(makeVideo({ status: VideoStatus.PROCESSING }))).toThrow(DomainValidationError);
+            expect(() => policy.ensurePending(makeVideo({ status: VideoStatus.PROCESSING }))).toThrow(
+                DomainValidationError,
+            );
         });
 
         it('READY 상태면 DomainValidationError를 던진다', () => {

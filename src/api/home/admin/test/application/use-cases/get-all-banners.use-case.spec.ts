@@ -39,7 +39,11 @@ describe('전체 배너 목록 조회 유스케이스 (Admin)', () => {
     const catalogService = new HomeBannerCatalogService();
 
     it('전체 배너 목록을 반환한다', async () => {
-        const useCase = new GetAllBannersUseCase(makeManager([makeBannerSnapshot()]), catalogService, makeAssetUrlPort());
+        const useCase = new GetAllBannersUseCase(
+            makeManager([makeBannerSnapshot()]),
+            catalogService,
+            makeAssetUrlPort(),
+        );
 
         const result = await useCase.execute();
 

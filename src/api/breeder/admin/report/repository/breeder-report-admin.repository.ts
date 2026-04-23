@@ -23,7 +23,11 @@ export class BreederReportAdminRepository {
     ) {}
 
     findAdminById(adminId: string): Promise<BreederAdminAdminDocumentRecord | null> {
-        return this.adminModel.findById(adminId).select('name permissions').lean<BreederAdminAdminDocumentRecord>().exec();
+        return this.adminModel
+            .findById(adminId)
+            .select('name permissions')
+            .lean<BreederAdminAdminDocumentRecord>()
+            .exec();
     }
 
     async getReports(query: BreederReportAdminReportListQuery): Promise<BreederAdminReportAggregateResult | null> {

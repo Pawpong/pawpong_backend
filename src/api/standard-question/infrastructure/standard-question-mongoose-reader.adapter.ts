@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import { StandardQuestionDocument } from '../../../schema/standard-question.schema';
-import { StandardQuestionReaderPort, StandardQuestionSnapshot } from '../application/ports/standard-question-reader.port';
+import {
+    StandardQuestionReaderPort,
+    StandardQuestionSnapshot,
+} from '../application/ports/standard-question-reader.port';
 import { StandardQuestionRepository } from '../repository/standard-question.repository';
 
 @Injectable()

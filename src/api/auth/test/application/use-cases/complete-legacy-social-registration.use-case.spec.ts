@@ -68,10 +68,7 @@ describe('레거시 소셜 가입 완료 유스케이스', () => {
             },
         );
 
-        expect(authRegistrationPort.saveAdopterRefreshToken).toHaveBeenCalledWith(
-            'adopter-1',
-            'hashed-refresh-token',
-        );
+        expect(authRegistrationPort.saveAdopterRefreshToken).toHaveBeenCalledWith('adopter-1', 'hashed-refresh-token');
         expect(result).toMatchObject({
             accessToken: 'access-token',
             message: '소셜 회원가입이 완료되었습니다.',

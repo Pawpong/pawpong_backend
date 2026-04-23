@@ -26,7 +26,9 @@ export class FeedVideoTagCatalogController {
     @Get('tag/popular')
     @ApiGetPopularFeedTagsEndpoint()
     async getPopularTags(@Query() query: FeedPopularTagLimitQueryDto): Promise<PopularTagItemDto[]> {
-        return (await this.getPopularTagsUseCase.execute(query.limit)) as Array<PopularTagItemDto & FeedPopularTagResult>;
+        return (await this.getPopularTagsUseCase.execute(query.limit)) as Array<
+            PopularTagItemDto & FeedPopularTagResult
+        >;
     }
 
     @Get('tag/suggest')

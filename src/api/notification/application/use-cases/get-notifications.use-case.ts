@@ -14,10 +14,7 @@ export class GetNotificationsUseCase {
         private readonly notificationPageAssemblerService: NotificationPageAssemblerService,
     ) {}
 
-    async execute(
-        userId: string,
-        filter: NotificationListQuery,
-    ): Promise<NotificationPageResult> {
+    async execute(userId: string, filter: NotificationListQuery): Promise<NotificationPageResult> {
         const page = filter.pageNumber || 1;
         const limit = filter.itemsPerPage || 20;
 

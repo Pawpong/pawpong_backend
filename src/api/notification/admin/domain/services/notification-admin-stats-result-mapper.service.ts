@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import {
-    NotificationAdminStatsSnapshot,
-} from '../../application/ports/notification-admin-reader.port';
+import { NotificationAdminStatsSnapshot } from '../../application/ports/notification-admin-reader.port';
 import type { NotificationAdminStatsResult } from '../../application/types/notification-admin-result.type';
 
 @Injectable()

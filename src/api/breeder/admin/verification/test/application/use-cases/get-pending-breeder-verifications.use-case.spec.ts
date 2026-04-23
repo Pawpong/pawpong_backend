@@ -4,7 +4,10 @@ import { BreederVerificationAdminPolicyService } from '../../../domain/services/
 import { BreederVerificationAdminPendingBreederItemMapperService } from '../../../domain/services/breeder-verification-admin-pending-breeder-item-mapper.service';
 import { BreederVerificationAdminListItemMapperService } from '../../../domain/services/breeder-verification-admin-list-item-mapper.service';
 import { BreederPaginationAssemblerService } from '../../../../../domain/services/breeder-pagination-assembler.service';
-import { BreederVerificationAdminReaderPort, BreederVerificationAdminBreederSnapshot } from '../../../application/ports/breeder-verification-admin-reader.port';
+import {
+    BreederVerificationAdminReaderPort,
+    BreederVerificationAdminBreederSnapshot,
+} from '../../../application/ports/breeder-verification-admin-reader.port';
 
 const adminWithPermission = { id: 'admin-1', name: '관리자', permissions: { canManageBreeders: true } };
 
@@ -18,7 +21,11 @@ function makeBreederSnapshot(): BreederVerificationAdminBreederSnapshot {
     };
 }
 
-function makeReader(items: BreederVerificationAdminBreederSnapshot[] = [], total = 0, admin: any = adminWithPermission): BreederVerificationAdminReaderPort {
+function makeReader(
+    items: BreederVerificationAdminBreederSnapshot[] = [],
+    total = 0,
+    admin: any = adminWithPermission,
+): BreederVerificationAdminReaderPort {
     return {
         findAdminById: jest.fn().mockResolvedValue(admin),
         getLevelChangeRequests: jest.fn(),
@@ -37,7 +44,12 @@ describe('승인 대기 브리더 목록 조회 유스케이스', () => {
     const paginationAssembler = new BreederPaginationAssemblerService();
 
     it('승인 대기 브리더 목록을 반환한다', async () => {
-        const useCase = new GetPendingBreederVerificationsUseCase(makeReader([makeBreederSnapshot()], 1), policy, pendingMapper, paginationAssembler);
+        const useCase = new GetPendingBreederVerificationsUseCase(
+            makeReader([makeBreederSnapshot()], 1),
+            policy,
+            pendingMapper,
+            paginationAssembler,
+        );
 
         const result = await useCase.execute('admin-1', { pageNumber: 1, itemsPerPage: 10 });
 
@@ -46,7 +58,12 @@ describe('승인 대기 브리더 목록 조회 유스케이스', () => {
     });
 
     it('대기 중인 브리더가 없으면 빈 목록을 반환한다', async () => {
-        const useCase = new GetPendingBreederVerificationsUseCase(makeReader([], 0), policy, pendingMapper, paginationAssembler);
+        const useCase = new GetPendingBreederVerificationsUseCase(
+            makeReader([], 0),
+            policy,
+            pendingMapper,
+            paginationAssembler,
+        );
 
         const result = await useCase.execute('admin-1', {});
 

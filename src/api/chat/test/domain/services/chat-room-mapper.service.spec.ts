@@ -21,8 +21,20 @@ describe('ChatRoomMapperService', () => {
 
     it('toSnapshots: 여러 개 매핑', () => {
         const rooms = [
-            { _id: { toString: () => 'r-1' }, adopterId: 'a', breederId: 'b', status: ChatRoomStatus.ACTIVE, createdAt: new Date() },
-            { _id: { toString: () => 'r-2' }, adopterId: 'a', breederId: 'b2', status: ChatRoomStatus.CLOSED, createdAt: new Date() },
+            {
+                _id: { toString: () => 'r-1' },
+                adopterId: 'a',
+                breederId: 'b',
+                status: ChatRoomStatus.ACTIVE,
+                createdAt: new Date(),
+            },
+            {
+                _id: { toString: () => 'r-2' },
+                adopterId: 'a',
+                breederId: 'b2',
+                status: ChatRoomStatus.CLOSED,
+                createdAt: new Date(),
+            },
         ] as any[];
         const result = service.toSnapshots(rooms);
         expect(result).toHaveLength(2);

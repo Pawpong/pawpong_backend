@@ -39,7 +39,9 @@ export function buildAuthDuplicateCheckMessage(
     isDuplicate: boolean,
 ): string {
     if (kind === 'email') {
-        return isDuplicate ? AUTH_RESPONSE_MESSAGE_EXAMPLES.emailDuplicated : AUTH_RESPONSE_MESSAGE_EXAMPLES.emailAvailable;
+        return isDuplicate
+            ? AUTH_RESPONSE_MESSAGE_EXAMPLES.emailDuplicated
+            : AUTH_RESPONSE_MESSAGE_EXAMPLES.emailAvailable;
     }
 
     if (kind === 'nickname') {

@@ -14,7 +14,9 @@ export class UpdateCommentUseCase {
     ) {}
 
     async execute(commentId: string, userId: string, content: string) {
-        const comment = this.feedCommentPolicyService.requireComment(await this.feedCommentManager.findComment(commentId));
+        const comment = this.feedCommentPolicyService.requireComment(
+            await this.feedCommentManager.findComment(commentId),
+        );
         this.feedCommentPolicyService.ensureOwner(comment, userId);
 
         const updatedComment = this.feedCommentPolicyService.requireComment(

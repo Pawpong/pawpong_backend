@@ -66,10 +66,7 @@ describe('소셜 로그인 콜백 처리 유스케이스', () => {
 
     beforeEach(() => {
         port = new StubAuthSocialCallbackPort();
-        useCase = new ProcessSocialLoginCallbackUseCase(
-            port,
-            logger,
-        );
+        useCase = new ProcessSocialLoginCallbackUseCase(port, logger);
     });
 
     it('신규 사용자는 signup 흐름 결과를 반환한다', async () => {

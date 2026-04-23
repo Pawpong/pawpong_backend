@@ -33,11 +33,21 @@ describe('BreederExploreCriteriaService', () => {
     });
 
     it('sortBy에 따라 정렬이 변경된다', () => {
-        expect(service.build({ petType: 'dog', sortBy: BreederSortBy.FAVORITE } as any).sortOrder).toEqual({ 'stats.totalFavorites': -1 });
-        expect(service.build({ petType: 'dog', sortBy: BreederSortBy.REVIEW } as any).sortOrder).toEqual({ 'stats.totalReviews': -1 });
-        expect(service.build({ petType: 'dog', sortBy: BreederSortBy.PRICE_ASC } as any).sortOrder).toEqual({ 'profile.priceRange.min': 1 });
-        expect(service.build({ petType: 'dog', sortBy: BreederSortBy.PRICE_DESC } as any).sortOrder).toEqual({ 'profile.priceRange.max': -1 });
-        expect(service.build({ petType: 'dog', sortBy: BreederSortBy.LATEST } as any).sortOrder).toEqual({ createdAt: -1 });
+        expect(service.build({ petType: 'dog', sortBy: BreederSortBy.FAVORITE } as any).sortOrder).toEqual({
+            'stats.totalFavorites': -1,
+        });
+        expect(service.build({ petType: 'dog', sortBy: BreederSortBy.REVIEW } as any).sortOrder).toEqual({
+            'stats.totalReviews': -1,
+        });
+        expect(service.build({ petType: 'dog', sortBy: BreederSortBy.PRICE_ASC } as any).sortOrder).toEqual({
+            'profile.priceRange.min': 1,
+        });
+        expect(service.build({ petType: 'dog', sortBy: BreederSortBy.PRICE_DESC } as any).sortOrder).toEqual({
+            'profile.priceRange.max': -1,
+        });
+        expect(service.build({ petType: 'dog', sortBy: BreederSortBy.LATEST } as any).sortOrder).toEqual({
+            createdAt: -1,
+        });
         expect(service.build({ petType: 'dog' } as any).sortOrder).toEqual({ createdAt: -1 });
     });
 

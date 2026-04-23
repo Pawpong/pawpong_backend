@@ -15,9 +15,7 @@ export type BreederManagementVerificationSubmissionNotification = {
     documents: BreederManagementVerificationNotificationDocument[];
 };
 
-export const BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT = Symbol(
-    'BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT',
-);
+export const BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT = Symbol('BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT');
 
 export interface BreederManagementVerificationNotifierPort {
     notifySubmission(payload: BreederManagementVerificationSubmissionNotification): Promise<void>;

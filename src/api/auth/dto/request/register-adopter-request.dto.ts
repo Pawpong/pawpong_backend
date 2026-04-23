@@ -59,7 +59,8 @@ export class RegisterAdopterRequestDto {
      * @example "https://cdn.pawpong.com/profiles/uuid.jpg"
      */
     @ApiProperty({
-        description: '프로필 이미지 파일 경로. 업로드 API 응답의 filename 사용을 권장하며, 기존 호환을 위해 URL도 허용됩니다.',
+        description:
+            '프로필 이미지 파일 경로. 업로드 API 응답의 filename 사용을 권장하며, 기존 호환을 위해 URL도 허용됩니다.',
         example: 'profiles/uuid.jpg',
         required: false,
     })

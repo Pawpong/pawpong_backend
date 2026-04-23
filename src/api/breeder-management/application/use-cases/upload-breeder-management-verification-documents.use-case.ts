@@ -51,7 +51,9 @@ export class UploadBreederManagementVerificationDocumentsUseCase {
         for (let index = 0; index < files.length; index += 1) {
             const file = files[index];
             const type = types[index];
-            const originalFileName = this.breederManagementVerificationOriginalFileNameService.resolve(file.originalname);
+            const originalFileName = this.breederManagementVerificationOriginalFileNameService.resolve(
+                file.originalname,
+            );
             const uploaded = await this.breederManagementVerificationDocumentStorePort.upload(
                 file,
                 `verification/${userId}`,

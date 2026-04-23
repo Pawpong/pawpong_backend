@@ -1,7 +1,11 @@
 import { Injectable, Inject } from '@nestjs/common';
 
 import { CHAT_ROOM_MANAGER, type ChatRoomManagerPort } from '../ports/chat-room-manager.port';
-import { CHAT_MESSAGE_MANAGER, type ChatMessageManagerPort, type ChatMessageSnapshot } from '../ports/chat-message-manager.port';
+import {
+    CHAT_MESSAGE_MANAGER,
+    type ChatMessageManagerPort,
+    type ChatMessageSnapshot,
+} from '../ports/chat-message-manager.port';
 import { CHAT_MESSAGE_BROKER, type ChatMessageBrokerPort } from '../ports/chat-message-broker.port';
 import { ChatPolicyService } from '../../domain/services/chat-policy.service';
 import { ChatMessageMapperService } from '../../domain/services/chat-message-mapper.service';
@@ -23,17 +27,11 @@ export class SendMessageUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(
-        senderId: string,
-        senderRole: SenderRole,
-        command: SendMessageCommand,
-    ): Promise<ChatMessageSnapshot> {
+    async execute(senderId: string, senderRole: SenderRole, command: SendMessageCommand): Promise<ChatMessageSnapshot> {
         this.logger.logStart('sendMessage', '채팅 메시지 전송 시작', { roomId: command.roomId, senderId });
 
         try {
-            const room = this.chatPolicyService.requireRoom(
-                await this.chatRoomManager.findRoomById(command.roomId),
-            );
+            const room = this.chatPolicyService.requireRoom(await this.chatRoomManager.findRoomById(command.roomId));
             this.chatPolicyService.requireParticipant(room, senderId);
 
             const receiverId = this.chatPolicyService.resolveReceiverId(room, senderId);

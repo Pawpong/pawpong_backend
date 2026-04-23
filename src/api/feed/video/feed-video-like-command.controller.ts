@@ -4,9 +4,7 @@ import { CurrentActorType, type ActorType } from '../../../common/decorator/curr
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
 import type { ToggleFeedVideoLikeUseCasePort } from '../like/application/ports/feed-like-interaction.port';
-import {
-    TOGGLE_FEED_VIDEO_LIKE_USE_CASE,
-} from '../like/application/tokens/feed-like-interaction.token';
+import { TOGGLE_FEED_VIDEO_LIKE_USE_CASE } from '../like/application/tokens/feed-like-interaction.token';
 import type { FeedLikeToggleResult } from '../like/application/types/feed-like-result.type';
 import { LikeToggleResponseDto } from '../like/dto/response/like-response.dto';
 import { FeedProtectedController } from './decorator/feed-video-controller.decorator';
@@ -26,7 +24,7 @@ export class FeedVideoLikeCommandController {
         @CurrentUser('userId') userId: string,
         @CurrentActorType() actorType: ActorType,
     ): Promise<LikeToggleResponseDto> {
-        return (await this.toggleLikeUseCase.execute(videoId, userId, actorType)) as
-            LikeToggleResponseDto & FeedLikeToggleResult;
+        return (await this.toggleLikeUseCase.execute(videoId, userId, actorType)) as LikeToggleResponseDto &
+            FeedLikeToggleResult;
     }
 }

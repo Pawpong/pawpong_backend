@@ -13,7 +13,7 @@ describe('브리더 관리자 종단간 테스트', () => {
 
     beforeAll(async () => {
         app = await createTestingApp();
-        adminToken = await getAdminToken(app) || '';
+        adminToken = (await getAdminToken(app)) || '';
         if (!adminToken) console.log('주의: 관리자 토큰 획득 실패');
 
         const breeder = await seedBreeder(app, 'approved');
@@ -27,7 +27,10 @@ describe('브리더 관리자 종단간 테스트', () => {
 
     describe('POST /api/breeder-관리자/suspend/:breederId', () => {
         it('브리더 계정 정지 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .post(`/api/breeder-admin/suspend/${breederId}`)
@@ -49,7 +52,10 @@ describe('브리더 관리자 종단간 테스트', () => {
 
     describe('POST /api/breeder-관리자/unsuspend/:breederId', () => {
         it('브리더 정지 해제 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .post(`/api/breeder-admin/unsuspend/${breederId}`)
@@ -62,7 +68,10 @@ describe('브리더 관리자 종단간 테스트', () => {
 
     describe('PATCH /api/breeder-관리자/test-account/:breederId', () => {
         it('테스트 계정 설정 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .patch(`/api/breeder-admin/test-account/${breederId}`)

@@ -8,10 +8,7 @@ describe('브리더 즐겨찾기 제거 유스케이스', () => {
         removeFavoriteBreeder: jest.fn(),
     };
 
-    const useCase = new RemoveFavoriteBreederUseCase(
-        adopterProfilePort as any,
-        new AdopterFavoritePolicyService(),
-    );
+    const useCase = new RemoveFavoriteBreederUseCase(adopterProfilePort as any, new AdopterFavoritePolicyService());
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -39,7 +36,9 @@ describe('브리더 즐겨찾기 제거 유스케이스', () => {
     it('브리더 역할이면 에러 메시지가 브리더 기준으로 나온다', async () => {
         adopterProfilePort.findById.mockResolvedValue(null);
 
-        await expect(useCase.execute('user-1', 'breeder-1', 'breeder')).rejects.toThrow('브리더 정보를 찾을 수 없습니다.');
+        await expect(useCase.execute('user-1', 'breeder-1', 'breeder')).rejects.toThrow(
+            '브리더 정보를 찾을 수 없습니다.',
+        );
     });
 
     it('즐겨찾기 목록에 없는 브리더 제거 시 도메인 검증 예외를 던진다', async () => {
@@ -48,7 +47,9 @@ describe('브리더 즐겨찾기 제거 유스케이스', () => {
         });
 
         await expect(useCase.execute('user-1', 'breeder-1')).rejects.toThrow(DomainValidationError);
-        await expect(useCase.execute('user-1', 'breeder-1')).rejects.toThrow('즐겨찾기 목록에서 해당 브리더를 찾을 수 없습니다.');
+        await expect(useCase.execute('user-1', 'breeder-1')).rejects.toThrow(
+            '즐겨찾기 목록에서 해당 브리더를 찾을 수 없습니다.',
+        );
     });
 
     it('favoriteBreederList가 없으면 빈 배열로 처리해 도메인 검증 예외를 던진다', async () => {

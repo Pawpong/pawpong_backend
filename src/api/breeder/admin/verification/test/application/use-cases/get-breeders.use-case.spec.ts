@@ -4,11 +4,16 @@ import { BreederVerificationAdminPolicyService } from '../../../domain/services/
 import { BreederVerificationAdminBreederItemMapperService } from '../../../domain/services/breeder-verification-admin-breeder-item-mapper.service';
 import { BreederVerificationAdminListItemMapperService } from '../../../domain/services/breeder-verification-admin-list-item-mapper.service';
 import { BreederPaginationAssemblerService } from '../../../../../domain/services/breeder-pagination-assembler.service';
-import { BreederVerificationAdminReaderPort, BreederVerificationAdminBreederSnapshot } from '../../../application/ports/breeder-verification-admin-reader.port';
+import {
+    BreederVerificationAdminReaderPort,
+    BreederVerificationAdminBreederSnapshot,
+} from '../../../application/ports/breeder-verification-admin-reader.port';
 
 const adminWithPermission = { id: 'admin-1', name: '관리자', permissions: { canManageBreeders: true } };
 
-function makeBreederSnapshot(overrides: Partial<BreederVerificationAdminBreederSnapshot> = {}): BreederVerificationAdminBreederSnapshot {
+function makeBreederSnapshot(
+    overrides: Partial<BreederVerificationAdminBreederSnapshot> = {},
+): BreederVerificationAdminBreederSnapshot {
     return {
         id: 'breeder-1',
         nickname: '브리더A',
@@ -18,7 +23,11 @@ function makeBreederSnapshot(overrides: Partial<BreederVerificationAdminBreederS
     };
 }
 
-function makeReader(items: BreederVerificationAdminBreederSnapshot[] = [], total = 0, admin: any = adminWithPermission): BreederVerificationAdminReaderPort {
+function makeReader(
+    items: BreederVerificationAdminBreederSnapshot[] = [],
+    total = 0,
+    admin: any = adminWithPermission,
+): BreederVerificationAdminReaderPort {
     return {
         findAdminById: jest.fn().mockResolvedValue(admin),
         getLevelChangeRequests: jest.fn(),
@@ -37,7 +46,12 @@ describe('브리더 목록 조회 유스케이스', () => {
     const paginationAssembler = new BreederPaginationAssemblerService();
 
     it('브리더 목록을 반환한다', async () => {
-        const useCase = new GetBreedersUseCase(makeReader([makeBreederSnapshot()], 1), policy, breederItemMapper, paginationAssembler);
+        const useCase = new GetBreedersUseCase(
+            makeReader([makeBreederSnapshot()], 1),
+            policy,
+            breederItemMapper,
+            paginationAssembler,
+        );
 
         const result = await useCase.execute('admin-1', { pageNumber: 1, itemsPerPage: 10 });
 

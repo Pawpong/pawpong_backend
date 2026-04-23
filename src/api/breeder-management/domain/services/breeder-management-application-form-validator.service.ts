@@ -6,7 +6,10 @@ import type { BreederManagementApplicationFormUpdateCommand } from '../../applic
 
 @Injectable()
 export class BreederManagementApplicationFormValidatorService {
-    validateCustomQuestions(updateDto: BreederManagementApplicationFormUpdateCommand, standardQuestionIds: string[]): void {
+    validateCustomQuestions(
+        updateDto: BreederManagementApplicationFormUpdateCommand,
+        standardQuestionIds: string[],
+    ): void {
         const ids = updateDto.customQuestions.map((question) => question.id);
         const uniqueIds = new Set(ids);
 
@@ -16,11 +19,15 @@ export class BreederManagementApplicationFormValidatorService {
 
         const conflicts = ids.filter((id) => standardQuestionIds.includes(id));
         if (conflicts.length > 0) {
-            throw new DomainValidationError(`다음 ID는 표준 질문과 중복되어 사용할 수 없습니다: ${conflicts.join(', ')}`);
+            throw new DomainValidationError(
+                `다음 ID는 표준 질문과 중복되어 사용할 수 없습니다: ${conflicts.join(', ')}`,
+            );
         }
     }
 
-    toStoredQuestions(updateDto: BreederManagementApplicationFormUpdateCommand): BreederManagementApplicationFormRecord[] {
+    toStoredQuestions(
+        updateDto: BreederManagementApplicationFormUpdateCommand,
+    ): BreederManagementApplicationFormRecord[] {
         return updateDto.customQuestions.map((question) => ({
             id: question.id,
             type: question.type,

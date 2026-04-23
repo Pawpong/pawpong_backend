@@ -1,7 +1,10 @@
 import { Injectable } from '@nestjs/common';
 
 import { FeedCommentSnapshot } from '../../application/ports/feed-comment-manager.port';
-import type { FeedCommentCreateResult, FeedCommentUpdateResult } from '../../application/types/feed-comment-result.type';
+import type {
+    FeedCommentCreateResult,
+    FeedCommentUpdateResult,
+} from '../../application/types/feed-comment-result.type';
 
 @Injectable()
 export class FeedCommentCommandResultMapperService {

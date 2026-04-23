@@ -30,9 +30,7 @@ export class SendBreederRemindNotificationsUseCase {
     ) {}
 
     async execute(adminId: string, remindData: BreederRemindCommand): Promise<BreederAdminReminderResult> {
-        this.breederAdminPolicyService.assertCanManageBreeders(
-            await this.breederAdminReader.findAdminById(adminId),
-        );
+        this.breederAdminPolicyService.assertCanManageBreeders(await this.breederAdminReader.findAdminById(adminId));
 
         const reminderPlan = this.breederAdminReminderPolicyService.resolve(remindData.remindType);
         const successIds: string[] = [];
@@ -43,10 +41,7 @@ export class SendBreederRemindNotificationsUseCase {
                 const breeder = await this.breederAdminReader.findBreederById(breederId);
                 if (
                     !breeder ||
-                    !this.breederAdminPolicyService.canSendReminder(
-                        breeder,
-                        reminderPlan.requiredVerificationStatus,
-                    )
+                    !this.breederAdminPolicyService.canSendReminder(breeder, reminderPlan.requiredVerificationStatus)
                 ) {
                     failIds.push(breederId);
                     continue;

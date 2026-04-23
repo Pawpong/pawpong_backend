@@ -36,9 +36,7 @@ export class DistrictRepository {
     }
 
     update(id: string, dto: UpdateDistrictCommand): Promise<District | null> {
-        return this.districtModel
-            .findByIdAndUpdate(id, { $set: dto }, { new: true, runValidators: false })
-            .exec();
+        return this.districtModel.findByIdAndUpdate(id, { $set: dto }, { new: true, runValidators: false }).exec();
     }
 
     async deleteById(id: string): Promise<boolean> {

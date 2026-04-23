@@ -29,12 +29,8 @@ describe('BreederManagementVerificationNotificationPayloadFactoryService', () =>
             level: 'elite',
             isResubmission: true,
             submittedAt: new Date(),
-            finalDocuments: [
-                { type: 'idCard', fileName: 'verification/abc.pdf', uploadedAt: new Date() } as any,
-            ],
-            draftDocuments: [
-                { fileName: 'verification/abc.pdf', originalFileName: '신분증.pdf' } as any,
-            ],
+            finalDocuments: [{ type: 'idCard', fileName: 'verification/abc.pdf', uploadedAt: new Date() } as any],
+            draftDocuments: [{ fileName: 'verification/abc.pdf', originalFileName: '신분증.pdf' } as any],
             fileUrlPort,
         });
         expect(payload.documents[0].originalFileName).toBe('신분증.pdf');
@@ -46,7 +42,9 @@ describe('BreederManagementVerificationNotificationPayloadFactoryService', () =>
             level: 'new',
             isResubmission: false,
             submittedAt: new Date(),
-            finalDocuments: [{ type: 'idCard', fileName: 'verification/folder/abc.pdf', uploadedAt: new Date() } as any],
+            finalDocuments: [
+                { type: 'idCard', fileName: 'verification/folder/abc.pdf', uploadedAt: new Date() } as any,
+            ],
             draftDocuments: [],
             fileUrlPort,
         });

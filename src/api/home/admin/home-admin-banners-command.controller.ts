@@ -9,11 +9,7 @@ import { HomeAdminProtectedController } from './decorator/home-admin-controller.
 import { BannerCreateRequestDto } from './dto/request/banner-create-request.dto';
 import { BannerUpdateRequestDto } from './dto/request/banner-update-request.dto';
 import { BannerResponseDto } from '../dto/response/banner-response.dto';
-import {
-    ApiCreateBannerAdminEndpoint,
-    ApiDeleteBannerAdminEndpoint,
-    ApiUpdateBannerAdminEndpoint,
-} from './swagger';
+import { ApiCreateBannerAdminEndpoint, ApiDeleteBannerAdminEndpoint, ApiUpdateBannerAdminEndpoint } from './swagger';
 
 @HomeAdminProtectedController()
 export class HomeAdminBannersCommandController {

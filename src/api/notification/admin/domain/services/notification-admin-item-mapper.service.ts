@@ -1,11 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
-import {
-    NotificationAdminRecordSnapshot,
-} from '../../application/ports/notification-admin-reader.port';
-import type {
-    NotificationAdminItemResult,
-} from '../../application/types/notification-admin-result.type';
+import { NotificationAdminRecordSnapshot } from '../../application/ports/notification-admin-reader.port';
+import type { NotificationAdminItemResult } from '../../application/types/notification-admin-result.type';
 
 @Injectable()
 export class NotificationAdminItemMapperService {

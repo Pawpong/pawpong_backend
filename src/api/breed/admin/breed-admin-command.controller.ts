@@ -9,11 +9,7 @@ import { BreedAdminControllerBase } from './decorator/breed-admin-controller.dec
 import { CreateBreedRequestDto } from './dto/request/create-breed-request.dto';
 import { UpdateBreedRequestDto } from './dto/request/update-breed-request.dto';
 import { BreedResponseDto } from '../dto/response/breed-response.dto';
-import {
-    ApiCreateBreedAdminEndpoint,
-    ApiDeleteBreedAdminEndpoint,
-    ApiUpdateBreedAdminEndpoint,
-} from './swagger';
+import { ApiCreateBreedAdminEndpoint, ApiDeleteBreedAdminEndpoint, ApiUpdateBreedAdminEndpoint } from './swagger';
 
 @BreedAdminControllerBase()
 export class BreedAdminCommandController {

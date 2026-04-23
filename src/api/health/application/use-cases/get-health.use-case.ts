@@ -1,9 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import {
-    SYSTEM_RUNTIME_READER_PORT,
-    type SystemRuntimeReaderPort,
-} from '../ports/system-runtime-reader.port';
+import { SYSTEM_RUNTIME_READER_PORT, type SystemRuntimeReaderPort } from '../ports/system-runtime-reader.port';
 import { HealthStatus } from '../../domain/entities/health-status.entity';
 import type { HealthResult } from '../types/health-result.type';
 

@@ -59,7 +59,9 @@ export class AuthPhoneVerificationPolicyService {
         }
     }
 
-    ensureVerificationRequested(verification?: AuthPhoneVerificationRecord): asserts verification is AuthPhoneVerificationRecord {
+    ensureVerificationRequested(
+        verification?: AuthPhoneVerificationRecord,
+    ): asserts verification is AuthPhoneVerificationRecord {
         if (!verification) {
             throw new DomainValidationError('인증번호를 먼저 요청해주세요.');
         }

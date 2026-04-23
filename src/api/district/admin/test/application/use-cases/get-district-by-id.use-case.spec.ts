@@ -7,10 +7,7 @@ describe('지역 ID 조회 유스케이스 (관리자)', () => {
         findById: jest.fn(),
     };
 
-    const useCase = new GetDistrictByIdAdminUseCase(
-        districtAdminReader as any,
-        new DistrictAdminResultMapperService(),
-    );
+    const useCase = new GetDistrictByIdAdminUseCase(districtAdminReader as any, new DistrictAdminResultMapperService());
 
     const mockDistrict = {
         id: 'district-1',

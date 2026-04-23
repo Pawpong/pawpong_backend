@@ -14,9 +14,7 @@ export class GetAppVersionListUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(
-        paginationData: AppVersionAdminListQuery,
-    ): Promise<AppVersionAdminPageResult> {
+    async execute(paginationData: AppVersionAdminListQuery): Promise<AppVersionAdminPageResult> {
         this.logger.logStart('getAppVersionList', '앱 버전 목록 조회 시작', paginationData);
 
         const page = paginationData.page ?? 1;

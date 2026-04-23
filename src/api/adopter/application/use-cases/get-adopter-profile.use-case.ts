@@ -27,8 +27,10 @@ export class GetAdopterProfileUseCase {
         const profileResponse = this.adopterProfileResultMapperService.toResult(adopter);
 
         if (profileResponse.profileImageFileName) {
-            profileResponse.profileImageFileName =
-                this.adopterFileUrlPort.generateOneSafe(profileResponse.profileImageFileName, 60);
+            profileResponse.profileImageFileName = this.adopterFileUrlPort.generateOneSafe(
+                profileResponse.profileImageFileName,
+                60,
+            );
         }
 
         return profileResponse;

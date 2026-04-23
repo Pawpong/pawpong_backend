@@ -196,7 +196,9 @@ async function bootstrap(): Promise<void> {
             },
         });
     } else {
-        logger.warn('[bootstrap] Kafka microservice 연결 건너뜀 - 활성화하려면 KAFKA_ENABLED=true 와 KAFKA_BROKER 값을 지정');
+        logger.warn(
+            '[bootstrap] Kafka microservice 연결 건너뜀 - 활성화하려면 KAFKA_ENABLED=true 와 KAFKA_BROKER 값을 지정',
+        );
     }
 
     // 프로덕션 환경 체크
@@ -229,7 +231,9 @@ async function bootstrap(): Promise<void> {
             await app.startAllMicroservices();
             logger.log('[bootstrap] Kafka chat consumer started');
         } catch {
-            logger.warn('[bootstrap] Kafka consumer failed to start - messages will be skipped until Kafka is available');
+            logger.warn(
+                '[bootstrap] Kafka consumer failed to start - messages will be skipped until Kafka is available',
+            );
         }
     }
 

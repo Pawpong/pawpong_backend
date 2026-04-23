@@ -52,7 +52,9 @@ export class BreederVerificationAdminMongooseRepositoryAdapter
         };
     }
 
-    async getBreeders(criteria: BreederVerificationAdminSearchCriteria): Promise<BreederVerificationAdminListResultSnapshot> {
+    async getBreeders(
+        criteria: BreederVerificationAdminSearchCriteria,
+    ): Promise<BreederVerificationAdminListResultSnapshot> {
         const result = await this.breederVerificationAdminRepository.getBreeders(criteria);
         return {
             items: result.items.map((breeder) => this.toBreederSnapshot(breeder)),
@@ -77,8 +79,11 @@ export class BreederVerificationAdminMongooseRepositoryAdapter
         };
     }
 
-    async findApprovedBreedersMissingDocuments(reviewedBefore: Date): Promise<BreederVerificationAdminBreederSnapshot[]> {
-        const breeders = await this.breederVerificationAdminRepository.findApprovedBreedersMissingDocuments(reviewedBefore);
+    async findApprovedBreedersMissingDocuments(
+        reviewedBefore: Date,
+    ): Promise<BreederVerificationAdminBreederSnapshot[]> {
+        const breeders =
+            await this.breederVerificationAdminRepository.findApprovedBreedersMissingDocuments(reviewedBefore);
         return breeders.map((breeder) => this.toBreederSnapshot(breeder));
     }
 

@@ -8,9 +8,7 @@ import { AuthHttpCookieService } from '../services/auth-http-cookie.service';
 import { AuthSocialCallbackResultFactoryService } from '../services/auth-social-callback-result-factory.service';
 
 @Injectable()
-export class AuthSocialCallbackResponseInterceptor
-    implements NestInterceptor<AuthSocialCallbackFlowResult, void>
-{
+export class AuthSocialCallbackResponseInterceptor implements NestInterceptor<AuthSocialCallbackFlowResult, void> {
     constructor(
         private readonly authHttpCookieService: AuthHttpCookieService,
         private readonly authSocialCallbackResultFactoryService: AuthSocialCallbackResultFactoryService,

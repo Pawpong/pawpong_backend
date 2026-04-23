@@ -166,10 +166,7 @@ export class LogCategorizerService {
             return 'infrastructure';
         }
 
-        if (
-            LogCategorizerService.REDIS_CONTEXTS.has(entry.context) ||
-            /redis/i.test(entry.context)
-        ) {
+        if (LogCategorizerService.REDIS_CONTEXTS.has(entry.context) || /redis/i.test(entry.context)) {
             return 'infrastructure';
         }
 
@@ -242,7 +239,8 @@ export class LogCategorizerService {
         };
 
         if (descMap[groupKey]) return descMap[groupKey];
-        if (category === 'api_error') return 'API 엔드포인트에서 오류가 발생했습니다. 사용자에게 영향이 있을 수 있습니다.';
+        if (category === 'api_error')
+            return 'API 엔드포인트에서 오류가 발생했습니다. 사용자에게 영향이 있을 수 있습니다.';
         return '애플리케이션 내부에서 예상치 못한 오류가 발생했습니다.';
     }
 

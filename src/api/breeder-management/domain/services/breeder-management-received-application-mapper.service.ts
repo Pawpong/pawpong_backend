@@ -33,7 +33,8 @@ export class BreederManagementReceivedApplicationMapperService {
             status: typeof application.status === 'string' ? application.status : '',
             applicationData: application.standardResponses,
             preferredPetInfo: application.standardResponses?.preferredPetDescription || null,
-            additionalMessage: typeof application.additionalNotes === 'string' ? application.additionalNotes : undefined,
+            additionalMessage:
+                typeof application.additionalNotes === 'string' ? application.additionalNotes : undefined,
             appliedAt,
             processedAt: processedAt ?? undefined,
             breederNotes: typeof application.breederNotes === 'string' ? application.breederNotes : undefined,

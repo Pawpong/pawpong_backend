@@ -56,17 +56,21 @@ export class StandardQuestionAdminCommandController {
 
     @Post('reorder')
     @ApiReorderStandardQuestionsAdminEndpoint()
-    async reorderStandardQuestions(
-        @Body() reorderData: ReorderStandardQuestionsDto,
-    ): Promise<ApiResponseDto<boolean>> {
+    async reorderStandardQuestions(@Body() reorderData: ReorderStandardQuestionsDto): Promise<ApiResponseDto<boolean>> {
         await this.reorderStandardQuestionsUseCase.execute(reorderData.reorderData);
-        return ApiResponseDto.success(true, STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsReordered);
+        return ApiResponseDto.success(
+            true,
+            STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsReordered,
+        );
     }
 
     @Post('reseed')
     @ApiReseedStandardQuestionsAdminEndpoint()
     async reseedStandardQuestions(): Promise<ApiResponseDto<boolean>> {
         await this.reseedStandardQuestionsUseCase.execute();
-        return ApiResponseDto.success(true, STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsReseeded);
+        return ApiResponseDto.success(
+            true,
+            STANDARD_QUESTION_ADMIN_RESPONSE_MESSAGE_EXAMPLES.standardQuestionsReseeded,
+        );
     }
 }

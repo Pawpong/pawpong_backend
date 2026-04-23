@@ -54,19 +54,16 @@ export class LokiQueryAdapter implements ILokiQueryPort {
         const query = `{app="pawpong-backend", level=~"error|warn"}`;
 
         try {
-            const response = await axios.get<LokiQueryRangeResponse>(
-                `${this.lokiUrl}/loki/api/v1/query_range`,
-                {
-                    params: {
-                        query,
-                        start: options.from,
-                        end: options.to,
-                        limit: options.limit,
-                        direction: 'backward',
-                    },
-                    timeout: 10_000,
+            const response = await axios.get<LokiQueryRangeResponse>(`${this.lokiUrl}/loki/api/v1/query_range`, {
+                params: {
+                    query,
+                    start: options.from,
+                    end: options.to,
+                    limit: options.limit,
+                    direction: 'backward',
                 },
-            );
+                timeout: 10_000,
+            });
 
             return this.parseStreams(response.data.data?.result ?? []);
         } catch (error) {

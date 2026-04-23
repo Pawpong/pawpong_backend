@@ -33,6 +33,8 @@ export class AddBreederManagementAvailablePetUseCase {
             this.breederManagementAvailablePetCommandMapperService.toCreateData(userId, availablePetDto),
         );
 
-        return this.breederManagementAvailablePetCommandResultMapperService.toAvailablePetAddedResult(String(savedPet._id));
+        return this.breederManagementAvailablePetCommandResultMapperService.toAvailablePetAddedResult(
+            String(savedPet._id),
+        );
     }
 }

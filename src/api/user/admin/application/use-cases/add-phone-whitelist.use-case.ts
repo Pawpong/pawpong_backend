@@ -18,7 +18,10 @@ export class AddPhoneWhitelistUseCase {
         private readonly userAdminPhoneWhitelistResultMapperService: UserAdminPhoneWhitelistResultMapperService,
     ) {}
 
-    async execute(adminId: string, dto: UserAdminPhoneWhitelistCreateCommand): Promise<UserAdminPhoneWhitelistItemResult> {
+    async execute(
+        adminId: string,
+        dto: UserAdminPhoneWhitelistCreateCommand,
+    ): Promise<UserAdminPhoneWhitelistItemResult> {
         this.userAdminCommandPolicyService.assertPhoneWhitelistDoesNotExist(
             await this.userAdminReader.findPhoneWhitelistByPhoneNumber(dto.phoneNumber),
         );

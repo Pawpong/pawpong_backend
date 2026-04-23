@@ -1,6 +1,12 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestingApp, cleanupDatabase, getAdminToken, getAdopterToken, seedBreeder } from '../../../../../../common/test/test-utils';
+import {
+    createTestingApp,
+    cleanupDatabase,
+    getAdminToken,
+    getAdopterToken,
+    seedBreeder,
+} from '../../../../../../common/test/test-utils';
 
 /**
  * 브리더 인증 관리자 종단간 테스트
@@ -14,7 +20,7 @@ describe('브리더 인증 관리자 종단간 테스트', () => {
 
     beforeAll(async () => {
         app = await createTestingApp();
-        adminToken = await getAdminToken(app) || '';
+        adminToken = (await getAdminToken(app)) || '';
         const adopter = await getAdopterToken(app);
         adopterToken = adopter?.token || '';
         if (!adminToken) console.log('주의: 관리자 토큰 획득 실패');
@@ -31,7 +37,10 @@ describe('브리더 인증 관리자 종단간 테스트', () => {
 
     describe('GET /api/breeder-verification-관리자/breeders', () => {
         it('브리더 목록 조회 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get('/api/breeder-verification-admin/breeders')
@@ -43,14 +52,15 @@ describe('브리더 인증 관리자 종단간 테스트', () => {
         });
 
         it('인증 없이 접근 시 401', async () => {
-            await request(app.getHttpServer())
-                .get('/api/breeder-verification-admin/breeders')
-                .expect(401);
+            await request(app.getHttpServer()).get('/api/breeder-verification-admin/breeders').expect(401);
             console.log('인증 없이 접근 401 확인');
         });
 
         it('일반 사용자 접근 시 403', async () => {
-            if (!adopterToken) { console.log('주의: 스킵'); return; }
+            if (!adopterToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             await request(app.getHttpServer())
                 .get('/api/breeder-verification-admin/breeders')
@@ -62,7 +72,10 @@ describe('브리더 인증 관리자 종단간 테스트', () => {
 
     describe('GET /api/breeder-verification-관리자/verification/대기', () => {
         it('승인 대기 브리더 목록 조회 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get('/api/breeder-verification-admin/verification/pending')
@@ -76,7 +89,10 @@ describe('브리더 인증 관리자 종단간 테스트', () => {
 
     describe('GET /api/breeder-verification-관리자/verification/:breederId', () => {
         it('브리더 상세 조회 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get(`/api/breeder-verification-admin/verification/${breederId}`)
@@ -89,7 +105,10 @@ describe('브리더 인증 관리자 종단간 테스트', () => {
 
     describe('GET /api/breeder-verification-관리자/stats', () => {
         it('브리더 통계 조회 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get('/api/breeder-verification-admin/stats')

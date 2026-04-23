@@ -54,9 +54,7 @@ describe('지역 목록 조회 유스케이스', () => {
     });
 
     it('지역 구 목록을 원본 그대로 유지한다', async () => {
-        districtReader = makeDistrictReader([
-            { city: '서울특별시', districts: ['강남구', '마포구', '송파구'] },
-        ]);
+        districtReader = makeDistrictReader([{ city: '서울특별시', districts: ['강남구', '마포구', '송파구'] }]);
         useCase = new GetAllDistrictsUseCase(districtReader, orderingService);
 
         const result = await useCase.execute();

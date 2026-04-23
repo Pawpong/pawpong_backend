@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { AppVersion } from '../../../../schema/app-version.schema';
-import { AppVersionAdminPage, AppVersionAdminReaderPort, AppVersionAdminSnapshot } from '../application/ports/app-version-admin-reader.port';
+import {
+    AppVersionAdminPage,
+    AppVersionAdminReaderPort,
+    AppVersionAdminSnapshot,
+} from '../application/ports/app-version-admin-reader.port';
 import { AppVersionRepository } from '../../repository/app-version.repository';
 
 @Injectable()

@@ -39,7 +39,10 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
         private readonly breederManagementVerificationNotificationPayloadFactoryService: BreederManagementVerificationNotificationPayloadFactoryService,
     ) {}
 
-    async execute(userId: string, dto: BreederManagementVerificationDocumentsSubmitCommand): Promise<{ message: string }> {
+    async execute(
+        userId: string,
+        dto: BreederManagementVerificationDocumentsSubmitCommand,
+    ): Promise<{ message: string }> {
         const breeder = await this.breederManagementProfilePort.findById(userId);
         if (!breeder) {
             throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');

@@ -3,7 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 
 import { Notification } from '../../../../schema/notification.schema';
-import type { NotificationDocumentRecord, NotificationStatsAggregateRecord } from '../../types/notification-record.type';
+import type {
+    NotificationDocumentRecord,
+    NotificationStatsAggregateRecord,
+} from '../../types/notification-record.type';
 
 @Injectable()
 export class NotificationAdminRepository {

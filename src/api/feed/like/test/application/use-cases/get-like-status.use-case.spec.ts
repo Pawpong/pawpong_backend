@@ -30,10 +30,7 @@ describe('좋아요 상태 조회 유스케이스', () => {
     });
 
     it('좋아요를 누르지 않은 경우 isLiked: false를 반환한다', async () => {
-        const useCase = new GetLikeStatusUseCase(
-            makeManager({ id: 'counter-1', likeCount: 5 }, null),
-            resultMapper,
-        );
+        const useCase = new GetLikeStatusUseCase(makeManager({ id: 'counter-1', likeCount: 5 }, null), resultMapper);
 
         const result = await useCase.execute('v-1', 'u-1');
 

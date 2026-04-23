@@ -16,7 +16,10 @@ describe('태그 자동 완성 유스케이스', () => {
 
     it('쿼리에 맞는 태그 제안을 반환한다', async () => {
         const useCase = new SuggestTagsUseCase(
-            makeReader([{ tag: '강아지', videoCount: 10 }, { tag: '강아지사랑', videoCount: 5 }]),
+            makeReader([
+                { tag: '강아지', videoCount: 10 },
+                { tag: '강아지사랑', videoCount: 5 },
+            ]),
             normalizer,
         );
 

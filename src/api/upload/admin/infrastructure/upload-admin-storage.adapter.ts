@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { StorageService } from '../../../../common/storage/storage.service';
-import { UploadAdminStorageListSnapshot, UploadAdminStoragePort, UploadAdminStoredObjectSnapshot } from '../application/ports/upload-admin-storage.port';
+import {
+    UploadAdminStorageListSnapshot,
+    UploadAdminStoragePort,
+    UploadAdminStoredObjectSnapshot,
+} from '../application/ports/upload-admin-storage.port';
 
 @Injectable()
 export class UploadAdminStorageAdapter implements UploadAdminStoragePort {

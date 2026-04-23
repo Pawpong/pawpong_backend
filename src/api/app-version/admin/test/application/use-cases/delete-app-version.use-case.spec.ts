@@ -12,7 +12,14 @@ function makeWriter(deleted = true): AppVersionWriterPort {
 }
 
 function makeLogger() {
-    return { logStart: jest.fn(), logSuccess: jest.fn(), logError: jest.fn(), log: jest.fn(), error: jest.fn(), warn: jest.fn() };
+    return {
+        logStart: jest.fn(),
+        logSuccess: jest.fn(),
+        logError: jest.fn(),
+        log: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+    };
 }
 
 describe('앱 버전 삭제 유스케이스', () => {

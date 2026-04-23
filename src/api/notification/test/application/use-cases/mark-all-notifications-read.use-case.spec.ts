@@ -39,10 +39,7 @@ describe('전체 알림 읽음 처리 유스케이스', () => {
         await useCase.execute('user-abc');
 
         const after = new Date();
-        expect(notificationInboxPort.markAllAsRead).toHaveBeenCalledWith(
-            'user-abc',
-            expect.any(Date),
-        );
+        expect(notificationInboxPort.markAllAsRead).toHaveBeenCalledWith('user-abc', expect.any(Date));
         const calledDate: Date = notificationInboxPort.markAllAsRead.mock.calls[0][1];
         expect(calledDate.getTime()).toBeGreaterThanOrEqual(before.getTime());
         expect(calledDate.getTime()).toBeLessThanOrEqual(after.getTime());

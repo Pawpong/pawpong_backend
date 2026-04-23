@@ -5,9 +5,7 @@ import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from './constants/auth-response-messag
 import { AuthPublicController } from './decorator/auth-public-controller.decorator';
 import { ProfileBannerResponseDto } from '../breeder-management/admin/dto/response/profile-banner-response.dto';
 import type { GetActiveProfileBannersQueryPort } from '../breeder-management/admin/application/ports/breeder-management-public-banner-query.port';
-import {
-    GET_ACTIVE_PROFILE_BANNERS_QUERY,
-} from '../breeder-management/admin/application/tokens/breeder-management-public-banner-query.token';
+import { GET_ACTIVE_PROFILE_BANNERS_QUERY } from '../breeder-management/admin/application/tokens/breeder-management-public-banner-query.token';
 import { ApiGetLoginBannersEndpoint, ApiGetRegisterBannersEndpoint } from './swagger';
 
 @AuthPublicController()

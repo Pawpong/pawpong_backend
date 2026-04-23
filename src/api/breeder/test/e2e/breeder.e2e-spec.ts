@@ -279,8 +279,7 @@ describe('브리더 종단간 테스트', () => {
                 return;
             }
 
-            const response = await request(app.getHttpServer())
-                .get(`/api/breeder/${breederId}/parent-pets`);
+            const response = await request(app.getHttpServer()).get(`/api/breeder/${breederId}/parent-pets`);
 
             // 시드 데이터 상태에 따라 200 또는 400 허용
             expect([200, 400]).toContain(response.status);
@@ -302,8 +301,7 @@ describe('브리더 종단간 테스트', () => {
                 return;
             }
 
-            const response = await request(app.getHttpServer())
-                .get(`/api/breeder/${breederId}/application-form`);
+            const response = await request(app.getHttpServer()).get(`/api/breeder/${breederId}/application-form`);
 
             // 시드 데이터 상태에 따라 200 또는 400 허용
             expect([200, 400]).toContain(response.status);

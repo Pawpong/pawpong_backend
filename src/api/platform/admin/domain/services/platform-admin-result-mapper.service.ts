@@ -1,7 +1,13 @@
 import { Injectable } from '@nestjs/common';
 
-import { PlatformAdminMvpStatsSnapshot, PlatformAdminStatsSnapshot } from '../../application/ports/platform-admin-reader.port';
-import type { PlatformAdminMvpStatsResult, PlatformAdminStatsResult } from '../../application/types/platform-admin-result.type';
+import {
+    PlatformAdminMvpStatsSnapshot,
+    PlatformAdminStatsSnapshot,
+} from '../../application/ports/platform-admin-reader.port';
+import type {
+    PlatformAdminMvpStatsResult,
+    PlatformAdminStatsResult,
+} from '../../application/types/platform-admin-result.type';
 
 @Injectable()
 export class PlatformAdminResultMapperService {

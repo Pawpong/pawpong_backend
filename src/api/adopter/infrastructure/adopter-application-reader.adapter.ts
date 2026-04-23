@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { type AdopterApplicationReaderPort, type AdopterApplicationRecord } from '../application/ports/adopter-application-reader.port';
+import {
+    type AdopterApplicationReaderPort,
+    type AdopterApplicationRecord,
+} from '../application/ports/adopter-application-reader.port';
 import { AdopterApplicationRepository } from '../repository/adopter-application.repository';
 
 @Injectable()
@@ -20,12 +23,9 @@ export class AdopterApplicationReaderAdapter implements AdopterApplicationReader
         limit: number,
         breederIds?: string[],
     ): Promise<AdopterApplicationRecord[]> {
-        return this.adopterApplicationRepository.findPagedByAdopterId(
-            adopterId,
-            page,
-            limit,
-            breederIds,
-        ) as Promise<AdopterApplicationRecord[]>;
+        return this.adopterApplicationRepository.findPagedByAdopterId(adopterId, page, limit, breederIds) as Promise<
+            AdopterApplicationRecord[]
+        >;
     }
 
     findByIdForAdopter(adopterId: string, applicationId: string): Promise<AdopterApplicationRecord | null> {

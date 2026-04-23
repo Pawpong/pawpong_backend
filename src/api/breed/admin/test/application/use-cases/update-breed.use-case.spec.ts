@@ -29,11 +29,7 @@ describe('품종 수정 유스케이스', () => {
             }),
             delete: jest.fn(),
         };
-        const useCase = new UpdateBreedUseCase(
-            breedAdminReader,
-            breedWriter,
-            new BreedAdminResultMapperService(),
-        );
+        const useCase = new UpdateBreedUseCase(breedAdminReader, breedWriter, new BreedAdminResultMapperService());
 
         await expect(useCase.execute('breed-1', { category: '중형견' })).resolves.toMatchObject({
             id: 'breed-1',
@@ -56,9 +52,7 @@ describe('품종 수정 유스케이스', () => {
             new BreedAdminResultMapperService(),
         );
 
-        await expect(useCase.execute('missing', { category: '중형견' })).rejects.toBeInstanceOf(
-            DomainNotFoundError,
-        );
+        await expect(useCase.execute('missing', { category: '중형견' })).rejects.toBeInstanceOf(DomainNotFoundError);
     });
 
     it('중복 카테고리면 예외을 던진다', async () => {
@@ -80,8 +74,6 @@ describe('품종 수정 유스케이스', () => {
             new BreedAdminResultMapperService(),
         );
 
-        await expect(useCase.execute('breed-1', { category: '중형견' })).rejects.toBeInstanceOf(
-            DomainConflictError,
-        );
+        await expect(useCase.execute('breed-1', { category: '중형견' })).rejects.toBeInstanceOf(DomainConflictError);
     });
 });

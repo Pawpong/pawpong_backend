@@ -23,9 +23,7 @@ export class SetBreederTestAccountUseCase {
     ) {}
 
     async execute(adminId: string, breederId: string, isTestAccount: boolean): Promise<BreederAdminTestAccountResult> {
-        this.breederAdminPolicyService.assertCanManageBreeders(
-            await this.breederAdminReader.findAdminById(adminId),
-        );
+        this.breederAdminPolicyService.assertCanManageBreeders(await this.breederAdminReader.findAdminById(adminId));
 
         const breeder = this.breederAdminPolicyService.assertBreederExists(
             await this.breederAdminReader.findBreederById(breederId),

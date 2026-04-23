@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
-import { AnnouncementPublicListQuery, AnnouncementPublicListResult } from '../../application/ports/announcement-public-reader.port';
+import {
+    AnnouncementPublicListQuery,
+    AnnouncementPublicListResult,
+} from '../../application/ports/announcement-public-reader.port';
 import { AnnouncementAdminReaderPort } from '../application/ports/announcement-admin-reader.port';
 import { AnnouncementRepository } from '../../repository/announcement.repository';
 

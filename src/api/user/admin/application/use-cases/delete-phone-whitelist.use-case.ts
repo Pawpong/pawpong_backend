@@ -15,7 +15,9 @@ export class DeletePhoneWhitelistUseCase {
     ) {}
 
     async execute(id: string): Promise<{ message: string }> {
-        this.userAdminCommandPolicyService.assertPhoneWhitelistExists(await this.userAdminReader.findPhoneWhitelistById(id));
+        this.userAdminCommandPolicyService.assertPhoneWhitelistExists(
+            await this.userAdminReader.findPhoneWhitelistById(id),
+        );
         await this.userAdminWriter.deletePhoneWhitelist(id);
         return { message: '화이트리스트가 삭제되었습니다.' };
     }

@@ -1,9 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import {
-    FilterOptionsCatalogService,
-    SortFilterOption,
-} from '../../domain/services/filter-options-catalog.service';
+import { FilterOptionsCatalogService, SortFilterOption } from '../../domain/services/filter-options-catalog.service';
 
 @Injectable()
 export class GetSortOptionsUseCase {

@@ -17,7 +17,11 @@ function makeFile(size = 1024): Express.Multer.File {
 
 describe('UploadResultMapperService', () => {
     const service = new UploadResultMapperService();
-    const resource = { fileName: 'uploads/a.jpg', cdnUrl: 'https://cdn.example.com/a.jpg', storageUrl: 'https://s3.example.com/a.jpg' };
+    const resource = {
+        fileName: 'uploads/a.jpg',
+        cdnUrl: 'https://cdn.example.com/a.jpg',
+        storageUrl: 'https://s3.example.com/a.jpg',
+    };
 
     it('단일 리소스를 결과로 변환한다 (url = cdnUrl)', () => {
         const result = service.toResult(resource, makeFile(512));

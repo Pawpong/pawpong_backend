@@ -18,11 +18,7 @@ describe('앱 버전 확인 유스케이스', () => {
         const appVersionReader: AppVersionReaderPort = {
             findLatestActiveByPlatform: jest.fn().mockResolvedValue(null),
         };
-        const useCase = new CheckAppVersionUseCase(
-            appVersionReader,
-            new AppVersionPolicyService(),
-            logger as any,
-        );
+        const useCase = new CheckAppVersionUseCase(appVersionReader, new AppVersionPolicyService(), logger as any);
 
         await expect(useCase.execute('ios', '1.0.0')).resolves.toEqual({
             needsForceUpdate: false,
@@ -44,11 +40,7 @@ describe('앱 버전 확인 유스케이스', () => {
                 androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
             }),
         };
-        const useCase = new CheckAppVersionUseCase(
-            appVersionReader,
-            new AppVersionPolicyService(),
-            logger as any,
-        );
+        const useCase = new CheckAppVersionUseCase(appVersionReader, new AppVersionPolicyService(), logger as any);
 
         await expect(useCase.execute('ios', '1.1.9')).resolves.toEqual({
             needsForceUpdate: true,
@@ -63,11 +55,7 @@ describe('앱 버전 확인 유스케이스', () => {
         const appVersionReader: AppVersionReaderPort = {
             findLatestActiveByPlatform: jest.fn(),
         };
-        const useCase = new CheckAppVersionUseCase(
-            appVersionReader,
-            new AppVersionPolicyService(),
-            logger as any,
-        );
+        const useCase = new CheckAppVersionUseCase(appVersionReader, new AppVersionPolicyService(), logger as any);
 
         await expect(useCase.execute(undefined as any, '1.0.0')).rejects.toBeInstanceOf(DomainValidationError);
         await expect(useCase.execute('android', '')).rejects.toBeInstanceOf(DomainValidationError);

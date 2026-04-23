@@ -53,7 +53,9 @@ describe('브리더 계정 탈퇴 유스케이스', () => {
         expect(result.deletedAt).toBeDefined();
         expect(result.message).toBeDefined();
         expect(breederManagementAccountCommandPort.softDeleteBreeder).toHaveBeenCalled();
-        expect(breederManagementAccountCommandPort.deactivateAllAvailablePetsByBreeder).toHaveBeenCalledWith('breeder-1');
+        expect(breederManagementAccountCommandPort.deactivateAllAvailablePetsByBreeder).toHaveBeenCalledWith(
+            'breeder-1',
+        );
     });
 
     it('이미 탈퇴된 계정이면 DomainValidationError를 던진다', async () => {

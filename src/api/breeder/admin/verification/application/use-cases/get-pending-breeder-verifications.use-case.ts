@@ -34,7 +34,9 @@ export class GetPendingBreederVerificationsUseCase {
         });
 
         return this.breederPaginationAssemblerService.build(
-            result.items.map((breeder) => this.breederVerificationAdminPendingBreederItemMapperService.toResponse(breeder)),
+            result.items.map((breeder) =>
+                this.breederVerificationAdminPendingBreederItemMapperService.toResponse(breeder),
+            ),
             pageNumber,
             itemsPerPage,
             result.total,

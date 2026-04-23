@@ -24,11 +24,6 @@ export class GetBreederParentPetsUseCase {
         }
 
         const parentPets = await this.breederPublicReaderPort.findActiveParentPetsByBreederId(breederId);
-        return this.breederPublicParentPetListAssemblerService.build(
-            parentPets,
-            page,
-            limit,
-            this.breederFileUrlPort,
-        );
+        return this.breederPublicParentPetListAssemblerService.build(parentPets, page, limit, this.breederFileUrlPort);
     }
 }

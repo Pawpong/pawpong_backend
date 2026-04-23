@@ -75,7 +75,10 @@ export class BreederAdminNotifierAdapter implements BreederAdminNotifierPort {
         await builder.send();
     }
 
-    private getReminderEmailContent(command: BreederAdminReminderNotificationCommand): { subject: string; html: string } {
+    private getReminderEmailContent(command: BreederAdminReminderNotificationCommand): {
+        subject: string;
+        html: string;
+    } {
         if (command.emailTemplate === 'document_reminder') {
             return this.mailTemplateService.getDocumentReminderEmail(command.recipient.breederName);
         }

@@ -9,7 +9,10 @@ import {
     BreederVerificationAdminActivityLogEntry,
     BreederVerificationAdminUpdateVerificationCommand,
 } from '../application/ports/breeder-verification-admin-writer.port';
-import type { BreederAdminAdminDocumentRecord, BreederAdminBreederDocumentRecord } from '../../types/breeder-admin-record.type';
+import type {
+    BreederAdminAdminDocumentRecord,
+    BreederAdminBreederDocumentRecord,
+} from '../../types/breeder-admin-record.type';
 
 @Injectable()
 export class BreederVerificationAdminRepository {
@@ -19,7 +22,11 @@ export class BreederVerificationAdminRepository {
     ) {}
 
     findAdminById(adminId: string): Promise<BreederAdminAdminDocumentRecord | null> {
-        return this.adminModel.findById(adminId).select('name permissions').lean<BreederAdminAdminDocumentRecord>().exec();
+        return this.adminModel
+            .findById(adminId)
+            .select('name permissions')
+            .lean<BreederAdminAdminDocumentRecord>()
+            .exec();
     }
 
     getLevelChangeRequests(
@@ -65,13 +72,18 @@ export class BreederVerificationAdminRepository {
         }
 
         if (searchKeyword) {
-            query.$or = [{ nickname: new RegExp(searchKeyword, 'i') }, { emailAddress: new RegExp(searchKeyword, 'i') }];
+            query.$or = [
+                { nickname: new RegExp(searchKeyword, 'i') },
+                { emailAddress: new RegExp(searchKeyword, 'i') },
+            ];
         }
 
         return this.search(query, pageNumber, itemsPerPage, { 'verification.submittedAt': -1 });
     }
 
-    getBreeders(criteria: BreederVerificationAdminSearchCriteria): Promise<{ items: BreederAdminBreederDocumentRecord[]; total: number }> {
+    getBreeders(
+        criteria: BreederVerificationAdminSearchCriteria,
+    ): Promise<{ items: BreederAdminBreederDocumentRecord[]; total: number }> {
         const { verificationStatus, cityName, searchKeyword, pageNumber, itemsPerPage } = criteria;
         const query: FilterQuery<BreederDocument> = {};
 
@@ -84,7 +96,10 @@ export class BreederVerificationAdminRepository {
         }
 
         if (searchKeyword) {
-            query.$or = [{ nickname: new RegExp(searchKeyword, 'i') }, { emailAddress: new RegExp(searchKeyword, 'i') }];
+            query.$or = [
+                { nickname: new RegExp(searchKeyword, 'i') },
+                { emailAddress: new RegExp(searchKeyword, 'i') },
+            ];
         }
 
         return this.search(query, pageNumber, itemsPerPage, { createdAt: -1 });
@@ -93,7 +108,9 @@ export class BreederVerificationAdminRepository {
     findBreederById(breederId: string): Promise<BreederAdminBreederDocumentRecord | null> {
         return this.breederModel
             .findById(breederId)
-            .select('_id name nickname emailAddress phoneNumber accountStatus isTestAccount verification profile createdAt updatedAt breeds')
+            .select(
+                '_id name nickname emailAddress phoneNumber accountStatus isTestAccount verification profile createdAt updatedAt breeds',
+            )
             .lean<BreederAdminBreederDocumentRecord>()
             .exec();
     }
@@ -182,7 +199,9 @@ export class BreederVerificationAdminRepository {
         const [items, total] = await Promise.all([
             this.breederModel
                 .find(query)
-                .select('_id name nickname emailAddress phoneNumber accountStatus isTestAccount verification profile createdAt')
+                .select(
+                    '_id name nickname emailAddress phoneNumber accountStatus isTestAccount verification profile createdAt',
+                )
                 .sort(sort)
                 .skip(skip)
                 .limit(itemsPerPage)

@@ -23,7 +23,9 @@ import { AnnouncementPaginationAssemblerService } from './domain/services/announ
 import { AnnouncementMongoosePublicReaderAdapter } from './infrastructure/announcement-mongoose-public-reader.adapter';
 import { AnnouncementRepository } from './repository/announcement.repository';
 
-const ANNOUNCEMENT_SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: Announcement.name, schema: AnnouncementSchema }]);
+const ANNOUNCEMENT_SCHEMA_IMPORTS = MongooseModule.forFeature([
+    { name: Announcement.name, schema: AnnouncementSchema },
+]);
 
 export const ANNOUNCEMENT_MODULE_IMPORTS = [ANNOUNCEMENT_SCHEMA_IMPORTS];
 

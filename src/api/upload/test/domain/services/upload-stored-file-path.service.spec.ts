@@ -18,13 +18,15 @@ describe('UploadStoredFilePathService', () => {
         });
 
         it('object.iwinv.kr 호스트의 URL에서 버킷 프리픽스를 제거한다', () => {
-            expect(
-                service.extractStoredPath(`https://object.iwinv.kr/${bucket}/folder/file.jpg`, bucket),
-            ).toBe('folder/file.jpg');
+            expect(service.extractStoredPath(`https://object.iwinv.kr/${bucket}/folder/file.jpg`, bucket)).toBe(
+                'folder/file.jpg',
+            );
         });
 
         it('다른 호스트의 URL은 pathname만 반환한다', () => {
-            expect(service.extractStoredPath('https://cdn.example.com/folder/file.jpg', bucket)).toBe('folder/file.jpg');
+            expect(service.extractStoredPath('https://cdn.example.com/folder/file.jpg', bucket)).toBe(
+                'folder/file.jpg',
+            );
         });
 
         it('URL 파싱에 실패하면 원본을 반환한다', () => {
@@ -34,10 +36,7 @@ describe('UploadStoredFilePathService', () => {
 
     describe('extractStoredPaths', () => {
         it('여러 URL을 변환한다', () => {
-            const result = service.extractStoredPaths([
-                `${bucket}/a.jpg`,
-                'pawpong_bucket/b.jpg',
-            ], bucket);
+            const result = service.extractStoredPaths([`${bucket}/a.jpg`, 'pawpong_bucket/b.jpg'], bucket);
             expect(result).toEqual(['a.jpg', 'b.jpg']);
         });
 

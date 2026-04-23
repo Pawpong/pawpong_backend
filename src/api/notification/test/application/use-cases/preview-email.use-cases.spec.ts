@@ -7,7 +7,10 @@ import { PreviewNewReviewEmailUseCase } from '../../../application/use-cases/pre
 import { SendNotificationEmailUseCase } from '../../../application/use-cases/send-notification-email.use-case';
 import { NotificationEmailPreviewTemplateService } from '../../../application/services/notification-email-preview-template.service';
 
-function makeTemplateService(html = '<p>preview</p>', subject = '이메일 제목'): NotificationEmailPreviewTemplateService {
+function makeTemplateService(
+    html = '<p>preview</p>',
+    subject = '이메일 제목',
+): NotificationEmailPreviewTemplateService {
     return {
         getBreederApprovalTemplate: jest.fn().mockReturnValue({ subject, html }),
         getBreederRejectionTemplate: jest.fn().mockReturnValue({ subject, html }),

@@ -1,5 +1,8 @@
 import { GetHealthUseCase } from '../../../application/use-cases/get-health.use-case';
-import { SYSTEM_RUNTIME_READER_PORT, SystemRuntimeReaderPort } from '../../../application/ports/system-runtime-reader.port';
+import {
+    SYSTEM_RUNTIME_READER_PORT,
+    SystemRuntimeReaderPort,
+} from '../../../application/ports/system-runtime-reader.port';
 
 function makeRuntimeReader(overrides: Partial<SystemRuntimeReaderPort> = {}): SystemRuntimeReaderPort {
     return {

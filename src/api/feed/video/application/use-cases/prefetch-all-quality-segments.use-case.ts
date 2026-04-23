@@ -13,12 +13,7 @@ export class PrefetchAllQualitySegmentsUseCase {
         private readonly feedVideoStreamingService: FeedVideoStreamingService,
     ) {}
 
-    async execute(
-        videoId: string,
-        currentSegment: number,
-        count: number = 5,
-        resolutions?: number[],
-    ): Promise<number> {
+    async execute(videoId: string, currentSegment: number, count: number = 5, resolutions?: number[]): Promise<number> {
         const targets = this.feedVideoStreamingService.getPrefetchTargets(videoId, currentSegment, count, resolutions);
 
         await Promise.allSettled(targets.map((target) => this.cacheSegmentIfMissing(target)));

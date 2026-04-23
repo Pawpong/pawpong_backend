@@ -14,7 +14,7 @@ describe('홈 관리자 종단간 테스트', () => {
 
     beforeAll(async () => {
         app = await createTestingApp();
-        adminToken = await getAdminToken(app) || '';
+        adminToken = (await getAdminToken(app)) || '';
         if (!adminToken) console.log('주의: 관리자 토큰 획득 실패');
     }, 30000);
 
@@ -28,7 +28,10 @@ describe('홈 관리자 종단간 테스트', () => {
      */
     describe('배너 관리', () => {
         it('배너 목록 조회', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get('/api/home-admin/banners')
@@ -40,7 +43,10 @@ describe('홈 관리자 종단간 테스트', () => {
         });
 
         it('배너 생성', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .post('/api/home-admin/banner')
@@ -64,7 +70,10 @@ describe('홈 관리자 종단간 테스트', () => {
         });
 
         it('배너 삭제', async () => {
-            if (!adminToken || !createdBannerId) { console.log('주의: 스킵'); return; }
+            if (!adminToken || !createdBannerId) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .delete(`/api/home-admin/banner/${createdBannerId}`)
@@ -76,9 +85,7 @@ describe('홈 관리자 종단간 테스트', () => {
         });
 
         it('인증 없이 접근 시 401', async () => {
-            await request(app.getHttpServer())
-                .get('/api/home-admin/banners')
-                .expect(401);
+            await request(app.getHttpServer()).get('/api/home-admin/banners').expect(401);
             console.log('인증 없이 접근 401 확인');
         });
     });
@@ -88,7 +95,10 @@ describe('홈 관리자 종단간 테스트', () => {
      */
     describe('자주 묻는 질문 관리', () => {
         it('자주 묻는 질문 목록 조회', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get('/api/home-admin/faqs')
@@ -100,7 +110,10 @@ describe('홈 관리자 종단간 테스트', () => {
         });
 
         it('자주 묻는 질문 생성', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .post('/api/home-admin/faq')
@@ -122,7 +135,10 @@ describe('홈 관리자 종단간 테스트', () => {
         });
 
         it('자주 묻는 질문 삭제', async () => {
-            if (!adminToken || !createdFaqId) { console.log('주의: 스킵'); return; }
+            if (!adminToken || !createdFaqId) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .delete(`/api/home-admin/faq/${createdFaqId}`)

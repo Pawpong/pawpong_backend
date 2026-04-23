@@ -2,7 +2,10 @@ import { DomainValidationError } from '../../../../../../common/error/domain.err
 import { UpdatePhoneWhitelistUseCase } from '../../../application/use-cases/update-phone-whitelist.use-case';
 import { UserAdminCommandPolicyService } from '../../../domain/services/user-admin-command-policy.service';
 import { UserAdminPhoneWhitelistResultMapperService } from '../../../domain/services/user-admin-phone-whitelist-result-mapper.service';
-import { UserAdminReaderPort, UserAdminPhoneWhitelistSnapshot } from '../../../application/ports/user-admin-reader.port';
+import {
+    UserAdminReaderPort,
+    UserAdminPhoneWhitelistSnapshot,
+} from '../../../application/ports/user-admin-reader.port';
 import { UserAdminWriterPort } from '../../../application/ports/user-admin-writer.port';
 
 const existingItem: UserAdminPhoneWhitelistSnapshot = {

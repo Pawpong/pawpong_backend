@@ -19,7 +19,9 @@ export class UpdatePhoneWhitelistUseCase {
     ) {}
 
     async execute(id: string, dto: UserAdminPhoneWhitelistUpdateCommand): Promise<UserAdminPhoneWhitelistItemResult> {
-        this.userAdminCommandPolicyService.assertPhoneWhitelistExists(await this.userAdminReader.findPhoneWhitelistById(id));
+        this.userAdminCommandPolicyService.assertPhoneWhitelistExists(
+            await this.userAdminReader.findPhoneWhitelistById(id),
+        );
 
         const item = this.userAdminCommandPolicyService.assertPhoneWhitelistExists(
             await this.userAdminWriter.updatePhoneWhitelist(id, {

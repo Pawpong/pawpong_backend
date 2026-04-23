@@ -1,6 +1,4 @@
-import type {
-    BreederAdminActivityLogEntry,
-} from '../application/ports/breeder-admin-writer.port';
+import type { BreederAdminActivityLogEntry } from '../application/ports/breeder-admin-writer.port';
 import type {
     BreederVerificationAdminDocumentSnapshot,
     BreederVerificationAdminLevelChangeHistorySnapshot,

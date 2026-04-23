@@ -9,11 +9,7 @@ import { HomeAdminProtectedController } from './decorator/home-admin-controller.
 import { FaqCreateRequestDto } from './dto/request/faq-create-request.dto';
 import { FaqUpdateRequestDto } from './dto/request/faq-update-request.dto';
 import { FaqResponseDto } from '../dto/response/faq-response.dto';
-import {
-    ApiCreateFaqAdminEndpoint,
-    ApiDeleteFaqAdminEndpoint,
-    ApiUpdateFaqAdminEndpoint,
-} from './swagger';
+import { ApiCreateFaqAdminEndpoint, ApiDeleteFaqAdminEndpoint, ApiUpdateFaqAdminEndpoint } from './swagger';
 
 @HomeAdminProtectedController()
 export class HomeAdminFaqsCommandController {

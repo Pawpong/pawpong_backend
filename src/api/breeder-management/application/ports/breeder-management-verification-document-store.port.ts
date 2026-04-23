@@ -8,8 +8,5 @@ export const BREEDER_MANAGEMENT_VERIFICATION_DOCUMENT_STORE_PORT = Symbol(
 );
 
 export interface BreederManagementVerificationDocumentStorePort {
-    upload(
-        file: Express.Multer.File,
-        folder: string,
-    ): Promise<BreederManagementUploadedVerificationDocument>;
+    upload(file: Express.Multer.File, folder: string): Promise<BreederManagementUploadedVerificationDocument>;
 }

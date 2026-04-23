@@ -15,13 +15,19 @@ describe('AuthSignupValidationService', () => {
 
     describe('ensureRequiredBreederAgreements', () => {
         it('termsOfService 동의 없으면 예외', () => {
-            expect(() => service.ensureRequiredBreederAgreements({ privacyPolicy: true })).toThrow(DomainValidationError);
+            expect(() => service.ensureRequiredBreederAgreements({ privacyPolicy: true })).toThrow(
+                DomainValidationError,
+            );
         });
         it('privacyPolicy 동의 없으면 예외', () => {
-            expect(() => service.ensureRequiredBreederAgreements({ termsOfService: true })).toThrow(DomainValidationError);
+            expect(() => service.ensureRequiredBreederAgreements({ termsOfService: true })).toThrow(
+                DomainValidationError,
+            );
         });
         it('둘 다 있으면 통과', () => {
-            expect(() => service.ensureRequiredBreederAgreements({ termsOfService: true, privacyPolicy: true })).not.toThrow();
+            expect(() =>
+                service.ensureRequiredBreederAgreements({ termsOfService: true, privacyPolicy: true }),
+            ).not.toThrow();
         });
     });
 
@@ -60,7 +66,9 @@ describe('AuthSignupValidationService', () => {
             expect(() => service.ensureCompleteSocialBreederInput(valid as any)).not.toThrow();
         });
         it('phone 없으면 예외', () => {
-            expect(() => service.ensureCompleteSocialBreederInput({ ...valid, phone: undefined } as any)).toThrow(/전화번호/);
+            expect(() => service.ensureCompleteSocialBreederInput({ ...valid, phone: undefined } as any)).toThrow(
+                /전화번호/,
+            );
         });
         it('breeds 빈 배열이면 예외', () => {
             expect(() => service.ensureCompleteSocialBreederInput({ ...valid, breeds: [] } as any)).toThrow(/품종/);

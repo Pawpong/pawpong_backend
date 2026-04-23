@@ -43,10 +43,7 @@ export const BREEDER_ADMIN_MODULE_IMPORTS = [
     BreederVerificationAdminModule,
 ];
 
-export const BREEDER_ADMIN_MODULE_CONTROLLERS = [
-    BreederAdminAccountController,
-    BreederAdminReminderController,
-];
+export const BREEDER_ADMIN_MODULE_CONTROLLERS = [BreederAdminAccountController, BreederAdminReminderController];
 
 const BREEDER_ADMIN_USE_CASE_PROVIDERS = [
     SuspendBreederUseCase,

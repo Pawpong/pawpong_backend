@@ -58,8 +58,6 @@ describe('업로드 URL 생성 유스케이스', () => {
 
         await useCase.execute('user-1', 'Breeder', '제목');
 
-        expect(command.createPendingVideo).toHaveBeenCalledWith(
-            expect.objectContaining({ tags: [] }),
-        );
+        expect(command.createPendingVideo).toHaveBeenCalledWith(expect.objectContaining({ tags: [] }));
     });
 });

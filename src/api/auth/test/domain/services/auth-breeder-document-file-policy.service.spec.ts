@@ -28,13 +28,15 @@ describe('AuthBreederDocumentFilePolicyService', () => {
     });
 
     it('중복 type은 예외', () => {
-        expect(() =>
-            policy.validate([makeFile('a.pdf'), makeFile('b.pdf')], ['idCard', 'idCard'], 'new'),
-        ).toThrow(/중복/);
+        expect(() => policy.validate([makeFile('a.pdf'), makeFile('b.pdf')], ['idCard', 'idCard'], 'new')).toThrow(
+            /중복/,
+        );
     });
 
     it('파일 수와 타입 수 불일치는 예외', () => {
-        expect(() => policy.validate([makeFile('a.pdf')], ['idCard', 'animalProductionLicense'], 'new')).toThrow(/일치하지 않습니다/);
+        expect(() => policy.validate([makeFile('a.pdf')], ['idCard', 'animalProductionLicense'], 'new')).toThrow(
+            /일치하지 않습니다/,
+        );
     });
 
     it('파일 크기 100MB 초과는 예외', () => {
@@ -44,9 +46,9 @@ describe('AuthBreederDocumentFilePolicyService', () => {
     });
 
     it('지원되지 않는 확장자와 MIME이면 예외', () => {
-        expect(() =>
-            policy.validate([makeFile('evil.exe', 'application/octet-stream')], ['idCard'], 'new'),
-        ).toThrow(/지원되지 않는/);
+        expect(() => policy.validate([makeFile('evil.exe', 'application/octet-stream')], ['idCard'], 'new')).toThrow(
+            /지원되지 않는/,
+        );
     });
 
     it('올바른 pdf는 통과', () => {

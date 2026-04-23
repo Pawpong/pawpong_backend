@@ -147,9 +147,7 @@ describe('앱 버전 관리자 종단간 테스트', () => {
         });
 
         it('인증 없이 접근 시 401', async () => {
-            await request(app.getHttpServer())
-                .get('/api/app-version-admin')
-                .expect(401);
+            await request(app.getHttpServer()).get('/api/app-version-admin').expect(401);
             console.log('목록 조회 인증 없이 접근 401 확인');
         });
     });
@@ -200,9 +198,7 @@ describe('앱 버전 관리자 종단간 테스트', () => {
         });
 
         it('인증 없이 삭제 시 401', async () => {
-            await request(app.getHttpServer())
-                .delete('/api/app-version-admin/000000000000000000000000')
-                .expect(401);
+            await request(app.getHttpServer()).delete('/api/app-version-admin/000000000000000000000000').expect(401);
             console.log('삭제 인증 없이 접근 401 확인');
         });
     });

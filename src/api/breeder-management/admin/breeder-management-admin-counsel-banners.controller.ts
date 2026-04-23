@@ -36,7 +36,9 @@ export class BreederManagementAdminCounselBannersController {
 
     @Post('counsel-banner')
     @ApiCreateCounselBannerAdminEndpoint()
-    async createCounselBanner(@Body() data: CounselBannerCreateRequestDto): Promise<ApiResponseDto<CounselBannerResponseDto>> {
+    async createCounselBanner(
+        @Body() data: CounselBannerCreateRequestDto,
+    ): Promise<ApiResponseDto<CounselBannerResponseDto>> {
         const banner = await this.createCounselBannerUseCase.execute(data);
         return ApiResponseDto.success(banner, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.counselBannerCreated);
     }

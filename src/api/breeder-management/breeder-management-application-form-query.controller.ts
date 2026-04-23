@@ -17,7 +17,9 @@ export class BreederManagementApplicationFormQueryController {
 
     @Get('application-form')
     @ApiEndpoint(BreederManagementSwaggerDocs.applicationForm)
-    async getApplicationForm(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<ApplicationFormResponseDto>> {
+    async getApplicationForm(
+        @CurrentUser('userId') userId: string,
+    ): Promise<ApiResponseDto<ApplicationFormResponseDto>> {
         const result = await this.getBreederManagementApplicationFormUseCase.execute(userId);
         return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationFormRetrieved);
     }

@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 
 import { DiscordWebhookService } from '../../../common/discord/discord-webhook.service';
 import { AdopterRepository } from '../repository/adopter.repository';
-import type { AdopterAccountRecord, AdopterDeleteAccountCommand } from '../application/ports/adopter-account-command.port';
+import type {
+    AdopterAccountRecord,
+    AdopterDeleteAccountCommand,
+} from '../application/ports/adopter-account-command.port';
 import type { AdopterAccountCommandPort } from '../application/ports/adopter-account-command.port';
 
 @Injectable()

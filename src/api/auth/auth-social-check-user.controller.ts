@@ -15,9 +15,7 @@ export class AuthSocialCheckUserController {
     @Post('social/check-user')
     @HttpCode(HttpStatus.OK)
     @ApiCheckSocialUserEndpoint()
-    async checkSocialUser(
-        @Body() dto: CheckSocialUserRequestDto,
-    ): Promise<ApiResponseDto<SocialCheckUserResponseDto>> {
+    async checkSocialUser(@Body() dto: CheckSocialUserRequestDto): Promise<ApiResponseDto<SocialCheckUserResponseDto>> {
         const result = await this.checkSocialUserUseCase.execute(dto.provider, dto.providerId, dto.email);
         return ApiResponseDto.success(
             result,

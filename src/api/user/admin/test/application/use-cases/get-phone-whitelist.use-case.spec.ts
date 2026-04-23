@@ -1,6 +1,9 @@
 import { GetPhoneWhitelistUseCase } from '../../../application/use-cases/get-phone-whitelist.use-case';
 import { UserAdminPhoneWhitelistResultMapperService } from '../../../domain/services/user-admin-phone-whitelist-result-mapper.service';
-import { UserAdminReaderPort, UserAdminPhoneWhitelistSnapshot } from '../../../application/ports/user-admin-reader.port';
+import {
+    UserAdminReaderPort,
+    UserAdminPhoneWhitelistSnapshot,
+} from '../../../application/ports/user-admin-reader.port';
 
 function makeReader(items: UserAdminPhoneWhitelistSnapshot[] = []): UserAdminReaderPort {
     return {
@@ -41,10 +44,7 @@ describe('전화번호 화이트리스트 목록 조회 유스케이스', () => 
     });
 
     it('목록이 없으면 빈 배열을 반환한다', async () => {
-        const useCase = new GetPhoneWhitelistUseCase(
-            makeReader([]),
-            new UserAdminPhoneWhitelistResultMapperService(),
-        );
+        const useCase = new GetPhoneWhitelistUseCase(makeReader([]), new UserAdminPhoneWhitelistResultMapperService());
 
         const result = await useCase.execute();
 

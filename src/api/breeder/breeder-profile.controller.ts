@@ -6,7 +6,10 @@ import { MongoObjectIdPipe } from '../../common/pipe/mongo-object-id.pipe';
 import { GetBreederApplicationFormUseCase } from './application/use-cases/get-breeder-application-form.use-case';
 import { GetBreederProfileUseCase } from './application/use-cases/get-breeder-profile.use-case';
 import type { BreederProfileResult } from './application/types/breeder-result.type';
-import { BreederOptionalAuthController, BreederPublicController } from './decorator/breeder-public-controller.decorator';
+import {
+    BreederOptionalAuthController,
+    BreederPublicController,
+} from './decorator/breeder-public-controller.decorator';
 import { PublicApplicationFormResponseDto } from './dto/response/public-application-form.dto';
 import { BREEDER_RESPONSE_MESSAGES } from './constants/breeder-response-messages';
 import { ApiGetBreederApplicationFormEndpoint, ApiGetBreederProfileEndpoint } from './swagger/decorators';

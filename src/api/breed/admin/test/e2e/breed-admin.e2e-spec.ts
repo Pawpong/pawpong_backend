@@ -49,9 +49,7 @@ describe('품종 관리 Admin 종단간 테스트', () => {
 
     describe('GET /api/breeds-admin', () => {
         it('전체 품종 목록 조회 성공', async () => {
-            const response = await request(app.getHttpServer())
-                .get('/api/breeds-admin')
-                .expect(200);
+            const response = await request(app.getHttpServer()).get('/api/breeds-admin').expect(200);
 
             expect(response.body.success).toBe(true);
             expect(Array.isArray(response.body.data)).toBe(true);
@@ -60,9 +58,7 @@ describe('품종 관리 Admin 종단간 테스트', () => {
         });
 
         it('응답 형식 검증', async () => {
-            const response = await request(app.getHttpServer())
-                .get('/api/breeds-admin')
-                .expect(200);
+            const response = await request(app.getHttpServer()).get('/api/breeds-admin').expect(200);
 
             expect(response.body).toHaveProperty('success', true);
             expect(response.body).toHaveProperty('code', 200);
@@ -74,9 +70,7 @@ describe('품종 관리 Admin 종단간 테스트', () => {
 
     describe('GET /api/breeds-admin/:id', () => {
         it('특정 품종 상세 조회 성공', async () => {
-            const response = await request(app.getHttpServer())
-                .get(`/api/breeds-admin/${existingBreedId}`)
-                .expect(200);
+            const response = await request(app.getHttpServer()).get(`/api/breeds-admin/${existingBreedId}`).expect(200);
 
             expect(response.body.success).toBe(true);
             expect(response.body.data).toMatchObject({
@@ -87,8 +81,7 @@ describe('품종 관리 Admin 종단간 테스트', () => {
         });
 
         it('존재하지 않는 ID 조회 시 에러', async () => {
-            const response = await request(app.getHttpServer())
-                .get('/api/breeds-admin/000000000000000000000000');
+            const response = await request(app.getHttpServer()).get('/api/breeds-admin/000000000000000000000000');
 
             expect([400, 404]).toContain(response.status);
             console.log('존재하지 않는 품종 ID 에러 확인');
@@ -117,10 +110,7 @@ describe('품종 관리 Admin 종단간 테스트', () => {
         });
 
         it('필수 필드 누락 시 400', async () => {
-            await request(app.getHttpServer())
-                .post('/api/breeds-admin')
-                .send({ petType: 'dog' })
-                .expect(400);
+            await request(app.getHttpServer()).post('/api/breeds-admin').send({ petType: 'dog' }).expect(400);
             console.log('품종 필수 필드 누락 400 확인');
         });
 
@@ -195,8 +185,7 @@ describe('품종 관리 Admin 종단간 테스트', () => {
         });
 
         it('존재하지 않는 ID 삭제 시 에러', async () => {
-            const response = await request(app.getHttpServer())
-                .delete('/api/breeds-admin/000000000000000000000000');
+            const response = await request(app.getHttpServer()).delete('/api/breeds-admin/000000000000000000000000');
 
             expect([400, 404]).toContain(response.status);
             console.log('존재하지 않는 품종 삭제 에러 확인');

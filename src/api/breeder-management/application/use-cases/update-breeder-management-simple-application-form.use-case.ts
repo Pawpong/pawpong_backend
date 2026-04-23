@@ -26,7 +26,10 @@ export class UpdateBreederManagementSimpleApplicationFormUseCase {
         }
 
         const customQuestions = this.breederManagementSimpleApplicationFormBuilderService.build(questions);
-        const updatedBreeder = await this.breederManagementSettingsPort.updateApplicationForm(breederId, customQuestions);
+        const updatedBreeder = await this.breederManagementSettingsPort.updateApplicationForm(
+            breederId,
+            customQuestions,
+        );
         const persistedQuestions = updatedBreeder?.applicationForm ?? customQuestions;
 
         return this.breederManagementApplicationCommandResultMapperService.toSimpleApplicationFormUpdatedResult(

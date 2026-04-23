@@ -124,7 +124,10 @@ export class UserAdminRepository {
         };
     }
 
-    findManagedUserById(role: UserAdminManagedUserRole, userId: string): Promise<UserAdminManagedUserDocumentRecord | null> {
+    findManagedUserById(
+        role: UserAdminManagedUserRole,
+        userId: string,
+    ): Promise<UserAdminManagedUserDocumentRecord | null> {
         if (role === 'adopter') {
             return this.adopterModel.findById(userId).lean<UserAdminManagedUserDocumentRecord>().exec();
         }
@@ -256,7 +259,11 @@ export class UserAdminRepository {
     }
 
     listPhoneWhitelist(): Promise<UserAdminPhoneWhitelistDocumentRecord[]> {
-        return this.phoneWhitelistModel.find().sort({ createdAt: -1 }).lean<UserAdminPhoneWhitelistDocumentRecord[]>().exec();
+        return this.phoneWhitelistModel
+            .find()
+            .sort({ createdAt: -1 })
+            .lean<UserAdminPhoneWhitelistDocumentRecord[]>()
+            .exec();
     }
 
     findPhoneWhitelistById(id: string): Promise<UserAdminPhoneWhitelistDocumentRecord | null> {
@@ -360,7 +367,10 @@ export class UserAdminRepository {
         return created.toObject() as UserAdminPhoneWhitelistDocumentRecord;
     }
 
-    updatePhoneWhitelist(id: string, command: UserAdminPhoneWhitelistUpdateCommand): Promise<UserAdminPhoneWhitelistDocumentRecord | null> {
+    updatePhoneWhitelist(
+        id: string,
+        command: UserAdminPhoneWhitelistUpdateCommand,
+    ): Promise<UserAdminPhoneWhitelistDocumentRecord | null> {
         const $set: Record<string, unknown> = {};
 
         if (command.description !== undefined) {
@@ -420,5 +430,4 @@ export class UserAdminRepository {
         }
         return query;
     }
-
 }

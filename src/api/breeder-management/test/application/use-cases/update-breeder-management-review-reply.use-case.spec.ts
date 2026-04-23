@@ -44,7 +44,9 @@ describe('브리더 후기 답글 수정 유스케이스', () => {
     it('해당 후기를 찾을 수 없거나 권한이 없으면 도메인 not found 예외를 던진다', async () => {
         breederManagementReviewReplyPort.findReviewByIdAndBreeder.mockResolvedValue(null);
 
-        await expect(useCase.execute('breeder-1', 'nonexistent-review', '수정 답글')).rejects.toThrow(DomainNotFoundError);
+        await expect(useCase.execute('breeder-1', 'nonexistent-review', '수정 답글')).rejects.toThrow(
+            DomainNotFoundError,
+        );
         await expect(useCase.execute('breeder-1', 'nonexistent-review', '수정 답글')).rejects.toThrow(
             '해당 후기를 찾을 수 없거나 권한이 없습니다.',
         );

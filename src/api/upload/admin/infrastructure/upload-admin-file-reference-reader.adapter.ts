@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { UploadAdminFileReferenceSnapshot, UploadAdminReferenceReaderPort } from '../application/ports/upload-admin-reference-reader.port';
+import {
+    UploadAdminFileReferenceSnapshot,
+    UploadAdminReferenceReaderPort,
+} from '../application/ports/upload-admin-reference-reader.port';
 import { UploadAdminFileReferenceRepository } from '../repository/upload-admin-file-reference.repository';
 
 @Injectable()

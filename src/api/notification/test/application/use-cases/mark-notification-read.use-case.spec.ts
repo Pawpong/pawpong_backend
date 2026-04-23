@@ -41,10 +41,7 @@ describe('알림 읽음 처리 유스케이스', () => {
             markAllAsRead: jest.fn(),
             deleteForUser: jest.fn(),
         };
-        const useCase = new MarkNotificationReadUseCase(
-            inboxPort,
-            new NotificationStateResultMapperService(),
-        );
+        const useCase = new MarkNotificationReadUseCase(inboxPort, new NotificationStateResultMapperService());
 
         await expect(useCase.execute('user-1', 'missing')).rejects.toBeInstanceOf(DomainNotFoundError);
     });

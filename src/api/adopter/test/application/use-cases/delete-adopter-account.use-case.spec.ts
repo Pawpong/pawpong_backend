@@ -33,7 +33,9 @@ describe('입양자 계정 탈퇴 유스케이스', () => {
         adopterAccountCommandPort.findAdopterById.mockResolvedValue(null);
 
         await expect(useCase.execute('user-1', { reason: 'already_adopted' })).rejects.toThrow(DomainNotFoundError);
-        await expect(useCase.execute('user-1', { reason: 'already_adopted' })).rejects.toThrow('입양자 정보를 찾을 수 없습니다.');
+        await expect(useCase.execute('user-1', { reason: 'already_adopted' })).rejects.toThrow(
+            '입양자 정보를 찾을 수 없습니다.',
+        );
     });
 
     it('이미 탈퇴한 계정이면 DomainValidationError를 던진다', async () => {
@@ -42,7 +44,9 @@ describe('입양자 계정 탈퇴 유스케이스', () => {
         });
 
         await expect(useCase.execute('user-1', { reason: 'already_adopted' })).rejects.toThrow(DomainValidationError);
-        await expect(useCase.execute('user-1', { reason: 'already_adopted' })).rejects.toThrow('이미 탈퇴한 계정입니다.');
+        await expect(useCase.execute('user-1', { reason: 'already_adopted' })).rejects.toThrow(
+            '이미 탈퇴한 계정입니다.',
+        );
     });
 
     it("reason이 'other'이고 otherReason이 없으면 DomainValidationError를 던진다", async () => {

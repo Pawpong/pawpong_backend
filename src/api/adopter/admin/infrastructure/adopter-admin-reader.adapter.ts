@@ -204,9 +204,7 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
         };
     }
 
-    private toReferencedId(
-        value?: AdopterObjectIdLike | { _id?: AdopterObjectIdLike } | null,
-    ): string {
+    private toReferencedId(value?: AdopterObjectIdLike | { _id?: AdopterObjectIdLike } | null): string {
         if (!value) {
             return '';
         }
@@ -219,7 +217,12 @@ export class AdopterAdminReaderAdapter implements AdopterAdminReaderPort {
     }
 
     private toReferencedName<TField extends 'name' | 'nickname'>(
-        value: AdopterObjectIdLike | { _id?: AdopterObjectIdLike } | { name?: string; nickname?: string } | null | undefined,
+        value:
+            | AdopterObjectIdLike
+            | { _id?: AdopterObjectIdLike }
+            | { name?: string; nickname?: string }
+            | null
+            | undefined,
         field: TField,
         fallback: string,
     ): string {

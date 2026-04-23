@@ -39,9 +39,8 @@ export class GetVideoMetaUseCase {
             return this.feedVideoMetaAssemblerService.buildPendingMetaResult(video);
         }
 
-        const result = await this.feedVideoMetaAssemblerService.buildMetaResult(
-            video,
-            (fileKey) => this.feedVideoAssetUrlPort.getSignedUrl(fileKey, 3000),
+        const result = await this.feedVideoMetaAssemblerService.buildMetaResult(video, (fileKey) =>
+            this.feedVideoAssetUrlPort.getSignedUrl(fileKey, 3000),
         );
 
         await this.cacheManager.set(cacheKey, result, 300000);

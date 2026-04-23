@@ -15,11 +15,7 @@ export class GetAdopterAdminReviewReportsUseCase {
         private readonly adopterAdminReviewReportPageAssemblerService: AdopterAdminReviewReportPageAssemblerService,
     ) {}
 
-    async execute(
-        adminId: string,
-        page: number = 1,
-        limit: number = 10,
-    ): Promise<AdopterAdminReviewReportPageResult> {
+    async execute(adminId: string, page: number = 1, limit: number = 10): Promise<AdopterAdminReviewReportPageResult> {
         const admin = await this.adopterAdminReader.findAdminById(adminId);
         this.adopterAdminPolicyService.assertCanManageReports(admin);
 

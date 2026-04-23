@@ -1,10 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { NotificationType } from '../../../../common/enum/user.enum';
-import {
-    NOTIFICATION_COMMAND_PORT,
-    NotificationUserRole,
-} from '../ports/notification-command.port';
+import { NOTIFICATION_COMMAND_PORT, NotificationUserRole } from '../ports/notification-command.port';
 import type { NotificationCommandPort } from '../ports/notification-command.port';
 import { NotificationMessageTemplateService } from '../../domain/services/notification-message-template.service';
 import type { NotificationDocumentRecord } from '../../types/notification-record.type';

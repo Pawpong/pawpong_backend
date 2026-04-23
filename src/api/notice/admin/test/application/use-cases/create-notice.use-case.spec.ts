@@ -12,11 +12,7 @@ describe('공지사항 생성 유스케이스', () => {
         logError: jest.fn(),
     };
 
-    const useCase = new CreateNoticeUseCase(
-        noticeWriter as any,
-        new NoticeItemMapperService(),
-        logger as any,
-    );
+    const useCase = new CreateNoticeUseCase(noticeWriter as any, new NoticeItemMapperService(), logger as any);
 
     const mockNotice = {
         id: 'notice-1',

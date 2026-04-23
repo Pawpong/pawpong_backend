@@ -42,7 +42,9 @@ export async function createBreederManagementE2eContext(): Promise<BreederManage
             storageUrl: `https://cdn.test/${fileName}`,
         };
     });
-    jest.spyOn(storageService, 'generateSignedUrl').mockImplementation((fileName: string) => `https://signed.test/${fileName}`);
+    jest.spyOn(storageService, 'generateSignedUrl').mockImplementation(
+        (fileName: string) => `https://signed.test/${fileName}`,
+    );
 
     const discordWebhookService = app.get(DiscordWebhookService);
     jest.spyOn(discordWebhookService, 'notifyBreederVerificationSubmission').mockResolvedValue();

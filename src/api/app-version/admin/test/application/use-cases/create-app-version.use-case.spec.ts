@@ -28,7 +28,14 @@ function makeWriter(snapshot: AppVersionAdminSnapshot = created): AppVersionWrit
 }
 
 function makeLogger() {
-    return { logStart: jest.fn(), logSuccess: jest.fn(), logError: jest.fn(), log: jest.fn(), error: jest.fn(), warn: jest.fn() };
+    return {
+        logStart: jest.fn(),
+        logSuccess: jest.fn(),
+        logError: jest.fn(),
+        log: jest.fn(),
+        error: jest.fn(),
+        warn: jest.fn(),
+    };
 }
 
 describe('앱 버전 생성 유스케이스', () => {

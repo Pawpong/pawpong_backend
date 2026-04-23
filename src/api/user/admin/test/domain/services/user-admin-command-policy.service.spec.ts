@@ -22,7 +22,9 @@ describe('UserAdminCommandPolicyService', () => {
         });
         it('권한 없으면 DomainAuthorizationError', () => {
             expect(() => policy.assertCanManageUsers(null, 'denied')).toThrow(DomainAuthorizationError);
-            expect(() => policy.assertCanManageUsers({ permissions: {} } as any, 'denied')).toThrow(DomainAuthorizationError);
+            expect(() => policy.assertCanManageUsers({ permissions: {} } as any, 'denied')).toThrow(
+                DomainAuthorizationError,
+            );
         });
     });
 
@@ -32,7 +34,9 @@ describe('UserAdminCommandPolicyService', () => {
             expect(policy.assertSuperAdmin(admin)).toBe(admin);
         });
         it('다른 레벨이면 예외', () => {
-            expect(() => policy.assertSuperAdmin({ adminLevel: AdminLevel.BREEDER_ADMIN } as any)).toThrow(DomainAuthorizationError);
+            expect(() => policy.assertSuperAdmin({ adminLevel: AdminLevel.BREEDER_ADMIN } as any)).toThrow(
+                DomainAuthorizationError,
+            );
             expect(() => policy.assertSuperAdmin(null)).toThrow(DomainAuthorizationError);
         });
     });
@@ -54,8 +58,12 @@ describe('UserAdminCommandPolicyService', () => {
             expect(() => policy.assertHardDeleteAllowed({ accountStatus: UserStatus.DELETED } as any)).not.toThrow();
         });
         it('다른 상태면 예외', () => {
-            expect(() => policy.assertDeletedUser({ accountStatus: UserStatus.ACTIVE } as any)).toThrow(DomainValidationError);
-            expect(() => policy.assertHardDeleteAllowed({ accountStatus: UserStatus.ACTIVE } as any)).toThrow(DomainValidationError);
+            expect(() => policy.assertDeletedUser({ accountStatus: UserStatus.ACTIVE } as any)).toThrow(
+                DomainValidationError,
+            );
+            expect(() => policy.assertHardDeleteAllowed({ accountStatus: UserStatus.ACTIVE } as any)).toThrow(
+                DomainValidationError,
+            );
         });
     });
 

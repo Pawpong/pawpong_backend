@@ -18,7 +18,9 @@ export class DeleteCommentUseCase {
     ) {}
 
     async execute(commentId: string, userId: string) {
-        const comment = this.feedCommentPolicyService.requireComment(await this.feedCommentManager.findComment(commentId));
+        const comment = this.feedCommentPolicyService.requireComment(
+            await this.feedCommentManager.findComment(commentId),
+        );
         this.feedCommentPolicyService.ensureOwner(comment, userId);
 
         await this.feedCommentManager.markDeleted(commentId);

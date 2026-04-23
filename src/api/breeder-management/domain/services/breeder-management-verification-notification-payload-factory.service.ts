@@ -47,9 +47,7 @@ export class BreederManagementVerificationNotificationPayloadFactoryService {
             type: document.type,
             url: fileUrlPort.generateOne(document.fileName, 60 * 24 * 7),
             originalFileName:
-                draftDocument?.originalFileName ||
-                document.originalFileName ||
-                document.fileName.split('/').pop(),
+                draftDocument?.originalFileName || document.originalFileName || document.fileName.split('/').pop(),
         };
     }
 }

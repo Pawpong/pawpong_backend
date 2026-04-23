@@ -10,7 +10,7 @@ describe('지역 관리자 종단간 테스트', () => {
 
     beforeAll(async () => {
         app = await createTestingApp();
-        adminToken = await getAdminToken(app) || '';
+        adminToken = (await getAdminToken(app)) || '';
         if (adminToken) {
             console.log('테스트용 관리자 토큰 준비 완료');
         } else {

@@ -46,9 +46,9 @@ describe('대표 사진 업로드 유스케이스', () => {
     it('브리더가 아니면 도메인 권한 예외를 던진다', async () => {
         const { useCase, fileStore } = createUseCase();
 
-        await expect(
-            useCase.execute([createImageFile('photo.jpg')], 'user-1', 'adopter'),
-        ).rejects.toBeInstanceOf(DomainAuthorizationError);
+        await expect(useCase.execute([createImageFile('photo.jpg')], 'user-1', 'adopter')).rejects.toBeInstanceOf(
+            DomainAuthorizationError,
+        );
         expect(fileStore.uploadFiles).not.toHaveBeenCalled();
     });
 
@@ -66,8 +66,6 @@ describe('대표 사진 업로드 유스케이스', () => {
         ]);
 
         expect(fileStore.uploadFiles).toHaveBeenCalledWith(expect.any(Array), 'representative');
-        expect(uploadOwner.replaceRepresentativePhotos).toHaveBeenCalledWith('user-1', [
-            'representative/photo-1.jpg',
-        ]);
+        expect(uploadOwner.replaceRepresentativePhotos).toHaveBeenCalledWith('user-1', ['representative/photo-1.jpg']);
     });
 });

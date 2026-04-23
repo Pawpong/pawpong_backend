@@ -104,10 +104,7 @@ describe('Chat API E2E Tests', () => {
         });
 
         it('인증 없이 요청 시 401 반환', async () => {
-            await request(app.getHttpServer())
-                .post('/api/chat/rooms')
-                .send({ breederId })
-                .expect(401);
+            await request(app.getHttpServer()).post('/api/chat/rooms').send({ breederId }).expect(401);
 
             console.log('✅ 미인증 요청 401 확인');
         });
@@ -278,9 +275,7 @@ describe('Chat API E2E Tests', () => {
         });
 
         it('인증 없이 요청 시 401 반환', async () => {
-            await request(app.getHttpServer())
-                .get(`/api/chat/rooms/${roomId}/messages`)
-                .expect(401);
+            await request(app.getHttpServer()).get(`/api/chat/rooms/${roomId}/messages`).expect(401);
 
             console.log('✅ 미인증 메시지 조회 401 확인');
         });
@@ -476,9 +471,7 @@ describe('Chat API E2E Tests', () => {
         });
 
         it('인증 없이 요청 시 401 반환', async () => {
-            await request(app.getHttpServer())
-                .delete(`/api/chat/rooms/${roomId}`)
-                .expect(401);
+            await request(app.getHttpServer()).delete(`/api/chat/rooms/${roomId}`).expect(401);
 
             console.log('✅ 미인증 채팅방 닫기 401 확인');
         });

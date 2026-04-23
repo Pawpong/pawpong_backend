@@ -14,13 +14,31 @@ describe('AdopterProfileResultMapperService', () => {
             socialAuthInfo: { authProvider: 'google' },
             marketingAgreed: true,
             favoriteBreederList: [
-                { favoriteBreederId: 'b-1', breederName: '브리더', addedAt: new Date(), breederProfileImageUrl: 'p', breederLocation: 'loc' },
+                {
+                    favoriteBreederId: 'b-1',
+                    breederName: '브리더',
+                    addedAt: new Date(),
+                    breederProfileImageUrl: 'p',
+                    breederLocation: 'loc',
+                },
             ],
             adoptionApplicationList: [
-                { applicationId: 'app-1', targetBreederId: 'b-1', targetPetId: 'p-1', applicationStatus: 'pending', appliedAt: new Date() },
+                {
+                    applicationId: 'app-1',
+                    targetBreederId: 'b-1',
+                    targetPetId: 'p-1',
+                    applicationStatus: 'pending',
+                    appliedAt: new Date(),
+                },
             ],
             writtenReviewList: [
-                { reviewId: 'r-1', targetBreederId: 'b-1', overallRating: 5, reviewContent: '좋음', createdAt: new Date() },
+                {
+                    reviewId: 'r-1',
+                    targetBreederId: 'b-1',
+                    overallRating: 5,
+                    reviewContent: '좋음',
+                    createdAt: new Date(),
+                },
             ],
             createdAt: new Date('2026-01-01'),
             updatedAt: new Date('2026-01-02'),
@@ -49,7 +67,11 @@ describe('AdopterProfileResultMapperService', () => {
 
     it('리스트가 없으면 빈 배열을 반환한다', () => {
         const result = service.toResult(
-            makeAdopter({ favoriteBreederList: undefined, adoptionApplicationList: undefined, writtenReviewList: undefined }),
+            makeAdopter({
+                favoriteBreederList: undefined,
+                adoptionApplicationList: undefined,
+                writtenReviewList: undefined,
+            }),
         );
         expect(result.favoriteBreederList).toEqual([]);
         expect(result.adoptionApplicationList).toEqual([]);

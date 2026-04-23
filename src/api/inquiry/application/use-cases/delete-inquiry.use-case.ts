@@ -22,7 +22,11 @@ export class DeleteInquiryUseCase {
             throw new DomainNotFoundError('해당 문의를 찾을 수 없습니다.');
         }
 
-        this.inquiryCommandPolicyService.ensureAuthorOwnsInquiry(inquiry, userId, '본인이 작성한 문의만 삭제할 수 있습니다.');
+        this.inquiryCommandPolicyService.ensureAuthorOwnsInquiry(
+            inquiry,
+            userId,
+            '본인이 작성한 문의만 삭제할 수 있습니다.',
+        );
         this.inquiryCommandPolicyService.ensureNoAnswers(inquiry, '답변이 달린 문의는 삭제할 수 없습니다.');
 
         await this.inquiryCommand.delete(inquiryId);

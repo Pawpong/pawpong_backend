@@ -64,9 +64,7 @@ describe('인증 관리자 종단간 테스트', () => {
                 return;
             }
 
-            const response = await request(app.getHttpServer())
-                .post('/api/auth-admin/refresh')
-                .send({ refreshToken });
+            const response = await request(app.getHttpServer()).post('/api/auth-admin/refresh').send({ refreshToken });
 
             // 성공 또는 구현 상태에 따라 유연하게 검증
             expect([200, 400, 401]).toContain(response.status);

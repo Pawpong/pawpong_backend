@@ -1,9 +1,6 @@
 import { GetAvailablePetsUseCase } from '../../../application/use-cases/get-available-pets.use-case';
 import { HomeAvailablePetCatalogService } from '../../../domain/services/home-available-pet-catalog.service';
-import {
-    HomeContentReaderPort,
-    HomeAvailablePetSnapshot,
-} from '../../../application/ports/home-content-reader.port';
+import { HomeContentReaderPort, HomeAvailablePetSnapshot } from '../../../application/ports/home-content-reader.port';
 import { HomeAssetUrlPort } from '../../../application/ports/home-asset-url.port';
 
 function makePetSnapshot(overrides: Partial<HomeAvailablePetSnapshot> = {}): HomeAvailablePetSnapshot {

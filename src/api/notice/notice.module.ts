@@ -1,10 +1,6 @@
 import { Module } from '@nestjs/common';
 
-import {
-    NOTICE_MODULE_CONTROLLERS,
-    NOTICE_MODULE_IMPORTS,
-    NOTICE_MODULE_PROVIDERS,
-} from './notice.module-definition';
+import { NOTICE_MODULE_CONTROLLERS, NOTICE_MODULE_IMPORTS, NOTICE_MODULE_PROVIDERS } from './notice.module-definition';
 
 /**
  * 공지사항 모듈

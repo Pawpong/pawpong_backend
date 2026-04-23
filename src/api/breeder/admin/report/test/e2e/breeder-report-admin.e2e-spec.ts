@@ -12,7 +12,7 @@ describe('브리더 신고 관리자 종단간 테스트', () => {
 
     beforeAll(async () => {
         app = await createTestingApp();
-        adminToken = await getAdminToken(app) || '';
+        adminToken = (await getAdminToken(app)) || '';
         if (!adminToken) console.log('주의: 관리자 토큰 획득 실패');
     }, 30000);
 
@@ -23,7 +23,10 @@ describe('브리더 신고 관리자 종단간 테스트', () => {
 
     describe('GET /api/breeder-report-관리자/reports', () => {
         it('브리더 신고 목록 조회 성공', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .get('/api/breeder-report-admin/reports')
@@ -35,16 +38,17 @@ describe('브리더 신고 관리자 종단간 테스트', () => {
         });
 
         it('인증 없이 접근 시 401', async () => {
-            await request(app.getHttpServer())
-                .get('/api/breeder-report-admin/reports')
-                .expect(401);
+            await request(app.getHttpServer()).get('/api/breeder-report-admin/reports').expect(401);
             console.log('인증 없이 접근 401 확인');
         });
     });
 
     describe('PATCH /api/breeder-report-관리자/reports/:reportId', () => {
         it('존재하지 않는 신고 처리 시 에러', async () => {
-            if (!adminToken) { console.log('주의: 스킵'); return; }
+            if (!adminToken) {
+                console.log('주의: 스킵');
+                return;
+            }
 
             const response = await request(app.getHttpServer())
                 .patch('/api/breeder-report-admin/reports/000000000000000000000000')

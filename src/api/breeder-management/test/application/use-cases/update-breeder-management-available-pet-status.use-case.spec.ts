@@ -27,8 +27,14 @@ describe('브리더 분양 개체 상태 변경 유스케이스', () => {
         const result = await useCase.execute('breeder-1', 'pet-2', PetStatus.RESERVED);
 
         expect(result.message).toBeDefined();
-        expect(breederManagementPetCommandPort.findAvailablePetByIdAndBreeder).toHaveBeenCalledWith('pet-2', 'breeder-1');
-        expect(breederManagementPetCommandPort.updateAvailablePetStatus).toHaveBeenCalledWith('pet-2', PetStatus.RESERVED);
+        expect(breederManagementPetCommandPort.findAvailablePetByIdAndBreeder).toHaveBeenCalledWith(
+            'pet-2',
+            'breeder-1',
+        );
+        expect(breederManagementPetCommandPort.updateAvailablePetStatus).toHaveBeenCalledWith(
+            'pet-2',
+            PetStatus.RESERVED,
+        );
     });
 
     it('해당 분양 개체를 찾을 수 없으면 도메인 not found 예외를 던진다', async () => {

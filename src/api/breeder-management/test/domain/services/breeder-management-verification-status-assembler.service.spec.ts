@@ -36,10 +36,7 @@ describe('BreederManagementVerificationStatusAssemblerService', () => {
     });
 
     it('submittedByEmail 플래그 반영', () => {
-        const result = service.toResponse(
-            { _id: 'b-1', verification: { submittedByEmail: true } } as any,
-            fileUrlPort,
-        );
+        const result = service.toResponse({ _id: 'b-1', verification: { submittedByEmail: true } } as any, fileUrlPort);
         expect(result.submittedByEmail).toBe(true);
     });
 });

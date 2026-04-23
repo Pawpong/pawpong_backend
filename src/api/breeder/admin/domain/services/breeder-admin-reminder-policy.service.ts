@@ -2,9 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { NotificationType, VerificationStatus } from '../../../../../common/enum/user.enum';
 import { DomainValidationError } from '../../../../../common/error/domain.error';
-import {
-    BreederAdminReminderEmailTemplate,
-} from '../../application/ports/breeder-admin-notifier.port';
+import { BreederAdminReminderEmailTemplate } from '../../application/ports/breeder-admin-notifier.port';
 import { RemindType } from '../../constants/breeder-remind.enum';
 
 export interface BreederAdminReminderPlan {

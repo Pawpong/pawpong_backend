@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { FeedTagUploaderSnapshot, FeedTagVideoSnapshot } from '../../application/ports/feed-tag-reader.port';
-import type {
-    FeedTagSearchResult,
-    FeedTagUploaderResult,
-} from '../../application/types/feed-tag-result.type';
+import type { FeedTagSearchResult, FeedTagUploaderResult } from '../../application/types/feed-tag-result.type';
 import { FeedVideoSummaryMapperService } from '../../../domain/services/feed-video-summary-mapper.service';
 
 type ThumbnailUrlResolver = (fileKey?: string) => string | Promise<string | null> | null;

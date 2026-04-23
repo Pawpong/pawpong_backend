@@ -85,7 +85,8 @@ describe('인증 소셜 콜백 결과 팩토리', () => {
         });
 
         expect(result).toEqual({
-            redirectUrl: 'https://pawpong.kr/login?error=%EB%A1%9C%EA%B7%B8%EC%9D%B8+%EC%B2%98%EB%A6%AC+%EC%A4%91+%EC%98%A4%EB%A5%98%EA%B0%80+%EB%B0%9C%EC%83%9D%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4.&type=login_error',
+            redirectUrl:
+                'https://pawpong.kr/login?error=%EB%A1%9C%EA%B7%B8%EC%9D%B8+%EC%B2%98%EB%A6%AC+%EC%A4%91+%EC%98%A4%EB%A5%98%EA%B0%80+%EB%B0%9C%EC%83%9D%ED%96%88%EC%8A%B5%EB%8B%88%EB%8B%A4.&type=login_error',
         });
     });
 });

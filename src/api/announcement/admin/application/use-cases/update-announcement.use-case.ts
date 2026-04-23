@@ -17,10 +17,7 @@ export class UpdateAnnouncementUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(
-        announcementId: string,
-        updateDto: AnnouncementUpdateCommand,
-    ): Promise<AnnouncementResult> {
+    async execute(announcementId: string, updateDto: AnnouncementUpdateCommand): Promise<AnnouncementResult> {
         this.logger.logStart('updateAnnouncement', '공지사항 수정', {
             announcementId,
             ...updateDto,

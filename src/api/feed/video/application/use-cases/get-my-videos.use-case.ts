@@ -22,12 +22,8 @@ export class GetMyVideosUseCase {
             this.feedVideoCommand.countMine(userId),
         ]);
 
-        return this.feedVideoLibraryAssemblerService.buildMyVideosResult(
-            videos,
-            page,
-            limit,
-            totalCount,
-            (fileKey) => this.feedVideoAssetUrlPort.getSignedUrl(fileKey, 3000),
+        return this.feedVideoLibraryAssemblerService.buildMyVideosResult(videos, page, limit, totalCount, (fileKey) =>
+            this.feedVideoAssetUrlPort.getSignedUrl(fileKey, 3000),
         );
     }
 }

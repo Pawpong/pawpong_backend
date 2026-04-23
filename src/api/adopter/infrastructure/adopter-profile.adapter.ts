@@ -26,10 +26,7 @@ export class AdopterProfileAdapter implements AdopterProfilePort {
         return this.adopterRepository.findById(adopterId) as Promise<AdopterProfileRecord | null>;
     }
 
-    updateProfile(
-        adopterId: string,
-        updateData: AdopterProfileUpdateRecord,
-    ): Promise<AdopterProfileRecord | null>;
+    updateProfile(adopterId: string, updateData: AdopterProfileUpdateRecord): Promise<AdopterProfileRecord | null>;
     updateProfile(
         adopterId: string,
         updateData: AdopterProfileUpdateRecord,
