@@ -22,7 +22,7 @@ export class RefreshAuthTokenUseCase {
 
             this.authSessionAuthenticationService.assertRefreshableRole(payload.role);
 
-            const user = await this.authSessionPort.findById(payload.sub, payload.role as AuthSessionRole);
+            const user = await this.authSessionPort.findById(payload.sub, payload.role);
 
             this.authSessionAuthenticationService.assertUser(user);
             this.authSessionAuthenticationService.assertRefreshTokenHash(user.refreshTokenHash);

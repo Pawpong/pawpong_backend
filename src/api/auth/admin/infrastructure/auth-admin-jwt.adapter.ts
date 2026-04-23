@@ -24,6 +24,6 @@ export class AuthAdminJwtAdapter implements AuthAdminTokenPort {
     }
 
     verifyRefreshToken(refreshToken: string): AuthAdminVerifiedTokenPayload {
-        return this.jwtService.verify(refreshToken) as AuthAdminVerifiedTokenPayload;
+        return this.jwtService.verify(refreshToken);
     }
 }
