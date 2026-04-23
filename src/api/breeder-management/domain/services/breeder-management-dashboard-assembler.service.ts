@@ -19,9 +19,9 @@ export class BreederManagementDashboardAssemblerService {
                 verificationInfo: {
                     verificationStatus: breeder.verification?.status || 'pending',
                     subscriptionPlan: breeder.verification?.plan || 'basic',
-                    submittedAt: breeder.verification?.submittedAt as Date | undefined,
-                    reviewedAt: breeder.verification?.reviewedAt as Date | undefined,
-                    rejectionReason: breeder.verification?.rejectionReason as string | undefined,
+                    submittedAt: breeder.verification?.submittedAt,
+                    reviewedAt: breeder.verification?.reviewedAt,
+                    rejectionReason: breeder.verification?.rejectionReason,
                 },
             },
             statisticsInfo: {
