@@ -18,6 +18,6 @@ export class AnnouncementAdminQueryController {
         @Query() paginationDto: PaginationRequestDto,
     ): Promise<PaginationResponseDto<AnnouncementResponseDto>> {
         const result = await this.getAllAnnouncementsUseCase.execute(paginationDto);
-        return PaginationResponseDto.fromPageResult(result as AnnouncementPageResult);
+        return PaginationResponseDto.fromPageResult(result);
     }
 }
