@@ -80,9 +80,7 @@ export class FeedCommentMongooseManagerAdapter implements FeedCommentManagerPort
 
     private toCommentSnapshot(comment: FeedCommentDocumentRecord): FeedCommentSnapshot {
         const populatedAuthor =
-            comment.userId && typeof comment.userId === 'object' && '_id' in comment.userId
-                ? (comment.userId as FeedUploaderDocumentRecord)
-                : null;
+            comment.userId && typeof comment.userId === 'object' && '_id' in comment.userId ? comment.userId : null;
 
         return {
             id: comment._id.toString(),
