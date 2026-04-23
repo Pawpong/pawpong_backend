@@ -67,7 +67,6 @@ swagger.json
 package-lock.json
 yarn.lock
 docs/*
-!docs/fcm-setup-guide.md
 
 # Firebase/FCM 자격 증명 (로컬 개발 + 프로덕션 환경변수)
 secrets/
