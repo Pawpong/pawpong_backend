@@ -11,6 +11,24 @@ export interface EmailData {
     html: string;
 }
 
+/** FCM 푸시 페이로드 오버라이드 (withPush 옵션) */
+export interface PushOverrideData {
+    /** 알림 탭 시 앱 내에서 이동할 경로 (기본: notification.targetUrl) */
+    targetUrl?: string;
+    /** 백그라운드 데이터 페이로드 (모두 string으로 직렬화 필요) */
+    data?: Record<string, string>;
+}
+
+/** Builder가 dispatch 서비스에 요청하는 푸시 발송 명세 */
+export interface PushDispatchData {
+    userId: string;
+    userRole: 'adopter' | 'breeder';
+    title: string;
+    body: string;
+    targetUrl?: string;
+    data?: Record<string, string>;
+}
+
 export interface NotificationCreateData {
     recipientId: string;
     recipientType: RecipientType;
@@ -26,6 +44,7 @@ export interface NotificationCreateData {
 export interface NotificationSendResult {
     notification: NotificationItemDto;
     emailSent: boolean;
+    pushRequested: boolean;
 }
 
 /**
@@ -66,10 +85,13 @@ export class NotificationBuilder {
     private notificationMetadata?: NotificationMetadata;
     private notificationTargetUrl?: string;
     private emailData?: EmailData;
+    private pushEnabled = false;
+    private pushOverride?: PushOverrideData;
 
     constructor(
         private readonly createFn: (data: NotificationCreateData) => Promise<NotificationItemDto>,
         private readonly sendEmailFn: (data: EmailData) => boolean,
+        private readonly sendPushFn: (data: PushDispatchData) => void,
         private readonly recipientId: string,
         private readonly recipientType: RecipientType,
     ) {}
@@ -139,8 +161,23 @@ export class NotificationBuilder {
     }
 
     /**
-     * 알림 전송 (서비스 알림 + 이메일)
-     * 이메일은 비동기로 발송되며 결과를 기다리지 않음
+     * 푸시 알림 발송 설정 (선택적, opt-in)
+     * 서비스 알림과 함께 사용자의 모든 등록 디바이스에 FCM 푸시를 발송합니다.
+     * title/body 는 자동으로 notification.title/content 가 사용됩니다.
+     *
+     * @example
+     * .withPush()                 // 기본 설정으로 발송
+     * .withPush({ targetUrl: '/applications/123' })  // 특정 경로 오버라이드
+     */
+    withPush(override?: PushOverrideData): this {
+        this.pushEnabled = true;
+        this.pushOverride = override;
+        return this;
+    }
+
+    /**
+     * 알림 전송 (서비스 알림 + 이메일 + 푸시)
+     * 이메일과 푸시는 비동기로 발송되며 결과를 기다리지 않습니다 (fire-and-forget).
      */
     async send(): Promise<NotificationSendResult> {
         if (!this.notificationType) {
@@ -166,14 +203,28 @@ export class NotificationBuilder {
             targetUrl: this.notificationTargetUrl,
         });
 
-        // 2. 이메일 발송 (비동기, 결과를 기다리지 않음 - 내부에서 fire-and-forget 처리)
+        // 2. 이메일 발송 (fire-and-forget)
         if (this.emailData) {
             this.sendEmailFn(this.emailData);
         }
 
+        // 3. 푸시 발송 (fire-and-forget)
+        if (this.pushEnabled) {
+            const role = this.recipientType === RecipientType.ADOPTER ? 'adopter' : 'breeder';
+            this.sendPushFn({
+                userId: this.recipientId,
+                userRole: role,
+                title: this.notificationTitle,
+                body: this.notificationContent,
+                targetUrl: this.pushOverride?.targetUrl ?? this.notificationTargetUrl,
+                data: this.pushOverride?.data,
+            });
+        }
+
         return {
             notification,
-            emailSent: !!this.emailData, // 발송 시작 여부 반환
+            emailSent: !!this.emailData,
+            pushRequested: this.pushEnabled,
         };
     }
 }

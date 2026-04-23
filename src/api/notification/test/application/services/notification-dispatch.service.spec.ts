@@ -12,10 +12,14 @@ describe('알림 발송 서비스', () => {
         const sendNotificationEmailUseCase = {
             execute: jest.fn().mockReturnValue(true),
         };
+        const sendNotificationPushUseCase = {
+            execute: jest.fn().mockResolvedValue(undefined),
+        };
         const service = new NotificationDispatchService(
             createNotificationUseCase,
             createNotificationFromBuilderUseCase,
             sendNotificationEmailUseCase,
+            sendNotificationPushUseCase as never,
         );
 
         await expect(
@@ -47,10 +51,14 @@ describe('알림 발송 서비스', () => {
         const sendNotificationEmailUseCase = {
             execute: jest.fn().mockReturnValue(true),
         };
+        const sendNotificationPushUseCase = {
+            execute: jest.fn().mockResolvedValue(undefined),
+        };
         const service = new NotificationDispatchService(
             createNotificationUseCase,
             createNotificationFromBuilderUseCase,
             sendNotificationEmailUseCase,
+            sendNotificationPushUseCase as never,
         );
 
         await service
