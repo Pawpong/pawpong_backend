@@ -1,6 +1,37 @@
 import { Prop, Schema } from '@nestjs/mongoose';
 
 /**
+ * 푸시 알림 디바이스 토큰 스키마
+ * 한 사용자가 여러 디바이스를 사용할 수 있어 배열로 관리합니다.
+ */
+@Schema({ _id: false })
+export class PushDeviceToken {
+    /**
+     * FCM 발급 디바이스 토큰 (고유 식별자)
+     */
+    @Prop({ required: true })
+    token: string;
+
+    /**
+     * 디바이스 플랫폼 (ios | android)
+     */
+    @Prop({ required: true, enum: ['ios', 'android'] })
+    platform: string;
+
+    /**
+     * 토큰 등록/갱신 시각 (FCM은 주기적 갱신 필요)
+     */
+    @Prop({ default: Date.now })
+    registeredAt: Date;
+
+    /**
+     * 앱 빌드 버전 (디버깅 용도)
+     */
+    @Prop()
+    appVersion?: string;
+}
+
+/**
  * 소셜 인증 정보 스키마 (공통)
  * 사용자의 소셜 로그인 연동 정보를 저장합니다.
  */
@@ -152,6 +183,13 @@ export class User {
      */
     @Prop({ default: false })
     marketingAgreed: boolean;
+
+    /**
+     * 푸시 알림 디바이스 토큰 목록 (FCM)
+     * 한 사용자가 여러 기기에서 앱을 쓸 수 있으므로 배열로 관리.
+     */
+    @Prop({ type: [PushDeviceToken], default: [] })
+    pushDeviceTokens: PushDeviceToken[];
 
     /**
      * 계정 생성 일시 (timestamps: true로 자동 생성)
