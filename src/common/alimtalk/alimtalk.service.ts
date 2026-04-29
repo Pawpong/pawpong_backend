@@ -1,15 +1,10 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import CoolsmsMessageService from 'coolsms-node-sdk';
 
-import {
-    AlimtalkTemplate as AlimtalkTemplateSchema,
-    AlimtalkTemplateDocument,
-} from '../../schema/alimtalk-template.schema';
 import { AlimtalkTemplateCodeEnum } from '../../common/enum/alimtalk-template-code.enum';
 import { getErrorMessage, getErrorStack } from '../utils/error.util';
+import { AlimtalkTemplateRepository } from './repository/alimtalk-template.repository';
 
 /**
  * 템플릿 캐시용 인터페이스
@@ -84,8 +79,7 @@ export class AlimtalkService implements OnModuleInit {
 
     constructor(
         private readonly configService: ConfigService,
-        @InjectModel(AlimtalkTemplateSchema.name)
-        private readonly alimtalkTemplateModel: Model<AlimtalkTemplateDocument>,
+        private readonly alimtalkTemplateRepository: AlimtalkTemplateRepository,
     ) {
         this.suppressExternalWarnings =
             this.configService.get<string>('PAWPONG_SUPPRESS_EXTERNAL_WARNINGS') === 'true' ||
@@ -115,7 +109,7 @@ export class AlimtalkService implements OnModuleInit {
      */
     async refreshTemplateCache(): Promise<void> {
         try {
-            const templates = await this.alimtalkTemplateModel.find({ isActive: true }).lean().exec();
+            const templates = await this.alimtalkTemplateRepository.findAllActive();
 
             this.templateCache.clear();
             for (const template of templates) {
@@ -148,7 +142,7 @@ export class AlimtalkService implements OnModuleInit {
         }
 
         // 캐시에 없으면 DB 조회
-        const template = await this.alimtalkTemplateModel.findOne({ templateCode, isActive: true }).lean().exec();
+        const template = await this.alimtalkTemplateRepository.findActiveByCode(templateCode);
 
         if (template) {
             const cached: CachedTemplate = {

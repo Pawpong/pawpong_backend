@@ -1,8 +1,7 @@
 import { Injectable, Inject, ForbiddenException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 
-import { Admin, AdminDocument } from '../../../../../schema/admin.schema';
+import { PLATFORM_ADMIN_READER_PORT } from '../ports/platform-admin-reader.port';
+import type { PlatformAdminReaderPort } from '../ports/platform-admin-reader.port';
 import { LOKI_QUERY_PORT } from '../ports/loki-query.port';
 import type { ILokiQueryPort } from '../ports/loki-query.port';
 import { LogCategorizerService } from '../../domain/services/log-categorizer.service';
@@ -21,7 +20,7 @@ import { SystemHealthFilterRequestDto } from '../../dto/request/system-health-fi
 @Injectable()
 export class GetSystemHealthUseCase {
     constructor(
-        @InjectModel(Admin.name) private readonly adminModel: Model<AdminDocument>,
+        @Inject(PLATFORM_ADMIN_READER_PORT) private readonly platformAdminReaderPort: PlatformAdminReaderPort,
         @Inject(LOKI_QUERY_PORT) private readonly lokiQueryPort: ILokiQueryPort,
         private readonly logCategorizerService: LogCategorizerService,
     ) {}
@@ -58,8 +57,8 @@ export class GetSystemHealthUseCase {
      * 관리자 통계 조회 권한을 확인합니다.
      */
     private async verifyAdminPermission(adminId: string): Promise<void> {
-        const admin = await this.adminModel.findById(adminId).lean();
-        if (!admin || !admin.permissions.canViewStatistics) {
+        const admin = await this.platformAdminReaderPort.findAdminById(adminId);
+        if (!admin || !admin.permissions?.canViewStatistics) {
             throw new ForbiddenException('시스템 헬스 조회 권한이 없습니다.');
         }
     }
