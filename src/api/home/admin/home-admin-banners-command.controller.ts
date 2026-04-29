@@ -1,4 +1,4 @@
-import { Body, Delete, Param, Post, Put } from '@nestjs/common';
+import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { CreateBannerUseCase } from './application/use-cases/create-banner.use-case';
@@ -26,7 +26,7 @@ export class HomeAdminBannersCommandController {
         return ApiResponseDto.success(banner, HOME_RESPONSE_MESSAGE_EXAMPLES.bannerCreated);
     }
 
-    @Put('banner/:bannerId')
+    @Patch('banner/:bannerId')
     @ApiUpdateBannerAdminEndpoint()
     async updateBanner(
         @Param('bannerId') bannerId: string,

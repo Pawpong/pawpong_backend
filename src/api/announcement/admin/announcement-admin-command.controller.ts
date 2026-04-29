@@ -1,4 +1,4 @@
-import { Body, Delete, Param, Post, Put } from '@nestjs/common';
+import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
 
 import { AnnouncementCreateRequestDto } from '../dto/request/announcement-create-request.dto';
 import { AnnouncementUpdateRequestDto } from '../dto/request/announcement-update-request.dto';
@@ -29,7 +29,7 @@ export class AnnouncementAdminCommandController {
         return result as AnnouncementResponseDto & AnnouncementResult;
     }
 
-    @Put('announcement/:announcementId')
+    @Patch('announcement/:announcementId')
     @ApiUpdateAnnouncementAdminEndpoint()
     async updateAnnouncement(
         @Param('announcementId') announcementId: string,
