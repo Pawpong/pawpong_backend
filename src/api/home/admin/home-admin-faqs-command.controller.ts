@@ -1,4 +1,4 @@
-import { Body, Delete, Param, Post, Put } from '@nestjs/common';
+import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { CreateFaqUseCase } from './application/use-cases/create-faq.use-case';
@@ -26,7 +26,7 @@ export class HomeAdminFaqsCommandController {
         return ApiResponseDto.success(faq, HOME_RESPONSE_MESSAGE_EXAMPLES.faqCreated);
     }
 
-    @Put('faq/:faqId')
+    @Patch('faq/:faqId')
     @ApiUpdateFaqAdminEndpoint()
     async updateFaq(
         @Param('faqId') faqId: string,

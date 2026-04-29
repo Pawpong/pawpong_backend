@@ -1,4 +1,4 @@
-import { Body, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { MongoObjectIdPipe } from '../../../common/pipe/mongo-object-id.pipe';
@@ -43,7 +43,7 @@ export class BreederManagementAdminProfileBannersController {
         return ApiResponseDto.success(banner, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerCreated);
     }
 
-    @Put('profile-banner/:bannerId')
+    @Patch('profile-banner/:bannerId')
     @ApiUpdateProfileBannerAdminEndpoint()
     async updateProfileBanner(
         @Param('bannerId', new MongoObjectIdPipe('배너', '올바르지 않은 배너 ID 형식입니다.')) bannerId: string,
