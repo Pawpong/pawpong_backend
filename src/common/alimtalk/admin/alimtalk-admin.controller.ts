@@ -1,4 +1,4 @@
-import { Body, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Body, Delete, Get, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../dto/response/api-response.dto';
 import { CreateAlimtalkTemplateUseCase } from './application/use-cases/create-alimtalk-template.use-case';
@@ -50,7 +50,7 @@ export class AlimtalkAdminController {
         return ApiResponseDto.success(data, ALIMTALK_ADMIN_RESPONSE_MESSAGES.templateDetailRetrieved);
     }
 
-    @Put('templates/:templateCode')
+    @Patch('templates/:templateCode')
     @ApiUpdateAlimtalkTemplateEndpoint()
     async updateTemplate(
         @Param('templateCode') templateCode: string,
