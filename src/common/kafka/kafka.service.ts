@@ -109,7 +109,7 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
      * 로컬/테스트 환경에서는 Kafka를 일부러 끄는 경우가 많아 알림을 보내지 않습니다.
      */
     private notifyKafkaCriticalError(description: string, error: unknown, metadata?: Record<string, unknown>): void {
-        if (process.env.NODE_ENV !== 'production' || !this.notifyCriticalErrorUseCase) {
+        if (!this.notifyCriticalErrorUseCase) {
             return;
         }
 

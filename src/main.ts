@@ -230,10 +230,18 @@ async function bootstrap(): Promise<void> {
         try {
             await app.startAllMicroservices();
             logger.log('[bootstrap] Kafka chat consumer started');
-        } catch {
+        } catch (error) {
             logger.warn(
                 '[bootstrap] Kafka consumer failed to start - messages will be skipped until Kafka is available',
             );
+            void notifyCriticalErrorUseCase
+                .execute({
+                    severity: 'critical',
+                    context: 'Bootstrap',
+                    message: `Kafka chat consumer 시작 실패 (브로커: ${kafkaBroker}): ${error instanceof Error ? error.message : String(error)}`,
+                    stack: error instanceof Error ? error.stack : undefined,
+                })
+                .catch(() => {});
         }
     }
 
