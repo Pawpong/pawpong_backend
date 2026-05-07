@@ -79,7 +79,7 @@ export class RegisterAdopterV2UseCase {
             },
             accountStatus: UserStatus.ACTIVE,
             userRole: 'adopter',
-            marketingAgreed: this.isMarketingAgreed(validatedAgreements, command.marketingAgreed),
+            marketingAgreed: this.isMarketingAgreed(validatedAgreements),
             notificationSettings: {
                 emailNotifications: true,
                 pushNotifications: true,
@@ -112,16 +112,10 @@ export class RegisterAdopterV2UseCase {
     }
 
     /**
-     * 마케팅 동의는 검증된 약관 이력에 'marketing' 코드가 있으면 true.
-     * 활성 marketing 약관이 없을 경우 client 의 marketingAgreed boolean 으로 fallback.
+     * 마케팅 수신 동의는 오직 검증된 약관 이력의 'marketing' 코드 존재 여부로만 판정한다.
+     * 클라이언트가 별도 boolean 으로 spoof 하는 경로를 차단하기 위해 fallback 을 두지 않는다.
      */
-    private isMarketingAgreed(
-        validatedAgreements: ReadonlyArray<{ code: string }>,
-        clientFallback?: boolean,
-    ): boolean {
-        if (validatedAgreements.some((a) => a.code === 'marketing')) {
-            return true;
-        }
-        return clientFallback ?? false;
+    private isMarketingAgreed(validatedAgreements: ReadonlyArray<{ code: string }>): boolean {
+        return validatedAgreements.some((a) => a.code === 'marketing');
     }
 }

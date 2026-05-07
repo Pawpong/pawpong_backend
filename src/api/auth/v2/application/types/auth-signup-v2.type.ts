@@ -20,6 +20,9 @@ export type CounselDefaultProfileInput = {
  * - interestedBreedIds: 온보딩3 관심 품종 ID 배열
  * - counselDefaultProfile: 온보딩4 상담 사전 정보
  * - termsAgreements: 온보딩2 약관 동의 이력 (활성 버전 기준)
+ *
+ * 마케팅 수신 동의는 별도 boolean 으로 받지 않는다.
+ * 'marketing' 코드 약관이 termsAgreements 에 포함되어 있는지로 판정한다.
  */
 export type RegisterAdopterV2Command = {
     tempId: string;
@@ -31,7 +34,6 @@ export type RegisterAdopterV2Command = {
     interestedBreedIds?: string[];
     counselDefaultProfile?: CounselDefaultProfileInput;
     termsAgreements: TermsAgreementInput[];
-    marketingAgreed?: boolean;
 };
 
 export type RegisterAdopterV2Result = RegisterAdopterAuthSignupResult;
