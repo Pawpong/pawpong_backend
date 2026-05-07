@@ -87,6 +87,8 @@ import { RegisterAdopterUseCase } from './application/use-cases/register-adopter
 import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
 import { RegisterAdopterV2UseCase } from './v2/application/use-cases/register-adopter-v2.use-case';
 import { AuthV2RegisterAdopterController } from './v2/auth-v2-register-adopter.controller';
+import { AuthV2TermsAgreementValidatorService } from './v2/domain/services/auth-v2-terms-agreement-validator.service';
+import { TermsModule } from '../terms/terms.module';
 import { ProcessSocialLoginCallbackUseCase } from './application/use-cases/process-social-login-callback.use-case';
 import { UploadAuthProfileImageUseCase } from './application/use-cases/upload-auth-profile-image.use-case';
 import { UploadAuthBreederDocumentsUseCase } from './application/use-cases/upload-auth-breeder-documents.use-case';
@@ -148,6 +150,7 @@ export const AUTH_MODULE_IMPORTS = [
     AUTH_SCHEMA_IMPORTS,
     StorageModule,
     BreederManagementModule,
+    TermsModule,
     DiscordWebhookModule,
     PassportModule,
     WinstonModule.forRoot(winstonConfig),
@@ -188,6 +191,7 @@ const AUTH_USE_CASE_PROVIDERS = [
     RegisterAdopterUseCase,
     RegisterBreederUseCase,
     RegisterAdopterV2UseCase,
+    AuthV2TermsAgreementValidatorService,
     ProcessSocialLoginCallbackUseCase,
     UploadAuthProfileImageUseCase,
     UploadAuthBreederDocumentsUseCase,
