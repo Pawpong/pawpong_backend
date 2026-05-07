@@ -37,3 +37,12 @@ export const TERMS_MODULE_PROVIDERS = [
     ...TERMS_INFRASTRUCTURE_PROVIDERS,
     ...TERMS_PORT_BINDINGS,
 ];
+
+// 다른 도메인(예: auth v2)이 활성 약관 검증을 위해 의존할 수 있도록 reader port 만 export
+export const TERMS_MODULE_EXPORTS = [
+    {
+        provide: TERMS_READER_PORT,
+        useExisting: TermsMongooseReaderAdapter,
+    },
+    TermsMongooseReaderAdapter,
+];
