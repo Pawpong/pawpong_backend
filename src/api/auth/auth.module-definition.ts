@@ -85,6 +85,8 @@ import { RefreshAuthTokenUseCase } from './application/use-cases/refresh-auth-to
 import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
 import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
+import { RegisterAdopterV2UseCase } from './v2/application/use-cases/register-adopter-v2.use-case';
+import { AuthV2RegisterAdopterController } from './v2/auth-v2-register-adopter.controller';
 import { ProcessSocialLoginCallbackUseCase } from './application/use-cases/process-social-login-callback.use-case';
 import { UploadAuthProfileImageUseCase } from './application/use-cases/upload-auth-profile-image.use-case';
 import { UploadAuthBreederDocumentsUseCase } from './application/use-cases/upload-auth-breeder-documents.use-case';
@@ -168,6 +170,7 @@ export const AUTH_MODULE_CONTROLLERS = [
     AuthBreederDocumentsUploadController,
     AuthAdminLoginController,
     AuthAdminTokenController,
+    AuthV2RegisterAdopterController,
 ];
 
 const AUTH_USE_CASE_PROVIDERS = [
@@ -184,6 +187,7 @@ const AUTH_USE_CASE_PROVIDERS = [
     LogoutUseCase,
     RegisterAdopterUseCase,
     RegisterBreederUseCase,
+    RegisterAdopterV2UseCase,
     ProcessSocialLoginCallbackUseCase,
     UploadAuthProfileImageUseCase,
     UploadAuthBreederDocumentsUseCase,
