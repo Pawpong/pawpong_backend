@@ -102,6 +102,35 @@ export class AvailablePet {
      */
     @Prop()
     reservedAt?: Date;
+
+    /**
+     * 입양 페이지 카드 통계 — 문의 수
+     * 상담 신청 생성 시 도메인 이벤트로 증가시킨다.
+     */
+    @Prop({ type: Number, default: 0 })
+    inquiryCount: number;
+
+    /**
+     * 입양 페이지 카드 통계 — 관심 등록 수
+     * adopter-pet-favorite 추가/제거 시 도메인 이벤트로 증감한다.
+     */
+    @Prop({ type: Number, default: 0 })
+    favoriteCount: number;
+
+    /**
+     * 입양 페이지 카드 통계 — 조회 수
+     * 상세 페이지 진입 시 증가시킨다.
+     */
+    @Prop({ type: Number, default: 0 })
+    viewCount: number;
+
+    /**
+     * 동물 종류 (강아지/고양이/도마뱀)
+     * 입양 페이지 카테고리 탭 필터링용.
+     * 기존 데이터 호환을 위해 optional 로 선언한다 (마이그레이션 시 채움).
+     */
+    @Prop({ type: String, enum: ['dog', 'cat', 'reptile'] })
+    petType?: 'dog' | 'cat' | 'reptile';
 }
 
 export const AvailablePetSchema = SchemaFactory.createForClass(AvailablePet);
@@ -110,3 +139,7 @@ export const AvailablePetSchema = SchemaFactory.createForClass(AvailablePet);
 AvailablePetSchema.index({ breederId: 1, isActive: 1, status: 1 });
 AvailablePetSchema.index({ breederId: 1, breed: 1 });
 AvailablePetSchema.index({ status: 1, price: 1 });
+
+// v2 입양 페이지 — petType + status + isActive 필터 + 정렬용 인덱스
+AvailablePetSchema.index({ petType: 1, status: 1, isActive: 1, createdAt: -1 });
+AvailablePetSchema.index({ petType: 1, status: 1, isActive: 1, favoriteCount: -1 });
