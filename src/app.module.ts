@@ -30,6 +30,7 @@ import { NotificationModule } from './api/notification/notification.module';
 import { NotificationAdminModule } from './api/notification/admin/notification-admin.module';
 import { AnnouncementModule } from './api/announcement/announcement.module';
 import { NoticeModule } from './api/notice/notice.module';
+import { TermsModule } from './api/terms/terms.module';
 import { AppVersionModule } from './api/app-version/app-version.module';
 import { InquiryModule } from './api/inquiry/inquiry.module';
 import { FeedModule } from './api/feed/feed.module';
@@ -68,6 +69,7 @@ import { ChatModule } from './api/chat/chat.module';
         NotificationAdminModule,
         AnnouncementModule,
         NoticeModule,
+        TermsModule,
         AppVersionModule,
         InquiryModule,
         FeedModule,
