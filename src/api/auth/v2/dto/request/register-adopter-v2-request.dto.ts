@@ -109,7 +109,8 @@ export class RegisterAdopterV2RequestDto {
     counselDefaultProfile?: CounselDefaultProfileDto;
 
     @ApiProperty({
-        description: '약관 동의 이력 (활성 버전 기준)',
+        description: `약관 동의 이력 (활성 버전 기준).
+            마케팅 수신 동의는 별도 필드가 아닌 'marketing' 코드를 이 배열에 포함하는 방식으로 표시한다.`,
         type: [TermsAgreementItemDto],
     })
     @IsArray()
@@ -117,9 +118,4 @@ export class RegisterAdopterV2RequestDto {
     @ValidateNested({ each: true })
     @Type(() => TermsAgreementItemDto)
     termsAgreements: TermsAgreementItemDto[];
-
-    @ApiProperty({ description: '마케팅 수신 동의 여부', example: false, required: false })
-    @IsBoolean()
-    @IsOptional()
-    marketingAgreed?: boolean;
 }
