@@ -32,6 +32,7 @@ import { AnnouncementModule } from './api/announcement/announcement.module';
 import { NoticeModule } from './api/notice/notice.module';
 import { TermsModule } from './api/terms/terms.module';
 import { PopularKeywordModule } from './api/popular-keyword/popular-keyword.module';
+import { AdoptionModule } from './api/adoption/adoption.module';
 import { AppVersionModule } from './api/app-version/app-version.module';
 import { InquiryModule } from './api/inquiry/inquiry.module';
 import { FeedModule } from './api/feed/feed.module';
@@ -72,6 +73,7 @@ import { ChatModule } from './api/chat/chat.module';
         NoticeModule,
         TermsModule,
         PopularKeywordModule,
+        AdoptionModule,
         AppVersionModule,
         InquiryModule,
         FeedModule,
