@@ -118,6 +118,41 @@ export class SubmittedReportInfo {
 }
 
 /**
+ * 입양 상담용 사전 정보 (v2 온보딩4 응답)
+ * 가입 후 첫 상담 신청 시 자동으로 prefill 되어 매번 재입력하지 않도록 한다.
+ */
+@Schema({ _id: false })
+export class CounselDefaultProfile {
+    @Prop({ trim: true, default: '' })
+    selfIntroduction: string;
+
+    @Prop({ trim: true })
+    dailyAbsenceHours?: string;
+
+    @Prop({ trim: true })
+    livingSpaceDescription?: string;
+
+    @Prop({ type: Date })
+    counselPrivacyAgreedAt?: Date;
+}
+
+/**
+ * 약관 동의 이력 (v2 온보딩2 동의 결과)
+ * 가입 시점의 약관 코드/버전/동의시각을 보관한다.
+ */
+@Schema({ _id: false })
+export class TermsAgreementRecord {
+    @Prop({ required: true })
+    code: string;
+
+    @Prop({ required: true })
+    version: string;
+
+    @Prop({ required: true, default: Date.now })
+    agreedAt: Date;
+}
+
+/**
  * 알림 설정 스키마 (camelCase)
  */
 @Schema({ _id: false })
@@ -212,6 +247,26 @@ export class Adopter extends User {
      */
     @Prop({ type: NotificationSettings, default: () => ({}) })
     notificationSettings: NotificationSettings;
+
+    /**
+     * 실명 (v2 온보딩4 입력 — 상담 시 표시되는 이름)
+     */
+    @Prop({ trim: true, default: '' })
+    realName?: string;
+
+    /**
+     * 입양 상담용 사전 정보 (v2 온보딩4)
+     * 첫 상담 신청 시 자동으로 prefill 되어 매번 재입력 부담을 줄임
+     */
+    @Prop({ type: CounselDefaultProfile, default: () => ({}) })
+    counselDefaultProfile?: CounselDefaultProfile;
+
+    /**
+     * 약관 동의 이력 (v2 온보딩2)
+     * 코드별 활성 버전과 동의 시각을 가입 시점 기준으로 누적
+     */
+    @Prop({ type: [TermsAgreementRecord], default: [] })
+    termsAgreementHistory: TermsAgreementRecord[];
 }
 
 export const AdopterSchema = SchemaFactory.createForClass(Adopter);
