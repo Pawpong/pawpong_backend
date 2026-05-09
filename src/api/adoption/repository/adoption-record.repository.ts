@@ -36,8 +36,13 @@ export class AdoptionRecordRepository {
             }>([
                 { $match: { adopterId: new Types.ObjectId(adopterId), status: 'adoption_approved' } },
                 {
+                    // 실제 승인 시점 추적: 신규 'approvedAt' 우선 → 기존 'updatedAt'(자동 timestamps,
+                    // 마지막 변경 시각이므로 approved 상태에서 사실상 승인 시각) → 'appliedAt' 최종 fallback.
+                    // 'processedAt' 은 schema 에 존재하지만 어떤 use-case 도 set 하지 않아 읽기 신뢰도가 없음 → 제외.
                     $addFields: {
-                        adoptedAt: { $ifNull: ['$processedAt', '$appliedAt'] },
+                        adoptedAt: {
+                            $ifNull: ['$approvedAt', { $ifNull: ['$updatedAt', '$appliedAt'] }],
+                        },
                     },
                 },
                 {
