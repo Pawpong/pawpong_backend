@@ -3,12 +3,17 @@ import { InjectConnection, InjectModel } from '@nestjs/mongoose';
 import { Connection, Model, Types } from 'mongoose';
 
 import { AdopterPetFavorite } from '../../../schema/adopter-pet-favorite.schema';
+import type { AvailablePetDocument } from '../../../schema/available-pet.schema';
 import { AvailablePet } from '../../../schema/available-pet.schema';
 import {
+    AdopterFavoritedPetsListQuery,
+    AdopterFavoritedPetsListResult,
     AdopterPetFavoriteReaderPort,
     AdopterPetFavoriteWriterPort,
     FavoriteAtomicResult,
 } from '../application/ports/adopter-pet-favorite.port';
+import type { AdoptionPetSnapshot } from '../application/ports/adoption-pet-reader.port';
+import { AdopterPetFavoriteRepository } from '../repository/adopter-pet-favorite.repository';
 
 /**
  * Mongoose 어댑터 — 즐겨찾기 추가/제거 + favoriteCount 증감을
@@ -24,7 +29,39 @@ export class AdopterPetFavoriteMongooseAdapter
         @InjectConnection() private readonly connection: Connection,
         @InjectModel(AdopterPetFavorite.name) private readonly favoriteModel: Model<AdopterPetFavorite>,
         @InjectModel(AvailablePet.name) private readonly petModel: Model<AvailablePet>,
+        private readonly favoriteRepository: AdopterPetFavoriteRepository,
     ) {}
+
+    async listMyFavoritedPets(
+        adopterId: string,
+        query: AdopterFavoritedPetsListQuery,
+    ): Promise<AdopterFavoritedPetsListResult> {
+        const { pets, totalItems } = await this.favoriteRepository.aggregateFavoritedPets(adopterId, query);
+        return {
+            snapshots: pets.map((pet) => this.toSnapshot(pet)),
+            totalItems,
+        };
+    }
+
+    private toSnapshot(pet: AvailablePetDocument): AdoptionPetSnapshot {
+        return {
+            id: pet._id.toString(),
+            breederId: pet.breederId.toString(),
+            name: pet.name,
+            breed: pet.breed,
+            petType: pet.petType,
+            gender: pet.gender as 'male' | 'female',
+            birthDate: pet.birthDate,
+            price: pet.price,
+            status: pet.status as 'available' | 'reserved' | 'adopted',
+            photos: pet.photos ?? [],
+            inquiryCount: pet.inquiryCount ?? 0,
+            favoriteCount: pet.favoriteCount ?? 0,
+            viewCount: pet.viewCount ?? 0,
+            createdAt: pet.createdAt,
+            updatedAt: pet.updatedAt,
+        };
+    }
 
     async isFavorited(adopterId: string, petId: string): Promise<boolean> {
         if (!Types.ObjectId.isValid(adopterId) || !Types.ObjectId.isValid(petId)) {

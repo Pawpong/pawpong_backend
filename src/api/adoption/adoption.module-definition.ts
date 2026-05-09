@@ -6,6 +6,7 @@ import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.sch
 
 import { AdoptionFavoriteController } from './adoption-favorite.controller';
 import { AdoptionListController } from './adoption-list.controller';
+import { AdoptionMyFavoritesController } from './adoption-my-favorites.controller';
 import {
     ADOPTER_PET_FAVORITE_READER_PORT,
     ADOPTER_PET_FAVORITE_WRITER_PORT,
@@ -14,6 +15,7 @@ import { ADOPTION_ASSET_URL_PORT } from './application/ports/adoption-asset-url.
 import { ADOPTION_PET_READER_PORT } from './application/ports/adoption-pet-reader.port';
 import { AddAdoptionPetFavoriteUseCase } from './application/use-cases/add-adoption-pet-favorite.use-case';
 import { GetAdoptionPetListUseCase } from './application/use-cases/get-adoption-pet-list.use-case';
+import { GetMyAdoptionFavoritesUseCase } from './application/use-cases/get-my-adoption-favorites.use-case';
 import { GetPopularAdoptionPetsUseCase } from './application/use-cases/get-popular-adoption-pets.use-case';
 import { RemoveAdoptionPetFavoriteUseCase } from './application/use-cases/remove-adoption-pet-favorite.use-case';
 import { AdoptionPetMapperService } from './domain/services/adoption-pet-mapper.service';
@@ -30,13 +32,18 @@ const SCHEMA_IMPORTS = MongooseModule.forFeature([
 
 export const ADOPTION_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule];
 
-export const ADOPTION_MODULE_CONTROLLERS = [AdoptionListController, AdoptionFavoriteController];
+export const ADOPTION_MODULE_CONTROLLERS = [
+    AdoptionListController,
+    AdoptionFavoriteController,
+    AdoptionMyFavoritesController,
+];
 
 const USE_CASE_PROVIDERS = [
     GetAdoptionPetListUseCase,
     GetPopularAdoptionPetsUseCase,
     AddAdoptionPetFavoriteUseCase,
     RemoveAdoptionPetFavoriteUseCase,
+    GetMyAdoptionFavoritesUseCase,
 ];
 
 const DOMAIN_PROVIDERS = [AdoptionPetMapperService];
