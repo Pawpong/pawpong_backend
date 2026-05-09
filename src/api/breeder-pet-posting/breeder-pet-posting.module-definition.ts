@@ -1,15 +1,23 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { StorageModule } from '../../common/storage/storage.module';
 import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 
+import { BREEDER_PET_POSTING_ASSET_URL_PORT } from './application/ports/breeder-pet-posting-asset-url.port';
 import { BREEDER_PET_POSTING_PROFILE_PORT } from './application/ports/breeder-pet-posting-profile.port';
+import { BREEDER_PET_POSTING_READER_PORT } from './application/ports/breeder-pet-posting-reader.port';
 import { BREEDER_PET_POSTING_WRITER_PORT } from './application/ports/breeder-pet-posting-writer.port';
 import { CreateBreederPetPostingUseCase } from './application/use-cases/create-breeder-pet-posting.use-case';
+import { ListMyBreederPetPostingsUseCase } from './application/use-cases/list-my-breeder-pet-postings.use-case';
 import { BreederPetPostingCreateController } from './breeder-pet-posting-create.controller';
+import { BreederPetPostingListController } from './breeder-pet-posting-list.controller';
+import { BreederPetPostingCardMapperService } from './domain/services/breeder-pet-posting-card-mapper.service';
 import { BreederPetPostingMapperService } from './domain/services/breeder-pet-posting-mapper.service';
 import { BreederPetPostingValidatorService } from './domain/services/breeder-pet-posting-validator.service';
+import { BreederPetPostingAssetUrlStorageAdapter } from './infrastructure/breeder-pet-posting-asset-url-storage.adapter';
 import { BreederPetPostingProfileMongooseAdapter } from './infrastructure/breeder-pet-posting-profile-mongoose.adapter';
+import { BreederPetPostingReaderMongooseAdapter } from './infrastructure/breeder-pet-posting-reader-mongoose.adapter';
 import { BreederPetPostingWriterMongooseAdapter } from './infrastructure/breeder-pet-posting-writer-mongoose.adapter';
 import { BreederPetPostingRepository } from './repository/breeder-pet-posting.repository';
 
@@ -18,23 +26,34 @@ const SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Breeder.name, schema: BreederSchema },
 ]);
 
-export const BREEDER_PET_POSTING_MODULE_IMPORTS = [SCHEMA_IMPORTS];
+export const BREEDER_PET_POSTING_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule];
 
-export const BREEDER_PET_POSTING_MODULE_CONTROLLERS = [BreederPetPostingCreateController];
+export const BREEDER_PET_POSTING_MODULE_CONTROLLERS = [
+    BreederPetPostingCreateController,
+    BreederPetPostingListController,
+];
 
-const USE_CASE_PROVIDERS = [CreateBreederPetPostingUseCase];
+const USE_CASE_PROVIDERS = [CreateBreederPetPostingUseCase, ListMyBreederPetPostingsUseCase];
 
-const DOMAIN_PROVIDERS = [BreederPetPostingValidatorService, BreederPetPostingMapperService];
+const DOMAIN_PROVIDERS = [
+    BreederPetPostingValidatorService,
+    BreederPetPostingMapperService,
+    BreederPetPostingCardMapperService,
+];
 
 const INFRASTRUCTURE_PROVIDERS = [
     BreederPetPostingRepository,
     BreederPetPostingProfileMongooseAdapter,
     BreederPetPostingWriterMongooseAdapter,
+    BreederPetPostingReaderMongooseAdapter,
+    BreederPetPostingAssetUrlStorageAdapter,
 ];
 
 const PORT_BINDINGS = [
     { provide: BREEDER_PET_POSTING_PROFILE_PORT, useExisting: BreederPetPostingProfileMongooseAdapter },
     { provide: BREEDER_PET_POSTING_WRITER_PORT, useExisting: BreederPetPostingWriterMongooseAdapter },
+    { provide: BREEDER_PET_POSTING_READER_PORT, useExisting: BreederPetPostingReaderMongooseAdapter },
+    { provide: BREEDER_PET_POSTING_ASSET_URL_PORT, useExisting: BreederPetPostingAssetUrlStorageAdapter },
 ];
 
 export const BREEDER_PET_POSTING_MODULE_PROVIDERS = [
