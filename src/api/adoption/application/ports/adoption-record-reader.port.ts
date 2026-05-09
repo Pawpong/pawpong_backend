@@ -8,7 +8,10 @@ export const ADOPTION_RECORD_READER_PORT = Symbol('ADOPTION_RECORD_READER_PORT')
  */
 export interface MyAdoptedRecordSnapshot {
     pet: AdoptionPetSnapshot;
-    /** 입양 승인이 확정된 시각 (application.processedAt 우선, 없으면 appliedAt) */
+    /**
+     * 입양 승인이 확정된 시각.
+     * approvedAt(신규 필드, 추후 상태 전이 use-case 가 set) → updatedAt(자동 timestamp, 기존 데이터 fallback) → appliedAt 순.
+     */
     adoptedAt: Date;
 }
 
