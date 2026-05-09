@@ -450,6 +450,19 @@ export class Breeder extends User {
     favoriteBreederList: FavoriteBreederInfo[];
 
     /**
+     * v2 브리더홈 — 한 줄 소개 (BreederProfile.description 의 긴 소개와 별개로 카드/헤더에 노출)
+     */
+    @Prop({ type: String, trim: true, maxlength: 200, default: '' })
+    bio?: string;
+
+    /**
+     * v2 브리더홈 — BPM (활동 점수, Pawpong 자체 지표)
+     * 산정 로직은 별도 세션에서 구현하며 여기서는 필드만 미리 둔다.
+     */
+    @Prop({ type: Number, default: 0, min: 0 })
+    bpm: number;
+
+    /**
      * 받은 신고 내역
      */
     @Prop({ type: [BreederReportInfo], default: [] })
