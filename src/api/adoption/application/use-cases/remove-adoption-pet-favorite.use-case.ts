@@ -24,15 +24,7 @@ export class RemoveAdoptionPetFavoriteUseCase {
             throw new BadRequestException('해당 동물을 찾을 수 없습니다.');
         }
 
-        const removed = await this.favoriteWriter.remove(adopterId, petId);
-        if (removed) {
-            await this.petReader.incrementFavoriteCount(petId, -1);
-        }
-
-        const refreshed = await this.petReader.readById(petId);
-        return {
-            removed,
-            favoriteCount: Math.max(0, refreshed?.favoriteCount ?? pet.favoriteCount),
-        };
+        const result = await this.favoriteWriter.removeAtomic(adopterId, petId);
+        return { removed: result.changed, favoriteCount: result.favoriteCount };
     }
 }

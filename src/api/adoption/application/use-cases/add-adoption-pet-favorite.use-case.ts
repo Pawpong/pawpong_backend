@@ -24,15 +24,7 @@ export class AddAdoptionPetFavoriteUseCase {
             throw new BadRequestException('해당 동물을 찾을 수 없습니다.');
         }
 
-        const added = await this.favoriteWriter.add(adopterId, petId);
-        if (added) {
-            await this.petReader.incrementFavoriteCount(petId, 1);
-        }
-
-        const refreshed = await this.petReader.readById(petId);
-        return {
-            added,
-            favoriteCount: refreshed?.favoriteCount ?? pet.favoriteCount,
-        };
+        const result = await this.favoriteWriter.addAtomic(adopterId, petId);
+        return { added: result.changed, favoriteCount: result.favoriteCount };
     }
 }
