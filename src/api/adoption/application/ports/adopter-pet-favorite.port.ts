@@ -1,9 +1,28 @@
+import type { AdoptionPetSnapshot, AdoptionPetStatus } from './adoption-pet-reader.port';
+
 export const ADOPTER_PET_FAVORITE_READER_PORT = Symbol('ADOPTER_PET_FAVORITE_READER_PORT');
 export const ADOPTER_PET_FAVORITE_WRITER_PORT = Symbol('ADOPTER_PET_FAVORITE_WRITER_PORT');
+
+export interface AdopterFavoritedPetsListResult {
+    snapshots: AdoptionPetSnapshot[];
+    totalItems: number;
+}
+
+export interface AdopterFavoritedPetsListQuery {
+    statusFilter?: AdoptionPetStatus;
+    skip: number;
+    limit: number;
+}
 
 export interface AdopterPetFavoriteReaderPort {
     isFavorited(adopterId: string, petId: string): Promise<boolean>;
     findFavoritedPetIds(adopterId: string, petIds: string[]): Promise<Set<string>>;
+    /**
+     * 입양자의 즐겨찾기 펫 목록 — 즐겨찾기 추가 시각 desc 정렬, status 필터 가능.
+     * 카드 응답을 한 번에 만들 수 있도록 펫 도큐먼트와 join 한 snapshot 을 반환한다.
+     * 비활성 펫(isActive=false) 은 제외한다.
+     */
+    listMyFavoritedPets(adopterId: string, query: AdopterFavoritedPetsListQuery): Promise<AdopterFavoritedPetsListResult>;
 }
 
 export type FavoriteAtomicResult = {
