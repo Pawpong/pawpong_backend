@@ -93,3 +93,24 @@ export function ApiRemoveAdoptionFavoriteEndpoint() {
         ApiParam({ name: 'petId', description: '동물 ID', example: '507f1f77bcf86cd799439011' }),
     );
 }
+
+export function ApiGetMyAdoptionFavoritesEndpoint() {
+    return applyDecorators(
+        ApiPaginatedEndpoint({
+            summary: '입양 관심 목록 (저장 목록 탭)',
+            description: `
+                입양자 본인이 즐겨찾기한 분양 펫 목록을 추가 시각 desc 로 페이지네이션합니다.
+
+                ## 필터
+                - status (선택): available / reserved / adopted — 미지정 시 전체
+
+                ## 응답 특이사항
+                - 본 목록의 모든 카드는 정의상 즐겨찾기 등록 상태 — isFavorited=true 고정
+            `,
+            responseType: PaginationResponseDto,
+            itemType: AdoptionPetResponseDto,
+            successDescription: '입양 관심 목록 조회 성공',
+            successMessageExample: ADOPTION_RESPONSE_MESSAGE_EXAMPLES.myFavoritesRetrieved,
+        }),
+    );
+}

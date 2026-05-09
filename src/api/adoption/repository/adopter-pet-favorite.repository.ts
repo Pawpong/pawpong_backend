@@ -3,6 +3,8 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { AdopterPetFavorite } from '../../../schema/adopter-pet-favorite.schema';
+import type { AvailablePetDocument } from '../../../schema/available-pet.schema';
+import type { AdoptionPetStatus } from '../application/ports/adoption-pet-reader.port';
 
 /**
  * 즐겨찾기 read-only 조회 헬퍼.
@@ -36,5 +38,58 @@ export class AdopterPetFavoriteRepository {
             .lean()
             .exec();
         return new Set(docs.map((doc) => doc.petId.toString()));
+    }
+
+    /**
+     * 입양자의 즐겨찾기 펫을 즐겨찾기 추가 시각 desc 로 정렬, status 필터 + 페이지네이션해서 반환.
+     * available_pets 컬렉션과 $lookup 으로 join 해 비활성 펫은 제외하고 한 번의 쿼리로 카드 데이터를 모은다.
+     */
+    async aggregateFavoritedPets(
+        adopterId: string,
+        query: { statusFilter?: AdoptionPetStatus; skip: number; limit: number },
+    ): Promise<{ pets: AvailablePetDocument[]; totalItems: number }> {
+        if (!Types.ObjectId.isValid(adopterId)) {
+            return { pets: [], totalItems: 0 };
+        }
+
+        const petMatch: Record<string, unknown> = { 'pet.isActive': true };
+        if (query.statusFilter) {
+            petMatch['pet.status'] = query.statusFilter;
+        }
+
+        const result = await this.model
+            .aggregate<{
+                items: AvailablePetDocument[];
+                total: Array<{ count: number }>;
+            }>([
+                { $match: { adopterId: new Types.ObjectId(adopterId) } },
+                {
+                    $lookup: {
+                        from: 'available_pets',
+                        localField: 'petId',
+                        foreignField: '_id',
+                        as: 'pet',
+                    },
+                },
+                { $unwind: '$pet' },
+                { $match: petMatch },
+                { $sort: { createdAt: -1 } },
+                {
+                    $facet: {
+                        items: [
+                            { $skip: query.skip },
+                            { $limit: query.limit },
+                            { $replaceRoot: { newRoot: '$pet' } },
+                        ],
+                        total: [{ $count: 'count' }],
+                    },
+                },
+            ])
+            .exec();
+
+        const facet = result[0];
+        const totalItems = facet?.total?.[0]?.count ?? 0;
+        const pets = (facet?.items ?? []) as AvailablePetDocument[];
+        return { pets, totalItems };
     }
 }
