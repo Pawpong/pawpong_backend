@@ -9,6 +9,7 @@ import {
 } from '../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { ADOPTION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/adoption-response-messages';
+import { AdoptedPetCardResponseDto } from '../dto/response/adopted-pet-card.dto';
 import { AdoptionFavoriteResponseDto, AdoptionPetResponseDto } from '../dto/response/adoption-pet-response.dto';
 
 const PET_NOT_FOUND_RESPONSE = {
@@ -111,6 +112,29 @@ export function ApiGetMyAdoptionFavoritesEndpoint() {
             itemType: AdoptionPetResponseDto,
             successDescription: '입양 관심 목록 조회 성공',
             successMessageExample: ADOPTION_RESPONSE_MESSAGE_EXAMPLES.myFavoritesRetrieved,
+        }),
+    );
+}
+
+export function ApiGetMyAdoptedListEndpoint() {
+    return applyDecorators(
+        ApiPaginatedEndpoint({
+            summary: '내가 입양한 목록 (저장 목록 — 입양목록 탭)',
+            description: `
+                Figma 296:3286 — 입양자 본인이 입양 완료(adoption_approved)한 펫의 카드 페이지네이션.
+
+                ## 데이터 출처
+                - adoption_applications.status = 'adoption_approved' 인 신청을 펫과 join 후 입양 확정 시각 desc 정렬
+                - 입양 확정 시각 = application.reviewedAt 우선, 없으면 appliedAt fallback
+
+                ## 응답 특이사항
+                - AdoptionPetResponseDto 에 adoptedAt(ISO 8601) 추가
+                - 본인이 이미 입양한 펫이므로 isFavorited 는 false 로 고정 (UI 미사용 가정)
+            `,
+            responseType: PaginationResponseDto,
+            itemType: AdoptedPetCardResponseDto,
+            successDescription: '내가 입양한 목록 조회 성공',
+            successMessageExample: ADOPTION_RESPONSE_MESSAGE_EXAMPLES.myAdoptedRetrieved,
         }),
     );
 }
