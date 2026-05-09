@@ -267,6 +267,27 @@ export class Adopter extends User {
      */
     @Prop({ type: [TermsAgreementRecord], default: [] })
     termsAgreementHistory: TermsAgreementRecord[];
+
+    /**
+     * v2 유저홈/마이홈 — 한 줄 소개 (프로필 카드 표시용)
+     * 회원가입 직후에는 비어있을 수 있다.
+     */
+    @Prop({ type: String, trim: true, maxlength: 200, default: '' })
+    bio?: string;
+
+    /**
+     * v2 유저홈 — BPM (활동 점수, Pawpong 자체 지표)
+     * 산정 로직은 별도 세션에서 구현하며 여기서는 필드만 미리 둔다.
+     */
+    @Prop({ type: Number, default: 0, min: 0 })
+    bpm: number;
+
+    /**
+     * v2 유저홈 — 팔로워 수 (입양자→입양자 follow 시스템 대비 카운터)
+     * follow 시스템 구현 전까지는 0 으로 유지.
+     */
+    @Prop({ type: Number, default: 0, min: 0 })
+    followerCount: number;
 }
 
 export const AdopterSchema = SchemaFactory.createForClass(Adopter);
