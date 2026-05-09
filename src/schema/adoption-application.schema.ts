@@ -230,6 +230,15 @@ export class AdoptionApplication {
     processedAt?: Date;
 
     /**
+     * 입양 승인이 확정된 시각 (status 가 'adoption_approved' 로 전이된 시점).
+     *
+     * 추후 상태 전이 use-case 가 status='adoption_approved' 로 갱신할 때 함께 set 한다.
+     * 기존 문서에는 부재할 수 있으므로 read-side 에서는 updatedAt → appliedAt 순으로 fallback 한다.
+     */
+    @Prop()
+    approvedAt?: Date;
+
+    /**
      * 브리더 처리 메모 (내부 참고용)
      */
     @Prop()
