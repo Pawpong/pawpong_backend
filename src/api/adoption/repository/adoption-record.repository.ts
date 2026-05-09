@@ -37,7 +37,7 @@ export class AdoptionRecordRepository {
                 { $match: { adopterId: new Types.ObjectId(adopterId), status: 'adoption_approved' } },
                 {
                     $addFields: {
-                        adoptedAt: { $ifNull: ['$reviewedAt', '$appliedAt'] },
+                        adoptedAt: { $ifNull: ['$processedAt', '$appliedAt'] },
                     },
                 },
                 {
