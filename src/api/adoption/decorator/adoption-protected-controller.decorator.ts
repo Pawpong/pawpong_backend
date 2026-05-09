@@ -3,7 +3,7 @@ import { Controller, UseGuards, applyDecorators } from '@nestjs/common';
 import { Roles } from '../../../common/decorator/roles.decorator';
 import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { OptionalJwtAuthGuard } from '../../../common/guard/optional-jwt-auth.guard';
-import { RolesGuard } from '../../../common/guard/roles.guard';
+import { StrictRolesGuard } from '../../../common/guard/strict-roles.guard';
 import { ApiAdoptionProtectedController, ApiAdoptionPublicController } from '../swagger';
 
 /**
@@ -19,13 +19,15 @@ export function AdoptionOptionalAuthController() {
 
 /**
  * 입양 페이지 인증 필수 라우트 — 즐겨찾기 토글 등 입양자 전용
- * adopter 역할만 허용 (브리더/관리자가 카운터를 spam 하지 못하도록 차단)
+ *
+ * StrictRolesGuard 사용: 표준 RolesGuard 는 'breeder' → 'adopter' 자동 권한 부여를 하므로
+ * v2 동물 단위 즐겨찾기에서는 brand 가 카운터를 spam 하지 못하도록 strict 검증을 적용한다.
  */
 export function AdoptionProtectedController() {
     return applyDecorators(
         ApiAdoptionProtectedController(),
         Controller('v2/adoption'),
-        UseGuards(JwtAuthGuard, RolesGuard),
+        UseGuards(JwtAuthGuard, StrictRolesGuard),
         Roles('adopter'),
     );
 }
