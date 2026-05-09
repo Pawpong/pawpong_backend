@@ -1,7 +1,13 @@
 import { applyDecorators } from '@nestjs/common';
 
-import { ApiController, ApiEndpoint } from '../../../common/decorator/swagger.decorator';
+import {
+    ApiController,
+    ApiEndpoint,
+    ApiPaginatedEndpoint,
+} from '../../../common/decorator/swagger.decorator';
+import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { BREEDER_PET_POSTING_RESPONSE_MESSAGES } from '../constants/breeder-pet-posting-response-messages';
+import { BreederPetPostingCardResponseDto } from '../dto/response/breeder-pet-posting-card.dto';
 import { CreateBreederPetPostingResponseDto } from '../dto/response/breeder-pet-posting-response.dto';
 
 const BREEDER_NOT_FOUND_RESPONSE = {
@@ -45,6 +51,29 @@ export function ApiCreateBreederPetPostingEndpoint() {
             successDescription: '분양글 작성 성공',
             successMessageExample: BREEDER_PET_POSTING_RESPONSE_MESSAGES.created,
             errorResponses: [VALIDATION_ERROR_RESPONSE, BREEDER_NOT_FOUND_RESPONSE],
+        }),
+    );
+}
+
+export function ApiListMyBreederPetPostingsEndpoint() {
+    return applyDecorators(
+        ApiPaginatedEndpoint({
+            summary: '내 분양글 목록 (마이홈 분양목록 탭)',
+            description: `
+                Figma 마이홈 분양목록 탭(290:795) 의 백엔드 진입점.
+
+                ## 정렬 / 필터
+                - 작성 시각 desc (createdAt)
+                - status 필터(선택): available / reserved / adopted
+
+                ## 응답
+                - Card 응답: representativePhotoIndex 기반의 primaryPhotoUrl + photoUrls signed URL 일괄 변환
+                - ageDescription 한국어 표현 ("6개월", "2살 3개월")
+            `,
+            responseType: PaginationResponseDto,
+            itemType: BreederPetPostingCardResponseDto,
+            successDescription: '내 분양글 목록 조회 성공',
+            successMessageExample: BREEDER_PET_POSTING_RESPONSE_MESSAGES.myListRetrieved,
         }),
     );
 }
