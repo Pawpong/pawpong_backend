@@ -5,45 +5,36 @@ import { AddAdoptionPetFavoriteUseCase } from '../../../application/use-cases/ad
 describe('AddAdoptionPetFavoriteUseCase', () => {
     const petReader = {
         readById: jest.fn(),
-        incrementFavoriteCount: jest.fn(),
     };
-    const favoriteWriter = { add: jest.fn() };
+    const favoriteWriter = { addAtomic: jest.fn() };
 
     const useCase = new AddAdoptionPetFavoriteUseCase(petReader as any, favoriteWriter as any);
 
-    const basePet = {
-        id: 'pet-1',
-        favoriteCount: 5,
-    };
-
     beforeEach(() => {
         jest.clearAllMocks();
-        petReader.readById.mockResolvedValue(basePet);
+        petReader.readById.mockResolvedValue({ id: 'pet-1', favoriteCount: 5 });
     });
 
     it('동물이 없으면 BadRequestException', async () => {
         petReader.readById.mockResolvedValueOnce(null);
         await expect(useCase.execute('adopter-1', 'pet-x')).rejects.toThrow(BadRequestException);
-        expect(favoriteWriter.add).not.toHaveBeenCalled();
+        expect(favoriteWriter.addAtomic).not.toHaveBeenCalled();
     });
 
-    it('새로 추가되면 favoriteCount 가 +1 증가하고 added=true', async () => {
-        favoriteWriter.add.mockResolvedValueOnce(true);
-        petReader.readById.mockResolvedValueOnce(basePet); // initial check
-        petReader.readById.mockResolvedValueOnce({ ...basePet, favoriteCount: 6 }); // refreshed
+    it('새로 추가되면 added=true 와 트랜잭션 결과 favoriteCount 가 그대로 반영된다', async () => {
+        favoriteWriter.addAtomic.mockResolvedValueOnce({ changed: true, favoriteCount: 6 });
 
         const result = await useCase.execute('adopter-1', 'pet-1');
 
-        expect(petReader.incrementFavoriteCount).toHaveBeenCalledWith('pet-1', 1);
+        expect(favoriteWriter.addAtomic).toHaveBeenCalledWith('adopter-1', 'pet-1');
         expect(result).toEqual({ added: true, favoriteCount: 6 });
     });
 
-    it('이미 등록된 즐겨찾기는 idempotent — added=false, increment 호출 안 함', async () => {
-        favoriteWriter.add.mockResolvedValueOnce(false);
+    it('이미 등록된 즐겨찾기는 idempotent — added=false, 카운터 트랜잭션 결과 그대로', async () => {
+        favoriteWriter.addAtomic.mockResolvedValueOnce({ changed: false, favoriteCount: 5 });
 
         const result = await useCase.execute('adopter-1', 'pet-1');
 
-        expect(petReader.incrementFavoriteCount).not.toHaveBeenCalled();
-        expect(result.added).toBe(false);
+        expect(result).toEqual({ added: false, favoriteCount: 5 });
     });
 });
