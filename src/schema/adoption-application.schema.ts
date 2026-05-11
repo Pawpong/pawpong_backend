@@ -256,6 +256,23 @@ export class AdoptionApplication {
 
 export const AdoptionApplicationSchema = SchemaFactory.createForClass(AdoptionApplication);
 
+/**
+ * v2 입양 신청 동시성 안전망:
+ * 동일 adopter × pet 의 처리 중(consultation_pending / consultation_completed) 신청이 두 개 이상 생기는 race
+ * 를 DB 단계에서 차단한다. 종결 상태(adoption_approved / adoption_rejected)는 partial filter 에서 제외되어
+ * 재신청을 허용한다. application 계층의 existsOpenApplicationForPet 사전 체크와 함께 이중 방어선.
+ */
+AdoptionApplicationSchema.index(
+    { adopterId: 1, petId: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            status: { $in: ['consultation_pending', 'consultation_completed'] },
+        },
+        name: 'uniq_adopter_pet_open_application',
+    },
+);
+
 // 복합 인덱스 설정 (성능 최적화)
 AdoptionApplicationSchema.index({ breederId: 1, status: 1, appliedAt: -1 }); // 브리더가 신청 목록 조회
 AdoptionApplicationSchema.index({ adopterId: 1, status: 1, appliedAt: -1 }); // 입양자가 자신의 신청 목록 조회
