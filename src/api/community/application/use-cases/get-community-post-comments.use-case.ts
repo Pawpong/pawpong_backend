@@ -30,12 +30,11 @@ export class GetCommunityPostCommentsUseCase {
         const page = Math.max(1, input.page ?? 1);
         const pageSize = Math.min(PAGE_SIZE_MAX, Math.max(1, input.pageSize ?? PAGE_SIZE_DEFAULT));
 
-        // page=1 일 때만 게시글 존재 확인 (이후 페이지는 첫 페이지에서 검증됐다고 가정 — 비용 절감)
-        if (page === 1) {
-            const post = await this.reader.readPostById(input.postId);
-            if (!post) {
-                throw new BadRequestException('해당 게시글을 찾을 수 없습니다.');
-            }
+        // 모든 페이지에서 일관되게 게시글 존재(+isActive) 검증 — 잘못된 postId 로 page=2 호출 시도 BadRequest 통일.
+        // 전체 도큐먼트를 가져오지 않는 가벼운 exists 쿼리 사용.
+        const exists = await this.reader.existsActivePost(input.postId);
+        if (!exists) {
+            throw new BadRequestException('해당 게시글을 찾을 수 없습니다.');
         }
 
         const { snapshots, totalItems } = await this.reader.listComments({
