@@ -35,6 +35,7 @@ import { PopularKeywordModule } from './api/popular-keyword/popular-keyword.modu
 import { AdoptionModule } from './api/adoption/adoption.module';
 import { BreederPetPostingModule } from './api/breeder-pet-posting/breeder-pet-posting.module';
 import { ProfileModule } from './api/profile/profile.module';
+import { CommunityModule } from './api/community/community.module';
 import { AppVersionModule } from './api/app-version/app-version.module';
 import { InquiryModule } from './api/inquiry/inquiry.module';
 import { FeedModule } from './api/feed/feed.module';
@@ -78,6 +79,7 @@ import { ChatModule } from './api/chat/chat.module';
         AdoptionModule,
         BreederPetPostingModule,
         ProfileModule,
+        CommunityModule,
         AppVersionModule,
         InquiryModule,
         FeedModule,
