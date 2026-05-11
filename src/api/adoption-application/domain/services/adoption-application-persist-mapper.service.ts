@@ -26,6 +26,7 @@ export class AdoptionApplicationPersistMapperService {
             petId: command.petId,
             petName: context.petName,
             status: 'consultation_pending',
+            formVersion: 'v2',
             standardResponses: {
                 privacyConsent: command.privacyConsent,
                 familyMembers: command.familyMembers.trim(),

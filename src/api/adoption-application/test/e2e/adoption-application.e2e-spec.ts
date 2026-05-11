@@ -222,6 +222,64 @@ describe('v2 입양 신청 종단간 테스트', () => {
             .expect(409);
     });
 
+    it('v1 호환 — formVersion 없는 v1 광역 상담 docs 는 partial index 적용 외 (다수 공존 허용)', async () => {
+        // partial unique index 가 `formVersion: 'v2'` 로 적용 범위가 한정돼 v1 의 /api/adopter/application
+        // 흐름과 인덱스 영향이 분리됨. v1 광역 상담(petId 미지정 또는 formVersion 없음) 도큐먼트들이
+        // 동일 adopter 에 다수 공존해도 새 인덱스가 차단하지 않음을 확인.
+        const adopterId = await seedAdopter();
+        const baseDoc = {
+            adopterId: new Types.ObjectId(adopterId),
+            breederId: new Types.ObjectId(),
+            status: 'consultation_pending',
+            standardResponses: {
+                privacyConsent: true,
+                familyMembers: '본인',
+                allFamilyConsent: true,
+                canProvideBasicCare: true,
+                canAffordMedicalExpenses: true,
+            },
+            appliedAt: new Date(),
+        };
+        await expect(
+            connection.collection('adoption_applications').insertMany([
+                { ...baseDoc },
+                { ...baseDoc, breederId: new Types.ObjectId() },
+            ]),
+        ).resolves.toBeDefined();
+        const count = await connection
+            .collection('adoption_applications')
+            .countDocuments({ adopterId: new Types.ObjectId(adopterId) });
+        expect(count).toBe(2);
+    });
+
+    it('v1 호환 — formVersion 없는 v1 docs 는 같은 adopter × pet 으로도 공존 허용 (인덱스 회귀 없음)', async () => {
+        // v1 은 petId 가 지정된 경우에도 별도 정책으로 운영되므로, formVersion 이 없는 docs 는
+        // 새 인덱스 적용 범위에서 제외되어야 한다.
+        const adopterId = await seedAdopter();
+        const petId = new Types.ObjectId();
+        const baseDoc = {
+            adopterId: new Types.ObjectId(adopterId),
+            breederId: new Types.ObjectId(),
+            petId,
+            status: 'consultation_pending',
+            standardResponses: {
+                privacyConsent: true,
+                familyMembers: '본인',
+                allFamilyConsent: true,
+                canProvideBasicCare: true,
+                canAffordMedicalExpenses: true,
+            },
+            appliedAt: new Date(),
+        };
+        await expect(
+            connection.collection('adoption_applications').insertMany([{ ...baseDoc }, { ...baseDoc }]),
+        ).resolves.toBeDefined();
+        const count = await connection
+            .collection('adoption_applications')
+            .countDocuments({ adopterId: new Types.ObjectId(adopterId), petId });
+        expect(count).toBe(2);
+    });
+
     it('동시성 — partial unique index 가 두 번째 처리 중 신청을 차단 (E11000 → 409)', async () => {
         const adopterId = await seedAdopter();
         const { petId, breederId } = await seedPet();
@@ -234,6 +292,7 @@ describe('v2 입양 신청 종단간 테스트', () => {
             breederId: new Types.ObjectId(breederId),
             petId: new Types.ObjectId(petId),
             status: 'consultation_pending',
+            formVersion: 'v2',
             standardResponses: {
                 privacyConsent: true,
                 familyMembers: '본인',

@@ -37,7 +37,7 @@ describe('AdoptionApplicationPersistMapperService', () => {
         expect(data.standardResponses.allFamilyConsent).toBe(true);
     });
 
-    it('context 의 비정규화 필드 + status=consultation_pending 고정', () => {
+    it('context 의 비정규화 필드 + status=consultation_pending 고정 + formVersion=v2 태깅', () => {
         const data = mapper.toPersistData(command, context);
         expect(data.breederId).toBe('b-1');
         expect(data.adopterId).toBe('a-1');
@@ -45,5 +45,6 @@ describe('AdoptionApplicationPersistMapperService', () => {
         expect(data.petName).toBe('레오파드 게코');
         expect(data.adopterName).toBe('홍길동');
         expect(data.status).toBe('consultation_pending');
+        expect(data.formVersion).toBe('v2');
     });
 });
