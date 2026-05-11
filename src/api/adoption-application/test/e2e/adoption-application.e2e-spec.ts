@@ -222,14 +222,17 @@ describe('v2 입양 신청 종단간 테스트', () => {
             .expect(409);
     });
 
-    it('v1 호환 — formVersion 없는 v1 광역 상담 docs 는 partial index 적용 외 (다수 공존 허용)', async () => {
-        // partial unique index 가 `formVersion: 'v2'` 로 적용 범위가 한정돼 v1 의 /api/adopter/application
-        // 흐름과 인덱스 영향이 분리됨. v1 광역 상담(petId 미지정 또는 formVersion 없음) 도큐먼트들이
-        // 동일 adopter 에 다수 공존해도 새 인덱스가 차단하지 않음을 확인.
+    it('use-case 사전 체크 — 처리 중 신청이 미리 있으면 두 번째 POST 가 409 로 차단된다', async () => {
+        // v1 collection 공유 회귀 방지를 위해 partial unique index 는 도입하지 않는다.
+        // 동시성 보호는 application 계층의 existsOpenApplicationForPet 사전 체크에만 의존:
+        // 1) 처리 중 도큐먼트를 직접 인서트해 사전 체크가 잡는 케이스를 검증
+        // 2) "거의 동시" race window 는 사용자가 같은 펫에 빠르게 두 번 누르는 극히 좁은 경우로 한정.
         const adopterId = await seedAdopter();
-        const baseDoc = {
+        const { petId, breederId } = await seedPet();
+        await connection.collection('adoption_applications').insertOne({
             adopterId: new Types.ObjectId(adopterId),
-            breederId: new Types.ObjectId(),
+            breederId: new Types.ObjectId(breederId),
+            petId: new Types.ObjectId(petId),
             status: 'consultation_pending',
             standardResponses: {
                 privacyConsent: true,
@@ -239,22 +242,24 @@ describe('v2 입양 신청 종단간 테스트', () => {
                 canAffordMedicalExpenses: true,
             },
             appliedAt: new Date(),
-        };
-        await expect(
-            connection.collection('adoption_applications').insertMany([
-                { ...baseDoc },
-                { ...baseDoc, breederId: new Types.ObjectId() },
-            ]),
-        ).resolves.toBeDefined();
+        } as any);
+        const tok = await adopterToken(adopterId);
+        const res = await request(app.getHttpServer())
+            .post('/api/v2/adoption-application')
+            .set('Authorization', `Bearer ${tok}`)
+            .send(validBody(petId))
+            .expect(409);
+        expect(res.body.error).toMatch(/이미 처리 중인 상담 신청/);
         const count = await connection
             .collection('adoption_applications')
-            .countDocuments({ adopterId: new Types.ObjectId(adopterId) });
-        expect(count).toBe(2);
+            .countDocuments({ adopterId: new Types.ObjectId(adopterId), petId: new Types.ObjectId(petId) });
+        expect(count).toBe(1);
     });
 
-    it('v1 호환 — formVersion 없는 v1 docs 는 같은 adopter × pet 으로도 공존 허용 (인덱스 회귀 없음)', async () => {
-        // v1 은 petId 가 지정된 경우에도 별도 정책으로 운영되므로, formVersion 이 없는 docs 는
-        // 새 인덱스 적용 범위에서 제외되어야 한다.
+    it('v1 호환 — v1 컬렉션 공유 시나리오에 신규 unique 인덱스가 도입되지 않음 (회귀 차단 확인)', async () => {
+        // v1 의 별개 중복 정책(adopter+breeder)과 충돌하지 않도록 collection-level unique 인덱스를 두지 않는다.
+        // 동일 adopter × pet 의 처리 중 v1-style 도큐먼트 두 개가 DB-단에서 거부되지 않음을 직접 확인해
+        // 후속 변경이 우연히 unique 인덱스를 추가하는 회귀를 가드한다.
         const adopterId = await seedAdopter();
         const petId = new Types.ObjectId();
         const baseDoc = {
@@ -278,42 +283,6 @@ describe('v2 입양 신청 종단간 테스트', () => {
             .collection('adoption_applications')
             .countDocuments({ adopterId: new Types.ObjectId(adopterId), petId });
         expect(count).toBe(2);
-    });
-
-    it('동시성 — partial unique index 가 두 번째 처리 중 신청을 차단 (E11000 → 409)', async () => {
-        const adopterId = await seedAdopter();
-        const { petId, breederId } = await seedPet();
-        // 두 use-case 가 거의 동시에 도착해 사전 체크를 모두 통과한 상황을 직접 시뮬레이션:
-        // adopter × pet 의 처리 중 도큐먼트를 미리 한 개 인서트한 다음 동일 입력으로 POST.
-        // existsOpenApplicationForPet 가 사전 잡으면 409, 못 잡고 create 단계에 도달하더라도
-        // partial unique index 가 E11000 으로 막아 ConflictException 으로 변환됨.
-        await connection.collection('adoption_applications').insertOne({
-            adopterId: new Types.ObjectId(adopterId),
-            breederId: new Types.ObjectId(breederId),
-            petId: new Types.ObjectId(petId),
-            status: 'consultation_pending',
-            formVersion: 'v2',
-            standardResponses: {
-                privacyConsent: true,
-                familyMembers: '본인',
-                allFamilyConsent: true,
-                canProvideBasicCare: true,
-                canAffordMedicalExpenses: true,
-            },
-            appliedAt: new Date(),
-        } as any);
-        const tok = await adopterToken(adopterId);
-        const res = await request(app.getHttpServer())
-            .post('/api/v2/adoption-application')
-            .set('Authorization', `Bearer ${tok}`)
-            .send(validBody(petId))
-            .expect(409);
-        expect(res.body.error).toMatch(/이미 처리 중인 상담 신청/);
-        // DB 에는 여전히 하나만 — partial unique index 가 두 번째 인서트를 차단했어야 함
-        const count = await connection
-            .collection('adoption_applications')
-            .countDocuments({ adopterId: new Types.ObjectId(adopterId), petId: new Types.ObjectId(petId) });
-        expect(count).toBe(1);
     });
 
     it('종결 신청(adoption_rejected) 이후 재신청 허용 → 200', async () => {

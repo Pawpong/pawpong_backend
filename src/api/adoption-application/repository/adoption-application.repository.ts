@@ -1,8 +1,7 @@
-import { ConflictException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { hasErrorCode } from '../../../common/utils/error.util';
 import {
     AdoptionApplication,
     AdoptionApplicationDocument,
@@ -62,26 +61,13 @@ export class AdoptionApplicationRepository {
         return Boolean(found);
     }
 
-    /**
-     * 동시성 안전한 입양 신청 생성.
-     * partial unique index(uniq_adopter_pet_open_application)에 의해 같은 adopter × pet 의 처리 중 신청이
-     * 두 개 이상 들어가면 E11000 이 발생하고, 이를 ConflictException 으로 변환해 use-case 의 사전 체크와
-     * 동일한 계약(409)으로 통일한다.
-     */
     async create(data: AdoptionApplicationPersistData): Promise<{ _id: string }> {
-        try {
-            const created = await this.applicationModel.create({
-                ...data,
-                breederId: new Types.ObjectId(data.breederId),
-                adopterId: new Types.ObjectId(data.adopterId),
-                petId: new Types.ObjectId(data.petId),
-            });
-            return { _id: String(created._id) };
-        } catch (error) {
-            if (hasErrorCode(error, 11000)) {
-                throw new ConflictException('이미 처리 중인 상담 신청이 있습니다.');
-            }
-            throw error;
-        }
+        const created = await this.applicationModel.create({
+            ...data,
+            breederId: new Types.ObjectId(data.breederId),
+            adopterId: new Types.ObjectId(data.adopterId),
+            petId: new Types.ObjectId(data.petId),
+        });
+        return { _id: String(created._id) };
     }
 }

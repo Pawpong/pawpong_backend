@@ -252,44 +252,21 @@ export class AdoptionApplication {
      */
     @Prop()
     breederNotes?: string;
-
-    /**
-     * 폼 버전 식별자 ('v2' 만 채워짐, v1 docs 는 미설정).
-     * partial unique index 가 v2 신청에만 적용되도록 식별하는 키.
-     * v1 의 /api/adopter/application 흐름과 인덱스 영향을 분리한다.
-     */
-    @Prop({ type: String })
-    formVersion?: 'v2';
 }
 
 export const AdoptionApplicationSchema = SchemaFactory.createForClass(AdoptionApplication);
 
 /**
- * v2 입양 신청 동시성 안전망 — v2 docs 에만 적용:
- * partialFilterExpression 에 `formVersion: 'v2'` 를 명시해 v1 의 /api/adopter/application 흐름은 인덱스
- * 적용 범위에 들지 않도록 분리한다. (v1 docs 는 formVersion 이 없어 partial 에서 자동 제외.)
+ * 동시성 노트:
+ * v1(/api/adopter/application)과 v2(/api/v2/adoption-application)가 동일 컬렉션을 공유하므로
+ * collection-level unique 인덱스를 v2 입양 신청 도메인이 추가하면 v1 의 별개 중복 정책(adopter+breeder)과
+ * 미묘한 회귀를 만들 수 있다.
  *
- * 인덱스 의도:
- * - 동일 adopter × pet 의 처리 중(consultation_pending / consultation_completed) v2 신청이 두 개 이상 생기는
- *   race 를 DB 단계에서 차단
- * - 종결 상태(adoption_approved / adoption_rejected)는 partial 에서 제외 → 재신청 허용
- *
- * 인덱스 rollout 경로 (deployment note):
- * - 새 필드 formVersion 은 optional 이라 v1 도큐먼트 변경 없이 안전
- * - Mongoose 가 모듈 로드 시 ensureIndex 호출로 자동 생성 (autoIndex 기본값)
- * - v2 출시 전이라 위반 데이터가 없어 인덱스 생성은 즉시 성공
+ * 그래서 v2 동시성 보호는 use-case 사전 체크(`existsOpenApplicationForPet`)에만 의존한다.
+ * Race window 는 사용자가 같은 펫에 거의 동시에 두 번 신청 버튼을 누른 극히 좁은 경우로 한정되며,
+ * 운영 중 발생 시 브리더 측에서 중복 신청을 manual 처리할 수 있다.
+ * 향후 별도 collection 으로 v2 가 분리되면 그 시점에 unique 인덱스를 안전하게 도입한다.
  */
-AdoptionApplicationSchema.index(
-    { adopterId: 1, petId: 1 },
-    {
-        unique: true,
-        partialFilterExpression: {
-            status: { $in: ['consultation_pending', 'consultation_completed'] },
-            formVersion: 'v2',
-        },
-        name: 'uniq_adopter_pet_open_application_v2',
-    },
-);
 
 // 복합 인덱스 설정 (성능 최적화)
 AdoptionApplicationSchema.index({ breederId: 1, status: 1, appliedAt: -1 }); // 브리더가 신청 목록 조회
