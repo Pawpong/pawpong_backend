@@ -2,6 +2,7 @@ import { applyDecorators } from '@nestjs/common';
 import { ApiParam } from '@nestjs/swagger';
 
 import {
+    ApiController,
     ApiEndpoint,
     ApiPaginatedEndpoint,
     ApiPublicController,
@@ -10,6 +11,7 @@ import { PaginationResponseDto } from '../../../common/dto/pagination/pagination
 import { COMMUNITY_RESPONSE_MESSAGES } from '../constants/community-response-messages';
 import { CommunityPostCardResponseDto } from '../dto/response/community-post-card.dto';
 import { CommunityPostCommentResponseDto } from '../dto/response/community-post-comment.dto';
+import { CommunityPostDeleteResponseDto } from '../dto/response/community-post-delete-response.dto';
 import { CommunityPostDetailResponseDto } from '../dto/response/community-post-detail.dto';
 
 const POST_NOT_FOUND_RESPONSE = {
@@ -85,6 +87,60 @@ export function ApiGetCommunityPostCommentsEndpoint() {
             successDescription: '댓글 조회 성공',
             successMessageExample: COMMUNITY_RESPONSE_MESSAGES.commentsRetrieved,
             errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiCommunityProtectedController() {
+    return ApiController('커뮤니티 (v2, 인증)');
+}
+
+const POST_FORBIDDEN_RESPONSE = {
+    status: 403,
+    description: '본인 게시글이 아님',
+    errorExample: '본인 게시글만 수정할 수 있습니다.',
+} as const;
+
+export function ApiCreateCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 작성 (v2)',
+            description: `
+                입양자/브리더 모두 작성 가능. JWT role 로 authorModel(Adopter/Breeder) 분기.
+                body 필수(≤2000), trim 후 비어있을 수 없음. title/photos/petType/category 선택 (photos ≤10).
+                생성된 게시글 상세 + 빈 commentPreview 반환.
+            `,
+            responseType: CommunityPostDetailResponseDto,
+            successDescription: '게시글 등록 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.created,
+        }),
+    );
+}
+
+export function ApiUpdateCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 수정 (v2)',
+            description: '작성자 본인만 가능. body 를 비우는 수정은 거부. 갱신 후 게시글 상세 반환.',
+            responseType: CommunityPostDetailResponseDto,
+            successDescription: '게시글 수정 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.updated,
+            errorResponses: [POST_NOT_FOUND_RESPONSE, POST_FORBIDDEN_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiDeleteCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 삭제 (v2, 소프트)',
+            description: '작성자 본인만 가능. isActive=false 로 소프트 삭제. 목록/상세에 더 이상 노출되지 않는다.',
+            responseType: CommunityPostDeleteResponseDto,
+            successDescription: '게시글 삭제 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.deleted,
+            errorResponses: [POST_NOT_FOUND_RESPONSE, POST_FORBIDDEN_RESPONSE],
         }),
         ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
     );
