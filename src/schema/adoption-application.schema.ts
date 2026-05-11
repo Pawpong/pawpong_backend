@@ -135,6 +135,15 @@ export class StandardApplicationData {
      */
     @Prop({ required: false, maxlength: 1500 })
     additionalNotes?: string;
+
+    /**
+     * v2 입양 신청 폼 — 입양 계획 간단 작성 (Figma 122:3)
+     * placeholder: "생활패턴, 주거환경, 입양 시기 등을 입력해주세요"
+     * 기존 selfIntroduction/livingSpaceDescription/desiredAdoptionTiming 보다 간소화된 free-text 입력.
+     * v1 호환 위해 optional.
+     */
+    @Prop({ required: false, maxlength: 1500 })
+    adoptionPlan?: string;
 }
 
 /**
@@ -246,6 +255,18 @@ export class AdoptionApplication {
 }
 
 export const AdoptionApplicationSchema = SchemaFactory.createForClass(AdoptionApplication);
+
+/**
+ * 동시성 노트:
+ * v1(/api/adopter/application)과 v2(/api/v2/adoption-application)가 동일 컬렉션을 공유하므로
+ * collection-level unique 인덱스를 v2 입양 신청 도메인이 추가하면 v1 의 별개 중복 정책(adopter+breeder)과
+ * 미묘한 회귀를 만들 수 있다.
+ *
+ * 그래서 v2 동시성 보호는 use-case 사전 체크(`existsOpenApplicationForPet`)에만 의존한다.
+ * Race window 는 사용자가 같은 펫에 거의 동시에 두 번 신청 버튼을 누른 극히 좁은 경우로 한정되며,
+ * 운영 중 발생 시 브리더 측에서 중복 신청을 manual 처리할 수 있다.
+ * 향후 별도 collection 으로 v2 가 분리되면 그 시점에 unique 인덱스를 안전하게 도입한다.
+ */
 
 // 복합 인덱스 설정 (성능 최적화)
 AdoptionApplicationSchema.index({ breederId: 1, status: 1, appliedAt: -1 }); // 브리더가 신청 목록 조회
