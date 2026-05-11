@@ -12,8 +12,16 @@ import type { AdopterDocument } from '../../../schema/adopter.schema';
 import { AvailablePet, AvailablePetDocument } from '../../../schema/available-pet.schema';
 import type { AdoptionApplicationPersistData } from '../application/types/adoption-application.type';
 
-/** 이전 브랜치 commits 가 추가했던 partial unique index 이름. rollback 대상. */
-const STALE_V2_UNIQUE_INDEX_NAME = 'uniq_adopter_pet_open_application_v2';
+/**
+ * 이전 브랜치 commits 가 잠시 추가했던 partial unique index 이름들. 모두 rollback 대상이다.
+ * - 0063f159: 'uniq_adopter_pet_open_application' (formVersion 분리 전)
+ * - 592e5a22: 'uniq_adopter_pet_open_application_v2' (formVersion 분리 후)
+ * 두 commits 중 하나라도 적용된 외부 환경에 stale 인덱스가 남아있을 가능성에 대비해 둘 다 drop 한다.
+ */
+const STALE_UNIQUE_INDEX_NAMES = [
+    'uniq_adopter_pet_open_application',
+    'uniq_adopter_pet_open_application_v2',
+] as const;
 
 /**
  * v2 입양 신청 — Mongoose 직접 접근 캡슐화.
@@ -32,21 +40,22 @@ export class AdoptionApplicationRepository implements OnModuleInit {
     ) {}
 
     /**
-     * 부트스트랩 시 이전 브랜치 commits 가 잠시 도입했다가 제거된 partial unique index 를 명시적으로
-     * 정리한다. 운영 DB 에 도달했을 가능성이 있는 stale 인덱스는 v1 의 별개 중복 정책과 충돌하거나
-     * 본 모듈이 더 이상 catch 하지 않는 E11000 을 raise 해 500 으로 surfacing 될 수 있다.
+     * 부트스트랩 시 이전 브랜치 commits 가 잠시 도입했던 partial unique index 들을 명시적으로 정리한다.
+     * 두 commits(0063f159 → 'uniq_adopter_pet_open_application', 592e5a22 → '..._v2') 중 어느 것이라도
+     * 적용된 외부 환경에 stale 인덱스가 남아 있으면 v1 의 별개 중복 정책과 충돌하거나 본 모듈이 더 이상
+     * 명시적으로 의존하지 않는 E11000 경로로 흘러 사용자 계약(409)을 깨뜨릴 위험이 있다.
      * 인덱스가 없으면 'index not found' 로 흡수한다.
      */
     async onModuleInit(): Promise<void> {
-        try {
-            await this.applicationModel.collection.dropIndex(STALE_V2_UNIQUE_INDEX_NAME);
-            this.logger.log(`Dropped stale index "${STALE_V2_UNIQUE_INDEX_NAME}"`);
-        } catch (error) {
-            const message = getErrorMessage(error);
-            if (!/index not found|ns not found/i.test(message)) {
-                this.logger.warn(
-                    `Stale index cleanup skipped for "${STALE_V2_UNIQUE_INDEX_NAME}": ${message}`,
-                );
+        for (const name of STALE_UNIQUE_INDEX_NAMES) {
+            try {
+                await this.applicationModel.collection.dropIndex(name);
+                this.logger.log(`Dropped stale index "${name}"`);
+            } catch (error) {
+                const message = getErrorMessage(error);
+                if (!/index not found|ns not found/i.test(message)) {
+                    this.logger.warn(`Stale index cleanup skipped for "${name}": ${message}`);
+                }
             }
         }
     }
