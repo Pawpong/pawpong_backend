@@ -36,6 +36,7 @@ import { AdoptionModule } from './api/adoption/adoption.module';
 import { BreederPetPostingModule } from './api/breeder-pet-posting/breeder-pet-posting.module';
 import { ProfileModule } from './api/profile/profile.module';
 import { CommunityModule } from './api/community/community.module';
+import { AdoptionApplicationModule } from './api/adoption-application/adoption-application.module';
 import { AppVersionModule } from './api/app-version/app-version.module';
 import { InquiryModule } from './api/inquiry/inquiry.module';
 import { FeedModule } from './api/feed/feed.module';
@@ -80,6 +81,7 @@ import { ChatModule } from './api/chat/chat.module';
         BreederPetPostingModule,
         ProfileModule,
         CommunityModule,
+        AdoptionApplicationModule,
         AppVersionModule,
         InquiryModule,
         FeedModule,
