@@ -60,6 +60,16 @@ export class CommunityRepository {
             .exec();
     }
 
+    /**
+     * 게시글 존재 + isActive 만 확인 (전체 도큐먼트 가져오지 않음).
+     * 댓글 페이지네이션처럼 후속 페이지에서 가볍게 확인용.
+     */
+    async existsActivePost(postId: string): Promise<boolean> {
+        if (!Types.ObjectId.isValid(postId)) return false;
+        const found = await this.postModel.exists({ _id: new Types.ObjectId(postId), isActive: true });
+        return Boolean(found);
+    }
+
     async listComments(
         query: CommunityPostCommentListQuery,
     ): Promise<{ docs: CommunityPostCommentDocument[]; totalItems: number }> {
