@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 
 import {
     CommunityPost,
@@ -14,6 +14,10 @@ import type {
     CommunityPostCommentListQuery,
     CommunityPostListQuery,
 } from '../application/types/community-post.type';
+import type {
+    CommunityPostCreatePersistData,
+    CommunityPostUpdateCommand,
+} from '../application/types/community-post-write.type';
 
 /**
  * v2 커뮤니티 — Mongoose 직접 접근 캡슐화.
@@ -68,6 +72,51 @@ export class CommunityRepository {
         if (!Types.ObjectId.isValid(postId)) return false;
         const found = await this.postModel.exists({ _id: new Types.ObjectId(postId), isActive: true });
         return Boolean(found);
+    }
+
+    async createPost(data: CommunityPostCreatePersistData): Promise<{ _id: string }> {
+        const created = await this.postModel.create({
+            ...data,
+            authorId: new Types.ObjectId(data.authorId),
+        });
+        return { _id: String(created._id) };
+    }
+
+    async updatePostByAuthor(
+        postId: string,
+        authorId: string,
+        patch: CommunityPostUpdateCommand,
+    ): Promise<{ changed: boolean }> {
+        if (!Types.ObjectId.isValid(postId) || !Types.ObjectId.isValid(authorId)) {
+            return { changed: false };
+        }
+        const $set: UpdateQuery<CommunityPost>['$set'] = {};
+        if (patch.title !== undefined) $set.title = patch.title;
+        if (patch.body !== undefined) $set.body = patch.body;
+        if (patch.photos !== undefined) $set.photos = patch.photos;
+        if (patch.petType !== undefined) $set.petType = patch.petType;
+        if (patch.category !== undefined) $set.category = patch.category;
+
+        if (Object.keys($set).length === 0) {
+            return { changed: false };
+        }
+
+        const result = await this.postModel.updateOne(
+            { _id: new Types.ObjectId(postId), authorId: new Types.ObjectId(authorId), isActive: true },
+            { $set },
+        );
+        return { changed: result.modifiedCount > 0 };
+    }
+
+    async softDeletePostByAuthor(postId: string, authorId: string): Promise<{ changed: boolean }> {
+        if (!Types.ObjectId.isValid(postId) || !Types.ObjectId.isValid(authorId)) {
+            return { changed: false };
+        }
+        const result = await this.postModel.updateOne(
+            { _id: new Types.ObjectId(postId), authorId: new Types.ObjectId(authorId), isActive: true },
+            { $set: { isActive: false } },
+        );
+        return { changed: result.modifiedCount > 0 };
     }
 
     async listComments(
