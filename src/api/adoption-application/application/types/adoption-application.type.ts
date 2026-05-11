@@ -47,5 +47,7 @@ export interface AdoptionApplicationPersistData {
     petId: string;
     petName: string;
     status: 'consultation_pending';
+    /** 폼 버전 식별자 — partial unique index 적용 범위 제한용 */
+    formVersion: 'v2';
     standardResponses: AdoptionApplicationStandardResponses;
 }

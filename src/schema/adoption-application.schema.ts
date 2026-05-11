@@ -252,15 +252,32 @@ export class AdoptionApplication {
      */
     @Prop()
     breederNotes?: string;
+
+    /**
+     * 폼 버전 식별자 ('v2' 만 채워짐, v1 docs 는 미설정).
+     * partial unique index 가 v2 신청에만 적용되도록 식별하는 키.
+     * v1 의 /api/adopter/application 흐름과 인덱스 영향을 분리한다.
+     */
+    @Prop({ type: String })
+    formVersion?: 'v2';
 }
 
 export const AdoptionApplicationSchema = SchemaFactory.createForClass(AdoptionApplication);
 
 /**
- * v2 입양 신청 동시성 안전망:
- * 동일 adopter × pet 의 처리 중(consultation_pending / consultation_completed) 신청이 두 개 이상 생기는 race
- * 를 DB 단계에서 차단한다. 종결 상태(adoption_approved / adoption_rejected)는 partial filter 에서 제외되어
- * 재신청을 허용한다. application 계층의 existsOpenApplicationForPet 사전 체크와 함께 이중 방어선.
+ * v2 입양 신청 동시성 안전망 — v2 docs 에만 적용:
+ * partialFilterExpression 에 `formVersion: 'v2'` 를 명시해 v1 의 /api/adopter/application 흐름은 인덱스
+ * 적용 범위에 들지 않도록 분리한다. (v1 docs 는 formVersion 이 없어 partial 에서 자동 제외.)
+ *
+ * 인덱스 의도:
+ * - 동일 adopter × pet 의 처리 중(consultation_pending / consultation_completed) v2 신청이 두 개 이상 생기는
+ *   race 를 DB 단계에서 차단
+ * - 종결 상태(adoption_approved / adoption_rejected)는 partial 에서 제외 → 재신청 허용
+ *
+ * 인덱스 rollout 경로 (deployment note):
+ * - 새 필드 formVersion 은 optional 이라 v1 도큐먼트 변경 없이 안전
+ * - Mongoose 가 모듈 로드 시 ensureIndex 호출로 자동 생성 (autoIndex 기본값)
+ * - v2 출시 전이라 위반 데이터가 없어 인덱스 생성은 즉시 성공
  */
 AdoptionApplicationSchema.index(
     { adopterId: 1, petId: 1 },
@@ -268,8 +285,9 @@ AdoptionApplicationSchema.index(
         unique: true,
         partialFilterExpression: {
             status: { $in: ['consultation_pending', 'consultation_completed'] },
+            formVersion: 'v2',
         },
-        name: 'uniq_adopter_pet_open_application',
+        name: 'uniq_adopter_pet_open_application_v2',
     },
 );
 
