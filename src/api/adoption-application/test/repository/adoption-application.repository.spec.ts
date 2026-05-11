@@ -53,19 +53,36 @@ describe('AdoptionApplicationRepository — stale index 방어층', () => {
         ).rejects.toBe(otherError);
     });
 
-    it('onModuleInit — stale 인덱스가 없으면(index not found) 조용히 통과', async () => {
-        const dropIndex = jest.fn().mockRejectedValueOnce(new Error('index not found with name [foo]'));
+    it('onModuleInit — 두 이름(0063f159/592e5a22) 모두 drop 시도, 없으면 조용히 통과', async () => {
+        const dropIndex = jest
+            .fn()
+            .mockRejectedValueOnce(new Error('index not found with name [a]'))
+            .mockRejectedValueOnce(new Error('index not found with name [b]'));
         const applicationModel = { collection: { dropIndex } };
         const repo = buildRepository(applicationModel);
         await expect(repo.onModuleInit()).resolves.toBeUndefined();
-        expect(dropIndex).toHaveBeenCalledWith('uniq_adopter_pet_open_application_v2');
+        expect(dropIndex).toHaveBeenNthCalledWith(1, 'uniq_adopter_pet_open_application');
+        expect(dropIndex).toHaveBeenNthCalledWith(2, 'uniq_adopter_pet_open_application_v2');
     });
 
-    it('onModuleInit — stale 인덱스가 있으면 명시적으로 drop', async () => {
-        const dropIndex = jest.fn().mockResolvedValueOnce({ ok: 1 });
+    it('onModuleInit — 둘 다 살아있으면 둘 다 명시적으로 drop', async () => {
+        const dropIndex = jest.fn().mockResolvedValue({ ok: 1 });
         const applicationModel = { collection: { dropIndex } };
         const repo = buildRepository(applicationModel);
         await repo.onModuleInit();
-        expect(dropIndex).toHaveBeenCalledWith('uniq_adopter_pet_open_application_v2');
+        expect(dropIndex).toHaveBeenCalledTimes(2);
+        expect(dropIndex).toHaveBeenNthCalledWith(1, 'uniq_adopter_pet_open_application');
+        expect(dropIndex).toHaveBeenNthCalledWith(2, 'uniq_adopter_pet_open_application_v2');
+    });
+
+    it('onModuleInit — 한쪽 drop 이 예상 외 오류로 실패해도 다른 쪽 drop 은 진행', async () => {
+        const dropIndex = jest
+            .fn()
+            .mockRejectedValueOnce(new Error('temporary network failure'))
+            .mockResolvedValueOnce({ ok: 1 });
+        const applicationModel = { collection: { dropIndex } };
+        const repo = buildRepository(applicationModel);
+        await expect(repo.onModuleInit()).resolves.toBeUndefined();
+        expect(dropIndex).toHaveBeenCalledTimes(2);
     });
 });
