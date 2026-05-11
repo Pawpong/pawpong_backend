@@ -81,3 +81,4 @@ GoogleService-Info.plist
 scripts/*.js
 scripts/*.js.map
 scripts/*.d.ts
+test-push.mjs
