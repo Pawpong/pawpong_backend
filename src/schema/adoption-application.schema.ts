@@ -135,6 +135,15 @@ export class StandardApplicationData {
      */
     @Prop({ required: false, maxlength: 1500 })
     additionalNotes?: string;
+
+    /**
+     * v2 입양 신청 폼 — 입양 계획 간단 작성 (Figma 122:3)
+     * placeholder: "생활패턴, 주거환경, 입양 시기 등을 입력해주세요"
+     * 기존 selfIntroduction/livingSpaceDescription/desiredAdoptionTiming 보다 간소화된 free-text 입력.
+     * v1 호환 위해 optional.
+     */
+    @Prop({ required: false, maxlength: 1500 })
+    adoptionPlan?: string;
 }
 
 /**
