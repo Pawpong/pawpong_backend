@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 
-import { RecipientType } from '../../../../common/enum/user.enum';
+import { NotificationType, RecipientType } from '../../../../common/enum/user.enum';
 import { MailService } from '../../../../common/mail/mail.service';
 import { MailTemplateService } from '../../../../common/mail/mail-template.service';
 import { getErrorStack } from '../../../../common/utils/error.util';
@@ -26,18 +26,23 @@ export class BreederAdminNotifierAdapter implements BreederAdminNotifierPort {
     ) {}
 
     async sendSuspensionEmail(recipient: BreederAdminNotificationRecipient, reason: string): Promise<void> {
-        if (!recipient.emailAddress) {
-            return;
-        }
+        const builder = this.notificationDispatchPort
+            .to(recipient.breederId, RecipientType.BREEDER)
+            .type(NotificationType.BREEDER_SUSPENDED)
+            .title('브리더 계정이 정지되었습니다')
+            .content('자세한 사유는 이메일을 확인해주세요.');
 
-        const emailContent = this.mailTemplateService.getBreederSuspensionEmail(recipient.breederName, reason);
-        void this.mailService
-            .sendMail({
+        if (recipient.emailAddress) {
+            const emailContent = this.mailTemplateService.getBreederSuspensionEmail(recipient.breederName, reason);
+            builder.withEmail({
                 to: recipient.emailAddress,
                 subject: emailContent.subject,
                 html: emailContent.html,
-            })
-            .catch((error: unknown) => this.logger.error('브리더 정지 이메일 발송 실패', getErrorStack(error)));
+            });
+        }
+
+        builder.withPush();
+        await builder.send();
     }
 
     async sendUnsuspensionEmail(recipient: BreederAdminNotificationRecipient): Promise<void> {
@@ -72,6 +77,7 @@ export class BreederAdminNotifierAdapter implements BreederAdminNotifierPort {
             });
         }
 
+        builder.withPush();
         await builder.send();
     }
 

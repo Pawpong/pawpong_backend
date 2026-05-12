@@ -36,6 +36,7 @@ export class BreederVerificationAdminNotifierAdapter implements BreederVerificat
             });
         }
 
+        builder.withPush();
         await builder.send();
     }
 
@@ -64,27 +65,28 @@ export class BreederVerificationAdminNotifierAdapter implements BreederVerificat
             });
         }
 
+        builder.withPush();
         await builder.send();
     }
 
     async sendDocumentReminder(recipient: BreederVerificationAdminNotificationRecipient): Promise<void> {
-        if (!recipient.emailAddress) {
-            return;
-        }
-
-        const emailContent = this.mailTemplateService.getDocumentReminderEmail(recipient.breederName);
-
-        await this.notificationDispatchPort
+        const builder = this.notificationDispatchPort
             .to(recipient.breederId, RecipientType.BREEDER)
             .type(NotificationType.DOCUMENT_REMINDER)
             .title('🐾 브리더 입점 절차가 아직 완료되지 않았어요!')
             .content('필요한 서류들을 제출하시면 입양자에게 프로필이 공개됩니다.')
-            .related(recipient.breederId, 'profile')
-            .withEmail({
+            .related(recipient.breederId, 'profile');
+
+        if (recipient.emailAddress) {
+            const emailContent = this.mailTemplateService.getDocumentReminderEmail(recipient.breederName);
+            builder.withEmail({
                 to: recipient.emailAddress,
                 subject: emailContent.subject,
                 html: emailContent.html,
-            })
-            .send();
+            });
+        }
+
+        builder.withPush();
+        await builder.send();
     }
 }
