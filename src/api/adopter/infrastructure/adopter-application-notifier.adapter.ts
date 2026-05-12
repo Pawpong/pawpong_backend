@@ -43,6 +43,7 @@ export class AdopterApplicationNotifierAdapter implements AdopterApplicationNoti
             });
         }
 
+        builder.withPush();
         await builder.send();
     }
 
@@ -69,6 +70,7 @@ export class AdopterApplicationNotifierAdapter implements AdopterApplicationNoti
             });
         }
 
+        builder.withPush();
         await builder.send();
     }
 }
