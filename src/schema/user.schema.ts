@@ -14,9 +14,10 @@ export class PushDeviceToken {
 
     /**
      * 디바이스 플랫폼 (ios | android)
+     * 웹 브릿지를 통한 토큰 등록 시 플랫폼 정보가 없을 수 있어 optional 처리
      */
-    @Prop({ required: true, enum: ['ios', 'android'] })
-    platform: string;
+    @Prop({ required: false, enum: ['ios', 'android'] })
+    platform?: string;
 
     /**
      * 토큰 등록/갱신 시각 (FCM은 주기적 갱신 필요)

@@ -386,13 +386,13 @@ export class BreederRepository {
      *
      * @param breederId 브리더 ID
      * @param token FCM 디바이스 토큰
-     * @param platform 디바이스 플랫폼
+     * @param platform 디바이스 플랫폼 (웹 브릿지 경유 시 생략 가능)
      * @param appVersion 선택적 앱 버전 (디버깅용)
      */
     async upsertPushDeviceToken(
         breederId: string,
         token: string,
-        platform: 'ios' | 'android',
+        platform?: 'ios' | 'android',
         appVersion?: string,
     ): Promise<void> {
         await this.breederModel.updateOne({ _id: breederId }, { $pull: { pushDeviceTokens: { token } } }).exec();

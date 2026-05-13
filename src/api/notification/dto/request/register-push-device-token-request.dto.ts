@@ -14,13 +14,15 @@ export class RegisterPushDeviceTokenRequestDto {
     token: string;
 
     @ApiProperty({
-        description: '디바이스 플랫폼',
+        description: '디바이스 플랫폼 (웹 브릿지 경유 시 생략 가능)',
         enum: ['ios', 'android'],
         example: 'ios',
+        required: false,
     })
+    @IsOptional()
     @IsString()
     @IsIn(['ios', 'android'])
-    platform: 'ios' | 'android';
+    platform?: 'ios' | 'android';
 
     @ApiProperty({
         description: '앱 버전 (디버깅용)',

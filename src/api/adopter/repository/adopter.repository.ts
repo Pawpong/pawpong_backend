@@ -300,13 +300,13 @@ export class AdopterRepository {
      *
      * @param adopterId 입양자 ID
      * @param token FCM 디바이스 토큰
-     * @param platform 디바이스 플랫폼 (ios/android)
+     * @param platform 디바이스 플랫폼 (ios/android, 웹 브릿지 경유 시 생략 가능)
      * @param appVersion 선택적 앱 버전 (디버깅용)
      */
     async upsertPushDeviceToken(
         adopterId: string,
         token: string,
-        platform: 'ios' | 'android',
+        platform?: 'ios' | 'android',
         appVersion?: string,
     ): Promise<void> {
         await this.adopterModel.updateOne({ _id: adopterId }, { $pull: { pushDeviceTokens: { token } } }).exec();
