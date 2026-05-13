@@ -9,7 +9,7 @@ export interface RegisterPushDeviceTokenCommand {
     userId: string;
     userRole: NotificationUserRole;
     token: string;
-    platform: 'ios' | 'android';
+    platform?: 'ios' | 'android';
     appVersion?: string;
 }
 
