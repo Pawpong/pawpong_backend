@@ -31,12 +31,14 @@ export class AuthSocialLoginSuccessRedirectFactoryService {
             (input.frontendUrl.includes('localhost') || input.frontendUrl.includes('127.0.0.1')) &&
             !input.frontendUrl.includes('local.pawpong.kr');
         const isVercelDev = input.frontendUrl.includes('vercel.app');
+        // dev.pawpong.kr는 dev 환경이므로 RN WebView가 accessToken을 받을 수 있도록 URL 파라미터 플로우 강제
+        const isDevDomain = input.frontendUrl.includes('dev.pawpong.kr');
 
         this.logger.log(
-            `[processSocialLoginCallback] isProduction: ${input.isProduction}, isLocalFrontend: ${isLocalFrontend}, isVercelDev: ${isVercelDev}, frontendUrl: ${input.frontendUrl}`,
+            `[processSocialLoginCallback] isProduction: ${input.isProduction}, isLocalFrontend: ${isLocalFrontend}, isVercelDev: ${isVercelDev}, isDevDomain: ${isDevDomain}, frontendUrl: ${input.frontendUrl}`,
         );
 
-        if (!input.isProduction || isLocalFrontend || isVercelDev) {
+        if (!input.isProduction || isLocalFrontend || isVercelDev || isDevDomain) {
             this.logger.log('[processSocialLoginCallback] URL 파라미터 방식으로 토큰 전달');
 
             const redirectPath = this.authSocialRedirectPathService.resolve(input.originUrl, this.logger, true);
