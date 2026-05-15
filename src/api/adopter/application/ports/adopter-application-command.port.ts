@@ -13,9 +13,9 @@ export type AdopterApplicationCustomResponseRecord = {
 export type AdopterApplicationCreateCommand = {
     breederId: string;
     adopterId: string;
-    adopterName: string;
-    adopterEmail: string;
-    adopterPhone: string;
+    adopterName?: string;
+    adopterEmail?: string;
+    adopterPhone?: string;
     petId?: string;
     petName?: string;
     status: string;

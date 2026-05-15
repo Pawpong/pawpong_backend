@@ -8,8 +8,8 @@ export type AdopterApplicationBreederNotificationTarget = {
 export type AdopterApplicationConfirmationTarget = {
     applicantId: string;
     applicantRole: string;
-    applicantName: string;
-    applicantEmail: string;
+    applicantName?: string;
+    applicantEmail?: string;
     breederName: string;
 };
 

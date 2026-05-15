@@ -6,13 +6,13 @@ export type AdopterApplicationAnswerValue = string | string[];
 
 export type AdopterApplicationStandardResponsesRecord = {
     privacyConsent: boolean;
-    selfIntroduction: string;
+    selfIntroduction?: string;
     familyMembers: string;
     allFamilyConsent: boolean;
-    allergyTestInfo: string;
-    timeAwayFromHome: string;
-    livingSpaceDescription: string;
-    previousPetExperience: string;
+    allergyTestInfo?: string;
+    timeAwayFromHome?: string;
+    livingSpaceDescription?: string;
+    previousPetExperience?: string;
     canProvideBasicCare: boolean;
     canAffordMedicalExpenses: boolean;
     preferredPetDescription?: string;

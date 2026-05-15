@@ -49,7 +49,7 @@ export class AdopterApplicationNotifierAdapter implements AdopterApplicationNoti
 
     async notifyApplicantApplicationConfirmed(target: AdopterApplicationConfirmationTarget): Promise<void> {
         const emailContent = target.applicantEmail
-            ? this.mailTemplateService.getApplicationConfirmationEmail(target.applicantName, target.breederName)
+            ? this.mailTemplateService.getApplicationConfirmationEmail(target.applicantName ?? '', target.breederName)
             : null;
 
         const recipientType = target.applicantRole === 'breeder' ? RecipientType.BREEDER : RecipientType.ADOPTER;
