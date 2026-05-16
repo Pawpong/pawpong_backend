@@ -7,9 +7,9 @@ import { BreederManagementApplicationStatusController } from './controller/breed
 import { BreederManagementApplicationsQueryController } from './controller/breeder-management-applications-query.controller';
 import { BreederManagementAvailablePetsController } from './controller/breeder-management-available-pets.controller';
 import { BreederManagementDashboardController } from './controller/breeder-management-dashboard.controller';
-import { BreederManagementAdminCounselBannersController } from './admin/breeder-management-admin-counsel-banners.controller';
-import { BreederManagementAdminProfileBannersController } from './admin/breeder-management-admin-profile-banners.controller';
-import { BreederManagementAdminPublicBannersController } from './admin/breeder-management-admin-public-banners.controller';
+import { BreederManagementAdminCounselBannersController } from './admin/controller/breeder-management-admin-counsel-banners.controller';
+import { BreederManagementAdminProfileBannersController } from './admin/controller/breeder-management-admin-profile-banners.controller';
+import { BreederManagementAdminPublicBannersController } from './admin/controller/breeder-management-admin-public-banners.controller';
 import { BreederManagementMyPetsController } from './controller/breeder-management-my-pets.controller';
 import { BreederManagementParentPetsController } from './controller/breeder-management-parent-pets.controller';
 import { BreederManagementProfileInfoController } from './controller/breeder-management-profile-info.controller';
