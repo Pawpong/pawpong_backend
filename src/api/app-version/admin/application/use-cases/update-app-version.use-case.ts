@@ -28,6 +28,25 @@ export class UpdateAppVersionUseCase {
         this.appVersionAdminCommandPolicyService.ensureAppVersionId(appVersionId);
         this.appVersionAdminCommandPolicyService.ensureAdminId(adminId);
 
+        // 부분 업데이트라도 들어온 필드는 형식 검증.
+        if (updateData.latestVersion !== undefined) {
+            this.appVersionAdminCommandPolicyService.ensureSemverFormat(updateData.latestVersion, '최신 버전');
+        }
+        if (updateData.minRequiredVersion !== undefined) {
+            this.appVersionAdminCommandPolicyService.ensureSemverFormat(
+                updateData.minRequiredVersion,
+                '최소 요구 버전',
+            );
+        }
+        // 둘 다 같은 요청에 있으면 브릭 방지 체크. 단일 필드 업데이트의 cross-field 검증은
+        // 어드민 UI 폼이 1차로 막고, 서버는 동일 페이로드 내 일관성만 책임진다.
+        if (updateData.latestVersion !== undefined && updateData.minRequiredVersion !== undefined) {
+            this.appVersionAdminCommandPolicyService.ensureMinRequiredNotAboveLatest(
+                updateData.minRequiredVersion,
+                updateData.latestVersion,
+            );
+        }
+
         try {
             const updated = await this.appVersionWriter.update(appVersionId, updateData);
 
