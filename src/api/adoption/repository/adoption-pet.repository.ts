@@ -3,7 +3,11 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types } from 'mongoose';
 
 import { AvailablePet } from '../../../schema/available-pet.schema';
-import type { AdoptionPetListQuery, AdoptionPetType } from '../application/ports/adoption-pet-reader.port';
+import type {
+    AdoptionPetListQuery,
+    AdoptionPetStatus,
+    AdoptionPetType,
+} from '../application/ports/adoption-pet-reader.port';
 
 @Injectable()
 export class AdoptionPetRepository {
@@ -13,6 +17,7 @@ export class AdoptionPetRepository {
         petType?: AdoptionPetType;
         breederId?: string;
         excludePetId?: string;
+        status?: AdoptionPetStatus;
     }): FilterQuery<AvailablePet> {
         const filter: FilterQuery<AvailablePet> = { isActive: true };
         if (input.petType) {
@@ -24,10 +29,15 @@ export class AdoptionPetRepository {
         if (input.excludePetId && Types.ObjectId.isValid(input.excludePetId)) {
             filter._id = { $ne: new Types.ObjectId(input.excludePetId) };
         }
+        if (input.status) {
+            filter.status = input.status;
+        }
         return filter;
     }
 
-    countList(query: Pick<AdoptionPetListQuery, 'petType' | 'breederId' | 'excludePetId'>): Promise<number> {
+    countList(
+        query: Pick<AdoptionPetListQuery, 'petType' | 'breederId' | 'excludePetId' | 'status'>,
+    ): Promise<number> {
         return this.model.countDocuments(this.buildBaseFilter(query)).exec();
     }
 
