@@ -4,7 +4,7 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection, Types } from 'mongoose';
 import request from 'supertest';
 
-import { createTestingApp } from '../../../../common/test/test-utils';
+import { createTestingApp } from '../../../../common/testing/test-utils';
 
 /**
  * v2 커뮤니티 게시글 작성/수정/삭제 — 라우팅/가드/검증/소유권/소프트 삭제 계약 커버리지.

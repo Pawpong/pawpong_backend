@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { AlimtalkService } from '../../../../common/alimtalk/alimtalk.service';
 import { StorageService } from '../../../../common/storage/storage.service';
-import { closeTestingApp, createTestingApp } from '../../../../common/test/test-utils';
+import { closeTestingApp, createTestingApp } from '../../../../common/testing/test-utils';
 
 export type AuthE2eContext = {
     app: INestApplication;

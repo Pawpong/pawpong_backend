@@ -1,7 +1,7 @@
 import { ArgumentsHost, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 
-import { AllExceptionsFilter, HttpExceptionFilter } from './http-exception.filter';
-import { NotifyCriticalErrorUseCase } from '../discord/application/use-cases/notify-critical-error.use-case';
+import { AllExceptionsFilter, HttpExceptionFilter } from '../http-exception.filter';
+import { NotifyCriticalErrorUseCase } from '../../discord/application/use-cases/notify-critical-error.use-case';
 
 describe('HttpExceptionFilter Discord 알림', () => {
     let notifyCriticalErrorUseCase: jest.Mocked<Pick<NotifyCriticalErrorUseCase, 'execute'>>;

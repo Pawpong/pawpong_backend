@@ -3,7 +3,7 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection, Types } from 'mongoose';
 import request from 'supertest';
 
-import { createTestingApp } from '../../../../common/test/test-utils';
+import { createTestingApp } from '../../../../common/testing/test-utils';
 
 describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
     let app: INestApplication;

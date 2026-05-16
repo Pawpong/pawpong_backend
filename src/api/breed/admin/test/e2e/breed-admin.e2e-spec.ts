@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 import { Connection } from 'mongoose';
 import request from 'supertest';
 
-import { createTestingApp, cleanupCollections } from '../../../../../common/test/test-utils';
+import { createTestingApp, cleanupCollections } from '../../../../../common/testing/test-utils';
 
 /**
  * 품종 관리 Admin 종단간 테스트
