@@ -20,6 +20,12 @@ export class CreateAppVersionUseCase {
     async execute(adminId: string, createData: AppVersionCreateCommand): Promise<AppVersionAdminItemResult> {
         this.logger.logStart('createAppVersion', '앱 버전 생성 시작', { adminId, platform: createData.platform });
         this.appVersionAdminCommandPolicyService.ensureAdminId(adminId);
+        this.appVersionAdminCommandPolicyService.ensureSemverFormat(createData.latestVersion, '최신 버전');
+        this.appVersionAdminCommandPolicyService.ensureSemverFormat(createData.minRequiredVersion, '최소 요구 버전');
+        this.appVersionAdminCommandPolicyService.ensureMinRequiredNotAboveLatest(
+            createData.minRequiredVersion,
+            createData.latestVersion,
+        );
 
         try {
             const appVersion = await this.appVersionWriter.create(createData);
