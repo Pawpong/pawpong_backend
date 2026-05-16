@@ -3,7 +3,7 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import request from 'supertest';
 
-import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../common/test/test-utils';
+import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../common/testing/test-utils';
 import { LOKI_QUERY_PORT } from '../application/ports/loki-query.port';
 import { LogCategorizerService } from '../domain/services/log-categorizer.service';
 import type { SystemHealthResponseDto } from '../dto/response/system-health-response.dto';

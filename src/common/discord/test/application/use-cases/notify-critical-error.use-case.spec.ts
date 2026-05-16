@@ -1,7 +1,7 @@
-import { NotifyCriticalErrorUseCase } from './notify-critical-error.use-case';
-import { DiscordErrorAlertPolicyService } from '../../domain/services/discord-error-alert-policy.service';
-import { DiscordErrorAlertPort } from '../ports/discord-error-alert.port';
-import { CustomLoggerService } from '../../../logger/custom-logger.service';
+import { NotifyCriticalErrorUseCase } from '../../../application/use-cases/notify-critical-error.use-case';
+import { DiscordErrorAlertPolicyService } from '../../../domain/services/discord-error-alert-policy.service';
+import { DiscordErrorAlertPort } from '../../../application/ports/discord-error-alert.port';
+import { CustomLoggerService } from '../../../../logger/custom-logger.service';
 
 describe('NotifyCriticalErrorUseCase', () => {
     let useCase: NotifyCriticalErrorUseCase;

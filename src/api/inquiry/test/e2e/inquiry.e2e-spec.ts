@@ -5,7 +5,7 @@ import {
     cleanupDatabase,
     getAdopterToken,
     getBreederToken,
-} from '../../../../common/test/test-utils';
+} from '../../../../common/testing/test-utils';
 
 /**
  * 문의 종단간 테스트
