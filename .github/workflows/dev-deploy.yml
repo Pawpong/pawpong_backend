@@ -39,15 +39,26 @@ jobs:
                   chmod 600 ~/.ssh/deploy_key
                   ssh-keyscan -p ${{ secrets.DEV_SERVER_PORT }} -H ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
-            - name: Verify remote prerequisites (rsync·pm2·pnpm)
+            - name: Verify remote prerequisites (node22·rsync·pm2·pnpm)
               run: |
                   SERVER="${{ secrets.DEV_SERVER_USER }}@${{ secrets.DEV_SERVER_HOST }}"
                   PORT="${{ secrets.DEV_SERVER_PORT }}"
+                  # Mac Mini 원격에서 Node 22 LTS + pnpm 9.15.4 를 강제. node 22 미만이면 빌드된 dist
+                  # (Node 22 toolchain 기준)와 런타임 ABI 가 어긋나 native modules(sharp/firebase-admin 등)이
+                  # 깨질 수 있어 deploy 자체를 fail-fast.
                   ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${PORT} ${SERVER} \
                     "command -v rsync >/dev/null || sudo apt-get install -y rsync; \
                      command -v pm2 >/dev/null || sudo npm install -g pm2; \
+                     NODE_MAJOR=\$(node -v 2>/dev/null | sed -E 's/^v([0-9]+).*/\1/' || echo 0); \
+                     if [ \"\${NODE_MAJOR}\" -lt 22 ]; then \
+                       echo \"❌ remote node 버전이 22 미만 (현재: \$(node -v 2>/dev/null || echo 'missing')). nvm/asdf 등으로 22 LTS 활성화 필요\"; exit 1; \
+                     fi; \
                      command -v pnpm >/dev/null || sudo npm install -g pnpm@9.15.4; \
-                     rsync --version | head -1; pm2 --version; pnpm --version"
+                     PNPM_MAJOR=\$(pnpm --version 2>/dev/null | cut -d. -f1 || echo 0); \
+                     if [ \"\${PNPM_MAJOR}\" -lt 9 ]; then \
+                       sudo npm install -g pnpm@9.15.4; \
+                     fi; \
+                     rsync --version | head -1; pm2 --version; node --version; pnpm --version"
 
             - name: Transfer artifacts to Mac Mini (rsync with tar fallback)
               run: |
