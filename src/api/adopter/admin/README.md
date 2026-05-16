@@ -99,5 +99,5 @@ async deleteReview(breederId: string, reviewId: string): Promise<void>
 ## 테스트 실행
 
 ```bash
-yarn test:e2e src/api/adopter/admin/test/adopter-admin.e2e-spec.ts
+pnpm test:e2e src/api/adopter/admin/test/adopter-admin.e2e-spec.ts
 ```
