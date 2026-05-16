@@ -1,8 +1,8 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AdopterAccountController } from './controller/adopter-account.controller';
-import { AdopterAdminApplicationController } from './admin/adopter-admin-application.controller';
-import { AdopterAdminReviewController } from './admin/adopter-admin-review.controller';
+import { AdopterAdminApplicationController } from './admin/controller/adopter-admin-application.controller';
+import { AdopterAdminReviewController } from './admin/controller/adopter-admin-review.controller';
 import { AdopterApplicationCommandController } from './controller/adopter-application-command.controller';
 import { AdopterApplicationQueryController } from './controller/adopter-application-query.controller';
 import { AdopterFavoriteCommandController } from './controller/adopter-favorite-command.controller';
