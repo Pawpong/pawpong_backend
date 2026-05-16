@@ -19,9 +19,9 @@ import { GetLevelChangeRequestsUseCase } from './application/use-cases/get-level
 import { GetPendingBreederVerificationsUseCase } from './application/use-cases/get-pending-breeder-verifications.use-case';
 import { SendDocumentRemindersUseCase } from './application/use-cases/send-document-reminders.use-case';
 import { UpdateBreederVerificationUseCase } from './application/use-cases/update-breeder-verification.use-case';
-import { BreederVerificationAdminCommandController } from './breeder-verification-admin-command.controller';
-import { BreederVerificationAdminDetailController } from './breeder-verification-admin-detail.controller';
-import { BreederVerificationAdminQueryController } from './breeder-verification-admin-query.controller';
+import { BreederVerificationAdminCommandController } from './controller/breeder-verification-admin-command.controller';
+import { BreederVerificationAdminDetailController } from './controller/breeder-verification-admin-detail.controller';
+import { BreederVerificationAdminQueryController } from './controller/breeder-verification-admin-query.controller';
 import { BreederVerificationAdminActivityLogFactoryService } from './domain/services/breeder-verification-admin-activity-log-factory.service';
 import { BreederVerificationAdminBreederItemMapperService } from './domain/services/breeder-verification-admin-breeder-item-mapper.service';
 import { BreederVerificationAdminCommandResultMapperService } from './domain/services/breeder-verification-admin-command-result-mapper.service';
