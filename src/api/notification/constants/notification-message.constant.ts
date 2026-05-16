@@ -61,4 +61,11 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; bo
         title: '{breederName}님이 새로운 아이를 등록했어요!',
         body: '지금 바로 확인해보세요.',
     },
+    [NotificationType.ADMIN_BROADCAST]: {
+        // 어드민이 발송 시점에 직접 입력한 title/body 를 그대로 사용한다. template render 를 거치는 경로에서는
+        // metadata 의 {title}/{body} 로 치환되도록 placeholder 만 둠. 실제 SendAdminPushUseCase 는 template 을
+        // 거치지 않고 NotificationCommandPort.create 에 직접 입력 텍스트를 전달한다.
+        title: '{title}',
+        body: '{body}',
+    },
 };
