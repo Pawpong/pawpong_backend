@@ -1,9 +1,6 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import {
-    POPULAR_KEYWORD_WRITER_PORT,
-    type PopularKeywordWriterPort,
-} from '../ports/popular-keyword-writer.port';
+import { POPULAR_KEYWORD_WRITER_PORT, type PopularKeywordWriterPort } from '../ports/popular-keyword-writer.port';
 
 @Injectable()
 export class DeletePopularKeywordUseCase {

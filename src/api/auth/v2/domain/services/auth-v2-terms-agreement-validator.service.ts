@@ -38,9 +38,7 @@ export class AuthV2TermsAgreementValidatorService {
             .map((term) => term.code);
 
         if (missingRequired.length > 0) {
-            throw new BadRequestException(
-                `필수 약관 동의가 누락되었습니다: ${missingRequired.join(', ')}`,
-            );
+            throw new BadRequestException(`필수 약관 동의가 누락되었습니다: ${missingRequired.join(', ')}`);
         }
 
         // 2) 제출된 항목이 활성 약관 목록에 존재하는지 + 버전 일치 검증

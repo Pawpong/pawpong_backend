@@ -2,18 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 
-import {
-    CommunityPost,
-    CommunityPostDocument,
-} from '../../../schema/community-post.schema';
-import {
-    CommunityPostComment,
-    CommunityPostCommentDocument,
-} from '../../../schema/community-post-comment.schema';
-import type {
-    CommunityPostCommentListQuery,
-    CommunityPostListQuery,
-} from '../application/types/community-post.type';
+import { CommunityPost, CommunityPostDocument } from '../../../schema/community-post.schema';
+import { CommunityPostComment, CommunityPostCommentDocument } from '../../../schema/community-post-comment.schema';
+import type { CommunityPostCommentListQuery, CommunityPostListQuery } from '../application/types/community-post.type';
 import type {
     CommunityPostCreatePersistData,
     CommunityPostUpdateCommand,
@@ -32,9 +23,7 @@ export class CommunityRepository {
         private readonly commentModel: Model<CommunityPostCommentDocument>,
     ) {}
 
-    async listPosts(
-        query: CommunityPostListQuery,
-    ): Promise<{ docs: CommunityPostDocument[]; totalItems: number }> {
+    async listPosts(query: CommunityPostListQuery): Promise<{ docs: CommunityPostDocument[]; totalItems: number }> {
         const filter: FilterQuery<CommunityPost> = { isActive: true };
         if (query.petType) filter.petType = query.petType;
         if (query.category && query.category.trim().length > 0) filter.category = query.category.trim();

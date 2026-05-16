@@ -33,9 +33,7 @@ describe('GetCommunityPostCommentsUseCase', () => {
 
     it('page>=2 + 게시글 없음 → BadRequest (일관된 missing-post 계약)', async () => {
         reader.existsActivePost.mockResolvedValueOnce(false);
-        await expect(useCase.execute({ postId: 'p-x', page: 3, pageSize: 10 })).rejects.toThrow(
-            BadRequestException,
-        );
+        await expect(useCase.execute({ postId: 'p-x', page: 3, pageSize: 10 })).rejects.toThrow(BadRequestException);
         expect(reader.listComments).not.toHaveBeenCalled();
     });
 

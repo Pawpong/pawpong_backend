@@ -43,11 +43,7 @@ export class CommunityPostWriteValidatorService {
         this.validateOptionalLimits(patch);
     }
 
-    private validateOptionalLimits(input: {
-        title?: string;
-        photos?: string[];
-        category?: string;
-    }): void {
+    private validateOptionalLimits(input: { title?: string; photos?: string[]; category?: string }): void {
         if (input.title !== undefined && input.title.length > MAX_TITLE) {
             throw new BadRequestException(`제목은 ${MAX_TITLE}자 이내여야 합니다.`);
         }

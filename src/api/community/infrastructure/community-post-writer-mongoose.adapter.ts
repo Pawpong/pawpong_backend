@@ -16,11 +16,7 @@ export class CommunityPostWriterMongooseAdapter implements CommunityPostWriterPo
         return { postId: _id };
     }
 
-    updateByAuthor(
-        postId: string,
-        authorId: string,
-        patch: CommunityPostUpdateCommand,
-    ): Promise<{ changed: boolean }> {
+    updateByAuthor(postId: string, authorId: string, patch: CommunityPostUpdateCommand): Promise<{ changed: boolean }> {
         return this.repository.updatePostByAuthor(postId, authorId, patch);
     }
 

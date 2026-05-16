@@ -3,9 +3,7 @@ import { Injectable } from '@nestjs/common';
 import { PopularKeyword } from '../../../../schema/popular-keyword.schema';
 import type { PopularKeywordSnapshot } from '../../application/ports/popular-keyword-reader.port';
 import { PopularKeywordRepository } from '../../repository/popular-keyword.repository';
-import {
-    PopularKeywordAdminReaderPort,
-} from '../application/ports/popular-keyword-admin-reader.port';
+import { PopularKeywordAdminReaderPort } from '../application/ports/popular-keyword-admin-reader.port';
 
 @Injectable()
 export class PopularKeywordAdminMongooseReaderAdapter implements PopularKeywordAdminReaderPort {

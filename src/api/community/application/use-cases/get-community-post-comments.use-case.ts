@@ -3,10 +3,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { buildPageResult, type PageResult } from '../../../../common/types/page-result.type';
 import { CommunityPostMapperService } from '../../domain/services/community-post-mapper.service';
 import type { CommunityPostCommentResponseDto } from '../../dto/response/community-post-comment.dto';
-import {
-    COMMUNITY_POST_READER_PORT,
-    type CommunityPostReaderPort,
-} from '../ports/community-post-reader.port';
+import { COMMUNITY_POST_READER_PORT, type CommunityPostReaderPort } from '../ports/community-post-reader.port';
 
 const PAGE_SIZE_DEFAULT = 20;
 const PAGE_SIZE_MAX = 100;
