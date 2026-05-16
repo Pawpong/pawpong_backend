@@ -5,6 +5,7 @@ import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../co
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES } from '../../constants/notification-response-messages';
 import { NOTIFICATION_ADMIN_FORBIDDEN_RESPONSE } from '../../constants/notification-swagger.constants';
+import { AdminPushResultResponseDto } from '../dto/response/admin-push-result.dto';
 import {
     NotificationAdminResponseDto,
     NotificationStatsResponseDto,
@@ -79,4 +80,38 @@ export function ApiGetNotificationAdminStatsEndpoint() {
         successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.notificationStatsRetrieved,
         errorResponses: [NOTIFICATION_ADMIN_FORBIDDEN_RESPONSE],
     });
+}
+
+const ADMIN_PUSH_VALIDATION_ERROR = {
+    status: 400,
+    description: '입력 검증 실패 (target/title/body)',
+    errorExample: '개별 발송은 userId가 필요합니다.',
+} as const;
+
+export function ApiSendAdminPushEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '어드민 푸시 발송',
+            description: `
+                관리자가 사용자에게 직접 푸시를 발송합니다. FCM 전송 + in-app 알림 doc 동시 생성.
+
+                ## 대상 (target)
+                - all_adopters: 활성 입양자 전체
+                - all_breeders: 활성 브리더 전체
+                - individual: { role, userId } 필수, 단일 사용자
+
+                ## 동작
+                - 활성 + 토큰 보유 사용자만 FCM 발송, 토큰 없는 사용자도 in-app 알림에는 저장
+                - FCM 500 토큰 chunk 로 분할 멀티캐스트
+                - invalidTokens 는 응답에 포함만 (정리는 후속 cleanup 작업 영역)
+
+                ## 권한
+                - 관리자(admin) 권한이 필요합니다.
+            `,
+            responseType: AdminPushResultResponseDto,
+            successDescription: '어드민 푸시 발송 완료',
+            successMessageExample: '어드민 푸시 발송이 완료되었습니다.',
+            errorResponses: [ADMIN_PUSH_VALIDATION_ERROR, NOTIFICATION_ADMIN_FORBIDDEN_RESPONSE],
+        }),
+    );
 }
