@@ -14,4 +14,4 @@ for domain in "${DOMAINS[@]}"; do
 done
 
 echo "[contract] ${DOMAINS[*]}"
-yarn test:e2e "${CONTRACT_PATHS[@]}" --runInBand --forceExit
+pnpm test:e2e -- "${CONTRACT_PATHS[@]}" --runInBand --forceExit
