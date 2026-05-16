@@ -109,5 +109,5 @@ Response:
 ## 테스트 실행
 
 ```bash
-yarn test:e2e src/api/breed/test/breed.e2e-spec.ts
+pnpm test:e2e src/api/breed/test/breed.e2e-spec.ts
 ```
