@@ -1,4 +1,4 @@
-import { DiscordErrorAlertPolicyService } from './discord-error-alert-policy.service';
+import { DiscordErrorAlertPolicyService } from '../../../domain/services/discord-error-alert-policy.service';
 
 describe('DiscordErrorAlertPolicyService', () => {
     let service: DiscordErrorAlertPolicyService;

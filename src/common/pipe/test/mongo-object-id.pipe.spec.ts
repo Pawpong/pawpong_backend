@@ -1,5 +1,5 @@
 import { DomainValidationError } from '../../../common/error/domain.error';
-import { MongoObjectIdPipe } from '../../pipe/mongo-object-id.pipe';
+import { MongoObjectIdPipe } from '../mongo-object-id.pipe';
 
 describe('MongoObjectIdPipe', () => {
     it('올바른 ObjectId 문자열은 그대로 반환한다', () => {

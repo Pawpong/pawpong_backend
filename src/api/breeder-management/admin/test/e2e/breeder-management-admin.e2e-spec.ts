@@ -5,7 +5,7 @@ import {
     cleanupDatabase,
     getAdminToken,
     getAdopterToken,
-} from '../../../../../common/test/test-utils';
+} from '../../../../../common/testing/test-utils';
 
 /**
  * 브리더 관리 관리자 종단간 테스트
