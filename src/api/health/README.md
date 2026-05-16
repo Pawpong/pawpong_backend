@@ -93,5 +93,5 @@ curl http://localhost:8082/api/health
 ## 테스트 실행
 
 ```bash
-yarn test:e2e src/api/health/test/health.e2e-spec.ts
+pnpm test:e2e src/api/health/test/health.e2e-spec.ts
 ```
