@@ -9,13 +9,13 @@ import { CounselBanner, CounselBannerSchema } from '../../schema/counsel-banner.
 import { ParentPet, ParentPetSchema } from '../../schema/parent-pet.schema';
 import { StorageModule } from '../../common/storage/storage.module';
 
-import { UploadAdminCheckFileReferencesController } from './admin/upload-admin-check-file-references.controller';
-import { UploadAdminFileDeleteController } from './admin/upload-admin-file-delete.controller';
-import { UploadAdminFilesDeleteController } from './admin/upload-admin-files-delete.controller';
-import { UploadAdminFilesListController } from './admin/upload-admin-files-list.controller';
-import { UploadAdminFolderDeleteController } from './admin/upload-admin-folder-delete.controller';
-import { UploadAdminFolderFilesController } from './admin/upload-admin-folder-files.controller';
-import { UploadAdminReferencedFilesController } from './admin/upload-admin-referenced-files.controller';
+import { UploadAdminCheckFileReferencesController } from './admin/controller/upload-admin-check-file-references.controller';
+import { UploadAdminFileDeleteController } from './admin/controller/upload-admin-file-delete.controller';
+import { UploadAdminFilesDeleteController } from './admin/controller/upload-admin-files-delete.controller';
+import { UploadAdminFilesListController } from './admin/controller/upload-admin-files-list.controller';
+import { UploadAdminFolderDeleteController } from './admin/controller/upload-admin-folder-delete.controller';
+import { UploadAdminFolderFilesController } from './admin/controller/upload-admin-folder-files.controller';
+import { UploadAdminReferencedFilesController } from './admin/controller/upload-admin-referenced-files.controller';
 import { UPLOAD_ADMIN_REFERENCE_READER_PORT } from './admin/application/ports/upload-admin-reference-reader.port';
 import { UPLOAD_ADMIN_STORAGE_PORT } from './admin/application/ports/upload-admin-storage.port';
 import {

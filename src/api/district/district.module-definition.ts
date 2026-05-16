@@ -2,8 +2,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { District, DistrictSchema } from '../../schema/district.schema';
 
-import { DistrictAdminCommandController } from './admin/district-admin-command.controller';
-import { DistrictAdminQueryController } from './admin/district-admin-query.controller';
+import { DistrictAdminCommandController } from './admin/controller/district-admin-command.controller';
+import { DistrictAdminQueryController } from './admin/controller/district-admin-query.controller';
 import { DISTRICT_ADMIN_READER_PORT } from './admin/application/ports/district-admin-reader.port';
 import { DISTRICT_WRITER_PORT } from './admin/application/ports/district-writer.port';
 import { CreateDistrictUseCase } from './admin/application/use-cases/create-district.use-case';

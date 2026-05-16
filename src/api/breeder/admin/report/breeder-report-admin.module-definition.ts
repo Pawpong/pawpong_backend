@@ -8,8 +8,8 @@ import { BREEDER_REPORT_ADMIN_READER_PORT } from './application/ports/breeder-re
 import { BREEDER_REPORT_ADMIN_WRITER_PORT } from './application/ports/breeder-report-admin-writer.port';
 import { GetBreederReportsUseCase } from './application/use-cases/get-breeder-reports.use-case';
 import { HandleBreederReportUseCase } from './application/use-cases/handle-breeder-report.use-case';
-import { BreederReportAdminCommandController } from './breeder-report-admin-command.controller';
-import { BreederReportAdminQueryController } from './breeder-report-admin-query.controller';
+import { BreederReportAdminCommandController } from './controller/breeder-report-admin-command.controller';
+import { BreederReportAdminQueryController } from './controller/breeder-report-admin-query.controller';
 import { BreederReportAdminActionResultMapperService } from './domain/services/breeder-report-admin-action-result-mapper.service';
 import { BreederReportAdminActivityLogFactoryService } from './domain/services/breeder-report-admin-activity-log-factory.service';
 import { BreederReportAdminPageAssemblerService } from './domain/services/breeder-report-admin-page-assembler.service';
