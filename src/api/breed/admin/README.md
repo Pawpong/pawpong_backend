@@ -136,5 +136,5 @@ async deleteBreed(id: string): Promise<void>
 ## 테스트 실행
 
 ```bash
-yarn test:e2e src/api/breed/admin/test/admin-breed.e2e-spec.ts
+pnpm test:e2e src/api/breed/admin/test/admin-breed.e2e-spec.ts
 ```

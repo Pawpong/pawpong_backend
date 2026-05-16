@@ -1,7 +1,7 @@
 /**
  * 관리자 계정 생성 스크립트
  *
- * 사용법: yarn create:admin
+ * 사용법: pnpm create:admin
  *
  * .env의 MONGODB_URI에 연결하여 관리자 계정을 생성합니다.
  * dev DB 또는 로컬 DB 대상으로만 사용하세요.

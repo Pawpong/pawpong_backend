@@ -212,5 +212,5 @@ bucket/
 ## 테스트 실행
 
 ```bash
-yarn test:e2e src/api/upload/test/upload.e2e-spec.ts
+pnpm test:e2e src/api/upload/test/upload.e2e-spec.ts
 ```

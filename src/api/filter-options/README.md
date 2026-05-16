@@ -199,5 +199,5 @@ const cached = JSON.parse(localStorage.getItem('filterOptions'));
 ## 테스트 실행
 
 ```bash
-yarn test:e2e src/api/filter-options/test/filter-options.e2e-spec.ts
+pnpm test:e2e src/api/filter-options/test/filter-options.e2e-spec.ts
 ```

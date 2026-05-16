@@ -157,5 +157,5 @@
 ## 테스트 실행
 
 ```bash
-yarn test:e2e src/api/home/test/home.e2e-spec.ts
+pnpm test:e2e src/api/home/test/home.e2e-spec.ts
 ```

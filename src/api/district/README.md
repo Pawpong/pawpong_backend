@@ -181,11 +181,11 @@ async function initDistrictCache() {
 ### 일반 사용자 API 테스트
 
 ```bash
-yarn test:e2e src/api/district/test/district.e2e-spec.ts
+pnpm test:e2e src/api/district/test/district.e2e-spec.ts
 ```
 
 ### 관리자 API 테스트
 
 ```bash
-yarn test:e2e src/api/district/admin/test/district-admin.e2e-spec.ts
+pnpm test:e2e src/api/district/admin/test/district-admin.e2e-spec.ts
 ```
