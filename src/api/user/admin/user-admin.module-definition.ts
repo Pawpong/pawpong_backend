@@ -29,17 +29,17 @@ import { UserAdminPhoneWhitelistResultMapperService } from './domain/services/us
 import { UserAdminUserPageAssemblerService } from './domain/services/user-admin-user-page-assembler.service';
 import { UserAdminMongooseRepositoryAdapter } from './infrastructure/user-admin-mongoose.repository.adapter';
 import { UserAdminRepository } from './repository/user-admin.repository';
-import { UserAdminDeletedUserStatsController } from './user-admin-deleted-user-stats.controller';
-import { UserAdminDeletedUsersListController } from './user-admin-deleted-users-list.controller';
-import { UserAdminHardDeleteUserController } from './user-admin-hard-delete-user.controller';
-import { UserAdminPhoneWhitelistCreateController } from './user-admin-phone-whitelist-create.controller';
-import { UserAdminPhoneWhitelistDeleteController } from './user-admin-phone-whitelist-delete.controller';
-import { UserAdminPhoneWhitelistListController } from './user-admin-phone-whitelist-list.controller';
-import { UserAdminPhoneWhitelistUpdateController } from './user-admin-phone-whitelist-update.controller';
-import { UserAdminProfileController } from './user-admin-profile.controller';
-import { UserAdminRestoreUserController } from './user-admin-restore-user.controller';
-import { UserAdminUsersListController } from './user-admin-users-list.controller';
-import { UserAdminUserStatusController } from './user-admin-user-status.controller';
+import { UserAdminDeletedUserStatsController } from './controller/user-admin-deleted-user-stats.controller';
+import { UserAdminDeletedUsersListController } from './controller/user-admin-deleted-users-list.controller';
+import { UserAdminHardDeleteUserController } from './controller/user-admin-hard-delete-user.controller';
+import { UserAdminPhoneWhitelistCreateController } from './controller/user-admin-phone-whitelist-create.controller';
+import { UserAdminPhoneWhitelistDeleteController } from './controller/user-admin-phone-whitelist-delete.controller';
+import { UserAdminPhoneWhitelistListController } from './controller/user-admin-phone-whitelist-list.controller';
+import { UserAdminPhoneWhitelistUpdateController } from './controller/user-admin-phone-whitelist-update.controller';
+import { UserAdminProfileController } from './controller/user-admin-profile.controller';
+import { UserAdminRestoreUserController } from './controller/user-admin-restore-user.controller';
+import { UserAdminUsersListController } from './controller/user-admin-users-list.controller';
+import { UserAdminUserStatusController } from './controller/user-admin-user-status.controller';
 
 const USER_ADMIN_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Admin.name, schema: AdminSchema },

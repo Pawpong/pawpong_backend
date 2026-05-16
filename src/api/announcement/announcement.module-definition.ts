@@ -3,8 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Announcement, AnnouncementSchema } from '../../schema/announcement.schema';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 
-import { AnnouncementAdminCommandController } from './admin/announcement-admin-command.controller';
-import { AnnouncementAdminQueryController } from './admin/announcement-admin-query.controller';
+import { AnnouncementAdminCommandController } from './admin/controller/announcement-admin-command.controller';
+import { AnnouncementAdminQueryController } from './admin/controller/announcement-admin-query.controller';
 import { ANNOUNCEMENT_ADMIN_READER_PORT } from './admin/application/ports/announcement-admin-reader.port';
 import { ANNOUNCEMENT_WRITER_PORT } from './admin/application/ports/announcement-writer.port';
 import { CreateAnnouncementUseCase } from './admin/application/use-cases/create-announcement.use-case';

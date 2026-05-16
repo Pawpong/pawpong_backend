@@ -19,9 +19,9 @@ import { NotificationAdminPaginationAssemblerService } from './domain/services/n
 import { NotificationAdminStatsResultMapperService } from './domain/services/notification-admin-stats-result-mapper.service';
 import { AdminPushRecipientMongooseAdapter } from './infrastructure/admin-push-recipient-mongoose.adapter';
 import { NotificationAdminMongooseReaderAdapter } from './infrastructure/notification-admin-mongoose-reader.adapter';
-import { NotificationAdminPushSendController } from './notification-admin-push-send.controller';
-import { NotificationAdminQueryController } from './notification-admin-query.controller';
-import { NotificationAdminStatsController } from './notification-admin-stats.controller';
+import { NotificationAdminPushSendController } from './controller/notification-admin-push-send.controller';
+import { NotificationAdminQueryController } from './controller/notification-admin-query.controller';
+import { NotificationAdminStatsController } from './controller/notification-admin-stats.controller';
 import { AdminPushRecipientRepository } from './repository/admin-push-recipient.repository';
 import { NotificationAdminRepository } from './repository/notification-admin.repository';
 
