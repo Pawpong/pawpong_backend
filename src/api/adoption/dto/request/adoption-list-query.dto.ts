@@ -13,6 +13,12 @@ export enum AdoptionSortQuery {
     POPULAR = 'popular',
 }
 
+export enum AdoptionStatusQuery {
+    AVAILABLE = 'available',
+    RESERVED = 'reserved',
+    ADOPTED = 'adopted',
+}
+
 export class AdoptionListQueryDto {
     @ApiProperty({
         description: '동물 종류 필터 (전체는 미지정)',
@@ -40,6 +46,16 @@ export class AdoptionListQueryDto {
     @IsOptional()
     @IsMongoId()
     excludePetId?: string;
+
+    @ApiProperty({
+        description:
+            '분양 상태 필터 (Figma 678:49176 분양가능 / 678:49772 예약중 / 678:52698 분양완료 탭). 미지정 시 전체 노출.',
+        enum: AdoptionStatusQuery,
+        required: false,
+    })
+    @IsOptional()
+    @IsEnum(AdoptionStatusQuery)
+    status?: AdoptionStatusQuery;
 
     @ApiProperty({
         description: '정렬 기준',
