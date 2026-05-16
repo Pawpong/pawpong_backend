@@ -1,13 +1,7 @@
 import { BadRequestException, ForbiddenException, Inject, Injectable } from '@nestjs/common';
 
-import {
-    COMMUNITY_POST_READER_PORT,
-    type CommunityPostReaderPort,
-} from '../ports/community-post-reader.port';
-import {
-    COMMUNITY_POST_WRITER_PORT,
-    type CommunityPostWriterPort,
-} from '../ports/community-post-writer.port';
+import { COMMUNITY_POST_READER_PORT, type CommunityPostReaderPort } from '../ports/community-post-reader.port';
+import { COMMUNITY_POST_WRITER_PORT, type CommunityPostWriterPort } from '../ports/community-post-writer.port';
 
 @Injectable()
 export class DeleteCommunityPostUseCase {

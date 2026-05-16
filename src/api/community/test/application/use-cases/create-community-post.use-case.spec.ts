@@ -11,7 +11,12 @@ const validator = new CommunityPostWriteValidatorService();
 describe('CreateCommunityPostUseCase', () => {
     const authorReader = { readAuthorSnapshot: jest.fn() };
     const writer = { create: jest.fn(), updateByAuthor: jest.fn(), softDeleteByAuthor: jest.fn() };
-    const reader = { listPosts: jest.fn(), readPostById: jest.fn(), existsActivePost: jest.fn(), listComments: jest.fn() };
+    const reader = {
+        listPosts: jest.fn(),
+        readPostById: jest.fn(),
+        existsActivePost: jest.fn(),
+        listComments: jest.fn(),
+    };
 
     const useCase = new CreateCommunityPostUseCase(
         authorReader as any,

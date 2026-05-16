@@ -6,10 +6,7 @@ import { GetAllPopularKeywordsAdminUseCase } from '../application/use-cases/get-
 import { GetPopularKeywordByIdUseCase } from '../application/use-cases/get-popular-keyword-by-id.use-case';
 import { POPULAR_KEYWORD_ADMIN_RESPONSE_MESSAGE_EXAMPLES } from '../constants/popular-keyword-admin-response-messages';
 import { PopularKeywordAdminControllerBase } from '../decorator/popular-keyword-admin-controller.decorator';
-import {
-    ApiGetAllPopularKeywordsAdminEndpoint,
-    ApiGetPopularKeywordByIdAdminEndpoint,
-} from '../swagger';
+import { ApiGetAllPopularKeywordsAdminEndpoint, ApiGetPopularKeywordByIdAdminEndpoint } from '../swagger';
 
 @PopularKeywordAdminControllerBase()
 export class PopularKeywordAdminQueryController {

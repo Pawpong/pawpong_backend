@@ -1,7 +1,4 @@
-import type {
-    CommunityAuthorModel,
-    CommunityPetType,
-} from './community-post.type';
+import type { CommunityAuthorModel, CommunityPetType } from './community-post.type';
 
 /**
  * v2 커뮤니티 게시글 작성/수정/삭제 — 내부 command/persist 타입.

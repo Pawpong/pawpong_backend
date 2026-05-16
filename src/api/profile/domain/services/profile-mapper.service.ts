@@ -1,9 +1,6 @@
 import { Injectable, Inject } from '@nestjs/common';
 
-import {
-    PROFILE_ASSET_URL_PORT,
-    type ProfileAssetUrlPort,
-} from '../../application/ports/profile-asset-url.port';
+import { PROFILE_ASSET_URL_PORT, type ProfileAssetUrlPort } from '../../application/ports/profile-asset-url.port';
 import type {
     AdopterProfileSnapshot,
     BreederProfileSnapshot,
