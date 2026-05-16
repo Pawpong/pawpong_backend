@@ -40,6 +40,11 @@ export interface CommunityPostCommentSnapshot {
 export interface CommunityPostListQuery {
     petType?: CommunityPetType;
     category?: string;
+    /**
+     * 작성자 ID 필터 — 마이홈 게시글 탭 (Figma 278:170) 등.
+     * 컨트롤러에서 'me' 별칭을 인증 사용자 id 로 치환한 뒤 전달한다.
+     */
+    authorId?: string;
     sort: CommunityPostSort;
     skip: number;
     limit: number;

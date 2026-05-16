@@ -23,6 +23,7 @@ export class GetCommunityPostListUseCase {
     async execute(input: {
         petType?: CommunityPetType;
         category?: string;
+        authorId?: string;
         sort?: CommunityPostSort;
         page?: number;
         pageSize?: number;
@@ -34,6 +35,7 @@ export class GetCommunityPostListUseCase {
         const { snapshots, totalItems } = await this.reader.listPosts({
             petType: input.petType,
             category: input.category,
+            authorId: input.authorId,
             sort,
             skip: (page - 1) * pageSize,
             limit: pageSize,
