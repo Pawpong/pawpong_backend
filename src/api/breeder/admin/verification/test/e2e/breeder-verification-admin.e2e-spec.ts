@@ -6,7 +6,7 @@ import {
     getAdminToken,
     getAdopterToken,
     seedBreeder,
-} from '../../../../../../common/test/test-utils';
+} from '../../../../../../common/testing/test-utils';
 
 /**
  * 브리더 인증 관리자 종단간 테스트

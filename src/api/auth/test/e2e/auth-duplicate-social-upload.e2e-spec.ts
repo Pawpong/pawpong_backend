@@ -1,6 +1,6 @@
 import request from 'supertest';
 
-import { getAdopterToken } from '../../../../common/test/test-utils';
+import { getAdopterToken } from '../../../../common/testing/test-utils';
 import {
     AuthE2eContext,
     closeAuthE2eContext,
