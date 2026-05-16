@@ -1,4 +1,4 @@
-import { BadRequestException, Get, Query } from '@nestjs/common';
+import { BadRequestException, Body, Get, Patch, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
@@ -6,22 +6,27 @@ import { PaginationResponseDto } from '../../../common/dto/pagination/pagination
 
 import { GetMyFavoriteBreedersUseCase } from '../application/use-cases/get-my-favorite-breeders.use-case';
 import { GetMyProfileUseCase } from '../application/use-cases/get-my-profile.use-case';
+import { UpdateMyProfileUseCase } from '../application/use-cases/update-my-profile.use-case';
 import { PROFILE_RESPONSE_MESSAGES } from '../constants/profile-response-messages';
 import {
     ProfileFavoritesController,
     ProfileMeController as ProfileMeControllerDecorator,
 } from '../decorator/profile-protected-controller.decorator';
 import { FavoriteBreedersQueryDto } from '../dto/request/favorite-breeders-query.dto';
+import { UpdateMyProfileRequestDto } from '../dto/request/update-my-profile-request.dto';
 import { FavoriteBreederCardResponseDto } from '../dto/response/favorite-breeder-card.dto';
 import { MyProfileResponseDto } from '../dto/response/my-profile-response.dto';
-import { ApiGetMyFavoriteBreedersEndpoint, ApiGetMyProfileEndpoint } from '../swagger';
+import { ApiGetMyFavoriteBreedersEndpoint, ApiGetMyProfileEndpoint, ApiUpdateMyProfileEndpoint } from '../swagger';
 
 /**
- * GET /v2/profile/me (인증 필수, role 무관)
+ * GET / PATCH /v2/profile/me (인증 필수, role 무관)
  */
 @ProfileMeControllerDecorator()
 export class ProfileMeController {
-    constructor(private readonly getMyProfileUseCase: GetMyProfileUseCase) {}
+    constructor(
+        private readonly getMyProfileUseCase: GetMyProfileUseCase,
+        private readonly updateMyProfileUseCase: UpdateMyProfileUseCase,
+    ) {}
 
     @Get('me')
     @ApiGetMyProfileEndpoint()
@@ -34,6 +39,23 @@ export class ProfileMeController {
         }
         const result = await this.getMyProfileUseCase.execute(userId, role);
         return ApiResponseDto.success(result, PROFILE_RESPONSE_MESSAGES.myRetrieved);
+    }
+
+    @Patch('me')
+    @ApiUpdateMyProfileEndpoint()
+    async updateMe(
+        @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
+        @Body() body: UpdateMyProfileRequestDto,
+    ): Promise<ApiResponseDto<MyProfileResponseDto>> {
+        if (role !== 'adopter' && role !== 'breeder') {
+            throw new BadRequestException('지원하지 않는 사용자 역할입니다.');
+        }
+        const result = await this.updateMyProfileUseCase.execute(userId, role, {
+            bio: body.bio,
+            location: body.location,
+        });
+        return ApiResponseDto.success(result, PROFILE_RESPONSE_MESSAGES.myUpdated);
     }
 }
 
