@@ -6,8 +6,8 @@ import { ConfigService } from '@nestjs/config';
 import { ChatRoom, ChatRoomSchema } from '../../schema/chat-room.schema';
 import { ChatMessage, ChatMessageSchema } from '../../schema/chat-message.schema';
 
-import { ChatRoomCommandController } from './chat-room-command.controller';
-import { ChatRoomQueryController } from './chat-room-query.controller';
+import { ChatRoomCommandController } from './controller/chat-room-command.controller';
+import { ChatRoomQueryController } from './controller/chat-room-query.controller';
 import { ChatGateway } from './chat.gateway';
 import { ChatKafkaConsumer } from './chat-kafka.consumer';
 

@@ -19,7 +19,7 @@ import { AppVersionAdminPageAssemblerService } from './admin/domain/services/app
 import { AppVersionAdminPaginationAssemblerService } from './admin/domain/services/app-version-admin-pagination-assembler.service';
 import { AppVersionMongooseAdminReaderAdapter } from './admin/infrastructure/app-version-mongoose-admin-reader.adapter';
 import { AppVersionMongooseWriterAdapter } from './admin/infrastructure/app-version-mongoose-writer.adapter';
-import { AppVersionController } from './app-version.controller';
+import { AppVersionController } from './controller/app-version.controller';
 import { AppVersionPolicyService } from './domain/services/app-version-policy.service';
 import { AppVersionMongooseReaderAdapter } from './infrastructure/app-version-mongoose-reader.adapter';
 import { AppVersionRepository } from './repository/app-version.repository';
