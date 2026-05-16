@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestingApp, cleanupDatabase, getAdopterToken } from '../../../../common/test/test-utils';
+import { createTestingApp, cleanupDatabase, getAdopterToken } from '../../../../common/testing/test-utils';
 
 /**
  * 피드 종단간 테스트

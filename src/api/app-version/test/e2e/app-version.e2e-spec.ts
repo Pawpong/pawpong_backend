@@ -4,7 +4,7 @@ import { ObjectId } from 'mongodb';
 import { Connection } from 'mongoose';
 import request from 'supertest';
 
-import { createTestingApp } from '../../../../common/test/test-utils';
+import { createTestingApp } from '../../../../common/testing/test-utils';
 
 /**
  * 앱 버전 체크 종단간 테스트 (공개 API)

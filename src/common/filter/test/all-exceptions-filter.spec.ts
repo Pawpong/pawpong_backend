@@ -2,7 +2,7 @@ import { BadRequestException } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { DomainAuthenticationError, DomainValidationError } from '../../../common/error/domain.error';
-import { AllExceptionsFilter } from '../../../common/filter/http-exception.filter';
+import { AllExceptionsFilter } from '../http-exception.filter';
 
 describe('AllExceptionsFilter', () => {
     const createHost = () => {
