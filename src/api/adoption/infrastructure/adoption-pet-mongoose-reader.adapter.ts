@@ -14,7 +14,9 @@ import { AdoptionPetRepository } from '../repository/adoption-pet.repository';
 export class AdoptionPetMongooseReaderAdapter implements AdoptionPetReaderPort {
     constructor(private readonly repository: AdoptionPetRepository) {}
 
-    countList(query: Pick<AdoptionPetListQuery, 'petType' | 'breederId' | 'excludePetId'>): Promise<number> {
+    countList(
+        query: Pick<AdoptionPetListQuery, 'petType' | 'breederId' | 'excludePetId' | 'status'>,
+    ): Promise<number> {
         return this.repository.countList(query);
     }
 
