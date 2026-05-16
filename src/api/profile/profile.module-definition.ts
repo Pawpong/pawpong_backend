@@ -17,8 +17,8 @@ import { ProfileReaderMongooseAdapter } from './infrastructure/profile-reader-mo
 import {
     ProfileFavoriteBreedersController,
     ProfileMeController,
-} from './profile-me.controller';
-import { ProfilePublicController } from './profile-public.controller';
+} from './controller/profile-me.controller';
+import { ProfilePublicController } from './controller/profile-public.controller';
 import { ProfileRepository } from './repository/profile.repository';
 
 const SCHEMA_IMPORTS = MongooseModule.forFeature([

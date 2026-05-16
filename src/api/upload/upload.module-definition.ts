@@ -49,12 +49,12 @@ import { UploadStoredFilePathService } from './domain/services/upload-stored-fil
 import { UploadMongooseOwnerAdapter } from './infrastructure/upload-mongoose-owner.adapter';
 import { UploadStorageAdapter } from './infrastructure/upload-storage.adapter';
 import { UploadOwnerRepository } from './repository/upload-owner.repository';
-import { UploadAvailablePetPhotoController } from './upload-available-pet-photo.controller';
-import { UploadFileDeleteController } from './upload-file-delete.controller';
-import { UploadMultipleFilesController } from './upload-multiple-files.controller';
-import { UploadParentPetPhotoController } from './upload-parent-pet-photo.controller';
-import { UploadRepresentativePhotoController } from './upload-representative-photo.controller';
-import { UploadSingleFileController } from './upload-single-file.controller';
+import { UploadAvailablePetPhotoController } from './controller/upload-available-pet-photo.controller';
+import { UploadFileDeleteController } from './controller/upload-file-delete.controller';
+import { UploadMultipleFilesController } from './controller/upload-multiple-files.controller';
+import { UploadParentPetPhotoController } from './controller/upload-parent-pet-photo.controller';
+import { UploadRepresentativePhotoController } from './controller/upload-representative-photo.controller';
+import { UploadSingleFileController } from './controller/upload-single-file.controller';
 
 const UPLOAD_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Breeder.name, schema: BreederSchema },

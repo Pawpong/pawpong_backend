@@ -5,10 +5,10 @@ import { AdopterPetFavorite, AdopterPetFavoriteSchema } from '../../schema/adopt
 import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
 import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
 
-import { AdoptionFavoriteController } from './adoption-favorite.controller';
-import { AdoptionListController } from './adoption-list.controller';
-import { AdoptionMyAdoptedController } from './adoption-my-adopted.controller';
-import { AdoptionMyFavoritesController } from './adoption-my-favorites.controller';
+import { AdoptionFavoriteController } from './controller/adoption-favorite.controller';
+import { AdoptionListController } from './controller/adoption-list.controller';
+import { AdoptionMyAdoptedController } from './controller/adoption-my-adopted.controller';
+import { AdoptionMyFavoritesController } from './controller/adoption-my-favorites.controller';
 import {
     ADOPTER_PET_FAVORITE_READER_PORT,
     ADOPTER_PET_FAVORITE_WRITER_PORT,
