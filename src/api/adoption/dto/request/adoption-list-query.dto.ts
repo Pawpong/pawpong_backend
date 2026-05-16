@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsMongoId, IsOptional, Max, Min } from 'class-validator';
 
 export enum AdoptionPetTypeQuery {
     DOG = 'dog',
@@ -22,6 +22,24 @@ export class AdoptionListQueryDto {
     @IsOptional()
     @IsEnum(AdoptionPetTypeQuery)
     petType?: AdoptionPetTypeQuery;
+
+    @ApiProperty({
+        description: '특정 브리더의 분양 동물만 필터링 (브리더홈 / 상세 화면의 "브리더의 다른 분양 동물" 영역)',
+        required: false,
+        example: '507f1f77bcf86cd799439011',
+    })
+    @IsOptional()
+    @IsMongoId()
+    breederId?: string;
+
+    @ApiProperty({
+        description: '특정 동물 ID 를 결과에서 제외 (상세 화면에서 현재 동물을 다른 분양 목록에서 제외할 때)',
+        required: false,
+        example: '507f1f77bcf86cd799439022',
+    })
+    @IsOptional()
+    @IsMongoId()
+    excludePetId?: string;
 
     @ApiProperty({
         description: '정렬 기준',
