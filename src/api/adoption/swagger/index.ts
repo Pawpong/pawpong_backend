@@ -40,6 +40,7 @@ export function ApiGetAdoptionListEndpoint() {
                 - petType 필터 (강아지/고양이/도마뱀)
                 - breederId 필터 (특정 브리더의 분양 동물만)
                 - excludePetId (특정 펫을 결과에서 제외 — 상세 화면 자기 자신 제외용)
+                - status 필터 (분양가능/예약중/분양완료 탭 — Figma 678:49176/49772/52698)
                 - 정렬: 최신순(latest) / 인기순(popular)
                 - 인증 사용자는 카드별 isFavorited 가 채워집니다
             `,
@@ -52,6 +53,12 @@ export function ApiGetAdoptionListEndpoint() {
         }),
         ApiQuery({ name: 'breederId', required: false, type: String, description: '특정 브리더 필터 (ObjectId)' }),
         ApiQuery({ name: 'excludePetId', required: false, type: String, description: '결과에서 제외할 펫 ID' }),
+        ApiQuery({
+            name: 'status',
+            required: false,
+            enum: ['available', 'reserved', 'adopted'],
+            description: '분양 상태 필터',
+        }),
     );
 }
 

@@ -12,6 +12,7 @@ import {
     type AdoptionPetListQuery,
     type AdoptionPetReaderPort,
     type AdoptionPetSnapshot,
+    type AdoptionPetStatus,
 } from '../ports/adoption-pet-reader.port';
 import type { AdoptionPetItemResult, AdoptionPetListResult } from '../types/adoption-result.type';
 
@@ -34,6 +35,7 @@ export class GetAdoptionPetListUseCase {
         petType?: AdoptionPetSnapshot['petType'];
         breederId?: string;
         excludePetId?: string;
+        status?: AdoptionPetStatus;
         sort?: AdoptionPetListQuery['sort'];
         page?: number;
         pageSize?: number;
@@ -47,6 +49,7 @@ export class GetAdoptionPetListUseCase {
             petType: input.petType,
             breederId: input.breederId,
             excludePetId: input.excludePetId,
+            status: input.status,
             sort,
             skip: (page - 1) * pageSize,
             limit: pageSize,
@@ -57,6 +60,7 @@ export class GetAdoptionPetListUseCase {
                 petType: input.petType,
                 breederId: input.breederId,
                 excludePetId: input.excludePetId,
+                status: input.status,
             }),
             this.petReader.readList(query),
         ]);
