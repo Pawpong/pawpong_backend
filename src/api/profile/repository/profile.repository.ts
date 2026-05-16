@@ -70,4 +70,43 @@ export class ProfileRepository {
         if (!adopter?.favoriteBreederList) return false;
         return adopter.favoriteBreederList.some((entry) => entry.favoriteBreederId === breederId);
     }
+
+    /**
+     * 입양자 프로필 편집 (현재는 bio 만 지원). 도큐먼트 자체가 없으면 false.
+     * 변경 항목이 없거나 동일 값이라도 true 로 처리 — 호출측 idempotent.
+     */
+    async updateAdopterProfile(userId: string, patch: { bio?: string }): Promise<boolean> {
+        if (!Types.ObjectId.isValid(userId)) return false;
+        const $set: Record<string, unknown> = {};
+        if (patch.bio !== undefined) $set.bio = patch.bio;
+
+        if (Object.keys($set).length === 0) {
+            const exists = await this.adopterModel.exists({ _id: new Types.ObjectId(userId) });
+            return Boolean(exists);
+        }
+
+        const result = await this.adopterModel
+            .updateOne({ _id: new Types.ObjectId(userId) }, { $set })
+            .exec();
+        return result.matchedCount > 0;
+    }
+
+    /**
+     * 브리더 프로필 편집 (현재는 bio 만 지원). 도큐먼트 자체가 없으면 false.
+     */
+    async updateBreederProfile(breederId: string, patch: { bio?: string }): Promise<boolean> {
+        if (!Types.ObjectId.isValid(breederId)) return false;
+        const $set: Record<string, unknown> = {};
+        if (patch.bio !== undefined) $set.bio = patch.bio;
+
+        if (Object.keys($set).length === 0) {
+            const exists = await this.breederModel.exists({ _id: new Types.ObjectId(breederId) });
+            return Boolean(exists);
+        }
+
+        const result = await this.breederModel
+            .updateOne({ _id: new Types.ObjectId(breederId) }, { $set })
+            .exec();
+        return result.matchedCount > 0;
+    }
 }
