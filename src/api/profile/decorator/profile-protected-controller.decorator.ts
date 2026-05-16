@@ -10,11 +10,7 @@ import { ApiProfileProtectedController, ApiProfilePublicController } from '../sw
  * GET /v2/profile/me — 인증 필수, role 무관 (입양자/브리더 둘 다 본인 프로필 접근).
  */
 export function ProfileMeController() {
-    return applyDecorators(
-        ApiProfileProtectedController(),
-        Controller('v2/profile'),
-        UseGuards(JwtAuthGuard),
-    );
+    return applyDecorators(ApiProfileProtectedController(), Controller('v2/profile'), UseGuards(JwtAuthGuard));
 }
 
 /**
@@ -35,9 +31,5 @@ export function ProfileFavoritesController() {
  * 비로그인 접근 가능, 로그인 시 isFollowing/isFavorited 를 채워준다.
  */
 export function ProfilePublicController() {
-    return applyDecorators(
-        ApiProfilePublicController(),
-        Controller('v2/profile'),
-        UseGuards(OptionalJwtAuthGuard),
-    );
+    return applyDecorators(ApiProfilePublicController(), Controller('v2/profile'), UseGuards(OptionalJwtAuthGuard));
 }

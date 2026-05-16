@@ -20,12 +20,12 @@ describe('AdminPushTargetValidatorService', () => {
     });
 
     it('individual + userId 비어있으면 BadRequest', () => {
-        expect(() =>
-            validator.validate({ type: 'individual', role: 'adopter', userId: '   ' } as any),
-        ).toThrow(BadRequestException);
-        expect(() =>
-            validator.validate({ type: 'individual', role: 'adopter', userId: '' } as any),
-        ).toThrow(BadRequestException);
+        expect(() => validator.validate({ type: 'individual', role: 'adopter', userId: '   ' } as any)).toThrow(
+            BadRequestException,
+        );
+        expect(() => validator.validate({ type: 'individual', role: 'adopter', userId: '' } as any)).toThrow(
+            BadRequestException,
+        );
     });
 
     it('individual + 잘못된 role → BadRequest', () => {

@@ -3,21 +3,10 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { CommunityPostMapperService } from '../../domain/services/community-post-mapper.service';
 import { CommunityPostWriteValidatorService } from '../../domain/services/community-post-write-validator.service';
 import { CommunityPostDetailResponseDto } from '../../dto/response/community-post-detail.dto';
-import {
-    COMMUNITY_AUTHOR_READER_PORT,
-    type CommunityAuthorReaderPort,
-} from '../ports/community-author-reader.port';
-import {
-    COMMUNITY_POST_READER_PORT,
-    type CommunityPostReaderPort,
-} from '../ports/community-post-reader.port';
-import {
-    COMMUNITY_POST_WRITER_PORT,
-    type CommunityPostWriterPort,
-} from '../ports/community-post-writer.port';
-import type {
-    CommunityPostCreateCommand,
-} from '../types/community-post-write.type';
+import { COMMUNITY_AUTHOR_READER_PORT, type CommunityAuthorReaderPort } from '../ports/community-author-reader.port';
+import { COMMUNITY_POST_READER_PORT, type CommunityPostReaderPort } from '../ports/community-post-reader.port';
+import { COMMUNITY_POST_WRITER_PORT, type CommunityPostWriterPort } from '../ports/community-post-writer.port';
+import type { CommunityPostCreateCommand } from '../types/community-post-write.type';
 
 @Injectable()
 export class CreateCommunityPostUseCase {

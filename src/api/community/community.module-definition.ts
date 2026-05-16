@@ -3,14 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { StorageModule } from '../../common/storage/storage.module';
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
-import {
-    CommunityPostComment,
-    CommunityPostCommentSchema,
-} from '../../schema/community-post-comment.schema';
-import {
-    CommunityPost,
-    CommunityPostSchema,
-} from '../../schema/community-post.schema';
+import { CommunityPostComment, CommunityPostCommentSchema } from '../../schema/community-post-comment.schema';
+import { CommunityPost, CommunityPostSchema } from '../../schema/community-post.schema';
 
 import { COMMUNITY_ASSET_URL_PORT } from './application/ports/community-asset-url.port';
 import { COMMUNITY_AUTHOR_READER_PORT } from './application/ports/community-author-reader.port';

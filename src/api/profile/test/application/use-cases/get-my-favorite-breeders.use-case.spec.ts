@@ -4,7 +4,12 @@ import { ProfileMapperService } from '../../../domain/services/profile-mapper.se
 const assetUrl = { toProfileImageUrl: () => undefined };
 
 describe('GetMyFavoriteBreedersUseCase', () => {
-    const reader = { readAdopter: jest.fn(), readBreeder: jest.fn(), listFavoriteBreeders: jest.fn(), isFavoritedBy: jest.fn() };
+    const reader = {
+        readAdopter: jest.fn(),
+        readBreeder: jest.fn(),
+        listFavoriteBreeders: jest.fn(),
+        isFavoritedBy: jest.fn(),
+    };
     const mapper = new ProfileMapperService(assetUrl as any);
     const useCase = new GetMyFavoriteBreedersUseCase(reader as any, mapper);
 

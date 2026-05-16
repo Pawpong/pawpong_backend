@@ -23,7 +23,12 @@ const existingPost = {
 };
 
 describe('UpdateCommunityPostUseCase', () => {
-    const reader = { listPosts: jest.fn(), readPostById: jest.fn(), existsActivePost: jest.fn(), listComments: jest.fn() };
+    const reader = {
+        listPosts: jest.fn(),
+        readPostById: jest.fn(),
+        existsActivePost: jest.fn(),
+        listComments: jest.fn(),
+    };
     const writer = { create: jest.fn(), updateByAuthor: jest.fn(), softDeleteByAuthor: jest.fn() };
 
     const useCase = new UpdateCommunityPostUseCase(reader as any, writer as any, validator, mapper);

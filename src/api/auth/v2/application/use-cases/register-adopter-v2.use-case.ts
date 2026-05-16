@@ -1,10 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { UserStatus } from '../../../../../common/enum/user.enum';
-import {
-    TERMS_READER_PORT,
-    type TermsReaderPort,
-} from '../../../../terms/application/ports/terms-reader.port';
+import { TERMS_READER_PORT, type TermsReaderPort } from '../../../../terms/application/ports/terms-reader.port';
 import { AUTH_REGISTRATION_PORT, type AuthRegistrationPort } from '../../../application/ports/auth-registration.port';
 import {
     AUTH_REGISTRATION_NOTIFICATION_PORT,

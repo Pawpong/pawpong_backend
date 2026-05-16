@@ -2,10 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { PopularKeywordItemMapperService } from '../../domain/services/popular-keyword-item-mapper.service';
-import {
-    POPULAR_KEYWORD_READER_PORT,
-    type PopularKeywordReaderPort,
-} from '../ports/popular-keyword-reader.port';
+import { POPULAR_KEYWORD_READER_PORT, type PopularKeywordReaderPort } from '../ports/popular-keyword-reader.port';
 import type { PopularKeywordItemResult } from '../types/popular-keyword-result.type';
 
 @Injectable()

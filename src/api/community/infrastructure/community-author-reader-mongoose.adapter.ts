@@ -14,10 +14,7 @@ export class CommunityAuthorReaderMongooseAdapter implements CommunityAuthorRead
         @InjectModel(Breeder.name) private readonly breederModel: Model<BreederDocument>,
     ) {}
 
-    async readAuthorSnapshot(
-        userId: string,
-        role: 'adopter' | 'breeder',
-    ): Promise<CommunityAuthorSnapshot | null> {
+    async readAuthorSnapshot(userId: string, role: 'adopter' | 'breeder'): Promise<CommunityAuthorSnapshot | null> {
         if (!Types.ObjectId.isValid(userId)) return null;
 
         if (role === 'adopter') {

@@ -151,10 +151,7 @@ describe('v2 입양자 회원가입 유스케이스', () => {
     it('marketing 코드를 termsAgreements 에 포함하면 marketingAgreed=true', async () => {
         await useCase.execute({
             ...baseCommand,
-            termsAgreements: [
-                ...baseCommand.termsAgreements,
-                { code: 'marketing', version: 'v1.0' },
-            ],
+            termsAgreements: [...baseCommand.termsAgreements, { code: 'marketing', version: 'v1.0' }],
         });
 
         const createdPayload = authRegistrationPort.createAdopter.mock.calls[0][0];

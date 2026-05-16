@@ -3,10 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { Breeder } from '../../../schema/breeder.schema';
-import {
-    AdoptionBreederSummary,
-    AdoptionBreederSummaryPort,
-} from '../application/ports/adoption-breeder-summary.port';
+import { AdoptionBreederSummary, AdoptionBreederSummaryPort } from '../application/ports/adoption-breeder-summary.port';
 
 /**
  * Breeder 도큐먼트에서 입양 상세 화면 노출용 요약만 추출한다.

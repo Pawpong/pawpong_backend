@@ -6,10 +6,7 @@ import {
     POPULAR_KEYWORD_ADMIN_READER_PORT,
     type PopularKeywordAdminReaderPort,
 } from '../ports/popular-keyword-admin-reader.port';
-import {
-    POPULAR_KEYWORD_WRITER_PORT,
-    type PopularKeywordWriterPort,
-} from '../ports/popular-keyword-writer.port';
+import { POPULAR_KEYWORD_WRITER_PORT, type PopularKeywordWriterPort } from '../ports/popular-keyword-writer.port';
 import type { UpdatePopularKeywordCommand } from '../types/popular-keyword-command.type';
 
 @Injectable()

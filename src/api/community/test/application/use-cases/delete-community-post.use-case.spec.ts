@@ -3,7 +3,12 @@ import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { DeleteCommunityPostUseCase } from '../../../application/use-cases/delete-community-post.use-case';
 
 describe('DeleteCommunityPostUseCase', () => {
-    const reader = { listPosts: jest.fn(), readPostById: jest.fn(), existsActivePost: jest.fn(), listComments: jest.fn() };
+    const reader = {
+        listPosts: jest.fn(),
+        readPostById: jest.fn(),
+        existsActivePost: jest.fn(),
+        listComments: jest.fn(),
+    };
     const writer = { create: jest.fn(), updateByAuthor: jest.fn(), softDeleteByAuthor: jest.fn() };
     const useCase = new DeleteCommunityPostUseCase(reader as any, writer as any);
 
