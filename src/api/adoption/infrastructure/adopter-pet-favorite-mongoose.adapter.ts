@@ -22,9 +22,7 @@ import { AdopterPetFavoriteRepository } from '../repository/adopter-pet-favorite
  * read 경로(isFavorited / findFavoritedPetIds)는 read-only 라 트랜잭션이 필요 없다.
  */
 @Injectable()
-export class AdopterPetFavoriteMongooseAdapter
-    implements AdopterPetFavoriteReaderPort, AdopterPetFavoriteWriterPort
-{
+export class AdopterPetFavoriteMongooseAdapter implements AdopterPetFavoriteReaderPort, AdopterPetFavoriteWriterPort {
     constructor(
         @InjectConnection() private readonly connection: Connection,
         @InjectModel(AdopterPetFavorite.name) private readonly favoriteModel: Model<AdopterPetFavorite>,
@@ -125,9 +123,7 @@ export class AdopterPetFavoriteMongooseAdapter
                         .exec();
                     result = { changed: true, favoriteCount: updated?.favoriteCount ?? 0 };
                 } else {
-                    const pet = await this.petModel
-                        .findById(petObjectId, { favoriteCount: 1 }, { session })
-                        .exec();
+                    const pet = await this.petModel.findById(petObjectId, { favoriteCount: 1 }, { session }).exec();
                     result = { changed: false, favoriteCount: pet?.favoriteCount ?? 0 };
                 }
             });
@@ -173,9 +169,7 @@ export class AdopterPetFavoriteMongooseAdapter
                         result = { changed: true, favoriteCount: 0 };
                     }
                 } else {
-                    const pet = await this.petModel
-                        .findById(petObjectId, { favoriteCount: 1 }, { session })
-                        .exec();
+                    const pet = await this.petModel.findById(petObjectId, { favoriteCount: 1 }, { session }).exec();
                     result = { changed: false, favoriteCount: pet?.favoriteCount ?? 0 };
                 }
             });

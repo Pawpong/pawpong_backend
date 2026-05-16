@@ -6,7 +6,12 @@ import { ProfileMapperService } from '../../../domain/services/profile-mapper.se
 const assetUrl = { toProfileImageUrl: (n?: string | null) => (n ? `https://signed/${n}` : undefined) };
 
 describe('GetMyProfileUseCase', () => {
-    const reader = { readAdopter: jest.fn(), readBreeder: jest.fn(), listFavoriteBreeders: jest.fn(), isFavoritedBy: jest.fn() };
+    const reader = {
+        readAdopter: jest.fn(),
+        readBreeder: jest.fn(),
+        listFavoriteBreeders: jest.fn(),
+        isFavoritedBy: jest.fn(),
+    };
     const mapper = new ProfileMapperService(assetUrl as any);
 
     const useCase = new GetMyProfileUseCase(reader as any, mapper);

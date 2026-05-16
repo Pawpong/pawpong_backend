@@ -14,10 +14,7 @@ import { GetMyProfileUseCase } from './application/use-cases/get-my-profile.use-
 import { ProfileMapperService } from './domain/services/profile-mapper.service';
 import { ProfileAssetUrlStorageAdapter } from './infrastructure/profile-asset-url-storage.adapter';
 import { ProfileReaderMongooseAdapter } from './infrastructure/profile-reader-mongoose.adapter';
-import {
-    ProfileFavoriteBreedersController,
-    ProfileMeController,
-} from './controller/profile-me.controller';
+import { ProfileFavoriteBreedersController, ProfileMeController } from './controller/profile-me.controller';
 import { ProfilePublicController } from './controller/profile-public.controller';
 import { ProfileRepository } from './repository/profile.repository';
 
@@ -44,11 +41,7 @@ const USE_CASE_PROVIDERS = [
 
 const DOMAIN_PROVIDERS = [ProfileMapperService];
 
-const INFRASTRUCTURE_PROVIDERS = [
-    ProfileRepository,
-    ProfileReaderMongooseAdapter,
-    ProfileAssetUrlStorageAdapter,
-];
+const INFRASTRUCTURE_PROVIDERS = [ProfileRepository, ProfileReaderMongooseAdapter, ProfileAssetUrlStorageAdapter];
 
 const PORT_BINDINGS = [
     { provide: PROFILE_READER_PORT, useExisting: ProfileReaderMongooseAdapter },

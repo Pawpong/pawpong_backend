@@ -1,12 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 
-export type TermsCode =
-    | 'service'
-    | 'privacy'
-    | 'marketing'
-    | 'age_14plus'
-    | 'counsel_privacy';
+export type TermsCode = 'service' | 'privacy' | 'marketing' | 'age_14plus' | 'counsel_privacy';
 
 @Schema({
     collection: 'terms',

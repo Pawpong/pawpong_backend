@@ -43,10 +43,7 @@ export class CreateAdoptionApplicationV2UseCase {
             throw new BadRequestException('해당 분양 펫을 찾을 수 없거나 신청할 수 없는 상태입니다.');
         }
 
-        const hasOpenApplication = await this.writerPort.existsOpenApplicationForPet(
-            command.adopterId,
-            command.petId,
-        );
+        const hasOpenApplication = await this.writerPort.existsOpenApplicationForPet(command.adopterId, command.petId);
         if (hasOpenApplication) {
             throw new ConflictException('이미 처리 중인 상담 신청이 있습니다.');
         }

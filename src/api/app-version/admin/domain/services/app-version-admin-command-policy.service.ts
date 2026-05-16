@@ -34,9 +34,7 @@ export class AppVersionAdminCommandPolicyService {
      */
     ensureSemverFormat(version: string, fieldName: string): void {
         if (!AppVersionAdminCommandPolicyService.SEMVER_PATTERN.test(version)) {
-            throw new DomainValidationError(
-                `${fieldName} 형식이 올바르지 않습니다. 예: 1.2.0 (숫자.숫자.숫자)`,
-            );
+            throw new DomainValidationError(`${fieldName} 형식이 올바르지 않습니다. 예: 1.2.0 (숫자.숫자.숫자)`);
         }
     }
 

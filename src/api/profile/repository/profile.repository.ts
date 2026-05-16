@@ -34,20 +34,28 @@ export class ProfileRepository {
     async findBreedersByIds(breederIds: string[]): Promise<BreederDocument[]> {
         const objectIds = breederIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
         if (objectIds.length === 0) return [];
-        return this.breederModel.find({ _id: { $in: objectIds } }).lean<BreederDocument[]>().exec();
+        return this.breederModel
+            .find({ _id: { $in: objectIds } })
+            .lean<BreederDocument[]>()
+            .exec();
     }
 
     /**
      * 브리더의 가장 최근 활성 분양 펫 status 1개를 반환.
      * 마이홈 즐겨찾는 브리더 카드의 "분양 진행중" / "분양 완료" 뱃지 표기용.
      */
-    async findRecentPetStatusByBreederIds(breederIds: string[]): Promise<Map<string, 'available' | 'reserved' | 'adopted'>> {
+    async findRecentPetStatusByBreederIds(
+        breederIds: string[],
+    ): Promise<Map<string, 'available' | 'reserved' | 'adopted'>> {
         const objectIds = breederIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
         const result = new Map<string, 'available' | 'reserved' | 'adopted'>();
         if (objectIds.length === 0) return result;
 
         const docs = await this.availablePetModel
-            .aggregate<{ _id: Types.ObjectId; status: 'available' | 'reserved' | 'adopted' }>([
+            .aggregate<{
+                _id: Types.ObjectId;
+                status: 'available' | 'reserved' | 'adopted';
+            }>([
                 { $match: { breederId: { $in: objectIds }, isActive: true } },
                 { $sort: { createdAt: -1 } },
                 { $group: { _id: '$breederId', status: { $first: '$status' } } },
