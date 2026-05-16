@@ -9,9 +9,12 @@ import { BREEDER_PET_POSTING_PROFILE_PORT } from './application/ports/breeder-pe
 import { BREEDER_PET_POSTING_READER_PORT } from './application/ports/breeder-pet-posting-reader.port';
 import { BREEDER_PET_POSTING_WRITER_PORT } from './application/ports/breeder-pet-posting-writer.port';
 import { CreateBreederPetPostingUseCase } from './application/use-cases/create-breeder-pet-posting.use-case';
+import { DeleteBreederPetPostingUseCase } from './application/use-cases/delete-breeder-pet-posting.use-case';
 import { ListMyBreederPetPostingsUseCase } from './application/use-cases/list-my-breeder-pet-postings.use-case';
+import { UpdateBreederPetPostingUseCase } from './application/use-cases/update-breeder-pet-posting.use-case';
 import { BreederPetPostingCreateController } from './controller/breeder-pet-posting-create.controller';
 import { BreederPetPostingListController } from './controller/breeder-pet-posting-list.controller';
+import { BreederPetPostingUpdateController } from './controller/breeder-pet-posting-update.controller';
 import { BreederPetPostingCardMapperService } from './domain/services/breeder-pet-posting-card-mapper.service';
 import { BreederPetPostingMapperService } from './domain/services/breeder-pet-posting-mapper.service';
 import { BreederPetPostingValidatorService } from './domain/services/breeder-pet-posting-validator.service';
@@ -31,9 +34,15 @@ export const BREEDER_PET_POSTING_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule
 export const BREEDER_PET_POSTING_MODULE_CONTROLLERS = [
     BreederPetPostingCreateController,
     BreederPetPostingListController,
+    BreederPetPostingUpdateController,
 ];
 
-const USE_CASE_PROVIDERS = [CreateBreederPetPostingUseCase, ListMyBreederPetPostingsUseCase];
+const USE_CASE_PROVIDERS = [
+    CreateBreederPetPostingUseCase,
+    ListMyBreederPetPostingsUseCase,
+    UpdateBreederPetPostingUseCase,
+    DeleteBreederPetPostingUseCase,
+];
 
 const DOMAIN_PROVIDERS = [
     BreederPetPostingValidatorService,
