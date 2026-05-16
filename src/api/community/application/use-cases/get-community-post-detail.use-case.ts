@@ -2,10 +2,7 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CommunityPostMapperService } from '../../domain/services/community-post-mapper.service';
 import { CommunityPostDetailResponseDto } from '../../dto/response/community-post-detail.dto';
-import {
-    COMMUNITY_POST_READER_PORT,
-    type CommunityPostReaderPort,
-} from '../ports/community-post-reader.port';
+import { COMMUNITY_POST_READER_PORT, type CommunityPostReaderPort } from '../ports/community-post-reader.port';
 
 const COMMENT_PREVIEW_LIMIT = 5;
 

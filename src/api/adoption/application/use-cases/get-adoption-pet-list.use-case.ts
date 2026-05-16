@@ -65,10 +65,7 @@ export class GetAdoptionPetListUseCase {
         return buildPageResult(items, page, pageSize, totalItems);
     }
 
-    private async toItems(
-        snapshots: AdoptionPetSnapshot[],
-        adopterId?: string,
-    ): Promise<AdoptionPetItemResult[]> {
+    private async toItems(snapshots: AdoptionPetSnapshot[], adopterId?: string): Promise<AdoptionPetItemResult[]> {
         if (snapshots.length === 0) {
             return [];
         }

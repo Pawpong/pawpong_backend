@@ -3,10 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { getErrorMessage, hasErrorCode } from '../../../common/utils/error.util';
-import {
-    AdoptionApplication,
-    AdoptionApplicationDocument,
-} from '../../../schema/adoption-application.schema';
+import { AdoptionApplication, AdoptionApplicationDocument } from '../../../schema/adoption-application.schema';
 import { Adopter } from '../../../schema/adopter.schema';
 import type { AdopterDocument } from '../../../schema/adopter.schema';
 import { AvailablePet, AvailablePetDocument } from '../../../schema/available-pet.schema';
@@ -18,10 +15,7 @@ import type { AdoptionApplicationPersistData } from '../application/types/adopti
  * - 592e5a22: 'uniq_adopter_pet_open_application_v2' (formVersion 분리 후)
  * 두 commits 중 하나라도 적용된 외부 환경에 stale 인덱스가 남아있을 가능성에 대비해 둘 다 drop 한다.
  */
-const STALE_UNIQUE_INDEX_NAMES = [
-    'uniq_adopter_pet_open_application',
-    'uniq_adopter_pet_open_application_v2',
-] as const;
+const STALE_UNIQUE_INDEX_NAMES = ['uniq_adopter_pet_open_application', 'uniq_adopter_pet_open_application_v2'] as const;
 
 /**
  * v2 입양 신청 — Mongoose 직접 접근 캡슐화.

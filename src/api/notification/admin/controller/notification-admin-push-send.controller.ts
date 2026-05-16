@@ -18,9 +18,7 @@ export class NotificationAdminPushSendController {
 
     @Post('push')
     @ApiSendAdminPushEndpoint()
-    async send(
-        @Body() body: SendAdminPushRequestDto,
-    ): Promise<ApiResponseDto<AdminPushResultResponseDto>> {
+    async send(@Body() body: SendAdminPushRequestDto): Promise<ApiResponseDto<AdminPushResultResponseDto>> {
         const result = await this.useCase.execute({
             target:
                 body.target.type === 'individual'

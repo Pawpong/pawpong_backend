@@ -8,10 +8,7 @@ import {
     type AdopterPetFavoriteReaderPort,
 } from '../ports/adopter-pet-favorite.port';
 import { ADOPTION_ASSET_URL_PORT, type AdoptionAssetUrlPort } from '../ports/adoption-asset-url.port';
-import {
-    ADOPTION_RECORD_READER_PORT,
-    type AdoptionRecordReaderPort,
-} from '../ports/adoption-record-reader.port';
+import { ADOPTION_RECORD_READER_PORT, type AdoptionRecordReaderPort } from '../ports/adoption-record-reader.port';
 
 const PAGE_SIZE_DEFAULT = 15;
 const PAGE_SIZE_MAX = 60;

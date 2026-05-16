@@ -44,9 +44,7 @@ describe('CreateBreederPetPostingUseCase', () => {
     });
 
     it('검증 실패 시 writer 가 호출되지 않는다', async () => {
-        await expect(useCase.execute('user-1', { ...validCommand(), photos: [] })).rejects.toThrow(
-            BadRequestException,
-        );
+        await expect(useCase.execute('user-1', { ...validCommand(), photos: [] })).rejects.toThrow(BadRequestException);
         expect(writerPort.create).not.toHaveBeenCalled();
     });
 

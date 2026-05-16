@@ -10,10 +10,7 @@ import { COMMUNITY_RESPONSE_MESSAGES } from '../constants/community-response-mes
 import { CommunityPostCommentQueryDto } from '../dto/request/community-post-comment-query.dto';
 import { CommunityPostCommentResponseDto } from '../dto/response/community-post-comment.dto';
 import { CommunityPostDetailResponseDto } from '../dto/response/community-post-detail.dto';
-import {
-    ApiGetCommunityPostCommentsEndpoint,
-    ApiGetCommunityPostDetailEndpoint,
-} from '../swagger';
+import { ApiGetCommunityPostCommentsEndpoint, ApiGetCommunityPostDetailEndpoint } from '../swagger';
 
 @CommunityPublicController()
 export class CommunityPostDetailController {
@@ -24,9 +21,7 @@ export class CommunityPostDetailController {
 
     @Get('posts/:postId')
     @ApiGetCommunityPostDetailEndpoint()
-    async detail(
-        @Param('postId') postId: string,
-    ): Promise<ApiResponseDto<CommunityPostDetailResponseDto>> {
+    async detail(@Param('postId') postId: string): Promise<ApiResponseDto<CommunityPostDetailResponseDto>> {
         const result = await this.getDetailUseCase.execute(postId);
         return ApiResponseDto.success(result, COMMUNITY_RESPONSE_MESSAGES.detailRetrieved);
     }

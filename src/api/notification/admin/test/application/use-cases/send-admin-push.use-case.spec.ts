@@ -65,7 +65,11 @@ describe('SendAdminPushUseCase', () => {
         // 700 토큰 → 500 + 200 두 chunk
         const recipients = [
             { userId: 'a-1', userRole: 'adopter' as const, tokens: Array.from({ length: 500 }, (_, i) => `t-${i}`) },
-            { userId: 'a-2', userRole: 'adopter' as const, tokens: Array.from({ length: 200 }, (_, i) => `t-${500 + i}`) },
+            {
+                userId: 'a-2',
+                userRole: 'adopter' as const,
+                tokens: Array.from({ length: 200 }, (_, i) => `t-${500 + i}`),
+            },
         ];
         recipientReader.readRecipients.mockResolvedValueOnce(recipients);
         notificationPush.sendToTokens

@@ -1,10 +1,6 @@
 import { applyDecorators } from '@nestjs/common';
 
-import {
-    ApiController,
-    ApiEndpoint,
-    ApiPaginatedEndpoint,
-} from '../../../common/decorator/swagger.decorator';
+import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { BREEDER_PET_POSTING_RESPONSE_MESSAGES } from '../constants/breeder-pet-posting-response-messages';
 import { BreederPetPostingCardResponseDto } from '../dto/response/breeder-pet-posting-card.dto';

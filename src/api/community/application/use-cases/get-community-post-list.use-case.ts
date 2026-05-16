@@ -3,10 +3,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import { buildPageResult, type PageResult } from '../../../../common/types/page-result.type';
 import { CommunityPostMapperService } from '../../domain/services/community-post-mapper.service';
 import type { CommunityPostCardResponseDto } from '../../dto/response/community-post-card.dto';
-import {
-    COMMUNITY_POST_READER_PORT,
-    type CommunityPostReaderPort,
-} from '../ports/community-post-reader.port';
+import { COMMUNITY_POST_READER_PORT, type CommunityPostReaderPort } from '../ports/community-post-reader.port';
 import type { CommunityPetType, CommunityPostSort } from '../types/community-post.type';
 
 const PAGE_SIZE_DEFAULT = 15;

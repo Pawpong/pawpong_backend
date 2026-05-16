@@ -48,9 +48,7 @@ describe('GetMyAdoptedListUseCase', () => {
 
     it('adoptedAt 이 ISO 8601 string 으로 직렬화 + 즐겨찾기 미등록 펫은 isFavorited=false', async () => {
         recordReader.listMyAdopted.mockResolvedValueOnce({
-            items: [
-                { pet: buildPetSnapshot('p-1'), adoptedAt: new Date('2025-12-08T00:00:00.000Z') },
-            ],
+            items: [{ pet: buildPetSnapshot('p-1'), adoptedAt: new Date('2025-12-08T00:00:00.000Z') }],
             totalItems: 1,
         });
         const result = await useCase.execute({ adopterId: 'a-1' });

@@ -22,7 +22,10 @@ export interface AdopterPetFavoriteReaderPort {
      * 카드 응답을 한 번에 만들 수 있도록 펫 도큐먼트와 join 한 snapshot 을 반환한다.
      * 비활성 펫(isActive=false) 은 제외한다.
      */
-    listMyFavoritedPets(adopterId: string, query: AdopterFavoritedPetsListQuery): Promise<AdopterFavoritedPetsListResult>;
+    listMyFavoritedPets(
+        adopterId: string,
+        query: AdopterFavoritedPetsListQuery,
+    ): Promise<AdopterFavoritedPetsListResult>;
 }
 
 export type FavoriteAtomicResult = {

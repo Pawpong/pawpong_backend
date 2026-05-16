@@ -67,9 +67,6 @@ describe('GetMyAdoptionFavoritesUseCase', () => {
     it('pageSize 상한 60 적용 (요청 999 → 60)', async () => {
         favoriteReader.listMyFavoritedPets.mockResolvedValueOnce({ snapshots: [], totalItems: 0 });
         await useCase.execute({ adopterId: 'a-1', pageSize: 999 });
-        expect(favoriteReader.listMyFavoritedPets).toHaveBeenCalledWith(
-            'a-1',
-            expect.objectContaining({ limit: 60 }),
-        );
+        expect(favoriteReader.listMyFavoritedPets).toHaveBeenCalledWith('a-1', expect.objectContaining({ limit: 60 }));
     });
 });
