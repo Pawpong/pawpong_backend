@@ -111,3 +111,48 @@ export interface BreederPetPostingCreatePersistData {
 export interface BreederPetPostingCreateResult {
     petId: string;
 }
+
+/**
+ * v2 분양글 부분 수정 command.
+ *
+ * 본 슬라이스는 단순 / 안전 필드만 지원한다:
+ * - 기본 정보 (name, breed, gender, birthDate, price, description, petType)
+ * - 분양 상태 전환 (status: available / reserved / adopted)
+ * - 사진 (photos / representativePhotoIndex)
+ *
+ * 복잡 필드(vaccination/geneticTest/parents/breedingEnvironment) 는 cross-field validation
+ * 부담이 커서 별도 PR 로 분리한다. 본 PR 의 update 는 위 화이트리스트 외의 필드를 받지 않는다.
+ */
+export interface BreederPetPostingUpdateCommand {
+    name?: string;
+    breed?: string;
+    gender?: PostingGender;
+    birthDate?: string;
+    price?: number;
+    description?: string;
+    petType?: PostingPetType;
+    status?: 'available' | 'reserved' | 'adopted';
+    photos?: string[];
+    representativePhotoIndex?: number;
+}
+
+/**
+ * persist 단계 — Date 캐스팅 등 적용 후 Mongoose $set 에 그대로 전달 가능한 모양.
+ */
+export interface BreederPetPostingUpdatePersistData {
+    name?: string;
+    breed?: string;
+    gender?: PostingGender;
+    birthDate?: Date;
+    price?: number;
+    description?: string;
+    petType?: PostingPetType;
+    status?: 'available' | 'reserved' | 'adopted';
+    photos?: string[];
+    representativePhotoIndex?: number;
+}
+
+export interface BreederPetPostingDeleteResult {
+    petId: string;
+    deleted: boolean;
+}
