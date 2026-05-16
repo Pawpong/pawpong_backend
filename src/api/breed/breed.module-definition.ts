@@ -2,8 +2,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { Breed, BreedSchema } from '../../schema/breed.schema';
 
-import { BreedAdminCommandController } from './admin/breed-admin-command.controller';
-import { BreedAdminQueryController } from './admin/breed-admin-query.controller';
+import { BreedAdminCommandController } from './admin/controller/breed-admin-command.controller';
+import { BreedAdminQueryController } from './admin/controller/breed-admin-query.controller';
 import { BREED_ADMIN_READER_PORT } from './admin/application/ports/breed-admin-reader.port';
 import { BREED_WRITER_PORT } from './admin/application/ports/breed-writer.port';
 import { CreateBreedUseCase } from './admin/application/use-cases/create-breed.use-case';
