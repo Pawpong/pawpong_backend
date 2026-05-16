@@ -5,8 +5,8 @@ import { StandardQuestion, StandardQuestionSchema } from '../../schema/standard-
 import { STANDARD_QUESTION_READER_PORT } from './application/ports/standard-question-reader.port';
 import { GetAllActiveStandardQuestionsUseCase } from './application/use-cases/get-all-active-standard-questions.use-case';
 import { GetStandardQuestionByIdUseCase } from './application/use-cases/get-standard-question-by-id.use-case';
-import { StandardQuestionAdminCommandController } from './admin/standard-question-admin-command.controller';
-import { StandardQuestionAdminQueryController } from './admin/standard-question-admin-query.controller';
+import { StandardQuestionAdminCommandController } from './admin/controller/standard-question-admin-command.controller';
+import { StandardQuestionAdminQueryController } from './admin/controller/standard-question-admin-query.controller';
 import { STANDARD_QUESTION_WRITER_PORT } from './admin/application/ports/standard-question-writer.port';
 import { GetAllStandardQuestionsUseCase } from './admin/application/use-cases/get-all-standard-questions.use-case';
 import { ReorderStandardQuestionsUseCase } from './admin/application/use-cases/reorder-standard-questions.use-case';

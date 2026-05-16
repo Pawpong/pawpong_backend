@@ -14,8 +14,8 @@ import { SendBreederRemindNotificationsUseCase } from './application/use-cases/s
 import { SetBreederTestAccountUseCase } from './application/use-cases/set-breeder-test-account.use-case';
 import { SuspendBreederUseCase } from './application/use-cases/suspend-breeder.use-case';
 import { UnsuspendBreederUseCase } from './application/use-cases/unsuspend-breeder.use-case';
-import { BreederAdminAccountController } from './breeder-admin-account.controller';
-import { BreederAdminReminderController } from './breeder-admin-reminder.controller';
+import { BreederAdminAccountController } from './controller/breeder-admin-account.controller';
+import { BreederAdminReminderController } from './controller/breeder-admin-reminder.controller';
 import { BreederAdminActivityLogFactoryService } from './domain/services/breeder-admin-activity-log-factory.service';
 import { BreederAdminPolicyService } from './domain/services/breeder-admin-policy.service';
 import { BreederAdminReminderPolicyService } from './domain/services/breeder-admin-reminder-policy.service';

@@ -11,9 +11,9 @@ import { GetPlatformMvpStatsUseCase } from './application/use-cases/get-platform
 import { GetPlatformStatsUseCase } from './application/use-cases/get-platform-stats.use-case';
 import { GetSystemHealthUseCase } from './application/use-cases/get-system-health.use-case';
 import { LOKI_QUERY_PORT } from './application/ports/loki-query.port';
-import { PlatformAdminMvpStatsController } from './platform-admin-mvp-stats.controller';
-import { PlatformAdminStatsController } from './platform-admin-stats.controller';
-import { PlatformAdminSystemHealthController } from './platform-admin-system-health.controller';
+import { PlatformAdminMvpStatsController } from './controller/platform-admin-mvp-stats.controller';
+import { PlatformAdminStatsController } from './controller/platform-admin-stats.controller';
+import { PlatformAdminSystemHealthController } from './controller/platform-admin-system-health.controller';
 import { PlatformAdminQueryPolicyService } from './domain/services/platform-admin-query-policy.service';
 import { PlatformAdminResultMapperService } from './domain/services/platform-admin-result-mapper.service';
 import { LogCategorizerService } from './domain/services/log-categorizer.service';

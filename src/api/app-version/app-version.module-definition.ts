@@ -5,8 +5,8 @@ import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 
 import { APP_VERSION_READER_PORT } from './application/ports/app-version-reader.port';
 import { CheckAppVersionUseCase } from './application/use-cases/check-app-version.use-case';
-import { AppVersionAdminCommandController } from './admin/app-version-admin-command.controller';
-import { AppVersionAdminQueryController } from './admin/app-version-admin-query.controller';
+import { AppVersionAdminCommandController } from './admin/controller/app-version-admin-command.controller';
+import { AppVersionAdminQueryController } from './admin/controller/app-version-admin-query.controller';
 import { APP_VERSION_ADMIN_READER_PORT } from './admin/application/ports/app-version-admin-reader.port';
 import { APP_VERSION_WRITER_PORT } from './admin/application/ports/app-version-writer.port';
 import { CreateAppVersionUseCase } from './admin/application/use-cases/create-app-version.use-case';
