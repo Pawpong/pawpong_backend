@@ -8,8 +8,7 @@ logs
 *.log
 npm-debug.log*
 pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+.pnpm-store/
 lerna-debug.log*
 
 # OS
@@ -65,7 +64,6 @@ swagger.json
 # MCP server config (local dev tool, machine-specific)
 .mcp.json
 package-lock.json
-yarn.lock
 docs/*
 
 # Firebase/FCM 자격 증명 (로컬 개발 + 프로덕션 환경변수)

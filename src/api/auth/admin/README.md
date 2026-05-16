@@ -92,5 +92,5 @@ async loginAdmin(email: string, password: string): Promise<AdminLoginResponseDto
 ## 테스트 실행
 
 ```bash
-yarn test:e2e src/api/auth/admin/test/auth-admin.e2e-spec.ts
+pnpm test:e2e src/api/auth/admin/test/auth-admin.e2e-spec.ts
 ```
