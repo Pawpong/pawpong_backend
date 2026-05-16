@@ -63,7 +63,15 @@ export interface AdoptionPetReaderPort {
     countList(query: Pick<AdoptionPetListQuery, 'petType' | 'breederId' | 'excludePetId'>): Promise<number>;
     readList(query: AdoptionPetListQuery): Promise<AdoptionPetSnapshot[]>;
     readPopular(petType: AdoptionPetType | undefined, limit: number): Promise<AdoptionPetSnapshot[]>;
+    /**
+     * 펫 단건 조회. isActive=false 인 도큐먼트도 포함 — 즐겨찾기 해제 등 cleanup 경로 용도.
+     */
     readById(petId: string): Promise<AdoptionPetSnapshot | null>;
+    /**
+     * 활성 펫 단건 조회 — isActive=true 만 반환. 즐겨찾기 추가 등 신규 행위 가드용.
+     * soft-deleted 펫에 새 즐겨찾기/조회수가 쌓여 stale state 가 생기지 않도록 한다.
+     */
+    readActiveById(petId: string): Promise<AdoptionPetSnapshot | null>;
     /**
      * 입양 상세용 — base snapshot 에 건강/부모/사육환경 등 추가 필드 포함.
      * isActive=false 항목은 null 을 반환한다.
