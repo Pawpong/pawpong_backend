@@ -31,6 +31,7 @@ export class AdoptionListController {
             petType: query.petType,
             breederId: query.breederId,
             excludePetId: query.excludePetId,
+            status: query.status,
             sort: query.sort,
             page: query.page,
             pageSize: query.pageSize,
