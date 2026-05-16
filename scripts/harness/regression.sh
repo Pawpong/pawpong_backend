@@ -12,7 +12,7 @@ echo "[regression] arch"
 "$REPO_ROOT/scripts/harness/arch.sh" "${DOMAINS[@]}"
 
 echo "[regression] unit"
-yarn test --runInBand
+pnpm test -- --runInBand
 
 E2E_PATHS=()
 for domain in "${DOMAINS[@]}"; do
@@ -20,7 +20,7 @@ for domain in "${DOMAINS[@]}"; do
 done
 
 echo "[regression] e2e ${DOMAINS[*]}"
-yarn test:e2e "${E2E_PATHS[@]}" --runInBand --forceExit
+pnpm test:e2e -- "${E2E_PATHS[@]}" --runInBand --forceExit
 
 echo "[regression] contract ${DOMAINS[*]}"
 "$REPO_ROOT/scripts/harness/contract.sh" "${DOMAINS[@]}"
