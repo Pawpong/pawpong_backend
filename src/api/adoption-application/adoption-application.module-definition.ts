@@ -7,7 +7,7 @@ import {
 } from '../../schema/adoption-application.schema';
 import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
 
-import { AdoptionApplicationCreateController } from './adoption-application-create.controller';
+import { AdoptionApplicationCreateController } from './controller/adoption-application-create.controller';
 import { ADOPTION_APPLICATION_CONTEXT_PORT } from './application/ports/adoption-application-context.port';
 import { ADOPTION_APPLICATION_WRITER_PORT } from './application/ports/adoption-application-writer.port';
 import { CreateAdoptionApplicationV2UseCase } from './application/use-cases/create-adoption-application-v2.use-case';

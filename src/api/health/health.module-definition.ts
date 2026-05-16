@@ -1,6 +1,6 @@
 import { SYSTEM_RUNTIME_READER_PORT } from './application/ports/system-runtime-reader.port';
 import { GetHealthUseCase } from './application/use-cases/get-health.use-case';
-import { HealthController } from './health.controller';
+import { HealthController } from './controller/health.controller';
 import { SystemRuntimeAdapter } from './infrastructure/system-runtime.adapter';
 
 export const HEALTH_MODULE_CONTROLLERS = [HealthController];
