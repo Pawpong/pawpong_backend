@@ -34,6 +34,7 @@ export function ApiGetCommunityPostListEndpoint() {
                 ## 필터 / 정렬
                 - petType (선택): dog / cat / reptile
                 - category (선택): 자유 텍스트 정확 일치 (예: "레오파드")
+                - authorId (선택): ObjectId 또는 "me" — "me" 는 인증 토큰 필요 (마이홈 게시글 탭, Figma 278:170)
                 - sort: latest(기본) / popular(likeCount desc)
 
                 ## 응답

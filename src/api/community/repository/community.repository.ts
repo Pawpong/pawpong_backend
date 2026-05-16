@@ -27,6 +27,9 @@ export class CommunityRepository {
         const filter: FilterQuery<CommunityPost> = { isActive: true };
         if (query.petType) filter.petType = query.petType;
         if (query.category && query.category.trim().length > 0) filter.category = query.category.trim();
+        if (query.authorId && Types.ObjectId.isValid(query.authorId)) {
+            filter.authorId = new Types.ObjectId(query.authorId);
+        }
 
         const sort: Record<string, 1 | -1> =
             query.sort === 'popular' ? { likeCount: -1, createdAt: -1 } : { createdAt: -1 };
