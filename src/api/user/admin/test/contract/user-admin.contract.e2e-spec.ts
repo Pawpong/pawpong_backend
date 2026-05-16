@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { cleanupDatabase, createTestingApp, seedAdmin } from '../../../../../common/test/test-utils';
+import { cleanupDatabase, createTestingApp, seedAdmin } from '../../../../../common/testing/test-utils';
 
 describe('사용자 관리자 응답 계약 종단간 테스트', () => {
     let app: INestApplication;
