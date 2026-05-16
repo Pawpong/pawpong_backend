@@ -51,7 +51,10 @@ export class ProfileMeController {
         if (role !== 'adopter' && role !== 'breeder') {
             throw new BadRequestException('지원하지 않는 사용자 역할입니다.');
         }
-        const result = await this.updateMyProfileUseCase.execute(userId, role, { bio: body.bio });
+        const result = await this.updateMyProfileUseCase.execute(userId, role, {
+            bio: body.bio,
+            location: body.location,
+        });
         return ApiResponseDto.success(result, PROFILE_RESPONSE_MESSAGES.myUpdated);
     }
 }

@@ -80,7 +80,7 @@ export class ProfileRepository {
     }
 
     /**
-     * 입양자 프로필 편집 (현재는 bio 만 지원). 도큐먼트 자체가 없으면 false.
+     * 입양자 프로필 편집 (bio 만 지원 — Adopter 스키마에 location 없음). 도큐먼트 자체가 없으면 false.
      * 변경 항목이 없거나 동일 값이라도 true 로 처리 — 호출측 idempotent.
      */
     async updateAdopterProfile(userId: string, patch: { bio?: string }): Promise<boolean> {
@@ -100,12 +100,21 @@ export class ProfileRepository {
     }
 
     /**
-     * 브리더 프로필 편집 (현재는 bio 만 지원). 도큐먼트 자체가 없으면 false.
+     * 브리더 프로필 편집 (bio + 사업장 위치). 도큐먼트 자체가 없으면 false.
+     * 위치 필드는 BreederProfile.location 의 city/district/address 에 dot-path 로 partial 적용.
      */
-    async updateBreederProfile(breederId: string, patch: { bio?: string }): Promise<boolean> {
+    async updateBreederProfile(
+        breederId: string,
+        patch: { bio?: string; location?: { city?: string; district?: string; address?: string } },
+    ): Promise<boolean> {
         if (!Types.ObjectId.isValid(breederId)) return false;
         const $set: Record<string, unknown> = {};
         if (patch.bio !== undefined) $set.bio = patch.bio;
+        if (patch.location !== undefined) {
+            if (patch.location.city !== undefined) $set['profile.location.city'] = patch.location.city;
+            if (patch.location.district !== undefined) $set['profile.location.district'] = patch.location.district;
+            if (patch.location.address !== undefined) $set['profile.location.address'] = patch.location.address;
+        }
 
         if (Object.keys($set).length === 0) {
             const exists = await this.breederModel.exists({ _id: new Types.ObjectId(breederId) });
