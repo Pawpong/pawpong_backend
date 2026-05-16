@@ -7,14 +7,20 @@ import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 
 import { PROFILE_ASSET_URL_PORT } from './application/ports/profile-asset-url.port';
 import { PROFILE_READER_PORT } from './application/ports/profile-reader.port';
+import { PROFILE_WRITER_PORT } from './application/ports/profile-writer.port';
 import { GetAdopterProfileUseCase } from './application/use-cases/get-adopter-profile.use-case';
 import { GetBreederProfileUseCase } from './application/use-cases/get-breeder-profile.use-case';
 import { GetMyFavoriteBreedersUseCase } from './application/use-cases/get-my-favorite-breeders.use-case';
 import { GetMyProfileUseCase } from './application/use-cases/get-my-profile.use-case';
+import { UpdateMyProfileUseCase } from './application/use-cases/update-my-profile.use-case';
 import { ProfileMapperService } from './domain/services/profile-mapper.service';
 import { ProfileAssetUrlStorageAdapter } from './infrastructure/profile-asset-url-storage.adapter';
 import { ProfileReaderMongooseAdapter } from './infrastructure/profile-reader-mongoose.adapter';
-import { ProfileFavoriteBreedersController, ProfileMeController } from './controller/profile-me.controller';
+import { ProfileWriterMongooseAdapter } from './infrastructure/profile-writer-mongoose.adapter';
+import {
+    ProfileFavoriteBreedersController,
+    ProfileMeController,
+} from './controller/profile-me.controller';
 import { ProfilePublicController } from './controller/profile-public.controller';
 import { ProfileRepository } from './repository/profile.repository';
 
@@ -34,6 +40,7 @@ export const PROFILE_MODULE_CONTROLLERS = [
 
 const USE_CASE_PROVIDERS = [
     GetMyProfileUseCase,
+    UpdateMyProfileUseCase,
     GetAdopterProfileUseCase,
     GetBreederProfileUseCase,
     GetMyFavoriteBreedersUseCase,
@@ -41,10 +48,16 @@ const USE_CASE_PROVIDERS = [
 
 const DOMAIN_PROVIDERS = [ProfileMapperService];
 
-const INFRASTRUCTURE_PROVIDERS = [ProfileRepository, ProfileReaderMongooseAdapter, ProfileAssetUrlStorageAdapter];
+const INFRASTRUCTURE_PROVIDERS = [
+    ProfileRepository,
+    ProfileReaderMongooseAdapter,
+    ProfileWriterMongooseAdapter,
+    ProfileAssetUrlStorageAdapter,
+];
 
 const PORT_BINDINGS = [
     { provide: PROFILE_READER_PORT, useExisting: ProfileReaderMongooseAdapter },
+    { provide: PROFILE_WRITER_PORT, useExisting: ProfileWriterMongooseAdapter },
     { provide: PROFILE_ASSET_URL_PORT, useExisting: ProfileAssetUrlStorageAdapter },
 ];
 
