@@ -1,6 +1,6 @@
-import { KafkaService } from './kafka.service';
-import { CustomLoggerService } from '../logger/custom-logger.service';
-import { NotifyCriticalErrorUseCase } from '../discord/application/use-cases/notify-critical-error.use-case';
+import { KafkaService } from '../kafka.service';
+import { CustomLoggerService } from '../../logger/custom-logger.service';
+import { NotifyCriticalErrorUseCase } from '../../discord/application/use-cases/notify-critical-error.use-case';
 
 describe('KafkaService', () => {
     const originalNodeEnv = process.env.NODE_ENV;

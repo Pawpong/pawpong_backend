@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 
-import { DiscordErrorAlertAdapter } from './discord-error-alert.adapter';
-import { CustomLoggerService } from '../../logger/custom-logger.service';
+import { DiscordErrorAlertAdapter } from '../../infrastructure/discord-error-alert.adapter';
+import { CustomLoggerService } from '../../../logger/custom-logger.service';
 
 jest.mock('axios');
 

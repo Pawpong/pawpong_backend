@@ -5,7 +5,7 @@ import request from 'supertest';
 
 import { JwtService } from '@nestjs/jwt';
 
-import { createTestingApp } from '../../../../common/test/test-utils';
+import { createTestingApp } from '../../../../common/testing/test-utils';
 
 /**
  * v2 입양 신청 — 라우팅 / 가드 / 동의 검증 / 펫 존재 / 중복 차단 / 정상 저장의 계약 커버리지.

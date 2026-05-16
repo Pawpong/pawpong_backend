@@ -2,7 +2,7 @@ import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
-import { createTestingApp, cleanupDatabase, getAdopterToken, getBreederToken } from '../../../common/test/test-utils';
+import { createTestingApp, cleanupDatabase, getAdopterToken, getBreederToken } from '../../../common/testing/test-utils';
 
 /**
  * 채팅 도메인 E2E 테스트
