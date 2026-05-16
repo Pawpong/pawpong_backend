@@ -18,7 +18,7 @@ import { POPULAR_KEYWORD_READER_PORT } from './application/ports/popular-keyword
 import { GetActivePopularKeywordsUseCase } from './application/use-cases/get-active-popular-keywords.use-case';
 import { PopularKeywordItemMapperService } from './domain/services/popular-keyword-item-mapper.service';
 import { PopularKeywordMongooseReaderAdapter } from './infrastructure/popular-keyword-mongoose-reader.adapter';
-import { PopularKeywordController } from './popular-keyword.controller';
+import { PopularKeywordController } from './controller/popular-keyword.controller';
 import { PopularKeywordRepository } from './repository/popular-keyword.repository';
 
 const SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: PopularKeyword.name, schema: PopularKeywordSchema }]);

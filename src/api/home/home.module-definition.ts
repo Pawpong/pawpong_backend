@@ -11,9 +11,9 @@ import { HOME_CONTENT_READER_PORT } from './application/ports/home-content-reade
 import { GetActiveBannersUseCase } from './application/use-cases/get-active-banners.use-case';
 import { GetAvailablePetsUseCase } from './application/use-cases/get-available-pets.use-case';
 import { GetFaqsUseCase } from './application/use-cases/get-faqs.use-case';
-import { HomeAvailablePetsController } from './home-available-pets.controller';
-import { HomeBannersController } from './home-banners.controller';
-import { HomeFaqsController } from './home-faqs.controller';
+import { HomeAvailablePetsController } from './controller/home-available-pets.controller';
+import { HomeBannersController } from './controller/home-banners.controller';
+import { HomeFaqsController } from './controller/home-faqs.controller';
 import { HomeAvailablePetCatalogService } from './domain/services/home-available-pet-catalog.service';
 import { HomeBannerCatalogService } from './domain/services/home-banner-catalog.service';
 import { HomeFaqCatalogService } from './domain/services/home-faq-catalog.service';

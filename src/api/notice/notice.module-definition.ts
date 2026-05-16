@@ -10,7 +10,7 @@ import { CreateNoticeUseCase } from './admin/application/use-cases/create-notice
 import { DeleteNoticeUseCase } from './admin/application/use-cases/delete-notice.use-case';
 import { UpdateNoticeUseCase } from './admin/application/use-cases/update-notice.use-case';
 import { NoticeMongooseWriterAdapter } from './admin/infrastructure/notice-mongoose-writer.adapter';
-import { NoticeController } from './notice.controller';
+import { NoticeController } from './controller/notice.controller';
 import { NOTICE_READER_PORT } from './application/ports/notice-reader.port';
 import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
 import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';
