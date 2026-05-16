@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import {
     ApiController,
@@ -10,6 +10,7 @@ import {
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { ADOPTION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/adoption-response-messages';
 import { AdoptedPetCardResponseDto } from '../dto/response/adopted-pet-card.dto';
+import { AdoptionPetDetailResponseDto } from '../dto/response/adoption-pet-detail-response.dto';
 import { AdoptionFavoriteResponseDto, AdoptionPetResponseDto } from '../dto/response/adoption-pet-response.dto';
 
 const PET_NOT_FOUND_RESPONSE = {
@@ -32,9 +33,13 @@ export function ApiGetAdoptionListEndpoint() {
             summary: '입양 가능 동물 목록 조회',
             description: `
                 입양 페이지의 "전체 입양 소식" 목록을 페이지네이션으로 반환합니다.
+                카테고리탭(Figma 6:131) — petType 필터로 동물 종류별 노출.
+                상세 화면(Figma 39:1240) — breederId + excludePetId 조합으로 "브리더의 다른 분양 동물" 영역 조회.
 
                 ## 주요 기능
                 - petType 필터 (강아지/고양이/도마뱀)
+                - breederId 필터 (특정 브리더의 분양 동물만)
+                - excludePetId (특정 펫을 결과에서 제외 — 상세 화면 자기 자신 제외용)
                 - 정렬: 최신순(latest) / 인기순(popular)
                 - 인증 사용자는 카드별 isFavorited 가 채워집니다
             `,
@@ -45,6 +50,8 @@ export function ApiGetAdoptionListEndpoint() {
             successDescription: '입양 동물 목록 조회 성공',
             successMessageExample: ADOPTION_RESPONSE_MESSAGE_EXAMPLES.listRetrieved,
         }),
+        ApiQuery({ name: 'breederId', required: false, type: String, description: '특정 브리더 필터 (ObjectId)' }),
+        ApiQuery({ name: 'excludePetId', required: false, type: String, description: '결과에서 제외할 펫 ID' }),
     );
 }
 
@@ -67,11 +74,47 @@ export function ApiGetPopularAdoptionEndpoint() {
     );
 }
 
+export function ApiGetAdoptionDetailEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '입양 동물 상세 조회 (Figma 39:1240)',
+            description: `
+                입양 상세 화면에 필요한 모든 정보를 한 번에 반환합니다.
+
+                ## 동작
+                - 상세 진입 시 viewCount 가 +1 증가합니다 (isActive=true 도큐먼트만 대상).
+                - 비활성 또는 미존재 펫은 400 으로 응답합니다.
+
+                ## 응답 구성
+                - 카드 필드 (이름/품종/가격/상태/사진/카운트 등)
+                - 건강 정보 (예방 접종 기록, 유전병 검사 기록 — 미완료시 사유)
+                - 부모 정보 스냅샷 (관계/품종/이름/생년/사진)
+                - 사육 환경 (설명 + 사진)
+                - 브리더 요약 (닉네임 우선 / 프로필 / 위치 동·구 / BPM)
+                - 인증 사용자는 isFavorited 채워집니다.
+
+                ## 브리더 요약 정책 (BreederAdminPolicyService.getBreederDisplayName 와 동일 컨벤션)
+                - displayName: User.nickname 우선, 없으면 Breeder.name(업체명) fallback
+                - profileImageUrl: User.profileImageFileName (아바타) 의 signed URL
+                - locationText: BreederProfile.location.district 우선, city fallback — 상세 주소(address)는 PII 라 노출하지 않음
+            `,
+            responseType: AdoptionPetDetailResponseDto,
+            isPublic: true,
+            supportsOptionalAuth: true,
+            successDescription: '입양 동물 상세 조회 성공',
+            successMessageExample: ADOPTION_RESPONSE_MESSAGE_EXAMPLES.detailRetrieved,
+            errorResponses: [PET_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'petId', description: '동물 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
 export function ApiAddAdoptionFavoriteEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '동물 관심 등록',
-            description: '입양 가능 동물을 입양자 즐겨찾기에 추가합니다. 이미 등록된 경우에도 200 으로 처리됩니다 (idempotent).',
+            description:
+                '입양 가능 동물을 입양자 즐겨찾기에 추가합니다. 이미 등록된 경우에도 200 으로 처리됩니다 (idempotent).',
             responseType: AdoptionFavoriteResponseDto,
             successDescription: '관심 등록 성공',
             successMessageExample: ADOPTION_RESPONSE_MESSAGE_EXAMPLES.favoriteAdded,
@@ -85,7 +128,8 @@ export function ApiRemoveAdoptionFavoriteEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '동물 관심 해제',
-            description: '입양자 즐겨찾기에서 동물을 제거합니다. 등록되어 있지 않아도 200 으로 처리됩니다 (idempotent).',
+            description:
+                '입양자 즐겨찾기에서 동물을 제거합니다. 등록되어 있지 않아도 200 으로 처리됩니다 (idempotent).',
             responseType: AdoptionFavoriteResponseDto,
             successDescription: '관심 해제 성공',
             successMessageExample: ADOPTION_RESPONSE_MESSAGE_EXAMPLES.favoriteRemoved,

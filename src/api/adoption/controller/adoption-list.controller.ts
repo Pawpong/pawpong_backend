@@ -29,6 +29,8 @@ export class AdoptionListController {
     ): Promise<ApiResponseDto<PaginationResponseDto<AdoptionPetResponseDto>>> {
         const result = await this.getAdoptionPetListUseCase.execute({
             petType: query.petType,
+            breederId: query.breederId,
+            excludePetId: query.excludePetId,
             sort: query.sort,
             page: query.page,
             pageSize: query.pageSize,

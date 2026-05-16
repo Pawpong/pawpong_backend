@@ -56,16 +56,28 @@ export class AdoptionPetBreederBlockDto {
     @ApiProperty({ description: '브리더 ID' })
     breederId: string;
 
-    @ApiProperty({ description: '표시용 닉네임', example: '도심속 도마뱀 사장님' })
+    @ApiProperty({
+        description:
+            '표시명. User.nickname 우선, 없으면 Breeder.name(업체명) fallback. 기존 BreederAdminPolicyService.getBreederDisplayName 컨벤션과 동일.',
+        example: '도심속 도마뱀 사장님',
+    })
     displayName: string;
 
-    @ApiProperty({ description: '프로필 이미지 signed URL', required: false })
+    @ApiProperty({
+        description: '프로필 이미지 signed URL (User.profileImageFileName 기반)',
+        required: false,
+    })
     profileImageUrl?: string;
 
-    @ApiProperty({ description: '위치 표기 (가장 구체적인 동/구/시)', example: '독산동', required: false })
+    @ApiProperty({
+        description:
+            '위치 표기. BreederProfile.location.district 우선, city fallback. 상세 주소(address)는 PII 라 공개 응답에서 제외.',
+        example: '독산동',
+        required: false,
+    })
     locationText?: string;
 
-    @ApiProperty({ description: 'Pawpong 활동 점수', example: 80 })
+    @ApiProperty({ description: 'Pawpong 활동 점수 (Breeder.bpm)', example: 80 })
     bpm: number;
 }
 
