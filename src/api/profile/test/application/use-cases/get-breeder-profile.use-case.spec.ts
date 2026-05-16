@@ -18,7 +18,12 @@ const breederSnapshot = {
 };
 
 describe('GetBreederProfileUseCase', () => {
-    const reader = { readBreeder: jest.fn(), readAdopter: jest.fn(), listFavoriteBreeders: jest.fn(), isFavoritedBy: jest.fn() };
+    const reader = {
+        readBreeder: jest.fn(),
+        readAdopter: jest.fn(),
+        listFavoriteBreeders: jest.fn(),
+        isFavoritedBy: jest.fn(),
+    };
     const mapper = new ProfileMapperService(assetUrl as any);
     const useCase = new GetBreederProfileUseCase(reader as any, mapper);
 

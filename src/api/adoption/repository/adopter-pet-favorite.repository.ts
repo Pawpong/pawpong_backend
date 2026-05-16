@@ -76,11 +76,7 @@ export class AdopterPetFavoriteRepository {
                 { $sort: { createdAt: -1 } },
                 {
                     $facet: {
-                        items: [
-                            { $skip: query.skip },
-                            { $limit: query.limit },
-                            { $replaceRoot: { newRoot: '$pet' } },
-                        ],
+                        items: [{ $skip: query.skip }, { $limit: query.limit }, { $replaceRoot: { newRoot: '$pet' } }],
                         total: [{ $count: 'count' }],
                     },
                 },

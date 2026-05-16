@@ -47,10 +47,7 @@ export class AdoptionPetMapperService {
             return '';
         }
         const now = Date.now();
-        const ageInMonths = Math.max(
-            0,
-            Math.floor((now - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30)),
-        );
+        const ageInMonths = Math.max(0, Math.floor((now - birthDate.getTime()) / (1000 * 60 * 60 * 24 * 30)));
 
         if (ageInMonths < 12) {
             return `${ageInMonths}개월`;
