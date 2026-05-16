@@ -102,10 +102,7 @@ describe('v2 입양 신청 종단간 테스트', () => {
 
     it('비로그인 → 401', async () => {
         const { petId } = await seedPet();
-        await request(app.getHttpServer())
-            .post('/api/v2/adoption-application')
-            .send(validBody(petId))
-            .expect(401);
+        await request(app.getHttpServer()).post('/api/v2/adoption-application').send(validBody(petId)).expect(401);
     });
 
     it('브리더 role 로 호출 → 403 (StrictRolesGuard adopter 강제)', async () => {

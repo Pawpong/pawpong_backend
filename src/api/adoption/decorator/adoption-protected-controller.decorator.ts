@@ -10,11 +10,7 @@ import { ApiAdoptionProtectedController, ApiAdoptionPublicController } from '../
  * 입양 페이지 공개 라우트 — 비로그인 접근 가능, 로그인 시 isFavorited 채움
  */
 export function AdoptionOptionalAuthController() {
-    return applyDecorators(
-        ApiAdoptionPublicController(),
-        Controller('v2/adoption'),
-        UseGuards(OptionalJwtAuthGuard),
-    );
+    return applyDecorators(ApiAdoptionPublicController(), Controller('v2/adoption'), UseGuards(OptionalJwtAuthGuard));
 }
 
 /**

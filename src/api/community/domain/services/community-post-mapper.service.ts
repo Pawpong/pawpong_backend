@@ -1,13 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import {
-    COMMUNITY_ASSET_URL_PORT,
-    type CommunityAssetUrlPort,
-} from '../../application/ports/community-asset-url.port';
-import type {
-    CommunityPostCommentSnapshot,
-    CommunityPostSnapshot,
-} from '../../application/types/community-post.type';
+import { COMMUNITY_ASSET_URL_PORT, type CommunityAssetUrlPort } from '../../application/ports/community-asset-url.port';
+import type { CommunityPostCommentSnapshot, CommunityPostSnapshot } from '../../application/types/community-post.type';
 import type { CommunityPostCommentResponseDto } from '../../dto/response/community-post-comment.dto';
 import type { CommunityPostCardResponseDto } from '../../dto/response/community-post-card.dto';
 import type { CommunityPostDetailResponseDto } from '../../dto/response/community-post-detail.dto';
@@ -47,7 +41,10 @@ export class CommunityPostMapperService {
         };
     }
 
-    toDetail(snapshot: CommunityPostSnapshot, comments: CommunityPostCommentResponseDto[]): CommunityPostDetailResponseDto {
+    toDetail(
+        snapshot: CommunityPostSnapshot,
+        comments: CommunityPostCommentResponseDto[],
+    ): CommunityPostDetailResponseDto {
         const photoUrls = snapshot.photos
             .map((fileName) => this.assetUrl.toSignedUrl(fileName))
             .filter((url): url is string => !!url);

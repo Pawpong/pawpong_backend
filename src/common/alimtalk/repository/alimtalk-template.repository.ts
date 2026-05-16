@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
-import {
-    AlimtalkTemplate,
-    AlimtalkTemplateDocument,
-} from '../../../schema/alimtalk-template.schema';
+import { AlimtalkTemplate, AlimtalkTemplateDocument } from '../../../schema/alimtalk-template.schema';
 
 @Injectable()
 export class AlimtalkTemplateRepository {

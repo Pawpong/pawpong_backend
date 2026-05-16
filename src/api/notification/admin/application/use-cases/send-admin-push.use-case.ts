@@ -5,10 +5,7 @@ import {
     NOTIFICATION_COMMAND_PORT,
     type NotificationCommandPort,
 } from '../../../application/ports/notification-command.port';
-import {
-    NOTIFICATION_PUSH_PORT,
-    type NotificationPushPort,
-} from '../../../application/ports/notification-push.port';
+import { NOTIFICATION_PUSH_PORT, type NotificationPushPort } from '../../../application/ports/notification-push.port';
 import { AdminPushTargetValidatorService } from '../../domain/services/admin-push-target-validator.service';
 import {
     ADMIN_PUSH_RECIPIENT_READER_PORT,
