@@ -62,7 +62,11 @@ export class AdoptionPetBreederBlockDto {
     @ApiProperty({ description: '프로필 이미지 signed URL', required: false })
     profileImageUrl?: string;
 
-    @ApiProperty({ description: '위치 표기 (가장 구체적인 동/구/시)', example: '독산동', required: false })
+    @ApiProperty({
+        description: '위치 표기 (district > city 순). 상세 주소는 PII 라 공개 응답에서 제외한다.',
+        example: '독산동',
+        required: false,
+    })
     locationText?: string;
 
     @ApiProperty({ description: 'Pawpong 활동 점수', example: 80 })
