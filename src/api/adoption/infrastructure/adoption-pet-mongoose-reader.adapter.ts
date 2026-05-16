@@ -35,6 +35,11 @@ export class AdoptionPetMongooseReaderAdapter implements AdoptionPetReaderPort {
         return item ? this.toSnapshot(item as unknown as AvailablePetDocument) : null;
     }
 
+    async readActiveById(petId: string): Promise<AdoptionPetSnapshot | null> {
+        const item = await this.repository.findActiveById(petId);
+        return item ? this.toSnapshot(item as unknown as AvailablePetDocument) : null;
+    }
+
     async readByIdDetailed(petId: string): Promise<AdoptionPetDetailSnapshot | null> {
         const item = await this.repository.findActiveById(petId);
         return item ? this.toDetailSnapshot(item as unknown as AvailablePetDocument) : null;
