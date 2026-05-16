@@ -15,7 +15,7 @@ import { BreedMongooseAdminReaderAdapter } from './admin/infrastructure/breed-mo
 import { BreedMongooseWriterAdapter } from './admin/infrastructure/breed-mongoose-writer.adapter';
 import { BREED_READER_PORT } from './application/ports/breed-reader.port';
 import { GetBreedsUseCase } from './application/use-cases/get-breeds.use-case';
-import { BreedController } from './breed.controller';
+import { BreedController } from './controller/breed.controller';
 import { BreedAdminResultMapperService } from './domain/services/breed-admin-result-mapper.service';
 import { BreedCatalogService } from './domain/services/breed-catalog.service';
 import { BreedMongooseReaderAdapter } from './infrastructure/breed-mongoose-reader.adapter';

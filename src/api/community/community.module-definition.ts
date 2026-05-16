@@ -22,9 +22,9 @@ import { GetCommunityPostCommentsUseCase } from './application/use-cases/get-com
 import { GetCommunityPostDetailUseCase } from './application/use-cases/get-community-post-detail.use-case';
 import { GetCommunityPostListUseCase } from './application/use-cases/get-community-post-list.use-case';
 import { UpdateCommunityPostUseCase } from './application/use-cases/update-community-post.use-case';
-import { CommunityPostDetailController } from './community-post-detail.controller';
-import { CommunityPostListController } from './community-post-list.controller';
-import { CommunityPostWriteController } from './community-post-write.controller';
+import { CommunityPostDetailController } from './controller/community-post-detail.controller';
+import { CommunityPostListController } from './controller/community-post-list.controller';
+import { CommunityPostWriteController } from './controller/community-post-write.controller';
 import { CommunityPostMapperService } from './domain/services/community-post-mapper.service';
 import { CommunityPostWriteValidatorService } from './domain/services/community-post-write-validator.service';
 import { CommunityAssetUrlStorageAdapter } from './infrastructure/community-asset-url-storage.adapter';
