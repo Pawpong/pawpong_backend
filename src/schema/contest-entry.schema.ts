@@ -27,7 +27,7 @@ export class ContestEntry {
     userDisplayName: string;
 
     /** 프로필 이미지 파일명 (스냅샷, signed URL 변환은 use-case 에서 수행) */
-    @Prop({ default: null })
+    @Prop({ type: String, default: null })
     userProfileImageFileName: string | null;
 
     /** S3 파일명 (signed URL 로 변환해서 응답) */
