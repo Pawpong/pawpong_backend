@@ -41,6 +41,7 @@ import { AppVersionModule } from './api/app-version/app-version.module';
 import { InquiryModule } from './api/inquiry/inquiry.module';
 import { FeedModule } from './api/feed/feed.module';
 import { ChatModule } from './api/chat/chat.module';
+import { ContestModule } from './api/contest/contest.module';
 
 @Module({
     imports: [
@@ -86,6 +87,7 @@ import { ChatModule } from './api/chat/chat.module';
         InquiryModule,
         FeedModule,
         ChatModule,
+        ContestModule,
     ],
     controllers: [],
     providers: [],
