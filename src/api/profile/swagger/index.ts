@@ -124,7 +124,11 @@ export function ApiFollowUserEndpoint() {
             successDescription: '팔로우 성공',
             successMessageExample: PROFILE_RESPONSE_MESSAGES.followed,
             errorResponses: [
-                { status: 400, description: '대상 없음 / 자기 자신 팔로우', errorExample: '해당 사용자를 찾을 수 없습니다.' },
+                {
+                    status: 400,
+                    description: '대상 없음 / 자기 자신 팔로우',
+                    errorExample: '해당 사용자를 찾을 수 없습니다.',
+                },
             ],
         }),
         ApiParam({ name: 'userId', description: '팔로우할 사용자 ID', example: '507f1f77bcf86cd799439011' }),

@@ -22,10 +22,7 @@ import { ProfileAssetUrlStorageAdapter } from './infrastructure/profile-asset-ur
 import { ProfileFollowMongooseAdapter } from './infrastructure/profile-follow-mongoose.adapter';
 import { ProfileReaderMongooseAdapter } from './infrastructure/profile-reader-mongoose.adapter';
 import { ProfileWriterMongooseAdapter } from './infrastructure/profile-writer-mongoose.adapter';
-import {
-    ProfileFavoriteBreedersController,
-    ProfileMeController,
-} from './controller/profile-me.controller';
+import { ProfileFavoriteBreedersController, ProfileMeController } from './controller/profile-me.controller';
 import { ProfileFollowController } from './controller/profile-follow.controller';
 import { ProfilePublicController } from './controller/profile-public.controller';
 import { ProfileFollowRepository } from './repository/profile-follow.repository';
