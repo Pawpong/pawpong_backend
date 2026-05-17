@@ -12,6 +12,7 @@ import { PROFILE_RESPONSE_MESSAGES } from '../constants/profile-response-message
 import { AdopterPublicProfileResponseDto } from '../dto/response/adopter-profile-response.dto';
 import { BreederPublicProfileResponseDto } from '../dto/response/breeder-profile-response.dto';
 import { FavoriteBreederCardResponseDto } from '../dto/response/favorite-breeder-card.dto';
+import { FollowResponseDto, UnfollowResponseDto } from '../dto/response/follow-response.dto';
 import { MyProfileResponseDto } from '../dto/response/my-profile-response.dto';
 
 const NOT_FOUND_RESPONSE = {
@@ -69,7 +70,7 @@ export function ApiGetAdopterProfileEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '다른 입양자 프로필 조회 (유저홈)',
-            description: '특정 입양자의 공개 프로필. follow 시스템 미구현이라 isFollowing 은 항상 false.',
+            description: '특정 입양자의 공개 프로필. 로그인 사용자는 isFollowing 이 실제 팔로우 여부로 채워진다.',
             responseType: AdopterPublicProfileResponseDto,
             isPublic: true,
             supportsOptionalAuth: true,
@@ -107,5 +108,38 @@ export function ApiGetMyFavoriteBreedersEndpoint() {
             successDescription: '즐겨찾는 브리더 목록 조회 성공',
             successMessageExample: PROFILE_RESPONSE_MESSAGES.favoriteBreedersRetrieved,
         }),
+    );
+}
+
+export function ApiFollowUserEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '사용자 팔로우 (Figma 678:46565)',
+            description: `
+                입양자 유저홈에서 팔로우. 대상은 입양자(Adopter)만 가능.
+                이미 팔로우 중이면 followed: false 반환 (멱등).
+                자기 자신 팔로우 시 400.
+            `,
+            responseType: FollowResponseDto,
+            successDescription: '팔로우 성공',
+            successMessageExample: PROFILE_RESPONSE_MESSAGES.followed,
+            errorResponses: [
+                { status: 400, description: '대상 없음 / 자기 자신 팔로우', errorExample: '해당 사용자를 찾을 수 없습니다.' },
+            ],
+        }),
+        ApiParam({ name: 'userId', description: '팔로우할 사용자 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiUnfollowUserEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '사용자 팔로우 취소',
+            description: '팔로우 중이 아닌 사용자에게 요청 시 unfollowed: false 반환 (멱등).',
+            responseType: UnfollowResponseDto,
+            successDescription: '팔로우 취소 성공',
+            successMessageExample: PROFILE_RESPONSE_MESSAGES.unfollowed,
+        }),
+        ApiParam({ name: 'userId', description: '팔로우 취소할 사용자 ID', example: '507f1f77bcf86cd799439011' }),
     );
 }
