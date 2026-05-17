@@ -3,11 +3,13 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { StorageModule } from '../../common/storage/storage.module';
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
+import { CommunityBookmark, CommunityBookmarkSchema } from '../../schema/community-bookmark.schema';
 import { CommunityPostComment, CommunityPostCommentSchema } from '../../schema/community-post-comment.schema';
 import { CommunityPost, CommunityPostSchema } from '../../schema/community-post.schema';
 
 import { COMMUNITY_ASSET_URL_PORT } from './application/ports/community-asset-url.port';
 import { COMMUNITY_AUTHOR_READER_PORT } from './application/ports/community-author-reader.port';
+import { COMMUNITY_BOOKMARK_PORT } from './application/ports/community-bookmark.port';
 import { COMMUNITY_POST_READER_PORT } from './application/ports/community-post-reader.port';
 import { COMMUNITY_POST_WRITER_PORT } from './application/ports/community-post-writer.port';
 import { CreateCommunityPostUseCase } from './application/use-cases/create-community-post.use-case';
@@ -15,7 +17,11 @@ import { DeleteCommunityPostUseCase } from './application/use-cases/delete-commu
 import { GetCommunityPostCommentsUseCase } from './application/use-cases/get-community-post-comments.use-case';
 import { GetCommunityPostDetailUseCase } from './application/use-cases/get-community-post-detail.use-case';
 import { GetCommunityPostListUseCase } from './application/use-cases/get-community-post-list.use-case';
+import { GetMySavedCommunityPostsUseCase } from './application/use-cases/get-my-saved-community-posts.use-case';
+import { SaveCommunityPostUseCase } from './application/use-cases/save-community-post.use-case';
+import { UnsaveCommunityPostUseCase } from './application/use-cases/unsave-community-post.use-case';
 import { UpdateCommunityPostUseCase } from './application/use-cases/update-community-post.use-case';
+import { CommunityPostBookmarkController } from './controller/community-post-bookmark.controller';
 import { CommunityPostDetailController } from './controller/community-post-detail.controller';
 import { CommunityPostListController } from './controller/community-post-list.controller';
 import { CommunityPostWriteController } from './controller/community-post-write.controller';
@@ -23,13 +29,16 @@ import { CommunityPostMapperService } from './domain/services/community-post-map
 import { CommunityPostWriteValidatorService } from './domain/services/community-post-write-validator.service';
 import { CommunityAssetUrlStorageAdapter } from './infrastructure/community-asset-url-storage.adapter';
 import { CommunityAuthorReaderMongooseAdapter } from './infrastructure/community-author-reader-mongoose.adapter';
+import { CommunityBookmarkMongooseAdapter } from './infrastructure/community-bookmark-mongoose.adapter';
 import { CommunityPostReaderMongooseAdapter } from './infrastructure/community-post-reader-mongoose.adapter';
 import { CommunityPostWriterMongooseAdapter } from './infrastructure/community-post-writer-mongoose.adapter';
+import { CommunityBookmarkRepository } from './repository/community-bookmark.repository';
 import { CommunityRepository } from './repository/community.repository';
 
 const SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: CommunityPost.name, schema: CommunityPostSchema },
     { name: CommunityPostComment.name, schema: CommunityPostCommentSchema },
+    { name: CommunityBookmark.name, schema: CommunityBookmarkSchema },
     { name: Adopter.name, schema: AdopterSchema },
     { name: Breeder.name, schema: BreederSchema },
 ]);
@@ -40,6 +49,7 @@ export const COMMUNITY_MODULE_CONTROLLERS = [
     CommunityPostListController,
     CommunityPostDetailController,
     CommunityPostWriteController,
+    CommunityPostBookmarkController,
 ];
 
 const USE_CASE_PROVIDERS = [
@@ -49,16 +59,21 @@ const USE_CASE_PROVIDERS = [
     CreateCommunityPostUseCase,
     UpdateCommunityPostUseCase,
     DeleteCommunityPostUseCase,
+    SaveCommunityPostUseCase,
+    UnsaveCommunityPostUseCase,
+    GetMySavedCommunityPostsUseCase,
 ];
 
 const DOMAIN_PROVIDERS = [CommunityPostMapperService, CommunityPostWriteValidatorService];
 
 const INFRASTRUCTURE_PROVIDERS = [
     CommunityRepository,
+    CommunityBookmarkRepository,
     CommunityPostReaderMongooseAdapter,
     CommunityPostWriterMongooseAdapter,
     CommunityAuthorReaderMongooseAdapter,
     CommunityAssetUrlStorageAdapter,
+    CommunityBookmarkMongooseAdapter,
 ];
 
 const PORT_BINDINGS = [
@@ -66,6 +81,7 @@ const PORT_BINDINGS = [
     { provide: COMMUNITY_POST_WRITER_PORT, useExisting: CommunityPostWriterMongooseAdapter },
     { provide: COMMUNITY_AUTHOR_READER_PORT, useExisting: CommunityAuthorReaderMongooseAdapter },
     { provide: COMMUNITY_ASSET_URL_PORT, useExisting: CommunityAssetUrlStorageAdapter },
+    { provide: COMMUNITY_BOOKMARK_PORT, useExisting: CommunityBookmarkMongooseAdapter },
 ];
 
 export const COMMUNITY_MODULE_PROVIDERS = [

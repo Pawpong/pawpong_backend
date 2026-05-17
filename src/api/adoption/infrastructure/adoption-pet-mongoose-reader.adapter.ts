@@ -15,7 +15,7 @@ export class AdoptionPetMongooseReaderAdapter implements AdoptionPetReaderPort {
     constructor(private readonly repository: AdoptionPetRepository) {}
 
     countList(
-        query: Pick<AdoptionPetListQuery, 'petType' | 'breederId' | 'excludePetId' | 'status'>,
+        query: Pick<AdoptionPetListQuery, 'petType' | 'breederId' | 'excludePetId' | 'status' | 'keyword'>,
     ): Promise<number> {
         return this.repository.countList(query);
     }
