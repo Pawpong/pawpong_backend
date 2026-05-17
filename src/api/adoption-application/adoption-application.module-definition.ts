@@ -1,13 +1,10 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
-import {
-    AdoptionApplication,
-    AdoptionApplicationSchema,
-} from '../../schema/adoption-application.schema';
+import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
 import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
 
-import { AdoptionApplicationCreateController } from './adoption-application-create.controller';
+import { AdoptionApplicationCreateController } from './controller/adoption-application-create.controller';
 import { ADOPTION_APPLICATION_CONTEXT_PORT } from './application/ports/adoption-application-context.port';
 import { ADOPTION_APPLICATION_WRITER_PORT } from './application/ports/adoption-application-writer.port';
 import { CreateAdoptionApplicationV2UseCase } from './application/use-cases/create-adoption-application-v2.use-case';
@@ -29,10 +26,7 @@ export const ADOPTION_APPLICATION_MODULE_CONTROLLERS = [AdoptionApplicationCreat
 
 const USE_CASE_PROVIDERS = [CreateAdoptionApplicationV2UseCase];
 
-const DOMAIN_PROVIDERS = [
-    AdoptionApplicationValidatorService,
-    AdoptionApplicationPersistMapperService,
-];
+const DOMAIN_PROVIDERS = [AdoptionApplicationValidatorService, AdoptionApplicationPersistMapperService];
 
 const INFRASTRUCTURE_PROVIDERS = [
     AdoptionApplicationRepository,

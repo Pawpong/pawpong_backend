@@ -52,9 +52,7 @@ describe('v2 약관 동의 검증 서비스', () => {
     });
 
     it('필수 약관이 누락되면 BadRequestException', () => {
-        expect(() =>
-            service.validate(ACTIVE, [{ code: 'service', version: 'v1.0' }]),
-        ).toThrow(BadRequestException);
+        expect(() => service.validate(ACTIVE, [{ code: 'service', version: 'v1.0' }])).toThrow(BadRequestException);
     });
 
     it('버전이 활성 버전과 다르면 BadRequestException', () => {

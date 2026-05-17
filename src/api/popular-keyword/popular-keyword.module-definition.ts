@@ -12,13 +12,13 @@ import { GetPopularKeywordByIdUseCase } from './admin/application/use-cases/get-
 import { UpdatePopularKeywordUseCase } from './admin/application/use-cases/update-popular-keyword.use-case';
 import { PopularKeywordAdminMongooseReaderAdapter } from './admin/infrastructure/popular-keyword-admin-mongoose-reader.adapter';
 import { PopularKeywordMongooseWriterAdapter } from './admin/infrastructure/popular-keyword-mongoose-writer.adapter';
-import { PopularKeywordAdminCommandController } from './admin/popular-keyword-admin-command.controller';
-import { PopularKeywordAdminQueryController } from './admin/popular-keyword-admin-query.controller';
+import { PopularKeywordAdminCommandController } from './admin/controller/popular-keyword-admin-command.controller';
+import { PopularKeywordAdminQueryController } from './admin/controller/popular-keyword-admin-query.controller';
 import { POPULAR_KEYWORD_READER_PORT } from './application/ports/popular-keyword-reader.port';
 import { GetActivePopularKeywordsUseCase } from './application/use-cases/get-active-popular-keywords.use-case';
 import { PopularKeywordItemMapperService } from './domain/services/popular-keyword-item-mapper.service';
 import { PopularKeywordMongooseReaderAdapter } from './infrastructure/popular-keyword-mongoose-reader.adapter';
-import { PopularKeywordController } from './popular-keyword.controller';
+import { PopularKeywordController } from './controller/popular-keyword.controller';
 import { PopularKeywordRepository } from './repository/popular-keyword.repository';
 
 const SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: PopularKeyword.name, schema: PopularKeywordSchema }]);

@@ -1,8 +1,5 @@
 import type { PopularKeywordSnapshot } from '../../../application/ports/popular-keyword-reader.port';
-import type {
-    CreatePopularKeywordCommand,
-    UpdatePopularKeywordCommand,
-} from '../types/popular-keyword-command.type';
+import type { CreatePopularKeywordCommand, UpdatePopularKeywordCommand } from '../types/popular-keyword-command.type';
 
 export const POPULAR_KEYWORD_WRITER_PORT = Symbol('POPULAR_KEYWORD_WRITER_PORT');
 

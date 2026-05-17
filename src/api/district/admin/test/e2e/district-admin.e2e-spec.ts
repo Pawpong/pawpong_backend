@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { createTestingApp, getAdminToken } from '../../../../../common/test/test-utils';
+import { createTestingApp, getAdminToken } from '../../../../../common/testing/test-utils';
 
 describe('지역 관리자 종단간 테스트', () => {
     let app: INestApplication;

@@ -21,7 +21,10 @@ export class AdoptionRecordRepository {
      * 입양 승인된(adoption_approved) 신청 목록을 펫과 join 해서 카드 데이터를 모아 반환.
      * 정렬은 입양 확정 시각(reviewedAt 또는 appliedAt fallback) desc.
      */
-    async aggregateMyAdopted(adopterId: string, query: { skip: number; limit: number }): Promise<{
+    async aggregateMyAdopted(
+        adopterId: string,
+        query: { skip: number; limit: number },
+    ): Promise<{
         docs: AggregatedAdoptedDoc[];
         totalItems: number;
     }> {

@@ -9,8 +9,8 @@ import { GetActiveTermsListUseCase } from './application/use-cases/get-active-te
 import { TermsItemMapperService } from './domain/services/terms-item-mapper.service';
 import { TermsMongooseReaderAdapter } from './infrastructure/terms-mongoose-reader.adapter';
 import { TermsRepository } from './repository/terms.repository';
-import { TermsDetailController } from './terms-detail.controller';
-import { TermsListController } from './terms-list.controller';
+import { TermsDetailController } from './controller/terms-detail.controller';
+import { TermsListController } from './controller/terms-list.controller';
 
 const TERMS_SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: Terms.name, schema: TermsSchema }]);
 

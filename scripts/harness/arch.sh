@@ -9,7 +9,7 @@ cd "$REPO_ROOT"
 DOMAINS=($(normalize_domains "$@"))
 
 echo "[arch] typecheck"
-yarn typecheck
+pnpm typecheck
 
 for domain in "${DOMAINS[@]}"; do
   path="$(domain_source_path "$domain")"

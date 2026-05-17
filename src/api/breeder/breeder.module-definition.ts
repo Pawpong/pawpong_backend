@@ -18,10 +18,10 @@ import { GetBreederProfileUseCase } from './application/use-cases/get-breeder-pr
 import { GetBreederReviewsUseCase } from './application/use-cases/get-breeder-reviews.use-case';
 import { GetPopularBreedersUseCase } from './application/use-cases/get-popular-breeders.use-case';
 import { SearchBreedersUseCase } from './application/use-cases/search-breeders.use-case';
-import { BreederDiscoveryController, BreederExploreController } from './breeder-discovery.controller';
-import { BreederPetDetailController, BreederPetsController } from './breeder-pets.controller';
-import { BreederApplicationFormController, BreederProfileController } from './breeder-profile.controller';
-import { BreederReviewsController } from './breeder-reviews.controller';
+import { BreederDiscoveryController, BreederExploreController } from './controller/breeder-discovery.controller';
+import { BreederPetDetailController, BreederPetsController } from './controller/breeder-pets.controller';
+import { BreederApplicationFormController, BreederProfileController } from './controller/breeder-profile.controller';
+import { BreederReviewsController } from './controller/breeder-reviews.controller';
 import { BreederBirthDateFormatterService } from './domain/services/breeder-birth-date-formatter.service';
 import { BreederExploreCardMapperService } from './domain/services/breeder-explore-card-mapper.service';
 import { BreederExploreCriteriaService } from './domain/services/breeder-explore-criteria.service';

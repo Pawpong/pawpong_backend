@@ -2,8 +2,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { District, DistrictSchema } from '../../schema/district.schema';
 
-import { DistrictAdminCommandController } from './admin/district-admin-command.controller';
-import { DistrictAdminQueryController } from './admin/district-admin-query.controller';
+import { DistrictAdminCommandController } from './admin/controller/district-admin-command.controller';
+import { DistrictAdminQueryController } from './admin/controller/district-admin-query.controller';
 import { DISTRICT_ADMIN_READER_PORT } from './admin/application/ports/district-admin-reader.port';
 import { DISTRICT_WRITER_PORT } from './admin/application/ports/district-writer.port';
 import { CreateDistrictUseCase } from './admin/application/use-cases/create-district.use-case';
@@ -13,7 +13,7 @@ import { GetDistrictByIdAdminUseCase } from './admin/application/use-cases/get-d
 import { UpdateDistrictUseCase } from './admin/application/use-cases/update-district.use-case';
 import { DistrictMongooseAdminReaderAdapter } from './admin/infrastructure/district-mongoose-admin-reader.adapter';
 import { DistrictMongooseWriterAdapter } from './admin/infrastructure/district-mongoose-writer.adapter';
-import { DistrictController } from './district.controller';
+import { DistrictController } from './controller/district.controller';
 import { DISTRICT_READER_PORT } from './application/ports/district-reader.port';
 import { GetAllDistrictsUseCase } from './application/use-cases/get-all-districts.use-case';
 import { DistrictAdminResultMapperService } from './domain/services/district-admin-result-mapper.service';

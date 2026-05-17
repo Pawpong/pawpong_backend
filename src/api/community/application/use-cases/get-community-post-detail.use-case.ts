@@ -1,11 +1,8 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CommunityPostMapperService } from '../../domain/services/community-post-mapper.service';
-import { CommunityPostDetailResponseDto } from '../../dto/response/community-post-detail.dto';
-import {
-    COMMUNITY_POST_READER_PORT,
-    type CommunityPostReaderPort,
-} from '../ports/community-post-reader.port';
+import { COMMUNITY_POST_READER_PORT, type CommunityPostReaderPort } from '../ports/community-post-reader.port';
+import type { CommunityPostDetailResult } from '../types/community-post-result.type';
 
 const COMMENT_PREVIEW_LIMIT = 5;
 
@@ -21,7 +18,7 @@ export class GetCommunityPostDetailUseCase {
         private readonly mapper: CommunityPostMapperService,
     ) {}
 
-    async execute(postId: string): Promise<CommunityPostDetailResponseDto> {
+    async execute(postId: string): Promise<CommunityPostDetailResult> {
         const snapshot = await this.reader.readPostById(postId);
         if (!snapshot) {
             throw new BadRequestException('해당 게시글을 찾을 수 없습니다.');

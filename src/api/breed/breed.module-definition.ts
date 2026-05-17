@@ -2,8 +2,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { Breed, BreedSchema } from '../../schema/breed.schema';
 
-import { BreedAdminCommandController } from './admin/breed-admin-command.controller';
-import { BreedAdminQueryController } from './admin/breed-admin-query.controller';
+import { BreedAdminCommandController } from './admin/controller/breed-admin-command.controller';
+import { BreedAdminQueryController } from './admin/controller/breed-admin-query.controller';
 import { BREED_ADMIN_READER_PORT } from './admin/application/ports/breed-admin-reader.port';
 import { BREED_WRITER_PORT } from './admin/application/ports/breed-writer.port';
 import { CreateBreedUseCase } from './admin/application/use-cases/create-breed.use-case';
@@ -15,7 +15,7 @@ import { BreedMongooseAdminReaderAdapter } from './admin/infrastructure/breed-mo
 import { BreedMongooseWriterAdapter } from './admin/infrastructure/breed-mongoose-writer.adapter';
 import { BREED_READER_PORT } from './application/ports/breed-reader.port';
 import { GetBreedsUseCase } from './application/use-cases/get-breeds.use-case';
-import { BreedController } from './breed.controller';
+import { BreedController } from './controller/breed.controller';
 import { BreedAdminResultMapperService } from './domain/services/breed-admin-result-mapper.service';
 import { BreedCatalogService } from './domain/services/breed-catalog.service';
 import { BreedMongooseReaderAdapter } from './infrastructure/breed-mongoose-reader.adapter';

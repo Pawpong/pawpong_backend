@@ -3,14 +3,14 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Notice, NoticeSchema } from '../../schema/notice.schema';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 
-import { NoticeAdminCommandController } from './admin/notice-admin-command.controller';
-import { NoticeAdminQueryController } from './admin/notice-admin-query.controller';
+import { NoticeAdminCommandController } from './admin/controller/notice-admin-command.controller';
+import { NoticeAdminQueryController } from './admin/controller/notice-admin-query.controller';
 import { NOTICE_WRITER_PORT } from './admin/application/ports/notice-writer.port';
 import { CreateNoticeUseCase } from './admin/application/use-cases/create-notice.use-case';
 import { DeleteNoticeUseCase } from './admin/application/use-cases/delete-notice.use-case';
 import { UpdateNoticeUseCase } from './admin/application/use-cases/update-notice.use-case';
 import { NoticeMongooseWriterAdapter } from './admin/infrastructure/notice-mongoose-writer.adapter';
-import { NoticeController } from './notice.controller';
+import { NoticeController } from './controller/notice.controller';
 import { NOTICE_READER_PORT } from './application/ports/notice-reader.port';
 import { GetNoticeDetailUseCase } from './application/use-cases/get-notice-detail.use-case';
 import { GetNoticeListUseCase } from './application/use-cases/get-notice-list.use-case';

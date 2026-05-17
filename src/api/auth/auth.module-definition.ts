@@ -10,25 +10,27 @@ import { JwtStrategy } from '../../common/strategy/jwt.strategy';
 import { NaverStrategy } from '../../common/strategy/naver.strategy';
 import { KakaoStrategy } from '../../common/strategy/kakao.strategy';
 import { GoogleStrategy } from '../../common/strategy/google.strategy';
+import { JWT_USER_STATUS_PORT } from '../../common/strategy/ports/jwt-user-status.port';
+import { JwtUserStatusMongooseAdapter } from '../../common/strategy/infrastructure/jwt-user-status-mongoose.adapter';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { StorageModule } from '../../common/storage/storage.module';
 import { DiscordWebhookModule } from '../../common/discord/discord-webhook.module';
 
-import { AuthBannerController } from './auth-banner.controller';
-import { AuthDuplicateCheckController } from './auth-duplicate-check.controller';
-import { AuthPhoneController } from './auth-phone.controller';
-import { AuthAdminLoginController } from './admin/auth-admin-login.controller';
-import { AuthAdminTokenController } from './admin/auth-admin-token.controller';
-import { AuthRefreshTokenController } from './auth-refresh-token.controller';
-import { AuthSignupController } from './auth-signup.controller';
-import { AuthGoogleLoginController } from './auth-google-login.controller';
-import { AuthKakaoLoginController } from './auth-kakao-login.controller';
-import { AuthNaverLoginController } from './auth-naver-login.controller';
-import { AuthSocialCheckUserController } from './auth-social-check-user.controller';
-import { AuthSocialCompleteRegistrationController } from './auth-social-complete-registration.controller';
-import { AuthProfileUploadController } from './auth-profile-upload.controller';
-import { AuthBreederDocumentsUploadController } from './auth-breeder-documents-upload.controller';
-import { AuthLogoutController } from './auth-logout.controller';
+import { AuthBannerController } from './controller/auth-banner.controller';
+import { AuthDuplicateCheckController } from './controller/auth-duplicate-check.controller';
+import { AuthPhoneController } from './controller/auth-phone.controller';
+import { AuthAdminLoginController } from './admin/controller/auth-admin-login.controller';
+import { AuthAdminTokenController } from './admin/controller/auth-admin-token.controller';
+import { AuthRefreshTokenController } from './controller/auth-refresh-token.controller';
+import { AuthSignupController } from './controller/auth-signup.controller';
+import { AuthGoogleLoginController } from './controller/auth-google-login.controller';
+import { AuthKakaoLoginController } from './controller/auth-kakao-login.controller';
+import { AuthNaverLoginController } from './controller/auth-naver-login.controller';
+import { AuthSocialCheckUserController } from './controller/auth-social-check-user.controller';
+import { AuthSocialCompleteRegistrationController } from './controller/auth-social-complete-registration.controller';
+import { AuthProfileUploadController } from './controller/auth-profile-upload.controller';
+import { AuthBreederDocumentsUploadController } from './controller/auth-breeder-documents-upload.controller';
+import { AuthLogoutController } from './controller/auth-logout.controller';
 import { LoginAdminUseCase } from './admin/application/use-cases/login-admin.use-case';
 import { RefreshAdminTokenUseCase } from './admin/application/use-cases/refresh-admin-token.use-case';
 import { AuthAdminAuthenticationService } from './admin/domain/services/auth-admin-authentication.service';
@@ -86,7 +88,7 @@ import { LogoutUseCase } from './application/use-cases/logout.use-case';
 import { RegisterAdopterUseCase } from './application/use-cases/register-adopter.use-case';
 import { RegisterBreederUseCase } from './application/use-cases/register-breeder.use-case';
 import { RegisterAdopterV2UseCase } from './v2/application/use-cases/register-adopter-v2.use-case';
-import { AuthV2RegisterAdopterController } from './v2/auth-v2-register-adopter.controller';
+import { AuthV2RegisterAdopterController } from './v2/controller/auth-v2-register-adopter.controller';
 import { AuthV2TermsAgreementValidatorService } from './v2/domain/services/auth-v2-terms-agreement-validator.service';
 import { TermsModule } from '../terms/terms.module';
 import { ProcessSocialLoginCallbackUseCase } from './application/use-cases/process-social-login-callback.use-case';
@@ -339,7 +341,18 @@ const AUTH_PORT_BINDINGS = [
     },
 ];
 
-const AUTH_STRATEGY_PROVIDERS = [JwtStrategy, GoogleStrategy, NaverStrategy, KakaoStrategy, CustomLoggerService];
+const AUTH_STRATEGY_PROVIDERS = [
+    JwtUserStatusMongooseAdapter,
+    {
+        provide: JWT_USER_STATUS_PORT,
+        useExisting: JwtUserStatusMongooseAdapter,
+    },
+    JwtStrategy,
+    GoogleStrategy,
+    NaverStrategy,
+    KakaoStrategy,
+    CustomLoggerService,
+];
 
 export const AUTH_MODULE_PROVIDERS = [
     ...AUTH_USE_CASE_PROVIDERS,

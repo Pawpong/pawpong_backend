@@ -1,18 +1,17 @@
 import { Injectable, Inject } from '@nestjs/common';
 
-import {
-    PROFILE_ASSET_URL_PORT,
-    type ProfileAssetUrlPort,
-} from '../../application/ports/profile-asset-url.port';
+import { PROFILE_ASSET_URL_PORT, type ProfileAssetUrlPort } from '../../application/ports/profile-asset-url.port';
 import type {
     AdopterProfileSnapshot,
     BreederProfileSnapshot,
     FavoriteBreederCardSnapshot,
 } from '../../application/types/profile.type';
-import { AdopterPublicProfileResponseDto } from '../../dto/response/adopter-profile-response.dto';
-import { BreederPublicProfileResponseDto } from '../../dto/response/breeder-profile-response.dto';
-import { FavoriteBreederCardResponseDto } from '../../dto/response/favorite-breeder-card.dto';
-import { MyProfileResponseDto } from '../../dto/response/my-profile-response.dto';
+import type {
+    AdopterPublicProfileResult,
+    BreederPublicProfileResult,
+    FavoriteBreederCardResult,
+    MyProfileResult,
+} from '../../application/types/profile-result.type';
 
 @Injectable()
 export class ProfileMapperService {
@@ -21,7 +20,7 @@ export class ProfileMapperService {
         private readonly assetUrl: ProfileAssetUrlPort,
     ) {}
 
-    toMyAdopterDto(snapshot: AdopterProfileSnapshot): MyProfileResponseDto {
+    toMyAdopterDto(snapshot: AdopterProfileSnapshot): MyProfileResult {
         return {
             role: 'adopter',
             userId: snapshot.userId,
@@ -34,7 +33,7 @@ export class ProfileMapperService {
         };
     }
 
-    toMyBreederDto(snapshot: BreederProfileSnapshot): MyProfileResponseDto {
+    toMyBreederDto(snapshot: BreederProfileSnapshot): MyProfileResult {
         return {
             role: 'breeder',
             userId: snapshot.breederId,
@@ -50,7 +49,7 @@ export class ProfileMapperService {
         };
     }
 
-    toAdopterPublicDto(snapshot: AdopterProfileSnapshot, isFollowing: boolean): AdopterPublicProfileResponseDto {
+    toAdopterPublicDto(snapshot: AdopterProfileSnapshot, isFollowing: boolean): AdopterPublicProfileResult {
         return {
             userId: snapshot.userId,
             nickname: snapshot.nickname,
@@ -62,7 +61,7 @@ export class ProfileMapperService {
         };
     }
 
-    toBreederPublicDto(snapshot: BreederProfileSnapshot, isFavorited: boolean): BreederPublicProfileResponseDto {
+    toBreederPublicDto(snapshot: BreederProfileSnapshot, isFavorited: boolean): BreederPublicProfileResult {
         return {
             breederId: snapshot.breederId,
             nickname: snapshot.nickname,
@@ -78,7 +77,7 @@ export class ProfileMapperService {
         };
     }
 
-    toFavoriteBreederCardDto(snapshot: FavoriteBreederCardSnapshot): FavoriteBreederCardResponseDto {
+    toFavoriteBreederCardDto(snapshot: FavoriteBreederCardSnapshot): FavoriteBreederCardResult {
         return {
             breederId: snapshot.breederId,
             nickname: snapshot.nickname,

@@ -3,7 +3,7 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection, Types } from 'mongoose';
 import request from 'supertest';
 
-import { createTestingApp } from '../../../../common/test/test-utils';
+import { createTestingApp } from '../../../../common/testing/test-utils';
 
 describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
     let app: INestApplication;
@@ -102,9 +102,7 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
         it('petType 필터 — 다른 종류는 제외', async () => {
             await seedPost({ petType: 'dog', category: '비숑' });
             await seedPost({ petType: 'reptile', category: '레오파드' });
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/community/posts?petType=dog')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/community/posts?petType=dog').expect(200);
             expect(res.body.data.items).toHaveLength(1);
             expect(res.body.data.items[0].petType).toBe('dog');
         });
@@ -128,9 +126,7 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
     describe('GET /api/v2/community/posts/:postId', () => {
         it('존재하지 않는 ObjectId → 400 (missing-post 계약)', async () => {
             const fakeId = new Types.ObjectId().toString();
-            const res = await request(app.getHttpServer())
-                .get(`/api/v2/community/posts/${fakeId}`)
-                .expect(400);
+            const res = await request(app.getHttpServer()).get(`/api/v2/community/posts/${fakeId}`).expect(400);
             expect(res.body.success).toBe(false);
             expect(res.body.error).toBe('해당 게시글을 찾을 수 없습니다.');
         });
@@ -140,9 +136,7 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
             for (let i = 0; i < 7; i++) {
                 await seedComment(postId, { body: `c${i}`, createdAt: new Date(Date.now() + i * 1000) });
             }
-            const res = await request(app.getHttpServer())
-                .get(`/api/v2/community/posts/${postId}`)
-                .expect(200);
+            const res = await request(app.getHttpServer()).get(`/api/v2/community/posts/${postId}`).expect(200);
             expect(res.body.data.body.length).toBe(200);
             expect(res.body.data.commentPreview).toHaveLength(5);
         });
@@ -151,9 +145,7 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
     describe('GET /api/v2/community/posts/:postId/comments', () => {
         it('잘못된 postId — page=1 일관되게 400', async () => {
             const fakeId = new Types.ObjectId().toString();
-            await request(app.getHttpServer())
-                .get(`/api/v2/community/posts/${fakeId}/comments`)
-                .expect(400);
+            await request(app.getHttpServer()).get(`/api/v2/community/posts/${fakeId}/comments`).expect(400);
         });
 
         it('잘못된 postId — page=2 에서도 동일하게 400 (일관 계약)', async () => {
@@ -181,9 +173,7 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
 
         it('isActive=false 게시글의 댓글 endpoint → 400 (소프트 삭제 일관성)', async () => {
             const postId = await seedPost({ isActive: false });
-            await request(app.getHttpServer())
-                .get(`/api/v2/community/posts/${postId}/comments`)
-                .expect(400);
+            await request(app.getHttpServer()).get(`/api/v2/community/posts/${postId}/comments`).expect(400);
         });
     });
 });

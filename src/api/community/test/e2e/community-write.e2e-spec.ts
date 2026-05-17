@@ -4,7 +4,7 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection, Types } from 'mongoose';
 import request from 'supertest';
 
-import { createTestingApp } from '../../../../common/test/test-utils';
+import { createTestingApp } from '../../../../common/testing/test-utils';
 
 /**
  * v2 커뮤니티 게시글 작성/수정/삭제 — 라우팅/가드/검증/소유권/소프트 삭제 계약 커버리지.
@@ -30,7 +30,9 @@ describe('v2 커뮤니티 작성/수정/삭제 종단간 테스트', () => {
         await connection.collection('breeders').deleteMany({});
     });
 
-    async function seedAdopter(suffix: string = String(Date.now()) + Math.random().toString(36).slice(2, 6)): Promise<string> {
+    async function seedAdopter(
+        suffix: string = String(Date.now()) + Math.random().toString(36).slice(2, 6),
+    ): Promise<string> {
         const _id = new Types.ObjectId();
         await connection.collection('adopters').insertOne({
             _id,
@@ -43,7 +45,9 @@ describe('v2 커뮤니티 작성/수정/삭제 종단간 테스트', () => {
         return String(_id);
     }
 
-    async function seedBreeder(suffix: string = String(Date.now()) + Math.random().toString(36).slice(2, 6)): Promise<string> {
+    async function seedBreeder(
+        suffix: string = String(Date.now()) + Math.random().toString(36).slice(2, 6),
+    ): Promise<string> {
         const _id = new Types.ObjectId();
         await connection.collection('breeders').insertOne({
             _id,
@@ -67,10 +71,7 @@ describe('v2 커뮤니티 작성/수정/삭제 종단간 테스트', () => {
 
     describe('POST /api/v2/community/posts', () => {
         it('비로그인 → 401', async () => {
-            await request(app.getHttpServer())
-                .post('/api/v2/community/posts')
-                .send({ body: '본문' })
-                .expect(401);
+            await request(app.getHttpServer()).post('/api/v2/community/posts').send({ body: '본문' }).expect(401);
         });
 
         it('body 누락 → 400 (DTO 검증)', async () => {
@@ -205,13 +206,9 @@ describe('v2 커뮤니티 작성/수정/삭제 종단간 테스트', () => {
                 .set('Authorization', `Bearer ${tok}`)
                 .expect(200);
             // 상세 조회 - 더 이상 노출되지 않음
-            await request(app.getHttpServer())
-                .get(`/api/v2/community/posts/${postId}`)
-                .expect(400);
+            await request(app.getHttpServer()).get(`/api/v2/community/posts/${postId}`).expect(400);
             // doc 은 남아있지만 isActive=false
-            const doc = await connection
-                .collection('community_posts')
-                .findOne({ _id: new Types.ObjectId(postId) });
+            const doc = await connection.collection('community_posts').findOne({ _id: new Types.ObjectId(postId) });
             expect(doc?.isActive).toBe(false);
         });
     });

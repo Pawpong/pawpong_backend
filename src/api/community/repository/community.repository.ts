@@ -2,18 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 
-import {
-    CommunityPost,
-    CommunityPostDocument,
-} from '../../../schema/community-post.schema';
-import {
-    CommunityPostComment,
-    CommunityPostCommentDocument,
-} from '../../../schema/community-post-comment.schema';
-import type {
-    CommunityPostCommentListQuery,
-    CommunityPostListQuery,
-} from '../application/types/community-post.type';
+import { CommunityPost, CommunityPostDocument } from '../../../schema/community-post.schema';
+import { CommunityPostComment, CommunityPostCommentDocument } from '../../../schema/community-post-comment.schema';
+import type { CommunityPostCommentListQuery, CommunityPostListQuery } from '../application/types/community-post.type';
 import type {
     CommunityPostCreatePersistData,
     CommunityPostUpdateCommand,
@@ -32,12 +23,13 @@ export class CommunityRepository {
         private readonly commentModel: Model<CommunityPostCommentDocument>,
     ) {}
 
-    async listPosts(
-        query: CommunityPostListQuery,
-    ): Promise<{ docs: CommunityPostDocument[]; totalItems: number }> {
+    async listPosts(query: CommunityPostListQuery): Promise<{ docs: CommunityPostDocument[]; totalItems: number }> {
         const filter: FilterQuery<CommunityPost> = { isActive: true };
         if (query.petType) filter.petType = query.petType;
         if (query.category && query.category.trim().length > 0) filter.category = query.category.trim();
+        if (query.authorId && Types.ObjectId.isValid(query.authorId)) {
+            filter.authorId = new Types.ObjectId(query.authorId);
+        }
 
         const sort: Record<string, 1 | -1> =
             query.sort === 'popular' ? { likeCount: -1, createdAt: -1 } : { createdAt: -1 };
@@ -61,6 +53,15 @@ export class CommunityRepository {
         return this.postModel
             .findOne({ _id: new Types.ObjectId(postId), isActive: true })
             .lean<CommunityPostDocument>()
+            .exec();
+    }
+
+    async findPostsByIds(postIds: string[]): Promise<CommunityPostDocument[]> {
+        const objectIds = postIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
+        if (objectIds.length === 0) return [];
+        return this.postModel
+            .find({ _id: { $in: objectIds }, isActive: true })
+            .lean<CommunityPostDocument[]>()
             .exec();
     }
 

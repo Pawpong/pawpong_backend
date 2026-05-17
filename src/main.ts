@@ -147,6 +147,53 @@ async function bootstrap(): Promise<void> {
             },
             'JWT-Auth',
         )
+        // ── 서비스 API (도메인별) ──────────────────────────────────────
+        .addTag('인증')
+        .addTag('인증 v2')
+        .addTag('홈페이지')
+        .addTag('브리더')
+        .addTag('Feed')
+        .addTag('커뮤니티 (v2)')
+        .addTag('커뮤니티 (v2, 인증)')
+        .addTag('입양자')
+        .addTag('프로필 (v2 공개)')
+        .addTag('프로필 (v2)')
+        .addTag('브리더 관리')
+        .addTag('분양글 (브리더, v2)')
+        .addTag('입양')
+        .addTag('입양 (인증)')
+        .addTag('입양 신청 (v2)')
+        .addTag('콘테스트')
+        .addTag('알림')
+        .addTag('문의')
+        .addTag('업로드')
+        .addTag('약관')
+        .addTag('공지사항')
+        .addTag('필터 옵션')
+        .addTag('품종')
+        .addTag('지역')
+        .addTag('인기 검색어')
+        .addTag('앱 버전')
+        .addTag('시스템')
+        // ── 관리자 API (Admin) ─────────────────────────────────────────
+        .addTag('인증 관리 (Admin)')
+        .addTag('사용자 관리 (Admin)')
+        .addTag('입양자 관리 (Admin)')
+        .addTag('브리더 관리 (Admin)')
+        .addTag('브리더 인증 관리 (Admin)')
+        .addTag('브리더 신고 관리 (Admin)')
+        .addTag('브리더 관리 배너 (Admin)')
+        .addTag('홈페이지 관리 (Admin)')
+        .addTag('공지사항 관리 (Admin)')
+        .addTag('알림 관리 (Admin)')
+        .addTag('알림 이메일 프리뷰 (Admin)')
+        .addTag('플랫폼 관리 (Admin)')
+        .addTag('인기 검색어 관리')
+        .addTag('품종 관리 (Admin)')
+        .addTag('지역 관리 (Admin)')
+        .addTag('앱 버전 관리 (Admin)')
+        .addTag('입양 신청 질문 (Admin)')
+        .addTag('스토리지 관리 (Admin)')
         .build();
 
     const document: OpenAPIObject = SwaggerModule.createDocument(app, config, {
@@ -241,7 +288,11 @@ async function bootstrap(): Promise<void> {
                     message: `Kafka chat consumer 시작 실패 (브로커: ${kafkaBroker}): ${error instanceof Error ? error.message : String(error)}`,
                     stack: error instanceof Error ? error.stack : undefined,
                 })
-                .catch(() => {});
+                .catch((notifyErr: unknown) => {
+                    logger.warn(
+                        `[bootstrap] Discord 긴급 알림 전송 실패: ${notifyErr instanceof Error ? notifyErr.message : String(notifyErr)}`,
+                    );
+                });
         }
     }
 

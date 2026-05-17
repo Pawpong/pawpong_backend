@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 
 import { EmailData } from '../../builder/notification.builder';
-import { ApplicationConfirmationEmailPreviewRequestDto } from '../../dto/request/notification-email-preview-request.dto';
-import { NotificationEmailPreviewResponseDto } from '../../dto/response/notification-email-preview-response.dto';
+import type { ApplicationConfirmationEmailPreviewCommand } from '../types/notification-email-preview-command.type';
+import type { NotificationEmailPreviewResult } from '../types/notification-email-preview-result.type';
 import { NotificationEmailPreviewTemplateService } from '../services/notification-email-preview-template.service';
 import { SendNotificationEmailUseCase } from './send-notification-email.use-case';
 
@@ -13,19 +13,19 @@ export class PreviewApplicationConfirmationEmailUseCase {
         private readonly sendNotificationEmailUseCase: SendNotificationEmailUseCase,
     ) {}
 
-    execute(request: ApplicationConfirmationEmailPreviewRequestDto): NotificationEmailPreviewResponseDto {
+    execute(command: ApplicationConfirmationEmailPreviewCommand): NotificationEmailPreviewResult {
         const template = this.notificationEmailPreviewTemplateService.getApplicationConfirmationTemplate(
-            request.applicantName,
-            request.breederName,
+            command.applicantName,
+            command.breederName,
         );
         const emailData: EmailData = {
-            to: request.email,
+            to: command.email,
             subject: template.subject,
             html: template.html,
         };
 
         return {
-            recipient: request.email,
+            recipient: command.email,
             subject: template.subject,
             preview: template.html,
             sent: this.sendNotificationEmailUseCase.execute(emailData),

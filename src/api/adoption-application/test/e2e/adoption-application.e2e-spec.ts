@@ -5,7 +5,7 @@ import request from 'supertest';
 
 import { JwtService } from '@nestjs/jwt';
 
-import { createTestingApp } from '../../../../common/test/test-utils';
+import { createTestingApp } from '../../../../common/testing/test-utils';
 
 /**
  * v2 입양 신청 — 라우팅 / 가드 / 동의 검증 / 펫 존재 / 중복 차단 / 정상 저장의 계약 커버리지.
@@ -102,10 +102,7 @@ describe('v2 입양 신청 종단간 테스트', () => {
 
     it('비로그인 → 401', async () => {
         const { petId } = await seedPet();
-        await request(app.getHttpServer())
-            .post('/api/v2/adoption-application')
-            .send(validBody(petId))
-            .expect(401);
+        await request(app.getHttpServer()).post('/api/v2/adoption-application').send(validBody(petId)).expect(401);
     });
 
     it('브리더 role 로 호출 → 403 (StrictRolesGuard adopter 강제)', async () => {

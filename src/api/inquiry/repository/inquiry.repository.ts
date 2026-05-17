@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 
@@ -31,6 +31,8 @@ import type {
  */
 @Injectable()
 export class InquiryRepository {
+    private readonly logger = new Logger(InquiryRepository.name);
+
     constructor(
         @InjectModel(Inquiry.name) private readonly inquiryModel: Model<InquiryDocument>,
         @InjectModel(Adopter.name) private readonly adopterModel: Model<AdopterDocument>,
@@ -170,7 +172,11 @@ export class InquiryRepository {
         this.inquiryModel
             .findByIdAndUpdate(inquiryId, { $inc: { viewCount: 1 } })
             .exec()
-            .catch(() => {});
+            .catch((err: unknown) => {
+                this.logger.warn(
+                    `[incrementViewCount] viewCount 증가 실패 (inquiryId: ${inquiryId}): ${err instanceof Error ? err.message : String(err)}`,
+                );
+            });
     }
 
     /**

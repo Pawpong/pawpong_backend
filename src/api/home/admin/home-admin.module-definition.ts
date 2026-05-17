@@ -13,10 +13,10 @@ import { GetAllBannersUseCase } from './application/use-cases/get-all-banners.us
 import { GetAllFaqsUseCase } from './application/use-cases/get-all-faqs.use-case';
 import { UpdateBannerUseCase } from './application/use-cases/update-banner.use-case';
 import { UpdateFaqUseCase } from './application/use-cases/update-faq.use-case';
-import { HomeAdminBannersCommandController } from './home-admin-banners-command.controller';
-import { HomeAdminBannersQueryController } from './home-admin-banners-query.controller';
-import { HomeAdminFaqsCommandController } from './home-admin-faqs-command.controller';
-import { HomeAdminFaqsQueryController } from './home-admin-faqs-query.controller';
+import { HomeAdminBannersCommandController } from './controller/home-admin-banners-command.controller';
+import { HomeAdminBannersQueryController } from './controller/home-admin-banners-query.controller';
+import { HomeAdminFaqsCommandController } from './controller/home-admin-faqs-command.controller';
+import { HomeAdminFaqsQueryController } from './controller/home-admin-faqs-query.controller';
 import { HomeAdminMongooseManagerAdapter } from './infrastructure/home-admin-mongoose-manager.adapter';
 import { HOME_ASSET_URL_PORT } from '../application/ports/home-asset-url.port';
 import { HomeBannerCatalogService } from '../domain/services/home-banner-catalog.service';

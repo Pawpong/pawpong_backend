@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsMongoId, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
 export enum AdoptionPetTypeQuery {
     DOG = 'dog',
@@ -13,6 +13,12 @@ export enum AdoptionSortQuery {
     POPULAR = 'popular',
 }
 
+export enum AdoptionStatusQuery {
+    AVAILABLE = 'available',
+    RESERVED = 'reserved',
+    ADOPTED = 'adopted',
+}
+
 export class AdoptionListQueryDto {
     @ApiProperty({
         description: '동물 종류 필터 (전체는 미지정)',
@@ -22,6 +28,44 @@ export class AdoptionListQueryDto {
     @IsOptional()
     @IsEnum(AdoptionPetTypeQuery)
     petType?: AdoptionPetTypeQuery;
+
+    @ApiProperty({
+        description: '특정 브리더의 분양 동물만 필터링 (브리더홈 / 상세 화면의 "브리더의 다른 분양 동물" 영역)',
+        required: false,
+        example: '507f1f77bcf86cd799439011',
+    })
+    @IsOptional()
+    @IsMongoId()
+    breederId?: string;
+
+    @ApiProperty({
+        description: '특정 동물 ID 를 결과에서 제외 (상세 화면에서 현재 동물을 다른 분양 목록에서 제외할 때)',
+        required: false,
+        example: '507f1f77bcf86cd799439022',
+    })
+    @IsOptional()
+    @IsMongoId()
+    excludePetId?: string;
+
+    @ApiProperty({
+        description:
+            '분양 상태 필터 (Figma 678:49176 분양가능 / 678:49772 예약중 / 678:52698 분양완료 탭). 미지정 시 전체 노출.',
+        enum: AdoptionStatusQuery,
+        required: false,
+    })
+    @IsOptional()
+    @IsEnum(AdoptionStatusQuery)
+    status?: AdoptionStatusQuery;
+
+    @ApiProperty({
+        description: '검색 키워드 — 이름·품종 부분 일치 (Figma 678:43115 탐색 입양 탭)',
+        required: false,
+        example: '말티즈',
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(50)
+    keyword?: string;
 
     @ApiProperty({
         description: '정렬 기준',

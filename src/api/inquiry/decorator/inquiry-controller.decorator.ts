@@ -6,13 +6,13 @@ import { RolesGuard } from '../../../common/guard/roles.guard';
 import { ApiInquiryController } from '../swagger';
 
 export function InquiryPublicController() {
-    return applyDecorators(ApiInquiryController(), Controller('inquiry'));
+    return applyDecorators(ApiInquiryController(), Controller('v2/inquiry'));
 }
 
 export function InquiryProtectedController(role: 'adopter' | 'breeder') {
     return applyDecorators(
         ApiInquiryController(),
-        Controller('inquiry'),
+        Controller('v2/inquiry'),
         UseGuards(JwtAuthGuard, RolesGuard),
         Roles(role),
     );

@@ -3,8 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Announcement, AnnouncementSchema } from '../../schema/announcement.schema';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 
-import { AnnouncementAdminCommandController } from './admin/announcement-admin-command.controller';
-import { AnnouncementAdminQueryController } from './admin/announcement-admin-query.controller';
+import { AnnouncementAdminCommandController } from './admin/controller/announcement-admin-command.controller';
+import { AnnouncementAdminQueryController } from './admin/controller/announcement-admin-query.controller';
 import { ANNOUNCEMENT_ADMIN_READER_PORT } from './admin/application/ports/announcement-admin-reader.port';
 import { ANNOUNCEMENT_WRITER_PORT } from './admin/application/ports/announcement-writer.port';
 import { CreateAnnouncementUseCase } from './admin/application/use-cases/create-announcement.use-case';
@@ -13,7 +13,7 @@ import { GetAllAnnouncementsUseCase } from './admin/application/use-cases/get-al
 import { UpdateAnnouncementUseCase } from './admin/application/use-cases/update-announcement.use-case';
 import { AnnouncementMongooseAdminReaderAdapter } from './admin/infrastructure/announcement-mongoose-admin-reader.adapter';
 import { AnnouncementMongooseWriterAdapter } from './admin/infrastructure/announcement-mongoose-writer.adapter';
-import { AnnouncementController } from './announcement.controller';
+import { AnnouncementController } from './controller/announcement.controller';
 import { ANNOUNCEMENT_PUBLIC_READER_PORT } from './application/ports/announcement-public-reader.port';
 import { GetActiveAnnouncementsUseCase } from './application/use-cases/get-active-announcements.use-case';
 import { GetAnnouncementByIdUseCase } from './application/use-cases/get-announcement-by-id.use-case';

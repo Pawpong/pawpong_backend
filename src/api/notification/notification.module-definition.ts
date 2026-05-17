@@ -7,13 +7,13 @@ import { MailModule } from '../../common/mail/mail.module';
 import { AdopterRepository } from '../adopter/repository/adopter.repository';
 import { BreederRepository } from '../breeder-management/repository/breeder.repository';
 
-import { NotificationDeleteController } from './notification-delete.controller';
-import { NotificationEmailPreviewController } from './notification-email-preview.controller';
-import { NotificationListController } from './notification-list.controller';
-import { NotificationMarkAllReadController } from './notification-mark-all-read.controller';
-import { NotificationMarkReadController } from './notification-mark-read.controller';
-import { NotificationPushTokenController } from './notification-push-token.controller';
-import { NotificationUnreadCountController } from './notification-unread-count.controller';
+import { NotificationDeleteController } from './controller/notification-delete.controller';
+import { NotificationEmailPreviewController } from './controller/notification-email-preview.controller';
+import { NotificationListController } from './controller/notification-list.controller';
+import { NotificationMarkAllReadController } from './controller/notification-mark-all-read.controller';
+import { NotificationMarkReadController } from './controller/notification-mark-read.controller';
+import { NotificationPushTokenController } from './controller/notification-push-token.controller';
+import { NotificationUnreadCountController } from './controller/notification-unread-count.controller';
 import { NOTIFICATION_COMMAND_PORT } from './application/ports/notification-command.port';
 import { NOTIFICATION_DISPATCH_PORT } from './application/ports/notification-dispatch.port';
 import { NOTIFICATION_EMAIL_PORT } from './application/ports/notification-email.port';
@@ -166,4 +166,9 @@ export const NOTIFICATION_MODULE_PROVIDERS = [
     ...NOTIFICATION_PORT_BINDINGS,
 ];
 
-export const NOTIFICATION_MODULE_EXPORTS = [NOTIFICATION_DISPATCH_PORT];
+export const NOTIFICATION_MODULE_EXPORTS = [
+    NOTIFICATION_DISPATCH_PORT,
+    // v2 어드민 푸시 모듈에서 자체 push 발송 + notification doc 생성을 위해 노출
+    NOTIFICATION_PUSH_PORT,
+    NOTIFICATION_COMMAND_PORT,
+];

@@ -12,6 +12,7 @@ import {
     type AdoptionPetListQuery,
     type AdoptionPetReaderPort,
     type AdoptionPetSnapshot,
+    type AdoptionPetStatus,
 } from '../ports/adoption-pet-reader.port';
 import type { AdoptionPetItemResult, AdoptionPetListResult } from '../types/adoption-result.type';
 
@@ -32,6 +33,10 @@ export class GetAdoptionPetListUseCase {
 
     async execute(input: {
         petType?: AdoptionPetSnapshot['petType'];
+        breederId?: string;
+        excludePetId?: string;
+        status?: AdoptionPetStatus;
+        keyword?: string;
         sort?: AdoptionPetListQuery['sort'];
         page?: number;
         pageSize?: number;
@@ -43,13 +48,23 @@ export class GetAdoptionPetListUseCase {
 
         const query: AdoptionPetListQuery = {
             petType: input.petType,
+            breederId: input.breederId,
+            excludePetId: input.excludePetId,
+            status: input.status,
+            keyword: input.keyword,
             sort,
             skip: (page - 1) * pageSize,
             limit: pageSize,
         };
 
         const [totalItems, snapshots] = await Promise.all([
-            this.petReader.countList({ petType: input.petType }),
+            this.petReader.countList({
+                petType: input.petType,
+                breederId: input.breederId,
+                excludePetId: input.excludePetId,
+                status: input.status,
+                keyword: input.keyword,
+            }),
             this.petReader.readList(query),
         ]);
 
@@ -57,10 +72,7 @@ export class GetAdoptionPetListUseCase {
         return buildPageResult(items, page, pageSize, totalItems);
     }
 
-    private async toItems(
-        snapshots: AdoptionPetSnapshot[],
-        adopterId?: string,
-    ): Promise<AdoptionPetItemResult[]> {
+    private async toItems(snapshots: AdoptionPetSnapshot[], adopterId?: string): Promise<AdoptionPetItemResult[]> {
         if (snapshots.length === 0) {
             return [];
         }

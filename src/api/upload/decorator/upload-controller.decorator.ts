@@ -4,7 +4,7 @@ import { JwtAuthGuard } from '../../../common/guard/jwt-auth.guard';
 import { ApiUploadController } from '../swagger';
 
 export function UploadController() {
-    return applyDecorators(ApiUploadController(), Controller('upload'));
+    return applyDecorators(ApiUploadController(), Controller('v2/upload'));
 }
 
 export function ProtectedUploadController() {

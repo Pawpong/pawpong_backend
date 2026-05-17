@@ -4,10 +4,7 @@ import {
     ADOPTER_PET_FAVORITE_WRITER_PORT,
     type AdopterPetFavoriteWriterPort,
 } from '../ports/adopter-pet-favorite.port';
-import {
-    ADOPTION_PET_READER_PORT,
-    type AdoptionPetReaderPort,
-} from '../ports/adoption-pet-reader.port';
+import { ADOPTION_PET_READER_PORT, type AdoptionPetReaderPort } from '../ports/adoption-pet-reader.port';
 
 @Injectable()
 export class RemoveAdoptionPetFavoriteUseCase {

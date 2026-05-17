@@ -12,6 +12,7 @@ import { PROFILE_RESPONSE_MESSAGES } from '../constants/profile-response-message
 import { AdopterPublicProfileResponseDto } from '../dto/response/adopter-profile-response.dto';
 import { BreederPublicProfileResponseDto } from '../dto/response/breeder-profile-response.dto';
 import { FavoriteBreederCardResponseDto } from '../dto/response/favorite-breeder-card.dto';
+import { FollowResponseDto, UnfollowResponseDto } from '../dto/response/follow-response.dto';
 import { MyProfileResponseDto } from '../dto/response/my-profile-response.dto';
 
 const NOT_FOUND_RESPONSE = {
@@ -41,11 +42,35 @@ export function ApiGetMyProfileEndpoint() {
     );
 }
 
+export function ApiUpdateMyProfileEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '내 프로필 수정 (마이홈, Figma 278:170 "프로필 편집" + 290:668 "사업장 위치 작성")',
+            description: `
+                현재 인증된 사용자의 프로필을 부분 수정한다. role 에 따라 Adopter/Breeder 도큐먼트에 적용.
+
+                ## 지원 필드
+                - bio (선택): 한 줄 소개. trim 후 200자 이내. 빈 문자열은 한 줄 소개 비움 의도.
+                - location (선택, 브리더 전용): 사업장 위치 — city / district / address 부분 수정.
+                  · Adopter 가 location 을 보내면 400 (Adopter 스키마에 해당 필드 없음).
+                  · address 는 PII 라 공개 응답(다른 사용자의 브리더 프로필 조회)에는 노출되지 않는다.
+
+                ## 응답
+                - 수정 후 GetMyProfile 와 동일한 응답 (계약 일관성)
+            `,
+            responseType: MyProfileResponseDto,
+            successDescription: '내 프로필 수정 성공',
+            successMessageExample: PROFILE_RESPONSE_MESSAGES.myUpdated,
+            errorResponses: [NOT_FOUND_RESPONSE],
+        }),
+    );
+}
+
 export function ApiGetAdopterProfileEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '다른 입양자 프로필 조회 (유저홈)',
-            description: '특정 입양자의 공개 프로필. follow 시스템 미구현이라 isFollowing 은 항상 false.',
+            description: '특정 입양자의 공개 프로필. 로그인 사용자는 isFollowing 이 실제 팔로우 여부로 채워진다.',
             responseType: AdopterPublicProfileResponseDto,
             isPublic: true,
             supportsOptionalAuth: true,
@@ -83,5 +108,42 @@ export function ApiGetMyFavoriteBreedersEndpoint() {
             successDescription: '즐겨찾는 브리더 목록 조회 성공',
             successMessageExample: PROFILE_RESPONSE_MESSAGES.favoriteBreedersRetrieved,
         }),
+    );
+}
+
+export function ApiFollowUserEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '사용자 팔로우 (Figma 678:46565)',
+            description: `
+                입양자 유저홈에서 팔로우. 대상은 입양자(Adopter)만 가능.
+                이미 팔로우 중이면 followed: false 반환 (멱등).
+                자기 자신 팔로우 시 400.
+            `,
+            responseType: FollowResponseDto,
+            successDescription: '팔로우 성공',
+            successMessageExample: PROFILE_RESPONSE_MESSAGES.followed,
+            errorResponses: [
+                {
+                    status: 400,
+                    description: '대상 없음 / 자기 자신 팔로우',
+                    errorExample: '해당 사용자를 찾을 수 없습니다.',
+                },
+            ],
+        }),
+        ApiParam({ name: 'userId', description: '팔로우할 사용자 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiUnfollowUserEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '사용자 팔로우 취소',
+            description: '팔로우 중이 아닌 사용자에게 요청 시 unfollowed: false 반환 (멱등).',
+            responseType: UnfollowResponseDto,
+            successDescription: '팔로우 취소 성공',
+            successMessageExample: PROFILE_RESPONSE_MESSAGES.unfollowed,
+        }),
+        ApiParam({ name: 'userId', description: '팔로우 취소할 사용자 ID', example: '507f1f77bcf86cd799439011' }),
     );
 }

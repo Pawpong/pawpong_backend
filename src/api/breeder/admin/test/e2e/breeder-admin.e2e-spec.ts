@@ -1,6 +1,11 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestingApp, cleanupDatabase, getAdminToken, seedBreeder } from '../../../../../common/test/test-utils';
+import {
+    createTestingApp,
+    cleanupDatabase,
+    getAdminToken,
+    seedBreeder,
+} from '../../../../../common/testing/test-utils';
 
 /**
  * 브리더 관리자 종단간 테스트

@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 
@@ -9,6 +9,8 @@ import { FEED_VIDEO_FILE_STORAGE_PORT, type FeedVideoFileStoragePort } from '../
 
 @Injectable()
 export class DeleteVideoUseCase {
+    private readonly logger = new Logger(DeleteVideoUseCase.name);
+
     constructor(
         @Inject(FEED_VIDEO_COMMAND_PORT)
         private readonly feedVideoCommand: FeedVideoCommandPort,
@@ -25,9 +27,13 @@ export class DeleteVideoUseCase {
         this.feedVideoCommandPolicyService.ensureOwner(video, userId);
 
         await Promise.all(
-            this.feedVideoCommandPolicyService
-                .getRemovableFileKeys(video)
-                .map((fileKey) => this.feedVideoFileStorage.deleteFile(fileKey).catch(() => {})),
+            this.feedVideoCommandPolicyService.getRemovableFileKeys(video).map((fileKey) =>
+                this.feedVideoFileStorage.deleteFile(fileKey).catch((err: unknown) => {
+                    this.logger.warn(
+                        `[execute] 파일 삭제 실패 (key: ${fileKey}): ${err instanceof Error ? err.message : String(err)}`,
+                    );
+                }),
+            ),
         );
 
         await this.feedVideoCommand.deleteById(videoId);

@@ -1,16 +1,16 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { AdopterAccountController } from './adopter-account.controller';
-import { AdopterAdminApplicationController } from './admin/adopter-admin-application.controller';
-import { AdopterAdminReviewController } from './admin/adopter-admin-review.controller';
-import { AdopterApplicationCommandController } from './adopter-application-command.controller';
-import { AdopterApplicationQueryController } from './adopter-application-query.controller';
-import { AdopterFavoriteCommandController } from './adopter-favorite-command.controller';
-import { AdopterFavoriteQueryController } from './adopter-favorite-query.controller';
-import { AdopterProfileController } from './adopter-profile.controller';
-import { AdopterReportController } from './adopter-report.controller';
-import { AdopterReviewCommandController } from './adopter-review-command.controller';
-import { AdopterReviewQueryController } from './adopter-review-query.controller';
+import { AdopterAccountController } from './controller/adopter-account.controller';
+import { AdopterAdminApplicationController } from './admin/controller/adopter-admin-application.controller';
+import { AdopterAdminReviewController } from './admin/controller/adopter-admin-review.controller';
+import { AdopterApplicationCommandController } from './controller/adopter-application-command.controller';
+import { AdopterApplicationQueryController } from './controller/adopter-application-query.controller';
+import { AdopterFavoriteCommandController } from './controller/adopter-favorite-command.controller';
+import { AdopterFavoriteQueryController } from './controller/adopter-favorite-query.controller';
+import { AdopterProfileController } from './controller/adopter-profile.controller';
+import { AdopterReportController } from './controller/adopter-report.controller';
+import { AdopterReviewCommandController } from './controller/adopter-review-command.controller';
+import { AdopterReviewQueryController } from './controller/adopter-review-query.controller';
 import { GetAdopterAdminReviewReportsUseCase } from './admin/application/use-cases/get-adopter-admin-review-reports.use-case';
 import { DeleteAdopterAdminReviewUseCase } from './admin/application/use-cases/delete-adopter-admin-review.use-case';
 import { GetAdopterAdminApplicationListUseCase } from './admin/application/use-cases/get-adopter-admin-application-list.use-case';

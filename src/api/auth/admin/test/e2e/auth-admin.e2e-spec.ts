@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../../common/test/test-utils';
+import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../../common/testing/test-utils';
 
 /**
  * 인증 관리자 종단간 테스트

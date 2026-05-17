@@ -323,7 +323,7 @@
 
 ```bash
 # 테스트 실행
-yarn test:e2e breeder-management.e2e-spec
+pnpm test:e2e breeder-management.e2e-spec
 ```
 
 ## 권한 및 보안
@@ -365,7 +365,7 @@ yarn test:e2e breeder-management.e2e-spec
 ## 테스트 실행
 
 ```bash
-yarn test:e2e src/api/breeder-management/test/breeder-management.e2e-spec.ts
+pnpm test:e2e src/api/breeder-management/test/breeder-management.e2e-spec.ts
 ```
 
 ## 관련 문서

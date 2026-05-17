@@ -78,7 +78,8 @@ export class NotificationFirebasePushAdapter implements NotificationPushPort, On
                 apns: {
                     headers: {
                         // iOS 개발 빌드(debug)는 sandbox APNs, 배포 빌드는 production APNs 사용
-                        'apns-environment': this.configService.get('NODE_ENV') === 'production' ? 'production' : 'sandbox',
+                        'apns-environment':
+                            this.configService.get('NODE_ENV') === 'production' ? 'production' : 'sandbox',
                     },
                     payload: {
                         aps: {

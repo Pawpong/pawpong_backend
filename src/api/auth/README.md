@@ -214,5 +214,5 @@ FRONTEND_URL=http://localhost:3000
 ## 테스트 실행
 
 ```bash
-yarn test:e2e src/api/auth/test/auth.e2e-spec.ts
+pnpm test:e2e src/api/auth/test/auth.e2e-spec.ts
 ```

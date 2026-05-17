@@ -17,6 +17,8 @@ export class UserAdminUserPageAssemblerService {
                 userId: user.id,
                 userName: user.nickname || user.name || '',
                 emailAddress: user.emailAddress,
+                nickname: user.nickname,
+                phoneNumber: user.phoneNumber,
                 userRole: user.role,
                 accountStatus: user.accountStatus,
                 lastLoginAt: user.lastLoginAt as Date,

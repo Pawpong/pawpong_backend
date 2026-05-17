@@ -2,11 +2,8 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { buildPageResult, type PageResult } from '../../../../common/types/page-result.type';
 import { CommunityPostMapperService } from '../../domain/services/community-post-mapper.service';
-import type { CommunityPostCommentResponseDto } from '../../dto/response/community-post-comment.dto';
-import {
-    COMMUNITY_POST_READER_PORT,
-    type CommunityPostReaderPort,
-} from '../ports/community-post-reader.port';
+import { COMMUNITY_POST_READER_PORT, type CommunityPostReaderPort } from '../ports/community-post-reader.port';
+import type { CommunityPostCommentResult } from '../types/community-post-result.type';
 
 const PAGE_SIZE_DEFAULT = 20;
 const PAGE_SIZE_MAX = 100;
@@ -26,7 +23,7 @@ export class GetCommunityPostCommentsUseCase {
         postId: string;
         page?: number;
         pageSize?: number;
-    }): Promise<PageResult<CommunityPostCommentResponseDto>> {
+    }): Promise<PageResult<CommunityPostCommentResult>> {
         const page = Math.max(1, input.page ?? 1);
         const pageSize = Math.min(PAGE_SIZE_MAX, Math.max(1, input.pageSize ?? PAGE_SIZE_DEFAULT));
 

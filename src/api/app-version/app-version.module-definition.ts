@@ -5,8 +5,8 @@ import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 
 import { APP_VERSION_READER_PORT } from './application/ports/app-version-reader.port';
 import { CheckAppVersionUseCase } from './application/use-cases/check-app-version.use-case';
-import { AppVersionAdminCommandController } from './admin/app-version-admin-command.controller';
-import { AppVersionAdminQueryController } from './admin/app-version-admin-query.controller';
+import { AppVersionAdminCommandController } from './admin/controller/app-version-admin-command.controller';
+import { AppVersionAdminQueryController } from './admin/controller/app-version-admin-query.controller';
 import { APP_VERSION_ADMIN_READER_PORT } from './admin/application/ports/app-version-admin-reader.port';
 import { APP_VERSION_WRITER_PORT } from './admin/application/ports/app-version-writer.port';
 import { CreateAppVersionUseCase } from './admin/application/use-cases/create-app-version.use-case';
@@ -19,7 +19,7 @@ import { AppVersionAdminPageAssemblerService } from './admin/domain/services/app
 import { AppVersionAdminPaginationAssemblerService } from './admin/domain/services/app-version-admin-pagination-assembler.service';
 import { AppVersionMongooseAdminReaderAdapter } from './admin/infrastructure/app-version-mongoose-admin-reader.adapter';
 import { AppVersionMongooseWriterAdapter } from './admin/infrastructure/app-version-mongoose-writer.adapter';
-import { AppVersionController } from './app-version.controller';
+import { AppVersionController } from './controller/app-version.controller';
 import { AppVersionPolicyService } from './domain/services/app-version-policy.service';
 import { AppVersionMongooseReaderAdapter } from './infrastructure/app-version-mongoose-reader.adapter';
 import { AppVersionRepository } from './repository/app-version.repository';

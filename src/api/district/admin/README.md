@@ -186,5 +186,5 @@ async deleteDistrict(id: string): Promise<void>
 ## 테스트 실행
 
 ```bash
-yarn test:e2e src/api/district/admin/test/district-admin.e2e-spec.ts
+pnpm test:e2e src/api/district/admin/test/district-admin.e2e-spec.ts
 ```
