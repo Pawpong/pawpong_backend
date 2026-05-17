@@ -3,43 +3,43 @@ import { Injectable } from '@nestjs/common';
 import { MailTemplateService } from '../../../../common/mail/mail-template.service';
 import type { NotificationEmailPreviewType } from '../../constants/notification-email-preview.constants';
 import { NOTIFICATION_EMAIL_PREVIEW_TYPES } from '../../constants/notification-email-preview.constants';
-import {
-    NotificationEmailPreviewCatalogResponseDto,
-    NotificationEmailTemplatePreviewDto,
-} from '../../dto/response/notification-email-preview-response.dto';
+import type {
+    NotificationEmailPreviewCatalogResult,
+    NotificationEmailTemplatePreviewResult,
+} from '../types/notification-email-preview-result.type';
 
 @Injectable()
 export class NotificationEmailPreviewTemplateService {
     constructor(private readonly mailTemplateService: MailTemplateService) {}
 
-    getBreederApprovalTemplate(breederName: string): NotificationEmailTemplatePreviewDto {
+    getBreederApprovalTemplate(breederName: string): NotificationEmailTemplatePreviewResult {
         return this.mailTemplateService.getBreederApprovalEmail(breederName);
     }
 
-    getBreederRejectionTemplate(breederName: string, rejectionReasons: string[]): NotificationEmailTemplatePreviewDto {
+    getBreederRejectionTemplate(breederName: string, rejectionReasons: string[]): NotificationEmailTemplatePreviewResult {
         return this.mailTemplateService.getBreederRejectionEmail(breederName, rejectionReasons);
     }
 
-    getNewApplicationTemplate(breederName: string): NotificationEmailTemplatePreviewDto {
+    getNewApplicationTemplate(breederName: string): NotificationEmailTemplatePreviewResult {
         return this.mailTemplateService.getNewApplicationEmail(breederName);
     }
 
-    getDocumentReminderTemplate(breederName: string): NotificationEmailTemplatePreviewDto {
+    getDocumentReminderTemplate(breederName: string): NotificationEmailTemplatePreviewResult {
         return this.mailTemplateService.getDocumentReminderEmail(breederName);
     }
 
     getApplicationConfirmationTemplate(
         applicantName: string,
         breederName: string,
-    ): NotificationEmailTemplatePreviewDto {
+    ): NotificationEmailTemplatePreviewResult {
         return this.mailTemplateService.getApplicationConfirmationEmail(applicantName, breederName);
     }
 
-    getNewReviewTemplate(breederName: string): NotificationEmailTemplatePreviewDto {
+    getNewReviewTemplate(breederName: string): NotificationEmailTemplatePreviewResult {
         return this.mailTemplateService.getNewReviewEmail(breederName);
     }
 
-    getPreviewCatalog(): NotificationEmailPreviewCatalogResponseDto {
+    getPreviewCatalog(): NotificationEmailPreviewCatalogResult {
         return {
             breederApproval: this.getBreederApprovalTemplate('테스트 브리더'),
             breederRejection: this.getBreederRejectionTemplate('테스트 브리더', [

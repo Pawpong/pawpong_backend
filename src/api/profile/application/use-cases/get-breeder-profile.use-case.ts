@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { ProfileMapperService } from '../../domain/services/profile-mapper.service';
-import { BreederPublicProfileResponseDto } from '../../dto/response/breeder-profile-response.dto';
 import { PROFILE_READER_PORT, type ProfileReaderPort } from '../ports/profile-reader.port';
+import type { BreederPublicProfileResult } from '../types/profile-result.type';
 
 /**
  * GET /v2/profile/breeders/:breederId — 브리더 공개 프로필 (브리더홈).
@@ -20,7 +20,7 @@ export class GetBreederProfileUseCase {
         breederId: string,
         viewerUserId?: string,
         viewerRole?: string,
-    ): Promise<BreederPublicProfileResponseDto> {
+    ): Promise<BreederPublicProfileResult> {
         const breeder = await this.reader.readBreeder(breederId);
         if (!breeder) throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
 
