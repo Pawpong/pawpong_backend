@@ -10,6 +10,8 @@ import { JwtStrategy } from '../../common/strategy/jwt.strategy';
 import { NaverStrategy } from '../../common/strategy/naver.strategy';
 import { KakaoStrategy } from '../../common/strategy/kakao.strategy';
 import { GoogleStrategy } from '../../common/strategy/google.strategy';
+import { JWT_USER_STATUS_PORT } from '../../common/strategy/ports/jwt-user-status.port';
+import { JwtUserStatusMongooseAdapter } from '../../common/strategy/infrastructure/jwt-user-status-mongoose.adapter';
 import { CustomLoggerService } from '../../common/logger/custom-logger.service';
 import { StorageModule } from '../../common/storage/storage.module';
 import { DiscordWebhookModule } from '../../common/discord/discord-webhook.module';
@@ -339,7 +341,18 @@ const AUTH_PORT_BINDINGS = [
     },
 ];
 
-const AUTH_STRATEGY_PROVIDERS = [JwtStrategy, GoogleStrategy, NaverStrategy, KakaoStrategy, CustomLoggerService];
+const AUTH_STRATEGY_PROVIDERS = [
+    JwtUserStatusMongooseAdapter,
+    {
+        provide: JWT_USER_STATUS_PORT,
+        useExisting: JwtUserStatusMongooseAdapter,
+    },
+    JwtStrategy,
+    GoogleStrategy,
+    NaverStrategy,
+    KakaoStrategy,
+    CustomLoggerService,
+];
 
 export const AUTH_MODULE_PROVIDERS = [
     ...AUTH_USE_CASE_PROVIDERS,

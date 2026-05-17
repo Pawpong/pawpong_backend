@@ -11,6 +11,23 @@ import type { NotificationDocumentRecord } from '../types/notification-record.ty
 export class NotificationRepository {
     constructor(@InjectModel(Notification.name) private readonly notificationModel: Model<Notification>) {}
 
+    async createMany(commands: NotificationCreateCommand[]): Promise<void> {
+        if (commands.length === 0) return;
+        await this.notificationModel.insertMany(
+            commands.map((c) => ({
+                userId: c.userId,
+                userRole: c.userRole,
+                type: c.type,
+                title: c.title,
+                body: c.body,
+                metadata: c.metadata,
+                targetUrl: c.targetUrl,
+                isRead: c.isRead ?? false,
+            })),
+            { ordered: false }, // 일부 실패해도 나머지 계속 삽입
+        );
+    }
+
     async create(command: NotificationCreateCommand): Promise<NotificationDocumentRecord> {
         const notification = new this.notificationModel({
             userId: command.userId,

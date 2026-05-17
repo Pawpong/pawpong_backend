@@ -1,15 +1,11 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import { Request } from 'express';
 
 import { DomainAuthenticationError } from '../error/domain.error';
-
-import { Adopter, AdopterDocument } from '../../schema/adopter.schema';
-import { Breeder, BreederDocument } from '../../schema/breeder.schema';
+import { JWT_USER_STATUS_PORT, type JwtUserStatusPort } from './ports/jwt-user-status.port';
 import type { AuthenticatedRequestUser, JwtPayloadClaims } from '../types/authenticated-request-user.type';
 
 /**
@@ -23,8 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
 
     constructor(
         configService: ConfigService,
-        @InjectModel(Adopter.name) private adopterModel: Model<AdopterDocument>,
-        @InjectModel(Breeder.name) private breederModel: Model<BreederDocument>,
+        @Inject(JWT_USER_STATUS_PORT) private readonly userStatusPort: JwtUserStatusPort,
     ) {
         const jwtSecret = configService.get<string>('JWT_SECRET') || 'fallback-secret';
 
@@ -52,14 +47,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
      * 탈퇴된 계정인 경우 도메인 인증 예외를 발생시킵니다.
      */
     async validate(payload: JwtPayloadClaims): Promise<AuthenticatedRequestUser> {
-        // 사용자 조회 및 탈퇴 여부 확인
         let accountStatus: string | undefined;
-        if (payload.role === 'adopter') {
-            const adopter = await this.adopterModel.findById(payload.sub).select('accountStatus').lean().exec();
-            accountStatus = adopter?.accountStatus;
-        } else if (payload.role === 'breeder') {
-            const breeder = await this.breederModel.findById(payload.sub).select('accountStatus').lean().exec();
-            accountStatus = breeder?.accountStatus;
+        if (payload.role === 'adopter' || payload.role === 'breeder') {
+            accountStatus = await this.userStatusPort.findAccountStatus(payload.sub, payload.role);
         }
 
         // 탈퇴된 계정인 경우 인증 실패

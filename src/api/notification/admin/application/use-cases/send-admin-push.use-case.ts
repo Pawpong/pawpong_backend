@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 
 import { NotificationType } from '../../../../../common/enum/user.enum';
 import {
@@ -27,6 +27,8 @@ const FCM_MULTICAST_CHUNK = 500; // FCM sendEachForMulticast 한도
  */
 @Injectable()
 export class SendAdminPushUseCase {
+    private readonly logger = new Logger(SendAdminPushUseCase.name);
+
     constructor(
         @Inject(ADMIN_PUSH_RECIPIENT_READER_PORT)
         private readonly recipientReader: AdminPushRecipientReaderPort,
@@ -51,22 +53,23 @@ export class SendAdminPushUseCase {
             throw new BadRequestException('대상 사용자를 찾을 수 없습니다.');
         }
 
-        // 1) in-app notification doc 생성 (토큰 없는 사용자도 알림 탭에는 보이도록 모든 recipients 대상)
+        // 1) in-app notification doc 일괄 생성 (토큰 없는 사용자도 알림 탭에는 보이도록 모든 recipients 대상)
         let notificationsCreated = 0;
-        for (const r of recipients) {
-            try {
-                await this.notificationCommand.create({
+        try {
+            await this.notificationCommand.createMany(
+                recipients.map((r) => ({
                     userId: r.userId,
                     userRole: r.userRole,
                     type: NotificationType.ADMIN_BROADCAST,
                     title,
                     body,
                     targetUrl: command.targetUrl,
-                });
-                notificationsCreated += 1;
-            } catch {
-                // 단일 사용자 인서트 실패 시 broadcast 전체를 끊지 않음. 카운트 미반영.
-            }
+                })),
+            );
+            notificationsCreated = recipients.length;
+        } catch (err) {
+            // insertMany ordered:false — 일부 실패 시에도 나머지는 삽입됨. 전체 카운트는 보수적으로 0 처리.
+            this.logger.warn(`[sendAdminPush] 일부 in-app notification 생성 실패: ${String(err)}`);
         }
 
         // 2) 토큰 평탄화 + FCM 500개 chunk 발송
