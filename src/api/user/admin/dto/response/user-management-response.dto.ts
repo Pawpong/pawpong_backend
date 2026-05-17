@@ -65,6 +65,28 @@ export class UserManagementResponseDto {
     emailAddress: string;
 
     /**
+     * 사용자 닉네임 (입양자만 보유, 브리더는 null/empty)
+     * @example "퐁이팜"
+     */
+    @ApiProperty({
+        description: '사용자 닉네임 (없으면 빈 문자열)',
+        example: '퐁이팜',
+        required: false,
+    })
+    nickname?: string;
+
+    /**
+     * 휴대전화 번호 (E.164 또는 010-xxxx-xxxx 등 가공된 표현)
+     * @example "01012345678"
+     */
+    @ApiProperty({
+        description: '휴대전화 번호 (없으면 빈 문자열)',
+        example: '01012345678',
+        required: false,
+    })
+    phoneNumber?: string;
+
+    /**
      * 사용자 역할 (입양자/브리더)
      * @example "adopter"
      */

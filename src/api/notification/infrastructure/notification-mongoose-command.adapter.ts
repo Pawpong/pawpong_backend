@@ -10,4 +10,8 @@ export class NotificationMongooseCommandAdapter implements NotificationCommandPo
     async create(command: NotificationCreateCommand): Promise<NotificationDocumentRecord> {
         return this.notificationRepository.create(command);
     }
+
+    async createMany(commands: NotificationCreateCommand[]): Promise<void> {
+        return this.notificationRepository.createMany(commands);
+    }
 }
