@@ -1,11 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { ProfileMapperService } from '../../domain/services/profile-mapper.service';
-import { FavoriteBreederCardResponseDto } from '../../dto/response/favorite-breeder-card.dto';
 import { PROFILE_READER_PORT, type ProfileReaderPort } from '../ports/profile-reader.port';
+import type { FavoriteBreederCardResult } from '../types/profile-result.type';
 
 export interface FavoriteBreedersPage {
-    items: FavoriteBreederCardResponseDto[];
+    items: FavoriteBreederCardResult[];
     pagination: {
         currentPage: number;
         pageSize: number;

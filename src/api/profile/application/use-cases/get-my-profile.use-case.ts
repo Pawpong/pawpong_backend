@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { ProfileMapperService } from '../../domain/services/profile-mapper.service';
-import { MyProfileResponseDto } from '../../dto/response/my-profile-response.dto';
 import { PROFILE_READER_PORT, type ProfileReaderPort } from '../ports/profile-reader.port';
+import type { MyProfileResult } from '../types/profile-result.type';
 
 /**
  * GET /v2/profile/me — 현재 인증된 사용자의 프로필.
@@ -16,7 +16,7 @@ export class GetMyProfileUseCase {
         private readonly mapper: ProfileMapperService,
     ) {}
 
-    async execute(userId: string, role: 'adopter' | 'breeder'): Promise<MyProfileResponseDto> {
+    async execute(userId: string, role: 'adopter' | 'breeder'): Promise<MyProfileResult> {
         if (role === 'adopter') {
             const adopter = await this.reader.readAdopter(userId);
             if (!adopter) throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');

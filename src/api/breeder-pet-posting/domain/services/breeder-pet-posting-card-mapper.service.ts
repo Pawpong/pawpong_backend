@@ -5,7 +5,7 @@ import {
     type BreederPetPostingAssetUrlPort,
 } from '../../application/ports/breeder-pet-posting-asset-url.port';
 import type { BreederPetPostingCardSnapshot } from '../../application/ports/breeder-pet-posting-reader.port';
-import { BreederPetPostingCardResponseDto } from '../../dto/response/breeder-pet-posting-card.dto';
+import type { BreederPetPostingCardResult } from '../../application/types/breeder-pet-posting-result.type';
 
 /**
  * v2 분양글 카드 매퍼 (도메인 계층).
@@ -20,7 +20,7 @@ export class BreederPetPostingCardMapperService {
         private readonly assetUrl: BreederPetPostingAssetUrlPort,
     ) {}
 
-    toCard(snapshot: BreederPetPostingCardSnapshot): BreederPetPostingCardResponseDto {
+    toCard(snapshot: BreederPetPostingCardSnapshot): BreederPetPostingCardResult {
         const photoUrls = snapshot.photos.map((fileName) => this.assetUrl.toSignedUrl(fileName));
         const repIndex = Math.min(Math.max(0, snapshot.representativePhotoIndex), Math.max(0, photoUrls.length - 1));
         return {

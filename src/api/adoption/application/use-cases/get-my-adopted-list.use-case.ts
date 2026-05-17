@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { buildPageResult, type PageResult } from '../../../../common/types/page-result.type';
 import { AdoptionPetMapperService } from '../../domain/services/adoption-pet-mapper.service';
-import type { AdoptedPetCardResponseDto } from '../../dto/response/adopted-pet-card.dto';
+import type { AdoptedPetCardResult } from '../types/adoption-result.type';
 import {
     ADOPTER_PET_FAVORITE_READER_PORT,
     type AdopterPetFavoriteReaderPort,
@@ -33,7 +33,7 @@ export class GetMyAdoptedListUseCase {
         adopterId: string;
         page?: number;
         pageSize?: number;
-    }): Promise<PageResult<AdoptedPetCardResponseDto>> {
+    }): Promise<PageResult<AdoptedPetCardResult>> {
         const page = Math.max(1, input.page ?? 1);
         const pageSize = Math.min(PAGE_SIZE_MAX, Math.max(1, input.pageSize ?? PAGE_SIZE_DEFAULT));
 
@@ -53,7 +53,7 @@ export class GetMyAdoptedListUseCase {
                   )
                 : new Set<string>();
 
-        const cards: AdoptedPetCardResponseDto[] = await Promise.all(
+        const cards: AdoptedPetCardResult[] = await Promise.all(
             items.map(async (record) => {
                 const photoUrls = await Promise.all(
                     record.pet.photos.map((fileName) => this.assetUrlPort.generateSignedUrl(fileName)),

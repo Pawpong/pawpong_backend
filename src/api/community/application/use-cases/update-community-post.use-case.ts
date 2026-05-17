@@ -2,8 +2,8 @@ import { BadRequestException, ForbiddenException, Inject, Injectable } from '@ne
 
 import { CommunityPostMapperService } from '../../domain/services/community-post-mapper.service';
 import { CommunityPostWriteValidatorService } from '../../domain/services/community-post-write-validator.service';
-import { CommunityPostDetailResponseDto } from '../../dto/response/community-post-detail.dto';
 import { COMMUNITY_POST_READER_PORT, type CommunityPostReaderPort } from '../ports/community-post-reader.port';
+import type { CommunityPostDetailResult } from '../types/community-post-result.type';
 import { COMMUNITY_POST_WRITER_PORT, type CommunityPostWriterPort } from '../ports/community-post-writer.port';
 import type { CommunityPostUpdateCommand } from '../types/community-post-write.type';
 
@@ -22,7 +22,7 @@ export class UpdateCommunityPostUseCase {
         userId: string,
         postId: string,
         patch: CommunityPostUpdateCommand,
-    ): Promise<CommunityPostDetailResponseDto> {
+    ): Promise<CommunityPostDetailResult> {
         this.validator.validateUpdate(patch);
 
         const existing = await this.reader.readPostById(postId);

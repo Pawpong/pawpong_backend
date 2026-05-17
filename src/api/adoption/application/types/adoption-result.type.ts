@@ -28,6 +28,10 @@ export type AdoptionPetListResult = PageResult<AdoptionPetItemResult>;
  * v2 입양 상세 응답 (Figma 39:1240).
  * 카드 응답 + 건강/부모/사육환경/태그/소개/브리더 요약을 포함.
  */
+export type AdoptedPetCardResult = AdoptionPetItemResult & {
+    adoptedAt: string;
+};
+
 export type AdoptionPetDetailResult = AdoptionPetItemResult & {
     description?: string;
     tags: string[];

@@ -1,7 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { GetMyProfileUseCase } from './get-my-profile.use-case';
-import type { MyProfileResponseDto } from '../../dto/response/my-profile-response.dto';
+import type { MyProfileResult } from '../types/profile-result.type';
 import {
     PROFILE_WRITER_PORT,
     type ProfileUpdatableRole,
@@ -27,7 +27,7 @@ export class UpdateMyProfileUseCase {
         userId: string,
         role: ProfileUpdatableRole,
         command: UpdateMyProfileCommand,
-    ): Promise<MyProfileResponseDto> {
+    ): Promise<MyProfileResult> {
         const sanitized = this.sanitize(role, command);
 
         const updated = await this.writer.updateMyProfile(userId, role, sanitized);
