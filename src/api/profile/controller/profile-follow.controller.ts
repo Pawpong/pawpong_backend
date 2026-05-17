@@ -26,10 +26,7 @@ export class ProfileFollowController {
         @CurrentUser('userId') followerId: string,
     ): Promise<ApiResponseDto<FollowResponseDto>> {
         const { alreadyFollowing } = await this.followUserUseCase.execute(followerId, followeeId);
-        return ApiResponseDto.success(
-            { followeeId, followed: !alreadyFollowing },
-            PROFILE_RESPONSE_MESSAGES.followed,
-        );
+        return ApiResponseDto.success({ followeeId, followed: !alreadyFollowing }, PROFILE_RESPONSE_MESSAGES.followed);
     }
 
     @Delete('users/:userId/follow')
@@ -39,9 +36,6 @@ export class ProfileFollowController {
         @CurrentUser('userId') followerId: string,
     ): Promise<ApiResponseDto<UnfollowResponseDto>> {
         const { wasFollowing } = await this.unfollowUserUseCase.execute(followerId, followeeId);
-        return ApiResponseDto.success(
-            { followeeId, unfollowed: wasFollowing },
-            PROFILE_RESPONSE_MESSAGES.unfollowed,
-        );
+        return ApiResponseDto.success({ followeeId, unfollowed: wasFollowing }, PROFILE_RESPONSE_MESSAGES.unfollowed);
     }
 }

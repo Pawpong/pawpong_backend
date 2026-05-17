@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import {
-    CommunityBookmark,
-    CommunityBookmarkDocument,
-} from '../../../schema/community-bookmark.schema';
+import { CommunityBookmark, CommunityBookmarkDocument } from '../../../schema/community-bookmark.schema';
 import { CommunityPost, CommunityPostDocument } from '../../../schema/community-post.schema';
 
 @Injectable()
@@ -17,11 +14,7 @@ export class CommunityBookmarkRepository {
         private readonly postModel: Model<CommunityPostDocument>,
     ) {}
 
-    async save(
-        postId: string,
-        userId: string,
-        userModel: 'Adopter' | 'Breeder',
-    ): Promise<{ alreadySaved: boolean }> {
+    async save(postId: string, userId: string, userModel: 'Adopter' | 'Breeder'): Promise<{ alreadySaved: boolean }> {
         if (!Types.ObjectId.isValid(postId)) {
             return { alreadySaved: false };
         }

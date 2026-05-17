@@ -38,9 +38,9 @@ export class GetMySavedCommunityPostsUseCase {
         }
 
         // 저장 순서 유지하며 active 게시글만 포함
-        const snapshots = (
-            await Promise.all(postIds.map((id) => this.reader.readPostById(id)))
-        ).filter((s): s is NonNullable<typeof s> => s !== null);
+        const snapshots = (await Promise.all(postIds.map((id) => this.reader.readPostById(id)))).filter(
+            (s): s is NonNullable<typeof s> => s !== null,
+        );
 
         const items = snapshots.map((s) => this.mapper.toCard(s));
         return buildPageResult(items, page, pageSize, totalItems);

@@ -9,7 +9,10 @@ import { UnsaveCommunityPostUseCase } from '../application/use-cases/unsave-comm
 import { COMMUNITY_RESPONSE_MESSAGES } from '../constants/community-response-messages';
 import { CommunityProtectedController } from '../decorator/community-protected-controller.decorator';
 import { CommunityPostPaginationQueryDto } from '../dto/request/community-post-list-query.dto';
-import type { CommunityBookmarkResponseDto, CommunityUnsaveResponseDto } from '../dto/response/community-bookmark-response.dto';
+import type {
+    CommunityBookmarkResponseDto,
+    CommunityUnsaveResponseDto,
+} from '../dto/response/community-bookmark-response.dto';
 import type { CommunityPostCardResponseDto } from '../dto/response/community-post-card.dto';
 import {
     ApiGetMySavedCommunityPostsEndpoint,
@@ -37,10 +40,7 @@ export class CommunityPostBookmarkController {
     ): Promise<ApiResponseDto<CommunityBookmarkResponseDto>> {
         const userModel = role === 'breeder' ? 'Breeder' : 'Adopter';
         const { alreadySaved } = await this.saveUseCase.execute({ postId, userId, userModel });
-        return ApiResponseDto.success(
-            { postId, saved: !alreadySaved },
-            COMMUNITY_RESPONSE_MESSAGES.saved,
-        );
+        return ApiResponseDto.success({ postId, saved: !alreadySaved }, COMMUNITY_RESPONSE_MESSAGES.saved);
     }
 
     @Delete('posts/:postId/bookmark')
@@ -50,10 +50,7 @@ export class CommunityPostBookmarkController {
         @CurrentUser('userId') userId: string,
     ): Promise<ApiResponseDto<CommunityUnsaveResponseDto>> {
         const { wasSaved } = await this.unsaveUseCase.execute({ postId, userId });
-        return ApiResponseDto.success(
-            { postId, unsaved: wasSaved },
-            COMMUNITY_RESPONSE_MESSAGES.unsaved,
-        );
+        return ApiResponseDto.success({ postId, unsaved: wasSaved }, COMMUNITY_RESPONSE_MESSAGES.unsaved);
     }
 
     @Get('posts/me/bookmarks')
