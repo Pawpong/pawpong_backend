@@ -11,7 +11,7 @@ import { ApiGetActiveTermsListEndpoint, ApiTermsController } from '../swagger';
  * 가입/온보딩 화면에서 동의받을 활성 약관 목록을 반환
  */
 @ApiTermsController()
-@Controller('terms')
+@Controller('v2/terms')
 export class TermsListController {
     constructor(private readonly getActiveTermsListUseCase: GetActiveTermsListUseCase) {}
 
