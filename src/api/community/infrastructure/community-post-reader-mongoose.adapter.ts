@@ -29,6 +29,15 @@ export class CommunityPostReaderMongooseAdapter implements CommunityPostReaderPo
         return doc ? this.toPostSnapshot(doc) : null;
     }
 
+    async readPostsByIds(postIds: string[]): Promise<CommunityPostSnapshot[]> {
+        const docs = await this.repository.findPostsByIds(postIds);
+        const docMap = new Map(docs.map((doc) => [String(doc._id), this.toPostSnapshot(doc)]));
+        return postIds.flatMap((id) => {
+            const snapshot = docMap.get(id);
+            return snapshot ? [snapshot] : [];
+        });
+    }
+
     existsActivePost(postId: string): Promise<boolean> {
         return this.repository.existsActivePost(postId);
     }
