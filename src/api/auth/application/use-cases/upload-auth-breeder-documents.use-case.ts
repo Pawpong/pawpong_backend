@@ -34,29 +34,22 @@ export class UploadAuthBreederDocumentsUseCase {
     ): Promise<AuthBreederDocumentUploadResult> {
         this.authBreederDocumentFilePolicyService.validate(files, types, level);
 
-        const uploadedDocuments: Array<{
-            type: string;
-            url: string;
-            filename: string;
-            originalFileName: string;
-            size: number;
-            uploadedAt: Date;
-        }> = [];
-
-        for (let index = 0; index < files.length; index += 1) {
-            const file = files[index];
-            const type = types[index];
-            const uploaded = await this.authUploadFileStorePort.upload(file, `documents/verification/temp/${level}`);
-
-            uploadedDocuments.push({
-                type,
-                url: uploaded.cdnUrl,
-                filename: uploaded.fileName,
-                originalFileName: this.authBreederDocumentOriginalFileNameService.resolve(file.originalname),
-                size: file.size,
-                uploadedAt: new Date(),
-            });
-        }
+        const uploadedDocuments = await Promise.all(
+            files.map(async (file, index) => {
+                const uploaded = await this.authUploadFileStorePort.upload(
+                    file,
+                    `documents/verification/temp/${level}`,
+                );
+                return {
+                    type: types[index],
+                    url: uploaded.cdnUrl,
+                    filename: uploaded.fileName,
+                    originalFileName: this.authBreederDocumentOriginalFileNameService.resolve(file.originalname),
+                    size: file.size,
+                    uploadedAt: new Date(),
+                };
+            }),
+        );
 
         if (tempId) {
             const tempDocuments: AuthTempUploadDocument[] = uploadedDocuments.map((document) => ({

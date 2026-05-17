@@ -241,7 +241,9 @@ async function bootstrap(): Promise<void> {
                     message: `Kafka chat consumer 시작 실패 (브로커: ${kafkaBroker}): ${error instanceof Error ? error.message : String(error)}`,
                     stack: error instanceof Error ? error.stack : undefined,
                 })
-                .catch(() => {});
+                .catch((notifyErr: unknown) => {
+                    logger.warn(`[bootstrap] Discord 긴급 알림 전송 실패: ${notifyErr instanceof Error ? notifyErr.message : String(notifyErr)}`);
+                });
         }
     }
 

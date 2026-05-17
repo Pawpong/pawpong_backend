@@ -56,6 +56,15 @@ export class CommunityRepository {
             .exec();
     }
 
+    async findPostsByIds(postIds: string[]): Promise<CommunityPostDocument[]> {
+        const objectIds = postIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
+        if (objectIds.length === 0) return [];
+        return this.postModel
+            .find({ _id: { $in: objectIds }, isActive: true })
+            .lean<CommunityPostDocument[]>()
+            .exec();
+    }
+
     /**
      * 게시글 존재 + isActive 만 확인 (전체 도큐먼트 가져오지 않음).
      * 댓글 페이지네이션처럼 후속 페이지에서 가볍게 확인용.
