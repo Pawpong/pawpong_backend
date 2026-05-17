@@ -2,7 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { buildPageResult, type PageResult } from '../../../../common/types/page-result.type';
 import { BreederPetPostingCardMapperService } from '../../domain/services/breeder-pet-posting-card-mapper.service';
-import type { BreederPetPostingCardResponseDto } from '../../dto/response/breeder-pet-posting-card.dto';
+import type { BreederPetPostingCardResult } from '../types/breeder-pet-posting-result.type';
 import {
     BREEDER_PET_POSTING_READER_PORT,
     type BreederPetPostingReaderPort,
@@ -31,7 +31,7 @@ export class ListMyBreederPetPostingsUseCase {
         status?: BreederPetPostingStatus;
         page?: number;
         pageSize?: number;
-    }): Promise<PageResult<BreederPetPostingCardResponseDto>> {
+    }): Promise<PageResult<BreederPetPostingCardResult>> {
         const page = Math.max(1, input.page ?? 1);
         const pageSize = Math.min(PAGE_SIZE_MAX, Math.max(1, input.pageSize ?? PAGE_SIZE_DEFAULT));
 
