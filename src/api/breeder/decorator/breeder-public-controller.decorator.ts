@@ -4,9 +4,9 @@ import { OptionalJwtAuthGuard } from '../../../common/guard/optional-jwt-auth.gu
 import { ApiBreederController } from '../swagger/decorators';
 
 export function BreederPublicController() {
-    return applyDecorators(ApiBreederController(), Controller('breeder'));
+    return applyDecorators(ApiBreederController(), Controller('v2/breeder'));
 }
 
 export function BreederOptionalAuthController() {
-    return applyDecorators(ApiBreederController(), Controller('breeder'), UseGuards(OptionalJwtAuthGuard));
+    return applyDecorators(ApiBreederController(), Controller('v2/breeder'), UseGuards(OptionalJwtAuthGuard));
 }
