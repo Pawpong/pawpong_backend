@@ -6,7 +6,7 @@ import { LOKI_QUERY_PORT } from '../ports/loki-query.port';
 import type { ILokiQueryPort } from '../ports/loki-query.port';
 import { LogCategorizerService } from '../../domain/services/log-categorizer.service';
 import type { CategorizationResult } from '../../domain/services/log-categorizer.service';
-import { SystemHealthFilterRequestDto } from '../../dto/request/system-health-filter-request.dto';
+import type { SystemHealthFilterCommand } from '../types/system-health.type';
 
 /**
  * 시스템 헬스 조회 Use Case
@@ -35,7 +35,7 @@ export class GetSystemHealthUseCase {
      */
     async execute(
         adminId: string,
-        filter: SystemHealthFilterRequestDto,
+        filter: SystemHealthFilterCommand,
         now: Date = new Date(),
     ): Promise<CategorizationResult> {
         await this.verifyAdminPermission(adminId);

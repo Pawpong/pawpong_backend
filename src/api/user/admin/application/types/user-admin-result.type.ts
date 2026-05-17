@@ -23,6 +23,8 @@ export type UserAdminUserManagementItemResult = {
     userId: string;
     userName: string;
     emailAddress: string;
+    nickname?: string;
+    phoneNumber?: string;
     userRole: UserAdminManagedUserRole;
     accountStatus: string;
     lastLoginAt: Date;

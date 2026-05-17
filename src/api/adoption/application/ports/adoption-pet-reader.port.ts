@@ -8,6 +8,8 @@ export type AdoptionPetListQuery = {
     excludePetId?: string;
     /** 분양 상태 필터 — 분양가능/예약중/분양완료 탭 (Figma 678:49176/49772/52698) */
     status?: AdoptionPetStatus;
+    /** 검색 키워드 — 이름·품종 부분 일치 (Figma 678:43115 탐색 입양 탭) */
+    keyword?: string;
     sort: AdoptionPetSort;
     skip: number;
     limit: number;
@@ -63,7 +65,7 @@ export const ADOPTION_PET_READER_PORT = Symbol('ADOPTION_PET_READER_PORT');
 
 export interface AdoptionPetReaderPort {
     countList(
-        query: Pick<AdoptionPetListQuery, 'petType' | 'breederId' | 'excludePetId' | 'status'>,
+        query: Pick<AdoptionPetListQuery, 'petType' | 'breederId' | 'excludePetId' | 'status' | 'keyword'>,
     ): Promise<number>;
     readList(query: AdoptionPetListQuery): Promise<AdoptionPetSnapshot[]>;
     readPopular(petType: AdoptionPetType | undefined, limit: number): Promise<AdoptionPetSnapshot[]>;

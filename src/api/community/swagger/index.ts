@@ -9,6 +9,10 @@ import {
 } from '../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../common/dto/pagination/pagination-response.dto';
 import { COMMUNITY_RESPONSE_MESSAGES } from '../constants/community-response-messages';
+import {
+    CommunityBookmarkResponseDto,
+    CommunityUnsaveResponseDto,
+} from '../dto/response/community-bookmark-response.dto';
 import { CommunityPostCardResponseDto } from '../dto/response/community-post-card.dto';
 import { CommunityPostCommentResponseDto } from '../dto/response/community-post-comment.dto';
 import { CommunityPostDeleteResponseDto } from '../dto/response/community-post-delete-response.dto';
@@ -144,5 +148,57 @@ export function ApiDeleteCommunityPostEndpoint() {
             errorResponses: [POST_NOT_FOUND_RESPONSE, POST_FORBIDDEN_RESPONSE],
         }),
         ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiSaveCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 저장 (북마크)',
+            description: `
+                Figma 711:59266 — 저장 피드 탭.
+                이미 저장된 경우 saved: false 를 반환하며 오류가 아닌 멱등 처리.
+                저장 시 게시글의 saveCount += 1.
+            `,
+            responseType: CommunityBookmarkResponseDto,
+            successDescription: '게시글 저장 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.saved,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiUnsaveCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 저장 취소',
+            description: `
+                저장되지 않은 게시글에 취소 요청 시 unsaved: false 반환 (멱등).
+                취소 시 게시글의 saveCount -= 1 (0 미만 방지).
+            `,
+            responseType: CommunityUnsaveResponseDto,
+            successDescription: '게시글 저장 취소 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.unsaved,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiGetMySavedCommunityPostsEndpoint() {
+    return applyDecorators(
+        ApiPaginatedEndpoint({
+            summary: '내가 저장한 커뮤니티 게시글 목록',
+            description: `
+                Figma 711:59266 — 저장 피드 탭.
+                저장일 내림차순 정렬. 소프트 삭제된 게시글은 결과에서 제외.
+            `,
+            responseType: PaginationResponseDto,
+            itemType: CommunityPostCardResponseDto,
+            isPublic: false,
+            successDescription: '저장한 게시글 목록 조회 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.savedListRetrieved,
+        }),
     );
 }
