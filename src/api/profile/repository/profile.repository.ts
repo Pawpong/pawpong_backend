@@ -93,9 +93,7 @@ export class ProfileRepository {
             return Boolean(exists);
         }
 
-        const result = await this.adopterModel
-            .updateOne({ _id: new Types.ObjectId(userId) }, { $set })
-            .exec();
+        const result = await this.adopterModel.updateOne({ _id: new Types.ObjectId(userId) }, { $set }).exec();
         return result.matchedCount > 0;
     }
 
@@ -121,9 +119,7 @@ export class ProfileRepository {
             return Boolean(exists);
         }
 
-        const result = await this.breederModel
-            .updateOne({ _id: new Types.ObjectId(breederId) }, { $set })
-            .exec();
+        const result = await this.breederModel.updateOne({ _id: new Types.ObjectId(breederId) }, { $set }).exec();
         return result.matchedCount > 0;
     }
 }

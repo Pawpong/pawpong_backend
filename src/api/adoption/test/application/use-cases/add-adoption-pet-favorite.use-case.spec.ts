@@ -25,9 +25,7 @@ describe('AddAdoptionPetFavoriteUseCase', () => {
     it('soft-deleted(isActive=false) 펫은 readActiveById 가 null 반환 → 추가 거부', async () => {
         // 즐겨찾기 추가 가드: soft-deleted 펫에 stale 즐겨찾기/카운터가 쌓이지 않도록 readActiveById 사용.
         petReader.readActiveById.mockResolvedValueOnce(null);
-        await expect(useCase.execute('adopter-1', 'pet-soft-deleted')).rejects.toThrow(
-            '해당 동물을 찾을 수 없습니다.',
-        );
+        await expect(useCase.execute('adopter-1', 'pet-soft-deleted')).rejects.toThrow('해당 동물을 찾을 수 없습니다.');
         expect(favoriteWriter.addAtomic).not.toHaveBeenCalled();
     });
 

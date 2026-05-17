@@ -19,4 +19,5 @@ export interface NotificationCreateCommand {
 
 export interface NotificationCommandPort {
     create(command: NotificationCreateCommand): Promise<NotificationDocumentRecord>;
+    createMany(commands: NotificationCreateCommand[]): Promise<void>;
 }

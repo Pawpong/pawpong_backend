@@ -18,6 +18,7 @@ export class AdoptionPetRepository {
         breederId?: string;
         excludePetId?: string;
         status?: AdoptionPetStatus;
+        keyword?: string;
     }): FilterQuery<AvailablePet> {
         const filter: FilterQuery<AvailablePet> = { isActive: true };
         if (input.petType) {
@@ -32,11 +33,17 @@ export class AdoptionPetRepository {
         if (input.status) {
             filter.status = input.status;
         }
+        if (input.keyword && input.keyword.trim()) {
+            // 정규식 특수문자 이스케이프 처리 (ReDoS 방지)
+            const escaped = input.keyword.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(escaped, 'i');
+            filter.$or = [{ name: regex }, { breed: regex }];
+        }
         return filter;
     }
 
     countList(
-        query: Pick<AdoptionPetListQuery, 'petType' | 'breederId' | 'excludePetId' | 'status'>,
+        query: Pick<AdoptionPetListQuery, 'petType' | 'breederId' | 'excludePetId' | 'status' | 'keyword'>,
     ): Promise<number> {
         return this.model.countDocuments(this.buildBaseFilter(query)).exec();
     }

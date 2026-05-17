@@ -6,7 +6,7 @@ import { AdminPushTargetValidatorService } from '../../../domain/services/admin-
 
 describe('SendAdminPushUseCase', () => {
     const recipientReader = { readRecipients: jest.fn() };
-    const notificationCommand = { create: jest.fn() };
+    const notificationCommand = { create: jest.fn(), createMany: jest.fn() };
     const notificationPush = { sendToTokens: jest.fn() };
 
     const useCase = new SendAdminPushUseCase(
@@ -18,7 +18,7 @@ describe('SendAdminPushUseCase', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        notificationCommand.create.mockResolvedValue({ _id: 'n-1' });
+        notificationCommand.createMany.mockResolvedValue(undefined);
     });
 
     const validCmd = () => ({
@@ -61,7 +61,7 @@ describe('SendAdminPushUseCase', () => {
         expect(notificationPush.sendToTokens).not.toHaveBeenCalled();
     });
 
-    it('정상 — notification doc 생성 + FCM chunk 발송 + 카운트 집계', async () => {
+    it('정상 — notification doc 일괄 생성 + FCM chunk 발송 + 카운트 집계', async () => {
         // 700 토큰 → 500 + 200 두 chunk
         const recipients = [
             { userId: 'a-1', userRole: 'adopter' as const, tokens: Array.from({ length: 500 }, (_, i) => `t-${i}`) },
@@ -86,11 +86,16 @@ describe('SendAdminPushUseCase', () => {
 
         const result = await useCase.execute(validCmd());
 
-        expect(notificationCommand.create).toHaveBeenCalledTimes(2);
-        const firstCreate = notificationCommand.create.mock.calls[0][0];
-        expect(firstCreate.type).toBe(NotificationType.ADMIN_BROADCAST);
-        expect(firstCreate.title).toBe('공지 제목');
-        expect(firstCreate.body).toBe('공지 본문');
+        // createMany를 한 번에 모든 수신자 command 배열로 호출
+        expect(notificationCommand.createMany).toHaveBeenCalledTimes(1);
+        const commands = notificationCommand.createMany.mock.calls[0][0];
+        expect(commands).toHaveLength(2);
+        expect(commands[0]).toMatchObject({
+            userId: 'a-1',
+            type: NotificationType.ADMIN_BROADCAST,
+            title: '공지 제목',
+            body: '공지 본문',
+        });
 
         expect(notificationPush.sendToTokens).toHaveBeenCalledTimes(2);
         expect(notificationPush.sendToTokens.mock.calls[0][0]).toHaveLength(500);
@@ -104,13 +109,13 @@ describe('SendAdminPushUseCase', () => {
         expect(result.invalidTokens).toBe(4);
     });
 
-    it('한 사용자의 notification create 실패해도 broadcast 중단 안 됨 (개별 실패는 카운트만 미반영)', async () => {
+    it('createMany 실패 시 경고 로그 후 broadcast 계속 진행, notificationsCreated=0', async () => {
         const recipients = [
             { userId: 'a-1', userRole: 'adopter' as const, tokens: ['t-1'] },
             { userId: 'a-2', userRole: 'adopter' as const, tokens: ['t-2'] },
         ];
         recipientReader.readRecipients.mockResolvedValueOnce(recipients);
-        notificationCommand.create.mockRejectedValueOnce(new Error('db blip')).mockResolvedValueOnce({ _id: 'n-2' });
+        notificationCommand.createMany.mockRejectedValueOnce(new Error('bulk write error'));
         notificationPush.sendToTokens.mockResolvedValueOnce([
             { token: 't-1', success: true, invalidToken: false },
             { token: 't-2', success: true, invalidToken: false },
@@ -119,7 +124,8 @@ describe('SendAdminPushUseCase', () => {
         const result = await useCase.execute(validCmd());
 
         expect(result.recipients).toBe(2);
-        expect(result.notificationsCreated).toBe(1);
+        // createMany 전체 실패 → notificationsCreated 보수적으로 0
+        expect(result.notificationsCreated).toBe(0);
         expect(result.pushTokensTargeted).toBe(2);
         expect(result.pushSuccess).toBe(2);
     });

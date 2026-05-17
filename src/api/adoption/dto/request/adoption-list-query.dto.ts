@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsMongoId, IsOptional, Max, Min } from 'class-validator';
+import { IsEnum, IsInt, IsMongoId, IsOptional, IsString, Max, MaxLength, Min } from 'class-validator';
 
 export enum AdoptionPetTypeQuery {
     DOG = 'dog',
@@ -56,6 +56,16 @@ export class AdoptionListQueryDto {
     @IsOptional()
     @IsEnum(AdoptionStatusQuery)
     status?: AdoptionStatusQuery;
+
+    @ApiProperty({
+        description: '검색 키워드 — 이름·품종 부분 일치 (Figma 678:43115 탐색 입양 탭)',
+        required: false,
+        example: '말티즈',
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(50)
+    keyword?: string;
 
     @ApiProperty({
         description: '정렬 기준',
