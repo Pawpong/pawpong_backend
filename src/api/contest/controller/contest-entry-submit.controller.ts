@@ -1,4 +1,4 @@
-import { Body, Post } from '@nestjs/common';
+import { BadRequestException, Body, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
@@ -23,7 +23,7 @@ export class ContestEntrySubmitController {
         @Body() dto: SubmitContestEntryRequestDto,
     ): Promise<ApiResponseDto<unknown>> {
         if (role !== 'adopter' && role !== 'breeder') {
-            throw new Error('지원하지 않는 역할입니다.');
+            throw new BadRequestException('지원하지 않는 역할입니다.');
         }
         const result = await this.submitContestEntryUseCase.execute({
             userId,
