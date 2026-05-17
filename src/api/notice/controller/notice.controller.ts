@@ -15,7 +15,7 @@ import { ApiGetNoticeDetailEndpoint, ApiGetNoticeListEndpoint, ApiNoticeControll
  * 모든 사용자가 접근 가능한 공지사항 조회 API
  */
 @ApiNoticeController()
-@Controller('notice')
+@Controller('v2/notice')
 export class NoticeController {
     constructor(
         private readonly getNoticeListUseCase: GetNoticeListUseCase,

@@ -8,7 +8,7 @@ import { BreedPetTypePipe } from '../pipe/breed-pet-type.pipe';
 import { ApiBreedController, ApiGetBreedsEndpoint } from '../swagger';
 
 @ApiBreedController()
-@Controller('breeds')
+@Controller('v2/breeds')
 export class BreedController {
     constructor(private readonly getBreedsUseCase: GetBreedsUseCase) {}
 
