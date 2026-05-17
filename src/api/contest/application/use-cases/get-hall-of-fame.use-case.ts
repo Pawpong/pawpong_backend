@@ -29,40 +29,43 @@ export class GetHallOfFameUseCase {
             this.reader.countAllEnded(),
         ]);
 
-        const items: HallOfFameItem[] = [];
+        // 콘테스트별 우승자 조회 + 서명 URL 생성을 병렬 실행
+        const settled = await Promise.all(
+            contests.map(async (contest): Promise<HallOfFameItem | null> => {
+                const topEntries = await this.reader.findTopEntries(contest.id, 1);
+                if (topEntries.length === 0) return null;
 
-        for (const contest of contests) {
-            const topEntries = await this.reader.findTopEntries(contest.id, 1);
-            if (topEntries.length === 0) continue;
+                const winner = topEntries[0];
+                const [photoUrl, profileImageUrl] = await Promise.all([
+                    this.assetUrl.generateSignedUrl(winner.photoFileName),
+                    winner.userProfileImageFileName
+                        ? this.assetUrl.generateSignedUrl(winner.userProfileImageFileName)
+                        : Promise.resolve<string | null>(null),
+                ]);
 
-            const winner = topEntries[0];
-            const [photoUrl, profileImageUrl] = await Promise.all([
-                this.assetUrl.generateSignedUrl(winner.photoFileName),
-                winner.userProfileImageFileName
-                    ? this.assetUrl.generateSignedUrl(winner.userProfileImageFileName)
-                    : Promise.resolve<string | null>(null),
-            ]);
+                return {
+                    contestId: contest.id,
+                    contestTitle: contest.title,
+                    startDate: contest.startDate,
+                    endDate: contest.endDate,
+                    winner: {
+                        id: winner.id,
+                        userId: winner.userId,
+                        userDisplayName: winner.userDisplayName,
+                        userProfileImageUrl: profileImageUrl,
+                        photoUrl,
+                        description: winner.description,
+                        voteCount: winner.voteCount,
+                        rank: winner.rank ?? 1,
+                        hasVoted: false,
+                        isMyEntry: false,
+                        createdAt: winner.createdAt,
+                    },
+                } satisfies HallOfFameItem;
+            }),
+        );
 
-            items.push({
-                contestId: contest.id,
-                contestTitle: contest.title,
-                startDate: contest.startDate,
-                endDate: contest.endDate,
-                winner: {
-                    id: winner.id,
-                    userId: winner.userId,
-                    userDisplayName: winner.userDisplayName,
-                    userProfileImageUrl: profileImageUrl,
-                    photoUrl,
-                    description: winner.description,
-                    voteCount: winner.voteCount,
-                    rank: winner.rank ?? 1,
-                    hasVoted: false,
-                    isMyEntry: false,
-                    createdAt: winner.createdAt,
-                },
-            });
-        }
+        const items = settled.filter((item): item is HallOfFameItem => item !== null);
 
         this.logger.logSuccess('getHallOfFame', '명예의 전당 조회 완료', { count: items.length });
 

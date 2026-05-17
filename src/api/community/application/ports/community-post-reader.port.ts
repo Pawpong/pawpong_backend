@@ -20,6 +20,7 @@ export interface CommunityPostCommentListResult {
 export interface CommunityPostReaderPort {
     listPosts(query: CommunityPostListQuery): Promise<CommunityPostListResult>;
     readPostById(postId: string): Promise<CommunityPostSnapshot | null>;
+    readPostsByIds(postIds: string[]): Promise<CommunityPostSnapshot[]>;
     existsActivePost(postId: string): Promise<boolean>;
     listComments(query: CommunityPostCommentListQuery): Promise<CommunityPostCommentListResult>;
 }
