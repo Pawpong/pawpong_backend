@@ -1,42 +1,21 @@
 import { DomainAuthenticationError } from '../../../common/error/domain.error';
 import { JwtStrategy } from '../../../common/strategy/jwt.strategy';
+import type { JwtUserStatusPort } from '../../../common/strategy/ports/jwt-user-status.port';
 
 describe('JwtStrategy', () => {
-    const createFindByIdQuery = (value: unknown) => ({
-        select: jest.fn().mockReturnValue({
-            lean: jest.fn().mockReturnValue({
-                exec: jest.fn().mockResolvedValue(value),
-            }),
-        }),
-    });
-
-    const createStrategy = () => {
+    const createStrategy = (userStatusPort: jest.Mocked<JwtUserStatusPort>) => {
         const configService = {
             get: jest.fn().mockReturnValue('jwt-secret'),
         };
-        const adopterModel = {
-            findById: jest.fn(),
-        };
-        const breederModel = {
-            findById: jest.fn(),
-        };
 
-        const strategy = new JwtStrategy(configService as never, adopterModel as never, breederModel as never);
-
-        return {
-            strategy,
-            adopterModel,
-            breederModel,
-        };
+        return new JwtStrategy(configService as never, userStatusPort);
     };
 
     it('탈퇴한 adopter는 DomainAuthenticationError를 던진다', async () => {
-        const { strategy, adopterModel } = createStrategy();
-        adopterModel.findById.mockReturnValue(
-            createFindByIdQuery({
-                accountStatus: 'deleted',
-            }),
-        );
+        const userStatusPort: jest.Mocked<JwtUserStatusPort> = {
+            findAccountStatus: jest.fn().mockResolvedValue('deleted'),
+        };
+        const strategy = createStrategy(userStatusPort);
 
         await expect(
             strategy.validate({
@@ -45,15 +24,15 @@ describe('JwtStrategy', () => {
                 role: 'adopter',
             }),
         ).rejects.toThrow(new DomainAuthenticationError('이미 탈퇴된 계정입니다.'));
+
+        expect(userStatusPort.findAccountStatus).toHaveBeenCalledWith('adopter-id', 'adopter');
     });
 
     it('정상 breeder는 인증 사용자 정보를 반환한다', async () => {
-        const { strategy, breederModel } = createStrategy();
-        breederModel.findById.mockReturnValue(
-            createFindByIdQuery({
-                accountStatus: 'active',
-            }),
-        );
+        const userStatusPort: jest.Mocked<JwtUserStatusPort> = {
+            findAccountStatus: jest.fn().mockResolvedValue('active'),
+        };
+        const strategy = createStrategy(userStatusPort);
 
         await expect(
             strategy.validate({

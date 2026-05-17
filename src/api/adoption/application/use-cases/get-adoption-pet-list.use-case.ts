@@ -36,6 +36,7 @@ export class GetAdoptionPetListUseCase {
         breederId?: string;
         excludePetId?: string;
         status?: AdoptionPetStatus;
+        keyword?: string;
         sort?: AdoptionPetListQuery['sort'];
         page?: number;
         pageSize?: number;
@@ -50,6 +51,7 @@ export class GetAdoptionPetListUseCase {
             breederId: input.breederId,
             excludePetId: input.excludePetId,
             status: input.status,
+            keyword: input.keyword,
             sort,
             skip: (page - 1) * pageSize,
             limit: pageSize,
@@ -61,6 +63,7 @@ export class GetAdoptionPetListUseCase {
                 breederId: input.breederId,
                 excludePetId: input.excludePetId,
                 status: input.status,
+                keyword: input.keyword,
             }),
             this.petReader.readList(query),
         ]);
