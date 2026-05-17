@@ -11,7 +11,7 @@ import { ApiGetActivePopularKeywordsEndpoint, ApiPopularKeywordController } from
  * 홈 화면 인기 검색어 칩 노출용
  */
 @ApiPopularKeywordController()
-@Controller('popular-keyword')
+@Controller('v2/popular-keyword')
 export class PopularKeywordController {
     constructor(private readonly getActivePopularKeywordsUseCase: GetActivePopularKeywordsUseCase) {}
 

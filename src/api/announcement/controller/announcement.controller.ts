@@ -18,7 +18,7 @@ import {
  * 인증 없이 활성화된 공지사항 조회 가능
  */
 @ApiAnnouncementController()
-@Controller('announcement')
+@Controller('v2/announcement')
 export class AnnouncementController {
     constructor(
         private readonly getActiveAnnouncementsUseCase: GetActiveAnnouncementsUseCase,

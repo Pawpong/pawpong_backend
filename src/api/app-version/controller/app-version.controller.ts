@@ -12,7 +12,7 @@ import { APP_VERSION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/app-version-
  * RN 앱 시작 시 강제/권장 업데이트 여부 확인 API
  */
 @ApiAppVersionController()
-@Controller('app-version')
+@Controller('v2/app-version')
 export class AppVersionController {
     constructor(private readonly checkAppVersionUseCase: CheckAppVersionUseCase) {}
 

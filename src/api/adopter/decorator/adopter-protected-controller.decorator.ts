@@ -8,7 +8,7 @@ import { ApiAdopterController } from '../swagger';
 export function AdopterProtectedController() {
     return applyDecorators(
         ApiAdopterController(),
-        Controller('adopter'),
+        Controller('v2/adopter'),
         UseGuards(JwtAuthGuard, RolesGuard),
         Roles('adopter'),
     );
