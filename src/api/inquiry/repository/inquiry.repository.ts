@@ -173,7 +173,9 @@ export class InquiryRepository {
             .findByIdAndUpdate(inquiryId, { $inc: { viewCount: 1 } })
             .exec()
             .catch((err: unknown) => {
-                this.logger.warn(`[incrementViewCount] viewCount 증가 실패 (inquiryId: ${inquiryId}): ${err instanceof Error ? err.message : String(err)}`);
+                this.logger.warn(
+                    `[incrementViewCount] viewCount 증가 실패 (inquiryId: ${inquiryId}): ${err instanceof Error ? err.message : String(err)}`,
+                );
             });
     }
 

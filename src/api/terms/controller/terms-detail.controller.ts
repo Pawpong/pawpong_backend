@@ -12,7 +12,7 @@ import { ApiGetActiveTermByCodeEndpoint, ApiTermsController } from '../swagger';
  * "자세히 보기"에서 호출되는 약관 본문 조회 API
  */
 @ApiTermsController()
-@Controller('terms')
+@Controller('v2/terms')
 export class TermsDetailController {
     constructor(private readonly getActiveTermByCodeUseCase: GetActiveTermByCodeUseCase) {}
 

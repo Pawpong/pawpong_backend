@@ -27,13 +27,13 @@ export class DeleteVideoUseCase {
         this.feedVideoCommandPolicyService.ensureOwner(video, userId);
 
         await Promise.all(
-            this.feedVideoCommandPolicyService
-                .getRemovableFileKeys(video)
-                .map((fileKey) =>
-                    this.feedVideoFileStorage.deleteFile(fileKey).catch((err: unknown) => {
-                        this.logger.warn(`[execute] 파일 삭제 실패 (key: ${fileKey}): ${err instanceof Error ? err.message : String(err)}`);
-                    }),
-                ),
+            this.feedVideoCommandPolicyService.getRemovableFileKeys(video).map((fileKey) =>
+                this.feedVideoFileStorage.deleteFile(fileKey).catch((err: unknown) => {
+                    this.logger.warn(
+                        `[execute] 파일 삭제 실패 (key: ${fileKey}): ${err instanceof Error ? err.message : String(err)}`,
+                    );
+                }),
+            ),
         );
 
         await this.feedVideoCommand.deleteById(videoId);
