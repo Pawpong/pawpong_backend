@@ -60,7 +60,7 @@ GET /chat/rooms/unread-count
 
 ### 신규/보강 필요
 
-- 홈 통합 API `GET /home/summary`
+- 홈 통합 API `GET /home/summary` <!-- issue: #85 -->
 - 인기 검색어 API
 - 명예의 전당 지난주 투표율 TOP 3 API
 - 커뮤니티 미리보기 API
