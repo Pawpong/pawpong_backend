@@ -1,9 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { ProfileMapperService } from '../../domain/services/profile-mapper.service';
-import { AdopterPublicProfileResponseDto } from '../../dto/response/adopter-profile-response.dto';
 import { PROFILE_FOLLOW_PORT, type ProfileFollowPort } from '../ports/profile-follow.port';
 import { PROFILE_READER_PORT, type ProfileReaderPort } from '../ports/profile-reader.port';
+import type { AdopterPublicProfileResult } from '../types/profile-result.type';
 
 /**
  * GET /v2/profile/users/:userId — 다른 입양자의 공개 프로필 (유저홈).
@@ -18,7 +18,7 @@ export class GetAdopterProfileUseCase {
         private readonly mapper: ProfileMapperService,
     ) {}
 
-    async execute(targetUserId: string, viewerUserId?: string): Promise<AdopterPublicProfileResponseDto> {
+    async execute(targetUserId: string, viewerUserId?: string): Promise<AdopterPublicProfileResult> {
         const adopter = await this.reader.readAdopter(targetUserId);
         if (!adopter) throw new BadRequestException('입양자 정보를 찾을 수 없습니다.');
 

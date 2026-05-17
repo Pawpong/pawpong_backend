@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { EmailData } from '../../builder/notification.builder';
 import type { BreederApprovalEmailPreviewCommand } from '../types/notification-email-preview-command.type';
-import { NotificationEmailPreviewResponseDto } from '../../dto/response/notification-email-preview-response.dto';
+import type { NotificationEmailPreviewResult } from '../types/notification-email-preview-result.type';
 import { NotificationEmailPreviewTemplateService } from '../services/notification-email-preview-template.service';
 import { SendNotificationEmailUseCase } from './send-notification-email.use-case';
 
@@ -13,7 +13,7 @@ export class PreviewBreederApprovalEmailUseCase {
         private readonly sendNotificationEmailUseCase: SendNotificationEmailUseCase,
     ) {}
 
-    execute(request: BreederApprovalEmailPreviewCommand): NotificationEmailPreviewResponseDto {
+    execute(request: BreederApprovalEmailPreviewCommand): NotificationEmailPreviewResult {
         const template = this.notificationEmailPreviewTemplateService.getBreederApprovalTemplate(request.breederName);
         const emailData: EmailData = {
             to: request.email,

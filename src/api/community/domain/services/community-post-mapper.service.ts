@@ -2,9 +2,11 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { COMMUNITY_ASSET_URL_PORT, type CommunityAssetUrlPort } from '../../application/ports/community-asset-url.port';
 import type { CommunityPostCommentSnapshot, CommunityPostSnapshot } from '../../application/types/community-post.type';
-import type { CommunityPostCommentResponseDto } from '../../dto/response/community-post-comment.dto';
-import type { CommunityPostCardResponseDto } from '../../dto/response/community-post-card.dto';
-import type { CommunityPostDetailResponseDto } from '../../dto/response/community-post-detail.dto';
+import type {
+    CommunityPostCardResult,
+    CommunityPostCommentResult,
+    CommunityPostDetailResult,
+} from '../../application/types/community-post-result.type';
 
 /**
  * v2 커뮤니티 — snapshot → 응답 DTO 매퍼.
@@ -18,7 +20,7 @@ export class CommunityPostMapperService {
         private readonly assetUrl: CommunityAssetUrlPort,
     ) {}
 
-    toCard(snapshot: CommunityPostSnapshot): CommunityPostCardResponseDto {
+    toCard(snapshot: CommunityPostSnapshot): CommunityPostCardResult {
         const photoUrls = snapshot.photos
             .map((fileName) => this.assetUrl.toSignedUrl(fileName))
             .filter((url): url is string => !!url);
@@ -43,8 +45,8 @@ export class CommunityPostMapperService {
 
     toDetail(
         snapshot: CommunityPostSnapshot,
-        comments: CommunityPostCommentResponseDto[],
-    ): CommunityPostDetailResponseDto {
+        comments: CommunityPostCommentResult[],
+    ): CommunityPostDetailResult {
         const photoUrls = snapshot.photos
             .map((fileName) => this.assetUrl.toSignedUrl(fileName))
             .filter((url): url is string => !!url);
@@ -68,7 +70,7 @@ export class CommunityPostMapperService {
         };
     }
 
-    toComment(snapshot: CommunityPostCommentSnapshot): CommunityPostCommentResponseDto {
+    toComment(snapshot: CommunityPostCommentSnapshot): CommunityPostCommentResult {
         return {
             commentId: snapshot.commentId,
             postId: snapshot.postId,

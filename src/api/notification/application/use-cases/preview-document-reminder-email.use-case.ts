@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 
 import { EmailData } from '../../builder/notification.builder';
 import type { DocumentReminderEmailPreviewCommand } from '../types/notification-email-preview-command.type';
-import { NotificationEmailPreviewResponseDto } from '../../dto/response/notification-email-preview-response.dto';
+import type { NotificationEmailPreviewResult } from '../types/notification-email-preview-result.type';
 import { NotificationEmailPreviewTemplateService } from '../services/notification-email-preview-template.service';
 import { SendNotificationEmailUseCase } from './send-notification-email.use-case';
 
@@ -13,7 +13,7 @@ export class PreviewDocumentReminderEmailUseCase {
         private readonly sendNotificationEmailUseCase: SendNotificationEmailUseCase,
     ) {}
 
-    execute(request: DocumentReminderEmailPreviewCommand): NotificationEmailPreviewResponseDto {
+    execute(request: DocumentReminderEmailPreviewCommand): NotificationEmailPreviewResult {
         const template = this.notificationEmailPreviewTemplateService.getDocumentReminderTemplate(request.breederName);
         const emailData: EmailData = {
             to: request.email,
