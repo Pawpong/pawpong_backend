@@ -4,9 +4,9 @@ import { OptionalJwtAuthGuard } from '../../../common/guard/optional-jwt-auth.gu
 import { ApiHomeController } from '../swagger';
 
 export function HomePublicController() {
-    return applyDecorators(ApiHomeController(), Controller('home'));
+    return applyDecorators(ApiHomeController(), Controller('v2/home'));
 }
 
 export function HomeOptionalAuthController() {
-    return applyDecorators(ApiHomeController(), Controller('home'), UseGuards(OptionalJwtAuthGuard));
+    return applyDecorators(ApiHomeController(), Controller('v2/home'), UseGuards(OptionalJwtAuthGuard));
 }

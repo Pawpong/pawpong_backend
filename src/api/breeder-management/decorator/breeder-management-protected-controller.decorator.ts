@@ -8,7 +8,7 @@ import { ApiBreederManagementController } from '../swagger';
 export function BreederManagementProtectedController() {
     return applyDecorators(
         ApiBreederManagementController(),
-        Controller('breeder-management'),
+        Controller('v2/breeder-management'),
         UseGuards(JwtAuthGuard, RolesGuard),
         Roles('breeder'),
     );

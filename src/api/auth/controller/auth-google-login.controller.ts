@@ -11,12 +11,12 @@ import {
     GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY,
     PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW,
 } from '../application/tokens/auth-social-flow.token';
-import { AuthPublicController } from '../decorator/auth-public-controller.decorator';
+import { AuthSocialOAuthController } from '../decorator/auth-public-controller.decorator';
 import { AuthRedirectResponseInterceptor } from '../presentation/interceptors/auth-redirect-response.interceptor';
 import { AuthSocialCallbackResponseInterceptor } from '../presentation/interceptors/auth-social-callback-response.interceptor';
 import { ApiGoogleCallbackEndpoint, ApiGoogleLoginEndpoint } from '../swagger';
 
-@AuthPublicController()
+@AuthSocialOAuthController()
 export class AuthGoogleLoginController {
     constructor(
         @Inject(GET_SOCIAL_LOGIN_REDIRECT_URL_QUERY)
