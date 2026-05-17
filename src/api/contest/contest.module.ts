@@ -1,6 +1,10 @@
 import { Module } from '@nestjs/common';
 
-import { CONTEST_MODULE_CONTROLLERS, CONTEST_MODULE_IMPORTS, CONTEST_MODULE_PROVIDERS } from './contest.module-definition';
+import {
+    CONTEST_MODULE_CONTROLLERS,
+    CONTEST_MODULE_IMPORTS,
+    CONTEST_MODULE_PROVIDERS,
+} from './contest.module-definition';
 
 /**
  * 명예의 전당 / 콘테스트 모듈 (v2)

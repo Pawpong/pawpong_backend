@@ -12,7 +12,7 @@ export function InquiryPublicController() {
 export function InquiryProtectedController(role: 'adopter' | 'breeder') {
     return applyDecorators(
         ApiInquiryController(),
-        Controller('inquiry'),
+        Controller('v2/inquiry'),
         UseGuards(JwtAuthGuard, RolesGuard),
         Roles(role),
     );
