@@ -22,6 +22,7 @@ export interface ContestEntrySnapshot {
     description: string;
     voteCount: number;
     rank: number | null;
+    status: 'active' | 'hidden' | 'deleted';
     createdAt: Date;
 }
 
@@ -51,4 +52,7 @@ export interface ContestReaderPort {
 
     /** 유저가 콘테스트에서 투표한 entryId 반환 (없으면 null) */
     findVotedEntryId(contestId: string, voterId: string): Promise<string | null>;
+
+    /** 투표 후보 랜덤 1개 반환 (본인 항목·hidden·deleted 제외, active 항목만) */
+    findRandomEntry(contestId: string, excludeUserId: string): Promise<ContestEntrySnapshot | null>;
 }

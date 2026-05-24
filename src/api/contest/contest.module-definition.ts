@@ -18,10 +18,12 @@ import { VoteContestEntryUseCase } from './application/use-cases/vote-contest-en
 import { GetMyContestEntryUseCase } from './application/use-cases/get-my-contest-entry.use-case';
 import { GetPreviousRankingUseCase } from './application/use-cases/get-previous-ranking.use-case';
 import { GetHallOfFameUseCase } from './application/use-cases/get-hall-of-fame.use-case';
+import { GetRandomContestEntryUseCase } from './application/use-cases/get-random-contest-entry.use-case';
 import { ContestCurrentController } from './controller/contest-current.controller';
 import { ContestEntriesController } from './controller/contest-entries.controller';
 import { ContestEntrySubmitController } from './controller/contest-entry-submit.controller';
 import { ContestHallOfFameController } from './controller/contest-hall-of-fame.controller';
+import { ContestRandomEntryController } from './controller/contest-random-entry.controller';
 import { ContestMeController } from './controller/contest-me.controller';
 import { ContestPreviousRankingController } from './controller/contest-previous-ranking.controller';
 import { ContestVoteController } from './controller/contest-vote.controller';
@@ -49,11 +51,13 @@ export const CONTEST_MODULE_CONTROLLERS = [
     ContestMeController,
     ContestPreviousRankingController,
     ContestHallOfFameController,
+    ContestRandomEntryController,
 ];
 
 const USE_CASE_PROVIDERS = [
     GetCurrentContestUseCase,
     GetContestEntriesUseCase,
+    GetRandomContestEntryUseCase,
     SubmitContestEntryUseCase,
     VoteContestEntryUseCase,
     GetMyContestEntryUseCase,

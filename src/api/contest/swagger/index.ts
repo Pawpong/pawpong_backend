@@ -14,6 +14,7 @@ import {
     ContestHallOfFameResponseDto,
     ContestPreviousRankingResponseDto,
 } from '../dto/response/contest-hall-of-fame-response.dto';
+import { ContestRandomEntryResponseDto } from '../dto/response/contest-random-entry-response.dto';
 
 const TAG = '콘테스트';
 
@@ -87,5 +88,16 @@ export function ApiGetHallOfFameEndpoint() {
         description: '역대 콘테스트 우승자 목록을 최신순으로 반환합니다.',
         responseType: ContestHallOfFameResponseDto,
         isPublic: true,
+    });
+}
+
+export function ApiGetRandomContestEntryEndpoint() {
+    return ApiEndpoint({
+        summary: '랜덤 투표 후보 조회',
+        description: `투표하러가기 클릭 시 호출. 이번 주 active 항목 중 본인 항목을 제외한 랜덤 1개를 반환합니다.
+- 이미 투표한 경우: entry: null, alreadyVoted: true
+- 투표 가능한 항목 없음: entry: null, alreadyVoted: false
+- 투표 전이므로 voteCount는 항상 null`,
+        responseType: ContestRandomEntryResponseDto,
     });
 }
