@@ -63,6 +63,11 @@ export class ContestReaderMongooseAdapter implements ContestReaderPort {
         return vote ? vote.entryId.toString() : null;
     }
 
+    async findRandomEntry(contestId: string, excludeUserId: string): Promise<ContestEntrySnapshot | null> {
+        const doc = await this.repository.findRandomEntry(contestId, excludeUserId);
+        return doc ? this.toEntrySnapshot(doc) : null;
+    }
+
     private toContestSnapshot(doc: ContestDocument): ContestSnapshot {
         return {
             id: doc._id.toString(),
@@ -88,6 +93,7 @@ export class ContestReaderMongooseAdapter implements ContestReaderPort {
             description: doc.description,
             voteCount: doc.voteCount ?? 0,
             rank: doc.rank ?? null,
+            status: (doc.status as 'active' | 'hidden' | 'deleted') ?? 'active',
             createdAt: doc.createdAt,
         };
     }

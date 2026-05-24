@@ -45,7 +45,7 @@ export class ContestRepository {
 
     findTopEntries(contestId: string, limit: number): Promise<ContestEntryDocument[]> {
         return this.entryModel
-            .find({ contestId: new Types.ObjectId(contestId) })
+            .find({ contestId: new Types.ObjectId(contestId), status: 'active' })
             .sort({ voteCount: -1, createdAt: 1 })
             .limit(limit)
             .lean<ContestEntryDocument[]>()
@@ -54,7 +54,7 @@ export class ContestRepository {
 
     findEntries(contestId: string, skip: number, limit: number): Promise<ContestEntryDocument[]> {
         return this.entryModel
-            .find({ contestId: new Types.ObjectId(contestId) })
+            .find({ contestId: new Types.ObjectId(contestId), status: 'active' })
             .sort({ voteCount: -1, createdAt: 1 })
             .skip(skip)
             .limit(limit)
@@ -63,7 +63,7 @@ export class ContestRepository {
     }
 
     countEntries(contestId: string): Promise<number> {
-        return this.entryModel.countDocuments({ contestId: new Types.ObjectId(contestId) }).exec();
+        return this.entryModel.countDocuments({ contestId: new Types.ObjectId(contestId), status: 'active' }).exec();
     }
 
     findEntryByUserId(contestId: string, userId: string): Promise<ContestEntryDocument | null> {
@@ -95,6 +95,16 @@ export class ContestRepository {
             description: data.description,
         });
         return doc._id.toString();
+    }
+
+    async findRandomEntry(contestId: string, excludeUserId: string): Promise<ContestEntryDocument | null> {
+        const results = await this.entryModel
+            .aggregate<ContestEntryDocument>([
+                { $match: { contestId: new Types.ObjectId(contestId), userId: { $ne: excludeUserId }, status: 'active' } },
+                { $sample: { size: 1 } },
+            ])
+            .exec();
+        return results[0] ?? null;
     }
 
     findVote(contestId: string, voterId: string): Promise<ContestVoteDocument | null> {
