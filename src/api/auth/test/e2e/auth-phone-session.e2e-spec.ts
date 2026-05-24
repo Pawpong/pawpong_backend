@@ -24,7 +24,7 @@ describe('인증 전화번호와 세션 종단간 테스트', () => {
             const phone = createPhoneNumber();
 
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/phone/send-code')
+                .post('/api/v2/auth/phone/send-code')
                 .send({ phone })
                 .expect(200);
 
@@ -37,13 +37,13 @@ describe('인증 전화번호와 세션 종단간 테스트', () => {
         it('인증코드 확인에 성공한다', async () => {
             const phone = createPhoneNumber();
 
-            await request(context.app.getHttpServer()).post('/api/auth/phone/send-code').send({ phone }).expect(200);
+            await request(context.app.getHttpServer()).post('/api/v2/auth/phone/send-code').send({ phone }).expect(200);
 
             const code = context.capturedVerificationCodes.get(phone);
             expect(code).toBeDefined();
 
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/phone/verify-code')
+                .post('/api/v2/auth/phone/verify-code')
                 .send({ phone, code })
                 .expect(200);
 
@@ -55,10 +55,10 @@ describe('인증 전화번호와 세션 종단간 테스트', () => {
         it('잘못된 인증코드면 실패한다', async () => {
             const phone = createPhoneNumber();
 
-            await request(context.app.getHttpServer()).post('/api/auth/phone/send-code').send({ phone }).expect(200);
+            await request(context.app.getHttpServer()).post('/api/v2/auth/phone/send-code').send({ phone }).expect(200);
 
             await request(context.app.getHttpServer())
-                .post('/api/auth/phone/verify-code')
+                .post('/api/v2/auth/phone/verify-code')
                 .send({ phone, code: '000000' })
                 .expect(400);
         });
@@ -74,7 +74,7 @@ describe('인증 전화번호와 세션 종단간 테스트', () => {
 
         it('유효한 토큰이면 재발급에 성공한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/refresh')
+                .post('/api/v2/auth/refresh')
                 .send({ refreshToken })
                 .expect(200);
 
@@ -86,14 +86,14 @@ describe('인증 전화번호와 세션 종단간 테스트', () => {
 
         it('유효하지 않은 토큰이면 실패한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/refresh')
+                .post('/api/v2/auth/refresh')
                 .send({ refreshToken: 'invalid-token' });
 
             expect([400, 401]).toContain(response.status);
         });
 
         it('토큰이 없으면 실패한다', async () => {
-            await request(context.app.getHttpServer()).post('/api/auth/refresh').send({}).expect(400);
+            await request(context.app.getHttpServer()).post('/api/v2/auth/refresh').send({}).expect(400);
         });
     });
 
@@ -107,7 +107,7 @@ describe('인증 전화번호와 세션 종단간 테스트', () => {
 
         it('유효한 토큰이면 로그아웃에 성공한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/logout')
+                .post('/api/v2/auth/logout')
                 .set('Authorization', `Bearer ${accessToken}`)
                 .expect(200);
 
@@ -118,12 +118,12 @@ describe('인증 전화번호와 세션 종단간 테스트', () => {
         });
 
         it('토큰이 없으면 실패한다', async () => {
-            await request(context.app.getHttpServer()).post('/api/auth/logout').expect(401);
+            await request(context.app.getHttpServer()).post('/api/v2/auth/logout').expect(401);
         });
 
         it('유효하지 않은 토큰이면 실패한다', async () => {
             await request(context.app.getHttpServer())
-                .post('/api/auth/logout')
+                .post('/api/v2/auth/logout')
                 .set('Authorization', 'Bearer invalid-token')
                 .expect(401);
         });
