@@ -25,7 +25,7 @@ describe('홈 종단간 테스트', () => {
      */
     describe('분양중인 아이들 조회', () => {
         it('조회 성공 (기본 한도)', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/available-pets').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/available-pets').expect(200);
 
             expect(response.body).toHaveProperty('success', true);
             expect(response.body).toHaveProperty('code');
@@ -37,7 +37,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('커스텀 한도 적용', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/available-pets?limit=5').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/available-pets?limit=5').expect(200);
 
             expect(response.body.success).toBe(true);
             expect(Array.isArray(response.body.data)).toBe(true);
@@ -46,7 +46,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('한도 범위 초과 시 처리 확인', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/available-pets?limit=100');
+            const response = await request(app.getHttpServer()).get('/api/v2/home/available-pets?limit=100');
 
             // API가 limit 범위를 강제하지 않을 수 있으므로 200 또는 400 허용
             expect([200, 400]).toContain(response.status);
@@ -54,7 +54,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('한도 음수 시 처리 확인', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/available-pets?limit=-1');
+            const response = await request(app.getHttpServer()).get('/api/v2/home/available-pets?limit=-1');
 
             // API가 음수 limit을 강제하지 않을 수 있으므로 200 또는 400 허용
             expect([200, 400]).toContain(response.status);
@@ -62,7 +62,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('한도 문자열 처리 확인', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/available-pets?limit=invalid');
+            const response = await request(app.getHttpServer()).get('/api/v2/home/available-pets?limit=invalid');
 
             // ValidationPipe가 잘못된 타입을 무시하고 기본값으로 처리할 수 있음
             expect([200, 400]).toContain(response.status);
@@ -80,7 +80,7 @@ describe('홈 종단간 테스트', () => {
      */
     describe('메인 배너 조회', () => {
         it('배너 목록 조회 성공', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/banners').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/banners').expect(200);
 
             expect(response.body).toHaveProperty('success', true);
             expect(response.body).toHaveProperty('code');
@@ -92,7 +92,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('배너 응답 데이터 구조 검증', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/banners').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/banners').expect(200);
 
             if (response.body.data.length > 0) {
                 const banner = response.body.data[0];
@@ -112,7 +112,7 @@ describe('홈 종단간 테스트', () => {
      */
     describe('자주 묻는 질문 조회', () => {
         it('자주 묻는 질문 조회 성공 (기본 파라미터)', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/faqs').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/faqs').expect(200);
 
             expect(response.body).toHaveProperty('success', true);
             expect(response.body).toHaveProperty('code');
@@ -124,7 +124,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('입양자용 자주 묻는 질문 조회', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/faqs?userType=adopter').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/faqs?userType=adopter').expect(200);
 
             expect(response.body.success).toBe(true);
             expect(Array.isArray(response.body.data)).toBe(true);
@@ -132,7 +132,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('브리더용 자주 묻는 질문 조회', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/faqs?userType=breeder').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/faqs?userType=breeder').expect(200);
 
             expect(response.body.success).toBe(true);
             expect(Array.isArray(response.body.data)).toBe(true);
@@ -140,7 +140,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('공통 자주 묻는 질문 조회', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/faqs?userType=both').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/faqs?userType=both').expect(200);
 
             expect(response.body.success).toBe(true);
             expect(Array.isArray(response.body.data)).toBe(true);
@@ -148,7 +148,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('커스텀 한도 적용', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/faqs?limit=3').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/faqs?limit=3').expect(200);
 
             expect(response.body.success).toBe(true);
             expect(Array.isArray(response.body.data)).toBe(true);
@@ -157,7 +157,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('잘못된 사용자 유형 처리 확인', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/faqs?userType=invalid');
+            const response = await request(app.getHttpServer()).get('/api/v2/home/faqs?userType=invalid');
 
             // API가 userType을 엄격히 검증하지 않으므로 200 또는 400 허용
             expect([200, 400]).toContain(response.status);
@@ -165,7 +165,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('한도 범위 초과 시 처리 확인', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/faqs?limit=100');
+            const response = await request(app.getHttpServer()).get('/api/v2/home/faqs?limit=100');
 
             // API가 limit 범위를 강제하지 않을 수 있으므로 200 또는 400 허용
             expect([200, 400]).toContain(response.status);
@@ -173,7 +173,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('한도 음수 시 처리 확인', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/faqs?limit=-1');
+            const response = await request(app.getHttpServer()).get('/api/v2/home/faqs?limit=-1');
 
             // API가 음수 limit을 강제하지 않을 수 있으므로 200 또는 400 허용
             expect([200, 400]).toContain(response.status);
@@ -181,7 +181,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('자주 묻는 질문 응답 데이터 구조 검증', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/faqs').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/faqs').expect(200);
 
             if (response.body.data.length > 0) {
                 const faq = response.body.data[0];
@@ -201,7 +201,7 @@ describe('홈 종단간 테스트', () => {
      */
     describe('응답 형식 검증', () => {
         it('표준 경로 응답 형식 확인', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/available-pets').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/available-pets').expect(200);
 
             expect(response.body).toHaveProperty('success');
             expect(response.body).toHaveProperty('code');
@@ -213,7 +213,7 @@ describe('홈 종단간 테스트', () => {
         });
 
         it('타임스탬프 형식 확인', async () => {
-            const response = await request(app.getHttpServer()).get('/api/home/banners').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/home/banners').expect(200);
 
             const timestamp = response.body.timestamp;
             expect(timestamp).toBeDefined();
