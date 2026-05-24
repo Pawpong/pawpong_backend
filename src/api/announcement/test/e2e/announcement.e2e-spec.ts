@@ -51,9 +51,9 @@ describe('공지사항 종단간 테스트', () => {
         await app.close();
     });
 
-    describe('GET /api/announcement/list', () => {
+    describe('GET /api/v2/announcement/list', () => {
         it('공지사항 목록 조회 성공', async () => {
-            const response = await request(app.getHttpServer()).get('/api/announcement/list').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/announcement/list').expect(200);
 
             expect(response.body.items).toHaveLength(1);
             expect(response.body.items[0]).toMatchObject({
@@ -73,10 +73,10 @@ describe('공지사항 종단간 테스트', () => {
         });
     });
 
-    describe('GET /api/announcement/:announcementId', () => {
+    describe('GET /api/v2/announcement/:announcementId', () => {
         it('활성 공지사항 상세 조회 성공', async () => {
             const response = await request(app.getHttpServer())
-                .get(`/api/announcement/${activeAnnouncementId}`)
+                .get(`/api/v2/announcement/${activeAnnouncementId}`)
                 .expect(200);
 
             expect(response.body).toMatchObject({
@@ -90,14 +90,14 @@ describe('공지사항 종단간 테스트', () => {
         });
 
         it('잘못된 공지사항 ID 형식이면 400을 반환한다', async () => {
-            const response = await request(app.getHttpServer()).get('/api/announcement/not-a-mongo-id').expect(400);
+            const response = await request(app.getHttpServer()).get('/api/v2/announcement/not-a-mongo-id').expect(400);
 
             expect(response.body.message || response.body.error).toContain('올바르지 않은 공지사항 ID');
             console.log('잘못된 공지사항 ID 형식 400 확인');
         });
 
         it('존재하지 않는 공지 조회 시 에러', async () => {
-            const response = await request(app.getHttpServer()).get('/api/announcement/000000000000000000000000');
+            const response = await request(app.getHttpServer()).get('/api/v2/announcement/000000000000000000000000');
 
             expect(response.status).toBe(404);
             console.log('존재하지 않는 공지 조회 시 에러 확인');

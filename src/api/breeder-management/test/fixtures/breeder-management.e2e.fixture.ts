@@ -51,7 +51,7 @@ export async function createBreederManagementE2eContext(): Promise<BreederManage
 
     const timestamp = Date.now();
     const breederResponse = await request(app.getHttpServer())
-        .post('/api/auth/register/breeder')
+        .post('/api/v2/auth/register/breeder')
         .send({
             email: `breeder_mgmt_${timestamp}@test.com`,
             phoneNumber: '010-9999-8888',
@@ -76,7 +76,7 @@ export async function createBreederManagementE2eContext(): Promise<BreederManage
     const adopterName = `테스트입양자${timestamp}`;
     const adopterEmail = `adopter_test_${timestamp}@test.com`;
     const adopterResponse = await request(app.getHttpServer())
-        .post('/api/auth/register/adopter')
+        .post('/api/v2/auth/register/adopter')
         .send({
             tempId: `temp_kakao_${adopterProviderId}_${timestamp}`,
             email: adopterEmail,

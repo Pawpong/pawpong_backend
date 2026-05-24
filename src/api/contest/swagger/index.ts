@@ -14,6 +14,8 @@ import {
     ContestHallOfFameResponseDto,
     ContestPreviousRankingResponseDto,
 } from '../dto/response/contest-hall-of-fame-response.dto';
+import { ContestRandomEntryResponseDto } from '../dto/response/contest-random-entry-response.dto';
+import { ContestYesterdayTopResponseDto } from '../dto/response/contest-yesterday-top-response.dto';
 
 const TAG = '콘테스트';
 
@@ -49,7 +51,15 @@ export function ApiSubmitContestEntryEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '콘테스트 참여',
-            description: '사진+설명으로 현재 콘테스트에 참여합니다. 유저당 1회 제한.',
+            description: `사진+설명으로 현재 콘테스트에 참여합니다. 유저당 1회 제한.
+
+**호출 순서**
+1. \`POST /v2/upload/single\` — 이미지 업로드 후 \`fileName\` 획득
+2. \`POST /v2/contest/entry\` — \`photoFileName\`(1번 결과) + \`description\` 전송
+
+**프론트엔드 전용 기능 (백엔드 API 없음)**
+- 임시저장: 작성 중인 이미지·설명을 클라이언트 로컬 스토리지에 저장. 서버 API 없음.
+- 위치(핀) 버튼: UI 장식 요소. 위치 데이터를 서버에 저장하지 않음.`,
             responseType: ContestSubmitResponseDto,
         }),
         ApiBody({ type: SubmitContestEntryRequestDto }),
@@ -87,5 +97,25 @@ export function ApiGetHallOfFameEndpoint() {
         description: '역대 콘테스트 우승자 목록을 최신순으로 반환합니다.',
         responseType: ContestHallOfFameResponseDto,
         isPublic: true,
+    });
+}
+
+export function ApiGetYesterdayTopEndpoint() {
+    return ApiEndpoint({
+        summary: '어제 기준 TOP 3 조회',
+        description: '현재 진행 중인 콘테스트에서 득표율(voteRate) 기준 TOP 3를 반환합니다. 진행 중인 콘테스트가 없으면 data: null.',
+        responseType: ContestYesterdayTopResponseDto,
+        supportsOptionalAuth: true,
+    });
+}
+
+export function ApiGetRandomContestEntryEndpoint() {
+    return ApiEndpoint({
+        summary: '랜덤 투표 후보 조회',
+        description: `투표하러가기 클릭 시 호출. 이번 주 active 항목 중 본인 항목을 제외한 랜덤 1개를 반환합니다.
+- 이미 투표한 경우: entry: null, alreadyVoted: true
+- 투표 가능한 항목 없음: entry: null, alreadyVoted: false
+- 투표 전이므로 voteCount는 항상 null`,
+        responseType: ContestRandomEntryResponseDto,
     });
 }

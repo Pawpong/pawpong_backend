@@ -105,7 +105,7 @@ describe('업로드 종단간 테스트', () => {
         // 1. 테스트용 브리더 생성
         const timestamp = Date.now();
         const breederResponse = await request(app.getHttpServer())
-            .post('/api/auth/register/breeder')
+            .post('/api/v2/auth/register/breeder')
             .send({
                 email: `upload_breeder_${timestamp}@test.com`,
                 phoneNumber: '010-3333-4444',
@@ -132,7 +132,7 @@ describe('업로드 종단간 테스트', () => {
         // 2. 테스트용 분양 개체 생성
         if (breederToken) {
             const availablePetResponse = await request(app.getHttpServer())
-                .post('/api/breeder-management/available-pets')
+                .post('/api/v2/breeder-management/available-pets')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .send({
                     name: '테스트 분양 개체',
@@ -149,7 +149,7 @@ describe('업로드 종단간 테스트', () => {
 
             // 3. 테스트용 부모견/묘 생성
             const parentPetResponse = await request(app.getHttpServer())
-                .post('/api/breeder-management/parent-pets')
+                .post('/api/v2/breeder-management/parent-pets')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .send({
                     name: '테스트 부모견',
@@ -169,7 +169,7 @@ describe('업로드 종단간 테스트', () => {
         // 업로드된 파일 삭제
         for (const fileName of uploadedFileNames) {
             try {
-                await request(app.getHttpServer()).delete('/api/upload').send({ fileName });
+                await request(app.getHttpServer()).delete('/api/v2/upload').send({ fileName });
             } catch (error) {
                 // 파일 삭제 실패해도 테스트는 계속 진행
             }
@@ -185,7 +185,7 @@ describe('업로드 종단간 테스트', () => {
     describe('브리더 대표 사진 업로드', () => {
         it('대표 사진 업로드 성공', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/upload/representative-photos')
+                .post('/api/v2/upload/representative-photos')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .attach('files', testImageBuffer, 'representative-1.jpg')
                 .attach('files', testImageBuffer, 'representative-2.jpg')
@@ -204,7 +204,7 @@ describe('업로드 종단간 테스트', () => {
 
         it('인증 없이 접근 실패', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/upload/representative-photos')
+                .post('/api/v2/upload/representative-photos')
                 .attach('files', testImageBuffer, 'representative.jpg');
 
             expect(response.status).toBe(401);
@@ -213,7 +213,7 @@ describe('업로드 종단간 테스트', () => {
 
         it('파일 없이 요청 실패', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/upload/representative-photos')
+                .post('/api/v2/upload/representative-photos')
                 .set('Authorization', `Bearer ${breederToken}`);
 
             expect([400, 401]).toContain(response.status);
@@ -229,7 +229,7 @@ describe('업로드 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .post(`/api/upload/available-pet-photos/${availablePetId}`)
+                .post(`/api/v2/upload/available-pet-photos/${availablePetId}`)
                 .set('Authorization', `Bearer ${breederToken}`)
                 .attach('files', testImageBuffer, 'available-pet.jpg');
 
@@ -248,7 +248,7 @@ describe('업로드 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .post(`/api/upload/available-pet-photos/${availablePetId}`)
+                .post(`/api/v2/upload/available-pet-photos/${availablePetId}`)
                 .attach('files', testImageBuffer, 'available-pet.jpg');
 
             expect(response.status).toBe(401);
@@ -257,7 +257,7 @@ describe('업로드 종단간 테스트', () => {
 
         it('잘못된 개체 ID로 요청 실패', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/upload/available-pet-photos/invalid_pet_id')
+                .post('/api/v2/upload/available-pet-photos/invalid_pet_id')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .attach('files', testImageBuffer, 'available-pet.jpg');
 
@@ -274,7 +274,7 @@ describe('업로드 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .post(`/api/upload/parent-pet-photos/${parentPetId}`)
+                .post(`/api/v2/upload/parent-pet-photos/${parentPetId}`)
                 .set('Authorization', `Bearer ${breederToken}`)
                 .attach('files', testImageBuffer, 'parent-pet.jpg');
 
@@ -293,7 +293,7 @@ describe('업로드 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .post(`/api/upload/parent-pet-photos/${parentPetId}`)
+                .post(`/api/v2/upload/parent-pet-photos/${parentPetId}`)
                 .attach('files', testImageBuffer, 'parent-pet.jpg');
 
             expect(response.status).toBe(401);
@@ -302,7 +302,7 @@ describe('업로드 종단간 테스트', () => {
 
         it('잘못된 부모견/묘 ID로 요청 실패', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/upload/parent-pet-photos/not-a-mongo-id')
+                .post('/api/v2/upload/parent-pet-photos/not-a-mongo-id')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .attach('files', testImageBuffer, 'parent-pet.jpg');
 
@@ -314,7 +314,7 @@ describe('업로드 종단간 테스트', () => {
     describe('단일 파일 업로드 (공개 경로)', () => {
         it('단일 파일 업로드 성공', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/upload/single')
+                .post('/api/v2/upload/single')
                 .attach('file', testImageBuffer, 'single-upload.jpg')
                 .field('folder', 'test');
 
@@ -332,7 +332,7 @@ describe('업로드 종단간 테스트', () => {
         });
 
         it('파일 없이 요청 실패', async () => {
-            const response = await request(app.getHttpServer()).post('/api/upload/single');
+            const response = await request(app.getHttpServer()).post('/api/v2/upload/single');
 
             expect(response.status).toBe(400);
             expect(response.body.message).toContain('파일이 없습니다');
@@ -343,7 +343,7 @@ describe('업로드 종단간 테스트', () => {
     describe('다중 파일 업로드 (공개 경로)', () => {
         it('다중 파일 업로드 성공', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/upload/multiple')
+                .post('/api/v2/upload/multiple')
                 .attach('files', testImageBuffer, 'multiple-1.jpg')
                 .attach('files', testImageBuffer, 'multiple-2.jpg')
                 .field('folder', 'test');
@@ -363,7 +363,7 @@ describe('업로드 종단간 테스트', () => {
         });
 
         it('파일 없이 요청 실패', async () => {
-            const response = await request(app.getHttpServer()).post('/api/upload/multiple');
+            const response = await request(app.getHttpServer()).post('/api/v2/upload/multiple');
 
             expect(response.status).toBe(400);
             expect(response.body.message).toContain('파일이 없습니다');
@@ -374,7 +374,7 @@ describe('업로드 종단간 테스트', () => {
     describe('파일 삭제', () => {
         it('파일 삭제 성공', async () => {
             const response = await request(app.getHttpServer())
-                .delete('/api/upload')
+                .delete('/api/v2/upload')
                 .send({ fileName: 'test/fake-file.jpg' });
 
             expect([200, 400, 404, 500]).toContain(response.status);
@@ -387,7 +387,7 @@ describe('업로드 종단간 테스트', () => {
         });
 
         it('파일명 없이 요청 실패', async () => {
-            const response = await request(app.getHttpServer()).delete('/api/upload').send({});
+            const response = await request(app.getHttpServer()).delete('/api/v2/upload').send({});
 
             expect(response.status).toBe(400);
             expect(response.body.message).toContain('파일명이 없습니다');
@@ -398,7 +398,7 @@ describe('업로드 종단간 테스트', () => {
     describe('응답 형식 검증', () => {
         it('모든 업로드 응답은 표준 형식을 따름', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/upload/single')
+                .post('/api/v2/upload/single')
                 .attach('file', testImageBuffer, 'response-shape.jpg');
 
             expect(response.body).toHaveProperty('success');

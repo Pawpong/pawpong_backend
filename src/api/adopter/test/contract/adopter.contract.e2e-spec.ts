@@ -20,7 +20,7 @@ describe('입양자 응답 계약 종단간 테스트', () => {
         breederName = `계약브리더${timestamp}`;
 
         const adopterResponse = await request(app.getHttpServer())
-            .post('/api/auth/register/adopter')
+            .post('/api/v2/auth/register/adopter')
             .send({
                 tempId: `temp_kakao_${adopterProviderId}_${timestamp}`,
                 email: `adopter_contract_${timestamp}@test.com`,
@@ -34,7 +34,7 @@ describe('입양자 응답 계약 종단간 테스트', () => {
         adopterId = adopterResponse.body.data.adopterId;
 
         const breederResponse = await request(app.getHttpServer())
-            .post('/api/auth/register/breeder')
+            .post('/api/v2/auth/register/breeder')
             .send({
                 email: `breeder_contract_${timestamp}@test.com`,
                 phoneNumber: '010-8765-4321',
@@ -65,7 +65,7 @@ describe('입양자 응답 계약 종단간 테스트', () => {
 
     it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
-            .get('/api/adopter/profile')
+            .get('/api/v2/adopter/profile')
             .set('Authorization', `Bearer ${adopterToken}`)
             .expect(200);
 
@@ -97,7 +97,7 @@ describe('입양자 응답 계약 종단간 테스트', () => {
 
     it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
-            .post('/api/adopter/application')
+            .post('/api/v2/adopter/application')
             .set('Authorization', `Bearer ${adopterToken}`)
             .send({
                 name: '계약테스트신청자',
@@ -141,7 +141,7 @@ describe('입양자 응답 계약 종단간 테스트', () => {
 
     it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
-            .get('/api/adopter/applications')
+            .get('/api/v2/adopter/applications')
             .set('Authorization', `Bearer ${adopterToken}`)
             .query({ page: 1, limit: 10 })
             .expect(200);

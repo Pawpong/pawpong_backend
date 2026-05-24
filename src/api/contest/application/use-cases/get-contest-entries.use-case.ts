@@ -65,7 +65,7 @@ export class GetContestEntriesUseCase {
                     userProfileImageUrl: profileImageUrl,
                     photoUrl,
                     description: entry.description,
-                    voteCount: entry.voteCount,
+                    voteCount: votedEntryId === entry.id ? entry.voteCount : null,
                     rank: entry.rank,
                     hasVoted: votedEntryId === entry.id,
                     isMyEntry: userId === entry.userId,

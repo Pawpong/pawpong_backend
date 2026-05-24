@@ -24,7 +24,7 @@ describe('알림 종단간 테스트', () => {
         await app.close();
     });
 
-    describe('GET /api/notification', () => {
+    describe('GET /api/v2/notification', () => {
         it('알림 목록 조회 성공', async () => {
             if (!adopterToken) {
                 console.log('주의: 토큰이 없어서 테스트 스킵');
@@ -32,7 +32,7 @@ describe('알림 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .get('/api/notification')
+                .get('/api/v2/notification')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -42,13 +42,13 @@ describe('알림 종단간 테스트', () => {
         });
 
         it('인증 없이 접근 시 401', async () => {
-            await request(app.getHttpServer()).get('/api/notification').expect(401);
+            await request(app.getHttpServer()).get('/api/v2/notification').expect(401);
 
             console.log('인증 없이 접근 401 확인');
         });
     });
 
-    describe('GET /api/notification/unread-count', () => {
+    describe('GET /api/v2/notification/unread-count', () => {
         it('읽지 않은 알림 수 조회 성공', async () => {
             if (!adopterToken) {
                 console.log('주의: 토큰이 없어서 테스트 스킵');
@@ -56,7 +56,7 @@ describe('알림 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .get('/api/notification/unread-count')
+                .get('/api/v2/notification/unread-count')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -66,7 +66,7 @@ describe('알림 종단간 테스트', () => {
         });
     });
 
-    describe('PATCH /api/notification/read-all', () => {
+    describe('PATCH /api/v2/notification/read-all', () => {
         it('전체 읽음 처리 성공', async () => {
             if (!adopterToken) {
                 console.log('주의: 토큰이 없어서 테스트 스킵');
@@ -74,7 +74,7 @@ describe('알림 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .patch('/api/notification/read-all')
+                .patch('/api/v2/notification/read-all')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -83,7 +83,7 @@ describe('알림 종단간 테스트', () => {
         });
     });
 
-    describe('DELETE /api/notification/:id', () => {
+    describe('DELETE /api/v2/notification/:id', () => {
         it('존재하지 않는 알림 삭제 시 에러', async () => {
             if (!adopterToken) {
                 console.log('주의: 토큰이 없어서 테스트 스킵');
@@ -91,7 +91,7 @@ describe('알림 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .delete('/api/notification/000000000000000000000000')
+                .delete('/api/v2/notification/000000000000000000000000')
                 .set('Authorization', `Bearer ${adopterToken}`);
 
             expect([400, 404]).toContain(response.status);

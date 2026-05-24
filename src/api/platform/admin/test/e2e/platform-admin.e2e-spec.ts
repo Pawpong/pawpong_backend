@@ -51,7 +51,7 @@ describe('플랫폼 관리자 종단간 테스트', () => {
                 const timestamp = Date.now() + i;
                 const providerId = Math.random().toString().substr(2, 10);
                 await request(app.getHttpServer())
-                    .post('/api/auth/register/adopter')
+                    .post('/api/v2/auth/register/adopter')
                     .send({
                         tempId: `temp_kakao_${providerId}_${timestamp}`,
                         email: `adopter_stats_${timestamp}_${providerId}@test.com`,
@@ -66,7 +66,7 @@ describe('플랫폼 관리자 종단간 테스트', () => {
             for (let i = 0; i < 3; i++) {
                 const timestamp = Date.now() + i;
                 await request(app.getHttpServer())
-                    .post('/api/auth/register/breeder')
+                    .post('/api/v2/auth/register/breeder')
                     .send({
                         email: `breeder_stats_${timestamp}@test.com`,
                         phoneNumber: `010-2222-${String(i).padStart(4, '0')}`,
@@ -220,7 +220,7 @@ describe('플랫폼 관리자 종단간 테스트', () => {
             const timestamp = Date.now();
             const providerId = Math.random().toString().substr(2, 10);
             const adopterResponse = await request(app.getHttpServer())
-                .post('/api/auth/register/adopter')
+                .post('/api/v2/auth/register/adopter')
                 .send({
                     tempId: `temp_kakao_${providerId}_${timestamp}`,
                     email: `forbidden_stats_${timestamp}_${providerId}@test.com`,
@@ -245,7 +245,7 @@ describe('플랫폼 관리자 종단간 테스트', () => {
             // 브리더 생성
             const timestamp = Date.now();
             const breederResponse = await request(app.getHttpServer())
-                .post('/api/auth/register/breeder')
+                .post('/api/v2/auth/register/breeder')
                 .send({
                     email: `forbidden_breeder_${timestamp}@test.com`,
                     phoneNumber: '010-8888-8888',
