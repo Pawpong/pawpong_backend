@@ -113,6 +113,12 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
             return;
         }
 
+        // 로컬/테스트 환경에서는 알림을 보내지 않는다.
+        // (개발자 로컬에서 prod webhook 을 사용하더라도 critical 채널 노이즈를 만들지 않게 차단)
+        if (process.env.NODE_ENV !== 'production') {
+            return;
+        }
+
         const errorMessage = error instanceof Error ? error.message : String(error);
         const stack = error instanceof Error ? error.stack : undefined;
 
