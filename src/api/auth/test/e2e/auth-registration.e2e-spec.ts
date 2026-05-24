@@ -55,12 +55,12 @@ describe('인증 회원가입 종단간 테스트', () => {
             const data = createAdopterRegisterData();
             delete (data as Record<string, unknown>).tempId;
 
-            await request(context.app.getHttpServer()).post('/api/auth/register/adopter').send(data).expect(400);
+            await request(context.app.getHttpServer()).post('/api/v2/auth/register/adopter').send(data).expect(400);
         });
 
         it('이메일 형식이 잘못되면 실패한다', async () => {
             await request(context.app.getHttpServer())
-                .post('/api/auth/register/adopter')
+                .post('/api/v2/auth/register/adopter')
                 .send(
                     createAdopterRegisterData({
                         email: 'invalid-email-format',
@@ -109,14 +109,14 @@ describe('인증 회원가입 종단간 테스트', () => {
             const data = createBreederRegisterData();
             delete (data as Record<string, unknown>).agreements;
 
-            await request(context.app.getHttpServer()).post('/api/auth/register/breeder').send(data).expect(400);
+            await request(context.app.getHttpServer()).post('/api/v2/auth/register/breeder').send(data).expect(400);
         });
 
         it('필수 필드가 없으면 실패한다', async () => {
             const data = createBreederRegisterData();
             delete (data as Record<string, unknown>).breederName;
 
-            await request(context.app.getHttpServer()).post('/api/auth/register/breeder').send(data).expect(400);
+            await request(context.app.getHttpServer()).post('/api/v2/auth/register/breeder').send(data).expect(400);
         });
     });
 });
