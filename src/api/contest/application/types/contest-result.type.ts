@@ -5,7 +5,8 @@ export interface ContestEntryItem {
     userProfileImageUrl: string | null;
     photoUrl: string;
     description: string;
-    voteCount: number;
+    /** 투표 전에는 null(비공개), 투표 완료 후에는 실제 득표 수 반환 */
+    voteCount: number | null;
     rank: number | null;
     hasVoted: boolean;
     isMyEntry: boolean;
@@ -64,4 +65,11 @@ export interface SubmitContestEntryResult {
 export interface VoteContestEntryResult {
     entryId: string;
     newVoteCount: number;
+}
+
+export interface GetRandomEntryResult {
+    /** 투표 후보 항목. 후보가 없거나 이미 투표한 경우 null */
+    entry: ContestEntryItem | null;
+    /** 이미 투표 완료 여부 */
+    alreadyVoted: boolean;
 }
