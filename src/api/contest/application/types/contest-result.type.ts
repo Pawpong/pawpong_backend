@@ -73,3 +73,15 @@ export interface GetRandomEntryResult {
     /** 이미 투표 완료 여부 */
     alreadyVoted: boolean;
 }
+
+export interface YesterdayTopEntry {
+    rank: number;
+    entry: ContestEntryItem;
+    /** 득표율 (0~100, 소수점 1자리) */
+    voteRate: number;
+}
+
+export interface GetYesterdayTopResult {
+    contestId: string;
+    ranking: YesterdayTopEntry[];
+}

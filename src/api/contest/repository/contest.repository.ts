@@ -114,6 +114,12 @@ export class ContestRepository {
             .exec();
     }
 
+    async updateEntryStatus(entryId: string, status: 'hidden' | 'deleted'): Promise<void> {
+        await this.entryModel
+            .updateOne({ _id: new Types.ObjectId(entryId) }, { $set: { status } })
+            .exec();
+    }
+
     async vote(data: { contestId: string; entryId: string; voterId: string }): Promise<number> {
         await this.voteModel.create({
             contestId: new Types.ObjectId(data.contestId),

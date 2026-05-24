@@ -15,6 +15,7 @@ import {
     ContestPreviousRankingResponseDto,
 } from '../dto/response/contest-hall-of-fame-response.dto';
 import { ContestRandomEntryResponseDto } from '../dto/response/contest-random-entry-response.dto';
+import { ContestYesterdayTopResponseDto } from '../dto/response/contest-yesterday-top-response.dto';
 
 const TAG = '콘테스트';
 
@@ -88,6 +89,15 @@ export function ApiGetHallOfFameEndpoint() {
         description: '역대 콘테스트 우승자 목록을 최신순으로 반환합니다.',
         responseType: ContestHallOfFameResponseDto,
         isPublic: true,
+    });
+}
+
+export function ApiGetYesterdayTopEndpoint() {
+    return ApiEndpoint({
+        summary: '어제 기준 TOP 3 조회',
+        description: '현재 진행 중인 콘테스트에서 득표율(voteRate) 기준 TOP 3를 반환합니다. 진행 중인 콘테스트가 없으면 data: null.',
+        responseType: ContestYesterdayTopResponseDto,
+        supportsOptionalAuth: true,
     });
 }
 
