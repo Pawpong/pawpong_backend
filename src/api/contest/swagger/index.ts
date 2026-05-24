@@ -51,7 +51,15 @@ export function ApiSubmitContestEntryEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '콘테스트 참여',
-            description: '사진+설명으로 현재 콘테스트에 참여합니다. 유저당 1회 제한.',
+            description: `사진+설명으로 현재 콘테스트에 참여합니다. 유저당 1회 제한.
+
+**호출 순서**
+1. \`POST /v2/upload/single\` — 이미지 업로드 후 \`fileName\` 획득
+2. \`POST /v2/contest/entry\` — \`photoFileName\`(1번 결과) + \`description\` 전송
+
+**프론트엔드 전용 기능 (백엔드 API 없음)**
+- 임시저장: 작성 중인 이미지·설명을 클라이언트 로컬 스토리지에 저장. 서버 API 없음.
+- 위치(핀) 버튼: UI 장식 요소. 위치 데이터를 서버에 저장하지 않음.`,
             responseType: ContestSubmitResponseDto,
         }),
         ApiBody({ type: SubmitContestEntryRequestDto }),
