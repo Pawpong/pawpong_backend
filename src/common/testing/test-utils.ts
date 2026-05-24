@@ -287,7 +287,7 @@ export async function getAdopterToken(app: INestApplication): Promise<{ token: s
     const providerId = Math.random().toString().substr(2, 10);
 
     const response = await request(app.getHttpServer())
-        .post('/api/auth/register/adopter')
+        .post('/api/v2/auth/register/adopter')
         .send({
             tempId: `temp_kakao_${providerId}_${timestamp}`,
             email: `adopter_${timestamp}_${providerId}@test.com`,
@@ -313,7 +313,7 @@ export async function getBreederToken(app: INestApplication): Promise<{ token: s
     const timestamp = Date.now();
 
     const response = await request(app.getHttpServer())
-        .post('/api/auth/register/breeder')
+        .post('/api/v2/auth/register/breeder')
         .send({
             email: `breeder_${timestamp}@test.com`,
             phoneNumber: `010-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
