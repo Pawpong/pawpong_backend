@@ -44,6 +44,15 @@ export class ContestEntry {
     /** 콘테스트 종료 후 순위 (1~3 = 명예의 전당). null = 미집계 또는 3위 밖 */
     @Prop({ type: Number, default: null })
     rank: number | null;
+
+    /**
+     * 항목 노출 상태.
+     * - active: 정상 노출
+     * - hidden: 관리자 숨김 (목록 미노출, 데이터 보존)
+     * - deleted: 관리자 삭제 (목록 미노출, 데이터 보존)
+     */
+    @Prop({ type: String, enum: ['active', 'hidden', 'deleted'], default: 'active', index: true })
+    status: 'active' | 'hidden' | 'deleted';
 }
 
 export const ContestEntrySchema = SchemaFactory.createForClass(ContestEntry);
