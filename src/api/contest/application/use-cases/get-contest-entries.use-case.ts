@@ -58,6 +58,8 @@ export class GetContestEntriesUseCase {
                         : Promise.resolve<string | null>(null),
                 ]);
 
+                const hasVotedInContest = votedEntryId !== null;
+
                 return {
                     id: entry.id,
                     userId: entry.userId,
@@ -65,7 +67,7 @@ export class GetContestEntriesUseCase {
                     userProfileImageUrl: profileImageUrl,
                     photoUrl,
                     description: entry.description,
-                    voteCount: entry.voteCount,
+                    voteCount: hasVotedInContest ? entry.voteCount : null,
                     rank: entry.rank,
                     hasVoted: votedEntryId === entry.id,
                     isMyEntry: userId === entry.userId,
