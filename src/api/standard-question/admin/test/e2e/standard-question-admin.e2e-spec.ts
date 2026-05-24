@@ -175,7 +175,7 @@ describe('기본 질문 관리자 종단간 테스트', () => {
             const timestamp = Date.now();
             const providerId = Math.random().toString().substr(2, 10);
             const adopterResponse = await request(app.getHttpServer())
-                .post('/api/auth/register/adopter')
+                .post('/api/v2/auth/register/adopter')
                 .send({
                     tempId: `temp_kakao_${providerId}_${timestamp}`,
                     email: `forbidden_question_${timestamp}_${providerId}@test.com`,
