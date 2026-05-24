@@ -29,7 +29,7 @@ describe('사용자 관리자 응답 계약 종단간 테스트', () => {
         const timestamp = Date.now();
         const adopterProviderId = Math.random().toString().slice(2, 12);
         const adopterResponse = await request(app.getHttpServer())
-            .post('/api/v2/auth/register/adopter')
+            .post('/api/auth/register/adopter')
             .send({
                 tempId: `temp_kakao_${adopterProviderId}_${timestamp}`,
                 email: `user_admin_contract_${timestamp}@test.com`,
