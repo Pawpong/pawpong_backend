@@ -20,7 +20,7 @@ describe('브리더 관리 개요 종단간 테스트', () => {
     describe('대시보드 관리', () => {
         it('대시보드를 조회한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get('/api/breeder-management/dashboard')
+                .get('/api/v2/breeder-management/dashboard')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
@@ -29,12 +29,12 @@ describe('브리더 관리 개요 종단간 테스트', () => {
         });
 
         it('인증이 없으면 실패한다', async () => {
-            await request(context.app.getHttpServer()).get('/api/breeder-management/dashboard').expect(401);
+            await request(context.app.getHttpServer()).get('/api/v2/breeder-management/dashboard').expect(401);
         });
 
         it('입양자는 접근할 수 없다', async () => {
             await request(context.app.getHttpServer())
-                .get('/api/breeder-management/dashboard')
+                .get('/api/v2/breeder-management/dashboard')
                 .set('Authorization', `Bearer ${context.adopterToken}`)
                 .expect(403);
         });
@@ -43,7 +43,7 @@ describe('브리더 관리 개요 종단간 테스트', () => {
     describe('프로필 관리', () => {
         it('프로필을 조회한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get('/api/breeder-management/profile')
+                .get('/api/v2/breeder-management/profile')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
@@ -53,7 +53,7 @@ describe('브리더 관리 개요 종단간 테스트', () => {
 
         it('프로필 수정 요청을 처리한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .patch('/api/breeder-management/profile')
+                .patch('/api/v2/breeder-management/profile')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     profile: {
@@ -66,14 +66,14 @@ describe('브리더 관리 개요 종단간 테스트', () => {
         });
 
         it('프로필은 인증 없이 조회할 수 없다', async () => {
-            await request(context.app.getHttpServer()).get('/api/breeder-management/profile').expect(401);
+            await request(context.app.getHttpServer()).get('/api/v2/breeder-management/profile').expect(401);
         });
     });
 
     describe('응답 형식 검증', () => {
         it('표준 응답 형식을 유지한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get('/api/breeder-management/dashboard')
+                .get('/api/v2/breeder-management/dashboard')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 

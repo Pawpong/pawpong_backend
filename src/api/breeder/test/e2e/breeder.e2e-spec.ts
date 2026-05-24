@@ -22,7 +22,7 @@ describe('브리더 종단간 테스트', () => {
         // 테스트용 브리더 생성
         const timestamp = Date.now();
         const breederResponse = await request(app.getHttpServer())
-            .post('/api/auth/register/breeder')
+            .post('/api/v2/auth/register/breeder')
             .send({
                 email: `breeder_test_${timestamp}@test.com`,
                 phoneNumber: '010-1234-5678',
@@ -60,7 +60,7 @@ describe('브리더 종단간 테스트', () => {
     describe('브리더 검색 및 탐색', () => {
         it('브리더 검색 성공 (레거시)', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/breeder/search')
+                .get('/api/v2/breeder/search')
                 .query({
                     petType: 'dog',
                     cityName: '서울',
@@ -73,7 +73,7 @@ describe('브리더 종단간 테스트', () => {
         });
 
         it('브리더 탐색 성공', async () => {
-            const response = await request(app.getHttpServer()).post('/api/breeder/explore').send({
+            const response = await request(app.getHttpServer()).post('/api/v2/breeder/explore').send({
                 petType: 'dog',
                 page: 1,
                 limit: 10,
@@ -99,7 +99,7 @@ describe('브리더 종단간 테스트', () => {
 
         it('지역 필터링', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/breeder/explore')
+                .post('/api/v2/breeder/explore')
                 .send({
                     petType: 'dog',
                     province: ['서울특별시'],
@@ -117,7 +117,7 @@ describe('브리더 종단간 테스트', () => {
 
         it('크기 필터링', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/breeder/explore')
+                .post('/api/v2/breeder/explore')
                 .send({
                     petType: 'dog',
                     dogSize: ['large'],
@@ -133,7 +133,7 @@ describe('브리더 종단간 테스트', () => {
         });
 
         it('인기 브리더 조회 성공', async () => {
-            const response = await request(app.getHttpServer()).get('/api/breeder/popular').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/breeder/popular').expect(200);
 
             expect(response.body.success).toBe(true);
             expect(response.body.data).toBeDefined();
@@ -152,7 +152,7 @@ describe('브리더 종단간 테스트', () => {
                 return;
             }
 
-            const response = await request(app.getHttpServer()).get(`/api/breeder/${breederId}`).expect(200);
+            const response = await request(app.getHttpServer()).get(`/api/v2/breeder/${breederId}`).expect(200);
 
             expect(response.body.success).toBe(true);
             expect(response.body.data).toBeDefined();
@@ -162,7 +162,7 @@ describe('브리더 종단간 테스트', () => {
         });
 
         it('존재하지 않는 브리더 ID로 실패', async () => {
-            const response = await request(app.getHttpServer()).get('/api/breeder/507f1f77bcf86cd799439011');
+            const response = await request(app.getHttpServer()).get('/api/v2/breeder/507f1f77bcf86cd799439011');
 
             // 404 또는 400 에러 허용
             expect([400, 404]).toContain(response.status);
@@ -170,7 +170,7 @@ describe('브리더 종단간 테스트', () => {
         });
 
         it('잘못된 ID 형식으로 실패', async () => {
-            const response = await request(app.getHttpServer()).get('/api/breeder/invalid-id').expect(400);
+            const response = await request(app.getHttpServer()).get('/api/v2/breeder/invalid-id').expect(400);
 
             // 에러 응답은 success 필드가 없을 수 있음
             expect(response.body.message || response.body.error).toContain('올바르지 않은 브리더 ID 형식');
@@ -178,7 +178,7 @@ describe('브리더 종단간 테스트', () => {
         });
 
         it('잘못된 브리더 ID 형식으로 후기 조회도 400', async () => {
-            const response = await request(app.getHttpServer()).get('/api/breeder/invalid-id/reviews').expect(400);
+            const response = await request(app.getHttpServer()).get('/api/v2/breeder/invalid-id/reviews').expect(400);
 
             expect(response.body.message || response.body.error).toContain('올바르지 않은 브리더 ID 형식');
             console.log('잘못된 브리더 ID 형식 후기 조회 400 확인');
@@ -196,7 +196,7 @@ describe('브리더 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .get(`/api/breeder/${breederId}/reviews`)
+                .get(`/api/v2/breeder/${breederId}/reviews`)
                 .query({ page: 1, limit: 10 })
                 .expect(200);
 
@@ -215,7 +215,7 @@ describe('브리더 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .get(`/api/breeder/${breederId}/reviews`)
+                .get(`/api/v2/breeder/${breederId}/reviews`)
                 .query({ page: 2, limit: 5 })
                 .expect(200);
 
@@ -237,7 +237,7 @@ describe('브리더 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .get(`/api/breeder/${breederId}/pets`)
+                .get(`/api/v2/breeder/${breederId}/pets`)
                 .query({ page: 1, limit: 20 })
                 .expect(200);
 
@@ -256,7 +256,7 @@ describe('브리더 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .get(`/api/breeder/${breederId}/pets`)
+                .get(`/api/v2/breeder/${breederId}/pets`)
                 .query({ status: 'available', page: 1, limit: 20 });
 
             // 시드 데이터 상태에 따라 200 또는 400 허용
@@ -279,7 +279,7 @@ describe('브리더 종단간 테스트', () => {
                 return;
             }
 
-            const response = await request(app.getHttpServer()).get(`/api/breeder/${breederId}/parent-pets`);
+            const response = await request(app.getHttpServer()).get(`/api/v2/breeder/${breederId}/parent-pets`);
 
             // 시드 데이터 상태에 따라 200 또는 400 허용
             expect([200, 400]).toContain(response.status);
@@ -301,7 +301,7 @@ describe('브리더 종단간 테스트', () => {
                 return;
             }
 
-            const response = await request(app.getHttpServer()).get(`/api/breeder/${breederId}/application-form`);
+            const response = await request(app.getHttpServer()).get(`/api/v2/breeder/${breederId}/application-form`);
 
             // 시드 데이터 상태에 따라 200 또는 400 허용
             expect([200, 400]).toContain(response.status);
@@ -318,7 +318,7 @@ describe('브리더 종단간 테스트', () => {
      */
     describe('응답 형식 검증', () => {
         it('표준 경로 응답 형식 확인', async () => {
-            const response = await request(app.getHttpServer()).get('/api/breeder/popular').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/breeder/popular').expect(200);
 
             // 표준 ApiResponseDto 형식 검증
             expect(response.body).toHaveProperty('success');
@@ -331,7 +331,7 @@ describe('브리더 종단간 테스트', () => {
         });
 
         it('페이지네이션 응답 형식 확인', async () => {
-            const response = await request(app.getHttpServer()).post('/api/breeder/explore').send({
+            const response = await request(app.getHttpServer()).post('/api/v2/breeder/explore').send({
                 petType: 'dog',
                 page: 1,
                 take: 10,
