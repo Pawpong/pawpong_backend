@@ -42,7 +42,7 @@ describe('문의 종단간 테스트', () => {
 
     describe('GET /api/inquiry (공개)', () => {
         it('공개 문의 목록 조회 성공', async () => {
-            const response = await request(app.getHttpServer()).get('/api/inquiry').expect(200);
+            const response = await request(app.getHttpServer()).get('/api/v2/inquiry').expect(200);
 
             expect(response.body.success).toBe(true);
             expect(response.body.data).toBeDefined();
@@ -58,7 +58,7 @@ describe('문의 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .post('/api/inquiry')
+                .post('/api/v2/inquiry')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({
                     title: '테스트 문의입니다',
@@ -79,7 +79,7 @@ describe('문의 종단간 테스트', () => {
 
         it('인증 없이 문의 생성 시 401', async () => {
             await request(app.getHttpServer())
-                .post('/api/inquiry')
+                .post('/api/v2/inquiry')
                 .send({ title: '테스트', content: '내용' })
                 .expect(401);
 
@@ -87,7 +87,7 @@ describe('문의 종단간 테스트', () => {
         });
     });
 
-    describe('GET /api/inquiry/my (입양자)', () => {
+    describe('GET /api/v2/inquiry/my (입양자)', () => {
         it('내 문의 목록 조회 성공', async () => {
             if (!adopterToken) {
                 console.log('주의: 입양자 토큰이 없어서 테스트 스킵');
@@ -95,7 +95,7 @@ describe('문의 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .get('/api/inquiry/my')
+                .get('/api/v2/inquiry/my')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -104,7 +104,7 @@ describe('문의 종단간 테스트', () => {
         });
     });
 
-    describe('GET /api/inquiry/breeder (브리더)', () => {
+    describe('GET /api/v2/inquiry/breeder (브리더)', () => {
         it('브리더 문의 목록 조회 성공', async () => {
             if (!breederToken) {
                 console.log('주의: 브리더 토큰이 없어서 테스트 스킵');
@@ -112,7 +112,7 @@ describe('문의 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .get('/api/inquiry/breeder')
+                .get('/api/v2/inquiry/breeder')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .expect(200);
 
@@ -121,7 +121,7 @@ describe('문의 종단간 테스트', () => {
         });
     });
 
-    describe('PATCH /api/inquiry/:inquiryId (입양자)', () => {
+    describe('PATCH /api/v2/inquiry/:inquiryId (입양자)', () => {
         it('문의 수정 - 존재하지 않는 ID 시 에러', async () => {
             if (!adopterToken) {
                 console.log('주의: 입양자 토큰이 없어서 테스트 스킵');
@@ -129,7 +129,7 @@ describe('문의 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .patch('/api/inquiry/000000000000000000000000')
+                .patch('/api/v2/inquiry/000000000000000000000000')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ title: '수정된 제목' });
 
@@ -138,7 +138,7 @@ describe('문의 종단간 테스트', () => {
         });
     });
 
-    describe('DELETE /api/inquiry/:inquiryId (입양자)', () => {
+    describe('DELETE /api/v2/inquiry/:inquiryId (입양자)', () => {
         it('문의 삭제 - 존재하지 않는 ID 시 에러', async () => {
             if (!adopterToken) {
                 console.log('주의: 입양자 토큰이 없어서 테스트 스킵');
@@ -146,7 +146,7 @@ describe('문의 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .delete('/api/inquiry/000000000000000000000000')
+                .delete('/api/v2/inquiry/000000000000000000000000')
                 .set('Authorization', `Bearer ${adopterToken}`);
 
             expect([400, 403, 404]).toContain(response.status);

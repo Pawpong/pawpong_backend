@@ -33,7 +33,7 @@ describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
 
         it('기존 이메일을 중복으로 확인한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/check-email')
+                .post('/api/v2/auth/check-email')
                 .send({ email: existingEmail })
                 .expect(200);
 
@@ -44,7 +44,7 @@ describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
 
         it('사용 가능한 이메일을 확인한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/check-email')
+                .post('/api/v2/auth/check-email')
                 .send({ email: `available_${Date.now()}@test.com` })
                 .expect(200);
 
@@ -68,7 +68,7 @@ describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
 
         it('기존 닉네임을 중복으로 확인한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/check-nickname')
+                .post('/api/v2/auth/check-nickname')
                 .send({ nickname: existingNickname });
 
             expect([200, 400]).toContain(response.status);
@@ -81,7 +81,7 @@ describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
 
         it('사용 가능한 닉네임을 확인한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/check-nickname')
+                .post('/api/v2/auth/check-nickname')
                 .send({ nickname: `사용가${Date.now()}`.slice(0, 12) });
 
             expect([200, 400]).toContain(response.status);
@@ -97,7 +97,7 @@ describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
         it('미가입 사용자를 확인한다', async () => {
             const timestamp = Date.now();
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/social/check-user')
+                .post('/api/v2/auth/social/check-user')
                 .send({
                     provider: 'kakao',
                     providerId: `new_user_${timestamp}`,
@@ -123,7 +123,7 @@ describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
             }).expect(200);
 
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/social/check-user')
+                .post('/api/v2/auth/social/check-user')
                 .send({
                     provider: 'kakao',
                     providerId,
@@ -139,7 +139,7 @@ describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
     describe('회원가입 전 업로드', () => {
         it('임시 ID 프로필 업로드 응답 계약을 유지한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .post(`/api/auth/upload-breeder-profile?tempId=temp-upload-${Date.now()}`)
+                .post(`/api/v2/auth/upload-breeder-profile?tempId=temp-upload-${Date.now()}`)
                 .attach('file', context.uploadTestFileBuffer, context.uploadTestFileName)
                 .expect(200);
 
@@ -160,7 +160,7 @@ describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
             expect(adopter).not.toBeNull();
 
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/upload-breeder-profile')
+                .post('/api/v2/auth/upload-breeder-profile')
                 .set('Authorization', `Bearer ${adopter!.token}`)
                 .attach('file', context.uploadTestFileBuffer, context.uploadTestFileName)
                 .expect(200);
@@ -177,7 +177,7 @@ describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
 
         it('임시 ID 서류 업로드 응답 계약을 유지한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .post(`/api/auth/upload-breeder-documents?tempId=temp-docs-${Date.now()}`)
+                .post(`/api/v2/auth/upload-breeder-documents?tempId=temp-docs-${Date.now()}`)
                 .field('types', JSON.stringify(['idCard', 'animalProductionLicense']))
                 .field('level', 'new')
                 .attach('files', context.uploadTestFileBuffer, context.uploadTestFileName)

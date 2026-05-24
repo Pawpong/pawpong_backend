@@ -20,7 +20,7 @@ describe('브리더 관리 인증 종단간 테스트', () => {
 
     it('인증 상태를 조회한다', async () => {
         const response = await request(context.app.getHttpServer())
-            .get('/api/breeder-management/verification')
+            .get('/api/v2/breeder-management/verification')
             .set('Authorization', `Bearer ${context.breederToken}`)
             .expect(200);
 
@@ -30,7 +30,7 @@ describe('브리더 관리 인증 종단간 테스트', () => {
 
     it('인증 신청 요청을 처리한다', async () => {
         const response = await request(context.app.getHttpServer())
-            .post('/api/breeder-management/verification')
+            .post('/api/v2/breeder-management/verification')
             .set('Authorization', `Bearer ${context.breederToken}`)
             .send({
                 documents: ['document1.pdf', 'document2.pdf'],
@@ -42,7 +42,7 @@ describe('브리더 관리 인증 종단간 테스트', () => {
 
     it('인증 서류 업로드 응답 계약을 유지한다', async () => {
         const response = await request(context.app.getHttpServer())
-            .post('/api/breeder-management/verification/upload')
+            .post('/api/v2/breeder-management/verification/upload')
             .set('Authorization', `Bearer ${context.breederToken}`)
             .field('types', JSON.stringify(['idCard', 'businessLicense']))
             .field('level', 'new')
@@ -59,7 +59,7 @@ describe('브리더 관리 인증 종단간 테스트', () => {
 
     it('인증 서류 제출 응답 계약을 유지한다', async () => {
         const response = await request(context.app.getHttpServer())
-            .post('/api/breeder-management/verification/submit')
+            .post('/api/v2/breeder-management/verification/submit')
             .set('Authorization', `Bearer ${context.breederToken}`)
             .send({
                 level: 'new',
@@ -79,6 +79,6 @@ describe('브리더 관리 인증 종단간 테스트', () => {
     });
 
     it('인증 경로는 인증 없이 접근할 수 없다', async () => {
-        await request(context.app.getHttpServer()).get('/api/breeder-management/verification').expect(401);
+        await request(context.app.getHttpServer()).get('/api/v2/breeder-management/verification').expect(401);
     });
 });

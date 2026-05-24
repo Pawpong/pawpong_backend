@@ -58,10 +58,10 @@ describe('앱 버전 체크 종단간 테스트', () => {
         await app.close();
     });
 
-    describe('GET /api/app-version/check', () => {
+    describe('GET /api/v2/app-version/check', () => {
         it('iOS - 최신 버전이면 업데이트 불필요 응답', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/app-version/check')
+                .get('/api/v2/app-version/check')
                 .query({ platform: 'ios', currentVersion: '2.0.0' })
                 .expect(200);
 
@@ -76,7 +76,7 @@ describe('앱 버전 체크 종단간 테스트', () => {
 
         it('iOS - 구버전이면 강제 업데이트 응답', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/app-version/check')
+                .get('/api/v2/app-version/check')
                 .query({ platform: 'ios', currentVersion: '1.0.0' })
                 .expect(200);
 
@@ -92,7 +92,7 @@ describe('앱 버전 체크 종단간 테스트', () => {
 
         it('iOS - 중간 버전이면 권장 업데이트 응답', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/app-version/check')
+                .get('/api/v2/app-version/check')
                 .query({ platform: 'ios', currentVersion: '1.5.0' })
                 .expect(200);
 
@@ -108,7 +108,7 @@ describe('앱 버전 체크 종단간 테스트', () => {
 
         it('Android - 버전 체크 성공', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/app-version/check')
+                .get('/api/v2/app-version/check')
                 .query({ platform: 'android', currentVersion: '2.0.0' })
                 .expect(200);
 
@@ -119,7 +119,7 @@ describe('앱 버전 체크 종단간 테스트', () => {
 
         it('platform 파라미터 없으면 에러', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/app-version/check')
+                .get('/api/v2/app-version/check')
                 .query({ currentVersion: '1.0.0' });
 
             expect([400, 500]).toContain(response.status);
@@ -128,7 +128,7 @@ describe('앱 버전 체크 종단간 테스트', () => {
 
         it('currentVersion 파라미터 없으면 에러', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/app-version/check')
+                .get('/api/v2/app-version/check')
                 .query({ platform: 'ios' });
 
             expect([400, 500]).toContain(response.status);
@@ -137,7 +137,7 @@ describe('앱 버전 체크 종단간 테스트', () => {
 
         it('표준 응답 형식 검증', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/app-version/check')
+                .get('/api/v2/app-version/check')
                 .query({ platform: 'ios', currentVersion: '2.0.0' })
                 .expect(200);
 

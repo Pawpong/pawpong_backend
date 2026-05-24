@@ -16,7 +16,7 @@ describe('브리더 관리 응답 계약 종단간 테스트', () => {
         breederName = `브리더관리계약${timestamp}`;
 
         const breederResponse = await request(app.getHttpServer())
-            .post('/api/auth/register/breeder')
+            .post('/api/v2/auth/register/breeder')
             .send({
                 email: `breeder_management_contract_${timestamp}@test.com`,
                 phoneNumber: '010-9999-8888',
@@ -48,7 +48,7 @@ describe('브리더 관리 응답 계약 종단간 테스트', () => {
 
     it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
-            .get('/api/breeder-management/dashboard')
+            .get('/api/v2/breeder-management/dashboard')
             .set('Authorization', `Bearer ${breederToken}`)
             .expect(200);
 
@@ -83,7 +83,7 @@ describe('브리더 관리 응답 계약 종단간 테스트', () => {
 
     it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
-            .get('/api/breeder-management/profile')
+            .get('/api/v2/breeder-management/profile')
             .set('Authorization', `Bearer ${breederToken}`)
             .expect(200);
 
@@ -114,7 +114,7 @@ describe('브리더 관리 응답 계약 종단간 테스트', () => {
 
     it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
-            .get('/api/breeder-management/verification')
+            .get('/api/v2/breeder-management/verification')
             .set('Authorization', `Bearer ${breederToken}`)
             .expect(200);
 

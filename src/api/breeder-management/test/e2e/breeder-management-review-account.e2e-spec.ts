@@ -30,7 +30,7 @@ describe('브리더 관리 후기와 계정 종단간 테스트', () => {
 
         it('후기 답글을 등록한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .post(`/api/breeder-management/reviews/${reviewId}/reply`)
+                .post(`/api/v2/breeder-management/reviews/${reviewId}/reply`)
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     content: '소중한 후기 감사합니다.',
@@ -45,7 +45,7 @@ describe('브리더 관리 후기와 계정 종단간 테스트', () => {
 
         it('후기 답글을 수정한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .patch(`/api/breeder-management/reviews/${reviewId}/reply`)
+                .patch(`/api/v2/breeder-management/reviews/${reviewId}/reply`)
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     content: '소중한 후기 정말 감사합니다.',
@@ -59,7 +59,7 @@ describe('브리더 관리 후기와 계정 종단간 테스트', () => {
 
         it('후기 답글을 삭제한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .delete(`/api/breeder-management/reviews/${reviewId}/reply`)
+                .delete(`/api/v2/breeder-management/reviews/${reviewId}/reply`)
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
@@ -77,7 +77,7 @@ describe('브리더 관리 후기와 계정 종단간 테스트', () => {
         beforeAll(async () => {
             const timestamp = Date.now();
             const response = await request(context.app.getHttpServer())
-                .post('/api/auth/register/breeder')
+                .post('/api/v2/auth/register/breeder')
                 .send({
                     email: `breeder_delete_${timestamp}@test.com`,
                     phoneNumber: '010-2222-1111',
@@ -104,7 +104,7 @@ describe('브리더 관리 후기와 계정 종단간 테스트', () => {
 
         it('브리더 회원 탈퇴를 처리한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .delete('/api/breeder-management/account')
+                .delete('/api/v2/breeder-management/account')
                 .set('Authorization', `Bearer ${deleteBreederToken}`)
                 .send({
                     reason: 'no_inquiry',
