@@ -42,6 +42,7 @@ import { InquiryModule } from './api/inquiry/inquiry.module';
 import { FeedModule } from './api/feed/feed.module';
 import { ChatModule } from './api/chat/chat.module';
 import { ContestModule } from './api/contest/contest.module';
+import { ContestAdminModule } from './api/contest/admin/contest-admin.module';
 
 @Module({
     imports: [
@@ -88,6 +89,7 @@ import { ContestModule } from './api/contest/contest.module';
         FeedModule,
         ChatModule,
         ContestModule,
+        ContestAdminModule,
     ],
     controllers: [],
     providers: [],
