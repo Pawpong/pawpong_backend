@@ -15,7 +15,7 @@ describe('브리더 응답 계약 종단간 테스트', () => {
         breederName = `브리더공개계약${timestamp}`;
 
         const breederResponse = await request(app.getHttpServer())
-            .post('/api/auth/register/breeder')
+            .post('/api/v2/auth/register/breeder')
             .send({
                 email: `breeder_contract_public_${timestamp}@test.com`,
                 phoneNumber: '010-4444-5555',
@@ -46,7 +46,7 @@ describe('브리더 응답 계약 종단간 테스트', () => {
 
     it('응답 계약을 유지한다', async () => {
         const response = await request(app.getHttpServer())
-            .get('/api/breeder/search')
+            .get('/api/v2/breeder/search')
             .query({
                 petType: 'dog',
                 cityName: '서울',
@@ -94,7 +94,7 @@ describe('브리더 응답 계약 종단간 테스트', () => {
     });
 
     it('응답 계약을 유지한다', async () => {
-        const response = await request(app.getHttpServer()).get('/api/breeder/popular').expect(200);
+        const response = await request(app.getHttpServer()).get('/api/v2/breeder/popular').expect(200);
 
         expect(response.body).toEqual(
             expect.objectContaining({
@@ -106,7 +106,7 @@ describe('브리더 응답 계약 종단간 테스트', () => {
     });
 
     it('응답 계약을 유지한다', async () => {
-        const response = await request(app.getHttpServer()).get(`/api/breeder/${breederId}`).expect(200);
+        const response = await request(app.getHttpServer()).get(`/api/v2/breeder/${breederId}`).expect(200);
 
         expect(response.body).toEqual(
             expect.objectContaining({

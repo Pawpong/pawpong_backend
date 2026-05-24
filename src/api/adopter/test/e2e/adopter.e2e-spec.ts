@@ -32,7 +32,7 @@ describe('입양자 종단간 테스트', () => {
         adopterNickname = `테스트입양자${timestamp}`;
 
         const adopterResponse = await request(app.getHttpServer())
-            .post('/api/auth/register/adopter')
+            .post('/api/v2/auth/register/adopter')
             .send({
                 tempId: `temp_kakao_${adopterProviderId}_${timestamp}`,
                 email: `adopter_${timestamp}@test.com`,
@@ -50,7 +50,7 @@ describe('입양자 종단간 테스트', () => {
         // 2. 브리더 회원가입
         const breederTimestamp = Date.now();
         const breederResponse = await request(app.getHttpServer())
-            .post('/api/auth/register/breeder')
+            .post('/api/v2/auth/register/breeder')
             .send({
                 email: `breeder_${breederTimestamp}@test.com`,
                 phoneNumber: '010-9876-5432',
@@ -88,7 +88,7 @@ describe('입양자 종단간 테스트', () => {
     describe('프로필 관리', () => {
         it('프로필 조회 성공', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/adopter/profile')
+                .get('/api/v2/adopter/profile')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -106,7 +106,7 @@ describe('입양자 종단간 테스트', () => {
             };
 
             const response = await request(app.getHttpServer())
-                .patch('/api/adopter/profile')
+                .patch('/api/v2/adopter/profile')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send(updateData)
                 .expect(200);
@@ -146,7 +146,7 @@ describe('입양자 종단간 테스트', () => {
             };
 
             const response = await request(app.getHttpServer())
-                .post('/api/adopter/application')
+                .post('/api/v2/adopter/application')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send(applicationData)
                 .expect(200);
@@ -162,7 +162,7 @@ describe('입양자 종단간 테스트', () => {
 
         it('입양 신청 목록 조회', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/adopter/applications')
+                .get('/api/v2/adopter/applications')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .query({ page: 1, limit: 10 })
                 .expect(200);
@@ -181,7 +181,7 @@ describe('입양자 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .get(`/api/adopter/applications/${applicationId}`)
+                .get(`/api/v2/adopter/applications/${applicationId}`)
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -208,7 +208,7 @@ describe('입양자 종단간 테스트', () => {
             };
 
             const response = await request(app.getHttpServer())
-                .post('/api/adopter/review')
+                .post('/api/v2/adopter/review')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send(reviewData);
 
@@ -225,7 +225,7 @@ describe('입양자 종단간 테스트', () => {
 
         it('내가 작성한 후기 목록 조회', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/adopter/reviews')
+                .get('/api/v2/adopter/reviews')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .query({ page: 1, limit: 10 })
                 .expect(200);
@@ -243,7 +243,7 @@ describe('입양자 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .get(`/api/adopter/reviews/${reviewId}`)
+                .get(`/api/v2/adopter/reviews/${reviewId}`)
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -259,7 +259,7 @@ describe('입양자 종단간 테스트', () => {
     describe('즐겨찾기', () => {
         it('즐겨찾기 추가 성공', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/adopter/favorite')
+                .post('/api/v2/adopter/favorite')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId })
                 .expect(200);
@@ -271,7 +271,7 @@ describe('입양자 종단간 테스트', () => {
 
         it('즐겨찾기 목록 조회', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/adopter/favorites')
+                .get('/api/v2/adopter/favorites')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .query({ page: 1, limit: 10 })
                 .expect(200);
@@ -284,7 +284,7 @@ describe('입양자 종단간 테스트', () => {
 
         it('즐겨찾기 삭제 성공', async () => {
             const response = await request(app.getHttpServer())
-                .delete(`/api/adopter/favorite/${breederId}`)
+                .delete(`/api/v2/adopter/favorite/${breederId}`)
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -307,7 +307,7 @@ describe('입양자 종단간 테스트', () => {
             };
 
             const response = await request(app.getHttpServer())
-                .post('/api/adopter/report')
+                .post('/api/v2/adopter/report')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send(reportData)
                 .expect(200);
@@ -321,7 +321,7 @@ describe('입양자 종단간 테스트', () => {
     describe('회원 탈퇴', () => {
         it('회원 탈퇴 성공', async () => {
             const response = await request(app.getHttpServer())
-                .delete('/api/adopter/account')
+                .delete('/api/v2/adopter/account')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({
                     reason: 'privacy_concern',

@@ -23,7 +23,7 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
     describe('입양 신청 관리', () => {
         it('입양 신청 목록을 조회한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get('/api/breeder-management/applications')
+                .get('/api/v2/breeder-management/applications')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
@@ -33,7 +33,7 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
 
         it('페이지네이션 파라미터를 적용한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get('/api/breeder-management/applications?page=1&limit=10')
+                .get('/api/v2/breeder-management/applications?page=1&limit=10')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
@@ -42,7 +42,7 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
 
         it('입양 신청 상세를 조회한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get(`/api/breeder-management/applications/${applicationId}`)
+                .get(`/api/v2/breeder-management/applications/${applicationId}`)
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
@@ -57,7 +57,7 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
 
         it('잘못된 입양 신청 ID 형식이면 400을 반환한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get('/api/breeder-management/applications/not-a-mongo-id')
+                .get('/api/v2/breeder-management/applications/not-a-mongo-id')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(400);
 
@@ -66,7 +66,7 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
 
         it('입양 신청 상태를 변경한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .patch(`/api/breeder-management/applications/${applicationId}`)
+                .patch(`/api/v2/breeder-management/applications/${applicationId}`)
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     applicationId,
@@ -82,7 +82,7 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
 
         it('잘못된 입양 신청 ID 형식으로 상태 변경 시 400을 반환한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .patch('/api/breeder-management/applications/not-a-mongo-id')
+                .patch('/api/v2/breeder-management/applications/not-a-mongo-id')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     applicationId,
@@ -96,7 +96,7 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
 
         it('상태 변경 후 상세를 다시 조회한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get(`/api/breeder-management/applications/${applicationId}`)
+                .get(`/api/v2/breeder-management/applications/${applicationId}`)
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
@@ -106,14 +106,14 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
         });
 
         it('인증 없이 접근할 수 없다', async () => {
-            await request(context.app.getHttpServer()).get('/api/breeder-management/applications').expect(401);
+            await request(context.app.getHttpServer()).get('/api/v2/breeder-management/applications').expect(401);
         });
     });
 
     describe('입양 신청 폼 관리', () => {
         it('입양 신청 폼을 조회한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get('/api/breeder-management/application-form')
+                .get('/api/v2/breeder-management/application-form')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
@@ -124,7 +124,7 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
 
         it('입양 신청 폼 수정 요청을 처리한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .patch('/api/breeder-management/application-form')
+                .patch('/api/v2/breeder-management/application-form')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     customQuestions: [
@@ -143,7 +143,7 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
 
         it('잘못된 질문 ID도 현재 계약대로 처리한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .patch('/api/breeder-management/application-form')
+                .patch('/api/v2/breeder-management/application-form')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     customQuestions: [
@@ -161,7 +161,7 @@ describe('브리더 관리 신청서 종단간 테스트', () => {
         });
 
         it('인증 없이 폼에 접근할 수 없다', async () => {
-            await request(context.app.getHttpServer()).get('/api/breeder-management/application-form').expect(401);
+            await request(context.app.getHttpServer()).get('/api/v2/breeder-management/application-form').expect(401);
         });
     });
 });

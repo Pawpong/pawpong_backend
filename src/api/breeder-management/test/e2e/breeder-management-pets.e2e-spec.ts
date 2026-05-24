@@ -20,7 +20,7 @@ describe('브리더 관리 개체 종단간 테스트', () => {
     describe('부모견과 분양 개체 관리', () => {
         it('부모견을 등록, 수정, 삭제한다', async () => {
             const createResponse = await request(context.app.getHttpServer())
-                .post('/api/breeder-management/parent-pets')
+                .post('/api/v2/breeder-management/parent-pets')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     name: '테스트 부모견',
@@ -36,7 +36,7 @@ describe('브리더 관리 개체 종단간 테스트', () => {
             expect(parentPetId).toBeDefined();
 
             await request(context.app.getHttpServer())
-                .patch(`/api/breeder-management/parent-pets/${parentPetId}`)
+                .patch(`/api/v2/breeder-management/parent-pets/${parentPetId}`)
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     name: '수정된 부모견',
@@ -45,14 +45,14 @@ describe('브리더 관리 개체 종단간 테스트', () => {
                 .expect(200);
 
             await request(context.app.getHttpServer())
-                .delete(`/api/breeder-management/parent-pets/${parentPetId}`)
+                .delete(`/api/v2/breeder-management/parent-pets/${parentPetId}`)
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
         });
 
         it('분양 개체를 등록, 수정, 상태 변경, 삭제한다', async () => {
             const createResponse = await request(context.app.getHttpServer())
-                .post('/api/breeder-management/available-pets')
+                .post('/api/v2/breeder-management/available-pets')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     name: '테스트 분양 개체',
@@ -68,7 +68,7 @@ describe('브리더 관리 개체 종단간 테스트', () => {
             expect(availablePetId).toBeDefined();
 
             await request(context.app.getHttpServer())
-                .patch(`/api/breeder-management/available-pets/${availablePetId}`)
+                .patch(`/api/v2/breeder-management/available-pets/${availablePetId}`)
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     name: '수정된 분양 개체',
@@ -78,7 +78,7 @@ describe('브리더 관리 개체 종단간 테스트', () => {
                 .expect(200);
 
             await request(context.app.getHttpServer())
-                .patch(`/api/breeder-management/available-pets/${availablePetId}/status`)
+                .patch(`/api/v2/breeder-management/available-pets/${availablePetId}/status`)
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .send({
                     petStatus: 'reserved',
@@ -86,14 +86,14 @@ describe('브리더 관리 개체 종단간 테스트', () => {
                 .expect(200);
 
             await request(context.app.getHttpServer())
-                .delete(`/api/breeder-management/available-pets/${availablePetId}`)
+                .delete(`/api/v2/breeder-management/available-pets/${availablePetId}`)
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
         });
 
         it('개체 관리 경로는 인증 없이 접근할 수 없다', async () => {
             await request(context.app.getHttpServer())
-                .post('/api/breeder-management/available-pets')
+                .post('/api/v2/breeder-management/available-pets')
                 .send({
                     name: '테스트 분양 개체',
                     breed: '포메라니안',
@@ -107,7 +107,7 @@ describe('브리더 관리 개체 종단간 테스트', () => {
     describe('내 개체와 후기 조회', () => {
         it('내 개체 목록을 조회한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get('/api/breeder-management/my-pets')
+                .get('/api/v2/breeder-management/my-pets')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
@@ -117,7 +117,7 @@ describe('브리더 관리 개체 종단간 테스트', () => {
 
         it('필터와 페이지네이션이 있는 내 개체 목록을 조회한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get('/api/breeder-management/my-pets?page=1&limit=10&status=available')
+                .get('/api/v2/breeder-management/my-pets?page=1&limit=10&status=available')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
@@ -126,7 +126,7 @@ describe('브리더 관리 개체 종단간 테스트', () => {
 
         it('내 후기 목록을 조회한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get('/api/breeder-management/my-reviews')
+                .get('/api/v2/breeder-management/my-reviews')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
@@ -136,7 +136,7 @@ describe('브리더 관리 개체 종단간 테스트', () => {
 
         it('필터와 페이지네이션이 있는 내 후기 목록을 조회한다', async () => {
             const response = await request(context.app.getHttpServer())
-                .get('/api/breeder-management/my-reviews?page=1&limit=10&visibility=public')
+                .get('/api/v2/breeder-management/my-reviews?page=1&limit=10&visibility=public')
                 .set('Authorization', `Bearer ${context.breederToken}`)
                 .expect(200);
 
