@@ -39,9 +39,13 @@ lerna-debug.log*
 .env
 .env.*
 
-# GCP Service Account Keys
+# GCP / Firebase Service Account Keys
 gcp-service-account.json
 *-service-account.json
+*-firebase-adminsdk-*.json
+
+# Local test scripts
+test-push.mjs
 
 # temp directory
 .temp
