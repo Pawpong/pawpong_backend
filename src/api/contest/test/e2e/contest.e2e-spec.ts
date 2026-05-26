@@ -221,6 +221,14 @@ describe('콘테스트 E2E 테스트', () => {
             expect(res.body.data).toBeNull();
         });
 
+        it('GET /weekly-top → data: null', async () => {
+            const res = await request(app.getHttpServer())
+                .get('/api/v2/contest/weekly-top')
+                .expect(200);
+
+            expect(res.body.data).toBeNull();
+        });
+
         it('GET /hall-of-fame → 빈 목록', async () => {
             const res = await request(app.getHttpServer())
                 .get('/api/v2/contest/hall-of-fame')
@@ -287,6 +295,16 @@ describe('콘테스트 E2E 테스트', () => {
                 .expect(200);
 
             expect(res.body.data.contest.title).toBe('저번주 명예의 전당');
+        });
+
+        it('GET /weekly-top → 종료 콘테스트 반환, topEntries 빈 배열', async () => {
+            const res = await request(app.getHttpServer())
+                .get('/api/v2/contest/weekly-top')
+                .expect(200);
+
+            expect(res.body.data.weekKey).toMatch(/^\d{4}-W\d{2}$/);
+            expect(res.body.data.topEntries).toHaveLength(0);
+            expect(res.body.data.calculatedAt).toBeDefined();
         });
 
         // ─── 참여 (user1) ──────────────────────────────────────────────────
@@ -489,6 +507,62 @@ describe('콘테스트 E2E 테스트', () => {
                     });
                 });
             });
+        });
+    });
+
+    // ── weekly-top: 종료 콘테스트에 항목 있을 때 ────────────────────────────
+
+    describe('종료 콘테스트에 항목 있을 때 — weekly-top', () => {
+        beforeAll(async () => {
+            const { contestId } = await seedContest(app, {
+                title: '지난주 명예의 전당',
+                status: 'ended',
+                startDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000),
+            });
+            await seedContestEntry(app, contestId, user1Id, { voteCount: 10, rank: 1 });
+            await seedContestEntry(app, contestId, user2Id, { voteCount: 7, rank: 2 });
+        });
+
+        it('GET /weekly-top → weekKey 형식 YYYY-WXX', async () => {
+            const res = await request(app.getHttpServer())
+                .get('/api/v2/contest/weekly-top')
+                .expect(200);
+
+            expect(res.body.data.weekKey).toMatch(/^\d{4}-W\d{2}$/);
+        });
+
+        it('GET /weekly-top → topEntries 최대 3개, voteCount 내림차순', async () => {
+            const res = await request(app.getHttpServer())
+                .get('/api/v2/contest/weekly-top')
+                .expect(200);
+
+            const { topEntries } = res.body.data;
+            expect(topEntries.length).toBeGreaterThan(0);
+            expect(topEntries.length).toBeLessThanOrEqual(3);
+            if (topEntries.length >= 2) {
+                expect(topEntries[0].voteCount).toBeGreaterThanOrEqual(topEntries[1].voteCount);
+            }
+        });
+
+        it('GET /weekly-top → topEntries 항목 필드 존재', async () => {
+            const res = await request(app.getHttpServer())
+                .get('/api/v2/contest/weekly-top')
+                .expect(200);
+
+            const entry = res.body.data.topEntries[0];
+            expect(entry).toHaveProperty('id');
+            expect(entry).toHaveProperty('photoUrl');
+            expect(entry).toHaveProperty('rank');
+            expect(typeof entry.voteCount).toBe('number');
+        });
+
+        it('GET /weekly-top → calculatedAt ISO 문자열', async () => {
+            const res = await request(app.getHttpServer())
+                .get('/api/v2/contest/weekly-top')
+                .expect(200);
+
+            expect(new Date(res.body.data.calculatedAt).toString()).not.toBe('Invalid Date');
         });
     });
 });
