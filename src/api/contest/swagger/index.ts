@@ -15,6 +15,7 @@ import {
     ContestPreviousRankingResponseDto,
 } from '../dto/response/contest-hall-of-fame-response.dto';
 import { ContestRandomEntryResponseDto } from '../dto/response/contest-random-entry-response.dto';
+import { ContestWeeklyTopResponseDto } from '../dto/response/contest-weekly-top-response.dto';
 import { ContestYesterdayTopResponseDto } from '../dto/response/contest-yesterday-top-response.dto';
 
 const TAG = '콘테스트';
@@ -117,5 +118,15 @@ export function ApiGetRandomContestEntryEndpoint() {
 - 투표 가능한 항목 없음: entry: null, alreadyVoted: false
 - 투표 전이므로 voteCount는 항상 null`,
         responseType: ContestRandomEntryResponseDto,
+    });
+}
+
+export function ApiGetWeeklyTopEndpoint() {
+    return ApiEndpoint({
+        summary: '지난주 TOP 3 조회',
+        description:
+            '가장 최근 종료된 콘테스트의 voteCount 기준 TOP 3를 반환합니다. 홈 화면 명예의 전당 영역 연동용. 종료된 콘테스트가 없으면 data: null.',
+        responseType: ContestWeeklyTopResponseDto,
+        isPublic: true,
     });
 }

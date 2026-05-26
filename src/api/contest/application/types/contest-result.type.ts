@@ -85,3 +85,12 @@ export interface GetYesterdayTopResult {
     contestId: string;
     ranking: YesterdayTopEntry[];
 }
+
+export interface GetWeeklyTopResult {
+    /** ISO 8601 주차 키 (예: "2026-W21") */
+    weekKey: string;
+    /** 지난주 voteCount 내림차순 TOP 3 항목 */
+    topEntries: ContestEntryItem[];
+    /** 집계 기준 시각 (해당 콘테스트 종료일) */
+    calculatedAt: Date;
+}
