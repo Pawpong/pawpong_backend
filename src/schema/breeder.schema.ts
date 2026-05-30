@@ -210,9 +210,9 @@ export class BreederProfile {
     representativePhotos: string[];
 
     /**
-     * 전문 분야 (강아지, 고양이)
+     * 전문 분야 (강아지, 고양이, 파충류)
      */
-    @Prop({ required: true, type: [String], enum: ['dog', 'cat'] })
+    @Prop({ required: true, type: [String], enum: ['dog', 'cat', 'reptile'] })
     specialization: string[];
 
     /**
@@ -408,9 +408,9 @@ export class Breeder extends User {
     name: string;
 
     /**
-     * 반려동물 타입 (강아지/고양이)
+     * 반려동물 타입 (강아지/고양이/파충류)
      */
-    @Prop({ required: true, enum: ['dog', 'cat'] })
+    @Prop({ required: true, enum: ['dog', 'cat', 'reptile'] })
     petType: string;
 
     /**

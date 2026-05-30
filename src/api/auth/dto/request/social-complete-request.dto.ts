@@ -115,11 +115,11 @@ export class SocialCompleteRequestDto {
      */
     @ApiProperty({
         description: '브리딩 동물 종류 (브리더 전용)',
-        enum: ['cat', 'dog'],
+        enum: ['cat', 'dog', 'reptile'],
         example: 'cat',
         required: false,
     })
-    @IsEnum(['cat', 'dog'])
+    @IsEnum(['cat', 'dog', 'reptile'])
     @IsOptional()
     petType?: string;
 

@@ -50,7 +50,7 @@ export class RegisterBreederResponseDto {
      */
     @ApiProperty({
         description: '브리딩 동물 종류',
-        enum: ['cat', 'dog'],
+        enum: ['cat', 'dog', 'reptile'],
         example: 'cat',
     })
     animal: string;
