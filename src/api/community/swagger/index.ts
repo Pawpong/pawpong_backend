@@ -13,6 +13,10 @@ import {
     CommunityBookmarkResponseDto,
     CommunityUnsaveResponseDto,
 } from '../dto/response/community-bookmark-response.dto';
+import {
+    CommunityLikeResponseDto,
+    CommunityUnlikeResponseDto,
+} from '../dto/response/community-like-response.dto';
 import { CommunityPostCardResponseDto } from '../dto/response/community-post-card.dto';
 import { CommunityPostCommentResponseDto } from '../dto/response/community-post-comment.dto';
 import { CommunityPostDeleteResponseDto } from '../dto/response/community-post-delete-response.dto';
@@ -180,6 +184,34 @@ export function ApiUnsaveCommunityPostEndpoint() {
             responseType: CommunityUnsaveResponseDto,
             successDescription: '게시글 저장 취소 성공',
             successMessageExample: COMMUNITY_RESPONSE_MESSAGES.unsaved,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiLikeCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 좋아요',
+            description: '이미 좋아요한 경우 liked: false 반환 (멱등). 신규 좋아요 시 likeCount += 1.',
+            responseType: CommunityLikeResponseDto,
+            successDescription: '좋아요 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.liked,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiUnlikeCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 좋아요 취소',
+            description: '좋아요 안 한 게시글 취소 시 unliked: false 반환 (멱등). 취소 시 likeCount -= 1 (0 미만 방지).',
+            responseType: CommunityUnlikeResponseDto,
+            successDescription: '좋아요 취소 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.unliked,
             errorResponses: [POST_NOT_FOUND_RESPONSE],
         }),
         ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
