@@ -144,4 +144,12 @@ export class CommunityRepository {
 
         return { docs, totalItems };
     }
+
+    async incrementViewCount(postId: string): Promise<void> {
+        if (!Types.ObjectId.isValid(postId)) return;
+        await this.postModel.updateOne(
+            { _id: new Types.ObjectId(postId), isActive: true },
+            { $inc: { viewCount: 1 } },
+        );
+    }
 }

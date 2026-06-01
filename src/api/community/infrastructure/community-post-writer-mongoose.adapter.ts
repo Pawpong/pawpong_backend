@@ -23,4 +23,8 @@ export class CommunityPostWriterMongooseAdapter implements CommunityPostWriterPo
     softDeleteByAuthor(postId: string, authorId: string): Promise<{ changed: boolean }> {
         return this.repository.softDeletePostByAuthor(postId, authorId);
     }
+
+    incrementViewCount(postId: string): Promise<void> {
+        return this.repository.incrementViewCount(postId);
+    }
 }
