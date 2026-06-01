@@ -13,6 +13,7 @@ import {
     CommunityBookmarkResponseDto,
     CommunityUnsaveResponseDto,
 } from '../dto/response/community-bookmark-response.dto';
+import { CommunityPostReportResponseDto } from '../dto/response/community-post-report-response.dto';
 import {
     CommunityLikeResponseDto,
     CommunityUnlikeResponseDto,
@@ -260,6 +261,20 @@ export function ApiUnlikeCommunityPostEndpoint() {
             responseType: CommunityUnlikeResponseDto,
             successDescription: '좋아요 취소 성공',
             successMessageExample: COMMUNITY_RESPONSE_MESSAGES.unliked,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiReportCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 신고',
+            description: '동일 유저가 같은 게시글을 중복 신고하면 reported: false 반환 (멱등). 비활성 게시글은 400.',
+            responseType: CommunityPostReportResponseDto,
+            successDescription: '신고 접수 성공',
+            successMessageExample: '신고가 접수되었습니다.',
             errorResponses: [POST_NOT_FOUND_RESPONSE],
         }),
         ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),

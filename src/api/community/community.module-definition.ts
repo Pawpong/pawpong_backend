@@ -7,6 +7,7 @@ import { CommunityBookmark, CommunityBookmarkSchema } from '../../schema/communi
 import { CommunityPostComment, CommunityPostCommentSchema } from '../../schema/community-post-comment.schema';
 import { CommunityPostLike, CommunityPostLikeSchema } from '../../schema/community-post-like.schema';
 import { CommunityPost, CommunityPostSchema } from '../../schema/community-post.schema';
+import { CommunityPostReport, CommunityPostReportSchema } from '../../schema/community-post-report.schema';
 
 import { COMMUNITY_ASSET_URL_PORT } from './application/ports/community-asset-url.port';
 import { COMMUNITY_AUTHOR_READER_PORT } from './application/ports/community-author-reader.port';
@@ -16,6 +17,9 @@ import { COMMUNITY_COMMENT_WRITER_PORT } from './application/ports/community-com
 import { COMMUNITY_LIKE_PORT } from './application/ports/community-like.port';
 import { COMMUNITY_POST_READER_PORT } from './application/ports/community-post-reader.port';
 import { COMMUNITY_POST_WRITER_PORT } from './application/ports/community-post-writer.port';
+import { COMMUNITY_REPORT_PORT } from './application/ports/community-report.port';
+import { COMMUNITY_REPORT_ADMIN_READER_PORT } from './admin/application/ports/community-report-admin-reader.port';
+import { COMMUNITY_REPORT_ADMIN_WRITER_PORT } from './admin/application/ports/community-report-admin-writer.port';
 import { CreateCommunityPostUseCase } from './application/use-cases/create-community-post.use-case';
 import { DeleteCommunityPostUseCase } from './application/use-cases/delete-community-post.use-case';
 import { GetCommunityPostCommentsUseCase } from './application/use-cases/get-community-post-comments.use-case';
@@ -26,18 +30,24 @@ import { IncrementViewCountUseCase } from './application/use-cases/increment-vie
 import { CreateCommunityPostCommentUseCase } from './application/use-cases/create-community-post-comment.use-case';
 import { DeleteCommunityPostCommentUseCase } from './application/use-cases/delete-community-post-comment.use-case';
 import { LikeCommunityPostUseCase } from './application/use-cases/like-community-post.use-case';
+import { ReportCommunityPostUseCase } from './application/use-cases/report-community-post.use-case';
 import { SaveCommunityPostUseCase } from './application/use-cases/save-community-post.use-case';
 import { UpdateCommunityPostCommentUseCase } from './application/use-cases/update-community-post-comment.use-case';
 import { UnlikeCommunityPostUseCase } from './application/use-cases/unlike-community-post.use-case';
 import { UnsaveCommunityPostUseCase } from './application/use-cases/unsave-community-post.use-case';
 import { UpdateCommunityPostUseCase } from './application/use-cases/update-community-post.use-case';
+import { GetCommunityPostReportsUseCase } from './admin/application/use-cases/get-community-post-reports.use-case';
+import { HandleCommunityPostReportUseCase } from './admin/application/use-cases/handle-community-post-report.use-case';
 import { CommunityPostBookmarkController } from './controller/community-post-bookmark.controller';
 import { CommunityPostDetailController } from './controller/community-post-detail.controller';
 import { CommunityPostCommentController } from './controller/community-post-comment.controller';
 import { CommunityPostLikeController } from './controller/community-post-like.controller';
 import { CommunityPostListController } from './controller/community-post-list.controller';
+import { CommunityPostReportController } from './controller/community-post-report.controller';
 import { CommunityPostViewCountController } from './controller/community-post-view-count.controller';
 import { CommunityPostWriteController } from './controller/community-post-write.controller';
+import { CommunityReportAdminQueryController } from './admin/controller/community-report-admin-query.controller';
+import { CommunityReportAdminCommandController } from './admin/controller/community-report-admin-command.controller';
 import { CommunityPostMapperService } from './domain/services/community-post-mapper.service';
 import { CommunityPostWriteValidatorService } from './domain/services/community-post-write-validator.service';
 import { CommunityAssetUrlStorageAdapter } from './infrastructure/community-asset-url-storage.adapter';
@@ -49,12 +59,15 @@ import { CommunityPostReaderMongooseAdapter } from './infrastructure/community-p
 import { CommunityPostWriterMongooseAdapter } from './infrastructure/community-post-writer-mongoose.adapter';
 import { CommunityBookmarkRepository } from './repository/community-bookmark.repository';
 import { CommunityLikeRepository } from './repository/community-like.repository';
+import { CommunityReportRepository } from './repository/community-report.repository';
 import { CommunityRepository } from './repository/community.repository';
+import { CommunityReportMongooseAdapter } from './infrastructure/community-report-mongoose.adapter';
 
 const SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: CommunityPost.name, schema: CommunityPostSchema },
     { name: CommunityPostComment.name, schema: CommunityPostCommentSchema },
     { name: CommunityPostLike.name, schema: CommunityPostLikeSchema },
+    { name: CommunityPostReport.name, schema: CommunityPostReportSchema },
     { name: CommunityBookmark.name, schema: CommunityBookmarkSchema },
     { name: Adopter.name, schema: AdopterSchema },
     { name: Breeder.name, schema: BreederSchema },
@@ -69,7 +82,10 @@ export const COMMUNITY_MODULE_CONTROLLERS = [
     CommunityPostWriteController,
     CommunityPostCommentController,
     CommunityPostLikeController,
+    CommunityPostReportController,
     CommunityPostBookmarkController,
+    CommunityReportAdminQueryController,
+    CommunityReportAdminCommandController,
 ];
 
 const USE_CASE_PROVIDERS = [
@@ -85,9 +101,12 @@ const USE_CASE_PROVIDERS = [
     DeleteCommunityPostCommentUseCase,
     LikeCommunityPostUseCase,
     UnlikeCommunityPostUseCase,
+    ReportCommunityPostUseCase,
     SaveCommunityPostUseCase,
     UnsaveCommunityPostUseCase,
     GetMySavedCommunityPostsUseCase,
+    GetCommunityPostReportsUseCase,
+    HandleCommunityPostReportUseCase,
 ];
 
 const DOMAIN_PROVIDERS = [CommunityPostMapperService, CommunityPostWriteValidatorService];
@@ -96,6 +115,7 @@ const INFRASTRUCTURE_PROVIDERS = [
     CommunityRepository,
     CommunityBookmarkRepository,
     CommunityLikeRepository,
+    CommunityReportRepository,
     CommunityCommentMongooseAdapter,
     CommunityPostReaderMongooseAdapter,
     CommunityPostWriterMongooseAdapter,
@@ -103,6 +123,7 @@ const INFRASTRUCTURE_PROVIDERS = [
     CommunityAssetUrlStorageAdapter,
     CommunityBookmarkMongooseAdapter,
     CommunityLikeMongooseAdapter,
+    CommunityReportMongooseAdapter,
 ];
 
 const PORT_BINDINGS = [
@@ -114,6 +135,9 @@ const PORT_BINDINGS = [
     { provide: COMMUNITY_LIKE_PORT, useExisting: CommunityLikeMongooseAdapter },
     { provide: COMMUNITY_COMMENT_WRITER_PORT, useExisting: CommunityCommentMongooseAdapter },
     { provide: COMMUNITY_COMMENT_READER_PORT, useExisting: CommunityCommentMongooseAdapter },
+    { provide: COMMUNITY_REPORT_PORT, useExisting: CommunityReportMongooseAdapter },
+    { provide: COMMUNITY_REPORT_ADMIN_READER_PORT, useExisting: CommunityReportMongooseAdapter },
+    { provide: COMMUNITY_REPORT_ADMIN_WRITER_PORT, useExisting: CommunityReportMongooseAdapter },
 ];
 
 export const COMMUNITY_MODULE_PROVIDERS = [
