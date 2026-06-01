@@ -59,6 +59,10 @@ export class StorageService {
         }
     }
 
+    // 레거시 버킷명 (rename 이전: pawpong_bucket → 현재 pawpong_s3).
+    // 옛 데이터의 'pawpong_bucket/' 키 접두사 보정용.
+    private static readonly LEGACY_BUCKET_NAME = 'pawpong_bucket';
+
     // HEIC/HEIF 전용 major brand 목록 (ISOBMFF offset 8-12)
     private static readonly HEIC_BRANDS = ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'mif1'];
     private static readonly FTYP_SIG = Buffer.from([0x66, 0x74, 0x79, 0x70]); // 'ftyp'
@@ -173,16 +177,25 @@ export class StorageService {
     generateSignedUrl(fileName: string, expirationMinutes: number = 60): string {
         let filePath = fileName;
 
+        // 제거 대상 버킷 접두사 = 현재 버킷명 + 레거시 버킷명.
+        // 버킷 rename(pawpong_bucket → pawpong_s3) 이전에 업로드되어 DB에
+        // 'pawpong_bucket/pets/...' 형태로 키가 박제된 레거시 데이터를 함께 보정한다.
+        // (현재 버킷명만 제거하면 레거시 접두사가 남아 .../pawpong_s3/pawpong_bucket/... 로 404 발생)
+        const bucketPrefixes = Array.from(
+            new Set([this.bucketName, StorageService.LEGACY_BUCKET_NAME].filter(Boolean)),
+        );
+
         // URL인 경우 파일 경로만 추출
         if (fileName.startsWith('http://') || fileName.startsWith('https://')) {
             try {
                 const urlObj = new URL(fileName);
                 // 스마일서브 도메인인 경우 경로 추출
                 if (urlObj.hostname.includes('object.iwinv.kr')) {
-                    // pathname에서 버킷 이름 제거: /pawpong_bucket/path/file.jpg -> path/file.jpg
+                    // pathname 선두의 버킷명(현재/레거시)을 연속으로 모두 제거
+                    // 예) /pawpong_s3/pawpong_bucket/pets/x.jpg -> pets/x.jpg
                     const pathParts = urlObj.pathname.split('/').filter((p) => p);
-                    if (pathParts[0] === this.bucketName) {
-                        pathParts.shift(); // 버킷 이름 제거
+                    while (pathParts.length > 0 && bucketPrefixes.includes(pathParts[0])) {
+                        pathParts.shift();
                     }
                     filePath = pathParts.join('/');
                 } else {
@@ -195,10 +208,17 @@ export class StorageService {
             }
         }
 
-        // 방어 로직: 파일 경로에 버킷 이름이 접두사로 포함된 경우 제거
+        // 방어 로직: 파일 경로 선두에 버킷명(현재/레거시) 접두사가 붙은 경우 모두 제거
         // (이전 버그로 인해 DB에 pawpong_bucket/representative/uuid.jpg 형태로 저장된 데이터 대응)
-        if (filePath.startsWith(`${this.bucketName}/`)) {
-            filePath = filePath.slice(`${this.bucketName}/`.length);
+        let stripped = true;
+        while (stripped) {
+            stripped = false;
+            for (const prefix of bucketPrefixes) {
+                if (filePath.startsWith(`${prefix}/`)) {
+                    filePath = filePath.slice(`${prefix}/`.length);
+                    stripped = true;
+                }
+            }
         }
 
         // 스마일서브는 공개 버킷이므로 만료 시간 없이 URL 반환
