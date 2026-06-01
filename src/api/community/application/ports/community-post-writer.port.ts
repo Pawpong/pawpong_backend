@@ -13,4 +13,7 @@ export interface CommunityPostWriterPort {
      * authorId 미일치 또는 이미 비활성이면 changed=false.
      */
     softDeleteByAuthor(postId: string, authorId: string): Promise<{ changed: boolean }>;
+
+    /** 조회 수 +1. 존재 검증은 UseCase 에서 선행한다. */
+    incrementViewCount(postId: string): Promise<void>;
 }

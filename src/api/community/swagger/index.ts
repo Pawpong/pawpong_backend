@@ -186,6 +186,21 @@ export function ApiUnsaveCommunityPostEndpoint() {
     );
 }
 
+export function ApiIncrementViewCountEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 조회 수 증가',
+            description: '게시글 상세 진입 시 호출. 단순 증가(dedup 없음). 비활성 게시글은 400.',
+            responseType: Object,
+            isPublic: true,
+            successDescription: '조회 수 반영 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.viewCounted,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
 export function ApiGetMySavedCommunityPostsEndpoint() {
     return applyDecorators(
         ApiPaginatedEndpoint({

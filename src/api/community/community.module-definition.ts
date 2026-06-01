@@ -18,12 +18,14 @@ import { GetCommunityPostCommentsUseCase } from './application/use-cases/get-com
 import { GetCommunityPostDetailUseCase } from './application/use-cases/get-community-post-detail.use-case';
 import { GetCommunityPostListUseCase } from './application/use-cases/get-community-post-list.use-case';
 import { GetMySavedCommunityPostsUseCase } from './application/use-cases/get-my-saved-community-posts.use-case';
+import { IncrementViewCountUseCase } from './application/use-cases/increment-view-count.use-case';
 import { SaveCommunityPostUseCase } from './application/use-cases/save-community-post.use-case';
 import { UnsaveCommunityPostUseCase } from './application/use-cases/unsave-community-post.use-case';
 import { UpdateCommunityPostUseCase } from './application/use-cases/update-community-post.use-case';
 import { CommunityPostBookmarkController } from './controller/community-post-bookmark.controller';
 import { CommunityPostDetailController } from './controller/community-post-detail.controller';
 import { CommunityPostListController } from './controller/community-post-list.controller';
+import { CommunityPostViewCountController } from './controller/community-post-view-count.controller';
 import { CommunityPostWriteController } from './controller/community-post-write.controller';
 import { CommunityPostMapperService } from './domain/services/community-post-mapper.service';
 import { CommunityPostWriteValidatorService } from './domain/services/community-post-write-validator.service';
@@ -48,6 +50,7 @@ export const COMMUNITY_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule];
 export const COMMUNITY_MODULE_CONTROLLERS = [
     CommunityPostListController,
     CommunityPostDetailController,
+    CommunityPostViewCountController,
     CommunityPostWriteController,
     CommunityPostBookmarkController,
 ];
@@ -59,6 +62,7 @@ const USE_CASE_PROVIDERS = [
     CreateCommunityPostUseCase,
     UpdateCommunityPostUseCase,
     DeleteCommunityPostUseCase,
+    IncrementViewCountUseCase,
     SaveCommunityPostUseCase,
     UnsaveCommunityPostUseCase,
     GetMySavedCommunityPostsUseCase,
