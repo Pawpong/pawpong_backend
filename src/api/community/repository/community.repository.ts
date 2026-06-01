@@ -152,4 +152,79 @@ export class CommunityRepository {
             { $inc: { viewCount: 1 } },
         );
     }
+
+    // ── 댓글 write ──────────────────────────────────────────
+
+    async createComment(data: {
+        postId: string;
+        authorId: string;
+        authorModel: 'Adopter' | 'Breeder';
+        authorNickname: string;
+        authorProfileImageFileName?: string;
+        body: string;
+        parentCommentId?: string;
+    }): Promise<{ _id: string }> {
+        const created = await this.commentModel.create({
+            postId: new Types.ObjectId(data.postId),
+            authorId: new Types.ObjectId(data.authorId),
+            authorModel: data.authorModel,
+            authorNickname: data.authorNickname,
+            authorProfileImageFileName: data.authorProfileImageFileName,
+            body: data.body,
+            parentCommentId: data.parentCommentId ? new Types.ObjectId(data.parentCommentId) : null,
+        });
+        // 게시글 commentCount 동기화
+        await this.postModel.updateOne(
+            { _id: new Types.ObjectId(data.postId) },
+            { $inc: { commentCount: 1 } },
+        );
+        return { _id: String(created._id) };
+    }
+
+    async updateCommentByAuthor(
+        commentId: string,
+        authorId: string,
+        body: string,
+    ): Promise<{ changed: boolean }> {
+        if (!Types.ObjectId.isValid(commentId) || !Types.ObjectId.isValid(authorId)) {
+            return { changed: false };
+        }
+        const result = await this.commentModel.updateOne(
+            { _id: new Types.ObjectId(commentId), authorId: new Types.ObjectId(authorId), isActive: true },
+            { $set: { body } },
+        );
+        return { changed: result.modifiedCount > 0 };
+    }
+
+    async softDeleteCommentByAuthor(commentId: string, authorId: string): Promise<{ changed: boolean }> {
+        if (!Types.ObjectId.isValid(commentId) || !Types.ObjectId.isValid(authorId)) {
+            return { changed: false };
+        }
+        const comment = await this.commentModel.findOne({
+            _id: new Types.ObjectId(commentId),
+            authorId: new Types.ObjectId(authorId),
+            isActive: true,
+        }).lean<CommunityPostCommentDocument>();
+
+        if (!comment) return { changed: false };
+
+        await this.commentModel.updateOne(
+            { _id: new Types.ObjectId(commentId) },
+            { $set: { isActive: false } },
+        );
+        // 게시글 commentCount 동기화
+        await this.postModel.updateOne(
+            { _id: comment.postId, commentCount: { $gt: 0 } },
+            { $inc: { commentCount: -1 } },
+        );
+        return { changed: true };
+    }
+
+    async findCommentById(commentId: string): Promise<CommunityPostCommentDocument | null> {
+        if (!Types.ObjectId.isValid(commentId)) return null;
+        return this.commentModel
+            .findById(new Types.ObjectId(commentId))
+            .lean<CommunityPostCommentDocument>()
+            .exec();
+    }
 }

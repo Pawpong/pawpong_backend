@@ -11,4 +11,7 @@ export const COMMUNITY_RESPONSE_MESSAGES = {
     viewCounted: '조회 수가 반영되었습니다.',
     liked: '게시글에 좋아요를 눌렀습니다.',
     unliked: '게시글 좋아요를 취소했습니다.',
+    commentCreated: '댓글이 등록되었습니다.',
+    commentUpdated: '댓글이 수정되었습니다.',
+    commentDeleted: '댓글이 삭제되었습니다.',
 } as const;
