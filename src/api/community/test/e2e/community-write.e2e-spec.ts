@@ -93,9 +93,9 @@ describe('v2 커뮤니티 작성/수정/삭제 종단간 테스트', () => {
                 .send({ body: '본문 텍스트', petType: 'reptile', category: '레오파드' })
                 .expect(200);
 
-            expect(res.body.data.authorId).toBe(a);
+            expect(res.body.data.author.userId).toBe(a);
             expect(res.body.data.authorModel).toBe('Adopter');
-            expect(res.body.data.authorNickname).toMatch(/^입양자-/);
+            expect(res.body.data.author.nickname).toMatch(/^입양자-/);
             expect(res.body.data.body).toBe('본문 텍스트');
             expect(res.body.data.petType).toBe('reptile');
             expect(res.body.data.category).toBe('레오파드');
@@ -117,7 +117,7 @@ describe('v2 커뮤니티 작성/수정/삭제 종단간 테스트', () => {
                 .send({ body: '브리더 본문' })
                 .expect(200);
             expect(res.body.data.authorModel).toBe('Breeder');
-            expect(res.body.data.authorNickname).toMatch(/^브리더-/);
+            expect(res.body.data.author.nickname).toMatch(/^브리더-/);
         });
     });
 
