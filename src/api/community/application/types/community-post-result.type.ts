@@ -5,13 +5,18 @@ import type { CommunityAuthorModel, CommunityPetType } from './community-post.ty
  * 컨트롤러 경계 밖으로 나가지 않으며 @ApiProperty 데코레이터에 의존하지 않는다.
  */
 
+export interface CommunityAuthorResult {
+    userId: string;
+    nickname: string;
+    profileImageUrl?: string;
+}
+
 export interface CommunityPostCommentResult {
     commentId: string;
     postId: string;
-    authorId: string;
+    author: CommunityAuthorResult;
+    /** 다형성 분기용 — 프론트 마이홈 연결 시 authorModel 기반 라우팅 */
     authorModel: CommunityAuthorModel;
-    authorNickname: string;
-    authorProfileImageUrl?: string;
     parentCommentId: string | null;
     body: string;
     likeCount: number;
@@ -20,10 +25,8 @@ export interface CommunityPostCommentResult {
 
 export interface CommunityPostCardResult {
     postId: string;
-    authorId: string;
+    author: CommunityAuthorResult;
     authorModel: CommunityAuthorModel;
-    authorNickname: string;
-    authorProfileImageUrl?: string;
     title?: string;
     bodyExcerpt: string;
     primaryPhotoUrl?: string;
@@ -38,10 +41,8 @@ export interface CommunityPostCardResult {
 
 export interface CommunityPostDetailResult {
     postId: string;
-    authorId: string;
+    author: CommunityAuthorResult;
     authorModel: CommunityAuthorModel;
-    authorNickname: string;
-    authorProfileImageUrl?: string;
     title?: string;
     body: string;
     photoUrls: string[];

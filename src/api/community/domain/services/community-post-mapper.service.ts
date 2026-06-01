@@ -26,10 +26,12 @@ export class CommunityPostMapperService {
             .filter((url): url is string => !!url);
         return {
             postId: snapshot.postId,
-            authorId: snapshot.authorId,
+            author: {
+                userId: snapshot.authorId,
+                nickname: snapshot.authorNickname,
+                profileImageUrl: this.assetUrl.toSignedUrl(snapshot.authorProfileImageFileName),
+            },
             authorModel: snapshot.authorModel,
-            authorNickname: snapshot.authorNickname,
-            authorProfileImageUrl: this.assetUrl.toSignedUrl(snapshot.authorProfileImageFileName),
             title: snapshot.title,
             bodyExcerpt: this.excerpt(snapshot.body, 120),
             primaryPhotoUrl: photoUrls[0],
@@ -52,10 +54,12 @@ export class CommunityPostMapperService {
             .filter((url): url is string => !!url);
         return {
             postId: snapshot.postId,
-            authorId: snapshot.authorId,
+            author: {
+                userId: snapshot.authorId,
+                nickname: snapshot.authorNickname,
+                profileImageUrl: this.assetUrl.toSignedUrl(snapshot.authorProfileImageFileName),
+            },
             authorModel: snapshot.authorModel,
-            authorNickname: snapshot.authorNickname,
-            authorProfileImageUrl: this.assetUrl.toSignedUrl(snapshot.authorProfileImageFileName),
             title: snapshot.title,
             body: snapshot.body,
             photoUrls,
@@ -74,10 +78,12 @@ export class CommunityPostMapperService {
         return {
             commentId: snapshot.commentId,
             postId: snapshot.postId,
-            authorId: snapshot.authorId,
+            author: {
+                userId: snapshot.authorId,
+                nickname: snapshot.authorNickname,
+                profileImageUrl: this.assetUrl.toSignedUrl(snapshot.authorProfileImageFileName),
+            },
             authorModel: snapshot.authorModel,
-            authorNickname: snapshot.authorNickname,
-            authorProfileImageUrl: this.assetUrl.toSignedUrl(snapshot.authorProfileImageFileName),
             parentCommentId: snapshot.parentCommentId,
             body: snapshot.body,
             likeCount: snapshot.likeCount,
