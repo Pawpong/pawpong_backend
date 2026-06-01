@@ -190,6 +190,54 @@ export function ApiUnsaveCommunityPostEndpoint() {
     );
 }
 
+export function ApiCreateCommentEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 댓글/답글 작성',
+            description: 'parentCommentId 있으면 답글. body 공백 trim 후 비어있으면 400.',
+            responseType: Object,
+            successDescription: '댓글 작성 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.commentCreated,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiUpdateCommentEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 댓글 수정',
+            description: '본인 댓글만 수정 가능.',
+            responseType: Object,
+            successDescription: '댓글 수정 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.commentUpdated,
+            errorResponses: [
+                POST_NOT_FOUND_RESPONSE,
+                { status: 403, description: '타인 댓글', errorExample: '본인 댓글만 수정할 수 있습니다.' },
+            ],
+        }),
+        ApiParam({ name: 'commentId', description: '댓글 ID', example: '507f1f77bcf86cd799439044' }),
+    );
+}
+
+export function ApiDeleteCommentEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 댓글 삭제',
+            description: '본인 댓글만 삭제 가능. isActive=false 소프트 삭제.',
+            responseType: Object,
+            successDescription: '댓글 삭제 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.commentDeleted,
+            errorResponses: [
+                POST_NOT_FOUND_RESPONSE,
+                { status: 403, description: '타인 댓글', errorExample: '본인 댓글만 삭제할 수 있습니다.' },
+            ],
+        }),
+        ApiParam({ name: 'commentId', description: '댓글 ID', example: '507f1f77bcf86cd799439044' }),
+    );
+}
+
 export function ApiLikeCommunityPostEndpoint() {
     return applyDecorators(
         ApiEndpoint({
