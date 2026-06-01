@@ -1,5 +1,6 @@
 import { Get, Param } from '@nestjs/common';
 
+import { CurrentUser } from '../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../common/dto/response/api-response.dto';
 import { GetCommunityPostDetailUseCase } from '../application/use-cases/get-community-post-detail.use-case';
 import { COMMUNITY_RESPONSE_MESSAGES } from '../constants/community-response-messages';
@@ -16,8 +17,11 @@ export class CommunityPostDetailController {
 
     @Get('posts/:postId')
     @ApiGetCommunityPostDetailEndpoint()
-    async detail(@Param('postId') postId: string): Promise<ApiResponseDto<CommunityPostDetailResponseDto>> {
-        const result = await this.getDetailUseCase.execute(postId);
+    async detail(
+        @Param('postId') postId: string,
+        @CurrentUser('userId') userId?: string,
+    ): Promise<ApiResponseDto<CommunityPostDetailResponseDto>> {
+        const result = await this.getDetailUseCase.execute(postId, userId);
         return ApiResponseDto.success(result, COMMUNITY_RESPONSE_MESSAGES.detailRetrieved);
     }
 }

@@ -53,4 +53,7 @@ export class CommunityPostCardResponseDto {
 
     @ApiProperty({ description: '작성 시각 (ISO 8601)', example: '2026-04-01T10:00:00.000Z' })
     createdAt: string;
+
+    @ApiProperty({ description: '현재 요청 사용자의 좋아요 여부 (비인증 시 false)', example: false })
+    isLiked: boolean;
 }

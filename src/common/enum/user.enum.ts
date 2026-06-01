@@ -169,6 +169,9 @@ export enum NotificationType {
 
     // 반려동물 등록
     NEW_PET_REGISTERED = 'new_pet_registered', // 새 반려동물 등록
+
+    // 커뮤니티
+    COMMUNITY_POST_LIKED = 'community_post_liked', // 커뮤니티 게시글 좋아요
 }
 
 export enum RecipientType {

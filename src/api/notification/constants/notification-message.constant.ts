@@ -68,4 +68,8 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; bo
         title: '{title}',
         body: '{body}',
     },
+    [NotificationType.COMMUNITY_POST_LIKED]: {
+        title: '좋아요를 받았어요!',
+        body: '{likerNickname}님이 내 게시글을 좋아합니다.',
+    },
 };

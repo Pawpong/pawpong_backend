@@ -20,7 +20,7 @@ export class CommunityPostMapperService {
         private readonly assetUrl: CommunityAssetUrlPort,
     ) {}
 
-    toCard(snapshot: CommunityPostSnapshot): CommunityPostCardResult {
+    toCard(snapshot: CommunityPostSnapshot, isLiked = false): CommunityPostCardResult {
         const photoUrls = snapshot.photos
             .map((fileName) => this.assetUrl.toSignedUrl(fileName))
             .filter((url): url is string => !!url);
@@ -42,12 +42,14 @@ export class CommunityPostMapperService {
             commentCount: snapshot.commentCount,
             saveCount: snapshot.saveCount,
             createdAt: snapshot.createdAt.toISOString(),
+            isLiked,
         };
     }
 
     toDetail(
         snapshot: CommunityPostSnapshot,
         comments: CommunityPostCommentResult[],
+        isLiked = false,
     ): CommunityPostDetailResult {
         const photoUrls = snapshot.photos
             .map((fileName) => this.assetUrl.toSignedUrl(fileName))
@@ -71,6 +73,7 @@ export class CommunityPostMapperService {
             viewCount: snapshot.viewCount,
             createdAt: snapshot.createdAt.toISOString(),
             commentPreview: comments,
+            isLiked,
         };
     }
 
