@@ -30,6 +30,7 @@ export class CommunityPostListController {
             sort: query.sort,
             page: query.page,
             pageSize: query.pageSize,
+            userId,
         });
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result),

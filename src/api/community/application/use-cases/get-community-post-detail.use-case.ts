@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CommunityPostMapperService } from '../../domain/services/community-post-mapper.service';
+import { COMMUNITY_LIKE_PORT, type CommunityLikePort } from '../ports/community-like.port';
 import { COMMUNITY_POST_READER_PORT, type CommunityPostReaderPort } from '../ports/community-post-reader.port';
 import type { CommunityPostDetailResult } from '../types/community-post-result.type';
 
@@ -15,22 +16,23 @@ export class GetCommunityPostDetailUseCase {
     constructor(
         @Inject(COMMUNITY_POST_READER_PORT)
         private readonly reader: CommunityPostReaderPort,
+        @Inject(COMMUNITY_LIKE_PORT)
+        private readonly likePort: CommunityLikePort,
         private readonly mapper: CommunityPostMapperService,
     ) {}
 
-    async execute(postId: string): Promise<CommunityPostDetailResult> {
+    async execute(postId: string, userId?: string): Promise<CommunityPostDetailResult> {
         const snapshot = await this.reader.readPostById(postId);
         if (!snapshot) {
             throw new BadRequestException('해당 게시글을 찾을 수 없습니다.');
         }
 
-        const { snapshots: commentSnapshots } = await this.reader.listComments({
-            postId,
-            skip: 0,
-            limit: COMMENT_PREVIEW_LIMIT,
-        });
+        const [{ snapshots: commentSnapshots }, isLiked] = await Promise.all([
+            this.reader.listComments({ postId, skip: 0, limit: COMMENT_PREVIEW_LIMIT }),
+            userId ? this.likePort.isLiked(userId, postId) : Promise.resolve(false),
+        ]);
         const commentPreview = commentSnapshots.map((c) => this.mapper.toComment(c));
 
-        return this.mapper.toDetail(snapshot, commentPreview);
+        return this.mapper.toDetail(snapshot, commentPreview, isLiked);
     }
 }

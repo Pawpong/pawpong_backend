@@ -53,4 +53,7 @@ export class CommunityPostDetailResponseDto {
         type: [CommunityPostCommentResponseDto],
     })
     commentPreview: CommunityPostCommentResponseDto[];
+
+    @ApiProperty({ description: '현재 요청 사용자의 좋아요 여부 (비인증 시 false)', example: false })
+    isLiked: boolean;
 }

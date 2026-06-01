@@ -18,10 +18,28 @@ const likePort = {
     findLikedPostIds: jest.fn(),
 };
 
+const authorReader = { readAuthorSnapshot: jest.fn().mockResolvedValue(null) };
+const notificationDispatch = {
+    to: jest.fn().mockReturnValue({
+        type: jest.fn().mockReturnThis(),
+        title: jest.fn().mockReturnThis(),
+        content: jest.fn().mockReturnThis(),
+        metadata: jest.fn().mockReturnThis(),
+        targetUrl: jest.fn().mockReturnThis(),
+        send: jest.fn().mockResolvedValue({}),
+    }),
+    createNotification: jest.fn(),
+};
+
 beforeEach(() => jest.clearAllMocks());
 
 describe('LikeCommunityPostUseCase', () => {
-    const useCase = new LikeCommunityPostUseCase(reader as any, likePort as any);
+    const useCase = new LikeCommunityPostUseCase(
+        reader as any,
+        likePort as any,
+        authorReader as any,
+        notificationDispatch as any,
+    );
 
     it('존재하지 않는 게시글 → BadRequestException, like 미호출', async () => {
         reader.existsActivePost.mockResolvedValueOnce(false);

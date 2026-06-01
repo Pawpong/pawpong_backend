@@ -22,7 +22,8 @@ const postSnap = {
 
 describe('GetCommunityPostDetailUseCase', () => {
     const reader = { listPosts: jest.fn(), readPostById: jest.fn(), listComments: jest.fn() };
-    const useCase = new GetCommunityPostDetailUseCase(reader as any, mapper);
+    const likePort = { like: jest.fn(), unlike: jest.fn(), isLiked: jest.fn().mockResolvedValue(false), findLikedPostIds: jest.fn() };
+    const useCase = new GetCommunityPostDetailUseCase(reader as any, likePort as any, mapper);
 
     beforeEach(() => jest.clearAllMocks());
 

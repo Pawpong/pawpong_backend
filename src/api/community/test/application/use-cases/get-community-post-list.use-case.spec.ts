@@ -6,7 +6,8 @@ const mapper = new CommunityPostMapperService(assetUrl as any);
 
 describe('GetCommunityPostListUseCase', () => {
     const reader = { listPosts: jest.fn(), readPostById: jest.fn(), listComments: jest.fn() };
-    const useCase = new GetCommunityPostListUseCase(reader as any, mapper);
+    const likePort = { like: jest.fn(), unlike: jest.fn(), isLiked: jest.fn(), findLikedPostIds: jest.fn().mockResolvedValue(new Set()) };
+    const useCase = new GetCommunityPostListUseCase(reader as any, likePort as any, mapper);
 
     beforeEach(() => jest.clearAllMocks());
 

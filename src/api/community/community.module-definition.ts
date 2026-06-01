@@ -1,6 +1,7 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { StorageModule } from '../../common/storage/storage.module';
+import { NotificationModule } from '../notification/notification.module';
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 import { CommunityBookmark, CommunityBookmarkSchema } from '../../schema/community-bookmark.schema';
@@ -73,7 +74,7 @@ const SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Breeder.name, schema: BreederSchema },
 ]);
 
-export const COMMUNITY_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule];
+export const COMMUNITY_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule, NotificationModule];
 
 export const COMMUNITY_MODULE_CONTROLLERS = [
     CommunityPostListController,
