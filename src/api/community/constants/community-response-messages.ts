@@ -14,4 +14,5 @@ export const COMMUNITY_RESPONSE_MESSAGES = {
     commentCreated: '댓글이 등록되었습니다.',
     commentUpdated: '댓글이 수정되었습니다.',
     commentDeleted: '댓글이 삭제되었습니다.',
+    reported: '신고가 접수되었습니다.',
 } as const;
