@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { buildPageResult, type PageResult } from '../../../../common/types/page-result.type';
 import { CommunityPostMapperService } from '../../domain/services/community-post-mapper.service';
+import { COMMUNITY_BOOKMARK_PORT, type CommunityBookmarkPort } from '../ports/community-bookmark.port';
 import { COMMUNITY_LIKE_PORT, type CommunityLikePort } from '../ports/community-like.port';
 import { COMMUNITY_POST_READER_PORT, type CommunityPostReaderPort } from '../ports/community-post-reader.port';
 import type { CommunityPostCardResult } from '../types/community-post-result.type';
@@ -17,6 +18,8 @@ export class GetCommunityPostListUseCase {
         private readonly reader: CommunityPostReaderPort,
         @Inject(COMMUNITY_LIKE_PORT)
         private readonly likePort: CommunityLikePort,
+        @Inject(COMMUNITY_BOOKMARK_PORT)
+        private readonly bookmarkPort: CommunityBookmarkPort,
         private readonly mapper: CommunityPostMapperService,
     ) {}
 
@@ -27,7 +30,7 @@ export class GetCommunityPostListUseCase {
         sort?: CommunityPostSort;
         page?: number;
         pageSize?: number;
-        /** 현재 요청 사용자 ID. 없으면 isLiked 는 모두 false. */
+        /** 현재 요청 사용자 ID. 없으면 isLiked/isSaved 는 모두 false. */
         userId?: string;
     }): Promise<PageResult<CommunityPostCardResult>> {
         const page = Math.max(1, input.page ?? 1);
@@ -43,14 +46,18 @@ export class GetCommunityPostListUseCase {
             limit: pageSize,
         });
 
-        const likedSet = input.userId
-            ? await this.likePort.findLikedPostIds(
-                  input.userId,
-                  snapshots.map((s) => s.postId),
-              )
-            : new Set<string>();
+        const postIds = snapshots.map((s) => s.postId);
 
-        const items = snapshots.map((s) => this.mapper.toCard(s, likedSet.has(s.postId)));
+        const [likedSet, savedSet] = input.userId
+            ? await Promise.all([
+                  this.likePort.findLikedPostIds(input.userId, postIds),
+                  this.bookmarkPort.findSavedPostIds(input.userId, postIds),
+              ])
+            : [new Set<string>(), new Set<string>()];
+
+        const items = snapshots.map((s) =>
+            this.mapper.toCard(s, likedSet.has(s.postId), savedSet.has(s.postId)),
+        );
         return buildPageResult(items, page, pageSize, totalItems);
     }
 }

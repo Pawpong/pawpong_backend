@@ -4,10 +4,35 @@ import { CommunityPostMapperService } from '../../../domain/services/community-p
 const assetUrl = { toSignedUrl: () => undefined };
 const mapper = new CommunityPostMapperService(assetUrl as any);
 
+const makeSnap = (postId: string) => ({
+    postId,
+    authorId: 'a-1',
+    authorModel: 'Adopter' as const,
+    authorNickname: '닉',
+    body: '본문',
+    photos: [],
+    likeCount: 0,
+    commentCount: 0,
+    saveCount: 0,
+    viewCount: 0,
+    createdAt: new Date('2026-05-01T00:00:00.000Z'),
+});
+
 describe('GetCommunityPostListUseCase', () => {
     const reader = { listPosts: jest.fn(), readPostById: jest.fn(), listComments: jest.fn() };
-    const likePort = { like: jest.fn(), unlike: jest.fn(), isLiked: jest.fn(), findLikedPostIds: jest.fn().mockResolvedValue(new Set()) };
-    const useCase = new GetCommunityPostListUseCase(reader as any, likePort as any, mapper);
+    const likePort = {
+        like: jest.fn(),
+        unlike: jest.fn(),
+        isLiked: jest.fn(),
+        findLikedPostIds: jest.fn().mockResolvedValue(new Set()),
+    };
+    const bookmarkPort = {
+        save: jest.fn(),
+        unsave: jest.fn(),
+        listSavedPostIds: jest.fn(),
+        findSavedPostIds: jest.fn().mockResolvedValue(new Set()),
+    };
+    const useCase = new GetCommunityPostListUseCase(reader as any, likePort as any, bookmarkPort as any, mapper);
 
     beforeEach(() => jest.clearAllMocks());
 
@@ -17,6 +42,7 @@ describe('GetCommunityPostListUseCase', () => {
         expect(reader.listPosts).toHaveBeenCalledWith({
             petType: undefined,
             category: undefined,
+            authorId: undefined,
             sort: 'latest',
             skip: 0,
             limit: 15,
@@ -50,5 +76,27 @@ describe('GetCommunityPostListUseCase', () => {
             category: '레오파드',
             sort: 'popular',
         });
+    });
+
+    it('비인증(userId 없음) → isSaved 모두 false, findSavedPostIds 미호출', async () => {
+        reader.listPosts.mockResolvedValueOnce({ snapshots: [makeSnap('p-1')], totalItems: 1 });
+        likePort.findLikedPostIds.mockResolvedValueOnce(new Set());
+
+        const result = await useCase.execute({});
+
+        expect(bookmarkPort.findSavedPostIds).not.toHaveBeenCalled();
+        expect(result.items[0].isSaved).toBe(false);
+    });
+
+    it('인증(userId 있음) + 저장된 게시글 → isSaved: true', async () => {
+        reader.listPosts.mockResolvedValueOnce({ snapshots: [makeSnap('p-saved'), makeSnap('p-other')], totalItems: 2 });
+        likePort.findLikedPostIds.mockResolvedValueOnce(new Set());
+        bookmarkPort.findSavedPostIds.mockResolvedValueOnce(new Set(['p-saved']));
+
+        const result = await useCase.execute({ userId: 'u-1' });
+
+        expect(bookmarkPort.findSavedPostIds).toHaveBeenCalledWith('u-1', ['p-saved', 'p-other']);
+        expect(result.items.find((i) => i.postId === 'p-saved')?.isSaved).toBe(true);
+        expect(result.items.find((i) => i.postId === 'p-other')?.isSaved).toBe(false);
     });
 });

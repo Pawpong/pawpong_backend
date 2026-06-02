@@ -22,8 +22,19 @@ const postSnap = {
 
 describe('GetCommunityPostDetailUseCase', () => {
     const reader = { listPosts: jest.fn(), readPostById: jest.fn(), listComments: jest.fn() };
-    const likePort = { like: jest.fn(), unlike: jest.fn(), isLiked: jest.fn().mockResolvedValue(false), findLikedPostIds: jest.fn() };
-    const useCase = new GetCommunityPostDetailUseCase(reader as any, likePort as any, mapper);
+    const likePort = {
+        like: jest.fn(),
+        unlike: jest.fn(),
+        isLiked: jest.fn().mockResolvedValue(false),
+        findLikedPostIds: jest.fn(),
+    };
+    const bookmarkPort = {
+        save: jest.fn(),
+        unsave: jest.fn(),
+        listSavedPostIds: jest.fn(),
+        findSavedPostIds: jest.fn().mockResolvedValue(new Set()),
+    };
+    const useCase = new GetCommunityPostDetailUseCase(reader as any, likePort as any, bookmarkPort as any, mapper);
 
     beforeEach(() => jest.clearAllMocks());
 
@@ -42,5 +53,38 @@ describe('GetCommunityPostDetailUseCase', () => {
         expect(reader.listComments).toHaveBeenCalledWith({ postId: 'p-1', skip: 0, limit: 5 });
         expect(result.postId).toBe('p-1');
         expect(result.commentPreview).toEqual([]);
+    });
+
+    it('비인증(userId 없음) → isSaved: false, findSavedPostIds 미호출', async () => {
+        reader.readPostById.mockResolvedValueOnce(postSnap);
+        reader.listComments.mockResolvedValueOnce({ snapshots: [], totalItems: 0 });
+
+        const result = await useCase.execute('p-1');
+
+        expect(bookmarkPort.findSavedPostIds).not.toHaveBeenCalled();
+        expect(result.isSaved).toBe(false);
+    });
+
+    it('인증 + 저장된 게시글 → isSaved: true', async () => {
+        reader.readPostById.mockResolvedValueOnce(postSnap);
+        reader.listComments.mockResolvedValueOnce({ snapshots: [], totalItems: 0 });
+        likePort.isLiked.mockResolvedValueOnce(false);
+        bookmarkPort.findSavedPostIds.mockResolvedValueOnce(new Set(['p-1']));
+
+        const result = await useCase.execute('p-1', 'u-1');
+
+        expect(bookmarkPort.findSavedPostIds).toHaveBeenCalledWith('u-1', ['p-1']);
+        expect(result.isSaved).toBe(true);
+    });
+
+    it('인증 + 저장 안 한 게시글 → isSaved: false', async () => {
+        reader.readPostById.mockResolvedValueOnce(postSnap);
+        reader.listComments.mockResolvedValueOnce({ snapshots: [], totalItems: 0 });
+        likePort.isLiked.mockResolvedValueOnce(false);
+        bookmarkPort.findSavedPostIds.mockResolvedValueOnce(new Set());
+
+        const result = await useCase.execute('p-1', 'u-1');
+
+        expect(result.isSaved).toBe(false);
     });
 });

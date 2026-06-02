@@ -39,6 +39,8 @@ export interface CommunityPostCardResult {
     createdAt: string;
     /** 현재 요청 사용자의 좋아요 여부. 비인증 요청 시 false. */
     isLiked: boolean;
+    /** 현재 요청 사용자의 저장 여부. 비인증 요청 시 false. */
+    isSaved: boolean;
 }
 
 export interface CommunityPostDetailResult {
@@ -58,4 +60,6 @@ export interface CommunityPostDetailResult {
     commentPreview: CommunityPostCommentResult[];
     /** 현재 요청 사용자의 좋아요 여부. 비인증 요청 시 false. */
     isLiked: boolean;
+    /** 현재 요청 사용자의 저장 여부. 비인증 요청 시 false. */
+    isSaved: boolean;
 }

@@ -3,7 +3,7 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection, Types } from 'mongoose';
 import request from 'supertest';
 
-import { createTestingApp } from '../../../../common/testing/test-utils';
+import { createTestingApp, getAdopterToken } from '../../../../common/testing/test-utils';
 
 describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
     let app: INestApplication;
@@ -99,6 +99,32 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
             expect(card.category).toBe('레오파드');
         });
 
+        it('비인증 목록 조회 — isSaved: false (저장 여부 미확인)', async () => {
+            await seedPost();
+            const res = await request(app.getHttpServer()).get('/api/v2/community/posts').expect(200);
+
+            expect(res.body.data.items[0].isSaved).toBe(false);
+        });
+
+        it('인증 + 북마크 된 게시글 → isSaved: true', async () => {
+            const postId = await seedPost();
+            const tokenRes = await getAdopterToken(app);
+            expect(tokenRes).not.toBeNull();
+
+            // 북마크 추가
+            await request(app.getHttpServer())
+                .post(`/api/v2/community/posts/${postId}/bookmark`)
+                .set('Authorization', `Bearer ${tokenRes!.token}`)
+                .expect(200);
+
+            const res = await request(app.getHttpServer())
+                .get('/api/v2/community/posts')
+                .set('Authorization', `Bearer ${tokenRes!.token}`)
+                .expect(200);
+
+            expect(res.body.data.items[0].isSaved).toBe(true);
+        });
+
         it('petType 필터 — 다른 종류는 제외', async () => {
             await seedPost({ petType: 'dog', category: '비숑' });
             await seedPost({ petType: 'reptile', category: '레오파드' });
@@ -140,6 +166,30 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
             expect(res.body.data.body.length).toBe(200);
             expect(res.body.data.commentPreview).toHaveLength(5);
         });
+
+        it('비인증 상세 조회 — isSaved: false', async () => {
+            const postId = await seedPost();
+            const res = await request(app.getHttpServer()).get(`/api/v2/community/posts/${postId}`).expect(200);
+            expect(res.body.data.isSaved).toBe(false);
+        });
+
+        it('인증 + 북마크 된 게시글 상세 → isSaved: true', async () => {
+            const postId = await seedPost();
+            const tokenRes = await getAdopterToken(app);
+            expect(tokenRes).not.toBeNull();
+
+            await request(app.getHttpServer())
+                .post(`/api/v2/community/posts/${postId}/bookmark`)
+                .set('Authorization', `Bearer ${tokenRes!.token}`)
+                .expect(200);
+
+            const res = await request(app.getHttpServer())
+                .get(`/api/v2/community/posts/${postId}`)
+                .set('Authorization', `Bearer ${tokenRes!.token}`)
+                .expect(200);
+
+            expect(res.body.data.isSaved).toBe(true);
+        });
     });
 
     describe('POST /api/v2/community/posts/:postId/view', () => {
@@ -178,7 +228,7 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
                 .expect(400);
         });
 
-        it('동일 게시글 두 번 호출 → viewCount 2 증가 (단순 증가, dedup 없음)', async () => {
+        it('비인증 동일 게시글 두 번 호출 → viewCount 2 (비인증은 dedup 없음)', async () => {
             const postId = await seedPost({ viewCount: 0 });
 
             await request(app.getHttpServer()).post(`/api/v2/community/posts/${postId}/view`).expect(200);
@@ -186,6 +236,24 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
 
             const doc = await connection.collection('community_posts').findOne({ _id: new Types.ObjectId(postId) });
             expect(doc?.viewCount).toBe(2);
+        });
+
+        it('인증된 사용자 동일 게시글 두 번 호출 → viewCount 1 (dedup 적용)', async () => {
+            const postId = await seedPost({ viewCount: 0 });
+            const tokenRes = await getAdopterToken(app);
+            expect(tokenRes).not.toBeNull();
+
+            await request(app.getHttpServer())
+                .post(`/api/v2/community/posts/${postId}/view`)
+                .set('Authorization', `Bearer ${tokenRes!.token}`)
+                .expect(200);
+            await request(app.getHttpServer())
+                .post(`/api/v2/community/posts/${postId}/view`)
+                .set('Authorization', `Bearer ${tokenRes!.token}`)
+                .expect(200);
+
+            const doc = await connection.collection('community_posts').findOne({ _id: new Types.ObjectId(postId) });
+            expect(doc?.viewCount).toBe(1);
         });
 
         it('잘못된 ObjectId 포맷 → 400 (게시글 없음으로 처리)', async () => {
