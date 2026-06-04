@@ -3,6 +3,7 @@ export type AdopterApplicationBreederNotificationTarget = {
     name?: string;
     nickname?: string;
     emailAddress?: string;
+    phoneNumber?: string;
 };
 
 export type AdopterApplicationConfirmationTarget = {

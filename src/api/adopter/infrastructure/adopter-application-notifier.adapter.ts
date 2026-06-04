@@ -1,7 +1,8 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 
 import { RecipientType } from '../../../common/enum/user.enum';
 import { MailTemplateService } from '../../../common/mail/mail-template.service';
+import { AlimtalkService } from '../../../common/alimtalk/alimtalk.service';
 import { NotificationType } from '../../../common/enum/user.enum';
 import {
     NOTIFICATION_DISPATCH_PORT,
@@ -15,8 +16,11 @@ import type {
 
 @Injectable()
 export class AdopterApplicationNotifierAdapter implements AdopterApplicationNotifierPort {
+    private readonly logger = new Logger(AdopterApplicationNotifierAdapter.name);
+
     constructor(
         private readonly mailTemplateService: MailTemplateService,
+        private readonly alimtalkService: AlimtalkService,
         @Inject(NOTIFICATION_DISPATCH_PORT)
         private readonly notificationDispatchPort: NotificationDispatchPort,
     ) {}
@@ -45,6 +49,20 @@ export class AdopterApplicationNotifierAdapter implements AdopterApplicationNoti
 
         builder.withPush();
         await builder.send();
+
+        // 브리더에게 카카오 알림톡 발송 (CONSULTATION_REQUEST 템플릿)
+        // 알림톡 발송 실패가 상담 신청 자체를 실패시키면 안 되므로 fire-and-forget + 에러 로깅 처리한다.
+        if (target.phoneNumber) {
+            this.alimtalkService.sendConsultationRequest(target.phoneNumber).catch((error) => {
+                this.logger.warn(
+                    `[notifyBreederOfNewApplication] 상담 신청 알림톡 발송 실패 (breederId: ${breederId}): ${error?.message ?? error}`,
+                );
+            });
+        } else {
+            this.logger.warn(
+                `[notifyBreederOfNewApplication] 브리더 전화번호가 없어 알림톡을 발송하지 못했습니다 (breederId: ${breederId})`,
+            );
+        }
     }
 
     async notifyApplicantApplicationConfirmed(target: AdopterApplicationConfirmationTarget): Promise<void> {

@@ -11,6 +11,7 @@ export type AdopterBreederRecord = {
     name: string;
     nickname?: string;
     emailAddress?: string;
+    phoneNumber?: string;
     accountStatus?: string;
     profileImageFileName?: string | null;
     favoriteBreederList?: AdopterFavoriteRecord[];
