@@ -10,6 +10,7 @@ import { StorageService } from '../../common/storage/storage.service';
 import { MailTemplateService } from '../../common/mail/mail-template.service';
 import { NotificationService } from '../notification/notification.service';
 import { DiscordWebhookService } from '../../common/discord/discord-webhook.service';
+import { AlimtalkService } from '../../common/alimtalk/alimtalk.service';
 
 import { NotificationType } from '../../schema/notification.schema';
 import { Breeder, BreederDocument } from '../../schema/breeder.schema';
@@ -57,6 +58,7 @@ export class AdopterService {
         private mailTemplateService: MailTemplateService,
         private notificationService: NotificationService,
         private discordWebhookService: DiscordWebhookService,
+        private alimtalkService: AlimtalkService,
         private adopterRepository: AdopterRepository,
         private breederRepository: BreederRepository,
         private availablePetManagementRepository: AvailablePetManagementRepository,
@@ -259,6 +261,20 @@ export class AdopterService {
         }
 
         await builder.send();
+
+        // 브리더에게 카카오 알림톡 발송 (CONSULTATION_REQUEST 템플릿)
+        // 알림톡 발송 실패가 상담 신청 자체를 실패시키면 안 되므로 fire-and-forget + 에러 로깅 처리한다.
+        if (breeder.phoneNumber) {
+            this.alimtalkService.sendConsultationRequest(breeder.phoneNumber).catch((error) => {
+                this.logger.warn(
+                    `[sendNewApplicationNotification] 상담 신청 알림톡 발송 실패 (breederId: ${breederId}): ${error?.message ?? error}`,
+                );
+            });
+        } else {
+            this.logger.warn(
+                `[sendNewApplicationNotification] 브리더 전화번호가 없어 알림톡을 발송하지 못했습니다 (breederId: ${breederId})`,
+            );
+        }
     }
 
     /**
