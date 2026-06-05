@@ -27,9 +27,15 @@ export class BreederExploreCriteriaService {
         const filter: Record<string, unknown> = {
             'verification.status': 'approved',
             accountStatus: 'active',
-            petType,
             isTestAccount: { $ne: true },
         };
+
+        // petType은 값이 있을 때만 필터에 추가한다.
+        // (undefined를 그대로 넣으면 드라이버가 { petType: null }로 변환해
+        //  petType이 설정된 브리더가 전부 제외되어 결과가 0건이 되는 버그가 있었음)
+        if (petType) {
+            filter['petType'] = petType;
+        }
 
         if (breeds && breeds.length > 0) {
             filter['breeds'] = { $in: breeds };
