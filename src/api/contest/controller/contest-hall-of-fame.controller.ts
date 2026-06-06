@@ -17,6 +17,20 @@ export class ContestHallOfFameController {
     @ApiGetHallOfFameEndpoint()
     async getHallOfFame(@Query('page') page = 1, @Query('limit') limit = 10): Promise<ApiResponseDto<unknown>> {
         const result = await this.getHallOfFameUseCase.execute({ page: Number(page), limit: Number(limit) });
-        return ApiResponseDto.success(result, '명예의 전당 조회 완료');
+        const totalPages = Math.ceil(result.total / result.limit) || 0;
+        return ApiResponseDto.success(
+            {
+                items: result.items,
+                pagination: {
+                    currentPage: result.page,
+                    pageSize: result.limit,
+                    totalItems: result.total,
+                    totalPages,
+                    hasNextPage: result.page < totalPages,
+                    hasPrevPage: result.page > 1,
+                },
+            },
+            '명예의 전당 조회 완료',
+        );
     }
 }

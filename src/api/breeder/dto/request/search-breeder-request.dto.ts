@@ -10,13 +10,14 @@ export class SearchBreederRequestDto {
      * 반려동물 타입 (강아지/고양이)
      * @example "dog"
      */
-    @ApiProperty({
-        description: '반려동물 타입',
+    @ApiPropertyOptional({
+        description: '반려동물 타입 (미지정 시 전체 조회)',
         enum: PetType,
         example: 'dog',
     })
+    @IsOptional()
     @IsEnum(PetType)
-    petType: string;
+    petType?: string;
 
     /**
      * 강아지 크기 필터 (소형/중형/대형) - 중복 선택 가능

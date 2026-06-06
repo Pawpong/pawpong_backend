@@ -15,7 +15,7 @@ export type BreederSearchQuery = {
 };
 
 export type BreederExploreQuery = {
-    petType: PetType | string;
+    petType?: PetType | string;
     dogSize?: Array<PetSize | string>;
     catFurLength?: Array<FurLength | string>;
     breeds?: string[];
