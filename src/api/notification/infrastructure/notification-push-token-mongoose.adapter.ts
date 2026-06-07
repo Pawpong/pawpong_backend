@@ -27,6 +27,14 @@ export class NotificationPushTokenMongooseAdapter implements NotificationPushTok
     ) {}
 
     async register(command: RegisterPushDeviceTokenCommand): Promise<void> {
+        // 기기 핸드오프 대응: 같은 디바이스에서 다른 계정으로 재로그인하면 옛 계정에
+        // 토큰이 남아 잘못 전달되므로, 등록 직전 adopter/breeder 전체에서 동일 토큰을
+        // 먼저 제거한다. 디바이스 토큰 1개는 마지막 로그인 계정 1명에게만 속한다.
+        await Promise.all([
+            this.adopterRepository.removePushDeviceTokenFromAllUsers(command.token),
+            this.breederRepository.removePushDeviceTokenFromAllUsers(command.token),
+        ]);
+
         if (command.userRole === 'adopter') {
             await this.adopterRepository.upsertPushDeviceToken(
                 command.userId,
