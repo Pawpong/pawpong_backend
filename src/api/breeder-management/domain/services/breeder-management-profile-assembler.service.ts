@@ -29,15 +29,25 @@ export class BreederManagementProfileAssemblerService {
         const priceRange = breeder.profile?.priceRange;
         const priceRangeMin = priceRange?.min ?? 0;
         const priceRangeMax = priceRange?.max ?? 0;
+        // profileInfo는 프론트 계약(BreederProfileInfoDto)에 맞춘 필드명으로 반환한다.
+        // (스키마: description/location{city,district}/representativePhotos/specialization/priceRange{min,max}
+        //  → 응답: profileDescription/locationInfo{cityName,districtName}/profilePhotos/specializationAreas/priceRangeInfo{minPrice,maxPrice})
         const profileWithSignedUrls = breeder.profile
             ? {
-                  ...breeder.profile,
-                  representativePhotos: fileUrlPort.generateMany(breeder.profile.representativePhotos || [], 60),
-                  priceRange: !priceRange
-                      ? { min: 0, max: 0, display: 'not_set' }
+                  profileDescription: breeder.profile.description ?? '',
+                  locationInfo: {
+                      cityName: breeder.profile.location?.city ?? '',
+                      districtName: breeder.profile.location?.district ?? '',
+                      detailAddress: breeder.profile.location?.address || undefined,
+                  },
+                  profilePhotos: fileUrlPort.generateMany(breeder.profile.representativePhotos || [], 60),
+                  specializationAreas: breeder.profile.specialization ?? [],
+                  experienceYears: breeder.profile.experienceYears,
+                  priceRangeInfo: !priceRange
+                      ? { minPrice: 0, maxPrice: 0, display: 'not_set' }
                       : {
-                            min: priceRangeMin,
-                            max: priceRangeMax,
+                            minPrice: priceRangeMin,
+                            maxPrice: priceRangeMax,
                             display:
                                 priceRange.display || (priceRangeMin > 0 || priceRangeMax > 0 ? 'range' : 'not_set'),
                         },

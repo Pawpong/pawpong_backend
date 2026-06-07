@@ -37,7 +37,7 @@ describe('BreederManagementProfileAssemblerService', () => {
         const result = service.toResponse(makeBreeder(), [], [], fileUrlPort);
         expect(result.authProvider).toBe('kakao');
         expect(result.marketingAgreed).toBe(true);
-        expect((result.profileInfo as any)?.priceRange).toEqual({ min: 100, max: 300, display: 'range' });
+        expect((result.profileInfo as any)?.priceRangeInfo).toEqual({ minPrice: 100, maxPrice: 300, display: 'range' });
         expect((result.verificationInfo as any)?.documents[0].url).toBe('https://cdn/verification/id.pdf');
     });
 
@@ -54,7 +54,7 @@ describe('BreederManagementProfileAssemblerService', () => {
 
     it('priceRange이 없으면 not_set', () => {
         const result = service.toResponse(makeBreeder({ profile: { representativePhotos: [] } }), [], [], fileUrlPort);
-        expect((result.profileInfo as any)?.priceRange).toEqual({ min: 0, max: 0, display: 'not_set' });
+        expect((result.profileInfo as any)?.priceRangeInfo).toEqual({ minPrice: 0, maxPrice: 0, display: 'not_set' });
     });
 
     it('consultationAgreed 기본값은 true', () => {
