@@ -427,6 +427,20 @@ export class BreederRepository {
     }
 
     /**
+     * 동일 FCM 토큰을 가진 모든 브리더에서 해당 토큰을 제거한다.
+     * 기기 핸드오프(같은 폰에서 다른 계정 재로그인) 대응: 디바이스 토큰 1개는
+     * 마지막 로그인 계정 1명에게만 속하도록, 등록 직전 전역에서 먼저 제거한다.
+     *
+     * @param token 제거할 FCM 디바이스 토큰
+     */
+    async removePushDeviceTokenFromAllUsers(token: string): Promise<void> {
+        if (!token) return;
+        await this.breederModel
+            .updateMany({ 'pushDeviceTokens.token': token }, { $pull: { pushDeviceTokens: { token } } })
+            .exec();
+    }
+
+    /**
      * 브리더의 활성 디바이스 푸시 토큰 문자열 목록 조회.
      *
      * @param breederId 브리더 ID
