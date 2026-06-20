@@ -45,6 +45,7 @@ function makeMessageManager(): ChatMessageManagerPort {
         createMessage: jest.fn().mockResolvedValue(message),
         findMessagesByRoomId: jest.fn(),
         markMessagesAsRead: jest.fn(),
+        countUnreadMessages: jest.fn().mockResolvedValue(0),
     };
 }
 

@@ -72,4 +72,8 @@ export class ChatMongooseManagerAdapter implements ChatRoomManagerPort, ChatMess
     async markMessagesAsRead(roomId: string, receiverId: string): Promise<void> {
         await this.chatRepository.markMessagesAsRead(roomId, receiverId);
     }
+
+    async countUnreadMessages(roomId: string, receiverId: string): Promise<number> {
+        return this.chatRepository.countUnreadMessages(roomId, receiverId);
+    }
 }

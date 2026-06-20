@@ -9,8 +9,10 @@ import { CurrentUser } from '../../../common/decorator/user.decorator';
 import { CreateOrGetRoomUseCase } from '../application/use-cases/create-or-get-room.use-case';
 import { CloseRoomUseCase } from '../application/use-cases/close-room.use-case';
 import { ChatPolicyService } from '../domain/services/chat-policy.service';
+import { ChatRoomResponseAssemblerService } from '../domain/services/chat-room-response-assembler.service';
 import { CreateRoomRequestDto } from '../dto/request/create-room-request.dto';
 import { ApiCreateOrGetRoomEndpoint, ApiCloseRoomEndpoint } from '../swagger';
+import { SenderRole } from '../../../schema/chat-message.schema';
 
 @ApiTags('채팅')
 @Controller('chat')
@@ -20,6 +22,7 @@ export class ChatRoomCommandController {
         private readonly createOrGetRoomUseCase: CreateOrGetRoomUseCase,
         private readonly closeRoomUseCase: CloseRoomUseCase,
         private readonly chatPolicyService: ChatPolicyService,
+        private readonly chatRoomResponseAssembler: ChatRoomResponseAssemblerService,
     ) {}
 
     @Post('rooms')
@@ -32,7 +35,7 @@ export class ChatRoomCommandController {
             breederId: dto.breederId,
             applicationId: dto.applicationId,
         });
-        return room;
+        return this.chatRoomResponseAssembler.toResult(room, user.userId, SenderRole.ADOPTER);
     }
 
     @Delete('rooms/:roomId')
