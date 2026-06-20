@@ -33,6 +33,7 @@ export class AdoptionPetMapperService {
             inquiryCount: pet.inquiryCount,
             favoriteCount: pet.favoriteCount,
             viewCount: pet.viewCount,
+            chatCount: pet.chatCount,
             isFavorited,
             isPopular: forcePopular ?? pet.favoriteCount >= POPULAR_FAVORITE_THRESHOLD,
             createdAt: pet.createdAt.toISOString(),

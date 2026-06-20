@@ -15,6 +15,7 @@ const buildSnapshot = (id: string, status: 'available' | 'reserved' | 'adopted' 
     inquiryCount: 0,
     favoriteCount: 1,
     viewCount: 0,
+    chatCount: 0,
     createdAt: new Date('2026-04-01T10:00:00.000Z'),
     updatedAt: new Date('2026-04-01T10:00:00.000Z'),
 });

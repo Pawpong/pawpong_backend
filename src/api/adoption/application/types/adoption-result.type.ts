@@ -17,6 +17,7 @@ export type AdoptionPetItemResult = {
     inquiryCount: number;
     favoriteCount: number;
     viewCount: number;
+    chatCount: number;
     isFavorited: boolean;
     isPopular: boolean;
     createdAt: string;

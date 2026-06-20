@@ -46,6 +46,9 @@ export class AdoptionPetResponseDto {
     @ApiProperty({ description: '조회 수', example: 20 })
     viewCount: number;
 
+    @ApiProperty({ description: '활성 채팅방 수', example: 2 })
+    chatCount: number;
+
     @ApiProperty({ description: '현재 사용자가 즐겨찾기 등록한 동물 여부', example: false })
     isFavorited: boolean;
 

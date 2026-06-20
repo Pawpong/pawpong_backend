@@ -30,6 +30,7 @@ export type AdoptionPetSnapshot = {
     inquiryCount: number;
     favoriteCount: number;
     viewCount: number;
+    chatCount: number;
     createdAt: Date;
     updatedAt: Date;
 };
