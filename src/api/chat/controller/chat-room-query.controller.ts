@@ -38,6 +38,16 @@ export class ChatRoomQueryController {
         @Query('before') before?: string,
     ) {
         const beforeDate = before ? new Date(before) : undefined;
-        return this.getMessagesUseCase.execute(user.userId, { roomId, limit, before: beforeDate });
+        const messages = await this.getMessagesUseCase.execute(user.userId, { roomId, limit, before: beforeDate });
+        return messages.map((message) => ({
+            messageId: message.id,
+            roomId: message.roomId,
+            senderRole: message.senderRole,
+            isMine: message.senderId === user.userId,
+            content: message.content,
+            messageType: message.messageType,
+            isRead: message.isRead,
+            createdAt: message.createdAt.toISOString(),
+        }));
     }
 }

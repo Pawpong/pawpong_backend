@@ -26,4 +26,5 @@ export interface ChatMessageManagerPort {
     }): Promise<ChatMessageSnapshot>;
     findMessagesByRoomId(roomId: string, limit: number, before?: Date): Promise<ChatMessageSnapshot[]>;
     markMessagesAsRead(roomId: string, receiverId: string): Promise<void>;
+    countUnreadMessages(roomId: string, receiverId: string): Promise<number>;
 }
