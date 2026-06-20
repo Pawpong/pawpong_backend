@@ -15,21 +15,43 @@ function makeManager(adopterRooms: any[], breederRooms: any[]): ChatRoomManagerP
 }
 
 const logger = { logStart: jest.fn(), logSuccess: jest.fn(), logError: jest.fn() } as any;
+const assembler = {
+    toResults: jest.fn(async (rooms) =>
+        rooms.map((room: any) => ({
+            roomId: room.id,
+            status: room.status,
+            counterpart: { userId: 'counterpart-1', role: SenderRole.BREEDER, nickname: '상대방' },
+            unreadCount: 0,
+            createdAt: new Date().toISOString(),
+        })),
+    ),
+} as any;
 
 describe('GetMyRoomsUseCase', () => {
+    beforeEach(() => {
+        jest.clearAllMocks();
+    });
+
     it('ADOPTER 역할: findRoomsByAdopterId', async () => {
         const manager = makeManager([{ id: 'a-room' }], []);
-        const useCase = new GetMyRoomsUseCase(manager, logger);
+        const useCase = new GetMyRoomsUseCase(manager, assembler, logger);
         const result = await useCase.execute('adopter-1', SenderRole.ADOPTER);
-        expect(result).toEqual([{ id: 'a-room' }]);
+        expect(result).toEqual([
+            expect.objectContaining({
+                roomId: 'a-room',
+                counterpart: expect.objectContaining({ nickname: '상대방' }),
+            }),
+        ]);
         expect(manager.findRoomsByAdopterId).toHaveBeenCalledWith('adopter-1');
+        expect(assembler.toResults).toHaveBeenCalledWith([{ id: 'a-room' }], 'adopter-1', SenderRole.ADOPTER);
     });
 
     it('BREEDER 역할: findRoomsByBreederId', async () => {
         const manager = makeManager([], [{ id: 'b-room' }]);
-        const useCase = new GetMyRoomsUseCase(manager, logger);
+        const useCase = new GetMyRoomsUseCase(manager, assembler, logger);
         const result = await useCase.execute('breeder-1', SenderRole.BREEDER);
-        expect(result).toEqual([{ id: 'b-room' }]);
+        expect(result).toEqual([expect.objectContaining({ roomId: 'b-room' })]);
         expect(manager.findRoomsByBreederId).toHaveBeenCalledWith('breeder-1');
+        expect(assembler.toResults).toHaveBeenCalledWith([{ id: 'b-room' }], 'breeder-1', SenderRole.BREEDER);
     });
 });

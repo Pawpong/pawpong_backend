@@ -30,6 +30,7 @@ function makeMessageManager(messages: any[] = []): ChatMessageManagerPort {
         createMessage: jest.fn(),
         findMessagesByRoomId: jest.fn().mockResolvedValue(messages),
         markMessagesAsRead: jest.fn().mockResolvedValue(undefined),
+        countUnreadMessages: jest.fn().mockResolvedValue(0),
     };
 }
 
