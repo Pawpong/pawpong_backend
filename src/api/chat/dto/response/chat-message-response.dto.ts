@@ -8,11 +8,11 @@ export class ChatMessageResponseDto {
     @ApiProperty()
     roomId: string;
 
-    @ApiProperty()
-    senderId: string;
-
     @ApiProperty({ enum: SenderRole })
     senderRole: SenderRole;
+
+    @ApiProperty()
+    isMine: boolean;
 
     @ApiProperty()
     content: string;
@@ -24,5 +24,5 @@ export class ChatMessageResponseDto {
     isRead: boolean;
 
     @ApiProperty()
-    createdAt: Date;
+    createdAt: string;
 }
