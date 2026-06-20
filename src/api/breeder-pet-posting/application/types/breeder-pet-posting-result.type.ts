@@ -7,6 +7,7 @@ export interface BreederPetPostingCardResult {
     petId: string;
     name: string;
     breed: string;
+    petType: 'dog' | 'cat' | 'reptile';
     gender: 'male' | 'female';
     ageDescription: string;
     price: number;
@@ -17,5 +18,6 @@ export interface BreederPetPostingCardResult {
     inquiryCount: number;
     favoriteCount: number;
     viewCount: number;
+    chatCount: number;
     createdAt: string;
 }

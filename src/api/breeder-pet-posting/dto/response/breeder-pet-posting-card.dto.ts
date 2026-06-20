@@ -13,6 +13,9 @@ export class BreederPetPostingCardResponseDto {
     @ApiProperty({ description: '품종 (검색용 normalized)', example: '레오파드게코' })
     breed: string;
 
+    @ApiProperty({ description: '동물 종류', enum: ['dog', 'cat', 'reptile'] })
+    petType: 'dog' | 'cat' | 'reptile';
+
     @ApiProperty({ description: '성별', enum: ['male', 'female'] })
     gender: 'male' | 'female';
 
@@ -42,6 +45,9 @@ export class BreederPetPostingCardResponseDto {
 
     @ApiProperty({ description: '조회 수', example: 20 })
     viewCount: number;
+
+    @ApiProperty({ description: '활성 채팅방 수', example: 2 })
+    chatCount: number;
 
     @ApiProperty({ description: '등록 시각 (ISO 8601)', example: '2026-04-01T10:00:00.000Z' })
     createdAt: string;

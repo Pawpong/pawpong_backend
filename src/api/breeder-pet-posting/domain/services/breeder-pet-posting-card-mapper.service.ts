@@ -27,6 +27,7 @@ export class BreederPetPostingCardMapperService {
             petId: snapshot.petId,
             name: snapshot.name,
             breed: snapshot.breed,
+            petType: snapshot.petType,
             gender: snapshot.gender,
             ageDescription: this.describeAge(snapshot.birthDate),
             price: snapshot.price,
@@ -37,6 +38,7 @@ export class BreederPetPostingCardMapperService {
             inquiryCount: snapshot.inquiryCount,
             favoriteCount: snapshot.favoriteCount,
             viewCount: snapshot.viewCount,
+            chatCount: snapshot.chatCount,
             createdAt: snapshot.createdAt.toISOString(),
         };
     }
