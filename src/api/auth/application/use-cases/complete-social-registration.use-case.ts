@@ -35,6 +35,7 @@ export class CompleteSocialRegistrationUseCase {
                 email: dto.email,
                 nickname: dto.nickname!,
                 phone: dto.phone,
+                profileImage: dto.profileImage,
                 marketingAgreed: dto.marketingAgreed,
             };
 

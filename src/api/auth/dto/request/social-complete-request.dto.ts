@@ -110,6 +110,19 @@ export class SocialCompleteRequestDto {
     nickname?: string;
 
     /**
+     * 프로필 이미지 (업로드 후 받은 파일명 또는 URL)
+     * @example "profiles/3f9c....jpg"
+     */
+    @ApiProperty({
+        description: '프로필 이미지 파일명 또는 URL (사전 업로드 후 전달)',
+        example: 'profiles/3f9c2b1a-....jpg',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    profileImage?: string;
+
+    /**
      * 브리딩 동물 종류 (브리더 전용)
      * @example "cat"
      */
