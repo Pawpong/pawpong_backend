@@ -68,6 +68,7 @@ export type CompleteSocialRegistrationCommand = {
     phone?: string;
     marketingAgreed?: boolean;
     nickname?: string;
+    profileImage?: string;
     petType?: string;
     plan?: string;
     breederName?: string;

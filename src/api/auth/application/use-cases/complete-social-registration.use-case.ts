@@ -35,6 +35,7 @@ export class CompleteSocialRegistrationUseCase {
                 email: dto.email,
                 nickname: dto.nickname!,
                 phone: dto.phone,
+                profileImage: dto.profileImage,
                 marketingAgreed: dto.marketingAgreed,
             };
 
@@ -47,6 +48,9 @@ export class CompleteSocialRegistrationUseCase {
             const breederDto: RegisterBreederAuthSignupCommand = {
                 tempId: dto.tempId,
                 provider: dto.provider,
+                // 입양자와 동일하게 사전 업로드한 프로필 이미지를 등록에 반영한다.
+                // (전달되지 않으면 register-breeder 가 tempId 임시저장소 값으로 폴백)
+                profileImage: dto.profileImage,
                 email: dto.email,
                 phoneNumber: dto.phone!,
                 breederName: dto.breederName!,
