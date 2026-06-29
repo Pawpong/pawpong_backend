@@ -15,6 +15,7 @@ const buildPetSnapshot = (id: string) => ({
     inquiryCount: 1,
     favoriteCount: 10,
     viewCount: 20,
+    chatCount: 0,
     createdAt: new Date('2025-12-01T00:00:00.000Z'),
     updatedAt: new Date('2025-12-08T00:00:00.000Z'),
 });

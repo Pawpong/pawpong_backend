@@ -17,6 +17,7 @@ describe('AdoptionPetMapperService', () => {
         inquiryCount: 1,
         favoriteCount: 5,
         viewCount: 20,
+        chatCount: 2,
         createdAt: new Date('2025-02-01'),
         updatedAt: new Date('2025-02-01'),
     };
@@ -57,5 +58,10 @@ describe('AdoptionPetMapperService', () => {
     it('isFavorited 값이 응답에 그대로 반영된다', () => {
         const result = service.toItem(baseSnapshot, ['url'], true);
         expect(result.isFavorited).toBe(true);
+    });
+
+    it('chatCount 값이 응답에 그대로 반영된다', () => {
+        const result = service.toItem(baseSnapshot, ['url'], false);
+        expect(result.chatCount).toBe(2);
     });
 });

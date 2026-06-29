@@ -5,6 +5,7 @@ import { AdopterPetFavorite, AdopterPetFavoriteSchema } from '../../schema/adopt
 import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
 import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
+import { ChatRoom, ChatRoomSchema } from '../../schema/chat-room.schema';
 
 import { AdoptionDetailController } from './controller/adoption-detail.controller';
 import { AdoptionFavoriteController } from './controller/adoption-favorite.controller';
@@ -43,6 +44,7 @@ const SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: AdopterPetFavorite.name, schema: AdopterPetFavoriteSchema },
     { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
     { name: Breeder.name, schema: BreederSchema },
+    { name: ChatRoom.name, schema: ChatRoomSchema },
 ]);
 
 export const ADOPTION_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule];

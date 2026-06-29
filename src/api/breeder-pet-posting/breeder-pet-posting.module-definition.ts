@@ -1,8 +1,10 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { StorageModule } from '../../common/storage/storage.module';
+import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
 import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
+import { ChatRoom, ChatRoomSchema } from '../../schema/chat-room.schema';
 
 import { BREEDER_PET_POSTING_ASSET_URL_PORT } from './application/ports/breeder-pet-posting-asset-url.port';
 import { BREEDER_PET_POSTING_PROFILE_PORT } from './application/ports/breeder-pet-posting-profile.port';
@@ -27,6 +29,8 @@ import { BreederPetPostingRepository } from './repository/breeder-pet-posting.re
 const SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: AvailablePet.name, schema: AvailablePetSchema },
     { name: Breeder.name, schema: BreederSchema },
+    { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
+    { name: ChatRoom.name, schema: ChatRoomSchema },
 ]);
 
 export const BREEDER_PET_POSTING_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule];

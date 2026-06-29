@@ -7,6 +7,7 @@ const buildSnapshot = (id: string, status: 'available' | 'reserved' | 'adopted' 
     petId: id,
     name: '레오',
     breed: '레오파드게코',
+    petType: 'reptile' as const,
     gender: 'female' as const,
     birthDate: new Date('2024-11-05'),
     price: 200000,
@@ -17,6 +18,7 @@ const buildSnapshot = (id: string, status: 'available' | 'reserved' | 'adopted' 
     inquiryCount: 1,
     favoriteCount: 10,
     viewCount: 20,
+    chatCount: 2,
     createdAt: new Date('2026-04-01T10:00:00.000Z'),
 });
 
@@ -46,6 +48,7 @@ describe('ListMyBreederPetPostingsUseCase', () => {
         const result = await useCase.execute({ breederId: 'b-1' });
         expect(result.items[0].primaryPhotoUrl).toBe('signed/p/2.jpg');
         expect(result.items[0].photoUrls).toEqual(['signed/p/1.jpg', 'signed/p/2.jpg', 'signed/p/3.jpg']);
+        expect(result.items[0]).toEqual(expect.objectContaining({ petType: 'reptile', chatCount: 2 }));
     });
 
     it('representativePhotoIndex 가 photos.length 초과면 마지막 사진으로 clamp', async () => {
