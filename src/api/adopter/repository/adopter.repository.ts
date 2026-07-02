@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { FilterQuery, Model } from 'mongoose';
 
 import { Adopter, AdopterDocument } from '../../../schema/adopter.schema';
+import { DomainConflictError } from '../../../common/error/domain.error';
 import { getErrorMessage, getErrorStack, hasErrorCode } from '../../../common/utils/error.util';
 import type { FavoriteBreederRecord } from '../application/ports/adopter-profile.port';
 import type { AdopterProfileUpdateRecord } from '../types/adopter-profile.type';
@@ -114,21 +115,16 @@ export class AdopterRepository {
      */
     async updateProfile(adopterId: string, updateData: AdopterProfileUpdateRecord): Promise<AdopterDocument | null> {
         try {
+            // updatedAt 은 schema timestamps 로 자동 갱신되므로 수동 필드를 주입하지 않는다.
             return await this.adopterModel
-                .findByIdAndUpdate(
-                    adopterId,
-                    {
-                        $set: {
-                            ...updateData,
-                            updated_at: new Date(),
-                            last_activity_at: new Date(),
-                        },
-                    },
-                    { new: true, runValidators: true },
-                )
+                .findByIdAndUpdate(adopterId, { $set: { ...updateData } }, { new: true, runValidators: true })
                 .select('-password_hash')
                 .exec();
         } catch (error) {
+            // 닉네임 unique 인덱스 위반(E11000) → 도메인 충돌로 변환해 409 로 응답
+            if (hasErrorCode(error, 11000)) {
+                throw new DomainConflictError('이미 사용 중인 닉네임입니다.');
+            }
             throw new Error(`입양자 프로필 업데이트 실패: ${getErrorMessage(error)}`);
         }
     }

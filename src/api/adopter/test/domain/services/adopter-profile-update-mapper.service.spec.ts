@@ -11,7 +11,7 @@ describe('AdopterProfileUpdateMapperService', () => {
             marketingConsent: true,
         });
         expect(result).toEqual({
-            fullName: '홍길동',
+            nickname: '홍길동',
             phoneNumber: '010-0',
             profileImageFileName: 'img.png',
             marketingConsent: true,
@@ -20,7 +20,7 @@ describe('AdopterProfileUpdateMapperService', () => {
 
     it('undefined 필드는 제외한다', () => {
         const result = service.toRecord({ name: '이름' });
-        expect(result).toEqual({ fullName: '이름' });
+        expect(result).toEqual({ nickname: '이름' });
     });
 
     it('빈 객체는 빈 객체를 반환한다', () => {

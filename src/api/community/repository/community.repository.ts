@@ -196,6 +196,33 @@ export class CommunityRepository {
         );
     }
 
+    /**
+     * 작성자 denormalized snapshot(닉네임/프로필 이미지) 일괄 동기화.
+     * 프로필 변경 시 해당 작성자의 모든 게시글·댓글 스냅샷을 최신 값으로 맞춘다.
+     * 제공된 필드만 갱신한다.
+     */
+    async syncAuthorSnapshots(
+        authorId: string,
+        patch: { nickname?: string; profileImageFileName?: string },
+    ): Promise<{ postsModified: number; commentsModified: number }> {
+        if (!Types.ObjectId.isValid(authorId)) {
+            return { postsModified: 0, commentsModified: 0 };
+        }
+        const $set: Record<string, string> = {};
+        if (patch.nickname !== undefined) $set.authorNickname = patch.nickname;
+        if (patch.profileImageFileName !== undefined) $set.authorProfileImageFileName = patch.profileImageFileName;
+        if (Object.keys($set).length === 0) {
+            return { postsModified: 0, commentsModified: 0 };
+        }
+
+        const authorObjectId = new Types.ObjectId(authorId);
+        const [posts, comments] = await Promise.all([
+            this.postModel.updateMany({ authorId: authorObjectId }, { $set }),
+            this.commentModel.updateMany({ authorId: authorObjectId }, { $set }),
+        ]);
+        return { postsModified: posts.modifiedCount, commentsModified: comments.modifiedCount };
+    }
+
     // ── 댓글 write ──────────────────────────────────────────
 
     async createComment(data: {

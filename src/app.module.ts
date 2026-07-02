@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { WinstonModule } from 'nest-winston';
 
 import { winstonConfig } from './common/config/winston.config';
@@ -51,6 +52,7 @@ import { ContestAdminModule } from './api/contest/admin/contest-admin.module';
             envFilePath: '.env',
         }),
         WinstonModule.forRoot(winstonConfig),
+        EventEmitterModule.forRoot(),
         LoggerModule,
         DiscordWebhookModule,
         RedisModule,

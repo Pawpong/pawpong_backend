@@ -12,7 +12,8 @@ export class AdopterProfileUpdateMapperService {
     }): AdopterProfileUpdateRecord {
         const mappedData: AdopterProfileUpdateRecord = {};
 
-        if (updateData.name) mappedData.fullName = updateData.name;
+        // 프로필 편집의 'name' 은 표시용 닉네임(nickname)이다. (스키마에 fullName 필드는 존재하지 않음)
+        if (updateData.name) mappedData.nickname = updateData.name;
         if (updateData.phone) mappedData.phoneNumber = updateData.phone;
         if (updateData.profileImage) mappedData.profileImageFileName = updateData.profileImage;
         if (typeof updateData.marketingConsent === 'boolean') mappedData.marketingConsent = updateData.marketingConsent;

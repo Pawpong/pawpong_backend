@@ -80,3 +80,6 @@ scripts/*.js
 scripts/*.js.map
 scripts/*.d.ts
 test-push.mjs
+
+# 로컬 하이브리드 개발용 인프라 compose (앱은 host, 인프라만 docker)
+docker-compose.infra.yml
