@@ -33,6 +33,20 @@ export class CommunityPostDetailResponseDto {
     @ApiPropertyOptional({ description: '카테고리' })
     category?: string;
 
+    @ApiProperty({
+        description: '공개 범위 (public=전체공개, followers=팔로워공개, private=나만보기)',
+        enum: ['public', 'followers', 'private'],
+        example: 'public',
+    })
+    visibility: 'public' | 'followers' | 'private';
+
+    @ApiProperty({
+        description: '발행 상태 (published=발행, draft=임시저장)',
+        enum: ['draft', 'published'],
+        example: 'published',
+    })
+    status: 'draft' | 'published';
+
     @ApiProperty({ description: '좋아요 수' })
     likeCount: number;
 

@@ -296,6 +296,23 @@ export function ApiIncrementViewCountEndpoint() {
     );
 }
 
+export function ApiGetMyDraftCommunityPostsEndpoint() {
+    return applyDecorators(
+        ApiPaginatedEndpoint({
+            summary: '내 임시저장 게시글 목록',
+            description: `
+                작성 중 임시저장(status=draft) 한 본인 게시글 목록.
+                작성자 본인에게만 노출되며 피드/상세에는 나타나지 않는다. 최신순 정렬.
+            `,
+            responseType: PaginationResponseDto,
+            itemType: CommunityPostCardResponseDto,
+            isPublic: false,
+            successDescription: '임시저장 게시글 목록 조회 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.draftListRetrieved,
+        }),
+    );
+}
+
 export function ApiGetMySavedCommunityPostsEndpoint() {
     return applyDecorators(
         ApiPaginatedEndpoint({

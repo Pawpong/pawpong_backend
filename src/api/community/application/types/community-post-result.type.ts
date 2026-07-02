@@ -1,4 +1,9 @@
-import type { CommunityAuthorModel, CommunityPetType } from './community-post.type';
+import type {
+    CommunityAuthorModel,
+    CommunityPetType,
+    CommunityPostStatus,
+    CommunityPostVisibility,
+} from './community-post.type';
 
 /**
  * application/domain 계층 내부 결과 타입.
@@ -33,6 +38,8 @@ export interface CommunityPostCardResult {
     photoUrls: string[];
     petType?: CommunityPetType;
     category?: string;
+    visibility: CommunityPostVisibility;
+    status: CommunityPostStatus;
     likeCount: number;
     commentCount: number;
     saveCount: number;
@@ -52,6 +59,8 @@ export interface CommunityPostDetailResult {
     photoUrls: string[];
     petType?: CommunityPetType;
     category?: string;
+    visibility: CommunityPostVisibility;
+    status: CommunityPostStatus;
     likeCount: number;
     commentCount: number;
     saveCount: number;

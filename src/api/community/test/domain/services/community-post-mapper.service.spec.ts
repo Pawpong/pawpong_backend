@@ -13,6 +13,8 @@ const snapshot = {
     photos: ['p/1.jpg', 'p/2.jpg', ''],
     petType: 'reptile' as const,
     category: '레오파드',
+    visibility: 'public' as const,
+    status: 'published' as const,
     likeCount: 10,
     commentCount: 5,
     saveCount: 2,

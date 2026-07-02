@@ -11,10 +11,17 @@ describe('CommunityPostWriteValidatorService', () => {
             authorModel: 'Adopter' as const,
             body: '본문 텍스트',
             photos: [],
+            visibility: 'public' as const,
+            status: 'published' as const,
         });
 
-        it('body 가 공백만이면 BadRequest', () => {
+        it('발행(published) 글은 body 가 공백만이면 BadRequest', () => {
             expect(() => validator.validateCreate({ ...validBase(), body: '   ' })).toThrow(BadRequestException);
+        });
+        it('임시저장(draft) 글은 body 가 비어 있어도 통과', () => {
+            expect(() =>
+                validator.validateCreate({ ...validBase(), body: '   ', status: 'draft' }),
+            ).not.toThrow();
         });
         it('body 가 2001자면 BadRequest', () => {
             expect(() => validator.validateCreate({ ...validBase(), body: 'A'.repeat(2001) })).toThrow(
@@ -45,8 +52,8 @@ describe('CommunityPostWriteValidatorService', () => {
         it('빈 patch 면 BadRequest', () => {
             expect(() => validator.validateUpdate({})).toThrow(BadRequestException);
         });
-        it('body 를 빈 문자열로 수정 시도 → BadRequest', () => {
-            expect(() => validator.validateUpdate({ body: '   ' })).toThrow(BadRequestException);
+        it('body 공백 수정은 validator 통과 (발행 시 본문 필수 규칙은 use-case 가 강제)', () => {
+            expect(() => validator.validateUpdate({ body: '   ' })).not.toThrow();
         });
         it('body 2001 자 → BadRequest', () => {
             expect(() => validator.validateUpdate({ body: 'A'.repeat(2001) })).toThrow(BadRequestException);

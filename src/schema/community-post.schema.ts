@@ -37,7 +37,11 @@ export class CommunityPost {
     @Prop({ type: String, maxlength: 100 })
     title?: string;
 
-    @Prop({ type: String, required: true, maxlength: 2000 })
+    /**
+     * 본문. 발행(published) 글은 도메인 validator 가 비어있지 않음을 강제하지만,
+     * 임시저장(draft) 은 미완성 상태 저장을 허용하므로 스키마 레벨에서는 required 로 막지 않는다.
+     */
+    @Prop({ type: String, required: false, default: '', maxlength: 2000 })
     body: string;
 
     @Prop({ type: [String], default: [] })
@@ -63,6 +67,24 @@ export class CommunityPost {
     @Prop({ type: Number, default: 0, min: 0 })
     viewCount: number;
 
+    /**
+     * 공개 범위 (Figma 글 작성 하단 선택).
+     * - public: 전체공개 — 누구나 열람
+     * - followers: 팔로워공개 — 작성자 본인 + 작성자를 팔로우한 사용자만 열람
+     * - private: 나만보기 — 작성자 본인만 열람
+     * 열람 제한은 list/detail use-case 에서 뷰어-작성자 관계로 게이팅한다.
+     */
+    @Prop({ type: String, enum: ['public', 'followers', 'private'], default: 'public', index: true })
+    visibility: 'public' | 'followers' | 'private';
+
+    /**
+     * 발행 상태.
+     * - published: 피드/상세에 노출되는 정식 게시글
+     * - draft: 임시저장 — 작성자 본인에게만, '내 임시저장' 목록에서만 노출
+     */
+    @Prop({ type: String, enum: ['draft', 'published'], default: 'published', index: true })
+    status: 'draft' | 'published';
+
     /** 소프트 삭제 플래그 */
     @Prop({ type: Boolean, default: true, index: true })
     isActive: boolean;
@@ -70,9 +92,11 @@ export class CommunityPost {
 
 export const CommunityPostSchema = SchemaFactory.createForClass(CommunityPost);
 
-// 목록 정렬 + 필터용 복합 인덱스
-CommunityPostSchema.index({ isActive: 1, createdAt: -1 });
-CommunityPostSchema.index({ isActive: 1, petType: 1, createdAt: -1 });
-CommunityPostSchema.index({ isActive: 1, category: 1, createdAt: -1 });
-CommunityPostSchema.index({ isActive: 1, likeCount: -1, createdAt: -1 });
-CommunityPostSchema.index({ authorId: 1, isActive: 1, createdAt: -1 });
+// 목록 정렬 + 필터용 복합 인덱스 (피드는 status=published + isActive=true 가 기본 전제)
+CommunityPostSchema.index({ isActive: 1, status: 1, createdAt: -1 });
+CommunityPostSchema.index({ isActive: 1, status: 1, petType: 1, createdAt: -1 });
+CommunityPostSchema.index({ isActive: 1, status: 1, category: 1, createdAt: -1 });
+CommunityPostSchema.index({ isActive: 1, status: 1, likeCount: -1, createdAt: -1 });
+CommunityPostSchema.index({ isActive: 1, status: 1, visibility: 1, createdAt: -1 });
+// 작성자별(마이홈/임시저장) + 팔로워공개 열람 판정용
+CommunityPostSchema.index({ authorId: 1, isActive: 1, status: 1, createdAt: -1 });
