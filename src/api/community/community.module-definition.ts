@@ -9,8 +9,10 @@ import { CommunityPostComment, CommunityPostCommentSchema } from '../../schema/c
 import { CommunityPostLike, CommunityPostLikeSchema } from '../../schema/community-post-like.schema';
 import { CommunityPost, CommunityPostSchema } from '../../schema/community-post.schema';
 import { CommunityPostReport, CommunityPostReportSchema } from '../../schema/community-post-report.schema';
+import { UserFollow, UserFollowSchema } from '../../schema/user-follow.schema';
 
 import { COMMUNITY_ASSET_URL_PORT } from './application/ports/community-asset-url.port';
+import { COMMUNITY_FOLLOW_READER_PORT } from './application/ports/community-follow-reader.port';
 import { COMMUNITY_AUTHOR_READER_PORT } from './application/ports/community-author-reader.port';
 import { COMMUNITY_BOOKMARK_PORT } from './application/ports/community-bookmark.port';
 import { COMMUNITY_COMMENT_READER_PORT } from './application/ports/community-comment-reader.port';
@@ -41,6 +43,7 @@ import { GetCommunityPostReportsUseCase } from './admin/application/use-cases/ge
 import { HandleCommunityPostReportUseCase } from './admin/application/use-cases/handle-community-post-report.use-case';
 import { CommunityPostBookmarkController } from './controller/community-post-bookmark.controller';
 import { CommunityPostDetailController } from './controller/community-post-detail.controller';
+import { CommunityPostDraftController } from './controller/community-post-draft.controller';
 import { CommunityPostCommentController } from './controller/community-post-comment.controller';
 import { CommunityPostLikeController } from './controller/community-post-like.controller';
 import { CommunityPostListController } from './controller/community-post-list.controller';
@@ -53,6 +56,7 @@ import { CommunityPostMapperService } from './domain/services/community-post-map
 import { CommunityPostWriteValidatorService } from './domain/services/community-post-write-validator.service';
 import { CommunityAssetUrlStorageAdapter } from './infrastructure/community-asset-url-storage.adapter';
 import { CommunityAuthorReaderMongooseAdapter } from './infrastructure/community-author-reader-mongoose.adapter';
+import { CommunityFollowReaderMongooseAdapter } from './infrastructure/community-follow-reader-mongoose.adapter';
 import { CommunityBookmarkMongooseAdapter } from './infrastructure/community-bookmark-mongoose.adapter';
 import { CommunityCommentMongooseAdapter } from './infrastructure/community-comment-mongoose.adapter';
 import { CommunityLikeMongooseAdapter } from './infrastructure/community-like-mongoose.adapter';
@@ -72,6 +76,7 @@ const SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: CommunityBookmark.name, schema: CommunityBookmarkSchema },
     { name: Adopter.name, schema: AdopterSchema },
     { name: Breeder.name, schema: BreederSchema },
+    { name: UserFollow.name, schema: UserFollowSchema },
 ]);
 
 export const COMMUNITY_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule, NotificationModule];
@@ -79,6 +84,7 @@ export const COMMUNITY_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule, Notifica
 export const COMMUNITY_MODULE_CONTROLLERS = [
     CommunityPostListController,
     CommunityPostDetailController,
+    CommunityPostDraftController,
     CommunityPostViewCountController,
     CommunityPostWriteController,
     CommunityPostCommentController,
@@ -121,6 +127,7 @@ const INFRASTRUCTURE_PROVIDERS = [
     CommunityPostReaderMongooseAdapter,
     CommunityPostWriterMongooseAdapter,
     CommunityAuthorReaderMongooseAdapter,
+    CommunityFollowReaderMongooseAdapter,
     CommunityAssetUrlStorageAdapter,
     CommunityBookmarkMongooseAdapter,
     CommunityLikeMongooseAdapter,
@@ -131,6 +138,7 @@ const PORT_BINDINGS = [
     { provide: COMMUNITY_POST_READER_PORT, useExisting: CommunityPostReaderMongooseAdapter },
     { provide: COMMUNITY_POST_WRITER_PORT, useExisting: CommunityPostWriterMongooseAdapter },
     { provide: COMMUNITY_AUTHOR_READER_PORT, useExisting: CommunityAuthorReaderMongooseAdapter },
+    { provide: COMMUNITY_FOLLOW_READER_PORT, useExisting: CommunityFollowReaderMongooseAdapter },
     { provide: COMMUNITY_ASSET_URL_PORT, useExisting: CommunityAssetUrlStorageAdapter },
     { provide: COMMUNITY_BOOKMARK_PORT, useExisting: CommunityBookmarkMongooseAdapter },
     { provide: COMMUNITY_LIKE_PORT, useExisting: CommunityLikeMongooseAdapter },

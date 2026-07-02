@@ -8,6 +8,7 @@ export const COMMUNITY_RESPONSE_MESSAGES = {
     saved: '게시글이 저장되었습니다.',
     unsaved: '게시글 저장이 취소되었습니다.',
     savedListRetrieved: '저장한 게시글 목록 조회 성공',
+    draftListRetrieved: '임시저장 게시글 목록 조회 성공',
     viewCounted: '조회 수가 반영되었습니다.',
     liked: '게시글에 좋아요를 눌렀습니다.',
     unliked: '게시글 좋아요를 취소했습니다.',

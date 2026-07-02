@@ -31,6 +31,21 @@ export class CommunityRepository {
             filter.authorId = new Types.ObjectId(query.authorId);
         }
 
+        const status = query.status ?? 'published';
+
+        if (status === 'draft') {
+            // 임시저장은 오직 작성자 본인만 조회할 수 있다. viewer 가 없으면 결과 없음.
+            if (!query.viewerId || !Types.ObjectId.isValid(query.viewerId)) {
+                return { docs: [], totalItems: 0 };
+            }
+            filter.status = 'draft';
+            filter.authorId = new Types.ObjectId(query.viewerId);
+        } else {
+            // published 피드: status 미기재(마이그레이션 전) 레거시 글도 발행 글로 취급하기 위해 draft 만 제외.
+            filter.status = { $ne: 'draft' };
+            this.applyVisibilityFilter(filter, query);
+        }
+
         const sort: Record<string, 1 | -1> =
             query.sort === 'popular' ? { likeCount: -1, createdAt: -1 } : { createdAt: -1 };
 
@@ -48,6 +63,31 @@ export class CommunityRepository {
         return { docs, totalItems };
     }
 
+    /**
+     * 발행 글 피드에 뷰어 기준 열람 제한($or)을 적용한다.
+     * - 비로그인: 전체공개만
+     * - 로그인: 전체공개 + (팔로우한 작성자의 팔로워공개) + (본인 글 전부)
+     */
+    private applyVisibilityFilter(filter: FilterQuery<CommunityPost>, query: CommunityPostListQuery): void {
+        // 제한 공개(팔로워공개/나만보기) 가 아닌 글 = 전체공개 + 레거시(visibility 미기재) 글.
+        const openVisibility: FilterQuery<CommunityPost> = { visibility: { $nin: ['followers', 'private'] } };
+
+        if (!query.viewerId || !Types.ObjectId.isValid(query.viewerId)) {
+            filter.visibility = { $nin: ['followers', 'private'] };
+            return;
+        }
+        const viewerObjectId = new Types.ObjectId(query.viewerId);
+        const followeeObjectIds = (query.viewerFolloweeIds ?? [])
+            .filter((id) => Types.ObjectId.isValid(id))
+            .map((id) => new Types.ObjectId(id));
+
+        filter.$or = [
+            openVisibility,
+            { visibility: 'followers', authorId: { $in: followeeObjectIds } },
+            { authorId: viewerObjectId },
+        ];
+    }
+
     async findPostById(postId: string): Promise<CommunityPostDocument | null> {
         if (!Types.ObjectId.isValid(postId)) return null;
         return this.postModel
@@ -59,8 +99,9 @@ export class CommunityRepository {
     async findPostsByIds(postIds: string[]): Promise<CommunityPostDocument[]> {
         const objectIds = postIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
         if (objectIds.length === 0) return [];
+        // 저장 목록은 발행 글만 노출 (임시저장 방어). 레거시(status 미기재) 글은 발행으로 취급.
         return this.postModel
-            .find({ _id: { $in: objectIds }, isActive: true })
+            .find({ _id: { $in: objectIds }, isActive: true, status: { $ne: 'draft' } })
             .lean<CommunityPostDocument[]>()
             .exec();
     }
@@ -97,6 +138,8 @@ export class CommunityRepository {
         if (patch.photos !== undefined) $set.photos = patch.photos;
         if (patch.petType !== undefined) $set.petType = patch.petType;
         if (patch.category !== undefined) $set.category = patch.category;
+        if (patch.visibility !== undefined) $set.visibility = patch.visibility;
+        if (patch.status !== undefined) $set.status = patch.status;
 
         if (Object.keys($set).length === 0) {
             return { changed: false };
