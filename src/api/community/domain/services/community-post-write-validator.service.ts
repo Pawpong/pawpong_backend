@@ -18,7 +18,8 @@ const MAX_CATEGORY = 50;
 export class CommunityPostWriteValidatorService {
     validateCreate(command: CommunityPostCreateCommand): void {
         const body = command.body?.trim() ?? '';
-        if (body.length === 0) {
+        // 발행 글은 본문 필수, 임시저장(draft) 은 미완성 저장을 허용해 빈 본문도 통과시킨다.
+        if (command.status !== 'draft' && body.length === 0) {
             throw new BadRequestException('본문을 작성해 주세요.');
         }
         if (body.length > MAX_BODY) {
@@ -27,18 +28,18 @@ export class CommunityPostWriteValidatorService {
         this.validateOptionalLimits(command);
     }
 
+    /**
+     * 수정 패치 정합성 검증.
+     *
+     * "본문을 비울 수 없음" 같은 발행 전제 규칙은 최종 status 를 아는 use-case 에서 강제한다.
+     * (draft 는 빈 본문 저장이 정상이므로 validator 는 길이/형식만 본다.)
+     */
     validateUpdate(patch: CommunityPostUpdateCommand): void {
         if (Object.keys(patch).length === 0) {
             throw new BadRequestException('수정할 내용이 없습니다.');
         }
-        if (patch.body !== undefined) {
-            const trimmed = patch.body.trim();
-            if (trimmed.length === 0) {
-                throw new BadRequestException('본문을 비울 수 없습니다.');
-            }
-            if (trimmed.length > MAX_BODY) {
-                throw new BadRequestException(`본문은 ${MAX_BODY}자 이내여야 합니다.`);
-            }
+        if (patch.body !== undefined && patch.body.trim().length > MAX_BODY) {
+            throw new BadRequestException(`본문은 ${MAX_BODY}자 이내여야 합니다.`);
         }
         this.validateOptionalLimits(patch);
     }

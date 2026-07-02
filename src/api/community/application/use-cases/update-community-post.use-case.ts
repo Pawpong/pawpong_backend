@@ -40,6 +40,13 @@ export class UpdateCommunityPostUseCase {
             category: patch.category !== undefined ? patch.category.trim() || undefined : undefined,
         };
 
+        // 최종 발행 상태에서 본문이 비어 있으면 거부 (임시저장→발행 전환 포함).
+        const resultingStatus = sanitizedPatch.status ?? existing.status;
+        const resultingBody = sanitizedPatch.body !== undefined ? sanitizedPatch.body : existing.body;
+        if (resultingStatus === 'published' && resultingBody.trim().length === 0) {
+            throw new BadRequestException('발행하려면 본문을 작성해 주세요.');
+        }
+
         await this.writer.updateByAuthor(postId, userId, sanitizedPatch);
 
         const updated = await this.reader.readPostById(postId);

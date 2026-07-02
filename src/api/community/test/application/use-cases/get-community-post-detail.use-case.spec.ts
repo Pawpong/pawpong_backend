@@ -13,6 +13,8 @@ const postSnap = {
     authorNickname: '닉',
     body: '본문',
     photos: [],
+    visibility: 'public' as const,
+    status: 'published' as const,
     likeCount: 0,
     commentCount: 0,
     saveCount: 0,
@@ -34,7 +36,17 @@ describe('GetCommunityPostDetailUseCase', () => {
         listSavedPostIds: jest.fn(),
         findSavedPostIds: jest.fn().mockResolvedValue(new Set()),
     };
-    const useCase = new GetCommunityPostDetailUseCase(reader as any, likePort as any, bookmarkPort as any, mapper);
+    const followReader = {
+        listFolloweeIds: jest.fn().mockResolvedValue([]),
+        isFollowing: jest.fn().mockResolvedValue(false),
+    };
+    const useCase = new GetCommunityPostDetailUseCase(
+        reader as any,
+        likePort as any,
+        bookmarkPort as any,
+        followReader as any,
+        mapper,
+    );
 
     beforeEach(() => jest.clearAllMocks());
 

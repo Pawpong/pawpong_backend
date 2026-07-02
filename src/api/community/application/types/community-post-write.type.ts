@@ -1,4 +1,9 @@
-import type { CommunityAuthorModel, CommunityPetType } from './community-post.type';
+import type {
+    CommunityAuthorModel,
+    CommunityPetType,
+    CommunityPostStatus,
+    CommunityPostVisibility,
+} from './community-post.type';
 
 /**
  * v2 커뮤니티 게시글 작성/수정/삭제 — 내부 command/persist 타입.
@@ -22,6 +27,8 @@ export interface CommunityPostCreateCommand {
     photos: string[];
     petType?: CommunityPetType;
     category?: string;
+    visibility: CommunityPostVisibility;
+    status: CommunityPostStatus;
 }
 
 export interface CommunityPostUpdateCommand {
@@ -30,6 +37,9 @@ export interface CommunityPostUpdateCommand {
     photos?: string[];
     petType?: CommunityPetType;
     category?: string;
+    visibility?: CommunityPostVisibility;
+    /** draft → published 발행 전환 등 상태 변경 */
+    status?: CommunityPostStatus;
 }
 
 export interface CommunityPostCreatePersistData {
@@ -42,4 +52,6 @@ export interface CommunityPostCreatePersistData {
     photos: string[];
     petType?: CommunityPetType;
     category?: string;
+    visibility: CommunityPostVisibility;
+    status: CommunityPostStatus;
 }

@@ -26,18 +26,22 @@ export class CreateCommunityPostUseCase {
         role: 'adopter' | 'breeder',
         command: {
             title?: string;
-            body: string;
+            body?: string;
             photos?: string[];
             petType?: CommunityPostCreateCommand['petType'];
             category?: string;
+            visibility?: CommunityPostCreateCommand['visibility'];
+            status?: CommunityPostCreateCommand['status'];
         },
     ): Promise<CommunityPostDetailResult> {
         const fullCommand: CommunityPostCreateCommand = {
             title: command.title,
-            body: command.body,
+            body: command.body ?? '',
             photos: command.photos ?? [],
             petType: command.petType,
             category: command.category,
+            visibility: command.visibility ?? 'public',
+            status: command.status ?? 'published',
             authorId: userId,
             authorModel: role === 'adopter' ? 'Adopter' : 'Breeder',
         };
@@ -58,6 +62,8 @@ export class CreateCommunityPostUseCase {
             photos: fullCommand.photos ?? [],
             petType: fullCommand.petType,
             category: fullCommand.category?.trim() || undefined,
+            visibility: fullCommand.visibility,
+            status: fullCommand.status,
         });
 
         const snapshot = await this.reader.readPostById(postId);
