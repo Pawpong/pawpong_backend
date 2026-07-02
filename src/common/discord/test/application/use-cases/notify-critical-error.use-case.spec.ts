@@ -7,8 +7,14 @@ describe('NotifyCriticalErrorUseCase', () => {
     let useCase: NotifyCriticalErrorUseCase;
     let errorAlertPort: jest.Mocked<DiscordErrorAlertPort>;
     let logger: jest.Mocked<Pick<CustomLoggerService, 'logError'>>;
+    let originalNodeEnv: string | undefined;
 
     beforeEach(() => {
+        // Use Case는 운영 환경(NODE_ENV=production)에서만 실제 발송하므로,
+        // 발송/정책 로직 자체를 검증하기 위해 production 환경을 강제한다.
+        originalNodeEnv = process.env.NODE_ENV;
+        process.env.NODE_ENV = 'production';
+
         errorAlertPort = {
             sendCriticalErrorAlert: jest.fn().mockResolvedValue(undefined),
         };
@@ -21,6 +27,29 @@ describe('NotifyCriticalErrorUseCase', () => {
             errorAlertPort,
             logger as unknown as CustomLoggerService,
         );
+    });
+
+    afterEach(() => {
+        // 다른 테스트에 NODE_ENV 변경이 새어나가지 않도록 원복한다.
+        if (originalNodeEnv === undefined) {
+            delete process.env.NODE_ENV;
+        } else {
+            process.env.NODE_ENV = originalNodeEnv;
+        }
+    });
+
+    it('비-운영 환경(NODE_ENV!=production)에서는 발송하지 않고 filtered 처리해야 한다', async () => {
+        process.env.NODE_ENV = 'test';
+
+        const result = await useCase.execute({
+            severity: 'critical',
+            context: 'AllExceptionsFilter',
+            message: 'Internal server error',
+            statusCode: 500,
+        });
+
+        expect(result).toEqual({ sent: false, reason: 'filtered' });
+        expect(errorAlertPort.sendCriticalErrorAlert).not.toHaveBeenCalled();
     });
 
     it('critical 5xx 에러를 Discord 알림 Port로 전달해야 한다', async () => {
