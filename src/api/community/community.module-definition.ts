@@ -12,6 +12,7 @@ import { CommunityPostReport, CommunityPostReportSchema } from '../../schema/com
 import { UserFollow, UserFollowSchema } from '../../schema/user-follow.schema';
 
 import { COMMUNITY_ASSET_URL_PORT } from './application/ports/community-asset-url.port';
+import { COMMUNITY_AUTHOR_SNAPSHOT_PORT } from './application/ports/community-author-snapshot.port';
 import { COMMUNITY_FOLLOW_READER_PORT } from './application/ports/community-follow-reader.port';
 import { COMMUNITY_AUTHOR_READER_PORT } from './application/ports/community-author-reader.port';
 import { COMMUNITY_BOOKMARK_PORT } from './application/ports/community-bookmark.port';
@@ -56,7 +57,9 @@ import { CommunityPostMapperService } from './domain/services/community-post-map
 import { CommunityPostWriteValidatorService } from './domain/services/community-post-write-validator.service';
 import { CommunityAssetUrlStorageAdapter } from './infrastructure/community-asset-url-storage.adapter';
 import { CommunityAuthorReaderMongooseAdapter } from './infrastructure/community-author-reader-mongoose.adapter';
+import { CommunityAuthorSnapshotMongooseAdapter } from './infrastructure/community-author-snapshot-mongoose.adapter';
 import { CommunityFollowReaderMongooseAdapter } from './infrastructure/community-follow-reader-mongoose.adapter';
+import { CommunityAuthorSyncListener } from './application/listeners/community-author-sync.listener';
 import { CommunityBookmarkMongooseAdapter } from './infrastructure/community-bookmark-mongoose.adapter';
 import { CommunityCommentMongooseAdapter } from './infrastructure/community-comment-mongoose.adapter';
 import { CommunityLikeMongooseAdapter } from './infrastructure/community-like-mongoose.adapter';
@@ -118,6 +121,9 @@ const USE_CASE_PROVIDERS = [
 
 const DOMAIN_PROVIDERS = [CommunityPostMapperService, CommunityPostWriteValidatorService];
 
+// 도메인 이벤트 리스너 (프로필 변경 → 작성자 snapshot 동기화)
+const LISTENER_PROVIDERS = [CommunityAuthorSyncListener];
+
 const INFRASTRUCTURE_PROVIDERS = [
     CommunityRepository,
     CommunityBookmarkRepository,
@@ -128,6 +134,7 @@ const INFRASTRUCTURE_PROVIDERS = [
     CommunityPostWriterMongooseAdapter,
     CommunityAuthorReaderMongooseAdapter,
     CommunityFollowReaderMongooseAdapter,
+    CommunityAuthorSnapshotMongooseAdapter,
     CommunityAssetUrlStorageAdapter,
     CommunityBookmarkMongooseAdapter,
     CommunityLikeMongooseAdapter,
@@ -139,6 +146,7 @@ const PORT_BINDINGS = [
     { provide: COMMUNITY_POST_WRITER_PORT, useExisting: CommunityPostWriterMongooseAdapter },
     { provide: COMMUNITY_AUTHOR_READER_PORT, useExisting: CommunityAuthorReaderMongooseAdapter },
     { provide: COMMUNITY_FOLLOW_READER_PORT, useExisting: CommunityFollowReaderMongooseAdapter },
+    { provide: COMMUNITY_AUTHOR_SNAPSHOT_PORT, useExisting: CommunityAuthorSnapshotMongooseAdapter },
     { provide: COMMUNITY_ASSET_URL_PORT, useExisting: CommunityAssetUrlStorageAdapter },
     { provide: COMMUNITY_BOOKMARK_PORT, useExisting: CommunityBookmarkMongooseAdapter },
     { provide: COMMUNITY_LIKE_PORT, useExisting: CommunityLikeMongooseAdapter },
@@ -152,6 +160,7 @@ const PORT_BINDINGS = [
 export const COMMUNITY_MODULE_PROVIDERS = [
     ...USE_CASE_PROVIDERS,
     ...DOMAIN_PROVIDERS,
+    ...LISTENER_PROVIDERS,
     ...INFRASTRUCTURE_PROVIDERS,
     ...PORT_BINDINGS,
 ];

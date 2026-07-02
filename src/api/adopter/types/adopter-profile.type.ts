@@ -17,7 +17,7 @@ export type AdopterWrittenReviewEmbeddedRecord = {
 };
 
 export type AdopterProfileUpdateRecord = {
-    fullName?: string;
+    nickname?: string;
     phoneNumber?: string;
     profileImageFileName?: string;
     marketingConsent?: boolean;
