@@ -1,5 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
+import {
+    USER_PROFILE_UPDATED_EVENT,
+    type UserProfileUpdatedEvent,
+} from '../../../../common/events/user-profile-updated.event';
 import { AUTH_TEMP_UPLOAD_PORT, type AuthTempUploadPort } from '../ports/auth-temp-upload.port';
 import {
     AUTH_PROFILE_IMAGE_TARGET_PORT,
@@ -30,6 +35,7 @@ export class UploadAuthProfileImageUseCase {
         @Inject(AUTH_TEMP_UPLOAD_PORT)
         private readonly authTempUploadPort: AuthTempUploadPort,
         private readonly authProfileImageFilePolicyService: AuthProfileImageFilePolicyService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async execute(
@@ -43,6 +49,14 @@ export class UploadAuthProfileImageUseCase {
 
         if (user && this.isSupportedRole(user.role)) {
             await this.authProfileImageTargetPort.save(user.userId, user.role, uploaded.fileName);
+
+            // 로그인 유저가 프로필 이미지를 교체하면 커뮤니티 등에 복제된 작성자 snapshot 을 동기화한다.
+            // 익명 가입(tempId 만 있는) 업로드는 여기 진입하지 않으므로 이벤트를 발행하지 않는다.
+            const payload: UserProfileUpdatedEvent = {
+                userId: user.userId,
+                profileImageFileName: uploaded.fileName,
+            };
+            this.eventEmitter.emit(USER_PROFILE_UPDATED_EVENT, payload);
         }
 
         if (tempId) {

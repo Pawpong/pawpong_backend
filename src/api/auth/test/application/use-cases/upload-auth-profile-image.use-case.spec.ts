@@ -13,6 +13,7 @@ import type {
 } from '../../../application/ports/auth-upload-file-store.port';
 import { AuthProfileImageFilePolicyService } from '../../../domain/services/auth-profile-image-file-policy.service';
 import { UploadAuthProfileImageUseCase } from '../../../application/use-cases/upload-auth-profile-image.use-case';
+import { USER_PROFILE_UPDATED_EVENT } from '../../../../../common/events/user-profile-updated.event';
 
 class StubAuthUploadFileStorePort implements AuthUploadFileStorePort {
     async upload(file: Express.Multer.File, folder: string): Promise<AuthUploadedStorageFile> {
@@ -64,16 +65,19 @@ class StubAuthTempUploadPort implements AuthTempUploadPort {
 describe('인증 프로필 이미지 업로드 유스케이스', () => {
     let targetPort: StubAuthProfileImageTargetPort;
     let tempUploadPort: StubAuthTempUploadPort;
+    let eventEmitter: { emit: jest.Mock };
     let useCase: UploadAuthProfileImageUseCase;
 
     beforeEach(() => {
         targetPort = new StubAuthProfileImageTargetPort();
         tempUploadPort = new StubAuthTempUploadPort();
+        eventEmitter = { emit: jest.fn() };
         useCase = new UploadAuthProfileImageUseCase(
             new StubAuthUploadFileStorePort(),
             targetPort,
             tempUploadPort,
             new AuthProfileImageFilePolicyService(),
+            eventEmitter as any,
         );
     });
 
@@ -98,6 +102,39 @@ describe('인증 프로필 이미지 업로드 유스케이스', () => {
         expect(tempUploadPort.get('temp-1')).toMatchObject({
             profileImage: 'profiles/profile.jpg',
         });
+        // 로그인 유저의 이미지 교체는 커뮤니티 작성자 snapshot 동기화 이벤트를 발행한다.
+        expect(eventEmitter.emit).toHaveBeenCalledWith(USER_PROFILE_UPDATED_EVENT, {
+            userId: 'user-id',
+            profileImageFileName: 'profiles/profile.jpg',
+        });
+    });
+
+    it('임시 ID만 있는 회원가입 업로드는 동기화 이벤트를 발행하지 않는다', async () => {
+        const file = {
+            originalname: 'profile.jpg',
+            size: 1024,
+        } as Express.Multer.File;
+
+        await useCase.execute(file, undefined, 'temp-1');
+
+        // 가입 전 임시 업로드는 유저 문서를 바꾸지 않으므로 이벤트 발행 대상이 아니다.
+        expect(targetPort.saved).toBeNull();
+        expect(eventEmitter.emit).not.toHaveBeenCalled();
+        expect(tempUploadPort.get('temp-1')).toMatchObject({
+            profileImage: 'profiles/profile.jpg',
+        });
+    });
+
+    it('지원하지 않는 role 은 저장과 이벤트를 모두 건너뛴다', async () => {
+        const file = {
+            originalname: 'profile.jpg',
+            size: 1024,
+        } as Express.Multer.File;
+
+        await useCase.execute(file, { userId: 'admin-id', role: 'admin' });
+
+        expect(targetPort.saved).toBeNull();
+        expect(eventEmitter.emit).not.toHaveBeenCalled();
     });
 
     it('100MB를 초과하면 기존 오류 계약을 유지한다', async () => {
