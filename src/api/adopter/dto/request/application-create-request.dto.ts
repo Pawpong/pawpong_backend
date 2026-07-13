@@ -59,36 +59,39 @@ export class ApplicationCreateRequestDto {
      * @example "김철수"
      */
     @ApiProperty({
-        description: '신청자 이름',
+        description: '신청자 이름 (미입력 시 로그인 프로필 닉네임으로 자동 설정)',
         example: '김철수',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    name: string;
+    name?: string;
 
     /**
      * 신청자 휴대폰 번호
      * @example "010-1234-5678"
      */
     @ApiProperty({
-        description: '신청자 휴대폰 번호',
+        description: '신청자 휴대폰 번호 (미입력 시 로그인 프로필 번호로 자동 설정)',
         example: '010-1234-5678',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    phone: string;
+    phone?: string;
 
     /**
      * 신청자 이메일 주소
      * @example "example@example.com"
      */
     @ApiProperty({
-        description: '신청자 이메일 주소',
+        description: '신청자 이메일 주소 (미입력 시 로그인 프로필 이메일로 자동 설정)',
         example: 'example@example.com',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    email: string;
+    email?: string;
 
     /**
      * 신청할 브리더 ID
@@ -188,10 +191,11 @@ export class ApplicationCreateRequestDto {
     @ApiProperty({
         description: '알러지 검사 여부와 결과(유무), 혹은 향후 계획',
         example: '본인과 배우자 모두 알러지 검사 완료했으며, 반려동물 알러지 없음',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    allergyTestInfo: string;
+    allergyTestInfo?: string;
 
     /**
      * 평균적으로 집을 비우는 시간
@@ -203,10 +207,11 @@ export class ApplicationCreateRequestDto {
     @ApiProperty({
         description: '평균적으로 집을 비우는 시간 (출퇴근·외출 시간 포함)',
         example: '주중 9시간(오전 9시~오후 6시), 주말 집에 있음',
+        required: false,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
-    timeAwayFromHome: string;
+    timeAwayFromHome?: string;
 
     /**
      * 반려동물과 함께 지낼 공간 소개 (최대 1500자)
@@ -223,10 +228,10 @@ export class ApplicationCreateRequestDto {
             '거실과 안방을 자유롭게 이용할 수 있습니다. 거실은 약 20평 크기이며, 캣타워와 스크래처를 설치할 예정입니다.',
         maxLength: 1500,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
     @MaxLength(1500, { message: '거주 공간 소개는 최대 1500자까지 입력 가능합니다.' })
-    livingSpaceDescription: string;
+    livingSpaceDescription?: string;
 
     /**
      * 현재 함께하는, 또는 이전에 함께했던 반려동물 정보 (최대 1500자)
@@ -241,10 +246,10 @@ export class ApplicationCreateRequestDto {
             '5년 전 고양이 한 마리를 키웠습니다. 러시안블루 품종이었으며, 매우 온순한 성격이었습니다. 수명을 다해 무지개다리를 건넸습니다.',
         maxLength: 1500,
     })
+    @IsOptional()
     @IsString()
-    @IsNotEmpty()
     @MaxLength(1500, { message: '반려동물 경험은 최대 1500자까지 입력 가능합니다.' })
-    previousPetExperience: string;
+    previousPetExperience?: string;
 
     /**
      * 기본 케어 책임 가능 여부
