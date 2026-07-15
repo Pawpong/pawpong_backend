@@ -4,8 +4,9 @@ import { DomainConflictError, DomainNotFoundError, DomainValidationError } from 
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
-import type { AdopterProfilePort } from '../ports/adopter-profile.port';
+import type { AdopterProfilePort, AdopterProfileRecord } from '../ports/adopter-profile.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
+import type { AdopterBreederRecord } from '../../types/adopter-breeder.type';
 import { ADOPTER_PET_READER_PORT, type AdopterPetReaderPort } from '../ports/adopter-pet-reader.port';
 import {
     ADOPTER_APPLICATION_COMMAND_PORT,
@@ -44,7 +45,8 @@ export class CreateAdopterApplicationUseCase {
         dto: AdopterApplicationCreateCommand,
         userRole?: string,
     ): Promise<AdopterApplicationCreateResult> {
-        await this.ensureApplicantExists(userId, userRole);
+        const applicant = await this.loadApplicant(userId, userRole);
+        const contact = this.resolveApplicantContact(dto, applicant);
 
         if (!dto.privacyConsent) {
             throw new DomainValidationError('개인정보 수집 및 이용에 동의해야 신청이 가능합니다.');
@@ -74,9 +76,9 @@ export class CreateAdopterApplicationUseCase {
         const savedApplication = await this.adopterApplicationCommandPort.create({
             breederId: dto.breederId,
             adopterId: userId,
-            adopterName: dto.name,
-            adopterEmail: dto.email,
-            adopterPhone: dto.phone,
+            adopterName: contact.name,
+            adopterEmail: contact.email,
+            adopterPhone: contact.phone,
             petId: pet ? dto.petId : undefined,
             petName: pet?.name,
             status: ApplicationStatus.CONSULTATION_PENDING,
@@ -91,8 +93,8 @@ export class CreateAdopterApplicationUseCase {
         await this.adopterApplicationNotifierPort.notifyApplicantApplicationConfirmed({
             applicantId: userId,
             applicantRole: userRole || 'adopter',
-            applicantName: dto.name,
-            applicantEmail: dto.email,
+            applicantName: contact.name,
+            applicantEmail: contact.email,
             breederName: breederDisplayName,
         });
 
@@ -103,19 +105,39 @@ export class CreateAdopterApplicationUseCase {
         );
     }
 
-    private async ensureApplicantExists(userId: string, userRole?: string): Promise<void> {
+    private async loadApplicant(
+        userId: string,
+        userRole?: string,
+    ): Promise<AdopterProfileRecord | AdopterBreederRecord> {
         if (userRole === 'breeder') {
             const breeder = await this.adopterBreederReaderPort.findById(userId);
             if (!breeder) {
                 throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
             }
-            return;
+            return breeder;
         }
 
         const adopter = await this.adopterProfilePort.findById(userId);
         if (!adopter) {
             throw new DomainNotFoundError('입양자 정보를 찾을 수 없습니다.');
         }
+        return adopter;
+    }
+
+    /**
+     * 신청자 연락처 결정 — 요청 값이 있으면 우선하고, 없으면 로그인 프로필에서 보강한다.
+     * (신청 폼이 이름/휴대폰/이메일을 받지 않는 경우 인증된 사용자 정보로 채운다)
+     */
+    private resolveApplicantContact(
+        dto: AdopterApplicationCreateCommand,
+        applicant: AdopterProfileRecord | AdopterBreederRecord,
+    ): { name: string; email: string; phone: string } {
+        const profileName = 'name' in applicant ? applicant.name : undefined;
+        return {
+            name: dto.name || profileName || applicant.nickname || '',
+            email: dto.email || applicant.emailAddress || '',
+            phone: dto.phone || applicant.phoneNumber || '',
+        };
     }
 
     private async readRequestedPet(petId: string | undefined, breederId: string) {
