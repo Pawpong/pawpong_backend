@@ -50,8 +50,13 @@ export class AdoptionPetRepository {
 
     findList(query: AdoptionPetListQuery): Promise<AvailablePet[]> {
         const filter = this.buildBaseFilter(query);
+        // _id 를 마지막 tiebreaker 로 둬 페이지네이션 정렬을 결정적으로 고정한다.
+        // (createdAt 이 같은 시드/일괄 등록 데이터는 tiebreaker 없이는 skip/limit 페이지마다
+        //  순서가 흔들려 같은 문서가 인접 페이지에 중복 노출되고 다른 문서는 누락된다.)
         const sort: Record<string, 1 | -1> =
-            query.sort === 'popular' ? { favoriteCount: -1, createdAt: -1 } : { createdAt: -1 };
+            query.sort === 'popular'
+                ? { favoriteCount: -1, createdAt: -1, _id: -1 }
+                : { createdAt: -1, _id: -1 };
         return this.model.find(filter).sort(sort).skip(query.skip).limit(query.limit).exec();
     }
 
