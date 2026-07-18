@@ -13,16 +13,16 @@ import {
  * 채팅 도메인 E2E 테스트
  *
  * 테스트 대상 REST API:
- * 1. POST   /api/chat/rooms              - 채팅방 생성 또는 기존 방 반환 (adopter 전용)
- * 2. GET    /api/chat/rooms              - 내 채팅방 목록 조회
- * 3. GET    /api/chat/rooms/:roomId/messages - 메시지 목록 조회
- * 4. DELETE /api/chat/rooms/:roomId      - 채팅방 닫기
+ * 1. POST   /api/v2/chat/rooms              - 채팅방 생성 또는 기존 방 반환 (adopter 전용)
+ * 2. GET    /api/v2/chat/rooms              - 내 채팅방 목록 조회
+ * 3. GET    /api/v2/chat/rooms/:roomId/messages - 메시지 목록 조회
+ * 4. DELETE /api/v2/chat/rooms/:roomId      - 채팅방 닫기
  *
  * 참고:
  * - WebSocket(ChatGateway) 테스트는 이 파일의 범위 밖
  * - KafkaService는 미연결 시 gracefully skip 처리되므로 Kafka 없이도 동작
  * - HttpStatusInterceptor는 main.ts에서만 등록되므로 테스트 환경에서는 미적용.
- *   POST /api/chat/rooms는 @HttpCode(200) 적용으로 200 반환
+ *   POST /api/v2/chat/rooms는 @HttpCode(200) 적용으로 200 반환
  * - RolesGuard는 브리더에게 adopter 권한을 부여하나, 채팅 컨트롤러에서 role 직접 검사하여 브리더 차단 (403)
  * - ChatPolicyService: 방 미존재 → NotFoundException(404), 비참가자 → ForbiddenException(403)
  */
@@ -60,12 +60,12 @@ describe('Chat API E2E Tests', () => {
     /**
      * 1. 채팅방 생성 / 기존 방 반환
      */
-    describe('POST /api/chat/rooms - 채팅방 생성', () => {
+    describe('POST /api/v2/chat/rooms - 채팅방 생성', () => {
         let roomId: string;
 
         it('입양자가 채팅방 생성 성공', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId })
                 .expect(200); // @HttpCode(200) 적용
@@ -89,7 +89,7 @@ describe('Chat API E2E Tests', () => {
 
         it('동일 참가자로 재요청 시 기존 채팅방 반환', async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId })
                 .expect(200);
@@ -104,7 +104,7 @@ describe('Chat API E2E Tests', () => {
             expect(anotherBreeder).not.toBeNull();
 
             const response = await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({
                     breederId: anotherBreeder!.breederId,
@@ -118,7 +118,7 @@ describe('Chat API E2E Tests', () => {
         });
 
         it('인증 없이 요청 시 401 반환', async () => {
-            await request(app.getHttpServer()).post('/api/chat/rooms').send({ breederId }).expect(401);
+            await request(app.getHttpServer()).post('/api/v2/chat/rooms').send({ breederId }).expect(401);
 
             console.log('✅ 미인증 요청 401 확인');
         });
@@ -128,7 +128,7 @@ describe('Chat API E2E Tests', () => {
             // RolesGuard는 브리더에게 adopter 권한을 부여하지만,
             // 컨트롤러에서 user.role을 직접 검사하여 브리더를 차단함
             await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .send({ breederId })
                 .expect(403);
@@ -138,7 +138,7 @@ describe('Chat API E2E Tests', () => {
 
         it('breederId 없이 요청 시 400 반환', async () => {
             await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({})
                 .expect(400);
@@ -154,7 +154,7 @@ describe('Chat API E2E Tests', () => {
 
             // 채팅방 생성
             const createRes = await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId: anotherBreeder!.breederId })
                 .expect(200);
@@ -162,13 +162,13 @@ describe('Chat API E2E Tests', () => {
 
             // 채팅방 닫기
             await request(app.getHttpServer())
-                .delete(`/api/chat/rooms/${firstRoomId}`)
+                .delete(`/api/v2/chat/rooms/${firstRoomId}`)
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
             // 같은 브리더로 재요청 → 새 방 생성
             const newRes = await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId: anotherBreeder!.breederId })
                 .expect(200);
@@ -181,18 +181,18 @@ describe('Chat API E2E Tests', () => {
     /**
      * 2. 채팅방 목록 조회
      */
-    describe('GET /api/chat/rooms - 채팅방 목록', () => {
+    describe('GET /api/v2/chat/rooms - 채팅방 목록', () => {
         beforeAll(async () => {
             // 채팅방이 없으면 하나 생성
             await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId });
         });
 
         it('입양자가 자신의 채팅방 목록 조회 성공', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/chat/rooms')
+                .get('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -213,7 +213,7 @@ describe('Chat API E2E Tests', () => {
 
         it('브리더가 자신의 채팅방 목록 조회 성공', async () => {
             const response = await request(app.getHttpServer())
-                .get('/api/chat/rooms')
+                .get('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .expect(200);
 
@@ -232,7 +232,7 @@ describe('Chat API E2E Tests', () => {
         });
 
         it('인증 없이 요청 시 401 반환', async () => {
-            await request(app.getHttpServer()).get('/api/chat/rooms').expect(401);
+            await request(app.getHttpServer()).get('/api/v2/chat/rooms').expect(401);
             console.log('✅ 미인증 채팅방 목록 조회 401 확인');
         });
     });
@@ -240,12 +240,12 @@ describe('Chat API E2E Tests', () => {
     /**
      * 3. 메시지 목록 조회
      */
-    describe('GET /api/chat/rooms/:roomId/messages - 메시지 조회', () => {
+    describe('GET /api/v2/chat/rooms/:roomId/messages - 메시지 조회', () => {
         let roomId: string;
 
         beforeAll(async () => {
             const response = await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId });
 
@@ -254,7 +254,7 @@ describe('Chat API E2E Tests', () => {
 
         it('입양자가 채팅방 메시지 조회 성공 (빈 목록)', async () => {
             const response = await request(app.getHttpServer())
-                .get(`/api/chat/rooms/${roomId}/messages`)
+                .get(`/api/v2/chat/rooms/${roomId}/messages`)
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -264,7 +264,7 @@ describe('Chat API E2E Tests', () => {
 
         it('브리더가 채팅방 메시지 조회 성공', async () => {
             const response = await request(app.getHttpServer())
-                .get(`/api/chat/rooms/${roomId}/messages`)
+                .get(`/api/v2/chat/rooms/${roomId}/messages`)
                 .set('Authorization', `Bearer ${breederToken}`)
                 .expect(200);
 
@@ -274,7 +274,7 @@ describe('Chat API E2E Tests', () => {
 
         it('limit 쿼리 파라미터 적용', async () => {
             const response = await request(app.getHttpServer())
-                .get(`/api/chat/rooms/${roomId}/messages?limit=10`)
+                .get(`/api/v2/chat/rooms/${roomId}/messages?limit=10`)
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -288,7 +288,7 @@ describe('Chat API E2E Tests', () => {
             expect(anotherAdopter).not.toBeNull();
 
             await request(app.getHttpServer())
-                .get(`/api/chat/rooms/${roomId}/messages`)
+                .get(`/api/v2/chat/rooms/${roomId}/messages`)
                 .set('Authorization', `Bearer ${anotherAdopter!.token}`)
                 .expect(403);
 
@@ -298,7 +298,7 @@ describe('Chat API E2E Tests', () => {
         it('존재하지 않는 roomId로 조회 시 404 반환', async () => {
             // ChatPolicyService.requireRoom → NotFoundException(404)
             await request(app.getHttpServer())
-                .get('/api/chat/rooms/000000000000000000000000/messages')
+                .get('/api/v2/chat/rooms/000000000000000000000000/messages')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(404);
 
@@ -306,7 +306,7 @@ describe('Chat API E2E Tests', () => {
         });
 
         it('인증 없이 요청 시 401 반환', async () => {
-            await request(app.getHttpServer()).get(`/api/chat/rooms/${roomId}/messages`).expect(401);
+            await request(app.getHttpServer()).get(`/api/v2/chat/rooms/${roomId}/messages`).expect(401);
 
             console.log('✅ 미인증 메시지 조회 401 확인');
         });
@@ -315,7 +315,7 @@ describe('Chat API E2E Tests', () => {
     /**
      * 3-1. 메시지 내용 조회 및 before 페이지네이션
      */
-    describe('GET /api/chat/rooms/:roomId/messages - 메시지 내용 및 페이지네이션', () => {
+    describe('GET /api/v2/chat/rooms/:roomId/messages - 메시지 내용 및 페이지네이션', () => {
         let roomId: string;
 
         const MSG_TIME_1 = new Date('2026-01-01T00:00:01Z');
@@ -328,7 +328,7 @@ describe('Chat API E2E Tests', () => {
             expect(freshBreeder).not.toBeNull();
 
             const response = await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId: freshBreeder!.breederId })
                 .expect(200);
@@ -380,7 +380,7 @@ describe('Chat API E2E Tests', () => {
 
         it('메시지 목록 조회 시 내용과 구조 검증', async () => {
             const response = await request(app.getHttpServer())
-                .get(`/api/chat/rooms/${roomId}/messages`)
+                .get(`/api/v2/chat/rooms/${roomId}/messages`)
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -417,7 +417,7 @@ describe('Chat API E2E Tests', () => {
             const before = MSG_TIME_2.toISOString();
 
             const response = await request(app.getHttpServer())
-                .get(`/api/chat/rooms/${roomId}/messages?before=${before}`)
+                .get(`/api/v2/chat/rooms/${roomId}/messages?before=${before}`)
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -434,7 +434,7 @@ describe('Chat API E2E Tests', () => {
     /**
      * 4. 채팅방 닫기
      */
-    describe('DELETE /api/chat/rooms/:roomId - 채팅방 닫기', () => {
+    describe('DELETE /api/v2/chat/rooms/:roomId - 채팅방 닫기', () => {
         let roomId: string;
 
         beforeEach(async () => {
@@ -443,7 +443,7 @@ describe('Chat API E2E Tests', () => {
             expect(anotherBreeder).not.toBeNull();
 
             const response = await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId: anotherBreeder!.breederId });
 
@@ -452,7 +452,7 @@ describe('Chat API E2E Tests', () => {
 
         it('입양자가 채팅방 닫기 성공', async () => {
             const response = await request(app.getHttpServer())
-                .delete(`/api/chat/rooms/${roomId}`)
+                .delete(`/api/v2/chat/rooms/${roomId}`)
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
@@ -463,7 +463,7 @@ describe('Chat API E2E Tests', () => {
         it('브리더가 채팅방 닫기 성공', async () => {
             // breederId(전역 브리더)가 참가한 채팅방 생성
             const createRes = await request(app.getHttpServer())
-                .post('/api/chat/rooms')
+                .post('/api/v2/chat/rooms')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId })
                 .expect(200);
@@ -471,7 +471,7 @@ describe('Chat API E2E Tests', () => {
             const targetRoomId = (createRes.body as { roomId: string }).roomId;
 
             const response = await request(app.getHttpServer())
-                .delete(`/api/chat/rooms/${targetRoomId}`)
+                .delete(`/api/v2/chat/rooms/${targetRoomId}`)
                 .set('Authorization', `Bearer ${breederToken}`)
                 .expect(200);
 
@@ -485,7 +485,7 @@ describe('Chat API E2E Tests', () => {
             expect(anotherAdopter).not.toBeNull();
 
             await request(app.getHttpServer())
-                .delete(`/api/chat/rooms/${roomId}`)
+                .delete(`/api/v2/chat/rooms/${roomId}`)
                 .set('Authorization', `Bearer ${anotherAdopter!.token}`)
                 .expect(403);
 
@@ -495,7 +495,7 @@ describe('Chat API E2E Tests', () => {
         it('존재하지 않는 roomId로 닫기 시도 시 404 반환', async () => {
             // ChatPolicyService.requireRoom → NotFoundException(404)
             await request(app.getHttpServer())
-                .delete('/api/chat/rooms/000000000000000000000000')
+                .delete('/api/v2/chat/rooms/000000000000000000000000')
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(404);
 
@@ -503,7 +503,7 @@ describe('Chat API E2E Tests', () => {
         });
 
         it('인증 없이 요청 시 401 반환', async () => {
-            await request(app.getHttpServer()).delete(`/api/chat/rooms/${roomId}`).expect(401);
+            await request(app.getHttpServer()).delete(`/api/v2/chat/rooms/${roomId}`).expect(401);
 
             console.log('✅ 미인증 채팅방 닫기 401 확인');
         });

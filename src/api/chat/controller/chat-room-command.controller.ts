@@ -15,7 +15,7 @@ import { ApiCreateOrGetRoomEndpoint, ApiCloseRoomEndpoint } from '../swagger';
 import { SenderRole } from '../../../schema/chat-message.schema';
 
 @ApiTags('채팅')
-@Controller('chat')
+@Controller('v2/chat')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ChatRoomCommandController {
     constructor(

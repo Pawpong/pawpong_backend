@@ -12,7 +12,7 @@ import { SenderRole } from '../../../schema/chat-message.schema';
 import { ApiGetMyRoomsEndpoint, ApiGetMessagesEndpoint } from '../swagger';
 
 @ApiTags('채팅')
-@Controller('chat')
+@Controller('v2/chat')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ChatRoomQueryController {
     constructor(
