@@ -1,13 +1,50 @@
+import { MongooseModule } from '@nestjs/mongoose';
+
 import { StorageModule } from '../../../common/storage/storage.module';
+import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
+import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
+import { ParentPet, ParentPetSchema } from '../../../schema/parent-pet.schema';
+import { AvailablePet, AvailablePetSchema } from '../../../schema/available-pet.schema';
+import { AdoptionApplication, AdoptionApplicationSchema } from '../../../schema/adoption-application.schema';
+import { BreederReview, BreederReviewSchema } from '../../../schema/breeder-review.schema';
 
 import { BreederManagementFileUrlAdapter } from '../infrastructure/breeder-management-file-url.adapter';
 import { BREEDER_MANAGEMENT_FILE_URL_PORT } from '../application/ports/breeder-management-file-url.port';
+import { BreederManagementPaginationAssemblerService } from '../domain/services/breeder-management-pagination-assembler.service';
+import { BreederRepository } from '../repository/breeder.repository';
+import { ParentPetRepository } from '../repository/parent-pet.repository';
+import { AdoptionApplicationRepository } from '../repository/adoption-application.repository';
+import { AvailablePetManagementRepository } from '../repository/available-pet-management.repository';
+import { BreederManagementAdopterRepository } from '../repository/breeder-management-adopter.repository';
+import { BreederManagementBreederReviewRepository } from '../repository/breeder-review.repository';
 
-// 브리더 관리 도메인의 여러 슬라이스가 공유하는 공통 capability.
-// 파일키 → CDN URL 변환(FILE_URL_PORT)은 profile/pets/verification/admin-banner 등에서 공통으로 쓰인다.
-export const BREEDER_MANAGEMENT_SHARED_MODULE_IMPORTS = [StorageModule];
+// 브리더 관리 도메인의 여러 슬라이스가 공유하는 공통 기반.
+// - 코어 리포지토리(모든 기능이 접근하는 영속성 계층)
+// - 파일키 → CDN URL 변환(FILE_URL_PORT)
+// - 목록 페이지네이션 조립(applications/pets/reviews 공용)
+const BREEDER_MANAGEMENT_SHARED_SCHEMA_IMPORTS = MongooseModule.forFeature([
+    { name: Breeder.name, schema: BreederSchema },
+    { name: Adopter.name, schema: AdopterSchema },
+    { name: ParentPet.name, schema: ParentPetSchema },
+    { name: AvailablePet.name, schema: AvailablePetSchema },
+    { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
+    { name: BreederReview.name, schema: BreederReviewSchema },
+]);
+
+export const BREEDER_MANAGEMENT_SHARED_MODULE_IMPORTS = [BREEDER_MANAGEMENT_SHARED_SCHEMA_IMPORTS, StorageModule];
+
+const BREEDER_MANAGEMENT_SHARED_REPOSITORY_PROVIDERS = [
+    BreederRepository,
+    ParentPetRepository,
+    AdoptionApplicationRepository,
+    AvailablePetManagementRepository,
+    BreederManagementAdopterRepository,
+    BreederManagementBreederReviewRepository,
+];
 
 export const BREEDER_MANAGEMENT_SHARED_MODULE_PROVIDERS = [
+    ...BREEDER_MANAGEMENT_SHARED_REPOSITORY_PROVIDERS,
+    BreederManagementPaginationAssemblerService,
     BreederManagementFileUrlAdapter,
     {
         provide: BREEDER_MANAGEMENT_FILE_URL_PORT,
@@ -15,4 +52,8 @@ export const BREEDER_MANAGEMENT_SHARED_MODULE_PROVIDERS = [
     },
 ];
 
-export const BREEDER_MANAGEMENT_SHARED_MODULE_EXPORTS = [BREEDER_MANAGEMENT_FILE_URL_PORT];
+export const BREEDER_MANAGEMENT_SHARED_MODULE_EXPORTS = [
+    ...BREEDER_MANAGEMENT_SHARED_REPOSITORY_PROVIDERS,
+    BreederManagementPaginationAssemblerService,
+    BREEDER_MANAGEMENT_FILE_URL_PORT,
+];

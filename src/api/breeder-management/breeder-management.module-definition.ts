@@ -1,5 +1,3 @@
-import { MongooseModule } from '@nestjs/mongoose';
-
 import { BreederManagementAccountController } from './controller/breeder-management-account.controller';
 import { BreederManagementApplicationFormCommandController } from './controller/breeder-management-application-form-command.controller';
 import { BreederManagementApplicationFormQueryController } from './controller/breeder-management-application-form-query.controller';
@@ -44,7 +42,6 @@ import { SubmitBreederManagementVerificationDocumentsUseCase } from './applicati
 import { BreederManagementDashboardAssemblerService } from './domain/services/breeder-management-dashboard-assembler.service';
 import { BreederManagementProfileUpdateMapperService } from './domain/services/breeder-management-profile-update-mapper.service';
 import { BreederManagementProfileAssemblerService } from './domain/services/breeder-management-profile-assembler.service';
-import { BreederManagementPaginationAssemblerService } from './domain/services/breeder-management-pagination-assembler.service';
 import { BreederManagementReceivedApplicationMapperService } from './domain/services/breeder-management-received-application-mapper.service';
 import { BreederManagementMyPetMapperService } from './domain/services/breeder-management-my-pet-mapper.service';
 import { BreederManagementMyReviewMapperService } from './domain/services/breeder-management-my-review-mapper.service';
@@ -89,18 +86,6 @@ import { BREEDER_MANAGEMENT_ACCOUNT_COMMAND_PORT } from './application/ports/bre
 import { BREEDER_MANAGEMENT_VERIFICATION_DOCUMENT_STORE_PORT } from './application/ports/breeder-management-verification-document-store.port';
 import { BREEDER_MANAGEMENT_VERIFICATION_DRAFT_STORE_PORT } from './application/ports/breeder-management-verification-draft-store.port';
 import { BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT } from './application/ports/breeder-management-verification-notifier.port';
-import { BreederRepository } from './repository/breeder.repository';
-import { ParentPetRepository } from './repository/parent-pet.repository';
-import { AdoptionApplicationRepository } from './repository/adoption-application.repository';
-import { AvailablePetManagementRepository } from './repository/available-pet-management.repository';
-import { BreederManagementAdopterRepository } from './repository/breeder-management-adopter.repository';
-import { BreederManagementBreederReviewRepository } from './repository/breeder-review.repository';
-import { Breeder, BreederSchema } from '../../schema/breeder.schema';
-import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
-import { ParentPet, ParentPetSchema } from '../../schema/parent-pet.schema';
-import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
-import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
-import { BreederReview, BreederReviewSchema } from '../../schema/breeder-review.schema';
 import { StorageModule } from '../../common/storage/storage.module';
 import { NotificationModule } from '../notification/notification.module';
 import { MailModule } from '../../common/mail/mail.module';
@@ -108,22 +93,12 @@ import { DiscordWebhookModule } from '../../common/discord/discord-webhook.modul
 import { BreederManagementSharedModule } from './shared/breeder-management-shared.module';
 import { BreederManagementAdminBannerModule } from './admin/breeder-management-admin-banner.module';
 
-const BREEDER_MANAGEMENT_SCHEMA_IMPORTS = MongooseModule.forFeature([
-    { name: Breeder.name, schema: BreederSchema },
-    { name: Adopter.name, schema: AdopterSchema },
-    { name: ParentPet.name, schema: ParentPetSchema },
-    { name: AvailablePet.name, schema: AvailablePetSchema },
-    { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
-    { name: BreederReview.name, schema: BreederReviewSchema },
-]);
-
 export const BREEDER_MANAGEMENT_MODULE_IMPORTS = [
-    BREEDER_MANAGEMENT_SCHEMA_IMPORTS,
     StorageModule,
     MailModule,
     NotificationModule,
     DiscordWebhookModule,
-    // 슬라이스 공통 capability (FILE_URL_PORT)
+    // 슬라이스 공통 기반 (코어 repo + FILE_URL_PORT + pagination)
     BreederManagementSharedModule,
     // 관리자 배너 슬라이스 (자기 DI 소유, GET_ACTIVE_PROFILE_BANNERS_QUERY 노출)
     BreederManagementAdminBannerModule,
@@ -145,15 +120,6 @@ export const BREEDER_MANAGEMENT_MODULE_CONTROLLERS = [
     BreederManagementReviewsQueryController,
     BreederManagementReviewReplyController,
     BreederManagementAccountController,
-];
-
-const BREEDER_MANAGEMENT_REPOSITORY_PROVIDERS = [
-    BreederRepository,
-    ParentPetRepository,
-    AdoptionApplicationRepository,
-    AvailablePetManagementRepository,
-    BreederManagementAdopterRepository,
-    BreederManagementBreederReviewRepository,
 ];
 
 const BREEDER_MANAGEMENT_USE_CASE_PROVIDERS = [
@@ -189,7 +155,6 @@ const BREEDER_MANAGEMENT_DOMAIN_PROVIDERS = [
     BreederManagementDashboardAssemblerService,
     BreederManagementProfileUpdateMapperService,
     BreederManagementProfileAssemblerService,
-    BreederManagementPaginationAssemblerService,
     BreederManagementReceivedApplicationMapperService,
     BreederManagementMyPetMapperService,
     BreederManagementMyReviewMapperService,
@@ -273,7 +238,6 @@ const BREEDER_MANAGEMENT_PORT_BINDINGS = [
 ];
 
 export const BREEDER_MANAGEMENT_MODULE_PROVIDERS = [
-    ...BREEDER_MANAGEMENT_REPOSITORY_PROVIDERS,
     ...BREEDER_MANAGEMENT_USE_CASE_PROVIDERS,
     ...BREEDER_MANAGEMENT_DOMAIN_PROVIDERS,
     ...BREEDER_MANAGEMENT_INFRASTRUCTURE_PROVIDERS,
@@ -281,8 +245,8 @@ export const BREEDER_MANAGEMENT_MODULE_PROVIDERS = [
 ];
 
 export const BREEDER_MANAGEMENT_MODULE_EXPORTS = [
+    // shared 재노출 → 코어 repo(BreederRepository 등)가 auth/notification 등 외부 소비자에 전달됨
+    BreederManagementSharedModule,
     // 관리자 배너 슬라이스를 재노출 → GET_ACTIVE_PROFILE_BANNERS_QUERY 가 auth 배너 컨트롤러에 전달됨
     BreederManagementAdminBannerModule,
-    BreederRepository,
-    AvailablePetManagementRepository,
 ];
