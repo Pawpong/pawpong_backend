@@ -1,7 +1,7 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AppVersion, AppVersionSchema } from '../../schema/app-version.schema';
-import { CustomLoggerService } from '../../common/logger/custom-logger.service';
+import { LoggerModule } from '../../common/logger/logger.module';
 
 import { APP_VERSION_READER_PORT } from './application/ports/app-version-reader.port';
 import { CheckAppVersionUseCase } from './application/use-cases/check-app-version.use-case';
@@ -26,7 +26,7 @@ import { AppVersionRepository } from './repository/app-version.repository';
 
 const APP_VERSION_SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: AppVersion.name, schema: AppVersionSchema }]);
 
-export const APP_VERSION_MODULE_IMPORTS = [APP_VERSION_SCHEMA_IMPORTS];
+export const APP_VERSION_MODULE_IMPORTS = [APP_VERSION_SCHEMA_IMPORTS, LoggerModule];
 
 export const APP_VERSION_MODULE_CONTROLLERS = [
     AppVersionController,
@@ -51,7 +51,6 @@ const APP_VERSION_DOMAIN_PROVIDERS = [
 ];
 
 const APP_VERSION_INFRASTRUCTURE_PROVIDERS = [
-    CustomLoggerService,
     AppVersionRepository,
     AppVersionMongooseReaderAdapter,
     AppVersionMongooseAdminReaderAdapter,

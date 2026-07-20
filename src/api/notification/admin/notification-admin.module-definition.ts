@@ -3,7 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 import { Notification, NotificationSchema } from '../../../schema/notification.schema';
-import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
+import { LoggerModule } from '../../../common/logger/logger.module';
 
 import { NotificationModule } from '../notification.module';
 
@@ -33,7 +33,7 @@ const NOTIFICATION_ADMIN_SCHEMA_IMPORTS = MongooseModule.forFeature([
 
 // NotificationModule 이 NOTIFICATION_PUSH_PORT, NOTIFICATION_COMMAND_PORT 를 export 하므로
 // SendAdminPushUseCase 가 두 port 를 주입받을 수 있다.
-export const NOTIFICATION_ADMIN_MODULE_IMPORTS = [NOTIFICATION_ADMIN_SCHEMA_IMPORTS, NotificationModule];
+export const NOTIFICATION_ADMIN_MODULE_IMPORTS = [NOTIFICATION_ADMIN_SCHEMA_IMPORTS, NotificationModule, LoggerModule];
 
 export const NOTIFICATION_ADMIN_MODULE_CONTROLLERS = [
     NotificationAdminQueryController,
@@ -56,7 +56,6 @@ const NOTIFICATION_ADMIN_DOMAIN_PROVIDERS = [
 ];
 
 const NOTIFICATION_ADMIN_INFRASTRUCTURE_PROVIDERS = [
-    CustomLoggerService,
     NotificationAdminRepository,
     NotificationAdminMongooseReaderAdapter,
     AdminPushRecipientRepository,

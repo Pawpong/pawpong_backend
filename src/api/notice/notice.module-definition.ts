@@ -1,7 +1,7 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { Notice, NoticeSchema } from '../../schema/notice.schema';
-import { CustomLoggerService } from '../../common/logger/custom-logger.service';
+import { LoggerModule } from '../../common/logger/logger.module';
 
 import { NoticeAdminCommandController } from './admin/controller/notice-admin-command.controller';
 import { NoticeAdminQueryController } from './admin/controller/notice-admin-query.controller';
@@ -22,7 +22,7 @@ import { NoticeRepository } from './repository/notice.repository';
 
 const NOTICE_SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: Notice.name, schema: NoticeSchema }]);
 
-export const NOTICE_MODULE_IMPORTS = [NOTICE_SCHEMA_IMPORTS];
+export const NOTICE_MODULE_IMPORTS = [NOTICE_SCHEMA_IMPORTS, LoggerModule];
 
 export const NOTICE_MODULE_CONTROLLERS = [NoticeController, NoticeAdminQueryController, NoticeAdminCommandController];
 
@@ -36,12 +36,7 @@ const NOTICE_USE_CASE_PROVIDERS = [
 
 const NOTICE_DOMAIN_PROVIDERS = [NoticePaginationAssemblerService, NoticeItemMapperService, NoticePageAssemblerService];
 
-const NOTICE_INFRASTRUCTURE_PROVIDERS = [
-    CustomLoggerService,
-    NoticeRepository,
-    NoticeMongooseReaderAdapter,
-    NoticeMongooseWriterAdapter,
-];
+const NOTICE_INFRASTRUCTURE_PROVIDERS = [NoticeRepository, NoticeMongooseReaderAdapter, NoticeMongooseWriterAdapter];
 
 const NOTICE_PORT_BINDINGS = [
     {

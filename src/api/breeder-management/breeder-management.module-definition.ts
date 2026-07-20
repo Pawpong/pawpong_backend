@@ -7,9 +7,6 @@ import { BreederManagementApplicationStatusController } from './controller/breed
 import { BreederManagementApplicationsQueryController } from './controller/breeder-management-applications-query.controller';
 import { BreederManagementAvailablePetsController } from './controller/breeder-management-available-pets.controller';
 import { BreederManagementDashboardController } from './controller/breeder-management-dashboard.controller';
-import { BreederManagementAdminCounselBannersController } from './admin/controller/breeder-management-admin-counsel-banners.controller';
-import { BreederManagementAdminProfileBannersController } from './admin/controller/breeder-management-admin-profile-banners.controller';
-import { BreederManagementAdminPublicBannersController } from './admin/controller/breeder-management-admin-public-banners.controller';
 import { BreederManagementMyPetsController } from './controller/breeder-management-my-pets.controller';
 import { BreederManagementParentPetsController } from './controller/breeder-management-parent-pets.controller';
 import { BreederManagementProfileInfoController } from './controller/breeder-management-profile-info.controller';
@@ -73,7 +70,6 @@ import { BreederManagementProfileCommandResultMapperService } from './domain/ser
 import { BreederManagementReviewReplyResultMapperService } from './domain/services/breeder-management-review-reply-result-mapper.service';
 import { BreederManagementVerificationCommandResultMapperService } from './domain/services/breeder-management-verification-command-result-mapper.service';
 import { BreederManagementProfileAdapter } from './infrastructure/breeder-management-profile.adapter';
-import { BreederManagementFileUrlAdapter } from './infrastructure/breeder-management-file-url.adapter';
 import { BreederManagementListReaderAdapter } from './infrastructure/breeder-management-list-reader.adapter';
 import { BreederManagementSettingsAdapter } from './infrastructure/breeder-management-settings.adapter';
 import { BreederManagementPetCommandAdapter } from './infrastructure/breeder-management-pet-command.adapter';
@@ -84,7 +80,6 @@ import { BreederManagementVerificationDocumentStoreAdapter } from './infrastruct
 import { BreederManagementVerificationDraftStoreAdapter } from './infrastructure/breeder-management-verification-draft-store.adapter';
 import { BreederManagementVerificationNotifierAdapter } from './infrastructure/breeder-management-verification-notifier.adapter';
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from './application/ports/breeder-management-profile.port';
-import { BREEDER_MANAGEMENT_FILE_URL_PORT } from './application/ports/breeder-management-file-url.port';
 import { BREEDER_MANAGEMENT_LIST_READER_PORT } from './application/ports/breeder-management-list-reader.port';
 import { BREEDER_MANAGEMENT_SETTINGS_PORT } from './application/ports/breeder-management-settings.port';
 import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from './application/ports/breeder-management-pet-command.port';
@@ -94,26 +89,6 @@ import { BREEDER_MANAGEMENT_ACCOUNT_COMMAND_PORT } from './application/ports/bre
 import { BREEDER_MANAGEMENT_VERIFICATION_DOCUMENT_STORE_PORT } from './application/ports/breeder-management-verification-document-store.port';
 import { BREEDER_MANAGEMENT_VERIFICATION_DRAFT_STORE_PORT } from './application/ports/breeder-management-verification-draft-store.port';
 import { BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT } from './application/ports/breeder-management-verification-notifier.port';
-import { BREEDER_MANAGEMENT_ADMIN_BANNER_READER_PORT } from './admin/application/ports/breeder-management-admin-banner-reader.port';
-import { BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER_PORT } from './admin/application/ports/breeder-management-admin-banner-writer.port';
-import {
-    GET_ACTIVE_COUNSEL_BANNERS_QUERY,
-    GET_ACTIVE_PROFILE_BANNERS_QUERY,
-} from './admin/application/tokens/breeder-management-public-banner-query.token';
-import { GetAllProfileBannersUseCase } from './admin/application/use-cases/get-all-profile-banners.use-case';
-import { GetActiveProfileBannersUseCase } from './admin/application/use-cases/get-active-profile-banners.use-case';
-import { CreateProfileBannerUseCase } from './admin/application/use-cases/create-profile-banner.use-case';
-import { UpdateProfileBannerUseCase } from './admin/application/use-cases/update-profile-banner.use-case';
-import { DeleteProfileBannerUseCase } from './admin/application/use-cases/delete-profile-banner.use-case';
-import { GetAllCounselBannersUseCase } from './admin/application/use-cases/get-all-counsel-banners.use-case';
-import { GetActiveCounselBannersUseCase } from './admin/application/use-cases/get-active-counsel-banners.use-case';
-import { CreateCounselBannerUseCase } from './admin/application/use-cases/create-counsel-banner.use-case';
-import { UpdateCounselBannerUseCase } from './admin/application/use-cases/update-counsel-banner.use-case';
-import { DeleteCounselBannerUseCase } from './admin/application/use-cases/delete-counsel-banner.use-case';
-import { BreederManagementBannerResultMapperService } from './admin/domain/services/breeder-management-banner-result-mapper.service';
-import { BreederManagementAdminBannerReaderAdapter } from './admin/infrastructure/breeder-management-admin-banner-reader.adapter';
-import { BreederManagementAdminBannerWriterAdapter } from './admin/infrastructure/breeder-management-admin-banner-writer.adapter';
-import { BreederManagementAdminBannerRepository } from './admin/repository/breeder-management-admin-banner.repository';
 import { BreederRepository } from './repository/breeder.repository';
 import { ParentPetRepository } from './repository/parent-pet.repository';
 import { AdoptionApplicationRepository } from './repository/adoption-application.repository';
@@ -125,13 +100,13 @@ import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { ParentPet, ParentPetSchema } from '../../schema/parent-pet.schema';
 import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
 import { AdoptionApplication, AdoptionApplicationSchema } from '../../schema/adoption-application.schema';
-import { AuthBanner, AuthBannerSchema } from '../../schema/auth-banner.schema';
-import { CounselBanner, CounselBannerSchema } from '../../schema/counsel-banner.schema';
 import { BreederReview, BreederReviewSchema } from '../../schema/breeder-review.schema';
 import { StorageModule } from '../../common/storage/storage.module';
 import { NotificationModule } from '../notification/notification.module';
 import { MailModule } from '../../common/mail/mail.module';
 import { DiscordWebhookModule } from '../../common/discord/discord-webhook.module';
+import { BreederManagementSharedModule } from './shared/breeder-management-shared.module';
+import { BreederManagementAdminBannerModule } from './admin/breeder-management-admin-banner.module';
 
 const BREEDER_MANAGEMENT_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Breeder.name, schema: BreederSchema },
@@ -139,8 +114,6 @@ const BREEDER_MANAGEMENT_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: ParentPet.name, schema: ParentPetSchema },
     { name: AvailablePet.name, schema: AvailablePetSchema },
     { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
-    { name: AuthBanner.name, schema: AuthBannerSchema },
-    { name: CounselBanner.name, schema: CounselBannerSchema },
     { name: BreederReview.name, schema: BreederReviewSchema },
 ]);
 
@@ -150,6 +123,10 @@ export const BREEDER_MANAGEMENT_MODULE_IMPORTS = [
     MailModule,
     NotificationModule,
     DiscordWebhookModule,
+    // 슬라이스 공통 capability (FILE_URL_PORT)
+    BreederManagementSharedModule,
+    // 관리자 배너 슬라이스 (자기 DI 소유, GET_ACTIVE_PROFILE_BANNERS_QUERY 노출)
+    BreederManagementAdminBannerModule,
 ];
 
 export const BREEDER_MANAGEMENT_MODULE_CONTROLLERS = [
@@ -168,35 +145,15 @@ export const BREEDER_MANAGEMENT_MODULE_CONTROLLERS = [
     BreederManagementReviewsQueryController,
     BreederManagementReviewReplyController,
     BreederManagementAccountController,
-    BreederManagementAdminProfileBannersController,
-    BreederManagementAdminCounselBannersController,
-    BreederManagementAdminPublicBannersController,
 ];
 
-const BREEDER_MANAGEMENT_REPOSITORIES = [
+const BREEDER_MANAGEMENT_REPOSITORY_PROVIDERS = [
     BreederRepository,
     ParentPetRepository,
     AdoptionApplicationRepository,
     AvailablePetManagementRepository,
     BreederManagementAdopterRepository,
     BreederManagementBreederReviewRepository,
-    BreederManagementAdminBannerRepository,
-];
-
-const BREEDER_MANAGEMENT_ADMIN_BANNER_PROVIDERS = [
-    GetAllProfileBannersUseCase,
-    GetActiveProfileBannersUseCase,
-    CreateProfileBannerUseCase,
-    UpdateProfileBannerUseCase,
-    DeleteProfileBannerUseCase,
-    GetAllCounselBannersUseCase,
-    GetActiveCounselBannersUseCase,
-    CreateCounselBannerUseCase,
-    UpdateCounselBannerUseCase,
-    DeleteCounselBannerUseCase,
-    BreederManagementBannerResultMapperService,
-    BreederManagementAdminBannerReaderAdapter,
-    BreederManagementAdminBannerWriterAdapter,
 ];
 
 const BREEDER_MANAGEMENT_USE_CASE_PROVIDERS = [
@@ -261,7 +218,6 @@ const BREEDER_MANAGEMENT_DOMAIN_PROVIDERS = [
 
 const BREEDER_MANAGEMENT_INFRASTRUCTURE_PROVIDERS = [
     BreederManagementProfileAdapter,
-    BreederManagementFileUrlAdapter,
     BreederManagementListReaderAdapter,
     BreederManagementSettingsAdapter,
     BreederManagementPetCommandAdapter,
@@ -277,18 +233,6 @@ const BREEDER_MANAGEMENT_PORT_BINDINGS = [
     {
         provide: BREEDER_MANAGEMENT_PROFILE_PORT,
         useExisting: BreederManagementProfileAdapter,
-    },
-    {
-        provide: BREEDER_MANAGEMENT_FILE_URL_PORT,
-        useExisting: BreederManagementFileUrlAdapter,
-    },
-    {
-        provide: BREEDER_MANAGEMENT_ADMIN_BANNER_READER_PORT,
-        useExisting: BreederManagementAdminBannerReaderAdapter,
-    },
-    {
-        provide: BREEDER_MANAGEMENT_ADMIN_BANNER_WRITER_PORT,
-        useExisting: BreederManagementAdminBannerWriterAdapter,
     },
     {
         provide: BREEDER_MANAGEMENT_LIST_READER_PORT,
@@ -326,19 +270,10 @@ const BREEDER_MANAGEMENT_PORT_BINDINGS = [
         provide: BREEDER_MANAGEMENT_VERIFICATION_NOTIFIER_PORT,
         useExisting: BreederManagementVerificationNotifierAdapter,
     },
-    {
-        provide: GET_ACTIVE_PROFILE_BANNERS_QUERY,
-        useExisting: GetActiveProfileBannersUseCase,
-    },
-    {
-        provide: GET_ACTIVE_COUNSEL_BANNERS_QUERY,
-        useExisting: GetActiveCounselBannersUseCase,
-    },
 ];
 
 export const BREEDER_MANAGEMENT_MODULE_PROVIDERS = [
-    ...BREEDER_MANAGEMENT_REPOSITORIES,
-    ...BREEDER_MANAGEMENT_ADMIN_BANNER_PROVIDERS,
+    ...BREEDER_MANAGEMENT_REPOSITORY_PROVIDERS,
     ...BREEDER_MANAGEMENT_USE_CASE_PROVIDERS,
     ...BREEDER_MANAGEMENT_DOMAIN_PROVIDERS,
     ...BREEDER_MANAGEMENT_INFRASTRUCTURE_PROVIDERS,
@@ -346,7 +281,8 @@ export const BREEDER_MANAGEMENT_MODULE_PROVIDERS = [
 ];
 
 export const BREEDER_MANAGEMENT_MODULE_EXPORTS = [
-    GET_ACTIVE_PROFILE_BANNERS_QUERY,
+    // 관리자 배너 슬라이스를 재노출 → GET_ACTIVE_PROFILE_BANNERS_QUERY 가 auth 배너 컨트롤러에 전달됨
+    BreederManagementAdminBannerModule,
     BreederRepository,
     AvailablePetManagementRepository,
 ];

@@ -28,14 +28,14 @@ import { ProfilePublicController } from './controller/profile-public.controller'
 import { ProfileFollowRepository } from './repository/profile-follow.repository';
 import { ProfileRepository } from './repository/profile.repository';
 
-const SCHEMA_IMPORTS = MongooseModule.forFeature([
+const PROFILE_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Adopter.name, schema: AdopterSchema },
     { name: Breeder.name, schema: BreederSchema },
     { name: AvailablePet.name, schema: AvailablePetSchema },
     { name: UserFollow.name, schema: UserFollowSchema },
 ]);
 
-export const PROFILE_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule];
+export const PROFILE_MODULE_IMPORTS = [PROFILE_SCHEMA_IMPORTS, StorageModule];
 
 export const PROFILE_MODULE_CONTROLLERS = [
     ProfileMeController,
@@ -44,7 +44,7 @@ export const PROFILE_MODULE_CONTROLLERS = [
     ProfileFollowController,
 ];
 
-const USE_CASE_PROVIDERS = [
+const PROFILE_USE_CASE_PROVIDERS = [
     GetMyProfileUseCase,
     UpdateMyProfileUseCase,
     GetAdopterProfileUseCase,
@@ -54,9 +54,9 @@ const USE_CASE_PROVIDERS = [
     UnfollowUserUseCase,
 ];
 
-const DOMAIN_PROVIDERS = [ProfileMapperService];
+const PROFILE_DOMAIN_PROVIDERS = [ProfileMapperService];
 
-const INFRASTRUCTURE_PROVIDERS = [
+const PROFILE_INFRASTRUCTURE_PROVIDERS = [
     ProfileRepository,
     ProfileFollowRepository,
     ProfileReaderMongooseAdapter,
@@ -65,7 +65,7 @@ const INFRASTRUCTURE_PROVIDERS = [
     ProfileFollowMongooseAdapter,
 ];
 
-const PORT_BINDINGS = [
+const PROFILE_PORT_BINDINGS = [
     { provide: PROFILE_READER_PORT, useExisting: ProfileReaderMongooseAdapter },
     { provide: PROFILE_WRITER_PORT, useExisting: ProfileWriterMongooseAdapter },
     { provide: PROFILE_ASSET_URL_PORT, useExisting: ProfileAssetUrlStorageAdapter },
@@ -73,8 +73,8 @@ const PORT_BINDINGS = [
 ];
 
 export const PROFILE_MODULE_PROVIDERS = [
-    ...USE_CASE_PROVIDERS,
-    ...DOMAIN_PROVIDERS,
-    ...INFRASTRUCTURE_PROVIDERS,
-    ...PORT_BINDINGS,
+    ...PROFILE_USE_CASE_PROVIDERS,
+    ...PROFILE_DOMAIN_PROVIDERS,
+    ...PROFILE_INFRASTRUCTURE_PROVIDERS,
+    ...PROFILE_PORT_BINDINGS,
 ];

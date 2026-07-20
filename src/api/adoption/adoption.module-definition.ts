@@ -39,7 +39,7 @@ import { AdopterPetFavoriteRepository } from './repository/adopter-pet-favorite.
 import { AdoptionPetRepository } from './repository/adoption-pet.repository';
 import { AdoptionRecordRepository } from './repository/adoption-record.repository';
 
-const SCHEMA_IMPORTS = MongooseModule.forFeature([
+const ADOPTION_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: AvailablePet.name, schema: AvailablePetSchema },
     { name: AdopterPetFavorite.name, schema: AdopterPetFavoriteSchema },
     { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
@@ -47,7 +47,7 @@ const SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: ChatRoom.name, schema: ChatRoomSchema },
 ]);
 
-export const ADOPTION_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule];
+export const ADOPTION_MODULE_IMPORTS = [ADOPTION_SCHEMA_IMPORTS, StorageModule];
 
 export const ADOPTION_MODULE_CONTROLLERS = [
     AdoptionListController,
@@ -57,7 +57,7 @@ export const ADOPTION_MODULE_CONTROLLERS = [
     AdoptionMyAdoptedController,
 ];
 
-const USE_CASE_PROVIDERS = [
+const ADOPTION_USE_CASE_PROVIDERS = [
     GetAdoptionPetListUseCase,
     GetPopularAdoptionPetsUseCase,
     GetAdoptionPetDetailUseCase,
@@ -67,9 +67,9 @@ const USE_CASE_PROVIDERS = [
     GetMyAdoptedListUseCase,
 ];
 
-const DOMAIN_PROVIDERS = [AdoptionPetMapperService];
+const ADOPTION_DOMAIN_PROVIDERS = [AdoptionPetMapperService];
 
-const INFRASTRUCTURE_PROVIDERS = [
+const ADOPTION_INFRASTRUCTURE_PROVIDERS = [
     AdoptionPetRepository,
     AdopterPetFavoriteRepository,
     AdoptionRecordRepository,
@@ -81,7 +81,7 @@ const INFRASTRUCTURE_PROVIDERS = [
     AdoptionStorageAssetUrlAdapter,
 ];
 
-const PORT_BINDINGS = [
+const ADOPTION_PORT_BINDINGS = [
     { provide: ADOPTION_PET_READER_PORT, useExisting: AdoptionPetMongooseReaderAdapter },
     { provide: ADOPTION_PET_WRITER_PORT, useExisting: AdoptionPetMongooseWriterAdapter },
     { provide: ADOPTION_BREEDER_SUMMARY_PORT, useExisting: AdoptionBreederSummaryMongooseAdapter },
@@ -92,8 +92,8 @@ const PORT_BINDINGS = [
 ];
 
 export const ADOPTION_MODULE_PROVIDERS = [
-    ...USE_CASE_PROVIDERS,
-    ...DOMAIN_PROVIDERS,
-    ...INFRASTRUCTURE_PROVIDERS,
-    ...PORT_BINDINGS,
+    ...ADOPTION_USE_CASE_PROVIDERS,
+    ...ADOPTION_DOMAIN_PROVIDERS,
+    ...ADOPTION_INFRASTRUCTURE_PROVIDERS,
+    ...ADOPTION_PORT_BINDINGS,
 ];

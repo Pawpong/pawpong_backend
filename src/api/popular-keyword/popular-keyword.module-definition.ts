@@ -1,6 +1,6 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
-import { CustomLoggerService } from '../../common/logger/custom-logger.service';
+import { LoggerModule } from '../../common/logger/logger.module';
 import { PopularKeyword, PopularKeywordSchema } from '../../schema/popular-keyword.schema';
 
 import { POPULAR_KEYWORD_ADMIN_READER_PORT } from './admin/application/ports/popular-keyword-admin-reader.port';
@@ -21,9 +21,11 @@ import { PopularKeywordMongooseReaderAdapter } from './infrastructure/popular-ke
 import { PopularKeywordController } from './controller/popular-keyword.controller';
 import { PopularKeywordRepository } from './repository/popular-keyword.repository';
 
-const SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: PopularKeyword.name, schema: PopularKeywordSchema }]);
+const POPULAR_KEYWORD_SCHEMA_IMPORTS = MongooseModule.forFeature([
+    { name: PopularKeyword.name, schema: PopularKeywordSchema },
+]);
 
-export const POPULAR_KEYWORD_MODULE_IMPORTS = [SCHEMA_IMPORTS];
+export const POPULAR_KEYWORD_MODULE_IMPORTS = [POPULAR_KEYWORD_SCHEMA_IMPORTS, LoggerModule];
 
 export const POPULAR_KEYWORD_MODULE_CONTROLLERS = [
     PopularKeywordController,
@@ -31,7 +33,7 @@ export const POPULAR_KEYWORD_MODULE_CONTROLLERS = [
     PopularKeywordAdminCommandController,
 ];
 
-const USE_CASE_PROVIDERS = [
+const POPULAR_KEYWORD_USE_CASE_PROVIDERS = [
     GetActivePopularKeywordsUseCase,
     GetAllPopularKeywordsAdminUseCase,
     GetPopularKeywordByIdUseCase,
@@ -40,25 +42,24 @@ const USE_CASE_PROVIDERS = [
     DeletePopularKeywordUseCase,
 ];
 
-const DOMAIN_PROVIDERS = [PopularKeywordItemMapperService];
+const POPULAR_KEYWORD_DOMAIN_PROVIDERS = [PopularKeywordItemMapperService];
 
-const INFRASTRUCTURE_PROVIDERS = [
-    CustomLoggerService,
+const POPULAR_KEYWORD_INFRASTRUCTURE_PROVIDERS = [
     PopularKeywordRepository,
     PopularKeywordMongooseReaderAdapter,
     PopularKeywordAdminMongooseReaderAdapter,
     PopularKeywordMongooseWriterAdapter,
 ];
 
-const PORT_BINDINGS = [
+const POPULAR_KEYWORD_PORT_BINDINGS = [
     { provide: POPULAR_KEYWORD_READER_PORT, useExisting: PopularKeywordMongooseReaderAdapter },
     { provide: POPULAR_KEYWORD_ADMIN_READER_PORT, useExisting: PopularKeywordAdminMongooseReaderAdapter },
     { provide: POPULAR_KEYWORD_WRITER_PORT, useExisting: PopularKeywordMongooseWriterAdapter },
 ];
 
 export const POPULAR_KEYWORD_MODULE_PROVIDERS = [
-    ...USE_CASE_PROVIDERS,
-    ...DOMAIN_PROVIDERS,
-    ...INFRASTRUCTURE_PROVIDERS,
-    ...PORT_BINDINGS,
+    ...POPULAR_KEYWORD_USE_CASE_PROVIDERS,
+    ...POPULAR_KEYWORD_DOMAIN_PROVIDERS,
+    ...POPULAR_KEYWORD_INFRASTRUCTURE_PROVIDERS,
+    ...POPULAR_KEYWORD_PORT_BINDINGS,
 ];

@@ -3,6 +3,8 @@ import { GetHealthUseCase } from './application/use-cases/get-health.use-case';
 import { HealthController } from './controller/health.controller';
 import { SystemRuntimeAdapter } from './infrastructure/system-runtime.adapter';
 
+export const HEALTH_MODULE_IMPORTS = [];
+
 export const HEALTH_MODULE_CONTROLLERS = [HealthController];
 
 const HEALTH_USE_CASE_PROVIDERS = [GetHealthUseCase];

@@ -1,6 +1,7 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { StorageModule } from '../../common/storage/storage.module';
+import { RedisModule } from '../../common/redis/redis.module';
 import { NotificationModule } from '../notification/notification.module';
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
@@ -71,7 +72,7 @@ import { CommunityReportRepository } from './repository/community-report.reposit
 import { CommunityRepository } from './repository/community.repository';
 import { CommunityReportMongooseAdapter } from './infrastructure/community-report-mongoose.adapter';
 
-const SCHEMA_IMPORTS = MongooseModule.forFeature([
+const COMMUNITY_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: CommunityPost.name, schema: CommunityPostSchema },
     { name: CommunityPostComment.name, schema: CommunityPostCommentSchema },
     { name: CommunityPostLike.name, schema: CommunityPostLikeSchema },
@@ -82,7 +83,7 @@ const SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: UserFollow.name, schema: UserFollowSchema },
 ]);
 
-export const COMMUNITY_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule, NotificationModule];
+export const COMMUNITY_MODULE_IMPORTS = [COMMUNITY_SCHEMA_IMPORTS, StorageModule, RedisModule, NotificationModule];
 
 export const COMMUNITY_MODULE_CONTROLLERS = [
     CommunityPostListController,
@@ -98,7 +99,7 @@ export const COMMUNITY_MODULE_CONTROLLERS = [
     CommunityReportAdminCommandController,
 ];
 
-const USE_CASE_PROVIDERS = [
+const COMMUNITY_USE_CASE_PROVIDERS = [
     GetCommunityPostListUseCase,
     GetCommunityPostDetailUseCase,
     GetCommunityPostCommentsUseCase,
@@ -119,12 +120,12 @@ const USE_CASE_PROVIDERS = [
     HandleCommunityPostReportUseCase,
 ];
 
-const DOMAIN_PROVIDERS = [CommunityPostMapperService, CommunityPostWriteValidatorService];
+const COMMUNITY_DOMAIN_PROVIDERS = [CommunityPostMapperService, CommunityPostWriteValidatorService];
 
 // 도메인 이벤트 리스너 (프로필 변경 → 작성자 snapshot 동기화)
-const LISTENER_PROVIDERS = [CommunityAuthorSyncListener];
+const COMMUNITY_LISTENER_PROVIDERS = [CommunityAuthorSyncListener];
 
-const INFRASTRUCTURE_PROVIDERS = [
+const COMMUNITY_INFRASTRUCTURE_PROVIDERS = [
     CommunityRepository,
     CommunityBookmarkRepository,
     CommunityLikeRepository,
@@ -141,7 +142,7 @@ const INFRASTRUCTURE_PROVIDERS = [
     CommunityReportMongooseAdapter,
 ];
 
-const PORT_BINDINGS = [
+const COMMUNITY_PORT_BINDINGS = [
     { provide: COMMUNITY_POST_READER_PORT, useExisting: CommunityPostReaderMongooseAdapter },
     { provide: COMMUNITY_POST_WRITER_PORT, useExisting: CommunityPostWriterMongooseAdapter },
     { provide: COMMUNITY_AUTHOR_READER_PORT, useExisting: CommunityAuthorReaderMongooseAdapter },
@@ -158,9 +159,9 @@ const PORT_BINDINGS = [
 ];
 
 export const COMMUNITY_MODULE_PROVIDERS = [
-    ...USE_CASE_PROVIDERS,
-    ...DOMAIN_PROVIDERS,
-    ...LISTENER_PROVIDERS,
-    ...INFRASTRUCTURE_PROVIDERS,
-    ...PORT_BINDINGS,
+    ...COMMUNITY_USE_CASE_PROVIDERS,
+    ...COMMUNITY_DOMAIN_PROVIDERS,
+    ...COMMUNITY_LISTENER_PROVIDERS,
+    ...COMMUNITY_INFRASTRUCTURE_PROVIDERS,
+    ...COMMUNITY_PORT_BINDINGS,
 ];

@@ -82,8 +82,6 @@ import { ADOPTER_ACCOUNT_COMMAND_PORT } from './application/ports/adopter-accoun
 import { ADOPTER_APPLICATION_READER_PORT } from './application/ports/adopter-application-reader.port';
 import { ADOPTER_FILE_URL_PORT } from './application/ports/adopter-file-url.port';
 import { AdopterRepository } from './repository/adopter.repository';
-import { BreederRepository } from '../breeder-management/repository/breeder.repository';
-import { AvailablePetManagementRepository } from '../breeder-management/repository/available-pet-management.repository';
 import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 import { Admin, AdminSchema } from '../../schema/admin.schema';
@@ -94,6 +92,7 @@ import { StorageModule } from '../../common/storage/storage.module';
 import { NotificationModule } from '../notification/notification.module';
 import { MailModule } from '../../common/mail/mail.module';
 import { DiscordWebhookModule } from '../../common/discord/discord-webhook.module';
+import { BreederManagementModule } from '../breeder-management/breeder-management.module';
 
 const ADOPTER_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Adopter.name, schema: AdopterSchema },
@@ -107,6 +106,7 @@ const ADOPTER_SCHEMA_IMPORTS = MongooseModule.forFeature([
 export const ADOPTER_MODULE_IMPORTS = [
     ADOPTER_SCHEMA_IMPORTS,
     StorageModule,
+    BreederManagementModule,
     MailModule,
     NotificationModule,
     DiscordWebhookModule,
@@ -126,17 +126,23 @@ export const ADOPTER_MODULE_CONTROLLERS = [
     AdopterAdminApplicationController,
 ];
 
-const ADOPTER_ADMIN_PROVIDERS = [
+const ADOPTER_ADMIN_USE_CASE_PROVIDERS = [
     GetAdopterAdminReviewReportsUseCase,
     DeleteAdopterAdminReviewUseCase,
     GetAdopterAdminApplicationListUseCase,
     GetAdopterAdminApplicationDetailUseCase,
+];
+
+const ADOPTER_ADMIN_DOMAIN_PROVIDERS = [
     AdopterAdminPolicyService,
     AdopterAdminApplicationDetailMapperService,
     AdopterAdminApplicationListAssemblerService,
     AdopterAdminActivityLogFactoryService,
     AdopterAdminReviewReportPageAssemblerService,
     AdopterAdminReviewDeleteResultMapperService,
+];
+
+const ADOPTER_ADMIN_INFRASTRUCTURE_PROVIDERS = [
     AdopterAdminReaderAdapter,
     AdopterAdminWriterAdapter,
     AdopterAdminRepository,
@@ -181,8 +187,6 @@ const ADOPTER_INFRASTRUCTURE_PROVIDERS = [
     AdopterApplicationRepository,
     AdopterBreederFavoriteRepository,
     AdopterReviewRepository,
-    BreederRepository,
-    AvailablePetManagementRepository,
     AdopterProfileAdapter,
     AdopterBreederReaderAdapter,
     AdopterPetReaderAdapter,
@@ -257,7 +261,9 @@ const ADOPTER_PORT_BINDINGS = [
 ];
 
 export const ADOPTER_MODULE_PROVIDERS = [
-    ...ADOPTER_ADMIN_PROVIDERS,
+    ...ADOPTER_ADMIN_USE_CASE_PROVIDERS,
+    ...ADOPTER_ADMIN_DOMAIN_PROVIDERS,
+    ...ADOPTER_ADMIN_INFRASTRUCTURE_PROVIDERS,
     ...ADOPTER_APPLICATION_PROVIDERS,
     ...ADOPTER_DOMAIN_PROVIDERS,
     ...ADOPTER_INFRASTRUCTURE_PROVIDERS,
