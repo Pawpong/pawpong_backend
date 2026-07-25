@@ -259,7 +259,7 @@ describe('콘테스트 E2E 테스트', () => {
             const res = await request(app.getHttpServer()).get('/api/v2/contest/entries').expect(200);
 
             expect(res.body.data.items).toHaveLength(0);
-            expect(res.body.data.total).toBe(0);
+            expect(res.body.data.pagination.totalItems).toBe(0);
         });
 
         it('GET /yesterday-top → 콘테스트 ID + 빈 랭킹', async () => {
@@ -457,7 +457,7 @@ describe('콘테스트 E2E 테스트', () => {
                         const res = await request(app.getHttpServer()).get('/api/v2/contest/entries').expect(200);
 
                         expect(res.body.data.items.find((i: any) => i.id === entryId)).toBeUndefined();
-                        expect(res.body.data.total).toBe(0);
+                        expect(res.body.data.pagination.totalItems).toBe(0);
                     });
 
                     it('관리자 → deleted 성공', async () => {

@@ -1,19 +1,18 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { PageInfoDto } from '../../../../common/dto/pagination/page-info.dto';
 import { ContestEntryDto } from './contest-entry.dto';
 
+/**
+ * 투표 항목 목록 응답.
+ * 플랫폼 표준 페이지네이션 계약(`data: { items, pagination }`)을 따른다.
+ */
 export class ContestEntriesResponseDto {
     @ApiProperty({ type: [ContestEntryDto] })
     items: ContestEntryDto[];
 
-    @ApiProperty()
-    total: number;
-
-    @ApiProperty()
-    page: number;
-
-    @ApiProperty()
-    limit: number;
+    @ApiProperty({ type: PageInfoDto })
+    pagination: PageInfoDto;
 }
 
 export class ContestSubmitResponseDto {

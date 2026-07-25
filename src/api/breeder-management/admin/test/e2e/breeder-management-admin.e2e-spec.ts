@@ -82,7 +82,7 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .put('/api/breeder-management-admin/profile-banner/invalid-banner-id')
+                .patch('/api/breeder-management-admin/profile-banner/invalid-banner-id')
                 .set('Authorization', `Bearer ${adminToken}`)
                 .send({})
                 .expect(400);
@@ -142,7 +142,7 @@ describe('브리더 관리 관리자 종단간 테스트', () => {
             }
 
             const response = await request(app.getHttpServer())
-                .put('/api/breeder-management-admin/counsel-banner/invalid-banner-id')
+                .patch('/api/breeder-management-admin/counsel-banner/invalid-banner-id')
                 .set('Authorization', `Bearer ${adminToken}`)
                 .send({})
                 .expect(400);
