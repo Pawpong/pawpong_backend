@@ -22,6 +22,10 @@ export enum KafkaTopic {
     // 시스템 이벤트
     SYSTEM_NOTIFICATION = 'system.notification',
     SYSTEM_ALERT = 'system.alert',
+
+    // AI 이미지 생성 (NestJS ↔ Python AI Agent 언어 경계 계약이라 버전을 붙인다)
+    AI_IMAGE_REQUEST = 'ai-image.request.v1',
+    AI_IMAGE_RESULT = 'ai-image.result.v1',
 }
 
 /**

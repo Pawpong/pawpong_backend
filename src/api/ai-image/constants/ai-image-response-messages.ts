@@ -5,4 +5,7 @@ export const AI_IMAGE_RESPONSE_MESSAGES = {
     filterDeleted: 'AI 필터가 삭제되었습니다.',
     filterNotFound: 'AI 필터를 찾을 수 없습니다.',
     uploadUrlIssued: '업로드 URL 발급 성공',
+    generationRequested: 'AI 이미지 생성 요청이 접수되었습니다.',
+    generationRetrieved: 'AI 생성 상태 조회 성공',
+    generationsRetrieved: 'AI 생성 이력 조회 성공',
 } as const;

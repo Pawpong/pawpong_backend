@@ -5,6 +5,9 @@ import { AiImageFilter, AiImageFilterSchema } from '../../../schema/ai-image-fil
 import { AiImageJob, AiImageJobSchema } from '../../../schema/ai-image-job.schema';
 
 import { AiImageFilterRepository } from './repository/ai-image-filter.repository';
+import { AiImageJobRepository } from './repository/ai-image-job.repository';
+import { AiImageJobReaderAdapter } from './infrastructure/ai-image-job-reader.adapter';
+import { AI_IMAGE_JOB_READER_PORT } from './application/ports/ai-image-job-reader.port';
 import { AiImageFilterReaderAdapter } from './infrastructure/ai-image-filter-reader.adapter';
 import { AiImageAssetUrlStorageAdapter } from './infrastructure/ai-image-asset-url-storage.adapter';
 import { AI_IMAGE_FILTER_READER_PORT } from './application/ports/ai-image-filter-reader.port';
@@ -26,12 +29,15 @@ const AI_IMAGE_SHARED_INFRASTRUCTURE_PROVIDERS = [
     AiImageFilterReaderAdapter,
     AiImageAssetUrlStorageAdapter,
     AiImageFileStorageAdapter,
+    AiImageJobRepository,
+    AiImageJobReaderAdapter,
 ];
 
 const AI_IMAGE_SHARED_PORT_BINDINGS = [
     { provide: AI_IMAGE_FILTER_READER_PORT, useExisting: AiImageFilterReaderAdapter },
     { provide: AI_IMAGE_ASSET_URL_PORT, useExisting: AiImageAssetUrlStorageAdapter },
     { provide: AI_IMAGE_FILE_STORAGE_PORT, useExisting: AiImageFileStorageAdapter },
+    { provide: AI_IMAGE_JOB_READER_PORT, useExisting: AiImageJobReaderAdapter },
 ];
 
 export const AI_IMAGE_SHARED_MODULE_PROVIDERS = [
@@ -44,6 +50,8 @@ export const AI_IMAGE_SHARED_MODULE_EXPORTS = [
     AI_IMAGE_ASSET_URL_PORT,
     AI_IMAGE_FILE_STORAGE_PORT,
     AiImageFilterRepository,
+    AiImageJobRepository,
+    AI_IMAGE_JOB_READER_PORT,
     // 슬라이스 레포지토리가 AiImageFilter/AiImageJob 모델을 주입받을 수 있도록 재노출
     MongooseModule,
 ];
