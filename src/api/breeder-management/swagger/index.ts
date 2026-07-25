@@ -12,11 +12,9 @@ import { BreederProfileResponseDto } from '../../breeder/dto/response/breeder-pr
 import { ReceivedApplicationListResponseDto } from '../../breeder/dto/response/received-application-list-response.dto';
 import { ApplicationFormUpdateRequestDto } from '../dto/request/application-form-update-request.dto';
 import { ApplicationStatusUpdateRequestDto } from '../dto/request/application-status-update-request.dto';
-import { AvailablePetAddDto } from '../dto/request/available-pet-add-request.dto';
 import { BreederAccountDeleteRequestDto } from '../dto/request/breeder-account-delete-request.dto';
 import { ParentPetAddDto } from '../dto/request/parent-pet-add-request.dto';
 import { ParentPetUpdateDto } from '../dto/request/parent-pet-update-request.dto';
-import { PetStatusUpdateRequestDto } from '../dto/request/pet-status-update-request.dto';
 import { ProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
 import { ReviewReplyRequestDto } from '../dto/request/review-reply-request.dto';
 import { SimpleApplicationFormUpdateRequestDto } from '../dto/request/simple-application-form-update-request.dto';
@@ -31,11 +29,9 @@ import {
 } from '../dto/response/application-form-update-response.dto';
 import { ApplicationStatusUpdateResponseDto } from '../dto/response/application-status-update-response.dto';
 import { BreederAccountDeleteResponseDto } from '../dto/response/breeder-account-delete-response.dto';
-import { MyPetItemDto, MyPetsListResponseDto } from '../dto/response/my-pets-list-response.dto';
 import { MyReviewItemDto, MyReviewsListResponseDto } from '../dto/response/my-reviews-list-response.dto';
 import { PetAddResponseDto } from '../dto/response/pet-add-response.dto';
 import { PetRemoveResponseDto } from '../dto/response/pet-remove-response.dto';
-import { PetStatusUpdateResponseDto } from '../dto/response/pet-status-update-response.dto';
 import { PetUpdateResponseDto } from '../dto/response/pet-update-response.dto';
 import { BreederProfileUpdateResponseDto } from '../dto/response/profile-update-response.dto';
 import { ReviewReplyDeleteResponseDto, ReviewReplyResponseDto } from '../dto/response/review-reply-response.dto';
@@ -196,42 +192,6 @@ export const BreederManagementSwaggerDocs = {
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
-    addAvailablePet: {
-        summary: '분양 가능한 반려동물 추가',
-        description: '새로운 분양 가능한 반려동물을 등록합니다.',
-        responseType: PetAddResponseDto,
-        successDescription: '분양 반려동물 추가 성공',
-        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetAdded,
-        isPublic: false,
-        errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
-    },
-    updateAvailablePet: {
-        summary: '분양 가능한 반려동물 정보 수정',
-        description: '등록된 분양 반려동물의 정보를 수정합니다.',
-        responseType: PetUpdateResponseDto,
-        successDescription: '분양 반려동물 수정 성공',
-        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetUpdated,
-        isPublic: false,
-        errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
-    },
-    updatePetStatus: {
-        summary: '반려동물 상태 변경',
-        description: '분양 반려동물의 상태를 변경합니다.',
-        responseType: PetStatusUpdateResponseDto,
-        successDescription: '반려동물 상태 변경 성공',
-        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.petStatusUpdated,
-        isPublic: false,
-        errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
-    },
-    removeAvailablePet: {
-        summary: '분양 가능한 반려동물 삭제',
-        description: '등록된 분양 반려동물을 삭제합니다.',
-        responseType: PetRemoveResponseDto,
-        successDescription: '분양 반려동물 삭제 성공',
-        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.availablePetRemoved,
-        isPublic: false,
-        errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
-    },
     receivedApplications: {
         summary: '받은 입양 신청 목록 조회',
         description: '브리더가 받은 입양 신청들을 페이지네이션으로 조회합니다.',
@@ -265,17 +225,6 @@ export const BreederManagementSwaggerDocs = {
         responseType: ApplicationStatusUpdateResponseDto,
         successDescription: '입양 신청 상태 업데이트 성공',
         successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.applicationStatusUpdated,
-        isPublic: false,
-        errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
-    },
-    myPets: {
-        summary: '내 개체 목록 조회',
-        description:
-            '브리더 자신의 모든 개체 목록을 관리 목적으로 조회합니다. 비활성화된 개체, 상태별 필터링, 입양 신청 수 등 상세 정보가 포함됩니다.',
-        responseType: MyPetsListResponseDto,
-        itemType: MyPetItemDto,
-        successDescription: '내 개체 목록 조회 성공',
-        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.myPetsRetrieved,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -442,8 +391,6 @@ export const BreederManagementRequestBodyDtos = {
     submitDocuments: SubmitDocumentsRequestDto,
     parentPetAdd: ParentPetAddDto,
     parentPetUpdate: ParentPetUpdateDto,
-    availablePetAdd: AvailablePetAddDto,
-    petStatusUpdate: PetStatusUpdateRequestDto,
     applicationFormUpdate: ApplicationFormUpdateRequestDto,
     simpleApplicationFormUpdate: SimpleApplicationFormUpdateRequestDto,
     applicationStatusUpdate: ApplicationStatusUpdateRequestDto,
@@ -512,36 +459,6 @@ export function ApiRemoveBreederManagementParentPetEndpoint() {
     return applyDecorators(ApiEndpoint(BreederManagementSwaggerDocs.removeParentPet), ApiBreederManagementPetIdParam());
 }
 
-export function ApiAddBreederManagementAvailablePetEndpoint() {
-    return applyDecorators(
-        ApiEndpoint(BreederManagementSwaggerDocs.addAvailablePet),
-        ApiBody({ type: AvailablePetAddDto }),
-    );
-}
-
-export function ApiUpdateBreederManagementAvailablePetEndpoint() {
-    return applyDecorators(
-        ApiEndpoint(BreederManagementSwaggerDocs.updateAvailablePet),
-        ApiBreederManagementPetIdParam(),
-        ApiBody({ type: AvailablePetAddDto }),
-    );
-}
-
-export function ApiUpdateBreederManagementPetStatusEndpoint() {
-    return applyDecorators(
-        ApiEndpoint(BreederManagementSwaggerDocs.updatePetStatus),
-        ApiBreederManagementPetIdParam(),
-        ApiBody({ type: PetStatusUpdateRequestDto }),
-    );
-}
-
-export function ApiRemoveBreederManagementAvailablePetEndpoint() {
-    return applyDecorators(
-        ApiEndpoint(BreederManagementSwaggerDocs.removeAvailablePet),
-        ApiBreederManagementPetIdParam(),
-    );
-}
-
 export function ApiGetBreederManagementReceivedApplicationsEndpoint() {
     return applyDecorators(
         ApiEndpoint(BreederManagementSwaggerDocs.receivedApplications),
@@ -583,28 +500,6 @@ export function ApiUpdateBreederManagementApplicationStatusEndpoint() {
         ApiEndpoint(BreederManagementSwaggerDocs.updateApplicationStatus),
         ApiBreederManagementApplicationIdParam(),
         ApiBody({ type: ApplicationStatusUpdateRequestDto }),
-    );
-}
-
-export function ApiGetBreederManagementMyPetsEndpoint() {
-    return applyDecorators(
-        ApiPaginatedEndpoint(BreederManagementSwaggerDocs.myPets),
-        ApiQuery({
-            name: 'status',
-            required: false,
-            type: String,
-            description: '개체 상태 필터',
-            example: 'available',
-        }),
-        ApiQuery({
-            name: 'includeInactive',
-            required: false,
-            type: Boolean,
-            description: '비활성 개체 포함 여부',
-            example: false,
-        }),
-        ApiQuery({ name: 'page', required: false, type: Number, description: '페이지 번호', example: 1 }),
-        ApiQuery({ name: 'limit', required: false, type: Number, description: '페이지당 항목 수', example: 20 }),
     );
 }
 

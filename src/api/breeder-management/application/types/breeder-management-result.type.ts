@@ -83,31 +83,6 @@ export type BreederManagementDashboardResult = {
     availablePetCount: number;
 };
 
-export type BreederManagementMyPetItemResult = {
-    petId: string;
-    name: string;
-    breed: string;
-    gender: string;
-    birthDate: Date;
-    ageInMonths: number;
-    price?: number;
-    status?: string;
-    isActive?: boolean;
-    mainPhoto: string;
-    photoCount: number;
-    viewCount: number;
-    applicationCount: number;
-    createdAt?: Date;
-    updatedAt?: Date;
-};
-
-export type BreederManagementMyPetsPageResult = PageResult<BreederManagementMyPetItemResult> & {
-    availableCount: number;
-    reservedCount: number;
-    adoptedCount: number;
-    inactiveCount: number;
-};
-
 export type BreederManagementMyReviewItemResult = {
     reviewId: string;
     adopterId: string;

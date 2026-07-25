@@ -9,7 +9,7 @@ import {
 /**
  * 브리더 관리 > 동물 슬라이스
  * - 부모 동물 등록/수정/삭제
- * - 분양 가능 동물 등록/수정/상태 변경/삭제, 내 동물 목록
+ * (분양 가능 동물 CRUD·내 동물 목록은 breeder-pet-posting 도메인으로 이관됨)
  */
 @Module({
     imports: BREEDER_MANAGEMENT_PETS_MODULE_IMPORTS,

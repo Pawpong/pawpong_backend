@@ -7,10 +7,14 @@
 **핵심 특징:**
 
 - **인증 필수**: 모든 API는 JWT 인증 + breeder 역할 필요
-- **완전한 CRUD**: 반려동물(부모견/분양용)과 프로필 전체 관리
+- **완전한 CRUD**: 부모견/부모묘와 프로필 전체 관리
 - **입양 신청 관리**: 받은 신청 조회 및 상태 업데이트
 - **커스텀 폼**: 입양 신청 폼 질문 추가/수정/삭제
 - **대시보드**: 통계 정보와 최근 활동 한눈에 확인
+
+> 분양 가능 반려동물(available-pet) 등록/수정/상태 변경/삭제와 "내 개체 목록" 조회는
+> `breeder-pet-posting` 도메인(`/api/v2/breeder-pet-posting`)으로 이관되었습니다.
+> 이 도메인은 더 이상 available-pet 쓰기 API를 제공하지 않습니다.
 
 ## 주요 기능
 
@@ -18,13 +22,11 @@
 - 프로필 관리 (조회, 수정)
 - 인증 관리 (상태 조회, 신청)
 - 부모견/부모묘 관리 (추가, 수정, 삭제)
-- 분양 가능 반려동물 관리 (추가, 수정, 상태 변경, 삭제)
 - 입양 신청 관리 (목록 조회, 상세 조회, 상태 업데이트)
-- 개체 목록 조회 (상태 필터링, 비활성화 포함)
 - 후기 목록 조회 (공개/비공개 필터링)
 - 입양 신청 폼 관리 (조회, 커스텀 질문 추가/수정)
 
-## API 엔드포인트 (19개)
+## API 엔드포인트 (14개)
 
 ### 1. 브리더 대시보드 조회 GET /api/breeder-management/dashboard
 
@@ -122,48 +124,7 @@
 
 등록된 부모 반려동물을 삭제합니다.
 
-### 9. 분양 가능한 반려동물 추가 POST /api/breeder-management/available-pets
-
-새로운 분양 가능한 반려동물을 등록합니다.
-
-**Request:**
-
-```json
-{
-    "name": "밀크",
-    "breed": "골든리트리버",
-    "gender": "female",
-    "birthDate": "2024-01-15",
-    "price": 1500000,
-    "description": "건강하고 활발한 아이입니다",
-    "parentInfo": {
-        "mother": "507f1f77bcf86cd799439011",
-        "father": "507f1f77bcf86cd799439012"
-    }
-}
-```
-
-### 10. 분양 가능한 반려동물 정보 수정 PATCH /api/breeder-management/available-pets/:petId
-
-등록된 분양 반려동물의 정보를 수정합니다.
-
-### 11. 반려동물 상태 변경 PATCH /api/breeder-management/available-pets/:petId/status
-
-분양 반려동물의 상태를 변경합니다 (available, reserved, adopted).
-
-**Request:**
-
-```json
-{
-    "petStatus": "reserved"
-}
-```
-
-### 12. 분양 가능한 반려동물 삭제 DELETE /api/breeder-management/available-pets/:petId
-
-등록된 분양 반려동물을 삭제합니다.
-
-### 13. 받은 입양 신청 목록 조회 GET /api/breeder-management/applications
+### 9. 받은 입양 신청 목록 조회 GET /api/breeder-management/applications
 
 브리더가 받은 입양 신청들을 페이지네이션으로 조회합니다.
 
@@ -172,7 +133,7 @@
 - `page`: 페이지 번호 (기본값: 1)
 - `take`: 페이지당 항목 수 (기본값: 10)
 
-### 14. 받은 입양 신청 상세 조회 GET /api/breeder-management/applications/:applicationId
+### 10. 받은 입양 신청 상세 조회 GET /api/breeder-management/applications/:applicationId
 
 브리더가 받은 특정 입양 신청의 상세 정보를 조회합니다.
 
@@ -184,7 +145,7 @@
 - 신청 상태, 신청 일시, 처리 일시
 - 브리더 메모
 
-### 15. 입양 신청 상태 업데이트 PATCH /api/breeder-management/applications/:applicationId
+### 11. 입양 신청 상태 업데이트 PATCH /api/breeder-management/applications/:applicationId
 
 받은 입양 신청의 상태를 변경합니다.
 
@@ -199,24 +160,7 @@
 
 **가능한 상태:** pending, reviewing, approved, rejected, cancelled
 
-### 16. 내 개체 목록 조회 GET /api/breeder-management/my-pets
-
-브리더 자신의 모든 개체 목록을 관리 목적으로 조회합니다.
-
-**Query Parameters:**
-
-- `status`: 상태 필터 (available, reserved, adopted)
-- `includeInactive`: 비활성화된 개체 포함 여부 (true/false)
-- `page`: 페이지 번호 (기본값: 1)
-- `limit`: 페이지당 항목 수 (기본값: 20)
-
-**Response 포함 정보:**
-
-- 비활성화된 개체
-- 상태별 필터링
-- 입양 신청 수 등 상세 정보
-
-### 17. 내게 달린 후기 목록 조회 GET /api/breeder-management/my-reviews
+### 12. 내게 달린 후기 목록 조회 GET /api/breeder-management/my-reviews
 
 브리더 자신에게 작성된 모든 후기를 관리 목적으로 조회합니다.
 
@@ -231,7 +175,7 @@
 - 공개/비공개 후기 모두 확인 가능
 - 신고된 후기 정보 포함
 
-### 18. 입양 신청 폼 조회 GET /api/breeder-management/application-form
+### 13. 입양 신청 폼 조회 GET /api/breeder-management/application-form
 
 브리더가 설정한 입양 신청 폼 전체 구조를 조회합니다.
 
@@ -254,7 +198,7 @@
 
 - **커스텀 질문**: 브리더가 자유롭게 추가/삭제 가능
 
-### 19. 입양 신청 폼 수정 PATCH /api/breeder-management/application-form
+### 14. 입양 신청 폼 수정 PATCH /api/breeder-management/application-form
 
 브리더가 커스텀 질문을 추가/수정/삭제합니다.
 
@@ -308,14 +252,9 @@
 - POST /api/breeder-management/parent-pets: 3개 테스트
 - PATCH /api/breeder-management/parent-pets/:petId: 3개 테스트
 - DELETE /api/breeder-management/parent-pets/:petId: 3개 테스트
-- POST /api/breeder-management/available-pets: 4개 테스트
-- PATCH /api/breeder-management/available-pets/:petId: 3개 테스트
-- PATCH /api/breeder-management/available-pets/:petId/status: 3개 테스트
-- DELETE /api/breeder-management/available-pets/:petId: 3개 테스트
 - GET /api/breeder-management/applications: 3개 테스트
 - GET /api/breeder-management/applications/:applicationId: 3개 테스트
 - PATCH /api/breeder-management/applications/:applicationId: 3개 테스트
-- GET /api/breeder-management/my-pets: 4개 테스트
 - GET /api/breeder-management/my-reviews: 4개 테스트
 - GET /api/breeder-management/application-form: 2개 테스트
 - PATCH /api/breeder-management/application-form: 4개 테스트
