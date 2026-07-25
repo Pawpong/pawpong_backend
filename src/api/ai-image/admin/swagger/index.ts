@@ -4,6 +4,7 @@ import { ApiParam } from '@nestjs/swagger';
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { AI_IMAGE_RESPONSE_MESSAGES } from '../../constants/ai-image-response-messages';
 import { AiImageAdminFilterResponseDto, AiImageFilterDeleteResponseDto } from '../dto/response/ai-image-admin-filter-response.dto';
+import { AiImageFilterPreviewResponseDto } from '../dto/response/ai-image-filter-preview-response.dto';
 
 const FILTER_NOT_FOUND_RESPONSE = {
     status: 400,
@@ -66,6 +67,32 @@ export function ApiDeleteAiImageFilterEndpoint() {
             successDescription: 'AI 필터 삭제 성공',
             successMessageExample: AI_IMAGE_RESPONSE_MESSAGES.filterDeleted,
             errorResponses: [FILTER_NOT_FOUND_RESPONSE],
+        }),
+    );
+}
+
+export function ApiGenerateAiImageFilterPreviewEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: 'AI 필터 미리보기 생성',
+            description: `
+                필터를 저장하지 않고 프롬프트를 즉시 시험한다. AI Agent 를 동기(gRPC) 호출하므로
+                OpenAI 왕복 시간만큼 응답이 지연된다(최대 120초).
+
+                Job 을 만들지 않으므로 사용자 쿼터·생성 이력에 영향이 없다.
+                생성 실패는 200 응답의 isSuccess=false 와 errorCode 로 내려간다.
+                AI Agent 자체에 연결하지 못한 경우에만 503 이 반환된다.
+            `,
+            responseType: AiImageFilterPreviewResponseDto,
+            successDescription: 'AI 필터 미리보기 생성 성공',
+            successMessageExample: AI_IMAGE_RESPONSE_MESSAGES.filterPreviewGenerated,
+            errorResponses: [
+                {
+                    status: 503,
+                    description: 'AI Agent 미기동 또는 연결 실패',
+                    errorExample: 'AI Agent에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.',
+                },
+            ],
         }),
     );
 }

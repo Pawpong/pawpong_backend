@@ -10,10 +10,14 @@ import { DeleteAiImageFilterUseCase } from '../application/use-cases/delete-ai-i
 import { AiImageAdminController } from '../decorator/ai-image-admin-controller.decorator';
 import { AiImageFilterCreateRequestDto } from '../dto/request/ai-image-filter-create-request.dto';
 import { AiImageFilterUpdateRequestDto } from '../dto/request/ai-image-filter-update-request.dto';
+import { AiImageFilterPreviewRequestDto } from '../dto/request/ai-image-filter-preview-request.dto';
 import type { AiImageAdminFilterResponseDto, AiImageFilterDeleteResponseDto } from '../dto/response/ai-image-admin-filter-response.dto';
+import type { AiImageFilterPreviewResponseDto } from '../dto/response/ai-image-filter-preview-response.dto';
+import { GenerateAiImageFilterPreviewUseCase } from '../application/use-cases/generate-ai-image-filter-preview.use-case';
 import {
     ApiCreateAiImageFilterEndpoint,
     ApiDeleteAiImageFilterEndpoint,
+    ApiGenerateAiImageFilterPreviewEndpoint,
     ApiGetAllAiImageFiltersEndpoint,
     ApiUpdateAiImageFilterEndpoint,
 } from '../swagger';
@@ -26,6 +30,7 @@ export class AiImageAdminFiltersController {
         private readonly createAiImageFilterUseCase: CreateAiImageFilterUseCase,
         private readonly updateAiImageFilterUseCase: UpdateAiImageFilterUseCase,
         private readonly deleteAiImageFilterUseCase: DeleteAiImageFilterUseCase,
+        private readonly generateAiImageFilterPreviewUseCase: GenerateAiImageFilterPreviewUseCase,
     ) {}
 
     @Get('filters')
@@ -61,5 +66,23 @@ export class AiImageAdminFiltersController {
     ): Promise<ApiResponseDto<AiImageFilterDeleteResponseDto>> {
         const result = await this.deleteAiImageFilterUseCase.execute(filterId);
         return ApiResponseDto.success(result, AI_IMAGE_RESPONSE_MESSAGES.filterDeleted);
+    }
+
+    @Post('filter/preview')
+    @ApiGenerateAiImageFilterPreviewEndpoint()
+    async previewFilter(
+        @Body() body: AiImageFilterPreviewRequestDto,
+    ): Promise<ApiResponseDto<AiImageFilterPreviewResponseDto>> {
+        const result = await this.generateAiImageFilterPreviewUseCase.execute({
+            prompt: body.prompt,
+            negativePrompt: body.negativePrompt ?? '',
+            inputObjectKey: body.inputObjectKey,
+            model: body.model ?? '',
+            outputSize: body.outputSize ?? '1024x1024',
+            postProcessType: body.postProcessType ?? 'pixelate',
+            pixelSize: body.pixelSize ?? 96,
+            paletteSize: body.paletteSize ?? 48,
+        });
+        return ApiResponseDto.success(result, AI_IMAGE_RESPONSE_MESSAGES.filterPreviewGenerated);
     }
 }
