@@ -1,7 +1,13 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { COMMUNITY_REPORT_ADMIN_READER_PORT, type CommunityReportAdminReaderPort } from '../ports/community-report-admin-reader.port';
-import { COMMUNITY_REPORT_ADMIN_WRITER_PORT, type CommunityReportAdminWriterPort } from '../ports/community-report-admin-writer.port';
+import {
+    COMMUNITY_REPORT_ADMIN_READER_PORT,
+    type CommunityReportAdminReaderPort,
+} from '../ports/community-report-admin-reader.port';
+import {
+    COMMUNITY_REPORT_ADMIN_WRITER_PORT,
+    type CommunityReportAdminWriterPort,
+} from '../ports/community-report-admin-writer.port';
 
 type ReportAction = 'resolve' | 'dismiss';
 

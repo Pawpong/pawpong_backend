@@ -33,11 +33,10 @@ export class CommunityAuthorSyncListener {
                 nickname: event.nickname,
                 profileImageFileName: event.profileImageFileName,
             });
-            this.logger.logSuccess(
-                'CommunityAuthorSyncListener',
-                '커뮤니티 작성자 snapshot 동기화 완료',
-                { userId: event.userId, ...result },
-            );
+            this.logger.logSuccess('CommunityAuthorSyncListener', '커뮤니티 작성자 snapshot 동기화 완료', {
+                userId: event.userId,
+                ...result,
+            });
         } catch (error) {
             // 스냅샷 동기화 실패는 본 요청(프로필 수정)을 실패시키지 않는다 — 로깅 후 흡수.
             this.logger.logError('CommunityAuthorSyncListener', '커뮤니티 작성자 snapshot 동기화 실패', error);

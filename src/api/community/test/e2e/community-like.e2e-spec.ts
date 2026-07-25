@@ -47,9 +47,7 @@ describe('커뮤니티 게시글 좋아요 E2E (v2)', () => {
     describe('POST /api/v2/community/posts/:postId/like', () => {
         it('비인증 요청 → 401', async () => {
             const postId = await seedPost();
-            await request(app.getHttpServer())
-                .post(`/api/v2/community/posts/${postId}/like`)
-                .expect(401);
+            await request(app.getHttpServer()).post(`/api/v2/community/posts/${postId}/like`).expect(401);
         });
 
         it('정상 좋아요 → 200 + liked: true + likeCount +1', async () => {
@@ -123,9 +121,7 @@ describe('커뮤니티 게시글 좋아요 E2E (v2)', () => {
     describe('DELETE /api/v2/community/posts/:postId/like', () => {
         it('비인증 요청 → 401', async () => {
             const postId = await seedPost();
-            await request(app.getHttpServer())
-                .delete(`/api/v2/community/posts/${postId}/like`)
-                .expect(401);
+            await request(app.getHttpServer()).delete(`/api/v2/community/posts/${postId}/like`).expect(401);
         });
 
         it('좋아요 후 취소 → unliked: true + likeCount 0으로 복원', async () => {

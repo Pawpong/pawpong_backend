@@ -1,6 +1,7 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { Video, VideoSchema } from '../../../schema/video.schema';
+import { RedisModule } from '../../../common/redis/redis.module';
 import { StorageModule } from '../../../common/storage/storage.module';
 import { FeedCacheKeyService } from '../domain/services/feed-cache-key.service';
 import { FeedVideoSummaryMapperService } from '../domain/services/feed-video-summary-mapper.service';
@@ -23,7 +24,7 @@ import { FeedTagRepository } from './repository/feed-tag.repository';
 
 const FEED_TAG_SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: Video.name, schema: VideoSchema }]);
 
-export const FEED_TAG_MODULE_IMPORTS = [FEED_TAG_SCHEMA_IMPORTS, StorageModule];
+export const FEED_TAG_MODULE_IMPORTS = [FEED_TAG_SCHEMA_IMPORTS, StorageModule, RedisModule];
 
 const FEED_TAG_USE_CASE_PROVIDERS = [SearchByTagUseCase, GetPopularTagsUseCase, SuggestTagsUseCase];
 

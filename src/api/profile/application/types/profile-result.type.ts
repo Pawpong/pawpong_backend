@@ -17,6 +17,7 @@ export interface MyProfileResult {
     bio: string;
     bpm: number;
     followerCount: number;
+    followingCount: number;
     // adopter only
     favoriteBreederCount?: number;
     // breeder only
@@ -33,6 +34,7 @@ export interface AdopterPublicProfileResult {
     bio: string;
     bpm: number;
     followerCount: number;
+    followingCount: number;
     isFollowing: boolean;
 }
 
@@ -44,6 +46,7 @@ export interface BreederPublicProfileResult {
     longDescription: string;
     bpm: number;
     followerCount: number;
+    followingCount: number;
     level: 'new' | 'elite';
     plan: 'basic' | 'pro';
     businessLocation: BusinessLocationResult;
@@ -59,4 +62,15 @@ export interface FavoriteBreederCardResult {
     bpm: number;
     level?: 'new' | 'elite';
     addedAt: string;
+}
+
+/** 친구 목록 모달 카드 (응답 계약) */
+export interface FollowUserCardResult {
+    userId: string;
+    nickname: string;
+    profileImageUrl?: string;
+    bio: string;
+    isFollowing: boolean;
+    isFollowedBy: boolean;
+    followedAt: string;
 }

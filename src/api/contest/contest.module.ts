@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import {
     CONTEST_MODULE_CONTROLLERS,
+    CONTEST_MODULE_EXPORTS,
     CONTEST_MODULE_IMPORTS,
     CONTEST_MODULE_PROVIDERS,
 } from './contest.module-definition';
@@ -14,5 +15,6 @@ import {
     imports: CONTEST_MODULE_IMPORTS,
     controllers: CONTEST_MODULE_CONTROLLERS,
     providers: CONTEST_MODULE_PROVIDERS,
+    exports: CONTEST_MODULE_EXPORTS,
 })
 export class ContestModule {}

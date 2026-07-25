@@ -37,6 +37,9 @@ export class MyProfileResponseDto {
     @ApiProperty({ description: '팔로워 수', example: 100 })
     followerCount: number;
 
+    @ApiProperty({ description: '팔로잉 수 (내가 팔로우하는 사용자 수)', example: 50 })
+    followingCount: number;
+
     // === Adopter only ===
     @ApiPropertyOptional({ description: '(입양자) 즐겨찾는 브리더 수', example: 3 })
     favoriteBreederCount?: number;

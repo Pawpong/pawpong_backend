@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
 
-import type { CommunityCommentReaderPort, CommunityCommentSnapshot } from '../application/ports/community-comment-reader.port';
-import type { CommunityCommentCreateData, CommunityCommentWriterPort } from '../application/ports/community-comment-writer.port';
+import type {
+    CommunityCommentReaderPort,
+    CommunityCommentSnapshot,
+} from '../application/ports/community-comment-reader.port';
+import type {
+    CommunityCommentCreateData,
+    CommunityCommentWriterPort,
+} from '../application/ports/community-comment-writer.port';
 import { CommunityRepository } from '../repository/community.repository';
 
 @Injectable()
-export class CommunityCommentMongooseAdapter
-    implements CommunityCommentWriterPort, CommunityCommentReaderPort
-{
+export class CommunityCommentMongooseAdapter implements CommunityCommentWriterPort, CommunityCommentReaderPort {
     constructor(private readonly repository: CommunityRepository) {}
 
     async createComment(data: CommunityCommentCreateData): Promise<{ commentId: string }> {

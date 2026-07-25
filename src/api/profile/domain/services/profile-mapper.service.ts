@@ -5,11 +5,13 @@ import type {
     AdopterProfileSnapshot,
     BreederProfileSnapshot,
     FavoriteBreederCardSnapshot,
+    FollowUserCardSnapshot,
 } from '../../application/types/profile.type';
 import type {
     AdopterPublicProfileResult,
     BreederPublicProfileResult,
     FavoriteBreederCardResult,
+    FollowUserCardResult,
     MyProfileResult,
 } from '../../application/types/profile-result.type';
 
@@ -29,6 +31,7 @@ export class ProfileMapperService {
             bio: snapshot.bio,
             bpm: snapshot.bpm,
             followerCount: snapshot.followerCount,
+            followingCount: snapshot.followingCount,
             favoriteBreederCount: snapshot.favoriteBreederCount,
         };
     }
@@ -42,6 +45,7 @@ export class ProfileMapperService {
             bio: snapshot.bio,
             bpm: snapshot.bpm,
             followerCount: snapshot.followerCount,
+            followingCount: snapshot.followingCount,
             level: snapshot.level,
             plan: snapshot.plan,
             businessLocation: snapshot.businessLocation,
@@ -57,6 +61,7 @@ export class ProfileMapperService {
             bio: snapshot.bio,
             bpm: snapshot.bpm,
             followerCount: snapshot.followerCount,
+            followingCount: snapshot.followingCount,
             isFollowing,
         };
     }
@@ -70,6 +75,7 @@ export class ProfileMapperService {
             longDescription: snapshot.longDescription,
             bpm: snapshot.bpm,
             followerCount: snapshot.followerCount,
+            followingCount: snapshot.followingCount,
             level: snapshot.level,
             plan: snapshot.plan,
             businessLocation: snapshot.businessLocation,
@@ -87,6 +93,19 @@ export class ProfileMapperService {
             bpm: snapshot.bpm,
             level: snapshot.level,
             addedAt: snapshot.addedAt.toISOString(),
+        };
+    }
+
+    /** 친구 목록 모달(팔로워/팔로잉) 카드 변환 */
+    toFollowUserCardDto(snapshot: FollowUserCardSnapshot): FollowUserCardResult {
+        return {
+            userId: snapshot.userId,
+            nickname: snapshot.nickname,
+            profileImageUrl: this.assetUrl.toProfileImageUrl(snapshot.profileImageFileName),
+            bio: snapshot.bio,
+            isFollowing: snapshot.isFollowing,
+            isFollowedBy: snapshot.isFollowedBy,
+            followedAt: snapshot.followedAt.toISOString(),
         };
     }
 }

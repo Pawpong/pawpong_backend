@@ -16,10 +16,7 @@ export class CommunityPostViewCountController {
 
     @Post('posts/:postId/view')
     @ApiIncrementViewCountEndpoint()
-    async view(
-        @Param('postId') postId: string,
-        @CurrentUser('userId') userId?: string,
-    ): Promise<ApiResponseDto<null>> {
+    async view(@Param('postId') postId: string, @CurrentUser('userId') userId?: string): Promise<ApiResponseDto<null>> {
         await this.incrementViewCountUseCase.execute(postId, userId);
         return ApiResponseDto.success(null, COMMUNITY_RESPONSE_MESSAGES.viewCounted);
     }

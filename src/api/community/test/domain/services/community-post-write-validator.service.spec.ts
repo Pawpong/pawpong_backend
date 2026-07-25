@@ -19,9 +19,7 @@ describe('CommunityPostWriteValidatorService', () => {
             expect(() => validator.validateCreate({ ...validBase(), body: '   ' })).toThrow(BadRequestException);
         });
         it('임시저장(draft) 글은 body 가 비어 있어도 통과', () => {
-            expect(() =>
-                validator.validateCreate({ ...validBase(), body: '   ', status: 'draft' }),
-            ).not.toThrow();
+            expect(() => validator.validateCreate({ ...validBase(), body: '   ', status: 'draft' })).not.toThrow();
         });
         it('body 가 2001자면 BadRequest', () => {
             expect(() => validator.validateCreate({ ...validBase(), body: 'A'.repeat(2001) })).toThrow(

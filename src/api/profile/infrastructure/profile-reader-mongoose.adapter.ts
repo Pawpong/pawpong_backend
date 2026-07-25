@@ -24,6 +24,7 @@ export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
             bio: adopter.bio ?? '',
             bpm: adopter.bpm ?? 0,
             followerCount: adopter.followerCount ?? 0,
+            followingCount: adopter.followingCount ?? 0,
             favoriteBreederCount: adopter.favoriteBreederList?.length ?? 0,
         };
     }
@@ -40,6 +41,7 @@ export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
             longDescription: breeder.profile?.description ?? '',
             bpm: breeder.bpm ?? 0,
             followerCount: breeder.stats?.totalFavorites ?? 0,
+            followingCount: 0,
             level: (breeder.verification?.level as 'new' | 'elite') ?? 'new',
             plan: (breeder.verification?.plan as 'basic' | 'pro') ?? 'basic',
             businessLocation: {

@@ -4,8 +4,12 @@ import type { BreederRepository } from '../../../breeder-management/repository/b
 import type { RegisterPushDeviceTokenCommand } from '../../application/ports/notification-push-token-store.port';
 
 describe('푸시 토큰 스토어 어댑터 - 기기 핸드오프', () => {
-    let adopterRepository: jest.Mocked<Pick<AdopterRepository, 'upsertPushDeviceToken' | 'removePushDeviceTokenFromAllUsers'>>;
-    let breederRepository: jest.Mocked<Pick<BreederRepository, 'upsertPushDeviceToken' | 'removePushDeviceTokenFromAllUsers'>>;
+    let adopterRepository: jest.Mocked<
+        Pick<AdopterRepository, 'upsertPushDeviceToken' | 'removePushDeviceTokenFromAllUsers'>
+    >;
+    let breederRepository: jest.Mocked<
+        Pick<BreederRepository, 'upsertPushDeviceToken' | 'removePushDeviceTokenFromAllUsers'>
+    >;
     let adapter: NotificationPushTokenMongooseAdapter;
 
     const command: RegisterPushDeviceTokenCommand = {

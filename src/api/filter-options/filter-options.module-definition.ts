@@ -12,6 +12,8 @@ import { FilterOptionsSortOptionsController } from './controller/filter-options-
 import { FilterOptionsSummaryController } from './controller/filter-options-summary.controller';
 import { FilterOptionsCatalogService } from './domain/services/filter-options-catalog.service';
 
+export const FILTER_OPTIONS_MODULE_IMPORTS = [];
+
 export const FILTER_OPTIONS_MODULE_CONTROLLERS = [
     FilterOptionsSummaryController,
     FilterOptionsBreederLevelsController,

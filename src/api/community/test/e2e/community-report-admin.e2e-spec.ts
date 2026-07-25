@@ -63,9 +63,7 @@ describe('커뮤니티 신고 관리자 E2E', () => {
 
     describe('GET /api/community-admin/reports', () => {
         it('비인증 → 401', async () => {
-            await request(app.getHttpServer())
-                .get('/api/community-admin/reports')
-                .expect(401);
+            await request(app.getHttpServer()).get('/api/community-admin/reports').expect(401);
         });
 
         it('입양자 토큰으로 접근 → 403', async () => {
@@ -126,9 +124,7 @@ describe('커뮤니티 신고 관리자 E2E', () => {
 
             expect(res.body.data.action).toBe('resolve');
 
-            const postDoc = await connection
-                .collection('community_posts')
-                .findOne({ _id: new Types.ObjectId(postId) });
+            const postDoc = await connection.collection('community_posts').findOne({ _id: new Types.ObjectId(postId) });
             expect(postDoc?.isActive).toBe(false);
 
             const reportDoc = await connection
@@ -170,9 +166,7 @@ describe('커뮤니티 신고 관리자 E2E', () => {
 
             expect(res.body.data.action).toBe('dismiss');
 
-            const postDoc = await connection
-                .collection('community_posts')
-                .findOne({ _id: new Types.ObjectId(postId) });
+            const postDoc = await connection.collection('community_posts').findOne({ _id: new Types.ObjectId(postId) });
             expect(postDoc?.isActive).toBe(true);
 
             const reportDoc = await connection

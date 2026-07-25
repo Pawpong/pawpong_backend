@@ -104,7 +104,8 @@ export function ApiGetHallOfFameEndpoint() {
 export function ApiGetYesterdayTopEndpoint() {
     return ApiEndpoint({
         summary: '어제 기준 TOP 3 조회',
-        description: '현재 진행 중인 콘테스트에서 득표율(voteRate) 기준 TOP 3를 반환합니다. 진행 중인 콘테스트가 없으면 data: null.',
+        description:
+            '현재 진행 중인 콘테스트에서 득표율(voteRate) 기준 TOP 3를 반환합니다. 진행 중인 콘테스트가 없으면 data: null.',
         responseType: ContestYesterdayTopResponseDto,
         supportsOptionalAuth: true,
     });

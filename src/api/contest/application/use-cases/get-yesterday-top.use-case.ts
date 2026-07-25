@@ -36,10 +36,7 @@ export class GetYesterdayTopUseCase {
         return { contestId: contest.id, ranking };
     }
 
-    private async resolveRanking(
-        entries: ContestEntrySnapshot[],
-        totalEntries: number,
-    ): Promise<YesterdayTopEntry[]> {
+    private async resolveRanking(entries: ContestEntrySnapshot[], totalEntries: number): Promise<YesterdayTopEntry[]> {
         return Promise.all(
             entries.map(async (entry, index) => {
                 const [photoUrl, profileImageUrl] = await Promise.all([

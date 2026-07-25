@@ -69,9 +69,7 @@ export class GetCommunityPostListUseCase {
               ])
             : [new Set<string>(), new Set<string>()];
 
-        const items = snapshots.map((s) =>
-            this.mapper.toCard(s, likedSet.has(s.postId), savedSet.has(s.postId)),
-        );
+        const items = snapshots.map((s) => this.mapper.toCard(s, likedSet.has(s.postId), savedSet.has(s.postId)));
         return buildPageResult(items, page, pageSize, totalItems);
     }
 }

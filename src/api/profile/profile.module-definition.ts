@@ -15,6 +15,9 @@ import { GetBreederProfileUseCase } from './application/use-cases/get-breeder-pr
 import { GetMyFavoriteBreedersUseCase } from './application/use-cases/get-my-favorite-breeders.use-case';
 import { GetMyProfileUseCase } from './application/use-cases/get-my-profile.use-case';
 import { FollowUserUseCase } from './application/use-cases/follow-user.use-case';
+import { GetUserFollowersUseCase } from './application/use-cases/get-user-followers.use-case';
+import { GetUserFollowingsUseCase } from './application/use-cases/get-user-followings.use-case';
+import { RemoveMyFollowerUseCase } from './application/use-cases/remove-my-follower.use-case';
 import { UnfollowUserUseCase } from './application/use-cases/unfollow-user.use-case';
 import { UpdateMyProfileUseCase } from './application/use-cases/update-my-profile.use-case';
 import { ProfileMapperService } from './domain/services/profile-mapper.service';
@@ -23,28 +26,29 @@ import { ProfileFollowMongooseAdapter } from './infrastructure/profile-follow-mo
 import { ProfileReaderMongooseAdapter } from './infrastructure/profile-reader-mongoose.adapter';
 import { ProfileWriterMongooseAdapter } from './infrastructure/profile-writer-mongoose.adapter';
 import { ProfileFavoriteBreedersController, ProfileMeController } from './controller/profile-me.controller';
-import { ProfileFollowController } from './controller/profile-follow.controller';
+import { ProfileFollowController, ProfileFollowListController } from './controller/profile-follow.controller';
 import { ProfilePublicController } from './controller/profile-public.controller';
 import { ProfileFollowRepository } from './repository/profile-follow.repository';
 import { ProfileRepository } from './repository/profile.repository';
 
-const SCHEMA_IMPORTS = MongooseModule.forFeature([
+const PROFILE_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Adopter.name, schema: AdopterSchema },
     { name: Breeder.name, schema: BreederSchema },
     { name: AvailablePet.name, schema: AvailablePetSchema },
     { name: UserFollow.name, schema: UserFollowSchema },
 ]);
 
-export const PROFILE_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule];
+export const PROFILE_MODULE_IMPORTS = [PROFILE_SCHEMA_IMPORTS, StorageModule];
 
 export const PROFILE_MODULE_CONTROLLERS = [
     ProfileMeController,
     ProfileFavoriteBreedersController,
     ProfilePublicController,
     ProfileFollowController,
+    ProfileFollowListController,
 ];
 
-const USE_CASE_PROVIDERS = [
+const PROFILE_USE_CASE_PROVIDERS = [
     GetMyProfileUseCase,
     UpdateMyProfileUseCase,
     GetAdopterProfileUseCase,
@@ -52,11 +56,14 @@ const USE_CASE_PROVIDERS = [
     GetMyFavoriteBreedersUseCase,
     FollowUserUseCase,
     UnfollowUserUseCase,
+    GetUserFollowersUseCase,
+    GetUserFollowingsUseCase,
+    RemoveMyFollowerUseCase,
 ];
 
-const DOMAIN_PROVIDERS = [ProfileMapperService];
+const PROFILE_DOMAIN_PROVIDERS = [ProfileMapperService];
 
-const INFRASTRUCTURE_PROVIDERS = [
+const PROFILE_INFRASTRUCTURE_PROVIDERS = [
     ProfileRepository,
     ProfileFollowRepository,
     ProfileReaderMongooseAdapter,
@@ -65,7 +72,7 @@ const INFRASTRUCTURE_PROVIDERS = [
     ProfileFollowMongooseAdapter,
 ];
 
-const PORT_BINDINGS = [
+const PROFILE_PORT_BINDINGS = [
     { provide: PROFILE_READER_PORT, useExisting: ProfileReaderMongooseAdapter },
     { provide: PROFILE_WRITER_PORT, useExisting: ProfileWriterMongooseAdapter },
     { provide: PROFILE_ASSET_URL_PORT, useExisting: ProfileAssetUrlStorageAdapter },
@@ -73,8 +80,8 @@ const PORT_BINDINGS = [
 ];
 
 export const PROFILE_MODULE_PROVIDERS = [
-    ...USE_CASE_PROVIDERS,
-    ...DOMAIN_PROVIDERS,
-    ...INFRASTRUCTURE_PROVIDERS,
-    ...PORT_BINDINGS,
+    ...PROFILE_USE_CASE_PROVIDERS,
+    ...PROFILE_DOMAIN_PROVIDERS,
+    ...PROFILE_INFRASTRUCTURE_PROVIDERS,
+    ...PROFILE_PORT_BINDINGS,
 ];

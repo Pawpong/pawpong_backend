@@ -190,10 +190,7 @@ export class CommunityRepository {
 
     async incrementViewCount(postId: string): Promise<void> {
         if (!Types.ObjectId.isValid(postId)) return;
-        await this.postModel.updateOne(
-            { _id: new Types.ObjectId(postId), isActive: true },
-            { $inc: { viewCount: 1 } },
-        );
+        await this.postModel.updateOne({ _id: new Types.ObjectId(postId), isActive: true }, { $inc: { viewCount: 1 } });
     }
 
     /**
@@ -244,18 +241,11 @@ export class CommunityRepository {
             parentCommentId: data.parentCommentId ? new Types.ObjectId(data.parentCommentId) : null,
         });
         // 게시글 commentCount 동기화
-        await this.postModel.updateOne(
-            { _id: new Types.ObjectId(data.postId) },
-            { $inc: { commentCount: 1 } },
-        );
+        await this.postModel.updateOne({ _id: new Types.ObjectId(data.postId) }, { $inc: { commentCount: 1 } });
         return { _id: String(created._id) };
     }
 
-    async updateCommentByAuthor(
-        commentId: string,
-        authorId: string,
-        body: string,
-    ): Promise<{ changed: boolean }> {
+    async updateCommentByAuthor(commentId: string, authorId: string, body: string): Promise<{ changed: boolean }> {
         if (!Types.ObjectId.isValid(commentId) || !Types.ObjectId.isValid(authorId)) {
             return { changed: false };
         }
@@ -270,18 +260,17 @@ export class CommunityRepository {
         if (!Types.ObjectId.isValid(commentId) || !Types.ObjectId.isValid(authorId)) {
             return { changed: false };
         }
-        const comment = await this.commentModel.findOne({
-            _id: new Types.ObjectId(commentId),
-            authorId: new Types.ObjectId(authorId),
-            isActive: true,
-        }).lean<CommunityPostCommentDocument>();
+        const comment = await this.commentModel
+            .findOne({
+                _id: new Types.ObjectId(commentId),
+                authorId: new Types.ObjectId(authorId),
+                isActive: true,
+            })
+            .lean<CommunityPostCommentDocument>();
 
         if (!comment) return { changed: false };
 
-        await this.commentModel.updateOne(
-            { _id: new Types.ObjectId(commentId) },
-            { $set: { isActive: false } },
-        );
+        await this.commentModel.updateOne({ _id: new Types.ObjectId(commentId) }, { $set: { isActive: false } });
         // 게시글 commentCount 동기화
         await this.postModel.updateOne(
             { _id: comment.postId, commentCount: { $gt: 0 } },
@@ -292,9 +281,6 @@ export class CommunityRepository {
 
     async findCommentById(commentId: string): Promise<CommunityPostCommentDocument | null> {
         if (!Types.ObjectId.isValid(commentId)) return null;
-        return this.commentModel
-            .findById(new Types.ObjectId(commentId))
-            .lean<CommunityPostCommentDocument>()
-            .exec();
+        return this.commentModel.findById(new Types.ObjectId(commentId)).lean<CommunityPostCommentDocument>().exec();
     }
 }

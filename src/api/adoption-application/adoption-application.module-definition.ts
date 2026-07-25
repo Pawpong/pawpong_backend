@@ -14,34 +14,37 @@ import { AdoptionApplicationContextMongooseAdapter } from './infrastructure/adop
 import { AdoptionApplicationWriterMongooseAdapter } from './infrastructure/adoption-application-writer-mongoose.adapter';
 import { AdoptionApplicationRepository } from './repository/adoption-application.repository';
 
-const SCHEMA_IMPORTS = MongooseModule.forFeature([
+const ADOPTION_APPLICATION_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
     { name: AvailablePet.name, schema: AvailablePetSchema },
     { name: Adopter.name, schema: AdopterSchema },
 ]);
 
-export const ADOPTION_APPLICATION_MODULE_IMPORTS = [SCHEMA_IMPORTS];
+export const ADOPTION_APPLICATION_MODULE_IMPORTS = [ADOPTION_APPLICATION_SCHEMA_IMPORTS];
 
 export const ADOPTION_APPLICATION_MODULE_CONTROLLERS = [AdoptionApplicationCreateController];
 
-const USE_CASE_PROVIDERS = [CreateAdoptionApplicationV2UseCase];
+const ADOPTION_APPLICATION_USE_CASE_PROVIDERS = [CreateAdoptionApplicationV2UseCase];
 
-const DOMAIN_PROVIDERS = [AdoptionApplicationValidatorService, AdoptionApplicationPersistMapperService];
+const ADOPTION_APPLICATION_DOMAIN_PROVIDERS = [
+    AdoptionApplicationValidatorService,
+    AdoptionApplicationPersistMapperService,
+];
 
-const INFRASTRUCTURE_PROVIDERS = [
+const ADOPTION_APPLICATION_INFRASTRUCTURE_PROVIDERS = [
     AdoptionApplicationRepository,
     AdoptionApplicationContextMongooseAdapter,
     AdoptionApplicationWriterMongooseAdapter,
 ];
 
-const PORT_BINDINGS = [
+const ADOPTION_APPLICATION_PORT_BINDINGS = [
     { provide: ADOPTION_APPLICATION_CONTEXT_PORT, useExisting: AdoptionApplicationContextMongooseAdapter },
     { provide: ADOPTION_APPLICATION_WRITER_PORT, useExisting: AdoptionApplicationWriterMongooseAdapter },
 ];
 
 export const ADOPTION_APPLICATION_MODULE_PROVIDERS = [
-    ...USE_CASE_PROVIDERS,
-    ...DOMAIN_PROVIDERS,
-    ...INFRASTRUCTURE_PROVIDERS,
-    ...PORT_BINDINGS,
+    ...ADOPTION_APPLICATION_USE_CASE_PROVIDERS,
+    ...ADOPTION_APPLICATION_DOMAIN_PROVIDERS,
+    ...ADOPTION_APPLICATION_INFRASTRUCTURE_PROVIDERS,
+    ...ADOPTION_APPLICATION_PORT_BINDINGS,
 ];

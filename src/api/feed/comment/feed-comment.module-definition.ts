@@ -2,6 +2,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { VideoComment, VideoCommentSchema } from '../../../schema/video-comment.schema';
 import { Video, VideoSchema } from '../../../schema/video.schema';
+import { RedisModule } from '../../../common/redis/redis.module';
 import { FeedCacheKeyService } from '../domain/services/feed-cache-key.service';
 
 import { CREATE_FEED_VIDEO_COMMENT_USE_CASE } from './application/tokens/feed-comment-interaction.token';
@@ -26,7 +27,7 @@ const FEED_COMMENT_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: VideoComment.name, schema: VideoCommentSchema },
 ]);
 
-export const FEED_COMMENT_MODULE_IMPORTS = [FEED_COMMENT_SCHEMA_IMPORTS];
+export const FEED_COMMENT_MODULE_IMPORTS = [FEED_COMMENT_SCHEMA_IMPORTS, RedisModule];
 
 const FEED_COMMENT_USE_CASE_PROVIDERS = [
     CreateCommentUseCase,

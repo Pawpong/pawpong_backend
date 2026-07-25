@@ -29,24 +29,18 @@ const authorReader = {
 beforeEach(() => jest.clearAllMocks());
 
 describe('CreateCommunityPostCommentUseCase', () => {
-    const useCase = new CreateCommunityPostCommentUseCase(
-        reader as any,
-        authorReader as any,
-        commentWriter as any,
-    );
+    const useCase = new CreateCommunityPostCommentUseCase(reader as any, authorReader as any, commentWriter as any);
 
     it('존재하지 않는 게시글 → BadRequestException', async () => {
         reader.existsActivePost.mockResolvedValueOnce(false);
-        await expect(useCase.execute('p-x', 'u-1', 'adopter', { body: '댓글' }))
-            .rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('p-x', 'u-1', 'adopter', { body: '댓글' })).rejects.toThrow(BadRequestException);
         expect(commentWriter.createComment).not.toHaveBeenCalled();
     });
 
     it('작성자 정보 없음 → BadRequestException', async () => {
         reader.existsActivePost.mockResolvedValueOnce(true);
         authorReader.readAuthorSnapshot.mockResolvedValueOnce(null);
-        await expect(useCase.execute('p-1', 'u-1', 'adopter', { body: '댓글' }))
-            .rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('p-1', 'u-1', 'adopter', { body: '댓글' })).rejects.toThrow(BadRequestException);
     });
 
     it('정상 댓글 작성 → createComment 호출 + commentId 반환', async () => {
@@ -70,7 +64,9 @@ describe('CreateCommunityPostCommentUseCase', () => {
     it('답글(parentCommentId 있음) → parentCommentId 전달', async () => {
         reader.existsActivePost.mockResolvedValueOnce(true);
         authorReader.readAuthorSnapshot.mockResolvedValueOnce({
-            authorId: 'u-1', authorModel: 'Adopter', authorNickname: '닉',
+            authorId: 'u-1',
+            authorModel: 'Adopter',
+            authorNickname: '닉',
         });
         commentWriter.createComment.mockResolvedValueOnce({ commentId: 'c-2' });
 
@@ -84,10 +80,11 @@ describe('CreateCommunityPostCommentUseCase', () => {
     it('빈 body → BadRequestException', async () => {
         reader.existsActivePost.mockResolvedValueOnce(true);
         authorReader.readAuthorSnapshot.mockResolvedValueOnce({
-            authorId: 'u-1', authorModel: 'Adopter', authorNickname: '닉',
+            authorId: 'u-1',
+            authorModel: 'Adopter',
+            authorNickname: '닉',
         });
-        await expect(useCase.execute('p-1', 'u-1', 'adopter', { body: '   ' }))
-            .rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('p-1', 'u-1', 'adopter', { body: '   ' })).rejects.toThrow(BadRequestException);
     });
 });
 
@@ -96,14 +93,12 @@ describe('UpdateCommunityPostCommentUseCase', () => {
 
     it('존재하지 않는 댓글 → BadRequestException', async () => {
         commentReader.readCommentById.mockResolvedValueOnce(null);
-        await expect(useCase.execute('c-x', 'u-1', '수정'))
-            .rejects.toThrow(BadRequestException);
+        await expect(useCase.execute('c-x', 'u-1', '수정')).rejects.toThrow(BadRequestException);
     });
 
     it('타인 댓글 수정 → ForbiddenException', async () => {
         commentReader.readCommentById.mockResolvedValueOnce({ commentId: 'c-1', authorId: 'other' });
-        await expect(useCase.execute('c-1', 'u-1', '수정'))
-            .rejects.toThrow(ForbiddenException);
+        await expect(useCase.execute('c-1', 'u-1', '수정')).rejects.toThrow(ForbiddenException);
     });
 
     it('정상 수정 → updateCommentByAuthor 호출', async () => {

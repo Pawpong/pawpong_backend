@@ -86,10 +86,10 @@ export class AdopterPetFavoriteMongooseAdapter implements AdopterPetFavoriteRead
         if (applicationToPetId.size === 0) return new Map();
 
         const counts = await this.chatRoomModel
-            .aggregate<{ _id: string; count: number }>([
-                { $match: { status: ChatRoomStatus.ACTIVE, applicationId: { $in: [...applicationToPetId.keys()] } } },
-                { $group: { _id: '$applicationId', count: { $sum: 1 } } },
-            ])
+            .aggregate<{
+                _id: string;
+                count: number;
+            }>([{ $match: { status: ChatRoomStatus.ACTIVE, applicationId: { $in: [...applicationToPetId.keys()] } } }, { $group: { _id: '$applicationId', count: { $sum: 1 } } }])
             .exec();
 
         const petChatCounts = new Map<string, number>();

@@ -70,10 +70,7 @@ export class CommunityReportRepository {
 
     async findReportById(reportId: string): Promise<CommunityReportAdminItem | null> {
         if (!Types.ObjectId.isValid(reportId)) return null;
-        const doc = await this.reportModel
-            .findById(reportId)
-            .lean<CommunityPostReportDocument>()
-            .exec();
+        const doc = await this.reportModel.findById(reportId).lean<CommunityPostReportDocument>().exec();
         return doc ? this.toAdminItem(doc) : null;
     }
 
@@ -91,10 +88,9 @@ export class CommunityReportRepository {
     }
 
     async hidePost(postId: string): Promise<void> {
-        await this.reportModel.db.collection('community_posts').updateOne(
-            { _id: new Types.ObjectId(postId) },
-            { $set: { isActive: false } },
-        );
+        await this.reportModel.db
+            .collection('community_posts')
+            .updateOne({ _id: new Types.ObjectId(postId) }, { $set: { isActive: false } });
     }
 
     private toAdminItem(doc: CommunityPostReportDocument): CommunityReportAdminItem {

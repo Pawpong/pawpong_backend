@@ -13,4 +13,5 @@ export interface ContestWriterPort {
     createEntry(data: CreateContestEntryData): Promise<string>;
     incrementParticipantCount(contestId: string): Promise<void>;
     vote(data: { contestId: string; entryId: string; voterId: string }): Promise<number>;
+    updateEntryStatus(entryId: string, status: 'hidden' | 'deleted'): Promise<void>;
 }

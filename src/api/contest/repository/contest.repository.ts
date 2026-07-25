@@ -100,7 +100,13 @@ export class ContestRepository {
     async findRandomEntry(contestId: string, excludeUserId: string): Promise<ContestEntryDocument | null> {
         const results = await this.entryModel
             .aggregate<ContestEntryDocument>([
-                { $match: { contestId: new Types.ObjectId(contestId), userId: { $ne: excludeUserId }, status: 'active' } },
+                {
+                    $match: {
+                        contestId: new Types.ObjectId(contestId),
+                        userId: { $ne: excludeUserId },
+                        status: 'active',
+                    },
+                },
                 { $sample: { size: 1 } },
             ])
             .exec();
@@ -115,9 +121,7 @@ export class ContestRepository {
     }
 
     async updateEntryStatus(entryId: string, status: 'hidden' | 'deleted'): Promise<void> {
-        await this.entryModel
-            .updateOne({ _id: new Types.ObjectId(entryId) }, { $set: { status } })
-            .exec();
+        await this.entryModel.updateOne({ _id: new Types.ObjectId(entryId) }, { $set: { status } }).exec();
     }
 
     async vote(data: { contestId: string; entryId: string; voterId: string }): Promise<number> {

@@ -16,11 +16,7 @@ export class GetBreederProfileUseCase {
         private readonly mapper: ProfileMapperService,
     ) {}
 
-    async execute(
-        breederId: string,
-        viewerUserId?: string,
-        viewerRole?: string,
-    ): Promise<BreederPublicProfileResult> {
+    async execute(breederId: string, viewerUserId?: string, viewerRole?: string): Promise<BreederPublicProfileResult> {
         const breeder = await this.reader.readBreeder(breederId);
         if (!breeder) throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
 

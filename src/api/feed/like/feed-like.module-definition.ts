@@ -2,6 +2,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema';
 import { Video, VideoSchema } from '../../../schema/video.schema';
+import { RedisModule } from '../../../common/redis/redis.module';
 import { StorageModule } from '../../../common/storage/storage.module';
 import { FeedCacheKeyService } from '../domain/services/feed-cache-key.service';
 import { FeedVideoSummaryMapperService } from '../domain/services/feed-video-summary-mapper.service';
@@ -27,7 +28,7 @@ const FEED_LIKE_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: VideoLike.name, schema: VideoLikeSchema },
 ]);
 
-export const FEED_LIKE_MODULE_IMPORTS = [FEED_LIKE_SCHEMA_IMPORTS, StorageModule];
+export const FEED_LIKE_MODULE_IMPORTS = [FEED_LIKE_SCHEMA_IMPORTS, StorageModule, RedisModule];
 
 const FEED_LIKE_USE_CASE_PROVIDERS = [ToggleLikeUseCase, GetLikeStatusUseCase, GetMyLikedVideosUseCase];
 

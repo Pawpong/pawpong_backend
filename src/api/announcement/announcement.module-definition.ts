@@ -1,7 +1,7 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { Announcement, AnnouncementSchema } from '../../schema/announcement.schema';
-import { CustomLoggerService } from '../../common/logger/custom-logger.service';
+import { LoggerModule } from '../../common/logger/logger.module';
 
 import { AnnouncementAdminCommandController } from './admin/controller/announcement-admin-command.controller';
 import { AnnouncementAdminQueryController } from './admin/controller/announcement-admin-query.controller';
@@ -27,7 +27,7 @@ const ANNOUNCEMENT_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Announcement.name, schema: AnnouncementSchema },
 ]);
 
-export const ANNOUNCEMENT_MODULE_IMPORTS = [ANNOUNCEMENT_SCHEMA_IMPORTS];
+export const ANNOUNCEMENT_MODULE_IMPORTS = [ANNOUNCEMENT_SCHEMA_IMPORTS, LoggerModule];
 
 export const ANNOUNCEMENT_MODULE_CONTROLLERS = [
     AnnouncementController,
@@ -51,7 +51,6 @@ const ANNOUNCEMENT_DOMAIN_PROVIDERS = [
 ];
 
 const ANNOUNCEMENT_INFRASTRUCTURE_PROVIDERS = [
-    CustomLoggerService,
     AnnouncementRepository,
     AnnouncementMongoosePublicReaderAdapter,
     AnnouncementMongooseAdminReaderAdapter,

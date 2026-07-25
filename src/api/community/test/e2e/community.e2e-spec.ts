@@ -195,9 +195,7 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
     describe('POST /api/v2/community/posts/:postId/view', () => {
         it('존재하는 게시글 → 200 + viewCounted 메시지', async () => {
             const postId = await seedPost({ viewCount: 0 });
-            const res = await request(app.getHttpServer())
-                .post(`/api/v2/community/posts/${postId}/view`)
-                .expect(200);
+            const res = await request(app.getHttpServer()).post(`/api/v2/community/posts/${postId}/view`).expect(200);
 
             expect(res.body.success).toBe(true);
             expect(res.body.message).toBe('조회 수가 반영되었습니다.');
@@ -214,18 +212,14 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
 
         it('존재하지 않는 postId → 400', async () => {
             const fakeId = new Types.ObjectId().toString();
-            const res = await request(app.getHttpServer())
-                .post(`/api/v2/community/posts/${fakeId}/view`)
-                .expect(400);
+            const res = await request(app.getHttpServer()).post(`/api/v2/community/posts/${fakeId}/view`).expect(400);
             expect(res.body.success).toBe(false);
             expect(res.body.error).toBe('해당 게시글을 찾을 수 없습니다.');
         });
 
         it('isActive=false 게시글 → 400 (소프트 삭제된 게시글은 조회 불가)', async () => {
             const postId = await seedPost({ isActive: false });
-            await request(app.getHttpServer())
-                .post(`/api/v2/community/posts/${postId}/view`)
-                .expect(400);
+            await request(app.getHttpServer()).post(`/api/v2/community/posts/${postId}/view`).expect(400);
         });
 
         it('비인증 동일 게시글 두 번 호출 → viewCount 2 (비인증은 dedup 없음)', async () => {
@@ -257,9 +251,7 @@ describe('커뮤니티 종단간 테스트 (v2 read-only slice)', () => {
         });
 
         it('잘못된 ObjectId 포맷 → 400 (게시글 없음으로 처리)', async () => {
-            await request(app.getHttpServer())
-                .post('/api/v2/community/posts/not-valid-id/view')
-                .expect(400);
+            await request(app.getHttpServer()).post('/api/v2/community/posts/not-valid-id/view').expect(400);
         });
     });
 

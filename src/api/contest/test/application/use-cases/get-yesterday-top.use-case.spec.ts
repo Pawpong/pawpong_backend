@@ -7,19 +7,21 @@ const logger = {
     logError: jest.fn(),
 };
 
-const makeEntry = (overrides: Partial<{
-    id: string;
-    contestId: string;
-    userId: string;
-    userDisplayName: string;
-    userProfileImageFileName: string | null;
-    photoFileName: string;
-    description: string;
-    voteCount: number;
-    rank: number | null;
-    status: 'active' | 'hidden' | 'deleted';
-    createdAt: Date;
-}> = {}) => ({
+const makeEntry = (
+    overrides: Partial<{
+        id: string;
+        contestId: string;
+        userId: string;
+        userDisplayName: string;
+        userProfileImageFileName: string | null;
+        photoFileName: string;
+        description: string;
+        voteCount: number;
+        rank: number | null;
+        status: 'active' | 'hidden' | 'deleted';
+        createdAt: Date;
+    }> = {},
+) => ({
     id: 'entry-1',
     contestId: 'contest-1',
     userId: 'user-1',
@@ -112,9 +114,7 @@ describe('GetYesterdayTopUseCase', () => {
 
     it('정상 — signed URL이 각 항목 photoUrl에 반영됨', async () => {
         reader.findActive.mockResolvedValue(makeContest());
-        reader.findTopEntries.mockResolvedValue([
-            makeEntry({ id: 'e-1', photoFileName: 'photo-1.jpg' }),
-        ]);
+        reader.findTopEntries.mockResolvedValue([makeEntry({ id: 'e-1', photoFileName: 'photo-1.jpg' })]);
         reader.countEntries.mockResolvedValue(5);
 
         const result = await useCase.execute();
@@ -149,9 +149,7 @@ describe('GetYesterdayTopUseCase', () => {
 
     it('엣지 — 엔트리가 1개뿐 → 1개만 반환', async () => {
         reader.findActive.mockResolvedValue(makeContest({ participantCount: 1 }));
-        reader.findTopEntries.mockResolvedValue([
-            makeEntry({ id: 'e-1', voteCount: 2 }),
-        ]);
+        reader.findTopEntries.mockResolvedValue([makeEntry({ id: 'e-1', voteCount: 2 })]);
         reader.countEntries.mockResolvedValue(1);
 
         const result = await useCase.execute();
@@ -172,9 +170,7 @@ describe('GetYesterdayTopUseCase', () => {
 
     it('엣지 — totalEntries = 0 → division by zero 방어, voteRate = 0', async () => {
         reader.findActive.mockResolvedValue(makeContest());
-        reader.findTopEntries.mockResolvedValue([
-            makeEntry({ id: 'e-1', voteCount: 0 }),
-        ]);
+        reader.findTopEntries.mockResolvedValue([makeEntry({ id: 'e-1', voteCount: 0 })]);
         reader.countEntries.mockResolvedValue(0);
 
         const result = await useCase.execute();

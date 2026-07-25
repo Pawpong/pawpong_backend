@@ -106,7 +106,9 @@ describe('필터 옵션 종단간 테스트', () => {
 
     describe('GET /api/v2/filter-options/breeder-levels', () => {
         it('브리더 레벨 옵션 조회 성공', async () => {
-            const response = await request(app.getHttpServer()).get('/api/v2/filter-options/breeder-levels').expect(200);
+            const response = await request(app.getHttpServer())
+                .get('/api/v2/filter-options/breeder-levels')
+                .expect(200);
 
             expect(response.body).toEqual({
                 success: true,
@@ -197,7 +199,9 @@ describe('필터 옵션 종단간 테스트', () => {
 
     describe('GET /api/v2/filter-options/cat-fur-lengths', () => {
         it('고양이 털 길이 옵션 조회 성공', async () => {
-            const response = await request(app.getHttpServer()).get('/api/v2/filter-options/cat-fur-lengths').expect(200);
+            const response = await request(app.getHttpServer())
+                .get('/api/v2/filter-options/cat-fur-lengths')
+                .expect(200);
 
             expect(response.body).toEqual({
                 success: true,
@@ -222,7 +226,9 @@ describe('필터 옵션 종단간 테스트', () => {
 
     describe('GET /api/v2/filter-options/adoption-status', () => {
         it('입양 상태 옵션 조회 성공', async () => {
-            const response = await request(app.getHttpServer()).get('/api/v2/filter-options/adoption-status').expect(200);
+            const response = await request(app.getHttpServer())
+                .get('/api/v2/filter-options/adoption-status')
+                .expect(200);
 
             expect(response.body).toEqual({
                 success: true,

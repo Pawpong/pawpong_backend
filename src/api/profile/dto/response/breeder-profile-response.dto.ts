@@ -36,6 +36,9 @@ export class BreederPublicProfileResponseDto {
     @ApiProperty({ description: '팔로워(=즐겨찾기 입양자) 수', example: 1600 })
     followerCount: number;
 
+    @ApiProperty({ description: '팔로잉 수 (내가 팔로우하는 사용자 수)', example: 50 })
+    followingCount: number;
+
     @ApiProperty({ description: '인증 레벨', enum: ['new', 'elite'], example: 'elite' })
     level: 'new' | 'elite';
 

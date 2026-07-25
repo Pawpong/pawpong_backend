@@ -37,7 +37,7 @@ import { ContestUserInfoMongooseAdapter } from './infrastructure/contest-user-in
 import { ContestWriterMongooseAdapter } from './infrastructure/contest-writer-mongoose.adapter';
 import { ContestRepository } from './repository/contest.repository';
 
-const SCHEMA_IMPORTS = MongooseModule.forFeature([
+const CONTEST_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Contest.name, schema: ContestSchema },
     { name: ContestEntry.name, schema: ContestEntrySchema },
     { name: ContestVote.name, schema: ContestVoteSchema },
@@ -45,7 +45,7 @@ const SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Breeder.name, schema: BreederSchema },
 ]);
 
-export const CONTEST_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule];
+export const CONTEST_MODULE_IMPORTS = [CONTEST_SCHEMA_IMPORTS, StorageModule];
 
 export const CONTEST_MODULE_CONTROLLERS = [
     ContestCurrentController,
@@ -60,7 +60,7 @@ export const CONTEST_MODULE_CONTROLLERS = [
     ContestYesterdayTopController,
 ];
 
-const USE_CASE_PROVIDERS = [
+const CONTEST_USE_CASE_PROVIDERS = [
     GetCurrentContestUseCase,
     GetContestEntriesUseCase,
     GetRandomContestEntryUseCase,
@@ -73,7 +73,7 @@ const USE_CASE_PROVIDERS = [
     GetHallOfFameUseCase,
 ];
 
-const INFRASTRUCTURE_PROVIDERS = [
+const CONTEST_INFRASTRUCTURE_PROVIDERS = [
     ContestRepository,
     ContestReaderMongooseAdapter,
     ContestWriterMongooseAdapter,
@@ -81,11 +81,17 @@ const INFRASTRUCTURE_PROVIDERS = [
     ContestUserInfoMongooseAdapter,
 ];
 
-const PORT_BINDINGS = [
+const CONTEST_PORT_BINDINGS = [
     { provide: CONTEST_READER_PORT, useExisting: ContestReaderMongooseAdapter },
     { provide: CONTEST_WRITER_PORT, useExisting: ContestWriterMongooseAdapter },
     { provide: CONTEST_ASSET_URL_PORT, useExisting: ContestAssetUrlStorageAdapter },
     { provide: CONTEST_USER_INFO_PORT, useExisting: ContestUserInfoMongooseAdapter },
 ];
 
-export const CONTEST_MODULE_PROVIDERS = [...USE_CASE_PROVIDERS, ...INFRASTRUCTURE_PROVIDERS, ...PORT_BINDINGS];
+export const CONTEST_MODULE_PROVIDERS = [
+    ...CONTEST_USE_CASE_PROVIDERS,
+    ...CONTEST_INFRASTRUCTURE_PROVIDERS,
+    ...CONTEST_PORT_BINDINGS,
+];
+
+export const CONTEST_MODULE_EXPORTS = [CONTEST_READER_PORT, CONTEST_WRITER_PORT];

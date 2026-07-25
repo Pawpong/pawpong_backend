@@ -78,9 +78,7 @@ describe('v2 커뮤니티 작성자 snapshot 동기화 (이벤트)', () => {
             profileImageFileName: 'new.png',
         });
 
-        const post = await connection
-            .collection('community_posts')
-            .findOne({ _id: new Types.ObjectId(postId) });
+        const post = await connection.collection('community_posts').findOne({ _id: new Types.ObjectId(postId) });
         const comment = await connection
             .collection('community_post_comments')
             .findOne({ _id: new Types.ObjectId(commentId) });

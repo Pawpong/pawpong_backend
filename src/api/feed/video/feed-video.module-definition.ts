@@ -5,6 +5,7 @@ import { Video, VideoSchema } from '../../../schema/video.schema';
 import { VideoLike, VideoLikeSchema } from '../../../schema/video-like.schema';
 import { VideoComment, VideoCommentSchema } from '../../../schema/video-comment.schema';
 import { StorageModule } from '../../../common/storage/storage.module';
+import { RedisModule } from '../../../common/redis/redis.module';
 import { FeedCommentModule } from '../comment/feed-comment.module';
 import { FeedLikeModule } from '../like/feed-like.module';
 import { FeedTagModule } from '../tag/feed-tag.module';
@@ -83,6 +84,7 @@ export const FEED_VIDEO_MODULE_IMPORTS = [
     FEED_VIDEO_SCHEMA_IMPORTS,
     FEED_VIDEO_QUEUE_IMPORT,
     StorageModule,
+    RedisModule,
     FeedCommentModule,
     FeedLikeModule,
     FeedTagModule,

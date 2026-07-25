@@ -26,14 +26,14 @@ import { BreederPetPostingReaderMongooseAdapter } from './infrastructure/breeder
 import { BreederPetPostingWriterMongooseAdapter } from './infrastructure/breeder-pet-posting-writer-mongoose.adapter';
 import { BreederPetPostingRepository } from './repository/breeder-pet-posting.repository';
 
-const SCHEMA_IMPORTS = MongooseModule.forFeature([
+const BREEDER_PET_POSTING_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: AvailablePet.name, schema: AvailablePetSchema },
     { name: Breeder.name, schema: BreederSchema },
     { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
     { name: ChatRoom.name, schema: ChatRoomSchema },
 ]);
 
-export const BREEDER_PET_POSTING_MODULE_IMPORTS = [SCHEMA_IMPORTS, StorageModule];
+export const BREEDER_PET_POSTING_MODULE_IMPORTS = [BREEDER_PET_POSTING_SCHEMA_IMPORTS, StorageModule];
 
 export const BREEDER_PET_POSTING_MODULE_CONTROLLERS = [
     BreederPetPostingCreateController,
@@ -41,20 +41,20 @@ export const BREEDER_PET_POSTING_MODULE_CONTROLLERS = [
     BreederPetPostingUpdateController,
 ];
 
-const USE_CASE_PROVIDERS = [
+const BREEDER_PET_POSTING_USE_CASE_PROVIDERS = [
     CreateBreederPetPostingUseCase,
     ListMyBreederPetPostingsUseCase,
     UpdateBreederPetPostingUseCase,
     DeleteBreederPetPostingUseCase,
 ];
 
-const DOMAIN_PROVIDERS = [
+const BREEDER_PET_POSTING_DOMAIN_PROVIDERS = [
     BreederPetPostingValidatorService,
     BreederPetPostingMapperService,
     BreederPetPostingCardMapperService,
 ];
 
-const INFRASTRUCTURE_PROVIDERS = [
+const BREEDER_PET_POSTING_INFRASTRUCTURE_PROVIDERS = [
     BreederPetPostingRepository,
     BreederPetPostingProfileMongooseAdapter,
     BreederPetPostingWriterMongooseAdapter,
@@ -62,7 +62,7 @@ const INFRASTRUCTURE_PROVIDERS = [
     BreederPetPostingAssetUrlStorageAdapter,
 ];
 
-const PORT_BINDINGS = [
+const BREEDER_PET_POSTING_PORT_BINDINGS = [
     { provide: BREEDER_PET_POSTING_PROFILE_PORT, useExisting: BreederPetPostingProfileMongooseAdapter },
     { provide: BREEDER_PET_POSTING_WRITER_PORT, useExisting: BreederPetPostingWriterMongooseAdapter },
     { provide: BREEDER_PET_POSTING_READER_PORT, useExisting: BreederPetPostingReaderMongooseAdapter },
@@ -70,8 +70,8 @@ const PORT_BINDINGS = [
 ];
 
 export const BREEDER_PET_POSTING_MODULE_PROVIDERS = [
-    ...USE_CASE_PROVIDERS,
-    ...DOMAIN_PROVIDERS,
-    ...INFRASTRUCTURE_PROVIDERS,
-    ...PORT_BINDINGS,
+    ...BREEDER_PET_POSTING_USE_CASE_PROVIDERS,
+    ...BREEDER_PET_POSTING_DOMAIN_PROVIDERS,
+    ...BREEDER_PET_POSTING_INFRASTRUCTURE_PROVIDERS,
+    ...BREEDER_PET_POSTING_PORT_BINDINGS,
 ];
