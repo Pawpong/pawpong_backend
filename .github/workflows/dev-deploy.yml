@@ -27,6 +27,18 @@ jobs:
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
 
+            - name: Format (prettier)
+              # 배포되는 산출물이 항상 포맷된 소스에서 빌드되도록 보장한다.
+              # 포맷 차이가 있었다면 로그에 남겨 로컬에서 pnpm format 을 누락했는지 확인할 수 있게 한다.
+              run: |
+                  pnpm format
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "⚠️ 포맷되지 않은 파일이 있어 CI 에서 정리했습니다 (로컬에서 pnpm format 실행 권장):"
+                    git status --porcelain
+                  else
+                    echo "✅ 이미 포맷 상태입니다"
+                  fi
+
             - name: Build
               env:
                   NODE_OPTIONS: '--max-old-space-size=3072'
