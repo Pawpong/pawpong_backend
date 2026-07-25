@@ -4,4 +4,5 @@ export const AI_IMAGE_RESPONSE_MESSAGES = {
     filterUpdated: 'AI 필터가 수정되었습니다.',
     filterDeleted: 'AI 필터가 삭제되었습니다.',
     filterNotFound: 'AI 필터를 찾을 수 없습니다.',
+    uploadUrlIssued: '업로드 URL 발급 성공',
 } as const;

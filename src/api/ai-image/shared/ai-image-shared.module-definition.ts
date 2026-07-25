@@ -9,6 +9,8 @@ import { AiImageFilterReaderAdapter } from './infrastructure/ai-image-filter-rea
 import { AiImageAssetUrlStorageAdapter } from './infrastructure/ai-image-asset-url-storage.adapter';
 import { AI_IMAGE_FILTER_READER_PORT } from './application/ports/ai-image-filter-reader.port';
 import { AI_IMAGE_ASSET_URL_PORT } from './application/ports/ai-image-asset-url.port';
+import { AiImageFileStorageAdapter } from './infrastructure/ai-image-file-storage.adapter';
+import { AI_IMAGE_FILE_STORAGE_PORT } from './application/ports/ai-image-file-storage.port';
 
 // AI 이미지 컨텍스트 공통 기반.
 // 필터 조회(READER)와 파일키 → URL 변환은 filters/generation/admin 슬라이스가 모두 사용한다.
@@ -23,11 +25,13 @@ const AI_IMAGE_SHARED_INFRASTRUCTURE_PROVIDERS = [
     AiImageFilterRepository,
     AiImageFilterReaderAdapter,
     AiImageAssetUrlStorageAdapter,
+    AiImageFileStorageAdapter,
 ];
 
 const AI_IMAGE_SHARED_PORT_BINDINGS = [
     { provide: AI_IMAGE_FILTER_READER_PORT, useExisting: AiImageFilterReaderAdapter },
     { provide: AI_IMAGE_ASSET_URL_PORT, useExisting: AiImageAssetUrlStorageAdapter },
+    { provide: AI_IMAGE_FILE_STORAGE_PORT, useExisting: AiImageFileStorageAdapter },
 ];
 
 export const AI_IMAGE_SHARED_MODULE_PROVIDERS = [
@@ -38,6 +42,7 @@ export const AI_IMAGE_SHARED_MODULE_PROVIDERS = [
 export const AI_IMAGE_SHARED_MODULE_EXPORTS = [
     AI_IMAGE_FILTER_READER_PORT,
     AI_IMAGE_ASSET_URL_PORT,
+    AI_IMAGE_FILE_STORAGE_PORT,
     AiImageFilterRepository,
     // 슬라이스 레포지토리가 AiImageFilter/AiImageJob 모델을 주입받을 수 있도록 재노출
     MongooseModule,
