@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package pawpong.aiagent.v1;
+
+// Pawpong AI Agent — NestJS 백엔드가 동기 호출하는 내부 서비스.
+//
+// 사용자 이미지 생성처럼 오래 걸리는 작업은 Kafka(ai-image.request.v1)로 처리하고,
+// 이 gRPC 는 즉답이 필요한 어드민 미리보기·헬스체크에만 사용한다.
+// 대용량 이미지 바이트는 주고받지 않고 S3 objectKey 만 교환한다.
+service AiAgentService {
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+    rpc GenerateFilterPreview(GenerateFilterPreviewRequest) returns (GenerateFilterPreviewResponse);
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+    // SERVING | DEGRADED
+    string status = 1;
+    string version = 2;
+    // 현재 처리 중인 작업 수 (동시성 슬롯 점유)
+    int32 in_flight_jobs = 3;
+    bool kafka_connected = 4;
+    bool openai_configured = 5;
+}
+
+message PostProcessOptions {
+    // none | pixelate
+    string type = 1;
+    int32 pixel_size = 2;
+    int32 palette_size = 3;
+}
+
+message GenerateFilterPreviewRequest {
+    string prompt = 1;
+    string negative_prompt = 2;
+    // 어드민이 미리 업로드한 원본 S3 키
+    string input_object_key = 3;
+    string model = 4;
+    string output_size = 5;
+    PostProcessOptions post_process = 6;
+}
+
+message GenerateFilterPreviewResponse {
+    bool success = 1;
+    // ai-image/preview/{uuid}.png
+    string output_object_key = 2;
+    int64 latency_ms = 3;
+    string error_code = 4;
+    string error_message = 5;
+}

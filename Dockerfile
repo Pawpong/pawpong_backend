@@ -18,6 +18,10 @@ COPY nest-cli.json ./
 # 소스 코드만 복사
 COPY src ./src
 
+# gRPC 계약 — nest-cli.json 에 assets 설정이 없어 dist 로 복사되지 않으므로
+# 런타임에서 process.cwd()/proto 로 읽을 수 있도록 이미지에 그대로 포함시킨다
+COPY proto ./proto
+
 # 빌드 시 메모리 최적화 옵션 추가
 ENV NODE_OPTIONS="--max-old-space-size=3072"
 RUN pnpm build
