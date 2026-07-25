@@ -9,6 +9,9 @@ import { Banner, BannerDocument } from '../../../../schema/banner.schema';
 import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
 import { CounselBanner, CounselBannerDocument } from '../../../../schema/counsel-banner.schema';
 import { ParentPet, ParentPetDocument } from '../../../../schema/parent-pet.schema';
+import { AiImageFilter, AiImageFilterDocument } from '../../../../schema/ai-image-filter.schema';
+import { AiImageJob, AiImageJobDocument } from '../../../../schema/ai-image-job.schema';
+import { ContestEntry, ContestEntryDocument } from '../../../../schema/contest-entry.schema';
 import type {
     UploadAdminReferencedAdopterDocumentRecord,
     UploadAdminReferencedAvailablePetDocumentRecord,
@@ -28,6 +31,9 @@ export class UploadAdminFileReferenceRepository {
         @InjectModel(Banner.name) private readonly bannerModel: Model<BannerDocument>,
         @InjectModel(AuthBanner.name) private readonly authBannerModel: Model<AuthBannerDocument>,
         @InjectModel(CounselBanner.name) private readonly counselBannerModel: Model<CounselBannerDocument>,
+        @InjectModel(AiImageFilter.name) private readonly aiImageFilterModel: Model<AiImageFilterDocument>,
+        @InjectModel(AiImageJob.name) private readonly aiImageJobModel: Model<AiImageJobDocument>,
+        @InjectModel(ContestEntry.name) private readonly contestEntryModel: Model<ContestEntryDocument>,
     ) {}
 
     countBreederProfileImages(fileKey: string): Promise<number> {
@@ -163,5 +169,70 @@ export class UploadAdminFileReferenceRepository {
             .lean<UploadAdminReferencedSingleImageBannerDocumentRecord[]>()
             .exec();
         return banners.flatMap((banner) => (banner.imageFileName ? [banner.imageFileName] : []));
+    }
+
+    // ---- AI 이미지 ----
+
+    countAiImageFilterThumbnails(fileKey: string): Promise<number> {
+        return this.aiImageFilterModel.countDocuments({ thumbnailFileName: fileKey });
+    }
+
+    countAiImageFilterReferenceImages(fileKey: string): Promise<number> {
+        return this.aiImageFilterModel.countDocuments({ referenceImageObjectKeys: fileKey });
+    }
+
+    /** 생성 작업은 원본·결과 두 키를 모두 참조한다 */
+    countAiImageJobFiles(fileKey: string): Promise<number> {
+        return this.aiImageJobModel.countDocuments({
+            $or: [{ inputObjectKey: fileKey }, { outputObjectKey: fileKey }],
+        });
+    }
+
+    async readAiImageFilterFiles(): Promise<string[]> {
+        const filters = await this.aiImageFilterModel
+            .find({}, { thumbnailFileName: 1, referenceImageObjectKeys: 1 })
+            .lean()
+            .exec();
+
+        const files: string[] = [];
+        filters.forEach((filter) => {
+            if (filter.thumbnailFileName) files.push(filter.thumbnailFileName);
+            (filter.referenceImageObjectKeys ?? []).forEach((key) => files.push(key));
+        });
+        return files;
+    }
+
+    async readAiImageJobFiles(): Promise<string[]> {
+        const jobs = await this.aiImageJobModel
+            .find({}, { inputObjectKey: 1, outputObjectKey: 1 })
+            .lean()
+            .exec();
+
+        const files: string[] = [];
+        jobs.forEach((job) => {
+            if (job.inputObjectKey) files.push(job.inputObjectKey);
+            if (job.outputObjectKey) files.push(job.outputObjectKey);
+        });
+        return files;
+    }
+
+    // ---- 콘테스트 출품작 (기존 누락분) ----
+
+    countContestEntryPhotos(fileKey: string): Promise<number> {
+        return this.contestEntryModel.countDocuments({ photoFileName: fileKey });
+    }
+
+    async readContestEntryPhotoFiles(): Promise<string[]> {
+        const entries = await this.contestEntryModel
+            .find({}, { photoFileName: 1, userProfileImageFileName: 1 })
+            .lean()
+            .exec();
+
+        const files: string[] = [];
+        entries.forEach((entry) => {
+            if (entry.photoFileName) files.push(entry.photoFileName);
+            if (entry.userProfileImageFileName) files.push(entry.userProfileImageFileName);
+        });
+        return files;
     }
 }

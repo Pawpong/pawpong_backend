@@ -129,10 +129,10 @@ describe('업로드 종단간 테스트', () => {
         breederToken = breederResponse.body.data.accessToken;
         breederId = breederResponse.body.data.breederId;
 
-        // 2. 테스트용 분양 개체 생성
+        // 2. 테스트용 분양 개체 생성 (breeder-pet-posting 도메인이 available_pets 컬렉션 소유)
         if (breederToken) {
             const availablePetResponse = await request(app.getHttpServer())
-                .post('/api/v2/breeder-management/available-pets')
+                .post('/api/v2/breeder-pet-posting')
                 .set('Authorization', `Bearer ${breederToken}`)
                 .send({
                     name: '테스트 분양 개체',
@@ -141,6 +141,11 @@ describe('업로드 종단간 테스트', () => {
                     gender: 'male',
                     price: 1500000,
                     description: '테스트용 분양 개체입니다.',
+                    photos: ['available-pets/test/1.jpg'],
+                    vaccinationStatus: 'incomplete',
+                    vaccinationIncompleteReason: '테스트용 미접종',
+                    geneticTestStatus: 'incomplete',
+                    geneticTestIncompleteReason: '테스트용 미검사',
                 });
 
             if ([200, 201].includes(availablePetResponse.status) && availablePetResponse.body.data?.petId) {

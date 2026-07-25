@@ -8,6 +8,9 @@ import { AvailablePet, AvailablePetSchema } from '../../../schema/available-pet.
 import { Banner, BannerSchema } from '../../../schema/banner.schema';
 import { AuthBanner, AuthBannerSchema } from '../../../schema/auth-banner.schema';
 import { CounselBanner, CounselBannerSchema } from '../../../schema/counsel-banner.schema';
+import { AiImageFilter, AiImageFilterSchema } from '../../../schema/ai-image-filter.schema';
+import { AiImageJob, AiImageJobSchema } from '../../../schema/ai-image-job.schema';
+import { ContestEntry, ContestEntrySchema } from '../../../schema/contest-entry.schema';
 
 import { UploadAdminFilesListController } from './controller/upload-admin-files-list.controller';
 import { UploadAdminFolderFilesController } from './controller/upload-admin-folder-files.controller';
@@ -45,6 +48,10 @@ const UPLOAD_ADMIN_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Banner.name, schema: BannerSchema },
     { name: AuthBanner.name, schema: AuthBannerSchema },
     { name: CounselBanner.name, schema: CounselBannerSchema },
+    // 고아 파일 오분류 방지 — 아래 컬렉션이 참조하는 키도 판정 대상에 포함해야 한다
+    { name: AiImageFilter.name, schema: AiImageFilterSchema },
+    { name: AiImageJob.name, schema: AiImageJobSchema },
+    { name: ContestEntry.name, schema: ContestEntrySchema },
 ]);
 
 export const UPLOAD_ADMIN_MODULE_IMPORTS = [UPLOAD_ADMIN_SCHEMA_IMPORTS, StorageModule];

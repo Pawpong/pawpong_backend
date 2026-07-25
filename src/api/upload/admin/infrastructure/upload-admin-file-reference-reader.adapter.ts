@@ -66,6 +66,30 @@ export class UploadAdminFileReferenceReaderAdapter implements UploadAdminReferen
             'counsel_banners',
             'imageFileName',
         );
+        await this.pushReferenceIfExists(
+            references,
+            await this.uploadAdminFileReferenceRepository.countAiImageFilterThumbnails(fileKey),
+            'ai_image_filters',
+            'thumbnailFileName',
+        );
+        await this.pushReferenceIfExists(
+            references,
+            await this.uploadAdminFileReferenceRepository.countAiImageFilterReferenceImages(fileKey),
+            'ai_image_filters',
+            'referenceImageObjectKeys',
+        );
+        await this.pushReferenceIfExists(
+            references,
+            await this.uploadAdminFileReferenceRepository.countAiImageJobFiles(fileKey),
+            'ai_image_jobs',
+            'inputObjectKey/outputObjectKey',
+        );
+        await this.pushReferenceIfExists(
+            references,
+            await this.uploadAdminFileReferenceRepository.countContestEntryPhotos(fileKey),
+            'contest_entries',
+            'photoFileName',
+        );
 
         return references;
     }
@@ -81,6 +105,9 @@ export class UploadAdminFileReferenceReaderAdapter implements UploadAdminReferen
             this.uploadAdminFileReferenceRepository.readBannerImageFiles(),
             this.uploadAdminFileReferenceRepository.readAuthBannerImageFiles(),
             this.uploadAdminFileReferenceRepository.readCounselBannerImageFiles(),
+            this.uploadAdminFileReferenceRepository.readAiImageFilterFiles(),
+            this.uploadAdminFileReferenceRepository.readAiImageJobFiles(),
+            this.uploadAdminFileReferenceRepository.readContestEntryPhotoFiles(),
         ]);
 
         for (const files of fileGroups) {
