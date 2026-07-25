@@ -253,7 +253,7 @@ export class AdopterRepository {
 
     /**
      * 입양자의 즐겨찾기 브리더 목록 조회
-     * 페이지네이션 지원
+     * 페이지네이션 지원, 최근 즐겨찾기 추가순(addedAt 내림차순) 정렬 고정
      *
      * @param adopterId 입양자 ID
      * @param page 페이지 번호 (기본값: 1)
@@ -275,7 +275,10 @@ export class AdopterRepository {
                 };
             }
 
-            const allFavorites = adopter.favoriteBreederList;
+            // addedAt 내림차순(최근 즐겨찾기 추가순) 정렬 — 어떤 소비자(adopter/profile)든 동일한 순서를 보장
+            const allFavorites = [...adopter.favoriteBreederList].sort(
+                (a, b) => (b.addedAt?.getTime?.() ?? 0) - (a.addedAt?.getTime?.() ?? 0),
+            );
             const total = allFavorites.length;
 
             // 페이지네이션 적용

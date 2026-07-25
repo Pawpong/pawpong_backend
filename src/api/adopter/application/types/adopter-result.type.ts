@@ -1,4 +1,3 @@
-import { PriceDisplayType } from '../../../../common/enum/user.enum';
 import type { PageResult } from '../../../../common/types/page-result.type';
 import type {
     AdopterApplicationAnswerValue,
@@ -95,29 +94,6 @@ export type AdopterApplicationCreateResult = {
     appliedAt: string;
     message: string;
 };
-
-export type AdopterFavoriteBreederResult = {
-    breederId: string;
-    breederName: string;
-    profileImage?: string;
-    representativePhotos?: string[];
-    breederLevel?: string;
-    petType?: string;
-    location: string;
-    specialization?: string | string[];
-    averageRating: number;
-    totalReviews: number;
-    priceRange?: {
-        min: number;
-        max: number;
-        display: PriceDisplayType;
-    };
-    availablePets: number;
-    addedAt: Date;
-    isActive: boolean;
-};
-
-export type AdopterFavoritePageResult = PageResult<AdopterFavoriteBreederResult>;
 
 export type AdopterReviewItemResult = {
     reviewId: string;

@@ -269,19 +269,6 @@ describe('입양자 종단간 테스트', () => {
             console.log('즐겨찾기 추가 성공');
         });
 
-        it('즐겨찾기 목록 조회', async () => {
-            const response = await request(app.getHttpServer())
-                .get('/api/v2/adopter/favorites')
-                .set('Authorization', `Bearer ${adopterToken}`)
-                .query({ page: 1, limit: 10 })
-                .expect(200);
-
-            expect(response.body.success).toBe(true);
-            expect(response.body.data.items).toBeDefined();
-            expect(Array.isArray(response.body.data.items)).toBe(true);
-            console.log('즐겨찾기 목록 조회 성공');
-        });
-
         it('즐겨찾기 삭제 성공', async () => {
             const response = await request(app.getHttpServer())
                 .delete(`/api/v2/adopter/favorite/${breederId}`)

@@ -10,14 +10,18 @@ import { AdopterBreederFavoriteRepository } from '../repository/adopter-breeder-
 import { AdopterProfileAdapter } from '../infrastructure/adopter-profile.adapter';
 import { AdopterBreederReaderAdapter } from '../infrastructure/adopter-breeder-reader.adapter';
 import { AdopterFileUrlAdapter } from '../infrastructure/adopter-file-url.adapter';
+import { AdopterFavoriteReaderAdapter } from '../infrastructure/adopter-favorite-reader.adapter';
 import { ADOPTER_PROFILE_PORT } from '../application/ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../application/ports/adopter-breeder-reader.port';
 import { ADOPTER_FILE_URL_PORT } from '../application/ports/adopter-file-url.port';
+import { ADOPTER_FAVORITE_READER_PORT } from '../application/ports/adopter-favorite-reader.port';
 import { AdopterPaginationAssemblerService } from '../domain/services/adopter-pagination-assembler.service';
 
 // 입양자 컨텍스트의 여러 슬라이스가 공유하는 기반.
 // - 입양자 영속성(프로필·즐겨찾기 repository)
 // - 본인 확인(ADOPTER_PROFILE_PORT) / 브리더 조회(ADOPTER_BREEDER_READER_PORT) / 파일 URL(ADOPTER_FILE_URL_PORT)
+// - 즐겨찾기 목록 읽기(ADOPTER_FAVORITE_READER_PORT) — adopter 가 유일하게 소유하는
+//   Adopter.favoriteBreederList 조회 창구. profile 등 다른 바운디드 컨텍스트는 이 Port 로만 접근한다.
 // - 목록 페이지네이션 조립
 // 브리더 조회는 breeder-management 컨텍스트의 repository 를 어댑터가 감싸 Port 로만 노출한다.
 const ADOPTER_SHARED_SCHEMA_IMPORTS = MongooseModule.forFeature([
@@ -34,6 +38,7 @@ export const ADOPTER_SHARED_MODULE_PROVIDERS = [
     AdopterProfileAdapter,
     AdopterBreederReaderAdapter,
     AdopterFileUrlAdapter,
+    AdopterFavoriteReaderAdapter,
     {
         provide: ADOPTER_PROFILE_PORT,
         useExisting: AdopterProfileAdapter,
@@ -46,6 +51,10 @@ export const ADOPTER_SHARED_MODULE_PROVIDERS = [
         provide: ADOPTER_FILE_URL_PORT,
         useExisting: AdopterFileUrlAdapter,
     },
+    {
+        provide: ADOPTER_FAVORITE_READER_PORT,
+        useExisting: AdopterFavoriteReaderAdapter,
+    },
 ];
 
 export const ADOPTER_SHARED_MODULE_EXPORTS = [
@@ -55,6 +64,7 @@ export const ADOPTER_SHARED_MODULE_EXPORTS = [
     ADOPTER_PROFILE_PORT,
     ADOPTER_BREEDER_READER_PORT,
     ADOPTER_FILE_URL_PORT,
+    ADOPTER_FAVORITE_READER_PORT,
     // 슬라이스 레포지토리가 Adopter/Breeder 모델을 주입받을 수 있도록 재노출
     MongooseModule,
     // 슬라이스 어댑터가 브리더 영속성(BreederRepository 등)에 접근할 수 있도록 재노출

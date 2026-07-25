@@ -20,7 +20,6 @@ import { ApplicationDetailResponseDto } from '../dto/response/application-detail
 import { ApplicationListItemResponseDto } from '../dto/response/application-list-item-response.dto';
 import { ApplicationListResponseDto } from '../dto/response/application-list-response.dto';
 import { FavoriteAddResponseDto } from '../dto/response/favorite-add-response.dto';
-import { FavoriteBreederDataDto, FavoriteListResponseDto } from '../dto/response/favorite-list-response.dto';
 import { FavoriteRemoveResponseDto } from '../dto/response/favorite-remove-response.dto';
 import { MyReviewDetailDto } from '../dto/response/my-review-detail.dto';
 import { MyReviewItemDto } from '../dto/response/my-review-item.dto';
@@ -194,22 +193,6 @@ export function ApiRemoveAdopterFavoriteEndpoint() {
             description: '즐겨찾기에서 제거할 브리더 ID',
             example: '507f1f77bcf86cd799439011',
         }),
-    );
-}
-
-export function ApiGetAdopterFavoritesEndpoint() {
-    return applyDecorators(
-        ApiPaginatedEndpoint({
-            summary: '즐겨찾기 브리더 목록 조회',
-            description: '입양자가 즐겨찾기에 추가한 브리더 목록을 페이지네이션과 함께 조회합니다.',
-            responseType: FavoriteListResponseDto,
-            itemType: FavoriteBreederDataDto,
-            errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-            successDescription: '관심 브리더 목록 조회 성공',
-            successMessageExample: ADOPTER_RESPONSE_MESSAGES.favoriteListRetrieved,
-        }),
-        ApiQuery({ name: 'page', required: false, type: Number, example: 1, description: '페이지 번호' }),
-        ApiQuery({ name: 'limit', required: false, type: Number, example: 10, description: '페이지당 항목 수' }),
     );
 }
 
