@@ -15,6 +15,9 @@ import { GetBreederProfileUseCase } from './application/use-cases/get-breeder-pr
 import { GetMyFavoriteBreedersUseCase } from './application/use-cases/get-my-favorite-breeders.use-case';
 import { GetMyProfileUseCase } from './application/use-cases/get-my-profile.use-case';
 import { FollowUserUseCase } from './application/use-cases/follow-user.use-case';
+import { GetUserFollowersUseCase } from './application/use-cases/get-user-followers.use-case';
+import { GetUserFollowingsUseCase } from './application/use-cases/get-user-followings.use-case';
+import { RemoveMyFollowerUseCase } from './application/use-cases/remove-my-follower.use-case';
 import { UnfollowUserUseCase } from './application/use-cases/unfollow-user.use-case';
 import { UpdateMyProfileUseCase } from './application/use-cases/update-my-profile.use-case';
 import { ProfileMapperService } from './domain/services/profile-mapper.service';
@@ -23,7 +26,7 @@ import { ProfileFollowMongooseAdapter } from './infrastructure/profile-follow-mo
 import { ProfileReaderMongooseAdapter } from './infrastructure/profile-reader-mongoose.adapter';
 import { ProfileWriterMongooseAdapter } from './infrastructure/profile-writer-mongoose.adapter';
 import { ProfileFavoriteBreedersController, ProfileMeController } from './controller/profile-me.controller';
-import { ProfileFollowController } from './controller/profile-follow.controller';
+import { ProfileFollowController, ProfileFollowListController } from './controller/profile-follow.controller';
 import { ProfilePublicController } from './controller/profile-public.controller';
 import { ProfileFollowRepository } from './repository/profile-follow.repository';
 import { ProfileRepository } from './repository/profile.repository';
@@ -42,6 +45,7 @@ export const PROFILE_MODULE_CONTROLLERS = [
     ProfileFavoriteBreedersController,
     ProfilePublicController,
     ProfileFollowController,
+    ProfileFollowListController,
 ];
 
 const PROFILE_USE_CASE_PROVIDERS = [
@@ -52,6 +56,9 @@ const PROFILE_USE_CASE_PROVIDERS = [
     GetMyFavoriteBreedersUseCase,
     FollowUserUseCase,
     UnfollowUserUseCase,
+    GetUserFollowersUseCase,
+    GetUserFollowingsUseCase,
+    RemoveMyFollowerUseCase,
 ];
 
 const PROFILE_DOMAIN_PROVIDERS = [ProfileMapperService];

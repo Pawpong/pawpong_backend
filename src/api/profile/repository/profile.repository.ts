@@ -31,6 +31,15 @@ export class ProfileRepository {
         return this.breederModel.findById(breederId).lean<BreederDocument>().exec();
     }
 
+    async findAdoptersByIds(adopterIds: string[]): Promise<AdopterDocument[]> {
+        const objectIds = adopterIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
+        if (objectIds.length === 0) return [];
+        return this.adopterModel
+            .find({ _id: { $in: objectIds } })
+            .lean<AdopterDocument[]>()
+            .exec();
+    }
+
     async findBreedersByIds(breederIds: string[]): Promise<BreederDocument[]> {
         const objectIds = breederIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
         if (objectIds.length === 0) return [];

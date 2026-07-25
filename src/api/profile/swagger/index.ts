@@ -13,6 +13,7 @@ import { AdopterPublicProfileResponseDto } from '../dto/response/adopter-profile
 import { BreederPublicProfileResponseDto } from '../dto/response/breeder-profile-response.dto';
 import { FavoriteBreederCardResponseDto } from '../dto/response/favorite-breeder-card.dto';
 import { FollowResponseDto, UnfollowResponseDto } from '../dto/response/follow-response.dto';
+import { FollowUserCardResponseDto, RemoveFollowerResponseDto } from '../dto/response/follow-user-card.dto';
 import { MyProfileResponseDto } from '../dto/response/my-profile-response.dto';
 
 const NOT_FOUND_RESPONSE = {
@@ -145,5 +146,56 @@ export function ApiUnfollowUserEndpoint() {
             successMessageExample: PROFILE_RESPONSE_MESSAGES.unfollowed,
         }),
         ApiParam({ name: 'userId', description: '팔로우 취소할 사용자 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiGetUserFollowersEndpoint() {
+    return applyDecorators(
+        ApiParam({ name: 'userId', description: '조회 대상 사용자 ID', example: '507f1f77bcf86cd799439011' }),
+        ApiPaginatedEndpoint({
+            summary: '팔로워 목록 (친구 목록 모달)',
+            description: `
+                대상 사용자를 팔로우하는 사용자 목록. 팔로우 최신순 정렬.
+                로그인 상태면 각 항목의 isFollowing(내가 팔로우 중) / isFollowedBy(상대가 나를 팔로우 중)가 채워지며,
+                둘 다 true 면 "맞팔로잉" 상태다. 비로그인 시 두 값 모두 false.
+            `,
+            responseType: PaginationResponseDto,
+            itemType: FollowUserCardResponseDto,
+            successDescription: '팔로워 목록 조회 성공',
+            successMessageExample: PROFILE_RESPONSE_MESSAGES.followersRetrieved,
+        }),
+    );
+}
+
+export function ApiGetUserFollowingsEndpoint() {
+    return applyDecorators(
+        ApiParam({ name: 'userId', description: '조회 대상 사용자 ID', example: '507f1f77bcf86cd799439011' }),
+        ApiPaginatedEndpoint({
+            summary: '팔로잉 목록 (친구 목록 모달)',
+            description: `
+                대상 사용자가 팔로우하는 사용자 목록. 팔로우 최신순 정렬.
+                isFollowing / isFollowedBy 규칙은 팔로워 목록과 동일하다.
+            `,
+            responseType: PaginationResponseDto,
+            itemType: FollowUserCardResponseDto,
+            successDescription: '팔로잉 목록 조회 성공',
+            successMessageExample: PROFILE_RESPONSE_MESSAGES.followingsRetrieved,
+        }),
+    );
+}
+
+export function ApiRemoveMyFollowerEndpoint() {
+    return applyDecorators(
+        ApiParam({ name: 'userId', description: '삭제할 팔로워의 사용자 ID', example: '507f1f77bcf86cd799439011' }),
+        ApiEndpoint({
+            summary: '내 팔로워 삭제 (친구 목록 모달)',
+            description: `
+                상대가 나를 팔로우한 관계를 끊는다. 언팔로우(내가 남을 취소)와 방향이 반대다.
+                팔로워가 아니었으면 removed: false 반환 (멱등).
+            `,
+            responseType: RemoveFollowerResponseDto,
+            successDescription: '팔로워 삭제 성공',
+            successMessageExample: PROFILE_RESPONSE_MESSAGES.followerRemoved,
+        }),
     );
 }

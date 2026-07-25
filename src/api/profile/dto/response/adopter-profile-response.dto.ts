@@ -24,6 +24,9 @@ export class AdopterPublicProfileResponseDto {
     @ApiProperty({ description: '팔로워 수', example: 100 })
     followerCount: number;
 
+    @ApiProperty({ description: '팔로잉 수 (내가 팔로우하는 사용자 수)', example: 50 })
+    followingCount: number;
+
     @ApiProperty({
         description: '현재 로그인 사용자가 이 입양자를 팔로우 중인지 (입양자→입양자 follow 시스템 미구현 — 항상 false)',
         example: false,

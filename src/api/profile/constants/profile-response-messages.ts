@@ -6,4 +6,7 @@ export const PROFILE_RESPONSE_MESSAGES = {
     favoriteBreedersRetrieved: '즐겨찾는 브리더 목록 조회 성공',
     followed: '팔로우되었습니다.',
     unfollowed: '팔로우가 취소되었습니다.',
+    followersRetrieved: '팔로워 목록 조회 성공',
+    followingsRetrieved: '팔로잉 목록 조회 성공',
+    followerRemoved: '팔로워가 삭제되었습니다.',
 } as const;

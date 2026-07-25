@@ -13,6 +13,7 @@ describe('ProfileMapperService', () => {
             bio: 'hi',
             bpm: 30,
             followerCount: 5,
+            followingCount: 0,
             favoriteBreederCount: 2,
         });
         expect(dto.role).toBe('adopter');
@@ -29,6 +30,7 @@ describe('ProfileMapperService', () => {
                 longDescription: '긴 소개',
                 bpm: 60,
                 followerCount: 1600,
+                followingCount: 0,
                 level: 'elite',
                 plan: 'pro',
                 businessLocation: { city: '경남', district: '창원시' },

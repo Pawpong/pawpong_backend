@@ -283,11 +283,18 @@ export class Adopter extends User {
     bpm: number;
 
     /**
-     * v2 유저홈 — 팔로워 수 (입양자→입양자 follow 시스템 대비 카운터)
-     * follow 시스템 구현 전까지는 0 으로 유지.
+     * v2 유저홈 — 팔로워 수 (나를 팔로우하는 사용자 수)
+     * user_follows 컬렉션의 follow/unfollow 시 원자적으로 갱신된다.
      */
     @Prop({ type: Number, default: 0, min: 0 })
     followerCount: number;
+
+    /**
+     * v2 유저홈 — 팔로잉 수 (내가 팔로우하는 사용자 수)
+     * 친구 목록 모달의 "팔로잉" 탭 카운트로 사용된다.
+     */
+    @Prop({ type: Number, default: 0, min: 0 })
+    followingCount: number;
 }
 
 export const AdopterSchema = SchemaFactory.createForClass(Adopter);
