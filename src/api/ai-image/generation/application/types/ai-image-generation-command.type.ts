@@ -25,3 +25,16 @@ export interface AiImageGenerationRequestedEvent {
     outputSize: string;
     requestedAt: string;
 }
+
+/** Kafka 결과 토픽 페이로드 (Python AI Agent → NestJS) */
+export interface AiImageGenerationResultEvent {
+    /** 파티션 키 (= jobId) */
+    id: string;
+    jobId: string;
+    status: 'succeeded' | 'failed';
+    /** 성공 시 결과 파일키 */
+    outputObjectKey?: string | null;
+    /** 실패 시 사유 코드 */
+    errorCode?: string | null;
+    completedAt: string;
+}

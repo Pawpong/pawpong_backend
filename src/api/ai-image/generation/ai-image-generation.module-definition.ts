@@ -1,10 +1,12 @@
 import { AiImageSharedModule } from '../shared/ai-image-shared.module';
 import { AiImageUploadUrlController } from './controller/ai-image-upload-url.controller';
 import { AiImageGenerationController } from './controller/ai-image-generation.controller';
+import { AiImageGenerationKafkaConsumer } from './ai-image-generation-kafka.consumer';
 import { CreateAiImageUploadUrlUseCase } from './application/use-cases/create-ai-image-upload-url.use-case';
 import { RequestAiImageGenerationUseCase } from './application/use-cases/request-ai-image-generation.use-case';
 import { GetAiImageGenerationUseCase } from './application/use-cases/get-ai-image-generation.use-case';
 import { GetMyAiImageGenerationsUseCase } from './application/use-cases/get-my-ai-image-generations.use-case';
+import { ApplyAiImageGenerationResultUseCase } from './application/use-cases/apply-ai-image-generation-result.use-case';
 import { AiImageObjectKeyService } from './domain/services/ai-image-object-key.service';
 import { AiImageQuotaService } from './domain/services/ai-image-quota.service';
 import { AiImageGenerationResultMapperService } from './domain/services/ai-image-generation-result-mapper.service';
@@ -18,13 +20,19 @@ import { AI_IMAGE_GENERATION_PUBLISHER_PORT } from './application/ports/ai-image
 // KafkaService 는 @Global KafkaModule 이 제공하므로 별도 import 가 필요 없다.
 export const AI_IMAGE_GENERATION_MODULE_IMPORTS = [AiImageSharedModule];
 
-export const AI_IMAGE_GENERATION_MODULE_CONTROLLERS = [AiImageUploadUrlController, AiImageGenerationController];
+export const AI_IMAGE_GENERATION_MODULE_CONTROLLERS = [
+    AiImageUploadUrlController,
+    AiImageGenerationController,
+    // Kafka 결과 수신 (@EventPattern 은 컨트롤러로 등록해야 마이크로서비스가 인식한다)
+    AiImageGenerationKafkaConsumer,
+];
 
 const AI_IMAGE_GENERATION_USE_CASE_PROVIDERS = [
     CreateAiImageUploadUrlUseCase,
     RequestAiImageGenerationUseCase,
     GetAiImageGenerationUseCase,
     GetMyAiImageGenerationsUseCase,
+    ApplyAiImageGenerationResultUseCase,
 ];
 
 const AI_IMAGE_GENERATION_DOMAIN_PROVIDERS = [
