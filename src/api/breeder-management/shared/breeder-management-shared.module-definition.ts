@@ -10,6 +10,10 @@ import { BreederReview, BreederReviewSchema } from '../../../schema/breeder-revi
 
 import { BreederManagementFileUrlAdapter } from '../infrastructure/breeder-management-file-url.adapter';
 import { BREEDER_MANAGEMENT_FILE_URL_PORT } from '../application/ports/breeder-management-file-url.port';
+import { BreederManagementListReaderAdapter } from '../infrastructure/breeder-management-list-reader.adapter';
+import { BREEDER_MANAGEMENT_LIST_READER_PORT } from '../application/ports/breeder-management-list-reader.port';
+import { BreederManagementSettingsAdapter } from '../infrastructure/breeder-management-settings.adapter';
+import { BREEDER_MANAGEMENT_SETTINGS_PORT } from '../application/ports/breeder-management-settings.port';
 import { BreederManagementPaginationAssemblerService } from '../domain/services/breeder-management-pagination-assembler.service';
 import { BreederRepository } from '../repository/breeder.repository';
 import { ParentPetRepository } from '../repository/parent-pet.repository';
@@ -46,9 +50,21 @@ export const BREEDER_MANAGEMENT_SHARED_MODULE_PROVIDERS = [
     ...BREEDER_MANAGEMENT_SHARED_REPOSITORY_PROVIDERS,
     BreederManagementPaginationAssemblerService,
     BreederManagementFileUrlAdapter,
+    BreederManagementListReaderAdapter,
+    BreederManagementSettingsAdapter,
     {
         provide: BREEDER_MANAGEMENT_FILE_URL_PORT,
         useExisting: BreederManagementFileUrlAdapter,
+    },
+    {
+        // 목록 read model — pets/reviews/applications 슬라이스가 공용으로 조회
+        provide: BREEDER_MANAGEMENT_LIST_READER_PORT,
+        useExisting: BreederManagementListReaderAdapter,
+    },
+    {
+        // 브리더 설정 조회 — verification/applications 슬라이스가 공용으로 사용
+        provide: BREEDER_MANAGEMENT_SETTINGS_PORT,
+        useExisting: BreederManagementSettingsAdapter,
     },
 ];
 
@@ -56,4 +72,6 @@ export const BREEDER_MANAGEMENT_SHARED_MODULE_EXPORTS = [
     ...BREEDER_MANAGEMENT_SHARED_REPOSITORY_PROVIDERS,
     BreederManagementPaginationAssemblerService,
     BREEDER_MANAGEMENT_FILE_URL_PORT,
+    BREEDER_MANAGEMENT_LIST_READER_PORT,
+    BREEDER_MANAGEMENT_SETTINGS_PORT,
 ];
