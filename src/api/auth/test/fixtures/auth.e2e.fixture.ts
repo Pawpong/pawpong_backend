@@ -95,11 +95,15 @@ export function createBreederRegisterData(overrides: Record<string, unknown> = {
 }
 
 export function registerAdopter(app: INestApplication, overrides: Record<string, unknown> = {}) {
-    return request(app.getHttpServer()).post('/api/v2/auth/register/adopter').send(createAdopterRegisterData(overrides));
+    return request(app.getHttpServer())
+        .post('/api/v2/auth/register/adopter')
+        .send(createAdopterRegisterData(overrides));
 }
 
 export function registerBreeder(app: INestApplication, overrides: Record<string, unknown> = {}) {
-    return request(app.getHttpServer()).post('/api/v2/auth/register/breeder').send(createBreederRegisterData(overrides));
+    return request(app.getHttpServer())
+        .post('/api/v2/auth/register/breeder')
+        .send(createBreederRegisterData(overrides));
 }
 
 export function createPhoneNumber(): string {

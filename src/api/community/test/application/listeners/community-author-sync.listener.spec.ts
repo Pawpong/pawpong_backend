@@ -42,9 +42,7 @@ describe('CommunityAuthorSyncListener', () => {
         const { listener, authorSnapshotPort, logger } = makeListener();
         authorSnapshotPort.syncAuthorSnapshots.mockRejectedValueOnce(new Error('db down'));
 
-        await expect(
-            listener.handleUserProfileUpdated({ userId: 'u-1', nickname: '장원영' }),
-        ).resolves.toBeUndefined();
+        await expect(listener.handleUserProfileUpdated({ userId: 'u-1', nickname: '장원영' })).resolves.toBeUndefined();
         expect(logger.logError).toHaveBeenCalled();
     });
 });

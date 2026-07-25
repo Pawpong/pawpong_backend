@@ -2,10 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import {
-    CommunityPostLike,
-    CommunityPostLikeDocument,
-} from '../../../schema/community-post-like.schema';
+import { CommunityPostLike, CommunityPostLikeDocument } from '../../../schema/community-post-like.schema';
 import type { CommunityAuthorModel } from '../application/types/community-post.type';
 
 @Injectable()
@@ -15,11 +12,7 @@ export class CommunityLikeRepository {
         private readonly likeModel: Model<CommunityPostLikeDocument>,
     ) {}
 
-    async like(
-        postId: string,
-        userId: string,
-        userModel: CommunityAuthorModel,
-    ): Promise<{ alreadyLiked: boolean }> {
+    async like(postId: string, userId: string, userModel: CommunityAuthorModel): Promise<{ alreadyLiked: boolean }> {
         if (!Types.ObjectId.isValid(postId) || !Types.ObjectId.isValid(userId)) {
             return { alreadyLiked: false };
         }
@@ -62,9 +55,7 @@ export class CommunityLikeRepository {
     }
 
     async findLikedPostIds(userId: string, postIds: string[]): Promise<Set<string>> {
-        const validIds = postIds
-            .filter((id) => Types.ObjectId.isValid(id))
-            .map((id) => new Types.ObjectId(id));
+        const validIds = postIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
 
         if (validIds.length === 0 || !Types.ObjectId.isValid(userId)) return new Set();
 
@@ -81,15 +72,13 @@ export class CommunityLikeRepository {
         // community_posts 컬렉션에 직접 접근 — 순환 의존 없이 같은 DB 내 업데이트
         const db = this.likeModel.db;
         if (delta === 1) {
-            await db.collection('community_posts').updateOne(
-                { _id: new Types.ObjectId(postId) },
-                { $inc: { likeCount: 1 } },
-            );
+            await db
+                .collection('community_posts')
+                .updateOne({ _id: new Types.ObjectId(postId) }, { $inc: { likeCount: 1 } });
         } else {
-            await db.collection('community_posts').updateOne(
-                { _id: new Types.ObjectId(postId), likeCount: { $gt: 0 } },
-                { $inc: { likeCount: -1 } },
-            );
+            await db
+                .collection('community_posts')
+                .updateOne({ _id: new Types.ObjectId(postId), likeCount: { $gt: 0 } }, { $inc: { likeCount: -1 } });
         }
     }
 }

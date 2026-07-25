@@ -25,11 +25,7 @@ const ADOPTER_SHARED_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Breeder.name, schema: BreederSchema },
 ]);
 
-export const ADOPTER_SHARED_MODULE_IMPORTS = [
-    ADOPTER_SHARED_SCHEMA_IMPORTS,
-    StorageModule,
-    BreederManagementModule,
-];
+export const ADOPTER_SHARED_MODULE_IMPORTS = [ADOPTER_SHARED_SCHEMA_IMPORTS, StorageModule, BreederManagementModule];
 
 export const ADOPTER_SHARED_MODULE_PROVIDERS = [
     AdopterRepository,

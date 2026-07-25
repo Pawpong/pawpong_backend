@@ -33,10 +33,7 @@ describe('GetCommunityPostReportsUseCase', () => {
 });
 
 describe('HandleCommunityPostReportUseCase', () => {
-    const useCase = new HandleCommunityPostReportUseCase(
-        reportAdminReader as any,
-        reportAdminWriter as any,
-    );
+    const useCase = new HandleCommunityPostReportUseCase(reportAdminReader as any, reportAdminWriter as any);
 
     const pendingReport = {
         reportId: 'r-1',

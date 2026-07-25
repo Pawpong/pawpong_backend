@@ -104,7 +104,10 @@ describe('GetCommunityPostListUseCase', () => {
     });
 
     it('인증(userId 있음) + 저장된 게시글 → isSaved: true', async () => {
-        reader.listPosts.mockResolvedValueOnce({ snapshots: [makeSnap('p-saved'), makeSnap('p-other')], totalItems: 2 });
+        reader.listPosts.mockResolvedValueOnce({
+            snapshots: [makeSnap('p-saved'), makeSnap('p-other')],
+            totalItems: 2,
+        });
         likePort.findLikedPostIds.mockResolvedValueOnce(new Set());
         bookmarkPort.findSavedPostIds.mockResolvedValueOnce(new Set(['p-saved']));
 

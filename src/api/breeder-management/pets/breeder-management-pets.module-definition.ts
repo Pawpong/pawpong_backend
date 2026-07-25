@@ -22,10 +22,7 @@ import { BREEDER_MANAGEMENT_PET_COMMAND_PORT } from '../application/ports/breede
 
 // 브리더 관리 > 부모 동물 / 분양 가능 동물 슬라이스
 // PROFILE_PORT(소유권 검증)는 profile 슬라이스에서, LIST_READER_PORT·pagination 은 shared 에서 주입받는다.
-export const BREEDER_MANAGEMENT_PETS_MODULE_IMPORTS = [
-    BreederManagementSharedModule,
-    BreederManagementProfileModule,
-];
+export const BREEDER_MANAGEMENT_PETS_MODULE_IMPORTS = [BreederManagementSharedModule, BreederManagementProfileModule];
 
 export const BREEDER_MANAGEMENT_PETS_MODULE_CONTROLLERS = [
     BreederManagementParentPetsController,

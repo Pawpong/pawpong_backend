@@ -151,7 +151,9 @@ describe('커뮤니티 댓글/답글 CRUD E2E (v2)', () => {
 
             expect(res.body.data.updated).toBe(true);
 
-            const doc = await connection.collection('community_post_comments').findOne({ _id: new Types.ObjectId(commentId) });
+            const doc = await connection
+                .collection('community_post_comments')
+                .findOne({ _id: new Types.ObjectId(commentId) });
             expect(doc?.body).toBe('수정된 댓글');
         });
 
@@ -186,9 +188,7 @@ describe('커뮤니티 댓글/답글 CRUD E2E (v2)', () => {
 
     describe('DELETE /api/v2/community/comments/:commentId', () => {
         it('비인증 → 401', async () => {
-            await request(app.getHttpServer())
-                .delete(`/api/v2/community/comments/${new Types.ObjectId()}`)
-                .expect(401);
+            await request(app.getHttpServer()).delete(`/api/v2/community/comments/${new Types.ObjectId()}`).expect(401);
         });
 
         it('정상 삭제 → 200 + deleted: true + commentCount -1', async () => {
@@ -212,7 +212,9 @@ describe('커뮤니티 댓글/답글 CRUD E2E (v2)', () => {
             const postDoc = await connection.collection('community_posts').findOne({ _id: new Types.ObjectId(postId) });
             expect(postDoc?.commentCount).toBe(0);
 
-            const commentDoc = await connection.collection('community_post_comments').findOne({ _id: new Types.ObjectId(commentId) });
+            const commentDoc = await connection
+                .collection('community_post_comments')
+                .findOne({ _id: new Types.ObjectId(commentId) });
             expect(commentDoc?.isActive).toBe(false);
         });
 

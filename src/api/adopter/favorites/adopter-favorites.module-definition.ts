@@ -11,10 +11,7 @@ import { AdopterFavoriteRecordMapperService } from '../domain/services/adopter-f
 // 입양자 > 즐겨찾기(관심 브리더) 슬라이스
 export const ADOPTER_FAVORITES_MODULE_IMPORTS = [AdopterSharedModule];
 
-export const ADOPTER_FAVORITES_MODULE_CONTROLLERS = [
-    AdopterFavoriteCommandController,
-    AdopterFavoriteQueryController,
-];
+export const ADOPTER_FAVORITES_MODULE_CONTROLLERS = [AdopterFavoriteCommandController, AdopterFavoriteQueryController];
 
 export const ADOPTER_FAVORITES_MODULE_PROVIDERS = [
     AddFavoriteBreederUseCase,

@@ -50,9 +50,7 @@ async function seedRequiredTerms(app: INestApplication): Promise<void> {
 
 // ─── v2 입양자 등록 헬퍼 ────────────────────────────────────────────────────
 
-async function registerAdopterV2(
-    app: INestApplication,
-): Promise<{ token: string; adopterId: string } | null> {
+async function registerAdopterV2(app: INestApplication): Promise<{ token: string; adopterId: string } | null> {
     const timestamp = Date.now();
     const providerId = Math.random().toString().slice(2, 12);
 
@@ -144,9 +142,7 @@ async function seedContestVote(
         voterId,
         createdAt: new Date(),
     });
-    await conn
-        .collection('contest_entries')
-        .updateOne({ _id: new ObjectId(entryId) }, { $inc: { voteCount: 1 } });
+    await conn.collection('contest_entries').updateOne({ _id: new ObjectId(entryId) }, { $inc: { voteCount: 1 } });
 }
 
 // ─── E2E 테스트 ──────────────────────────────────────────────────────────────
@@ -193,9 +189,7 @@ describe('콘테스트 E2E 테스트', () => {
 
     describe('공개 API — 진행 중인 콘테스트 없음', () => {
         it('GET /current → data: null', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/current')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/current').expect(200);
 
             expect(res.body.success).toBe(true);
             expect(res.body.data).toBeNull();
@@ -206,33 +200,25 @@ describe('콘테스트 E2E 테스트', () => {
         });
 
         it('GET /yesterday-top → data: null', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/yesterday-top')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/yesterday-top').expect(200);
 
             expect(res.body.data).toBeNull();
         });
 
         it('GET /previous-ranking → data: null', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/previous-ranking')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/previous-ranking').expect(200);
 
             expect(res.body.data).toBeNull();
         });
 
         it('GET /weekly-top → data: null', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/weekly-top')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/weekly-top').expect(200);
 
             expect(res.body.data).toBeNull();
         });
 
         it('GET /hall-of-fame → 빈 목록', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/hall-of-fame')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/hall-of-fame').expect(200);
 
             expect(res.body.data.items).toHaveLength(0);
         });
@@ -252,9 +238,7 @@ describe('콘테스트 E2E 테스트', () => {
         // ─── 공개 API ─────────────────────────────────────────────────────
 
         it('GET /current → 콘테스트 정보 반환', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/current')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/current').expect(200);
 
             expect(res.body.data.contest.title).toBe('이번주 명예의 전당');
             expect(res.body.data.ranking).toHaveLength(0);
@@ -272,35 +256,27 @@ describe('콘테스트 E2E 테스트', () => {
         });
 
         it('GET /entries → 빈 목록', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/entries')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/entries').expect(200);
 
             expect(res.body.data.items).toHaveLength(0);
             expect(res.body.data.total).toBe(0);
         });
 
         it('GET /yesterday-top → 콘테스트 ID + 빈 랭킹', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/yesterday-top')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/yesterday-top').expect(200);
 
             expect(res.body.data.contestId).toBe(contestId);
             expect(res.body.data.ranking).toHaveLength(0);
         });
 
         it('GET /previous-ranking → 종료 콘테스트 반환', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/previous-ranking')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/previous-ranking').expect(200);
 
             expect(res.body.data.contest.title).toBe('저번주 명예의 전당');
         });
 
         it('GET /weekly-top → 종료 콘테스트 반환, topEntries 빈 배열', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/weekly-top')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/weekly-top').expect(200);
 
             expect(res.body.data.weekKey).toMatch(/^\d{4}-W\d{2}$/);
             expect(res.body.data.topEntries).toHaveLength(0);
@@ -389,9 +365,7 @@ describe('콘테스트 E2E 테스트', () => {
                 });
 
                 it('POST /vote/:entryId 인증 없음 → 401', async () => {
-                    await request(app.getHttpServer())
-                        .post(`/api/v2/contest/vote/${entryId}`)
-                        .expect(401);
+                    await request(app.getHttpServer()).post(`/api/v2/contest/vote/${entryId}`).expect(401);
                 });
 
                 it('POST /vote/:entryId 성공 → newVoteCount: 1', async () => {
@@ -443,9 +417,7 @@ describe('콘테스트 E2E 테스트', () => {
                 });
 
                 it('GET /yesterday-top → voteRate 계산됨', async () => {
-                    const res = await request(app.getHttpServer())
-                        .get('/api/v2/contest/yesterday-top')
-                        .expect(200);
+                    const res = await request(app.getHttpServer()).get('/api/v2/contest/yesterday-top').expect(200);
 
                     expect(res.body.data.ranking).toHaveLength(1);
                     expect(res.body.data.ranking[0].rank).toBe(1);
@@ -482,9 +454,7 @@ describe('콘테스트 E2E 테스트', () => {
                     });
 
                     it('hidden 항목은 공개 entries에서 제외', async () => {
-                        const res = await request(app.getHttpServer())
-                            .get('/api/v2/contest/entries')
-                            .expect(200);
+                        const res = await request(app.getHttpServer()).get('/api/v2/contest/entries').expect(200);
 
                         expect(res.body.data.items.find((i: any) => i.id === entryId)).toBeUndefined();
                         expect(res.body.data.total).toBe(0);
@@ -525,17 +495,13 @@ describe('콘테스트 E2E 테스트', () => {
         });
 
         it('GET /weekly-top → weekKey 형식 YYYY-WXX', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/weekly-top')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/weekly-top').expect(200);
 
             expect(res.body.data.weekKey).toMatch(/^\d{4}-W\d{2}$/);
         });
 
         it('GET /weekly-top → topEntries 최대 3개, voteCount 내림차순', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/weekly-top')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/weekly-top').expect(200);
 
             const { topEntries } = res.body.data;
             expect(topEntries.length).toBeGreaterThan(0);
@@ -546,9 +512,7 @@ describe('콘테스트 E2E 테스트', () => {
         });
 
         it('GET /weekly-top → topEntries 항목 필드 존재', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/weekly-top')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/weekly-top').expect(200);
 
             const entry = res.body.data.topEntries[0];
             expect(entry).toHaveProperty('id');
@@ -558,9 +522,7 @@ describe('콘테스트 E2E 테스트', () => {
         });
 
         it('GET /weekly-top → calculatedAt ISO 문자열', async () => {
-            const res = await request(app.getHttpServer())
-                .get('/api/v2/contest/weekly-top')
-                .expect(200);
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/weekly-top').expect(200);
 
             expect(new Date(res.body.data.calculatedAt).toString()).not.toBe('Invalid Date');
         });

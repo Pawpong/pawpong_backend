@@ -12,11 +12,7 @@ export class UpdateCommunityPostCommentUseCase {
         private readonly commentWriter: CommunityCommentWriterPort,
     ) {}
 
-    async execute(
-        commentId: string,
-        userId: string,
-        body: string,
-    ): Promise<{ commentId: string; updated: boolean }> {
+    async execute(commentId: string, userId: string, body: string): Promise<{ commentId: string; updated: boolean }> {
         const comment = await this.commentReader.readCommentById(commentId);
         if (!comment) throw new BadRequestException('해당 댓글을 찾을 수 없습니다.');
         if (comment.authorId !== userId) throw new ForbiddenException('본인 댓글만 수정할 수 있습니다.');

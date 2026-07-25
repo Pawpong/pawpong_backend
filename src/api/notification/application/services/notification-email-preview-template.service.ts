@@ -16,7 +16,10 @@ export class NotificationEmailPreviewTemplateService {
         return this.mailTemplateService.getBreederApprovalEmail(breederName);
     }
 
-    getBreederRejectionTemplate(breederName: string, rejectionReasons: string[]): NotificationEmailTemplatePreviewResult {
+    getBreederRejectionTemplate(
+        breederName: string,
+        rejectionReasons: string[],
+    ): NotificationEmailTemplatePreviewResult {
         return this.mailTemplateService.getBreederRejectionEmail(breederName, rejectionReasons);
     }
 

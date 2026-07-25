@@ -27,11 +27,7 @@ describe('UpdateContestEntryStatusUseCase', () => {
     const reader = { findEntryById: jest.fn() };
     const adminWriter = { updateEntryStatus: jest.fn() };
 
-    const useCase = new UpdateContestEntryStatusUseCase(
-        reader as any,
-        adminWriter as any,
-        logger as any,
-    );
+    const useCase = new UpdateContestEntryStatusUseCase(reader as any, adminWriter as any, logger as any);
 
     beforeEach(() => {
         jest.clearAllMocks();

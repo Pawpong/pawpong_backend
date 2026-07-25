@@ -16,9 +16,7 @@ export class ContestRandomEntryController {
 
     @Get('random-entry')
     @ApiGetRandomContestEntryEndpoint()
-    async getRandomEntry(
-        @CurrentUser('userId') userId: string,
-    ): Promise<ApiResponseDto<unknown>> {
+    async getRandomEntry(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<unknown>> {
         const result = await this.getRandomContestEntryUseCase.execute(userId);
         return ApiResponseDto.success(result, '랜덤 투표 후보 조회 완료');
     }

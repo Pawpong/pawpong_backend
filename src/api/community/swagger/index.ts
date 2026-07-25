@@ -14,10 +14,7 @@ import {
     CommunityUnsaveResponseDto,
 } from '../dto/response/community-bookmark-response.dto';
 import { CommunityPostReportResponseDto } from '../dto/response/community-post-report-response.dto';
-import {
-    CommunityLikeResponseDto,
-    CommunityUnlikeResponseDto,
-} from '../dto/response/community-like-response.dto';
+import { CommunityLikeResponseDto, CommunityUnlikeResponseDto } from '../dto/response/community-like-response.dto';
 import { CommunityPostCardResponseDto } from '../dto/response/community-post-card.dto';
 import { CommunityPostCommentResponseDto } from '../dto/response/community-post-comment.dto';
 import { CommunityPostDeleteResponseDto } from '../dto/response/community-post-delete-response.dto';
@@ -257,7 +254,8 @@ export function ApiUnlikeCommunityPostEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '커뮤니티 게시글 좋아요 취소',
-            description: '좋아요 안 한 게시글 취소 시 unliked: false 반환 (멱등). 취소 시 likeCount -= 1 (0 미만 방지).',
+            description:
+                '좋아요 안 한 게시글 취소 시 unliked: false 반환 (멱등). 취소 시 likeCount -= 1 (0 미만 방지).',
             responseType: CommunityUnlikeResponseDto,
             successDescription: '좋아요 취소 성공',
             successMessageExample: COMMUNITY_RESPONSE_MESSAGES.unliked,

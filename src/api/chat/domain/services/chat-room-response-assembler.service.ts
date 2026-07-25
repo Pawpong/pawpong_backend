@@ -2,10 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 
 import { SenderRole } from '../../../../schema/chat-message.schema';
 import { type ChatRoomSnapshot } from '../../application/ports/chat-room-manager.port';
-import {
-    CHAT_MESSAGE_MANAGER,
-    type ChatMessageManagerPort,
-} from '../../application/ports/chat-message-manager.port';
+import { CHAT_MESSAGE_MANAGER, type ChatMessageManagerPort } from '../../application/ports/chat-message-manager.port';
 import {
     CHAT_PARTICIPANT_READER,
     type ChatParticipantReaderPort,

@@ -33,9 +33,6 @@ export class CommunityReportAdminQueryController {
             pageSize: query.limit,
             status: query.status,
         });
-        return ApiResponseDto.success(
-            PaginationResponseDto.fromPageResult(result),
-            '커뮤니티 신고 목록 조회 성공',
-        );
+        return ApiResponseDto.success(PaginationResponseDto.fromPageResult(result), '커뮤니티 신고 목록 조회 성공');
     }
 }

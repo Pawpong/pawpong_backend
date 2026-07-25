@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { buildPageResult, type PageResult } from '../../../../../common/types/page-result.type';
-import { COMMUNITY_REPORT_ADMIN_READER_PORT, type CommunityReportAdminReaderPort } from '../ports/community-report-admin-reader.port';
+import {
+    COMMUNITY_REPORT_ADMIN_READER_PORT,
+    type CommunityReportAdminReaderPort,
+} from '../ports/community-report-admin-reader.port';
 import type { CommunityReportAdminItem, CommunityReportStatus } from '../../../application/types/community-report.type';
 
 interface GetReportsQuery {
