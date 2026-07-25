@@ -1,21 +1,14 @@
 import { Module } from '@nestjs/common';
 
-import {
-    NOTIFICATION_MODULE_CONTROLLERS,
-    NOTIFICATION_MODULE_EXPORTS,
-    NOTIFICATION_MODULE_IMPORTS,
-    NOTIFICATION_MODULE_PROVIDERS,
-} from './notification.module-definition';
+import { NOTIFICATION_MODULE_EXPORTS, NOTIFICATION_MODULE_IMPORTS } from './notification.module-definition';
 
 /**
- * 알림 모듈
- *
- * 서비스 알림 및 이메일 발송 기능을 통합 제공합니다.
+ * 알림 바운디드 컨텍스트
+ * - 하위 기능 슬라이스(shared/inbox/email/push/dispatch) 조립만 담당
+ * - 컨트롤러·프로바이더는 각 슬라이스 모듈이 소유한다
  */
 @Module({
     imports: NOTIFICATION_MODULE_IMPORTS,
-    controllers: NOTIFICATION_MODULE_CONTROLLERS,
-    providers: NOTIFICATION_MODULE_PROVIDERS,
     exports: NOTIFICATION_MODULE_EXPORTS,
 })
 export class NotificationModule {}
