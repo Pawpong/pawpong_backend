@@ -25,6 +25,7 @@ import { BreederPetPostingModule } from './api/breeder-pet-posting/breeder-pet-p
 import { ChatModule } from './api/chat/chat.module';
 import { CommunityModule } from './api/community/community.module';
 import { ContestAdminModule } from './api/contest/admin/contest-admin.module';
+import { AiImageModule } from './api/ai-image/ai-image.module';
 import { ContestModule } from './api/contest/contest.module';
 import { DistrictModule } from './api/district/district.module';
 import { FeedModule } from './api/feed/feed.module';
@@ -93,6 +94,7 @@ const APP_API_MODULES = [
     ChatModule,
     ContestModule,
     ContestAdminModule,
+    AiImageModule,
 ];
 
 export const APP_MODULE_IMPORTS = [...APP_FOUNDATION_MODULES, ...APP_API_MODULES];
