@@ -1,6 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
-import type { FavoriteBreederInfo } from '../../../schema/adopter.schema';
+import {
+    ADOPTER_FAVORITE_READER_PORT,
+    type AdopterFavoriteReaderPort,
+} from '../../adopter/application/ports/adopter-favorite-reader.port';
 import type { ProfileReaderPort, FavoriteBreedersPageResult } from '../application/ports/profile-reader.port';
 import type {
     AdopterProfileSnapshot,
@@ -11,7 +14,11 @@ import { ProfileRepository } from '../repository/profile.repository';
 
 @Injectable()
 export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
-    constructor(private readonly repository: ProfileRepository) {}
+    constructor(
+        private readonly repository: ProfileRepository,
+        @Inject(ADOPTER_FAVORITE_READER_PORT)
+        private readonly adopterFavoriteReaderPort: AdopterFavoriteReaderPort,
+    ) {}
 
     async readAdopter(userId: string): Promise<AdopterProfileSnapshot | null> {
         const adopter = await this.repository.findAdopterById(userId);
@@ -56,17 +63,14 @@ export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
         adopterId: string,
         pagination: { page: number; pageSize: number },
     ): Promise<FavoriteBreedersPageResult> {
-        const adopter = await this.repository.findAdopterById(adopterId);
-        if (!adopter || !Array.isArray(adopter.favoriteBreederList)) {
-            return { items: [], totalItems: 0 };
-        }
-
-        const all: FavoriteBreederInfo[] = [...adopter.favoriteBreederList].sort(
-            (a, b) => (b.addedAt?.getTime?.() ?? 0) - (a.addedAt?.getTime?.() ?? 0),
+        // 즐겨찾기 원본 데이터(favoriteBreederList) 조회·페이지네이션·정렬(addedAt DESC)은
+        // adopter 도메인이 소유한 ADOPTER_FAVORITE_READER_PORT 에 위임한다 —
+        // 여기서 Mongo 쿼리를 직접 재구현하지 않는다.
+        const { favorites: slice, total: totalItems } = await this.adopterFavoriteReaderPort.findFavoriteList(
+            adopterId,
+            pagination.page,
+            pagination.pageSize,
         );
-        const totalItems = all.length;
-        const start = (pagination.page - 1) * pagination.pageSize;
-        const slice = all.slice(start, start + pagination.pageSize);
 
         if (slice.length === 0) {
             return { items: [], totalItems };
@@ -85,7 +89,7 @@ export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
                 breederId: entry.favoriteBreederId,
                 nickname: breeder?.nickname ?? entry.breederName,
                 profileImageFileName: breeder?.profileImageFileName ?? undefined,
-                breederLocation: entry.breederLocation,
+                breederLocation: entry.breederLocation ?? '',
                 recentPetStatus: recentPetStatusMap.get(entry.favoriteBreederId),
                 bpm: breeder?.bpm ?? 0,
                 level: (breeder?.verification?.level as 'new' | 'elite' | undefined) ?? undefined,

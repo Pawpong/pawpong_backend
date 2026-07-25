@@ -8,7 +8,7 @@ import { ApiNotificationEmailPreviewAdminController } from '../swagger';
 export function NotificationEmailPreviewAdminController() {
     return applyDecorators(
         ApiNotificationEmailPreviewAdminController(),
-        Controller('email-test'),
+        Controller('notification-email-preview-admin'),
         UseGuards(JwtAuthGuard, RolesGuard),
         Roles('admin'),
     );

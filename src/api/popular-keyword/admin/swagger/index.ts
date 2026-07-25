@@ -18,7 +18,7 @@ const CONFLICT_RESPONSE = {
 } as const;
 
 export function ApiPopularKeywordAdminController() {
-    return ApiController('인기 검색어 관리');
+    return ApiController('인기 검색어 관리 (Admin)');
 }
 
 export function ApiGetAllPopularKeywordsAdminEndpoint() {

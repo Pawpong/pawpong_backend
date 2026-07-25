@@ -5,6 +5,7 @@ import { Adopter, AdopterSchema } from '../../schema/adopter.schema';
 import { AvailablePet, AvailablePetSchema } from '../../schema/available-pet.schema';
 import { Breeder, BreederSchema } from '../../schema/breeder.schema';
 import { UserFollow, UserFollowSchema } from '../../schema/user-follow.schema';
+import { AdopterModule } from '../adopter/adopter.module';
 
 import { PROFILE_ASSET_URL_PORT } from './application/ports/profile-asset-url.port';
 import { PROFILE_FOLLOW_PORT } from './application/ports/profile-follow.port';
@@ -38,7 +39,10 @@ const PROFILE_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: UserFollow.name, schema: UserFollowSchema },
 ]);
 
-export const PROFILE_MODULE_IMPORTS = [PROFILE_SCHEMA_IMPORTS, StorageModule];
+// AdopterModule: 즐겨찾기 원본 데이터(ADOPTER_FAVORITE_READER_PORT) 조회용.
+// adopter 도메인이 Adopter.favoriteBreederList 의 유일한 쓰기 소유자이므로,
+// profile 도메인은 자체 쿼리를 재구현하지 않고 이 Port 를 통해서만 읽는다.
+export const PROFILE_MODULE_IMPORTS = [PROFILE_SCHEMA_IMPORTS, StorageModule, AdopterModule];
 
 export const PROFILE_MODULE_CONTROLLERS = [
     ProfileMeController,

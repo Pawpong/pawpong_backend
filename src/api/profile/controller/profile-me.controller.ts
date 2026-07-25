@@ -53,7 +53,6 @@ export class ProfileMeController {
         }
         const result = await this.updateMyProfileUseCase.execute(userId, role, {
             bio: body.bio,
-            location: body.location,
         });
         return ApiResponseDto.success(result, PROFILE_RESPONSE_MESSAGES.myUpdated);
     }

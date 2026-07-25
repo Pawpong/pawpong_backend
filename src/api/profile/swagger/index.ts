@@ -46,15 +46,16 @@ export function ApiGetMyProfileEndpoint() {
 export function ApiUpdateMyProfileEndpoint() {
     return applyDecorators(
         ApiEndpoint({
-            summary: '내 프로필 수정 (마이홈, Figma 278:170 "프로필 편집" + 290:668 "사업장 위치 작성")',
+            summary: '내 프로필 수정 (마이홈, Figma 278:170 "프로필 편집")',
             description: `
                 현재 인증된 사용자의 프로필을 부분 수정한다. role 에 따라 Adopter/Breeder 도큐먼트에 적용.
 
                 ## 지원 필드
                 - bio (선택): 한 줄 소개. trim 후 200자 이내. 빈 문자열은 한 줄 소개 비움 의도.
-                - location (선택, 브리더 전용): 사업장 위치 — city / district / address 부분 수정.
-                  · Adopter 가 location 을 보내면 400 (Adopter 스키마에 해당 필드 없음).
-                  · address 는 PII 라 공개 응답(다른 사용자의 브리더 프로필 조회)에는 노출되지 않는다.
+
+                사업장 위치는 이 엔드포인트로 수정할 수 없다.
+                PATCH /breeder-management/profile 이 해당 필드의 단독 쓰기 경로다 (locationInfo: cityName/districtName/detailAddress).
+                응답의 businessLocation 은 읽기 전용으로만 노출된다.
 
                 ## 응답
                 - 수정 후 GetMyProfile 와 동일한 응답 (계약 일관성)

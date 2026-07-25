@@ -90,7 +90,7 @@ export class NotificationEmailPreviewTemplateService {
 
         const links = NOTIFICATION_EMAIL_PREVIEW_TYPES.map((type, index) => {
             return `
-                <a href="/api/email-test/render?type=${type}" class="button">
+                <a href="/api/notification-email-preview-admin/render?type=${type}" class="button">
                     ${index + 1}. ${labels[type]}
                 </a>
             `;

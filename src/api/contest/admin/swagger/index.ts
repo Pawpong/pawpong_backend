@@ -1,6 +1,6 @@
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 
-const TAG = '콘테스트 관리자';
+const TAG = '콘테스트 관리 (Admin)';
 
 export function ApiContestAdminController() {
     return ApiController(TAG);

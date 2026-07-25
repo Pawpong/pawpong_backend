@@ -7,7 +7,7 @@ import { ApiController } from '../../../../common/decorator/swagger.decorator';
 
 export function CommunityAdminController() {
     return applyDecorators(
-        ApiController('커뮤니티 관리자 (v2)'),
+        ApiController('커뮤니티 관리 (Admin) (v2)'),
         Controller('community-admin'),
         UseGuards(JwtAuthGuard, RolesGuard),
         Roles('admin'),
