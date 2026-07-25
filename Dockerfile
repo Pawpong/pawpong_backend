@@ -40,6 +40,9 @@ COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --chown=nodejs:nodejs package*.json ./
 
+# gRPC 계약 — 런타임에 process.cwd()/proto 로 읽으므로 실행 이미지에도 있어야 한다
+COPY --from=builder --chown=nodejs:nodejs /app/proto ./proto
+
 # 로그 디렉토리 생성
 RUN mkdir -p /app/logs && chown nodejs:nodejs /app/logs
 
