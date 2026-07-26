@@ -41,10 +41,15 @@ export function ApiGetCommunityPostListEndpoint() {
                 - petType (선택): dog / cat / reptile
                 - category (선택): 자유 텍스트 정확 일치 (예: "레오파드")
                 - authorId (선택): ObjectId 또는 "me" — "me" 는 인증 토큰 필요 (마이홈 게시글 탭, Figma 278:170)
+                - search (선택): 제목·본문 키워드 검색 (대소문자 무시). 위 필터들과 AND 로 결합
+                  · 예) ?search=레오파드&sort=latest&page=1
                 - sort: latest(기본) / popular(likeCount desc)
 
                 ## 응답
                 - 카드 단위: 본문 발췌(최대 120자) + 첫 사진 primary URL + 전체 사진 URL 배열
+                - commentPreview: 카드에 한 줄로 노출할 최신 댓글. 상세 응답과 같은 형태이며 최신 1건만 담긴다.
+                  댓글이 없으면 빈 배열. 카드마다 상세를 다시 호출하지 않도록 목록 응답에 포함한다
+                  · 작성자 닉네임은 commentPreview[].author.nickname, 본문은 commentPreview[].body
                 - 카테고리 사이드바 카운트는 별도 endpoint (이번 slice 미포함)
             `,
             responseType: PaginationResponseDto,

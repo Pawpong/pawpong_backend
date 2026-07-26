@@ -30,6 +30,7 @@ export class CommunityRepository {
         if (query.authorId && Types.ObjectId.isValid(query.authorId)) {
             filter.authorId = new Types.ObjectId(query.authorId);
         }
+        this.applySearchFilter(filter, query.search);
 
         const status = query.status ?? 'published';
 
@@ -61,6 +62,26 @@ export class CommunityRepository {
         ]);
 
         return { docs, totalItems };
+    }
+
+    /**
+     * 제목·본문 키워드 검색을 적용한다 (대소문자 무시, 기존 필터와 AND 조합).
+     *
+     * 검색어 자체의 title/body OR 조건을 `filter.$or` 에 직접 넣으면
+     * 뒤이어 실행되는 열람 범위 필터(applyVisibilityFilter)가 같은 `$or` 키를 덮어써
+     * 비공개 글까지 노출된다. 그래서 반드시 `$and` 로 감싸 별도 절로 유지한다.
+     */
+    private applySearchFilter(filter: FilterQuery<CommunityPost>, search?: string): void {
+        const keyword = search?.trim();
+        if (!keyword) {
+            return;
+        }
+        // 사용자 입력이 정규식으로 해석되지 않도록 메타문자를 이스케이프한다
+        const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const pattern = new RegExp(escaped, 'i');
+
+        const searchClause: FilterQuery<CommunityPost> = { $or: [{ title: pattern }, { body: pattern }] };
+        filter.$and = [...(filter.$and ?? []), searchClause];
     }
 
     /**
@@ -186,6 +207,30 @@ export class CommunityRepository {
         ]);
 
         return { docs, totalItems };
+    }
+
+    /**
+     * 게시글별 최신 댓글 1건을 한 번의 쿼리로 모아 온다 (피드 카드 미리보기용).
+     *
+     * 카드마다 listComments 를 호출하면 목록 1콜이 다시 N 콜로 늘어나므로
+     * postId 전체를 한 번에 집계한다. 게시글당 1건만 뽑는 $first 라
+     * 댓글이 많은 글에서도 메모리가 늘지 않는다.
+     */
+    async findLatestCommentByPostIds(postIds: string[]): Promise<CommunityPostCommentDocument[]> {
+        const objectIds = postIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
+        if (objectIds.length === 0) {
+            return [];
+        }
+
+        const rows = await this.commentModel
+            .aggregate<{ latest: CommunityPostCommentDocument }>([
+                { $match: { postId: { $in: objectIds }, isActive: true } },
+                { $sort: { postId: 1, createdAt: -1 } },
+                { $group: { _id: '$postId', latest: { $first: '$$ROOT' } } },
+            ])
+            .exec();
+
+        return rows.map((row) => row.latest);
     }
 
     async incrementViewCount(postId: string): Promise<void> {

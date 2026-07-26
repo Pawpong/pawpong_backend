@@ -27,6 +27,7 @@ export class CommunityPostListController {
             petType: query.petType,
             category: query.category,
             authorId: resolvedAuthorId,
+            search: query.search,
             sort: query.sort,
             page: query.page,
             pageSize: query.pageSize,

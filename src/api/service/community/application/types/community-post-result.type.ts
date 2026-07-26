@@ -44,6 +44,11 @@ export interface CommunityPostCardResult {
     commentCount: number;
     saveCount: number;
     createdAt: string;
+    /**
+     * 카드에 한 줄로 노출할 최신 댓글. 없으면 빈 배열.
+     * 상세(commentPreview)와 같은 형태를 쓰되 카드에서는 최신 1건만 담는다.
+     */
+    commentPreview: CommunityPostCommentResult[];
     /** 현재 요청 사용자의 좋아요 여부. 비인증 요청 시 false. */
     isLiked: boolean;
     /** 현재 요청 사용자의 저장 여부. 비인증 요청 시 false. */

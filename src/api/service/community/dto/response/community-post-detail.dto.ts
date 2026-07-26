@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { CommunityAuthorResponseDto } from './community-post-card.dto';
+import { CommunityAuthorResponseDto } from './community-author.dto';
 import { CommunityPostCommentResponseDto } from './community-post-comment.dto';
 
 /**

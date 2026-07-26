@@ -1,15 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-export class CommunityAuthorResponseDto {
-    @ApiProperty({ description: '작성자 ID (마이홈 연결용)', example: '507f1f77bcf86cd799439022' })
-    userId: string;
+import { CommunityAuthorResponseDto } from './community-author.dto';
+import { CommunityPostCommentResponseDto } from './community-post-comment.dto';
 
-    @ApiProperty({ description: '작성자 닉네임 (작성 시점 스냅샷)', example: '파이리귀여워' })
-    nickname: string;
-
-    @ApiPropertyOptional({ description: '작성자 프로필 이미지 signed URL' })
-    profileImageUrl?: string;
-}
+// 기존 import 경로(`from './community-post-card.dto'`)를 쓰던 곳이 깨지지 않도록 재노출한다
+export { CommunityAuthorResponseDto };
 
 /**
  * 커뮤니티 메인 피드 카드 (Figma 21:2).
@@ -67,6 +62,13 @@ export class CommunityPostCardResponseDto {
 
     @ApiProperty({ description: '작성 시각 (ISO 8601)', example: '2026-04-01T10:00:00.000Z' })
     createdAt: string;
+
+    @ApiProperty({
+        description:
+            '카드에 노출할 최신 댓글 (없으면 빈 배열). 상세 응답과 같은 형태이며 카드에서는 최신 1건만 담긴다. 카드마다 상세를 다시 호출하지 않도록 목록 응답에 포함한다.',
+        type: [CommunityPostCommentResponseDto],
+    })
+    commentPreview: CommunityPostCommentResponseDto[];
 
     @ApiProperty({ description: '현재 요청 사용자의 좋아요 여부 (비인증 시 false)', example: false })
     isLiked: boolean;

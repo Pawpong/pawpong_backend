@@ -41,6 +41,15 @@ export class CommunityPostListQueryDto {
     @Matches(/^(me|[0-9a-fA-F]{24})$/, { message: 'authorId 는 "me" 또는 24자 ObjectId 여야 합니다.' })
     authorId?: string;
 
+    @ApiPropertyOptional({
+        description: '제목·본문 키워드 검색 (대소문자 무시). petType·category 등 다른 필터와 AND 로 결합된다.',
+        example: '레오파드',
+    })
+    @IsOptional()
+    @IsString()
+    @MaxLength(50)
+    search?: string;
+
     @ApiPropertyOptional({ description: '정렬', enum: ['latest', 'popular'], example: 'latest' })
     @IsOptional()
     @IsEnum(['latest', 'popular'])

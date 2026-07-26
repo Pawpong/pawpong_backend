@@ -47,6 +47,11 @@ export class CommunityPostReaderMongooseAdapter implements CommunityPostReaderPo
         return { snapshots: docs.map((doc) => this.toCommentSnapshot(doc)), totalItems };
     }
 
+    async listLatestCommentPerPost(postIds: string[]): Promise<CommunityPostCommentSnapshot[]> {
+        const docs = await this.repository.findLatestCommentByPostIds(postIds);
+        return docs.map((doc) => this.toCommentSnapshot(doc));
+    }
+
     private toPostSnapshot(doc: CommunityPostDocument): CommunityPostSnapshot {
         return {
             postId: String(doc._id),

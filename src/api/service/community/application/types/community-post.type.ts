@@ -52,6 +52,8 @@ export interface CommunityPostListQuery {
      * 컨트롤러에서 'me' 별칭을 인증 사용자 id 로 치환한 뒤 전달한다.
      */
     authorId?: string;
+    /** 제목·본문 키워드 검색. 다른 필터와 AND 로 결합된다. */
+    search?: string;
     sort: CommunityPostSort;
     skip: number;
     limit: number;

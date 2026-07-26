@@ -6,7 +6,7 @@ import { COMMUNITY_BOOKMARK_PORT, type CommunityBookmarkPort } from '../ports/co
 import { COMMUNITY_FOLLOW_READER_PORT, type CommunityFollowReaderPort } from '../ports/community-follow-reader.port';
 import { COMMUNITY_LIKE_PORT, type CommunityLikePort } from '../ports/community-like.port';
 import { COMMUNITY_POST_READER_PORT, type CommunityPostReaderPort } from '../ports/community-post-reader.port';
-import type { CommunityPostCardResult } from '../types/community-post-result.type';
+import type { CommunityPostCardResult, CommunityPostCommentResult } from '../types/community-post-result.type';
 import type { CommunityPetType, CommunityPostSort, CommunityPostStatus } from '../types/community-post.type';
 
 const PAGE_SIZE_DEFAULT = 15;
@@ -30,6 +30,8 @@ export class GetCommunityPostListUseCase {
         petType?: CommunityPetType;
         category?: string;
         authorId?: string;
+        /** 제목·본문 키워드 검색. 다른 필터와 AND 로 결합된다. */
+        search?: string;
         sort?: CommunityPostSort;
         page?: number;
         pageSize?: number;
@@ -52,6 +54,7 @@ export class GetCommunityPostListUseCase {
             petType: input.petType,
             category: input.category,
             authorId: input.authorId,
+            search: input.search,
             sort,
             skip: (page - 1) * pageSize,
             limit: pageSize,
@@ -62,14 +65,24 @@ export class GetCommunityPostListUseCase {
 
         const postIds = snapshots.map((s) => s.postId);
 
-        const [likedSet, savedSet] = input.userId
-            ? await Promise.all([
-                  this.likePort.findLikedPostIds(input.userId, postIds),
-                  this.bookmarkPort.findSavedPostIds(input.userId, postIds),
-              ])
-            : [new Set<string>(), new Set<string>()];
+        // 카드 미리보기 댓글은 게시글 수와 무관하게 쿼리 1회로 모아 온다.
+        // 카드마다 상세를 호출하면 목록 1콜이 다시 N 콜로 늘어나기 때문이다.
+        const [likedSet, savedSet, previewComments] = await Promise.all([
+            input.userId ? this.likePort.findLikedPostIds(input.userId, postIds) : Promise.resolve(new Set<string>()),
+            input.userId
+                ? this.bookmarkPort.findSavedPostIds(input.userId, postIds)
+                : Promise.resolve(new Set<string>()),
+            postIds.length > 0 ? this.reader.listLatestCommentPerPost(postIds) : Promise.resolve([]),
+        ]);
 
-        const items = snapshots.map((s) => this.mapper.toCard(s, likedSet.has(s.postId), savedSet.has(s.postId)));
+        const previewByPostId = new Map<string, CommunityPostCommentResult[]>();
+        for (const comment of previewComments) {
+            previewByPostId.set(comment.postId, [this.mapper.toComment(comment)]);
+        }
+
+        const items = snapshots.map((s) =>
+            this.mapper.toCard(s, likedSet.has(s.postId), savedSet.has(s.postId), previewByPostId.get(s.postId) ?? []),
+        );
         return buildPageResult(items, page, pageSize, totalItems);
     }
 }

@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
-import { CommunityAuthorResponseDto } from './community-post-card.dto';
+import { CommunityAuthorResponseDto } from './community-author.dto';
 
 export class CommunityPostCommentResponseDto {
     @ApiProperty({ description: '댓글 ID', example: '507f1f77bcf86cd799439055' })

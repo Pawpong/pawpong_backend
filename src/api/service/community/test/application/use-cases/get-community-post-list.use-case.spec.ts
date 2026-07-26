@@ -21,7 +21,13 @@ const makeSnap = (postId: string) => ({
 });
 
 describe('GetCommunityPostListUseCase', () => {
-    const reader = { listPosts: jest.fn(), readPostById: jest.fn(), listComments: jest.fn() };
+    const reader = {
+        listPosts: jest.fn(),
+        readPostById: jest.fn(),
+        listComments: jest.fn(),
+        // 카드 미리보기 댓글 배치 조회. 대부분의 케이스는 댓글을 검증하지 않으므로 빈 배열로 둔다.
+        listLatestCommentPerPost: jest.fn().mockResolvedValue([]),
+    };
     const likePort = {
         like: jest.fn(),
         unlike: jest.fn(),
