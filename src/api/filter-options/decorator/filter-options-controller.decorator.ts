@@ -1,7 +1,0 @@
-import { Controller, applyDecorators } from '@nestjs/common';
-
-import { ApiFilterOptionsController } from '../swagger';
-
-export function FilterOptionsController() {
-    return applyDecorators(ApiFilterOptionsController(), Controller('v2/filter-options'));
-}
