@@ -1,0 +1,29 @@
+import { Controller, UseGuards, applyDecorators } from '@nestjs/common';
+
+import { Roles } from '../../../../common/decorator/roles.decorator';
+import { JwtAuthGuard } from '../../../../common/guard/jwt-auth.guard';
+import { OptionalJwtAuthGuard } from '../../../../common/guard/optional-jwt-auth.guard';
+import { StrictRolesGuard } from '../../../../common/guard/strict-roles.guard';
+import { ApiAdoptionProtectedController, ApiAdoptionPublicController } from '../swagger/index';
+
+/**
+ * 입양 페이지 공개 라우트 — 비로그인 접근 가능, 로그인 시 isFavorited 채움
+ */
+export function AdoptionOptionalAuthController() {
+    return applyDecorators(ApiAdoptionPublicController(), Controller('v2/adoption'), UseGuards(OptionalJwtAuthGuard));
+}
+
+/**
+ * 입양 페이지 인증 필수 라우트 — 즐겨찾기 토글 등 입양자 전용
+ *
+ * StrictRolesGuard 사용: 표준 RolesGuard 는 'breeder' → 'adopter' 자동 권한 부여를 하므로
+ * v2 동물 단위 즐겨찾기에서는 brand 가 카운터를 spam 하지 못하도록 strict 검증을 적용한다.
+ */
+export function AdoptionProtectedController() {
+    return applyDecorators(
+        ApiAdoptionProtectedController(),
+        Controller('v2/adoption'),
+        UseGuards(JwtAuthGuard, StrictRolesGuard),
+        Roles('adopter'),
+    );
+}

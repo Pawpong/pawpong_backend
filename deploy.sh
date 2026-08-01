@@ -142,8 +142,21 @@ else
     exit 1
 fi
 
-# Grafana/Loki/Promtail 확인 (Kafka는 채팅 기능 구현 시 활성화)
+# Grafana/Loki/Promtail 확인
 echo -e "${BLUE}Ensuring monitoring stack is running...${NC}"
 docker compose up -d grafana loki promtail
-# docker compose up -d zookeeper kafka kafka-ui  # 채팅 기능 구현 시 활성화
+
+# Kafka + AI Agent (AI 사진 콘테스트).
+# KAFKA_ENABLED=true 일 때만 띄운다 — 앱은 Kafka 없이도 동작하므로
+# 검증 전 서버에서 메모리를 미리 잡아먹지 않게 한다.
+#
+# Blue-Green 스왑과 무관하게 상주하는 사이드카라 --no-deps 로 앱을 건드리지 않는다.
+# ai-agent 는 Job 을 Kafka 에서만 받으므로 앱 컨테이너 교체 중에도 계속 소비한다.
+if grep -qE '^KAFKA_ENABLED=true' .env.production 2>/dev/null; then
+    echo -e "${BLUE}Ensuring Kafka + AI Agent are running...${NC}"
+    docker compose --profile kafka up -d --no-deps zookeeper kafka
+    docker compose --profile kafka up -d --no-deps --build ai-agent
+else
+    echo -e "${BLUE}KAFKA_ENABLED != true — Kafka/AI Agent 기동을 건너뜁니다${NC}"
+fi
 

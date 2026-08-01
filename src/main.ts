@@ -188,7 +188,7 @@ async function bootstrap(): Promise<void> {
         .addTag('알림 관리 (Admin)')
         .addTag('알림 이메일 프리뷰 (Admin)')
         .addTag('플랫폼 관리 (Admin)')
-        .addTag('인기 검색어 관리')
+        .addTag('인기 검색어 관리 (Admin)')
         .addTag('품종 관리 (Admin)')
         .addTag('지역 관리 (Admin)')
         .addTag('앱 버전 관리 (Admin)')
@@ -226,7 +226,7 @@ async function bootstrap(): Promise<void> {
             transport: Transport.KAFKA,
             options: {
                 client: {
-                    clientId: 'pawpong-chat-consumer',
+                    clientId: 'pawpong-backend-consumer',
                     brokers: [kafkaBroker],
                     requestTimeout: 30000,
                     retry: {
@@ -235,7 +235,7 @@ async function bootstrap(): Promise<void> {
                     },
                 },
                 consumer: {
-                    groupId: 'pawpong-chat-consumer-group',
+                    groupId: 'pawpong-backend-consumer-group',
                     allowAutoTopicCreation: true,
                     sessionTimeout: 30000,
                     heartbeatInterval: 3000,

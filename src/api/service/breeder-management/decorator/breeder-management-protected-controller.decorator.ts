@@ -1,0 +1,15 @@
+import { Controller, UseGuards, applyDecorators } from '@nestjs/common';
+
+import { Roles } from '../../../../common/decorator/roles.decorator';
+import { RolesGuard } from '../../../../common/guard/roles.guard';
+import { JwtAuthGuard } from '../../../../common/guard/jwt-auth.guard';
+import { ApiBreederManagementController } from '../swagger/index';
+
+export function BreederManagementProtectedController() {
+    return applyDecorators(
+        ApiBreederManagementController(),
+        Controller('v2/breeder-management'),
+        UseGuards(JwtAuthGuard, RolesGuard),
+        Roles('breeder'),
+    );
+}

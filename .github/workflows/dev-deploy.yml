@@ -79,14 +79,18 @@ jobs:
                   SSH_OPTS="-i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${PORT}"
                   REMOTE_DIR="/home/colding/pawpong_backend"
 
+                  # proto/ 는 반드시 함께 보낸다.
+                  # nest-cli 에 assets 설정이 없어 .proto 가 dist 로 복사되지 않고,
+                  # gRPC 클라이언트가 process.cwd()/proto 를 읽으므로 없으면 부팅이 실패한다.
                   if rsync -avz --delete -e "ssh ${SSH_OPTS}" dist/ "${SERVER}:${REMOTE_DIR}/dist/" \
+                     && rsync -avz --delete -e "ssh ${SSH_OPTS}" proto/ "${SERVER}:${REMOTE_DIR}/proto/" \
                      && rsync -avz -e "ssh ${SSH_OPTS}" package.json pnpm-lock.yaml .npmrc "${SERVER}:${REMOTE_DIR}/"; then
                     echo "✅ rsync 전송 성공"
                   else
                     echo "⚠️ rsync 실패 → tar+ssh fallback 시도"
-                    tar czf - dist package.json pnpm-lock.yaml .npmrc | \
+                    tar czf - dist proto package.json pnpm-lock.yaml .npmrc | \
                       ssh ${SSH_OPTS% -p*} -p ${PORT} ${SERVER} \
-                        "cd ${REMOTE_DIR} && rm -rf dist && tar xzf -"
+                        "cd ${REMOTE_DIR} && rm -rf dist proto && tar xzf -"
                   fi
 
             - name: Install & Restart on Mac Mini

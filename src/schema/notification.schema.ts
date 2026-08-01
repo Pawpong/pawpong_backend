@@ -1,7 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 import { NotificationType } from '../common/enum/user.enum';
-import type { NotificationMetadata } from '../api/notification/types/notification-metadata.type';
+import type { NotificationMetadata } from '../api/service/notification/types/notification-metadata.type';
 
 /**
  * 알림 스키마
