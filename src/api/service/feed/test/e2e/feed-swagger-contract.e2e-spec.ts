@@ -59,20 +59,38 @@ describe('피드 Swagger 계약 일치 (e2e)', () => {
         expect(json).toBeUndefined();
     });
 
-    it('문서의 봉투 구조가 실제 응답과 같다', async () => {
-        const response = await request(app.getHttpServer()).get('/api/v2/feed/videos?page=1&limit=1').expect(200);
+    /** 실제로 호출 가능한(인증 불필요) feed GET 엔드포인트 */
+    const CALLABLE: Array<[string, string]> = [
+        ['/api/v2/feed/videos', '/api/v2/feed/videos?page=1&limit=1'],
+        ['/api/v2/feed/videos/popular', '/api/v2/feed/videos/popular?limit=1'],
+        ['/api/v2/feed/tag/popular', '/api/v2/feed/tag/popular?limit=1'],
+        ['/api/v2/feed/tag/suggest', '/api/v2/feed/tag/suggest?q=강'],
+        ['/api/v2/feed/tag/search', '/api/v2/feed/tag/search?tag=강아지'],
+    ];
 
-        const documented = Object.keys(envelopeProps('/api/v2/feed/videos', 'get') ?? {});
-        // 문서에 선언한 봉투 필드가 실응답에 전부 존재해야 한다
-        for (const key of documented) {
-            expect(response.body).toHaveProperty(key);
-        }
+    it.each(CALLABLE)('%s: 문서가 선언한 봉투 키 집합이 실응답 키 집합과 정확히 같다', async (specPath, url) => {
+        const response = await request(app.getHttpServer()).get(url).expect(200);
+
+        const documented = Object.keys(envelopeProps(specPath, 'get') ?? {}).sort();
+        const actual = Object.keys(response.body).sort();
+
+        // 한쪽에만 있는 키가 없어야 한다 — 문서 누락과 실응답 누락을 모두 잡는다
+        expect(documented).not.toHaveLength(0);
+        expect(actual).toEqual(documented);
     });
 
-    it('문서의 message 예시가 컨트롤러가 실제로 넣는 값과 같다', async () => {
-        const response = await request(app.getHttpServer()).get('/api/v2/feed/videos?page=1&limit=1').expect(200);
+    it.each(CALLABLE)('%s: 문서의 message 예시가 실제로 내려가는 message 와 같다', async (specPath, url) => {
+        const response = await request(app.getHttpServer()).get(url).expect(200);
 
-        const props = envelopeProps('/api/v2/feed/videos', 'get') as Record<string, { example?: string }>;
+        const props = envelopeProps(specPath, 'get') as Record<string, { example?: unknown }>;
         expect(props.message?.example).toBe(response.body.message);
+    });
+
+    it.each(CALLABLE)('%s: 문서의 code 예시가 실제 HTTP 상태·본문 code 와 같다', async (specPath, url) => {
+        const response = await request(app.getHttpServer()).get(url);
+
+        const props = envelopeProps(specPath, 'get') as Record<string, { example?: unknown }>;
+        expect(props.code?.example).toBe(response.status);
+        expect(response.body.code).toBe(response.status);
     });
 });
