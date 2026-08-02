@@ -11,7 +11,11 @@ import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../../../service/notice/consta
 import { NoticeCreateRequestDto } from '../../../service/notice/dto/request/notice-create-request.dto';
 import { NoticeUpdateRequestDto } from '../../../service/notice/dto/request/notice-update-request.dto';
 import { NoticeResponseDto } from '../../../service/notice/dto/response/notice-response.dto';
-import { ApiCreateNoticeAdminEndpoint, ApiDeleteNoticeAdminEndpoint, ApiUpdateNoticeAdminEndpoint } from '../swagger/index';
+import {
+    ApiCreateNoticeAdminEndpoint,
+    ApiDeleteNoticeAdminEndpoint,
+    ApiUpdateNoticeAdminEndpoint,
+} from '../swagger/index';
 
 @NoticeAdminProtectedController()
 export class NoticeAdminCommandController {

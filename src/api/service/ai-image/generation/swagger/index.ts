@@ -52,8 +52,16 @@ export function ApiRequestAiImageGenerationEndpoint() {
             successDescription: 'AI 생성 요청 접수',
             successMessageExample: AI_IMAGE_RESPONSE_MESSAGES.generationRequested,
             errorResponses: [
-                { status: 400, description: '필터 없음 / 비활성 필터 / 생성 횟수 초과', errorExample: 'AI 이미지 생성 횟수를 모두 사용했습니다. (최대 3회)' },
-                { status: 503, description: '생성 대기열 사용 불가', errorExample: 'AI 생성 대기열을 사용할 수 없습니다. 잠시 후 다시 시도해주세요.' },
+                {
+                    status: 400,
+                    description: '필터 없음 / 비활성 필터 / 생성 횟수 초과',
+                    errorExample: 'AI 이미지 생성 횟수를 모두 사용했습니다. (최대 3회)',
+                },
+                {
+                    status: 503,
+                    description: '생성 대기열 사용 불가',
+                    errorExample: 'AI 생성 대기열을 사용할 수 없습니다. 잠시 후 다시 시도해주세요.',
+                },
             ],
         }),
     );
@@ -71,7 +79,9 @@ export function ApiGetAiImageGenerationEndpoint() {
             responseType: AiImageGenerationResponseDto,
             successDescription: 'AI 생성 상태 조회 성공',
             successMessageExample: AI_IMAGE_RESPONSE_MESSAGES.generationRetrieved,
-            errorResponses: [{ status: 400, description: '작업 없음', errorExample: 'AI 생성 요청을 찾을 수 없습니다.' }],
+            errorResponses: [
+                { status: 400, description: '작업 없음', errorExample: 'AI 생성 요청을 찾을 수 없습니다.' },
+            ],
         }),
     );
 }

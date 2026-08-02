@@ -28,7 +28,7 @@ export class FeedVideoLikeCommandController {
     ): Promise<ApiResponseDto<LikeToggleResponseDto>> {
         return ApiResponseDto.success(
             (await this.toggleLikeUseCase.execute(videoId, userId, actorType)) as LikeToggleResponseDto &
-            FeedLikeToggleResult,
+                FeedLikeToggleResult,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.likeToggled,
         );
     }

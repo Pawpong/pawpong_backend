@@ -10,7 +10,10 @@ import { BreederSuspendRequestDto } from '../dto/request/breeder-suspend-request
 import { SetTestAccountRequestDto } from '../dto/request/set-test-account-request.dto';
 import { BreederSuspendResponseDto } from '../dto/response/breeder-suspend-response.dto';
 import { SetTestAccountResponseDto } from '../dto/response/set-test-account-response.dto';
-import { BREEDER_RESPONSE_MESSAGES, buildBreederTestAccountMessage } from '../../../service/breeder/constants/breeder-response-messages';
+import {
+    BREEDER_RESPONSE_MESSAGES,
+    buildBreederTestAccountMessage,
+} from '../../../service/breeder/constants/breeder-response-messages';
 import {
     ApiSetBreederTestAccountAdminEndpoint,
     ApiSuspendBreederAdminEndpoint,

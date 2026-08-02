@@ -66,7 +66,8 @@ export class AiImageGenerationController {
     @Get('generation/:jobId')
     @ApiGetAiImageGenerationEndpoint()
     async getGeneration(
-        @Param('jobId', new MongoObjectIdPipe('AI 생성 요청', '올바르지 않은 AI 생성 요청 ID 형식입니다.')) jobId: string,
+        @Param('jobId', new MongoObjectIdPipe('AI 생성 요청', '올바르지 않은 AI 생성 요청 ID 형식입니다.'))
+        jobId: string,
         @CurrentUser('userId') userId: string,
     ): Promise<ApiResponseDto<AiImageGenerationResponseDto>> {
         const result = await this.getAiImageGenerationUseCase.execute(jobId, userId);

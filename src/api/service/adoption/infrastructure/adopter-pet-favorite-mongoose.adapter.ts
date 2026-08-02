@@ -89,7 +89,10 @@ export class AdopterPetFavoriteMongooseAdapter implements AdopterPetFavoriteRead
             .aggregate<{
                 _id: string;
                 count: number;
-            }>([{ $match: { status: ChatRoomStatus.ACTIVE, applicationId: { $in: [...applicationToPetId.keys()] } } }, { $group: { _id: '$applicationId', count: { $sum: 1 } } }])
+            }>([
+                { $match: { status: ChatRoomStatus.ACTIVE, applicationId: { $in: [...applicationToPetId.keys()] } } },
+                { $group: { _id: '$applicationId', count: { $sum: 1 } } },
+            ])
             .exec();
 
         const petChatCounts = new Map<string, number>();

@@ -28,7 +28,7 @@ export class FeedVideoCommentUpdateController {
     ): Promise<ApiResponseDto<CommentUpdateResponseDto>> {
         return ApiResponseDto.success(
             (await this.updateCommentUseCase.execute(commentId, userId, dto.content)) as CommentUpdateResponseDto &
-            FeedCommentUpdateResult,
+                FeedCommentUpdateResult,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentUpdated,
         );
     }

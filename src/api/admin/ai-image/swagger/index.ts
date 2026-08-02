@@ -3,7 +3,10 @@ import { ApiParam } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { AI_IMAGE_RESPONSE_MESSAGES } from '../../../service/ai-image/constants/ai-image-response-messages';
-import { AiImageAdminFilterResponseDto, AiImageFilterDeleteResponseDto } from '../dto/response/ai-image-admin-filter-response.dto';
+import {
+    AiImageAdminFilterResponseDto,
+    AiImageFilterDeleteResponseDto,
+} from '../dto/response/ai-image-admin-filter-response.dto';
 import { AiImageFilterPreviewResponseDto } from '../dto/response/ai-image-filter-preview-response.dto';
 
 const FILTER_NOT_FOUND_RESPONSE = {

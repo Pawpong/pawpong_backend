@@ -18,8 +18,8 @@ export class FeedVideoPopularController {
     async getPopularVideos(@Query() query: FeedPopularLimitQueryDto): Promise<ApiResponseDto<PopularVideoItemDto[]>> {
         return ApiResponseDto.success(
             (await this.getPopularVideosUseCase.execute(query.limit)) as Array<
-            PopularVideoItemDto & FeedPopularVideoItemResult
-        >,
+                PopularVideoItemDto & FeedPopularVideoItemResult
+            >,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.popularVideosListed,
         );
     }

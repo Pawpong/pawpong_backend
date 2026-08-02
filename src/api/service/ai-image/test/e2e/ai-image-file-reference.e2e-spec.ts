@@ -45,7 +45,9 @@ describe('AI 이미지 파일 참조 판정', () => {
         const result = response.body.data.files.find((f: { fileKey: string }) => f.fileKey === thumbnailKey);
         expect(result).toBeDefined();
         expect(result.isReferenced).toBe(true);
-        expect(result.references.some((ref: { collection: string }) => ref.collection === 'ai_image_filters')).toBe(true);
+        expect(result.references.some((ref: { collection: string }) => ref.collection === 'ai_image_filters')).toBe(
+            true,
+        );
     });
 
     it('아무도 안 쓰는 키는 그대로 고아로 판정된다', async () => {

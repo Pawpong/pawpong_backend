@@ -25,11 +25,8 @@ export class FeedVideoLikedVideosController {
         @Query() query: FeedPaginationQueryDto,
     ): Promise<ApiResponseDto<MyLikedVideosResponseDto>> {
         return ApiResponseDto.success(
-            (await this.getMyLikedVideosUseCase.execute(
-            userId,
-            query.page,
-            query.limit,
-        )) as MyLikedVideosResponseDto & FeedMyLikedVideosResult,
+            (await this.getMyLikedVideosUseCase.execute(userId, query.page, query.limit)) as MyLikedVideosResponseDto &
+                FeedMyLikedVideosResult,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.myLikedVideosListed,
         );
     }

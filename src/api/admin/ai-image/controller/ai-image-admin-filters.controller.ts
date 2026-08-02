@@ -11,7 +11,10 @@ import { AiImageAdminController } from '../decorator/ai-image-admin-controller.d
 import { AiImageFilterCreateRequestDto } from '../dto/request/ai-image-filter-create-request.dto';
 import { AiImageFilterUpdateRequestDto } from '../dto/request/ai-image-filter-update-request.dto';
 import { AiImageFilterPreviewRequestDto } from '../dto/request/ai-image-filter-preview-request.dto';
-import type { AiImageAdminFilterResponseDto, AiImageFilterDeleteResponseDto } from '../dto/response/ai-image-admin-filter-response.dto';
+import type {
+    AiImageAdminFilterResponseDto,
+    AiImageFilterDeleteResponseDto,
+} from '../dto/response/ai-image-admin-filter-response.dto';
 import type { AiImageFilterPreviewResponseDto } from '../dto/response/ai-image-filter-preview-response.dto';
 import { GenerateAiImageFilterPreviewUseCase } from '../application/use-cases/generate-ai-image-filter-preview.use-case';
 import {

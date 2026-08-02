@@ -25,9 +25,9 @@ export class FeedVideoPrefetchController {
         await this.prefetchAllQualitySegmentsUseCase.execute(videoId, query.segment, requestedCount);
         return ApiResponseDto.success(
             {
-            success: true,
-            message: `${requestedCount}개 세그먼트 프리페치 완료`,
-        } as SegmentPrefetchResponseDto & FeedVideoSegmentPrefetchResult,
+                success: true,
+                message: `${requestedCount}개 세그먼트 프리페치 완료`,
+            } as SegmentPrefetchResponseDto & FeedVideoSegmentPrefetchResult,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.segmentsPrefetched,
         );
     }

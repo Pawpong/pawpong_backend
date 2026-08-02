@@ -10,7 +10,10 @@ import { ApplicationListRequestDto } from '../dto/request/application-list-reque
 import { AdminApplicationDetailResponseDto } from '../dto/response/application-detail-response.dto';
 import { AdminApplicationListResponseDto } from '../dto/response/application-list-response.dto';
 import { ADOPTER_RESPONSE_MESSAGES } from '../../../service/adopter/constants/adopter-response-messages';
-import { ApiGetAdopterAdminApplicationDetailEndpoint, ApiGetAdopterAdminApplicationListEndpoint } from '../swagger/index';
+import {
+    ApiGetAdopterAdminApplicationDetailEndpoint,
+    ApiGetAdopterAdminApplicationListEndpoint,
+} from '../swagger/index';
 
 @AdopterAdminProtectedController()
 export class AdopterAdminApplicationController {

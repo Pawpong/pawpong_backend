@@ -30,12 +30,12 @@ export class FeedVideoCommentCreateController {
     ): Promise<ApiResponseDto<CommentCreateResponseDto>> {
         return ApiResponseDto.success(
             (await this.createCommentUseCase.execute(
-            videoId,
-            userId,
-            actorType,
-            dto.content,
-            dto.parentId,
-        )) as CommentCreateResponseDto & FeedCommentCreateResult,
+                videoId,
+                userId,
+                actorType,
+                dto.content,
+                dto.parentId,
+            )) as CommentCreateResponseDto & FeedCommentCreateResult,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentCreated,
         );
     }

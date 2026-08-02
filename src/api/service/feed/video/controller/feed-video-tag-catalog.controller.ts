@@ -29,9 +29,7 @@ export class FeedVideoTagCatalogController {
     @ApiGetPopularFeedTagsEndpoint()
     async getPopularTags(@Query() query: FeedPopularTagLimitQueryDto): Promise<ApiResponseDto<PopularTagItemDto[]>> {
         return ApiResponseDto.success(
-            (await this.getPopularTagsUseCase.execute(query.limit)) as Array<
-            PopularTagItemDto & FeedPopularTagResult
-        >,
+            (await this.getPopularTagsUseCase.execute(query.limit)) as Array<PopularTagItemDto & FeedPopularTagResult>,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.popularTagsListed,
         );
     }
@@ -41,8 +39,8 @@ export class FeedVideoTagCatalogController {
     async suggestTags(@Query() query: FeedSuggestTagQueryDto): Promise<ApiResponseDto<TagSuggestionItemDto[]>> {
         return ApiResponseDto.success(
             (await this.suggestTagsUseCase.execute(query.q, query.limit)) as Array<
-            TagSuggestionItemDto & FeedTagSuggestionResult
-        >,
+                TagSuggestionItemDto & FeedTagSuggestionResult
+            >,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.tagSuggestionsListed,
         );
     }

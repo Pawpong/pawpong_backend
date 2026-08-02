@@ -1,6 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { DomainConflictError, DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
+import {
+    DomainConflictError,
+    DomainNotFoundError,
+    DomainValidationError,
+} from '../../../../../common/error/domain.error';
 import { ApplicationStatus } from '../../../../../common/enum/user.enum';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';

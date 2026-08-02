@@ -1,4 +1,7 @@
-import { HomeBannerSnapshot, HomeFaqSnapshot } from '../../../../service/home/application/ports/home-content-reader.port';
+import {
+    HomeBannerSnapshot,
+    HomeFaqSnapshot,
+} from '../../../../service/home/application/ports/home-content-reader.port';
 import type {
     HomeBannerCommand,
     HomeBannerUpdateCommand,

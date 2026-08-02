@@ -1,6 +1,9 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
-import { AI_IMAGE_ADMIN_FILTER_WRITER_PORT, type AiImageAdminFilterWriterPort } from '../ports/ai-image-admin-filter-writer.port';
+import {
+    AI_IMAGE_ADMIN_FILTER_WRITER_PORT,
+    type AiImageAdminFilterWriterPort,
+} from '../ports/ai-image-admin-filter-writer.port';
 import { AiImageAdminFilterResultMapperService } from '../../domain/services/ai-image-admin-filter-result-mapper.service';
 import { AI_IMAGE_RESPONSE_MESSAGES } from '../../../../service/ai-image/constants/ai-image-response-messages';
 import type { AiImageFilterUpdateCommand } from '../types/ai-image-admin-filter-command.type';

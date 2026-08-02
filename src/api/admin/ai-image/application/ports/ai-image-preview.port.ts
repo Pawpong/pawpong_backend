@@ -1,7 +1,4 @@
-import type {
-    AiImagePreviewCommand,
-    AiImagePreviewResult,
-} from '../types/ai-image-preview.type';
+import type { AiImagePreviewCommand, AiImagePreviewResult } from '../types/ai-image-preview.type';
 
 export const AI_IMAGE_PREVIEW_PORT = Symbol('AI_IMAGE_PREVIEW_PORT');
 

@@ -26,7 +26,9 @@ describe('AiImageGenerationKafkaConsumer', () => {
 
     it('성공 결과를 유스케이스로 전달한다', async () => {
         await consumer.handleGenerationResult(successEvent);
-        expect(applyUseCase.execute).toHaveBeenCalledWith(expect.objectContaining({ jobId: 'job-1', status: 'succeeded' }));
+        expect(applyUseCase.execute).toHaveBeenCalledWith(
+            expect.objectContaining({ jobId: 'job-1', status: 'succeeded' }),
+        );
     });
 
     it('문자열 payload 도 파싱한다', async () => {

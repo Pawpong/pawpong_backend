@@ -22,7 +22,7 @@ export class FeedVideoLibraryController {
     ): Promise<ApiResponseDto<MyVideoListResponseDto>> {
         return ApiResponseDto.success(
             (await this.getMyVideosUseCase.execute(userId, query.page, query.limit)) as MyVideoListResponseDto &
-            FeedMyVideoListResult,
+                FeedMyVideoListResult,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.myVideosListed,
         );
     }

@@ -2,7 +2,10 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
-import { AI_IMAGE_JOB_IN_PROGRESS_STATUSES, AiImageJobStatus } from '../../../../../common/enum/ai-image-job-status.enum';
+import {
+    AI_IMAGE_JOB_IN_PROGRESS_STATUSES,
+    AiImageJobStatus,
+} from '../../../../../common/enum/ai-image-job-status.enum';
 import { AiImageJob, AiImageJobDocument } from '../../../../../schema/ai-image-job.schema';
 
 /** 생성 작업 영속성. 상태 전이는 모두 조건부 원자 업데이트로 수행한다. */
@@ -24,12 +27,7 @@ export class AiImageJobRepository {
     }
 
     findByUserId(userId: string, limit: number): Promise<AiImageJobDocument[]> {
-        return this.jobModel
-            .find({ userId })
-            .sort({ createdAt: -1 })
-            .limit(limit)
-            .lean<AiImageJobDocument[]>()
-            .exec();
+        return this.jobModel.find({ userId }).sort({ createdAt: -1 }).limit(limit).lean<AiImageJobDocument[]>().exec();
     }
 
     /**
@@ -50,10 +48,7 @@ export class AiImageJobRepository {
      * 진행 중 상태일 때만 전이. 이미 종결된 작업이면 null 을 반환한다.
      * 결과 메시지가 중복 도착해도 최초 1회만 반영되도록 하는 멱등성의 핵심.
      */
-    transitionIfInProgress(
-        jobId: string,
-        update: Record<string, unknown>,
-    ): Promise<AiImageJobDocument | null> {
+    transitionIfInProgress(jobId: string, update: Record<string, unknown>): Promise<AiImageJobDocument | null> {
         if (!Types.ObjectId.isValid(jobId)) return Promise.resolve(null);
         return this.jobModel
             .findOneAndUpdate(

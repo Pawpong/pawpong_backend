@@ -22,7 +22,7 @@ export class FeedVideoTagSearchController {
     async searchByTag(@Query() query: FeedTagSearchQueryDto): Promise<ApiResponseDto<TagSearchResponseDto>> {
         return ApiResponseDto.success(
             (await this.searchByTagUseCase.execute(query.tag, query.page, query.limit)) as TagSearchResponseDto &
-            FeedTagSearchResult,
+                FeedTagSearchResult,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videosSearchedByTag,
         );
     }

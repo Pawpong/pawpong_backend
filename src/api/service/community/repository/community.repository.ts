@@ -223,7 +223,9 @@ export class CommunityRepository {
         }
 
         const rows = await this.commentModel
-            .aggregate<{ latest: CommunityPostCommentDocument }>([
+            .aggregate<{
+                latest: CommunityPostCommentDocument;
+            }>([
                 { $match: { postId: { $in: objectIds }, isActive: true } },
                 { $sort: { postId: 1, createdAt: -1 } },
                 { $group: { _id: '$postId', latest: { $first: '$$ROOT' } } },

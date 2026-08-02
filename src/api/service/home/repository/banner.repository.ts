@@ -3,7 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Banner, BannerDocument } from '../../../../schema/banner.schema';
-import type { HomeBannerCommand, HomeBannerUpdateCommand } from '../../../admin/home/application/types/home-admin-command.type';
+import type {
+    HomeBannerCommand,
+    HomeBannerUpdateCommand,
+} from '../../../admin/home/application/types/home-admin-command.type';
 
 @Injectable()
 export class BannerRepository {

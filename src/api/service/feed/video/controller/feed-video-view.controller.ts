@@ -18,9 +18,6 @@ export class FeedVideoViewController {
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
     ): Promise<ApiResponseDto<VideoActionSuccessResponseDto>> {
         await this.incrementViewCountUseCase.execute(videoId);
-        return ApiResponseDto.success(
-            { success: true },
-            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoViewIncremented,
-        );
+        return ApiResponseDto.success({ success: true }, FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoViewIncremented);
     }
 }

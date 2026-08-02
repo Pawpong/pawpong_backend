@@ -3,7 +3,10 @@ import { Injectable } from '@nestjs/common';
 import type { AiImageFilterDocument } from '../../../../schema/ai-image-filter.schema';
 import type { AiImageFilterSnapshot } from '../../../service/ai-image/shared/application/types/ai-image-filter-snapshot.type';
 import type { AiImageAdminFilterWriterPort } from '../application/ports/ai-image-admin-filter-writer.port';
-import type { AiImageFilterCreateCommand, AiImageFilterUpdateCommand } from '../application/types/ai-image-admin-filter-command.type';
+import type {
+    AiImageFilterCreateCommand,
+    AiImageFilterUpdateCommand,
+} from '../application/types/ai-image-admin-filter-command.type';
 import { AiImageAdminFilterRepository } from '../repository/ai-image-admin-filter.repository';
 
 @Injectable()

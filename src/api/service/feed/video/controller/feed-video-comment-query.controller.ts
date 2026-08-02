@@ -39,11 +39,11 @@ export class FeedVideoCommentQueryController {
     ): Promise<ApiResponseDto<CommentListResponseDto>> {
         return ApiResponseDto.success(
             (await this.getCommentsUseCase.execute(
-            videoId,
-            userId,
-            query.page,
-            query.limit,
-        )) as CommentListResponseDto & FeedCommentListResult,
+                videoId,
+                userId,
+                query.page,
+                query.limit,
+            )) as CommentListResponseDto & FeedCommentListResult,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentsListed,
         );
     }
@@ -56,12 +56,8 @@ export class FeedVideoCommentQueryController {
         @CurrentUser('userId') userId?: string,
     ): Promise<ApiResponseDto<ReplyListResponseDto>> {
         return ApiResponseDto.success(
-            (await this.getRepliesUseCase.execute(
-            commentId,
-            userId,
-            query.page,
-            query.limit,
-        )) as ReplyListResponseDto & FeedReplyListResult,
+            (await this.getRepliesUseCase.execute(commentId, userId, query.page, query.limit)) as ReplyListResponseDto &
+                FeedReplyListResult,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.repliesListed,
         );
     }

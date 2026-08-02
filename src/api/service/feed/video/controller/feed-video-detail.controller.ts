@@ -20,8 +20,8 @@ export class FeedVideoDetailController {
     ): Promise<ApiResponseDto<VideoMetaResponseDto | PendingVideoMetaResponseDto>> {
         return ApiResponseDto.success(
             (await this.getVideoMetaUseCase.execute(videoId)) as
-            | (VideoMetaResponseDto & FeedVideoMetaQueryResult)
-            | (PendingVideoMetaResponseDto & FeedVideoMetaQueryResult),
+                | (VideoMetaResponseDto & FeedVideoMetaQueryResult)
+                | (PendingVideoMetaResponseDto & FeedVideoMetaQueryResult),
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoMetaRetrieved,
         );
     }

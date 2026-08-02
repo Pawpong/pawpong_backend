@@ -41,10 +41,7 @@ const AI_IMAGE_GENERATION_DOMAIN_PROVIDERS = [
     AiImageGenerationResultMapperService,
 ];
 
-const AI_IMAGE_GENERATION_INFRASTRUCTURE_PROVIDERS = [
-    AiImageJobWriterAdapter,
-    AiImageGenerationKafkaPublisherAdapter,
-];
+const AI_IMAGE_GENERATION_INFRASTRUCTURE_PROVIDERS = [AiImageJobWriterAdapter, AiImageGenerationKafkaPublisherAdapter];
 
 const AI_IMAGE_GENERATION_PORT_BINDINGS = [
     { provide: AI_IMAGE_JOB_WRITER_PORT, useExisting: AiImageJobWriterAdapter },

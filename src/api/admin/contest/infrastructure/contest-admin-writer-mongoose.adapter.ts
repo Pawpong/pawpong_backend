@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { CONTEST_WRITER_PORT, type ContestWriterPort } from '../../../service/contest/application/ports/contest-writer.port';
+import {
+    CONTEST_WRITER_PORT,
+    type ContestWriterPort,
+} from '../../../service/contest/application/ports/contest-writer.port';
 import type { ContestAdminWriterPort } from '../application/ports/contest-admin-writer.port';
 
 @Injectable()

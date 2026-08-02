@@ -25,8 +25,7 @@ export class FeedVideoLikeStatusController {
         @CurrentUser('userId') userId: string,
     ): Promise<ApiResponseDto<LikeStatusResponseDto>> {
         return ApiResponseDto.success(
-            (await this.getLikeStatusUseCase.execute(videoId, userId)) as LikeStatusResponseDto &
-            FeedLikeStatusResult,
+            (await this.getLikeStatusUseCase.execute(videoId, userId)) as LikeStatusResponseDto & FeedLikeStatusResult,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.likeStatusRetrieved,
         );
     }

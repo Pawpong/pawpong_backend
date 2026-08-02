@@ -29,12 +29,12 @@ export class FeedVideoUploadController {
     ): Promise<ApiResponseDto<UploadUrlResponseDto>> {
         return ApiResponseDto.success(
             (await this.getUploadUrlUseCase.execute(
-            userId,
-            actorType,
-            dto.title,
-            dto.description,
-            dto.tags,
-        )) as UploadUrlResponseDto & FeedVideoUploadUrlResult,
+                userId,
+                actorType,
+                dto.title,
+                dto.description,
+                dto.tags,
+            )) as UploadUrlResponseDto & FeedVideoUploadUrlResult,
             FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.uploadUrlIssued,
         );
     }

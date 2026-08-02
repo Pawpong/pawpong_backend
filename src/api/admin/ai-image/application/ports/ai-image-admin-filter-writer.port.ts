@@ -1,5 +1,8 @@
 import type { AiImageFilterSnapshot } from '../../../../service/ai-image/shared/application/types/ai-image-filter-snapshot.type';
-import type { AiImageFilterCreateCommand, AiImageFilterUpdateCommand } from '../types/ai-image-admin-filter-command.type';
+import type {
+    AiImageFilterCreateCommand,
+    AiImageFilterUpdateCommand,
+} from '../types/ai-image-admin-filter-command.type';
 
 export const AI_IMAGE_ADMIN_FILTER_WRITER_PORT = Symbol('AI_IMAGE_ADMIN_FILTER_WRITER_PORT');
 
