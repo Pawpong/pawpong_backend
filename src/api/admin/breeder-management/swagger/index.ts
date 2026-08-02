@@ -64,7 +64,6 @@ export function ApiCreateProfileBannerAdminEndpoint() {
                 - 생성 직후 가공된 배너 응답을 반환합니다.
             `,
             responseType: ProfileBannerResponseDto,
-            successStatus: 201,
             successDescription: '프로필 배너 생성 성공',
             successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileBannerCreated,
             errorResponses: [
@@ -177,7 +176,6 @@ export function ApiCreateCounselBannerAdminEndpoint() {
                 - 생성된 상담 배너를 즉시 응답으로 반환합니다.
             `,
             responseType: CounselBannerResponseDto,
-            successStatus: 201,
             successDescription: '상담 배너 생성 성공',
             successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.counselBannerCreated,
             errorResponses: [

@@ -261,7 +261,6 @@ export function ApiAddPhoneWhitelistAdminEndpoint() {
                 - 이미 등록된 번호면 예외를 반환합니다.
             `,
             responseType: PhoneWhitelistResponseDto,
-            successStatus: 201,
             successDescription: '화이트리스트 추가 성공',
             successMessageExample: USER_ADMIN_RESPONSE_MESSAGES.phoneWhitelistCreated,
             errorResponses: [USER_ADMIN_FORBIDDEN_RESPONSE],
