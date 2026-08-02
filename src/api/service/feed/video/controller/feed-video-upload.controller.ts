@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Body, Param, Post } from '@nestjs/common';
 
 import { CurrentActorType, type ActorType } from '../../../../../common/decorator/current-actor-type.decorator';
@@ -24,14 +26,17 @@ export class FeedVideoUploadController {
         @CurrentUser('userId') userId: string,
         @CurrentActorType() actorType: ActorType,
         @Body() dto: UploadVideoRequestDto,
-    ): Promise<UploadUrlResponseDto> {
-        return (await this.getUploadUrlUseCase.execute(
+    ): Promise<ApiResponseDto<UploadUrlResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.getUploadUrlUseCase.execute(
             userId,
             actorType,
             dto.title,
             dto.description,
             dto.tags,
-        )) as UploadUrlResponseDto & FeedVideoUploadUrlResult;
+        )) as UploadUrlResponseDto & FeedVideoUploadUrlResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.uploadUrlIssued,
+        );
     }
 
     @Post('videos/:videoId/upload-complete')
@@ -39,7 +44,10 @@ export class FeedVideoUploadController {
     async completeUpload(
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
-    ): Promise<UploadCompleteResponseDto> {
-        return this.completeUploadUseCase.execute(videoId, userId);
+    ): Promise<ApiResponseDto<UploadCompleteResponseDto>> {
+        return ApiResponseDto.success(
+            await this.completeUploadUseCase.execute(videoId, userId),
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.uploadCompleted,
+        );
     }
 }

@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Get, Inject, Param, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../../common/decorator/current-user.decorator';
@@ -34,13 +36,16 @@ export class FeedVideoCommentQueryController {
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @Query() query: FeedPaginationQueryDto,
         @CurrentUser('userId') userId?: string,
-    ): Promise<CommentListResponseDto> {
-        return (await this.getCommentsUseCase.execute(
+    ): Promise<ApiResponseDto<CommentListResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.getCommentsUseCase.execute(
             videoId,
             userId,
             query.page,
             query.limit,
-        )) as CommentListResponseDto & FeedCommentListResult;
+        )) as CommentListResponseDto & FeedCommentListResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentsListed,
+        );
     }
 
     @Get('comment/:commentId/replies')
@@ -49,12 +54,15 @@ export class FeedVideoCommentQueryController {
         @Param('commentId', new MongoObjectIdPipe('댓글')) commentId: string,
         @Query() query: FeedPaginationQueryDto,
         @CurrentUser('userId') userId?: string,
-    ): Promise<ReplyListResponseDto> {
-        return (await this.getRepliesUseCase.execute(
+    ): Promise<ApiResponseDto<ReplyListResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.getRepliesUseCase.execute(
             commentId,
             userId,
             query.page,
             query.limit,
-        )) as ReplyListResponseDto & FeedReplyListResult;
+        )) as ReplyListResponseDto & FeedReplyListResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.repliesListed,
+        );
     }
 }

@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Get, Query } from '@nestjs/common';
 
 import { GetPopularVideosUseCase } from '../application/use-cases/get-popular-videos.use-case';
@@ -13,9 +15,12 @@ export class FeedVideoPopularController {
 
     @Get('videos/popular')
     @ApiGetPopularFeedVideosEndpoint()
-    async getPopularVideos(@Query() query: FeedPopularLimitQueryDto): Promise<PopularVideoItemDto[]> {
-        return (await this.getPopularVideosUseCase.execute(query.limit)) as Array<
+    async getPopularVideos(@Query() query: FeedPopularLimitQueryDto): Promise<ApiResponseDto<PopularVideoItemDto[]>> {
+        return ApiResponseDto.success(
+            (await this.getPopularVideosUseCase.execute(query.limit)) as Array<
             PopularVideoItemDto & FeedPopularVideoItemResult
-        >;
+        >,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.popularVideosListed,
+        );
     }
 }

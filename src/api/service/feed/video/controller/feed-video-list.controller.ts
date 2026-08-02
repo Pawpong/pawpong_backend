@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Get, Query } from '@nestjs/common';
 
 import { GetFeedUseCase } from '../application/use-cases/get-feed.use-case';
@@ -13,7 +15,10 @@ export class FeedVideoListController {
 
     @Get('videos')
     @ApiGetFeedVideosEndpoint()
-    async getFeed(@Query() query: FeedPaginationQueryDto): Promise<FeedResponseDto> {
-        return (await this.getFeedUseCase.execute(query.page, query.limit)) as FeedResponseDto & FeedVideoFeedResult;
+    async getFeed(@Query() query: FeedPaginationQueryDto): Promise<ApiResponseDto<FeedResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.getFeedUseCase.execute(query.page, query.limit)) as FeedResponseDto & FeedVideoFeedResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.feedListed,
+        );
     }
 }

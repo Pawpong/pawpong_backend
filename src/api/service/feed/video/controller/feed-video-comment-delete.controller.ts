@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Delete, Inject, Param } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../../common/decorator/current-user.decorator';
@@ -20,7 +22,10 @@ export class FeedVideoCommentDeleteController {
     async deleteComment(
         @Param('commentId', new MongoObjectIdPipe('댓글')) commentId: string,
         @CurrentUser('userId') userId: string,
-    ): Promise<VideoActionSuccessResponseDto> {
-        return this.deleteCommentUseCase.execute(commentId, userId);
+    ): Promise<ApiResponseDto<VideoActionSuccessResponseDto>> {
+        return ApiResponseDto.success(
+            await this.deleteCommentUseCase.execute(commentId, userId),
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentDeleted,
+        );
     }
 }

@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Body, Inject, Param, Patch } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../../common/decorator/current-user.decorator';
@@ -23,8 +25,11 @@ export class FeedVideoCommentUpdateController {
         @Param('commentId', new MongoObjectIdPipe('댓글')) commentId: string,
         @CurrentUser('userId') userId: string,
         @Body() dto: UpdateCommentRequestDto,
-    ): Promise<CommentUpdateResponseDto> {
-        return (await this.updateCommentUseCase.execute(commentId, userId, dto.content)) as CommentUpdateResponseDto &
-            FeedCommentUpdateResult;
+    ): Promise<ApiResponseDto<CommentUpdateResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.updateCommentUseCase.execute(commentId, userId, dto.content)) as CommentUpdateResponseDto &
+            FeedCommentUpdateResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentUpdated,
+        );
     }
 }

@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Body, Inject, Param, Post } from '@nestjs/common';
 
 import { CurrentActorType, type ActorType } from '../../../../../common/decorator/current-actor-type.decorator';
@@ -25,13 +27,16 @@ export class FeedVideoCommentCreateController {
         @CurrentUser('userId') userId: string,
         @CurrentActorType() actorType: ActorType,
         @Body() dto: CreateCommentRequestDto,
-    ): Promise<CommentCreateResponseDto> {
-        return (await this.createCommentUseCase.execute(
+    ): Promise<ApiResponseDto<CommentCreateResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.createCommentUseCase.execute(
             videoId,
             userId,
             actorType,
             dto.content,
             dto.parentId,
-        )) as CommentCreateResponseDto & FeedCommentCreateResult;
+        )) as CommentCreateResponseDto & FeedCommentCreateResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentCreated,
+        );
     }
 }

@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Get, Inject, Query } from '@nestjs/common';
 
 import type { SearchFeedVideosByTagUseCasePort } from '../../tag/application/ports/feed-tag-interaction.port';
@@ -17,8 +19,11 @@ export class FeedVideoTagSearchController {
 
     @Get('tag/search')
     @ApiSearchFeedVideosByTagEndpoint()
-    async searchByTag(@Query() query: FeedTagSearchQueryDto): Promise<TagSearchResponseDto> {
-        return (await this.searchByTagUseCase.execute(query.tag, query.page, query.limit)) as TagSearchResponseDto &
-            FeedTagSearchResult;
+    async searchByTag(@Query() query: FeedTagSearchQueryDto): Promise<ApiResponseDto<TagSearchResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.searchByTagUseCase.execute(query.tag, query.page, query.limit)) as TagSearchResponseDto &
+            FeedTagSearchResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videosSearchedByTag,
+        );
     }
 }

@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Get, Inject, Query } from '@nestjs/common';
 
 import type {
@@ -25,17 +27,23 @@ export class FeedVideoTagCatalogController {
 
     @Get('tag/popular')
     @ApiGetPopularFeedTagsEndpoint()
-    async getPopularTags(@Query() query: FeedPopularTagLimitQueryDto): Promise<PopularTagItemDto[]> {
-        return (await this.getPopularTagsUseCase.execute(query.limit)) as Array<
+    async getPopularTags(@Query() query: FeedPopularTagLimitQueryDto): Promise<ApiResponseDto<PopularTagItemDto[]>> {
+        return ApiResponseDto.success(
+            (await this.getPopularTagsUseCase.execute(query.limit)) as Array<
             PopularTagItemDto & FeedPopularTagResult
-        >;
+        >,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.popularTagsListed,
+        );
     }
 
     @Get('tag/suggest')
     @ApiSuggestFeedTagsEndpoint()
-    async suggestTags(@Query() query: FeedSuggestTagQueryDto): Promise<TagSuggestionItemDto[]> {
-        return (await this.suggestTagsUseCase.execute(query.q, query.limit)) as Array<
+    async suggestTags(@Query() query: FeedSuggestTagQueryDto): Promise<ApiResponseDto<TagSuggestionItemDto[]>> {
+        return ApiResponseDto.success(
+            (await this.suggestTagsUseCase.execute(query.q, query.limit)) as Array<
             TagSuggestionItemDto & FeedTagSuggestionResult
-        >;
+        >,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.tagSuggestionsListed,
+        );
     }
 }

@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Param, Post, Query } from '@nestjs/common';
 
 import { MongoObjectIdPipe } from '../../../../../common/pipe/mongo-object-id.pipe';
@@ -17,13 +19,16 @@ export class FeedVideoPrefetchController {
     async prefetchSegments(
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @Query() query: FeedPrefetchQueryDto,
-    ): Promise<SegmentPrefetchResponseDto> {
+    ): Promise<ApiResponseDto<SegmentPrefetchResponseDto>> {
         const requestedCount = query.count;
 
         await this.prefetchAllQualitySegmentsUseCase.execute(videoId, query.segment, requestedCount);
-        return {
+        return ApiResponseDto.success(
+            {
             success: true,
             message: `${requestedCount}개 세그먼트 프리페치 완료`,
-        } as SegmentPrefetchResponseDto & FeedVideoSegmentPrefetchResult;
+        } as SegmentPrefetchResponseDto & FeedVideoSegmentPrefetchResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.segmentsPrefetched,
+        );
     }
 }

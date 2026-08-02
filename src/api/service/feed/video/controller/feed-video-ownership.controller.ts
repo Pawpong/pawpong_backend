@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Delete, Param, Patch } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../../common/decorator/current-user.decorator';
@@ -20,8 +22,11 @@ export class FeedVideoOwnershipController {
     async deleteVideo(
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
-    ): Promise<VideoActionSuccessResponseDto> {
-        return this.deleteVideoUseCase.execute(videoId, userId);
+    ): Promise<ApiResponseDto<VideoActionSuccessResponseDto>> {
+        return ApiResponseDto.success(
+            await this.deleteVideoUseCase.execute(videoId, userId),
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoDeleted,
+        );
     }
 
     @Patch('videos/:videoId/visibility')
@@ -29,7 +34,10 @@ export class FeedVideoOwnershipController {
     async toggleVisibility(
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
-    ): Promise<VideoVisibilityResponseDto> {
-        return this.toggleVideoVisibilityUseCase.execute(videoId, userId);
+    ): Promise<ApiResponseDto<VideoVisibilityResponseDto>> {
+        return ApiResponseDto.success(
+            await this.toggleVideoVisibilityUseCase.execute(videoId, userId),
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.visibilityToggled,
+        );
     }
 }

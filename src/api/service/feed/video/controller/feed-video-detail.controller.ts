@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Get, Param } from '@nestjs/common';
 
 import { MongoObjectIdPipe } from '../../../../../common/pipe/mongo-object-id.pipe';
@@ -15,9 +17,12 @@ export class FeedVideoDetailController {
     @ApiGetFeedVideoMetaEndpoint()
     async getVideoMeta(
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
-    ): Promise<VideoMetaResponseDto | PendingVideoMetaResponseDto> {
-        return (await this.getVideoMetaUseCase.execute(videoId)) as
+    ): Promise<ApiResponseDto<VideoMetaResponseDto | PendingVideoMetaResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.getVideoMetaUseCase.execute(videoId)) as
             | (VideoMetaResponseDto & FeedVideoMetaQueryResult)
-            | (PendingVideoMetaResponseDto & FeedVideoMetaQueryResult);
+            | (PendingVideoMetaResponseDto & FeedVideoMetaQueryResult),
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoMetaRetrieved,
+        );
     }
 }

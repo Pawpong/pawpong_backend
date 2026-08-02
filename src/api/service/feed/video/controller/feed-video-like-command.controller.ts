@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Inject, Param, Post } from '@nestjs/common';
 
 import { CurrentActorType, type ActorType } from '../../../../../common/decorator/current-actor-type.decorator';
@@ -23,8 +25,11 @@ export class FeedVideoLikeCommandController {
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
         @CurrentActorType() actorType: ActorType,
-    ): Promise<LikeToggleResponseDto> {
-        return (await this.toggleLikeUseCase.execute(videoId, userId, actorType)) as LikeToggleResponseDto &
-            FeedLikeToggleResult;
+    ): Promise<ApiResponseDto<LikeToggleResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.toggleLikeUseCase.execute(videoId, userId, actorType)) as LikeToggleResponseDto &
+            FeedLikeToggleResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.likeToggled,
+        );
     }
 }
