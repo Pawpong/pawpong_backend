@@ -33,6 +33,30 @@
 - `CreateAdopterFromSocialUseCase` = 구 최소 유스케이스. HTTP 경로는 없어졌지만
   `REGISTER_ADOPTER_AUTH_SIGNUP` 토큰으로 **`social/complete` 가 계속 소비**한다.
 
+#### ⚠️ 파괴적 변경 — 호환 계층 없음
+
+두 가지가 동시에 깨진다. 구버전 클라이언트를 위한 호환 경로를 **두지 않았다.**
+
+| 변경 | 구버전 호출 결과 |
+|---|---|
+| `POST v2/auth/register-adopter` 제거 | **404** |
+| `POST v2/auth/register/adopter` 가 `realName`·`termsAgreements` 를 필수로 요구 | **400** |
+
+400 응답은 누락 필드를 그대로 알려주므로(`realName should not be empty, termsAgreements must contain at least 1 elements`) 호출자가 원인을 바로 안다.
+
+호환 경로를 두지 않은 이유는 그것이 **정확히 이번에 없앤 중복을 되살리기 때문**이다.
+대신 소비자가 없다는 것을 아래 방법으로 확인하고 진행했다 (2026-08-04).
+
+1. 4개 클라이언트 레포(`frontend_2.0`, `frontend`, `rn`, `admin_frontend`) 소스 전수 검색 — 호출 0건
+   (`swagger.json` 사본 1건만 매칭)
+2. 프론트 빌드 산출물(`.next` server+static) 전수 검색 — `register/adopter` 0, `register-adopter` 0.
+   같은 검사에서 **대조군 `social/complete` 는 29개 파일에 매칭**돼 검사 방식이 유효함을 확인
+3. RN 앱은 자체 auth 엔드포인트가 없다 (Firebase 만 사용)
+
+> 배포된 번들을 네트워크로 긁어 확인하려던 첫 시도는 **대조군도 안 잡혀 무효**였다.
+> 라우트별 청크를 못 집었기 때문이며, 빌드 산출물 전수 검색으로 대체했다.
+> 소비자 부재를 주장할 때는 대조군이 잡히는지 먼저 확인해야 한다.
+
 ### 남은 중복 — `social/complete`
 
 프론트는 아직 입양자 가입에 `POST v2/auth/social/complete` (`role: 'adopter'`) 를 쓴다.
