@@ -27,13 +27,14 @@ admin/                 콘테스트 관리(숨김/삭제)
 | GET | `/api/v2/contest/current` | 진행 중 콘테스트 |
 | GET | `/api/v2/contest/entries` | 출품 목록(페이지네이션) |
 | POST | `/api/v2/contest/entry` | 출품 등록 |
-| GET | `/api/v2/contest/me/entry` | 내 출품 |
-| POST | `/api/v2/contest/vote/:entryId` | 투표 |
 | GET | `/api/v2/contest/hall-of-fame` | 명예의 전당 |
-| GET | `/api/v2/contest/weekly-top` | 주간 TOP |
-| GET | `/api/v2/contest/yesterday-top` | 어제 TOP3 |
+| GET | `/api/v2/contest/me/entry` | 내 출품 |
 | GET | `/api/v2/contest/previous-ranking` | 지난주 랭킹 |
 | GET | `/api/v2/contest/random-entry` | 랜덤 투표 후보 |
+| POST | `/api/v2/contest/vote/{entryId}` | 투표 |
+| GET | `/api/v2/contest/weekly-top` | 주간 TOP |
+| GET | `/api/v2/contest/yesterday-top` | 어제 TOP3 |
+| PATCH | `/api/contest-admin/entries/{entryId}/status` | 콘테스트 항목 상태 변경 |
 
 ## Data Models
 

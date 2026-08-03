@@ -23,11 +23,10 @@ infrastructure/* · repository/*  mongoose
 
 | Method | Path | 용도 |
 |---|---|---|
-| GET | `/api/chat/rooms` | 채팅방 목록(counterpart, lastMessage, unreadCount 포함) |
-| GET | `/api/chat/rooms/:roomId/messages` | 방 메시지 목록 |
-| POST | `/api/chat/rooms` | 채팅방 생성 |
-| DELETE | `/api/chat/rooms/:roomId` | 채팅방 삭제/나가기 |
-| (ws) | socket.io | 실시간 메시지 송수신 |
+| GET | `/api/v2/chat/rooms` | 내 채팅방 목록 조회 |
+| POST | `/api/v2/chat/rooms` | 채팅방 생성 또는 조회 |
+| DELETE | `/api/v2/chat/rooms/{roomId}` | 채팅방 종료 |
+| GET | `/api/v2/chat/rooms/{roomId}/messages` | 채팅 메시지 내역 조회 |
 
 ## Data Models
 

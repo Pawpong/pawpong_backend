@@ -23,7 +23,11 @@ admin/  안내 CRUD
 | Method | Path | 용도 |
 |---|---|---|
 | GET | `/api/v2/announcement/list` | 안내 목록 |
-| GET | `/api/v2/announcement/:announcementId` | 안내 상세 |
+| GET | `/api/v2/announcement/{announcementId}` | 안내 상세 |
+| POST | `/api/announcement-admin/announcement` | 공지사항 생성 |
+| PATCH | `/api/announcement-admin/announcement/{announcementId}` | 공지사항 수정 |
+| DELETE | `/api/announcement-admin/announcement/{announcementId}` | 공지사항 삭제 |
+| GET | `/api/announcement-admin/announcements` | 공지사항 목록 조회 (관리자) |
 
 ## Data Models
 

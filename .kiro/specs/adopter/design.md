@@ -25,20 +25,23 @@ admin/                                  입양자 관리(admin)
 
 | Method | Path | 용도 |
 |---|---|---|
+| DELETE | `/api/v2/adopter/account` | 계정 삭제(탈퇴) |
+| POST | `/api/v2/adopter/application` | 신청 생성 |
+| GET | `/api/v2/adopter/applications` | 내 신청 목록 |
+| GET | `/api/v2/adopter/applications/{id}` | 신청 상세 |
+| POST | `/api/v2/adopter/favorite` | 즐겨찾기 등록 |
+| DELETE | `/api/v2/adopter/favorite/{breederId}` | 즐겨찾기 해제 |
 | GET | `/api/v2/adopter/profile` | 프로필 조회 |
 | PATCH | `/api/v2/adopter/profile` | 프로필 수정 |
-| DELETE | `/api/v2/adopter/account` | 계정 삭제(탈퇴) |
-| GET | `/api/v2/adopter/favorites` | 즐겨찾기(브리더) 목록 |
-| POST | `/api/v2/adopter/favorite` | 즐겨찾기 등록 |
-| DELETE | `/api/v2/adopter/favorite/:breederId` | 즐겨찾기 해제 |
-| GET | `/api/v2/adopter/applications` | 내 신청 목록 |
-| GET | `/api/v2/adopter/applications/:id` | 신청 상세 |
-| POST | `/api/v2/adopter/application` | 신청 생성 |
-| GET | `/api/v2/adopter/reviews` | 내 후기 목록 |
-| GET | `/api/v2/adopter/reviews/:id` | 후기 상세 |
-| POST | `/api/v2/adopter/review` | 후기 작성 |
 | POST | `/api/v2/adopter/report` | 브리더 신고 |
 | POST | `/api/v2/adopter/report/review` | 후기 신고 |
+| POST | `/api/v2/adopter/review` | 후기 작성 |
+| GET | `/api/v2/adopter/reviews` | 내 후기 목록 |
+| GET | `/api/v2/adopter/reviews/{id}` | 후기 상세 |
+| GET | `/api/adopter-admin/applications` | 입양 신청 리스트 조회 |
+| GET | `/api/adopter-admin/applications/{applicationId}` | 입양 신청 상세 조회 |
+| GET | `/api/adopter-admin/reviews/reports` | 후기 신고 목록 조회 |
+| DELETE | `/api/adopter-admin/reviews/{breederId}/{reviewId}` | 부적절한 후기 삭제 |
 
 ## Data Models
 

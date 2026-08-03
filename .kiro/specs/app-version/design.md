@@ -23,6 +23,10 @@ admin/  버전 정책 관리
 | Method | Path | 용도 |
 |---|---|---|
 | GET | `/api/v2/app-version/check` | 현재 버전 대비 업데이트 필요 여부 |
+| GET | `/api/app-version-admin` | 앱 버전 목록 조회 |
+| POST | `/api/app-version-admin` | 앱 버전 생성 |
+| PATCH | `/api/app-version-admin/{appVersionId}` | 앱 버전 수정 |
+| DELETE | `/api/app-version-admin/{appVersionId}` | 앱 버전 삭제 |
 
 ## Data Models
 

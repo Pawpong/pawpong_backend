@@ -22,7 +22,12 @@ admin/  공지 CRUD
 | Method | Path | 용도 |
 |---|---|---|
 | GET | `/api/v2/notice` | 공지 목록(페이지네이션) |
-| GET | `/api/v2/notice/:noticeId` | 공지 상세 |
+| GET | `/api/v2/notice/{noticeId}` | 공지 상세 |
+| GET | `/api/notice-admin` | 공지사항 목록 조회 (관리자) |
+| POST | `/api/notice-admin` | 공지사항 생성 |
+| GET | `/api/notice-admin/{noticeId}` | 공지사항 상세 조회 (관리자) |
+| PATCH | `/api/notice-admin/{noticeId}` | 공지사항 수정 |
+| DELETE | `/api/notice-admin/{noticeId}` | 공지사항 삭제 |
 
 ## Data Models
 

@@ -22,7 +22,12 @@ admin/  품종 관리
 
 | Method | Path | 용도 |
 |---|---|---|
-| GET | `/api/v2/breeds/:petType` | 펫 타입별 품종 목록 |
+| GET | `/api/v2/breeds/{petType}` | 펫 타입별 품종 목록 |
+| GET | `/api/breeds-admin` | 모든 품종 조회 (관리자) |
+| POST | `/api/breeds-admin` | 품종 생성 (관리자) |
+| GET | `/api/breeds-admin/{id}` | 특정 품종 조회 (관리자) |
+| PATCH | `/api/breeds-admin/{id}` | 품종 정보 수정 (관리자) |
+| DELETE | `/api/breeds-admin/{id}` | 품종 삭제 (관리자) |
 
 ## Data Models
 

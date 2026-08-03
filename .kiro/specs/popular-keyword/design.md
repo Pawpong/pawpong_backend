@@ -22,6 +22,11 @@ admin/  검색어 관리
 | Method | Path | 용도 |
 |---|---|---|
 | GET | `/api/v2/popular-keyword` | 인기 검색어 목록 |
+| GET | `/api/popular-keyword-admin` | 전체 인기 검색어 조회 (관리자) |
+| POST | `/api/popular-keyword-admin` | 인기 검색어 생성 (관리자) |
+| GET | `/api/popular-keyword-admin/{id}` | 인기 검색어 단건 조회 (관리자) |
+| PATCH | `/api/popular-keyword-admin/{id}` | 인기 검색어 수정 (관리자) |
+| DELETE | `/api/popular-keyword-admin/{id}` | 인기 검색어 삭제 (관리자) |
 
 ## Data Models
 

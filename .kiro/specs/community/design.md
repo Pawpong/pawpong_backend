@@ -14,6 +14,26 @@
 상태: 전 엔드포인트 구현 완료(dev). 최근 보강 — isLiked/isSaved, 조회수 중복 방지(#135/#137),
 좋아요 알림(#136), 신고/관리자 숨김(#138).
 
+위치: `src/api/service/community/` (사용자) + `src/api/admin/community/` (신고 처리).
+
+### 목록 카드 댓글 미리보기 · 키워드 검색 (2026-07-26)
+
+프론트 피드 카드가 "작성자 + 댓글 1줄 + 더보기" 를 그려야 하는데 `commentPreview` 가
+상세 응답에만 있어 **카드마다 상세를 호출하는 N+1** 이 되고 있었다. 목록 카드에도 추가해 1콜로 해결.
+
+- 카드의 `commentPreview` 는 **최신 댓글 1건**, 없으면 빈 배열(`null` 아님).
+  상세와 같은 `CommunityPostCommentResponseDto` 를 재사용하므로 닉네임 경로는
+  `commentPreview[0].author.nickname`, 본문은 `.body`.
+- 백엔드도 N+1 이 나지 않도록 `$group` + `$first` 집계로 **게시글 수와 무관하게 쿼리 1회**.
+- `search` 쿼리 파라미터 추가 — 제목·본문 대상, 대소문자 무시, 기존 필터와 AND 결합.
+
+**주의**: 목록 쿼리는 열람 범위(전체공개/팔로워공개/본인글) 판정에 이미 `filter.$or` 를 쓴다.
+검색 조건을 `$or` 에 직접 넣으면 그 조건이 덮여 **나만보기·팔로워공개 글이 검색 결과로 노출**된다.
+반드시 `$and` 로 감싸 별도 절로 유지한다. 사용자 입력의 정규식 메타문자는 이스케이프한다.
+
+카드·댓글 DTO 가 서로를 참조하면 순환 import 로 Swagger 데코레이터가 `undefined` 를 받으므로,
+공통 `CommunityAuthorResponseDto` 는 `dto/response/community-author.dto.ts` 로 분리했다.
+
 ## Architecture
 
 헥사고날(본 레포 표준): `controller → use-case → port → adapter → repository`.
@@ -39,20 +59,26 @@ swagger/index.ts        Swagger 명세 분리
 
 | Method | Path | 컨트롤러 | 인증 | 용도 |
 |---|---|---|---|---|
+| PATCH | `/api/v2/community/comments/{commentId}` | community-post-comment | 인증 | 댓글 수정/삭제(작성자) |
+| DELETE | `/api/v2/community/comments/{commentId}` | community-post-comment | 인증 | 댓글 수정/삭제(작성자) |
 | GET | `/api/v2/community/posts` | community-post-list | Optional | 목록(정렬/펫타입/카테고리/작성자) |
-| GET | `/api/v2/community/posts/:postId` | community-post-detail | Optional | 상세(+댓글 프리뷰) |
-| GET | `/api/v2/community/posts/:postId/comments` | community-post-comment | Optional | 댓글 목록 |
-| GET | `/api/v2/community/posts/me/bookmarks` | community-post-bookmark | 인증 | 내 북마크 목록 |
 | POST | `/api/v2/community/posts` | community-post-write | 인증 | 작성 |
-| PATCH | `/api/v2/community/posts/:postId` | community-post-write | 인증 | 수정(작성자) |
-| DELETE | `/api/v2/community/posts/:postId` | community-post-write | 인증 | 삭제(소프트, 작성자) |
-| POST/DELETE | `/api/v2/community/posts/:postId/like` | community-post-like | 인증 | 좋아요/취소(+알림) |
-| POST/DELETE | `/api/v2/community/posts/:postId/bookmark` | community-post-bookmark | 인증 | 북마크/취소 |
-| POST | `/api/v2/community/posts/:postId/comments` | community-post-comment | 인증 | 댓글 작성 |
-| PATCH/DELETE | `/api/v2/community/comments/:commentId` | community-post-comment | 인증 | 댓글 수정/삭제(작성자) |
-| POST | `/api/v2/community/posts/:postId/view` | community-post-view-count | Optional | 조회수 증가 |
-| POST | `/api/v2/community/posts/:postId/report` | community-post-report | 인증 | 신고 |
-| (admin) | `/api/v2/community-admin/*` | admin/* | admin | 신고 목록/처리·게시글 숨김 |
+| GET | `/api/v2/community/posts/me/bookmarks` | community-post-bookmark | 인증 | 내 북마크 목록 |
+| GET | `/api/v2/community/posts/me/drafts` |  |  | 내 임시저장 게시글 목록 |
+| GET | `/api/v2/community/posts/{postId}` | community-post-detail | Optional | 상세(+댓글 프리뷰) |
+| PATCH | `/api/v2/community/posts/{postId}` | community-post-write | 인증 | 수정(작성자) |
+| DELETE | `/api/v2/community/posts/{postId}` | community-post-write | 인증 | 삭제(소프트, 작성자) |
+| POST | `/api/v2/community/posts/{postId}/bookmark` | community-post-bookmark | 인증 | 북마크/취소 |
+| DELETE | `/api/v2/community/posts/{postId}/bookmark` | community-post-bookmark | 인증 | 북마크/취소 |
+| GET | `/api/v2/community/posts/{postId}/comments` | community-post-comment | Optional | 댓글 목록 |
+| POST | `/api/v2/community/posts/{postId}/comments` | community-post-comment | 인증 | 댓글 작성 |
+| POST | `/api/v2/community/posts/{postId}/like` | community-post-like | 인증 | 좋아요/취소(+알림) |
+| DELETE | `/api/v2/community/posts/{postId}/like` | community-post-like | 인증 | 좋아요/취소(+알림) |
+| POST | `/api/v2/community/posts/{postId}/report` | community-post-report | 인증 | 신고 |
+| POST | `/api/v2/community/posts/{postId}/view` | community-post-view-count | Optional | 조회수 증가 |
+| GET | `/api/community-admin/reports` |  |  | 커뮤니티 신고 목록 조회 |
+| POST | `/api/community-admin/reports/{reportId}/dismiss` |  |  | 커뮤니티 신고 기각 |
+| POST | `/api/community-admin/reports/{reportId}/resolve` |  |  | 커뮤니티 신고 처리 (숨김) |
 
 ### 유스케이스 (application/use-cases)
 

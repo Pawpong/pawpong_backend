@@ -32,12 +32,12 @@ repository/*            adoption-pet, adopter-pet-favorite, adoption-record
 | Method | Path | 인증 | 용도 |
 |---|---|---|---|
 | GET | `/api/v2/adoption` | Optional | 목록(petType/breederId/excludePetId/status/keyword/sort, 페이지네이션) |
-| GET | `/api/v2/adoption/popular` | Optional | 인기 분양 동물 |
-| GET | `/api/v2/adoption/:petId` | Optional | 상세 |
-| GET | `/api/v2/adoption/me/favorites` | adopter | 내 관심 목록 |
 | GET | `/api/v2/adoption/me/adopted` | adopter | 내 입양 완료 목록 |
-| POST | `/api/v2/adoption/:petId/favorite` | adopter | 관심 등록 |
-| DELETE | `/api/v2/adoption/:petId/favorite` | adopter | 관심 해제 |
+| GET | `/api/v2/adoption/me/favorites` | adopter | 내 관심 목록 |
+| GET | `/api/v2/adoption/popular` | Optional | 인기 분양 동물 |
+| GET | `/api/v2/adoption/{petId}` | Optional | 상세 |
+| POST | `/api/v2/adoption/{petId}/favorite` | adopter | 관심 등록 |
+| DELETE | `/api/v2/adoption/{petId}/favorite` | adopter | 관심 해제 |
 
 ## Data Models
 

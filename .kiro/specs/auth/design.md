@@ -27,22 +27,30 @@ infrastructure/*        mongoose + redis(인증코드) + storage
 
 | Method | Path | 용도 |
 |---|---|---|
-| POST | `/api/v2/auth/social/check-user` | 소셜 신규/기존 유저 확인 |
-| POST | `/api/v2/auth/social/complete` | 소셜 회원가입 완료(입양자/브리더) |
-| POST | `/api/v2/auth/register/adopter` | 입양자 가입 |
-| POST | `/api/v2/auth/register/breeder` | 브리더 가입 |
-| POST | `/api/v2/auth/register-adopter` | (레거시 호환) 입양자 가입 |
-| POST | `/api/v2/auth/refresh` | 토큰 갱신 |
-| POST | `/api/v2/auth/logout` | 로그아웃 |
+| GET | `/api/auth/google` | 구글 로그인 |
+| GET | `/api/auth/google/callback` | 구글 로그인 콜백 |
+| GET | `/api/auth/kakao` | 카카오 로그인 |
+| GET | `/api/auth/kakao/callback` | 카카오 로그인 콜백 |
+| GET | `/api/auth/naver` | 네이버 로그인 |
+| GET | `/api/auth/naver/callback` | 네이버 로그인 콜백 |
+| POST | `/api/v2/auth/check-breeder-name` | 브리더 상호명 중복 |
 | POST | `/api/v2/auth/check-email` | 이메일 중복 |
 | POST | `/api/v2/auth/check-nickname` | 닉네임 중복 |
-| POST | `/api/v2/auth/check-breeder-name` | 브리더 상호명 중복 |
+| GET | `/api/v2/auth/login-banners` | 로그인 배너 |
+| POST | `/api/v2/auth/logout` | 로그아웃 |
 | POST | `/api/v2/auth/phone/send-code` | 인증코드 발송 |
 | POST | `/api/v2/auth/phone/verify-code` | 인증코드 확인 |
+| POST | `/api/v2/auth/refresh` | 토큰 갱신 |
+| POST | `/api/v2/auth/register-adopter` | (레거시 호환) 입양자 가입 |
+| GET | `/api/v2/auth/register-banners` | 가입 배너 |
+| POST | `/api/v2/auth/register/adopter` | 입양자 가입 |
+| POST | `/api/v2/auth/register/breeder` | 브리더 가입 |
+| POST | `/api/v2/auth/social/check-user` | 소셜 신규/기존 유저 확인 |
+| POST | `/api/v2/auth/social/complete` | 소셜 회원가입 완료(입양자/브리더) |
 | POST | `/api/v2/auth/upload-breeder-documents` | 브리더 서류 업로드 |
 | POST | `/api/v2/auth/upload-breeder-profile` | 브리더 프로필 업로드 |
-| GET | `/api/v2/auth/login-banners` | 로그인 배너 |
-| GET | `/api/v2/auth/register-banners` | 가입 배너 |
+| POST | `/api/auth-admin/login` | 관리자 로그인 |
+| POST | `/api/auth-admin/refresh` | 관리자 토큰 갱신 |
 
 ## Data Models
 

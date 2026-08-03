@@ -22,9 +22,17 @@ admin/  배너/FAQ 관리
 
 | Method | Path | 용도 |
 |---|---|---|
+| GET | `/api/v2/home/available-pets` | 분양 가능 동물(요약) |
 | GET | `/api/v2/home/banners` | 메인 배너 |
 | GET | `/api/v2/home/faqs` | FAQ |
-| GET | `/api/v2/home/available-pets` | 분양 가능 동물(요약) |
+| POST | `/api/home-admin/banner` | 배너 생성 |
+| PATCH | `/api/home-admin/banner/{bannerId}` | 배너 수정 |
+| DELETE | `/api/home-admin/banner/{bannerId}` | 배너 삭제 |
+| GET | `/api/home-admin/banners` | 배너 전체 목록 조회 (관리자) |
+| POST | `/api/home-admin/faq` | FAQ 생성 |
+| PATCH | `/api/home-admin/faq/{faqId}` | FAQ 수정 |
+| DELETE | `/api/home-admin/faq/{faqId}` | FAQ 삭제 |
+| GET | `/api/home-admin/faqs` | FAQ 전체 목록 조회 (관리자) |
 
 ## Data Models
 

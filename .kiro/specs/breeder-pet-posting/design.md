@@ -25,8 +25,8 @@ infrastructure/* · repository/*  mongoose + storage url
 |---|---|---|
 | POST | `/api/v2/breeder-pet-posting` | 분양글 등록 |
 | GET | `/api/v2/breeder-pet-posting/me` | 내 분양글 목록(페이지네이션) |
-| PATCH | `/api/v2/breeder-pet-posting/:petId` | 분양글 수정 |
-| DELETE | `/api/v2/breeder-pet-posting/:petId` | 분양글 삭제 |
+| PATCH | `/api/v2/breeder-pet-posting/{petId}` | 분양글 수정 |
+| DELETE | `/api/v2/breeder-pet-posting/{petId}` | 분양글 삭제 |
 
 ## Data Models
 
