@@ -27,7 +27,7 @@ const POST_NOT_FOUND_RESPONSE = {
 } as const;
 
 export function ApiCommunityPublicController() {
-    return ApiPublicController('커뮤니티 (v2)');
+    return ApiPublicController('커뮤니티');
 }
 
 export function ApiGetCommunityPostListEndpoint() {
@@ -48,7 +48,7 @@ export function ApiGetCommunityPostListEndpoint() {
                 ## 응답
                 - 카드 단위: 본문 발췌(최대 120자) + 첫 사진 primary URL + 전체 사진 URL 배열
                 - commentPreview: 카드에 한 줄로 노출할 최신 댓글. 상세 응답과 같은 형태이며 최신 1건만 담긴다.
-                  댓글이 없으면 빈 배열. 카드마다 상세를 다시 호출하지 않도록 목록 응답에 포함한다
+                  댓글이 없으면 빈 배열. 카드마다 상세를 다시 호출하지 않도록 목록 응답에 포함합니다
                   · 작성자 닉네임은 commentPreview[].author.nickname, 본문은 commentPreview[].body
                 - 카테고리 사이드바 카운트는 별도 endpoint (이번 slice 미포함)
             `,
@@ -90,7 +90,7 @@ export function ApiGetCommunityPostCommentsEndpoint() {
             summary: '커뮤니티 게시글 댓글 페이지네이션',
             description: `
                 작성일 asc 정렬 (오래된 댓글이 먼저). 답글(parentCommentId 있음)도 같은 목록에 포함되며,
-                프론트에서 parentCommentId 기준으로 트리 구성한다.
+                프론트에서 parentCommentId 기준으로 트리를 구성합니다.
             `,
             responseType: PaginationResponseDto,
             itemType: CommunityPostCommentResponseDto,
@@ -105,7 +105,7 @@ export function ApiGetCommunityPostCommentsEndpoint() {
 }
 
 export function ApiCommunityProtectedController() {
-    return ApiController('커뮤니티 (v2, 인증)');
+    return ApiController('커뮤니티');
 }
 
 const POST_FORBIDDEN_RESPONSE = {
@@ -148,7 +148,7 @@ export function ApiDeleteCommunityPostEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '커뮤니티 게시글 삭제 (v2, 소프트)',
-            description: '작성자 본인만 가능. isActive=false 로 소프트 삭제. 목록/상세에 더 이상 노출되지 않는다.',
+            description: '작성자 본인만 가능. isActive=false 로 소프트 삭제. 목록/상세에 더 이상 노출되지 않습니다.',
             responseType: CommunityPostDeleteResponseDto,
             successDescription: '게시글 삭제 성공',
             successMessageExample: COMMUNITY_RESPONSE_MESSAGES.deleted,
@@ -305,7 +305,7 @@ export function ApiGetMyDraftCommunityPostsEndpoint() {
             summary: '내 임시저장 게시글 목록',
             description: `
                 작성 중 임시저장(status=draft) 한 본인 게시글 목록.
-                작성자 본인에게만 노출되며 피드/상세에는 나타나지 않는다. 최신순 정렬.
+                작성자 본인에게만 노출되며 피드/상세에는 나타나지 않습니다. 최신순 정렬.
             `,
             responseType: PaginationResponseDto,
             itemType: CommunityPostCardResponseDto,

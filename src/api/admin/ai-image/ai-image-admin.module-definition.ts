@@ -5,17 +5,29 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 
 import { AiImageSharedModule } from '../../service/ai-image/shared/ai-image-shared.module';
 import { AiImageAdminFiltersController } from './controller/ai-image-admin-filters.controller';
+import { AiImageAdminAssetsController } from './controller/ai-image-admin-assets.controller';
+import { AiImageAdminAgentController } from './controller/ai-image-admin-agent.controller';
+import { AiImageAdminJobsController } from './controller/ai-image-admin-jobs.controller';
 import { GetAllAiImageFiltersUseCase } from './application/use-cases/get-all-ai-image-filters.use-case';
 import { CreateAiImageFilterUseCase } from './application/use-cases/create-ai-image-filter.use-case';
 import { UpdateAiImageFilterUseCase } from './application/use-cases/update-ai-image-filter.use-case';
 import { DeleteAiImageFilterUseCase } from './application/use-cases/delete-ai-image-filter.use-case';
 import { GenerateAiImageFilterPreviewUseCase } from './application/use-cases/generate-ai-image-filter-preview.use-case';
+import { CreateAiImageAdminUploadUrlUseCase } from './application/use-cases/create-ai-image-admin-upload-url.use-case';
+import { GetAiImageAgentHealthUseCase } from './application/use-cases/get-ai-image-agent-health.use-case';
+import { GetAiImageJobsUseCase } from './application/use-cases/get-ai-image-jobs.use-case';
 import { AiImageAdminFilterResultMapperService } from './domain/services/ai-image-admin-filter-result-mapper.service';
+import { AiImageAdminJobResultMapperService } from './domain/services/ai-image-admin-job-result-mapper.service';
 import { AiImageAdminFilterRepository } from './repository/ai-image-admin-filter.repository';
+import { AiImageAdminJobRepository } from './repository/ai-image-admin-job.repository';
 import { AiImageAdminFilterWriterAdapter } from './infrastructure/ai-image-admin-filter-writer.adapter';
+import { AiImageAdminJobReaderAdapter } from './infrastructure/ai-image-admin-job-reader.adapter';
 import { AiImagePreviewGrpcAdapter } from './infrastructure/ai-image-preview-grpc.adapter';
+import { AiImageAgentHealthGrpcAdapter } from './infrastructure/ai-image-agent-health-grpc.adapter';
 import { AI_IMAGE_ADMIN_FILTER_WRITER_PORT } from './application/ports/ai-image-admin-filter-writer.port';
+import { AI_IMAGE_ADMIN_JOB_READER_PORT } from './application/ports/ai-image-admin-job-reader.port';
 import { AI_IMAGE_PREVIEW_PORT } from './application/ports/ai-image-preview.port';
+import { AI_IMAGE_AGENT_HEALTH_PORT } from './application/ports/ai-image-agent-health.port';
 import { AI_IMAGE_AGENT_GRPC_CLIENT, AI_IMAGE_AGENT_GRPC_PACKAGE } from './constants/ai-image-agent-grpc.constant';
 
 // AI 이미지 > 관리자 슬라이스 (필터 CRUD + AI Agent 미리보기)
@@ -44,7 +56,12 @@ const AI_IMAGE_AGENT_GRPC_CLIENT_MODULE = ClientsModule.registerAsync([
 
 export const AI_IMAGE_ADMIN_MODULE_IMPORTS = [AiImageSharedModule, AI_IMAGE_AGENT_GRPC_CLIENT_MODULE];
 
-export const AI_IMAGE_ADMIN_MODULE_CONTROLLERS = [AiImageAdminFiltersController];
+export const AI_IMAGE_ADMIN_MODULE_CONTROLLERS = [
+    AiImageAdminFiltersController,
+    AiImageAdminAssetsController,
+    AiImageAdminAgentController,
+    AiImageAdminJobsController,
+];
 
 const AI_IMAGE_ADMIN_USE_CASE_PROVIDERS = [
     GetAllAiImageFiltersUseCase,
@@ -52,19 +69,27 @@ const AI_IMAGE_ADMIN_USE_CASE_PROVIDERS = [
     UpdateAiImageFilterUseCase,
     DeleteAiImageFilterUseCase,
     GenerateAiImageFilterPreviewUseCase,
+    CreateAiImageAdminUploadUrlUseCase,
+    GetAiImageAgentHealthUseCase,
+    GetAiImageJobsUseCase,
 ];
 
-const AI_IMAGE_ADMIN_DOMAIN_PROVIDERS = [AiImageAdminFilterResultMapperService];
+const AI_IMAGE_ADMIN_DOMAIN_PROVIDERS = [AiImageAdminFilterResultMapperService, AiImageAdminJobResultMapperService];
 
 const AI_IMAGE_ADMIN_INFRASTRUCTURE_PROVIDERS = [
     AiImageAdminFilterRepository,
+    AiImageAdminJobRepository,
     AiImageAdminFilterWriterAdapter,
+    AiImageAdminJobReaderAdapter,
     AiImagePreviewGrpcAdapter,
+    AiImageAgentHealthGrpcAdapter,
 ];
 
 const AI_IMAGE_ADMIN_PORT_BINDINGS = [
     { provide: AI_IMAGE_ADMIN_FILTER_WRITER_PORT, useExisting: AiImageAdminFilterWriterAdapter },
+    { provide: AI_IMAGE_ADMIN_JOB_READER_PORT, useExisting: AiImageAdminJobReaderAdapter },
     { provide: AI_IMAGE_PREVIEW_PORT, useExisting: AiImagePreviewGrpcAdapter },
+    { provide: AI_IMAGE_AGENT_HEALTH_PORT, useExisting: AiImageAgentHealthGrpcAdapter },
 ];
 
 export const AI_IMAGE_ADMIN_MODULE_PROVIDERS = [

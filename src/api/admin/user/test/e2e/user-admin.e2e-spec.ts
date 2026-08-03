@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../../common/testing/test-utils';
+import { createTestingApp, cleanupDatabase, seedAdmin, agreeAllActiveTerms } from '../../../../../common/testing/test-utils';
 
 /**
  * 사용자 관리자 종단간 테스트
@@ -85,6 +85,8 @@ describe('사용자 관리자 종단간 테스트', () => {
                     tempId: `temp_kakao_${providerId}_${timestamp}`,
                     email: `adopter_${timestamp}_${providerId}@test.com`,
                     nickname: `입양자${timestamp}`,
+                    realName: '테스트입양자',
+                    termsAgreements: await agreeAllActiveTerms(app),
                     phone: '010-1111-1111',
                     profileImage: 'https://example.com/profile.jpg',
                 })
@@ -197,6 +199,8 @@ describe('사용자 관리자 종단간 테스트', () => {
                     tempId: `temp_kakao_${providerId}_${timestamp}`,
                     email: `status_test_${timestamp}_${providerId}@test.com`,
                     nickname: `상태변경${timestamp}`,
+                    realName: '테스트입양자',
+                    termsAgreements: await agreeAllActiveTerms(app),
                     phone: '010-3333-3333',
                     profileImage: 'https://example.com/profile.jpg',
                 })
@@ -305,6 +309,8 @@ describe('사용자 관리자 종단간 테스트', () => {
                     tempId: `temp_kakao_${providerId}_${timestamp}`,
                     email: `forbidden_${timestamp}_${providerId}@test.com`,
                     nickname: `권한테스트${timestamp}`,
+                    realName: '테스트입양자',
+                    termsAgreements: await agreeAllActiveTerms(app),
                     phone: '010-4444-4444',
                     profileImage: 'https://example.com/profile.jpg',
                 })

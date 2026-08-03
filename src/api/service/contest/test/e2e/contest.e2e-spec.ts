@@ -55,7 +55,7 @@ async function registerAdopterV2(app: INestApplication): Promise<{ token: string
     const providerId = Math.random().toString().slice(2, 12);
 
     const res = await request(app.getHttpServer())
-        .post('/api/v2/auth/register-adopter')
+        .post('/api/v2/auth/register/adopter')
         .send({
             tempId: `temp_kakao_${providerId}_${timestamp}`,
             email: `adopter_${timestamp}_${providerId}@test.com`,

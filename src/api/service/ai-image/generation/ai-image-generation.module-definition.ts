@@ -7,7 +7,6 @@ import { RequestAiImageGenerationUseCase } from './application/use-cases/request
 import { GetAiImageGenerationUseCase } from './application/use-cases/get-ai-image-generation.use-case';
 import { GetMyAiImageGenerationsUseCase } from './application/use-cases/get-my-ai-image-generations.use-case';
 import { ApplyAiImageGenerationResultUseCase } from './application/use-cases/apply-ai-image-generation-result.use-case';
-import { AiImageObjectKeyService } from './domain/services/ai-image-object-key.service';
 import { AiImageQuotaService } from './domain/services/ai-image-quota.service';
 import { AiImageGenerationResultMapperService } from './domain/services/ai-image-generation-result-mapper.service';
 import { AiImageJobWriterAdapter } from './infrastructure/ai-image-job-writer.adapter';
@@ -35,8 +34,8 @@ const AI_IMAGE_GENERATION_USE_CASE_PROVIDERS = [
     ApplyAiImageGenerationResultUseCase,
 ];
 
+// AiImageObjectKeyService 는 어드민 애셋 업로드와 공유하므로 shared 에서 주입받는다
 const AI_IMAGE_GENERATION_DOMAIN_PROVIDERS = [
-    AiImageObjectKeyService,
     AiImageQuotaService,
     AiImageGenerationResultMapperService,
 ];

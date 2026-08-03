@@ -16,7 +16,7 @@ import { CheckBreederNameRequestDto } from '../dto/request/check-breeder-name-re
 import { CheckSocialUserRequestDto } from '../dto/request/check-social-user-request.dto';
 import { SendVerificationCodeRequestDto, VerifyCodeRequestDto } from '../dto/request/phone-verification-request.dto';
 import { SocialCompleteRequestDto } from '../dto/request/social-complete-request.dto';
-import { RegisterAdopterRequestDto } from '../dto/request/register-adopter-request.dto';
+import { RegisterAdopterFullRequestDto } from '../dto/request/register-adopter-full-request.dto';
 import { RegisterBreederRequestDto } from '../dto/request/register-breeder-request.dto';
 import { TokenResponseDto } from '../dto/response/token-response.dto';
 import { LogoutResponseDto } from '../dto/response/logout-response.dto';
@@ -314,19 +314,31 @@ export function ApiRegisterAdopterEndpoint() {
         ApiEndpoint({
             summary: '입양자 회원가입',
             description: `
-                소셜 로그인 기반 입양자 회원가입을 완료합니다.
+                온보딩 시퀀스(약관 동의 → 계정 정보 → 회원 정보 → 간단한 조사 양식)의
+                마지막 단계에서 호출되는 가입 완료 API입니다.
 
                 ## 주요 기능
                 - tempId에서 소셜 식별자를 파싱합니다.
-                - 닉네임 중복을 검증하고 입양자 계정을 생성합니다.
+                - 활성 약관 기준으로 동의 이력을 검증하고 입양자 계정을 생성합니다.
                 - 발급된 Access/Refresh Token을 함께 반환합니다.
+
+                ## 폼 대응
+                - realName: 실명 (상담 시 표시)
+                - interestedBreedIds: 관심 품종 ID 배열 (회원 정보 단계)
+                - counselDefaultProfile: 첫 상담 prefill 용 사전 정보 (조사 양식 단계)
+                  · counsel_privacy 약관에 동의하지 않으면 이 값을 보낼 수 없습니다.
+                - termsAgreements: 활성 버전 기준 약관 동의 이력 (약관 동의 단계)
+
+                ## 부수 효과
+                - 환영 알림 발행 (in-app, 알림톡, 이메일)
+                - 토큰 발급 + Refresh 저장
             `,
             responseType: RegisterAdopterResponseDto,
             isPublic: true,
             successDescription: '입양자 회원가입 성공',
             successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.adopterSignupCompleted,
         }),
-        ApiBody({ type: RegisterAdopterRequestDto }),
+        ApiBody({ type: RegisterAdopterFullRequestDto }),
     );
 }
 

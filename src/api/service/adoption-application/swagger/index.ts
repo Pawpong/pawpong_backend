@@ -23,7 +23,7 @@ const CONFLICT_RESPONSE = {
 } as const;
 
 export function ApiAdoptionApplicationProtectedController() {
-    return ApiController('입양 신청 (v2)');
+    return ApiController('입양 신청');
 }
 
 export function ApiCreateAdoptionApplicationEndpoint() {

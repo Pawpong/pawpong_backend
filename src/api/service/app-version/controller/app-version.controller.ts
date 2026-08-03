@@ -16,10 +16,8 @@ import { APP_VERSION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/app-version-
 export class AppVersionController {
     constructor(private readonly checkAppVersionUseCase: CheckAppVersionUseCase) {}
 
-    /**
-     * 앱 버전 체크 (RN 앱 시작 시 호출)
-     * 현재 버전을 기준으로 강제/권장 업데이트 여부를 반환
-     */
+    // 앱 버전 체크 (RN 앱 시작 시 호출). 현재 버전 기준으로 강제/권장 업데이트 여부를 반환한다.
+    // JSDoc 블록으로 쓰면 swagger 플러그인이 ApiOperation 을 덮어써 summary 가 사라진다.
     @Get('check')
     @ApiCheckAppVersionEndpoint()
     async checkVersion(

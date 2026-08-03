@@ -10,7 +10,7 @@ import {
     type AiImageJobReaderPort,
 } from '../../../shared/application/ports/ai-image-job-reader.port';
 import { AI_IMAGE_RESPONSE_MESSAGES } from '../../../constants/ai-image-response-messages';
-import { AiImageObjectKeyService } from '../../domain/services/ai-image-object-key.service';
+import { AiImageObjectKeyService } from '../../../shared/domain/services/ai-image-object-key.service';
 import { AiImageQuotaService } from '../../domain/services/ai-image-quota.service';
 import {
     AI_IMAGE_GENERATION_PUBLISHER_PORT,

@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
-import type { TermsSnapshot } from '../../../../terms/application/ports/terms-reader.port';
-import type { TermsAgreementInput } from '../../application/types/auth-signup-v2.type';
+import type { TermsSnapshot } from '../../../terms/application/ports/terms-reader.port';
+import type { TermsAgreementInput } from '../../application/types/auth-signup-register.type';
 
 export type ValidatedTermsAgreement = {
     code: string;
@@ -16,7 +16,7 @@ export type ValidatedTermsAgreement = {
  * - 동의 시각은 서버 시각으로 강제 (클라이언트 조작 방지)
  */
 @Injectable()
-export class AuthV2TermsAgreementValidatorService {
+export class AuthTermsAgreementValidatorService {
     validate(activeTerms: TermsSnapshot[], submitted: TermsAgreementInput[]): ValidatedTermsAgreement[] {
         if (activeTerms.length === 0) {
             throw new BadRequestException('등록된 활성 약관이 없습니다. 관리자에게 문의하세요.');

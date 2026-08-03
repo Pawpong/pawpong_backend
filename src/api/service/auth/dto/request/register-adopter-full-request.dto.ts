@@ -53,7 +53,7 @@ class CounselDefaultProfileDto {
 /**
  * v2 입양자 회원가입 요청 DTO
  */
-export class RegisterAdopterV2RequestDto {
+export class RegisterAdopterFullRequestDto {
     @ApiProperty({ description: '소셜 로그인 임시 ID', example: 'temp_kakao_4479198661_1759826027884' })
     @IsString()
     @IsNotEmpty()

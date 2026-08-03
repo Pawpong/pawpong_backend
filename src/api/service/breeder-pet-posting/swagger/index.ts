@@ -27,7 +27,7 @@ const POSTING_NOT_FOUND_RESPONSE = {
 } as const;
 
 export function ApiBreederPetPostingProtectedController() {
-    return ApiController('분양글 (브리더, v2)');
+    return ApiController('분양글 (브리더)');
 }
 
 export function ApiCreateBreederPetPostingEndpoint() {
@@ -49,7 +49,7 @@ export function ApiCreateBreederPetPostingEndpoint() {
 
                 ## 권한
                 - JWT 인증 + StrictRolesGuard('breeder')
-                - admin/adopter 호출은 403 으로 차단된다.
+                - admin/adopter 호출은 403 으로 차단됩니다.
             `,
             responseType: CreateBreederPetPostingResponseDto,
             successDescription: '분양글 작성 성공',
@@ -64,7 +64,7 @@ export function ApiUpdateBreederPetPostingEndpoint() {
         ApiEndpoint({
             summary: '분양글 부분 수정 (v2, 작성자 본인)',
             description: `
-                v2 분양글의 단순/안전 필드를 부분 수정한다.
+                v2 분양글의 단순/안전 필드를 부분 수정합니다.
 
                 ## 지원 필드 (화이트리스트)
                 - name, breed, gender, birthDate, price, description, petType
@@ -77,7 +77,7 @@ export function ApiUpdateBreederPetPostingEndpoint() {
                 - parentPetSnapshots
                 - breedingEnvironment
 
-                위 필드들은 cross-field 정합성이 복잡하여 별도 PR 에서 다룬다. 본 endpoint 에 보내면 무시된다.
+                위 필드들은 cross-field 정합성이 복잡하여 별도 PR 에서 다룹니다. 본 endpoint 에 보내면 무시됩니다.
 
                 ## 권한
                 - JWT 인증 + StrictRolesGuard('breeder')
@@ -97,9 +97,9 @@ export function ApiDeleteBreederPetPostingEndpoint() {
         ApiEndpoint({
             summary: '분양글 삭제 (v2, soft, 작성자 본인)',
             description: `
-                v2 분양글을 isActive=false 로 soft delete 한다.
+                v2 분양글을 isActive=false 로 soft delete 합니다.
 
-                - 다른 도메인(상담 신청/즐겨찾기 등)이 참조하므로 도큐먼트는 보존한다.
+                - 다른 도메인(상담 신청/즐겨찾기 등)이 참조하므로 도큐먼트는 보존합니다.
                 - 본인 글이 아니거나 이미 비활성/미존재면 400 ("해당 분양글을 찾을 수 없습니다.")
                 - 권한: JWT + StrictRolesGuard('breeder')
             `,

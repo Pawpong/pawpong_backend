@@ -279,12 +279,77 @@ export async function getAdminToken(app: INestApplication, password: string = 'a
 }
 
 /**
+ * 입양자 가입에 필요한 활성 약관을 보장한다.
+ *
+ * 가입은 활성 약관이 하나도 없으면 400 으로 거부되고(AuthTermsAgreementValidatorService),
+ * 필수 약관을 모두 동의해야 통과한다. 인메모리 DB 는 비어 있으므로 여기서 심는다.
+ * 이미 있으면 그대로 두고 현재 활성 목록을 돌려준다.
+ */
+export async function ensureActiveTerms(
+    app: INestApplication,
+): Promise<Array<{ code: string; version: string; isRequired: boolean }>> {
+    const connection = app.get<Connection>(getConnectionToken());
+    const collection = connection.collection('terms');
+
+    const existing = await collection.find({ isActive: true }).toArray();
+    if (existing.length > 0) {
+        return existing.map((t) => ({
+            code: String(t.code),
+            version: String(t.version),
+            isRequired: Boolean(t.isRequired),
+        }));
+    }
+
+    const seeds = [
+        { code: 'service', isRequired: true },
+        { code: 'privacy', isRequired: true },
+        { code: 'age_14plus', isRequired: true },
+        { code: 'marketing', isRequired: false },
+        { code: 'counsel_privacy', isRequired: false },
+    ];
+    const now = new Date();
+    await collection.insertMany(
+        seeds.map((s) => ({
+            code: s.code,
+            version: '1.0.0',
+            title: `${s.code} 약관`,
+            body: '테스트용 약관 본문',
+            isRequired: s.isRequired,
+            isActive: true,
+            activatedAt: now,
+            createdAt: now,
+            updatedAt: now,
+        })),
+    );
+
+    return seeds.map((s) => ({ code: s.code, version: '1.0.0', isRequired: s.isRequired }));
+}
+
+/**
+ * 활성 약관을 보장하고, 가입 payload 에 그대로 넣을 동의 배열을 만든다.
+ *
+ * 각 e2e 가 직접 가입을 호출할 때 쓴다.
+ */
+export async function agreeAllActiveTerms(
+    app: INestApplication,
+): Promise<Array<{ code: string; version: string }>> {
+    const activeTerms = await ensureActiveTerms(app);
+    // 필수 약관만 동의한다. 선택 약관(marketing 등)까지 동의하면
+    // marketingAgreed 같은 파생 값이 바뀌어 응답 계약 테스트가 흔들린다.
+    return activeTerms.filter((t) => t.isRequired).map((t) => ({ code: t.code, version: t.version }));
+}
+
+/**
  * 입양자 등록 API를 통해 토큰 반환
+ *
+ * 가입 계약이 약관 동의를 요구하므로 활성 약관을 먼저 보장하고 전부 동의한 payload 를 보낸다.
  */
 export async function getAdopterToken(app: INestApplication): Promise<{ token: string; adopterId: string } | null> {
     const request = require('supertest');
     const timestamp = Date.now();
     const providerId = Math.random().toString().substr(2, 10);
+
+    const activeTerms = await ensureActiveTerms(app);
 
     const response = await request(app.getHttpServer())
         .post('/api/v2/auth/register/adopter')
@@ -292,8 +357,12 @@ export async function getAdopterToken(app: INestApplication): Promise<{ token: s
             tempId: `temp_kakao_${providerId}_${timestamp}`,
             email: `adopter_${timestamp}_${providerId}@test.com`,
             nickname: `테스트입양자${timestamp}`,
+            realName: '테스트입양자',
             phone: `010-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
             profileImage: 'https://example.com/profile.jpg',
+            termsAgreements: activeTerms
+                .filter((t) => t.isRequired)
+                .map((t) => ({ code: t.code, version: t.version })),
         });
 
     if (response.status === 200 && response.body.data?.accessToken) {

@@ -67,6 +67,24 @@ AI Agent 가 꺼져 있어도 동작해야 하고, 여기에만 의존시키면 
 | POST | `/api/ai-image-admin/filter/preview` | 프롬프트 즉시 시험 (gRPC 동기) |
 | PATCH | `/api/ai-image-admin/filter/{filterId}` | 필터 수정 |
 | DELETE | `/api/ai-image-admin/filter/{filterId}` | 필터 삭제 |
+| POST | `/api/ai-image-admin/upload-url` | 썸네일·레퍼런스·미리보기 원본 업로드 URL |
+| GET | `/api/ai-image-admin/agent/health` | AI Agent 가동 상태 (gRPC 동기) |
+| GET | `/api/ai-image-admin/jobs` | 생성 작업 모니터링 (상태·사용자·필터 필터링) |
+
+### 어드민 운영 경로가 닫혀 있어야 하는 이유
+
+필터 CRUD 만으로는 어드민이 필터를 완성할 수 없다. `thumbnailFileName` 과
+`referenceImageObjectKeys` 는 S3 키를 요구하는데 어드민에게 업로드 경로가 없으면
+그 값을 채울 방법이 없고, 미리보기의 `inputObjectKey` 도 마찬가지다.
+`upload-admin` 도메인은 조회·삭제만 제공하므로 여기서 자체 발급한다.
+
+용도별로 키 경로를 나눠(`thumbnail`→`ai-image/filter`, `reference`→`ai-image/reference`,
+`source`→`ai-image/source`) 고아 파일 정리 시 출처를 구분할 수 있게 한다.
+MIME 허용 규칙은 사용자 생성 경로와 같아야 하므로 `shared` 의 키 서비스 한 곳에서 관리한다.
+
+헬스체크는 **연결 실패도 200 + `UNREACHABLE`** 로 내려간다. 미리보기와 정반대 계약인데,
+미리보기는 실패하면 재시도해야 할 일이지만 헬스체크는 죽었다는 사실 자체가 조회 결과이기 때문이다.
+타임아웃도 미리보기(120초)와 달리 5초로 짧게 끊는다.
 
 ## Data Models
 
@@ -105,6 +123,10 @@ publisher 어댑터가 `isKafkaConnected()` 로 먼저 가드하고, 발행 실�
 `@EventPattern` 핸들러가 throw 하면 오프셋 커밋이 막혀 같은 메시지를 무한 재처리한다.
 try/catch 로 감싸 로그만 남기고, 형식 오류·성공인데 결과키 누락 메시지는 폐기한다.
 
+이 선택의 대가로 실패가 조용해지므로, `GET /api/ai-image-admin/jobs` 가 그 짝이다.
+어드민 응답에는 프롬프트·모델 스냅샷을 포함한다 — 필터를 수정한 뒤에는 필터 정의만 봐서
+그 작업이 무엇으로 돌았는지 알 수 없기 때문이다(사용자 응답에는 여전히 넣지 않는다).
+
 ### Property 5: 쿼터는 실패 건을 세지 않는다
 사용자·콘테스트당 3회. 실패한 생성은 카운트에서 제외해 사용자가 손해보지 않게 한다.
 
@@ -129,7 +151,11 @@ try/catch 로 감싸 로그만 남기고, 형식 오류·성공인데 결과키 
 
 - e2e: 필터 CRUD 왕복, presign 발급, 큐 미연결 시 즉시 FAILED 실측, 상태 폴링 권한(본인 것만)
 - 단위: Kafka 결과 컨슈머(멱등·폐기 조건), 쿼터 정책
-- 미리보기 e2e 는 Port 를 대역으로 교체해 OpenAI 실호출·과금을 피한다
+- 미리보기·헬스체크 e2e 는 Port 를 대역으로 교체해 OpenAI 실호출·과금과 gRPC 기동을 피한다
+- 어드민 작업 모니터링 e2e 는 작업을 컬렉션에 직접 시드한다. 조회 엔드포인트이므로
+  검증 대상은 필터링·페이지네이션·응답 계약이고, 작업이 만들어지는 과정은
+  generation e2e 가 이미 실측한다. 모니터링 테스트를 회원가입·큐 경로에 묶으면
+  auth 계약이 바뀔 때 같이 깨진다
 - 파일 참조 등록 e2e: AI 키가 `isReferenced` 로 나오는지 (고아 오분류 방지)
 
 ## 외부 구성

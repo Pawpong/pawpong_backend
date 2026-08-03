@@ -14,7 +14,7 @@ import { FileReferenceResponseDto } from '../dto/response/file-reference-respons
 import { StorageListResponseDto } from '../dto/response/storage-list-response.dto';
 
 export function ApiUploadAdminController() {
-    return ApiController('스토리지 관리 (Admin)');
+    return ApiController('업로드 관리 (Admin)');
 }
 
 export function ApiListFilesAdminEndpoint() {

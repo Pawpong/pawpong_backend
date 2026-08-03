@@ -1,6 +1,6 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
-import { createTestingApp } from '../../../../../common/testing/test-utils';
+import { createTestingApp, agreeAllActiveTerms } from '../../../../../common/testing/test-utils';
 
 /**
  * 입양자 종단간 테스트
@@ -37,6 +37,8 @@ describe('입양자 종단간 테스트', () => {
                 tempId: `temp_kakao_${adopterProviderId}_${timestamp}`,
                 email: `adopter_${timestamp}@test.com`,
                 nickname: adopterNickname,
+                realName: '테스트입양자',
+                termsAgreements: await agreeAllActiveTerms(app),
                 phone: '010-1234-5678',
                 profileImage: 'https://example.com/adopter.jpg',
             })

@@ -3,7 +3,7 @@ import request from 'supertest';
 
 import { AlimtalkService } from '../../../../../common/alimtalk/alimtalk.service';
 import { StorageService } from '../../../../../common/storage/storage.service';
-import { closeTestingApp, createTestingApp } from '../../../../../common/testing/test-utils';
+import { closeTestingApp, createTestingApp, ensureActiveTerms } from '../../../../../common/testing/test-utils';
 
 export type AuthE2eContext = {
     app: INestApplication;
@@ -21,6 +21,8 @@ function createBase64JpegBuffer(): Buffer {
 
 export async function createAuthE2eContext(): Promise<AuthE2eContext> {
     const app = await createTestingApp();
+    // 입양자 가입은 활성 약관이 있어야 통과한다. 컨텍스트 생성 시 한 번 심어둔다.
+    await ensureActiveTerms(app);
     const uploadTestFileBuffer = createBase64JpegBuffer();
     const uploadTestFileName = 'auth-upload-test.jpg';
     const capturedVerificationCodes = new Map<string, string>();
@@ -64,8 +66,15 @@ export function createAdopterRegisterData(overrides: Record<string, unknown> = {
         tempId: `temp_kakao_${providerId}_${timestamp}`,
         email: `adopter_${timestamp}_${providerId}@test.com`,
         nickname: `테스트입양자${timestamp}`.slice(0, 20),
+        realName: '테스트입양자',
         phone: '010-1234-5678',
         profileImage: 'https://example.com/profile.jpg',
+        // ensureActiveTerms 가 심는 필수 약관 3종 (버전 고정)
+        termsAgreements: [
+            { code: 'service', version: '1.0.0' },
+            { code: 'privacy', version: '1.0.0' },
+            { code: 'age_14plus', version: '1.0.0' },
+        ],
         ...overrides,
     };
 }

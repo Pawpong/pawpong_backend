@@ -9,4 +9,7 @@ export const AI_IMAGE_RESPONSE_MESSAGES = {
     generationRetrieved: 'AI 생성 상태 조회 성공',
     generationsRetrieved: 'AI 생성 이력 조회 성공',
     filterPreviewGenerated: 'AI 필터 미리보기 생성 완료',
+    adminUploadUrlIssued: '업로드 URL 발급 성공',
+    agentHealthRetrieved: 'AI Agent 상태 조회 성공',
+    jobsRetrieved: 'AI 생성 작업 목록 조회 성공',
 } as const;

@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../../common/testing/test-utils';
+import { createTestingApp, cleanupDatabase, seedAdmin, agreeAllActiveTerms } from '../../../../../common/testing/test-utils';
 
 /**
  * 기본 질문 관리자 종단간 테스트
@@ -180,6 +180,8 @@ describe('기본 질문 관리자 종단간 테스트', () => {
                     tempId: `temp_kakao_${providerId}_${timestamp}`,
                     email: `forbidden_question_${timestamp}_${providerId}@test.com`,
                     nickname: `권한테스트${timestamp}`,
+                    realName: '테스트입양자',
+                    termsAgreements: await agreeAllActiveTerms(app),
                     phone: '010-5555-5555',
                     profileImage: 'https://example.com/profile.jpg',
                 })

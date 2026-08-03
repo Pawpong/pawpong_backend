@@ -1,4 +1,4 @@
-import type { RegisterAdopterAuthSignupResult } from '../../../application/types/auth-signup.type';
+import type { RegisterAdopterAuthSignupResult } from '../../application/types/auth-signup.type';
 
 export type TermsAgreementInput = {
     code: string;
@@ -24,7 +24,7 @@ export type CounselDefaultProfileInput = {
  * 마케팅 수신 동의는 별도 boolean 으로 받지 않는다.
  * 'marketing' 코드 약관이 termsAgreements 에 포함되어 있는지로 판정한다.
  */
-export type RegisterAdopterV2Command = {
+export type RegisterAdopterCommand = {
     tempId: string;
     email: string;
     nickname: string;
@@ -36,4 +36,4 @@ export type RegisterAdopterV2Command = {
     termsAgreements: TermsAgreementInput[];
 };
 
-export type RegisterAdopterV2Result = RegisterAdopterAuthSignupResult;
+export type RegisterAdopterResult = RegisterAdopterAuthSignupResult;

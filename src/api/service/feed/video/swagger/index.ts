@@ -74,7 +74,8 @@ function ApiLimitQuery(example: number) {
 }
 
 export function ApiFeedVideoController() {
-    return ApiPublicController('Feed');
+    // 태그는 전 도메인 한글 통일 (47개 중 여기만 영문이었다)
+    return ApiPublicController('피드');
 }
 
 export function ApiGetFeedVideosEndpoint() {

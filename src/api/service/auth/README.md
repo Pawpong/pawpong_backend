@@ -90,7 +90,7 @@ auth/
 ├── sms.service.ts             # SMS 인증 로직
 ├── dto/
 │   ├── request/
-│   │   ├── register-adopter-request.dto.ts
+│   │   ├── register-adopter-full-request.dto.ts
 │   │   ├── register-breeder-request.dto.ts
 │   │   ├── login-request.dto.ts
 │   │   ├── social-login-request.dto.ts

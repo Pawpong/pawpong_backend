@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 
-import { AuthV2TermsAgreementValidatorService } from '../../../domain/services/auth-v2-terms-agreement-validator.service';
+import { AuthTermsAgreementValidatorService } from '../../../domain/services/auth-terms-agreement-validator.service';
 
 const ACTIVE = [
     {
@@ -39,7 +39,7 @@ const ACTIVE = [
 ];
 
 describe('v2 약관 동의 검증 서비스', () => {
-    const service = new AuthV2TermsAgreementValidatorService();
+    const service = new AuthTermsAgreementValidatorService();
 
     it('필수 약관이 모두 포함되면 검증 통과 + 동의시각은 서버 시각으로 채운다', () => {
         const result = service.validate(ACTIVE, [

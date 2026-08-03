@@ -149,20 +149,16 @@ async function bootstrap(): Promise<void> {
         )
         // ── 서비스 API (도메인별) ──────────────────────────────────────
         .addTag('인증')
-        .addTag('인증 v2')
         .addTag('홈페이지')
         .addTag('브리더')
         .addTag('Feed')
-        .addTag('커뮤니티 (v2)')
-        .addTag('커뮤니티 (v2, 인증)')
+        .addTag('커뮤니티')
         .addTag('입양자')
-        .addTag('프로필 (v2 공개)')
-        .addTag('프로필 (v2)')
+        .addTag('프로필')
         .addTag('브리더 관리')
-        .addTag('분양글 (브리더, v2)')
+        .addTag('분양글 (브리더)')
         .addTag('입양')
-        .addTag('입양 (인증)')
-        .addTag('입양 신청 (v2)')
+        .addTag('입양 신청')
         .addTag('콘테스트')
         .addTag('알림')
         .addTag('문의')
@@ -193,7 +189,7 @@ async function bootstrap(): Promise<void> {
         .addTag('지역 관리 (Admin)')
         .addTag('앱 버전 관리 (Admin)')
         .addTag('입양 신청 질문 (Admin)')
-        .addTag('스토리지 관리 (Admin)')
+        .addTag('업로드 관리 (Admin)')
         .build();
 
     const document: OpenAPIObject = SwaggerModule.createDocument(app, config, {

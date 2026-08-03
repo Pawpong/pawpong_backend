@@ -1,7 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { cleanupDatabase, createTestingApp, seedAdmin } from '../../../../../common/testing/test-utils';
+import { cleanupDatabase, createTestingApp, seedAdmin, agreeAllActiveTerms } from '../../../../../common/testing/test-utils';
 
 describe('사용자 관리자 응답 계약 종단간 테스트', () => {
     let app: INestApplication;
@@ -34,6 +34,8 @@ describe('사용자 관리자 응답 계약 종단간 테스트', () => {
                 tempId: `temp_kakao_${adopterProviderId}_${timestamp}`,
                 email: `user_admin_contract_${timestamp}@test.com`,
                 nickname: `유저관리계약${timestamp}`,
+                realName: '테스트입양자',
+                termsAgreements: await agreeAllActiveTerms(app),
                 phone: '010-2222-3333',
                 profileImage: 'https://example.com/user-admin-contract.jpg',
             })

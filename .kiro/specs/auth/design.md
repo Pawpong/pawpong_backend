@@ -10,7 +10,37 @@
 - 소셜 OAuth는 백엔드 콜백이 기존/신규 분기 후 리다이렉트(토큰 URL 전달).
 - JWT Access + Refresh, 쿠키 기반.
 
-상태: 구현 완료(dev).
+상태: 구현 완료(dev). **실측 기준 2026-08-04.**
+
+### 입양자 회원가입 단일화 (2026-08-04)
+
+입양자 가입 엔드포인트가 둘로 갈라져 있었다.
+
+| 옛 경로 | 태그 | 상태 |
+|---|---|---|
+| `POST v2/auth/register/adopter` | `인증` | 최소 필드(tempId·email·nickname·phone) |
+| `POST v2/auth/register-adopter` | `인증 v2` | 약관·관심품종·상담 사전정보 포함 |
+
+둘 다 `v2/auth` 아래인데 하나만 `인증 v2` 태그를 달아 Swagger 가 두 섹션으로 쪼개져 있었고,
+**operationId 가 `registerAdopter` 로 중복**돼 클라이언트 코드 생성이 깨질 수 있었다.
+관리자 API 를 빼면 전 도메인이 이미 v2 이므로 `v2` 를 별도 축으로 표기할 이유도 없다.
+
+프론트 온보딩 폼(약관 동의 → 계정 정보 → 회원 정보 → 간단한 조사 양식)이 수집하는 필드와
+대조한 결과 후자가 실제 플로우와 일치해, **경로는 `register/adopter`(브리더와 대칭), 계약은 후자**로
+단일화하고 `인증 v2` 태그·`v2/` 슬라이스를 제거했다.
+
+- `RegisterAdopterUseCase` = 단일 가입 유스케이스 (구 v2)
+- `CreateAdopterFromSocialUseCase` = 구 최소 유스케이스. HTTP 경로는 없어졌지만
+  `REGISTER_ADOPTER_AUTH_SIGNUP` 토큰으로 **`social/complete` 가 계속 소비**한다.
+
+### 남은 중복 — `social/complete`
+
+프론트는 아직 입양자 가입에 `POST v2/auth/social/complete` (`role: 'adopter'`) 를 쓴다.
+이 경로는 최소 필드만 받으므로 폼이 수집한 약관 동의·관심 품종·상담 사전정보가 유실되고,
+자기소개는 가입 후 `PATCH v2/profile/me` 로 따로 저장하는 우회가 들어가 있다.
+
+프론트를 `register/adopter` 로 옮기면 한 번의 호출로 정리되지만, 운영 중인 가입 흐름이라
+프론트 배포와 함께 진행해야 한다. **현재는 두 경로가 공존한다.**
 
 ## Architecture
 
@@ -41,7 +71,6 @@ infrastructure/*        mongoose + redis(인증코드) + storage
 | POST | `/api/v2/auth/phone/send-code` | 인증코드 발송 |
 | POST | `/api/v2/auth/phone/verify-code` | 인증코드 확인 |
 | POST | `/api/v2/auth/refresh` | 토큰 갱신 |
-| POST | `/api/v2/auth/register-adopter` | (레거시 호환) 입양자 가입 |
 | GET | `/api/v2/auth/register-banners` | 가입 배너 |
 | POST | `/api/v2/auth/register/adopter` | 입양자 가입 |
 | POST | `/api/v2/auth/register/breeder` | 브리더 가입 |

@@ -18,18 +18,15 @@ import { ApiGetSystemHealthEndpoint } from '../swagger/decorators';
  * 관리자 대시보드의 "서버 현황" 페이지에 데이터를 제공합니다.
  * Loki 로그를 분석하여 PM이 읽기 쉬운 형태로 반환합니다.
  */
-@ApiController('플랫폼 관리 (Admin) — 서버 현황')
+@ApiController('플랫폼 관리 (Admin)')
 @Controller('platform-admin')
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('admin')
 export class PlatformAdminSystemHealthController {
     constructor(private readonly getSystemHealthUseCase: GetSystemHealthUseCase) {}
 
-    /**
-     * GET /api/platform-admin/system-health
-     *
-     * 서버 현황을 조회합니다.
-     */
+    // GET /api/platform-admin/system-health — 서버 현황을 조회합니다.
+    // JSDoc 블록으로 쓰면 swagger 플러그인이 ApiOperation 을 덮어써 summary 가 사라진다.
     @Get('system-health')
     @ApiGetSystemHealthEndpoint()
     async getSystemHealth(
