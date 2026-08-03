@@ -19,9 +19,20 @@ src/api/
 - 관리자 기능이 없는 도메인은 `service/` 에만 존재한다.
   (`adoption-application`, `adoption`, `breeder-pet-posting`, `chat`, `feed`,
   `filter-options`, `health`, `inquiry`, `profile`, `terms`)
-- 관리자 전용 도메인은 `admin/` 에만 존재한다. (`user`, `platform`, `alimtalk`,
-  `notification-email-preview`, `standard-question`)
+- 관리자 전용 도메인은 `admin/` 에만 존재한다. (`user`, `platform`)
 - 두 트리는 도메인 이름을 그대로 미러링한다.
+
+**두 트리 밖에 있는 것** (실측 2026-08-03):
+
+| 도메인 | 실제 위치 | 이유 |
+|---|---|---|
+| `alimtalk` | `src/common/alimtalk/` (+ `admin/`) | 발송 기능을 여러 도메인이 공유하는 인프라 |
+| `notification-email-preview` | `src/api/service/notification/` | notification 도메인의 관리자 슬라이스 |
+| `breeder-verification` | `src/api/admin/breeder/verification/` | breeder 관리자 트리의 슬라이스 |
+| `breeder-report` | `src/api/admin/breeder/report/` | 〃 |
+
+라우트 prefix 는 독립돼 있으나(`alimtalk-admin` 등) 물리 위치는 위와 같다.
+`standard-question` 은 `service/` 와 `admin/` 양쪽에 있다.
 
 각 도메인 내부 계층은 동일하다.
 
@@ -88,12 +99,33 @@ src/api/
 }
 ```
 
-**예외는 바이너리 응답 하나뿐이다** — `GET /api/v2/feed/videos/stream/:videoId/:filename`
-(HLS manifest·segment). 봉투로 감싸면 재생이 깨진다.
+### 봉투를 쓰지 않는 응답 — 실측 현황 (2026-08-03)
 
-> feed 도메인은 2026-08-02 까지 봉투 없이 raw 를 반환하던 유일한 예외였고,
-> 프론트가 다른 도메인과 동일하게 `unwrap()` 을 쓰다 댓글·태그 조회가 실패했다.
-> 21개 엔드포인트를 봉투로 통일해 해소했다(`128cc572`).
+두 종류가 있다. **의도된 예외**와 **아직 정리 안 된 이탈**을 구분해야 한다.
+
+#### 의도된 예외 (봉투를 씌우면 안 됨)
+
+| 엔드포인트 | 반환 | 이유 |
+|---|---|---|
+| `GET /api/v2/feed/videos/stream/{videoId}/{filename}` | HLS manifest·segment | 바이너리. 감싸면 재생이 깨진다 |
+| `GET /api/notification-email-preview-admin/render` | `text/html` 문자열 | 브라우저로 직접 여는 미리보기 |
+| `GET /api/auth/{google,kakao,naver}` 및 `/callback` | 소셜 로그인 리다이렉트 | OAuth 플로우 |
+
+#### 아직 봉투를 쓰지 않는 도메인 (정리 대상)
+
+| 도메인 | 상태 |
+|---|---|
+| `announcement` (service·admin) | raw `{items, pagination}` 반환 — 실측 확인 |
+| `chat` | raw 반환 — 실측 확인 |
+
+프론트가 다른 도메인처럼 `unwrap()` 을 쓰면 이 둘은 **런타임에 실패한다.**
+feed 가 정확히 같은 이유로 깨져 있었으므로(아래), 이 두 도메인도 같은 사고가 날 수 있다.
+**신규 엔드포인트는 반드시 봉투를 쓴다.** 위 목록은 늘어나면 안 된다.
+
+> feed 는 2026-08-02 까지 21개 엔드포인트 전부가 raw 를 반환했고,
+> 프론트가 `unwrap()` 을 쓰다 댓글·태그 조회가 실패했다.
+> `FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES` 에 전 엔드포인트 메시지가 이미 정의돼 있었고
+> 컨트롤러 배선만 빠져 있던 상태라, 봉투로 통일해 해소했다(`128cc572`).
 
 ---
 

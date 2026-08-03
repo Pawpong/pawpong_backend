@@ -48,18 +48,28 @@ verification/controller/ · decorator/ · swagger/
 ## Correctness Properties
 
 ### Property 1: 승인 상태만 공개 노출로 이어진다
-`approved` 가 아닌 브리더는 공개 검색·상세에 나타나지 않는다.
+공개 조회 repository 가 `'verification.status': 'approved'` 로 필터한다
+(`service/breeder/repository/breeder-public.repository.ts`).
+심사 전·거절 브리더는 공개 검색·상세에 나타나지 않는다.
 
-### Property 2: 심사 결과는 되돌릴 수 있어야 한다
-승인/거절은 최종 상태가 아니라 재심사가 가능한 전이로 다룬다. 이력이 남는다.
+### Property 2: 심사 요청이 있어야 처리할 수 있다
+`assertVerificationRequestExists` 가 `breeder.verification` 없으면
+`No verification request found` 로 거부한다.
+**이미 처리된 심사를 다시 처리하는 것을 막는 가드는 없다** — 재심사가 가능한 현재 구조다.
 
-### Property 3: 독촉 메일은 미제출자에게만 나간다
-서류를 이미 제출한 브리더는 발송 대상에서 제외된다.
+### Property 3: 독촉 메일 대상은 세 조건을 모두 만족한다
+`findApprovedBreedersMissingDocuments(reviewedBefore)` 기준:
+**승인된(approved)** 브리더 중 **서류가 비어 있고**, 심사 시점이 **28일 이전**인 경우만.
+심사 대기·거절 브리더에게는 나가지 않는다.
+
+### Property 4: 관리자 활동이 로그로 남는다
+`BreederVerificationAdminActivityLogFactoryService` 가 승인·거절·레벨변경·독촉을 기록한다.
 
 ## Error Handling
 
-- 없는 브리더: `BadRequestException`(400).
-- 이미 처리된 심사에 중복 처리 요청: 400 으로 거부하고 현재 상태를 메시지에 포함한다.
+- 권한 없는 관리자: `assertCanManageBreeders` 로 거부 (`브리더 관리 권한이 없습니다.`).
+- 없는 브리더: `assertBreederExists` 로 거부.
+- 심사 요청 없음: `No verification request found`.
 - 응답 봉투·상태 코드는 [`_conventions.md`](../_conventions.md) 를 따른다.
 
 ## Testing Strategy

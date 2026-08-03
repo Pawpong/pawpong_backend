@@ -78,6 +78,8 @@ verify-code는 발급된 코드와 유효시간 내에서만 성공한다.
 - 인증 실패: 401. 검증 실패/중복: 400.
 - 탈퇴/정지 계정은 소셜 콜백에서 에러 type으로 리다이렉트.
 - 응답은 `ApiResponseDto<T>` 래핑.
+  단 소셜 로그인 3종(`auth-{google,kakao,naver}-login.controller.ts`)은 **예외** —
+  OAuth 리다이렉트 URL 을 반환하므로 봉투를 쓰지 않는다 (의도된 예외, 실측 확인).
 
 ## Testing Strategy
 

@@ -53,7 +53,10 @@ socket.io로 전송된 메시지는 영속 저장되어 이후 메시지 조회�
 ## Error Handling
 
 - 없는 방/비참여자: `BadRequestException`(400)/권한 거부.
-- REST 응답은 `ApiResponseDto<T>` 래핑.
+- ⚠️ **REST 응답이 표준 봉투를 쓰지 않는다** (실측 2026-08-03).
+  `chat-room-query` / `chat-room-command` 컨트롤러가 `ApiResponseDto` 를 쓰지 않고
+  결과를 그대로 반환한다. 프론트가 `unwrap()` 을 쓰면 실패한다.
+  정리 대상이며 [`_conventions.md`](../_conventions.md#봉투를-쓰지-않는-응답--실측-현황-2026-08-03) 에 기록돼 있다.
 
 ## Testing Strategy
 

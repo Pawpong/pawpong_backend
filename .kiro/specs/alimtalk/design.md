@@ -53,22 +53,25 @@ common/alimtalk/
 
 ## Correctness Properties
 
-### Property 1: 카카오 승인 코드와 로컬 템플릿이 어긋나면 발송이 실패한다
-`templateCode` 는 카카오 측 승인 값과 일치해야 한다. 임의 생성 금지.
+### Property 1: 템플릿은 인메모리 캐시로 읽는다
+`AlimtalkService` 가 `templateCache: Map<string, CachedTemplate>` 를 들고 있고
+`refreshTemplateCache()` 로 갱신한다.
+관리자가 템플릿을 수정해도 **캐시를 갱신하기 전까지 발송은 옛 내용을 쓴다.**
+그래서 `refresh-cache` 엔드포인트가 별도로 존재한다.
 
-### Property 2: 템플릿 삭제가 진행 중 발송을 깨뜨리지 않는다
-발송 시점에 템플릿을 조회하므로, 삭제된 코드로 발송을 시도하면 실패한다.
-사용 중인 코드는 비활성화를 우선한다.
+### Property 2: 식별자가 ObjectId 가 아니다
+경로 파라미터가 `{templateCode}` 문자열이다(카카오 승인 코드).
+다른 도메인처럼 `MongoObjectIdPipe` 를 쓰지 않는다.
 
-### Property 3: 캐시 갱신은 멱등하다
-`refresh-cache` 를 여러 번 호출해도 결과가 같다.
+### Property 3: 발송은 여러 도메인이 공유한다
+`AlimtalkService` 를 브리더 승인/반려, 상담 신청, 리마인드 등이 주입받아 호출한다.
+그래서 `src/api/` 가 아니라 `src/common/` 에 있다.
 
 ## Error Handling
 
-- 없는 `templateCode`: `BadRequestException`(400).
-- 중복 코드 생성: 400.
-- 발송 실패는 호출 도메인의 흐름을 막지 않는다 — 로그·모니터링으로 남긴다.
 - 응답 봉투·상태 코드는 [`_conventions.md`](../_conventions.md) 를 따른다.
+- 발송 실패 시 호출 도메인의 처리 흐름을 어떻게 다루는지는
+  각 호출 지점(`AlimtalkService` 주입처)에서 결정한다. 이 문서에서 단일 규칙으로 정하지 않는다.
 
 ## Testing Strategy
 

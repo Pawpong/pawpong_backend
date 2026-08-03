@@ -47,18 +47,23 @@ common/mail/MailTemplateService     실제 HTML 생성 (운영과 동일 코드 
 ### Property 1: 미리보기와 실제 발송물이 같아야 한다
 운영 템플릿 서비스를 그대로 호출한다. 미리보기 전용 분기를 만들지 않는다.
 
-### Property 2: 테스트 발송은 요청자에게만 간다
-수신자를 요청 본문으로 받되, 실제 사용자 목록으로 대량 발송할 수 없어야 한다.
+### Property 2: 테스트 발송 수신자는 요청 본문의 단일 이메일이다
+각 요청 DTO 가 `@IsEmail() email: string` 하나를 받는다(배열 아님).
+사용자 목록으로 대량 발송하는 경로가 없다.
 
-### Property 3: 관리자만 접근한다
+### Property 3: `render` 만 봉투를 쓰지 않는다
+`@Header('Content-Type', 'text/html; charset=utf-8')` 로 HTML 문자열을 그대로 반환한다.
+브라우저로 직접 열어 확인하는 용도라 봉투로 감싸면 안 된다.
+같은 컨트롤러의 나머지 8개는 전부 `ApiResponseDto` 봉투를 쓴다.
+
+### Property 4: 관리자만 접근한다
 템플릿 내용과 더미 데이터가 노출되므로 관리자 권한이 필수다.
+인증 없이 `render` 를 호출하면 401 이 나간다(실측 확인).
 
 ## Error Handling
 
-- 없는 템플릿 키: `BadRequestException`(400).
-- 메일 발송 실패: 실패 사유를 응답에 담아 관리자가 원인을 알 수 있게 한다.
 - 응답 봉투·상태 코드는 [`_conventions.md`](../_conventions.md) 를 따른다.
-  단 `render` 의 HTML 응답은 봉투 대상이 아니다.
+  단 `render` 는 위 Property 3 대로 예외다.
 
 ## Testing Strategy
 
