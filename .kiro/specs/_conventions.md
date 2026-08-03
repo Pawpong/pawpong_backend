@@ -1,7 +1,23 @@
 # Conventions — 전 도메인 공통 계약
 
 각 도메인 `design.md` 가 반복해서 적지 않도록 여기에 한 번만 정의한다.
-**실측 기준: 2026-08-03, `https://dev-api.pawpong.kr/docs-json` 및 리포지토리 소스.**
+
+**실측 기준: 2026-08-03.**
+출처는 배포된 실서버 스펙(`https://dev-api.pawpong.kr/docs-json`)과 리포지토리 소스이며,
+소스 측정 범위는 **`src/**/*.ts` 전체**(`.spec.ts` 제외)다. `src/api` 만 보면 `src/common` 의
+사례가 빠져 수치가 어긋난다 — 실제로 이 문서 초판이 그 실수를 했다.
+
+아래 수치는 전부 스크립트로 대조했다. 코드가 바뀌면 수치도 다시 재야 한다.
+
+| 주장 | 실측값 |
+|---|---|
+| `InjectModel` 이 `repository/` 에 있는 비율 | 72개 중 60개 |
+| Port 바인딩 `useExisting` / `useClass` | 193 / 1 |
+| 봉투를 쓰지 않는 컨트롤러 | 9개 |
+| 소스에서 `throw new NotFoundException` | 0건 |
+| 관리자 라우트에 `v2` 접두사 | 0건 |
+| `@Post` 중 `@HttpCode` 200 누락 | 0건 |
+| 도메인 스펙 디렉토리 | 33개 (실서버 도메인 수와 일치) |
 
 ---
 
@@ -172,20 +188,26 @@ feed 가 정확히 같은 이유로 깨져 있었으므로(아래), 이 두 도�
 
 - `InjectModel` 은 `repository/` 에만 둔다. adapter 는 repository 를 주입받아 Port 를 구현한다.
 
-  **실측(2026-08-03): 69개 중 59개만 지켜지고 있다.** 아래 10개는 adapter 가 직접
-  `InjectModel` 을 쓴다 — 목표 규약이지 현재 상태가 아니다.
+  **실측(2026-08-03): `src/` 전체에서 `InjectModel` 사용 파일 72개 중 60개만 `repository/` 에 있다.**
+  (측정 범위: `src/**/*.ts`, `.spec.ts` 제외)
+  나머지 12개는 규약을 벗어난다 — 목표 규약이지 현재 상태가 아니다.
 
-  | 도메인 | 위반 파일 수 |
-  |---|---|
-  | `service/adoption` | 4 |
-  | `service/community` | 2 |
-  | `service/breeder-pet-posting` | 2 |
-  | `service/contest` | 1 |
-  | `service/chat` | 1 |
+  | 위치 | 파일 수 | 비고 |
+  |---|---|---|
+  | `service/adoption/infrastructure` | 4 | adapter 가 직접 모델 주입 |
+  | `service/community/infrastructure` | 2 | author-reader, follow-reader |
+  | `service/breeder-pet-posting/infrastructure` | 2 | profile, reader |
+  | `service/contest/infrastructure` | 1 | user-info |
+  | `service/chat/infrastructure` | 1 | participant-reader |
+  | `common/strategy/infrastructure` | 1 | jwt-user-status (인증 경로) |
+  | `common/alimtalk/admin` | 1 | `alimtalk-admin.service.ts` — adapter 도 아닌 service 에서 직접 |
 
   신규 코드는 규약을 따르고, 위 목록은 늘리지 않는다.
 - request DTO 를 `application/`·`domain/`·`repository/` 로 넘기지 않는다. 내부 command 타입으로 변환한다.
-- Port 바인딩은 항상 `useExisting`.
+- Port 바인딩은 `useExisting` 을 쓴다.
+  실측(2026-08-03): `useExisting` 193건 / `useClass` 1건
+  (`common/discord/discord-webhook.module.ts` 의 `DISCORD_ERROR_ALERT_PORT` — 유일한 예외).
+  `useClass` 를 쓰면 같은 클래스가 토큰별로 별도 인스턴스가 되어 상태를 공유하지 못한다.
 - 도메인 간 직접 서비스 주입 금지. `EventEmitter2` 또는 Port 를 쓴다.
 - NestJS DI: 다른 모듈에서 온 토큰은 재노출할 수 없다. **모듈 자체**를 `exports` 한다.
   Mongoose 모델을 공유하려면 `MongooseModule` 을 재노출한다.
