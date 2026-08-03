@@ -22,7 +22,16 @@ describe('피드 응답 봉투 계약 (e2e)', () => {
         await app.close();
     });
 
-    const expectEnvelope = (body: Record<string, unknown>): void => {
+    /** 표준 봉투 형태 */
+    interface Envelope {
+        success?: unknown;
+        code?: unknown;
+        data?: unknown;
+        message?: unknown;
+        timestamp?: unknown;
+    }
+
+    const expectEnvelope = (body: Envelope): void => {
         expect(body.success).toBe(true);
         expect(body.code).toBe(200);
         expect(body).toHaveProperty('data');
@@ -33,41 +42,42 @@ describe('피드 응답 봉투 계약 (e2e)', () => {
     it('피드 목록이 표준 봉투로 감싸진다', async () => {
         const response = await request(app.getHttpServer()).get('/api/v2/feed/videos?page=1&limit=1').expect(200);
 
-        expectEnvelope(response.body);
+        expectEnvelope(response.body as Envelope);
         // 기존 payload 는 data 안으로 그대로 이동한다 (필드 손실 없음)
-        expect(response.body.data).toHaveProperty('items');
-        expect(response.body.data).toHaveProperty('pagination');
+        expect((response.body as Envelope).data).toHaveProperty('items');
+        expect((response.body as Envelope).data).toHaveProperty('pagination');
     });
 
     it('인기 동영상·인기 태그도 동일한 봉투를 쓴다', async () => {
         const popular = await request(app.getHttpServer()).get('/api/v2/feed/videos/popular?limit=1').expect(200);
-        expectEnvelope(popular.body);
-        expect(Array.isArray(popular.body.data)).toBe(true);
+        expectEnvelope(popular.body as Envelope);
+        expect(Array.isArray((popular.body as Envelope).data)).toBe(true);
 
         const tags = await request(app.getHttpServer()).get('/api/v2/feed/tag/popular?limit=1').expect(200);
-        expectEnvelope(tags.body);
-        expect(Array.isArray(tags.body.data)).toBe(true);
+        expectEnvelope(tags.body as Envelope);
+        expect(Array.isArray((tags.body as Envelope).data)).toBe(true);
     });
 
     it('태그 자동완성이 봉투 안에 배열로 내려온다', async () => {
         const response = await request(app.getHttpServer()).get('/api/v2/feed/tag/suggest?q=강').expect(200);
 
-        expectEnvelope(response.body);
-        expect(Array.isArray(response.body.data)).toBe(true);
+        expectEnvelope(response.body as Envelope);
+        expect(Array.isArray((response.body as Envelope).data)).toBe(true);
     });
 
     it('태그 검색은 tag 를 주면 200 + 봉투로 응답한다', async () => {
         const response = await request(app.getHttpServer()).get('/api/v2/feed/tag/search?tag=강아지').expect(200);
 
-        expectEnvelope(response.body);
-        expect(response.body.data).toHaveProperty('videos');
+        expectEnvelope(response.body as Envelope);
+        expect((response.body as Envelope).data).toHaveProperty('videos');
     });
 
     it('tag 파라미터 누락은 500 이 아니라 400 으로 거부한다', async () => {
         const response = await request(app.getHttpServer()).get('/api/v2/feed/tag/search').expect(400);
 
-        expect(response.body.success).toBe(false);
-        expect(response.body.code).toBe(400);
+        const body = response.body as Envelope;
+        expect(body.success).toBe(false);
+        expect(body.code).toBe(400);
     });
 
     it('빈 tag 도 400 으로 거부한다', async () => {
