@@ -2,27 +2,28 @@
 
 ## Overview
 
-브리더 인증 심사 도메인. 관리자가 브리더 가입 신청과 제출 서류를 검토해
-승인·거절하고, 레벨(new/elite) 변경 신청을 처리한다. 서류 미제출 브리더에게 독촉 메일도 발송한다.
+브리더 인증 심사 도메인. 관리자가 브리더 가입 신청과 제출 서류를 검토해 승인·거절하고,
+레벨(new/elite) 변경 신청을 처리한다. 승인됐지만 서류를 오래 내지 않은 브리더에게 독촉 메일도 보낸다.
 
 위치: `src/api/admin/breeder/verification/` (breeder 관리자 트리의 슬라이스).
 라우트 prefix: `breeder-verification-admin`.
-상태: 구현 완료(dev).
+상태: 구현 완료(dev). **실측 기준 2026-08-03** (소스 대조).
 
 ## Architecture
 
-헥사고날: `controller → use-case → port → adapter → repository`.
-브리더 문서를 공유하므로 repository·Port 는 breeder 관리자 트리의 공용 레이어를 쓴다.
+헥사고날: `controller → use-case → policy → port → adapter → repository`.
 
 ```
 verification/application/use-cases/  get-breeders, get-pending-breeder-verifications,
                                      get-breeder-detail, get-breeder-stats,
                                      update-breeder-verification, change-breeder-level,
                                      get-level-change-requests, send-document-reminders
-verification/controller/ · decorator/ · swagger/
+verification/application/ports/      reader, writer, notifier
+verification/domain/services/        policy(권한·표시명·액션 해석), activity-log-factory, result-mapper
 ```
 
-승인·거절 결과 통보는 도메인 간 직접 주입 대신 알림 경로(이메일·알림톡)를 통해 나간다.
+승인·거절 통보는 도메인 간 직접 주입 대신 **Notifier Port**(`sendApproval` / `sendRejection` /
+`sendDocumentReminder`)를 통해 나간다.
 
 ## Components and Interfaces
 
@@ -39,40 +40,56 @@ verification/controller/ · decorator/ · swagger/
 
 ## Data Models
 
-`breeders.verification` 임베딩 — `status`(pending/reviewing/approved/rejected),
-`documents[]`(제출 서류 파일키), 심사 메모·처리 시각.
-`breeders.level` — `new | elite`, 레벨 변경 신청 상태 포함.
+`breeders.verification` 임베딩.
+
+| 필드 | 용도 |
+|---|---|
+| `status` | `pending` / `reviewing` / `approved` / `rejected` |
+| `reviewedAt` | 심사 시각 (독촉 대상 판정에 쓰임) |
+| `rejectionReason` | 거절 사유 (거절 시) |
+| `documents[]` | 제출 서류 파일키 |
+| `levelChangeRequest` | 레벨 변경 신청 (previousLevel, requestedLevel, requestedAt) |
+| `levelChangeHistory[]` | 승인된 레벨 변경 이력 (approvedAt, approvedBy) |
 
 서류 파일키는 upload 고아 판정 화이트리스트에 `breeders.verification.documents` 로 등록돼 있다.
 
 ## Correctness Properties
 
-### Property 1: 승인 상태만 공개 노출로 이어진다
-공개 조회 repository 가 `'verification.status': 'approved'` 로 필터한다
+### Property 1: 승인된 브리더만 공개 노출된다
+공개 조회 레포지토리가 `'verification.status': 'approved'` 로 필터한다
 (`service/breeder/repository/breeder-public.repository.ts`).
-심사 전·거절 브리더는 공개 검색·상세에 나타나지 않는다.
 
-### Property 2: 심사 요청이 있어야 처리할 수 있다
-`assertVerificationRequestExists` 가 `breeder.verification` 없으면
-`No verification request found` 로 거부한다.
-**이미 처리된 심사를 다시 처리하는 것을 막는 가드는 없다** — 재심사가 가능한 현재 구조다.
+### Property 2: 심사 처리는 관리자 활동 로그에 남는다
+`appendAdminActivityLog` 로 승인/거절 액션이 기록된다.
+레벨 변경 승인이면 `levelChangeHistory` 에 `previousLevel → newLevel`, `approvedAt`, `approvedBy` 가 추가되고
+`levelChangeRequest` 는 정리된다.
 
-### Property 3: 독촉 메일 대상은 세 조건을 모두 만족한다
-`findApprovedBreedersMissingDocuments(reviewedBefore)` 기준:
-**승인된(approved)** 브리더 중 **서류가 비어 있고**, 심사 시점이 **28일 이전**인 경우만.
-심사 대기·거절 브리더에게는 나가지 않는다.
+### Property 3: 독촉 대상은 세 조건을 모두 만족한 브리더다
+`findApprovedBreedersMissingDocuments` 의 실제 쿼리 조건이다.
 
-### Property 4: 관리자 활동이 로그로 남는다
-`BreederVerificationAdminActivityLogFactoryService` 가 승인·거절·레벨변경·독촉을 기록한다.
+1. `verification.status === 'approved'` — **승인된 브리더만** (대기·거절 대상 아님)
+2. `verification.reviewedAt <= 오늘 - 28일` — 심사 후 28일 경과
+3. `verification.documents` 가 없거나 빈 배열
+
+즉 "승인은 됐는데 28일 넘게 서류를 안 낸 사람" 이 대상이다.
+
+### Property 4: 발송 실패가 나머지 대상을 막지 않는다
+루프 안에서 개별 try/catch 로 처리해, 한 명 실패가 전체 발송을 중단시키지 않는다.
+성공한 건만 `sentCount` 와 `breederIds` 에 집계된다.
+
+### Property 5: 브리더 관리 권한이 필요하다
+모든 유스케이스가 `assertCanManageBreeders(admin)` 로 시작한다.
 
 ## Error Handling
 
-- 권한 없는 관리자: `assertCanManageBreeders` 로 거부 (`브리더 관리 권한이 없습니다.`).
-- 없는 브리더: `assertBreederExists` 로 거부.
-- 심사 요청 없음: `No verification request found`.
+- 없는 브리더: 조회 단계에서 거부된다.
+- 권한 없는 관리자: `assertCanManageBreeders` 가 거부한다.
+- **이미 처리된 심사의 재처리를 막는 가드는 없다.** `status` 를 그대로 덮어쓰므로
+  승인 → 거절, 거절 → 승인 재심사가 가능하다. 이것이 현재 동작이며 의도 여부는 미확인이다.
 - 응답 봉투·상태 코드는 [`_conventions.md`](../_conventions.md) 를 따른다.
 
 ## Testing Strategy
 
-- e2e: 승인 대기 목록 → 상세 → 승인/거절 왕복, 권한 없는 접근 401/403
-- 단위: 레벨 변경 정책, 독촉 대상 필터링
+- e2e: 승인 대기 목록 → 상세 → 승인/거절 왕복, 권한 없는 접근 차단
+- 독촉 대상 필터링은 세 조건(승인·28일·서류없음)을 각각 어긋나게 한 픽스처로 검증한다
+- 레벨 변경 승인 시 `levelChangeHistory` 가 쌓이고 `levelChangeRequest` 가 정리되는지
