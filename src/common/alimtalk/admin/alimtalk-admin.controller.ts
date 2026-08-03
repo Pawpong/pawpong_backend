@@ -1,4 +1,4 @@
-import { Body, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../dto/response/api-response.dto';
 import { CreateAlimtalkTemplateUseCase } from './application/use-cases/create-alimtalk-template.use-case';
@@ -61,6 +61,7 @@ export class AlimtalkAdminController {
     }
 
     @Post('templates')
+    @HttpCode(HttpStatus.OK)
     @ApiCreateAlimtalkTemplateEndpoint()
     async createTemplate(
         @Body() createData: TemplateCreateRequestDto,
@@ -79,6 +80,7 @@ export class AlimtalkAdminController {
     }
 
     @Post('templates/refresh-cache')
+    @HttpCode(HttpStatus.OK)
     @ApiRefreshAlimtalkTemplateCacheEndpoint()
     async refreshCache(): Promise<ApiResponseDto<TemplateActionResponseDto>> {
         const data = await this.refreshAlimtalkTemplateCacheUseCase.execute();

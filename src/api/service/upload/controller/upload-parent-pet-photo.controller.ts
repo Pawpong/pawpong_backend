@@ -1,4 +1,4 @@
-import { Body, Param, Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Param, Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
@@ -16,6 +16,7 @@ export class UploadParentPetPhotoController {
     constructor(private readonly uploadParentPetPhotosUseCase: UploadParentPetPhotosUseCase) {}
 
     @Post('parent-pet-photos/:petId')
+    @HttpCode(HttpStatus.OK)
     @ApiUploadParentPetPhotosEndpoint()
     @UseInterceptors(FilesInterceptor('files', 5))
     async uploadParentPetPhotos(

@@ -1,4 +1,4 @@
-import { Body, Param, Patch, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { ReorderStandardQuestionsUseCase } from '../application/use-cases/reorder-standard-questions.use-case';
@@ -55,6 +55,7 @@ export class StandardQuestionAdminCommandController {
     }
 
     @Post('reorder')
+    @HttpCode(HttpStatus.OK)
     @ApiReorderStandardQuestionsAdminEndpoint()
     async reorderStandardQuestions(@Body() reorderData: ReorderStandardQuestionsDto): Promise<ApiResponseDto<boolean>> {
         await this.reorderStandardQuestionsUseCase.execute(reorderData.reorderData);
@@ -65,6 +66,7 @@ export class StandardQuestionAdminCommandController {
     }
 
     @Post('reseed')
+    @HttpCode(HttpStatus.OK)
     @ApiReseedStandardQuestionsAdminEndpoint()
     async reseedStandardQuestions(): Promise<ApiResponseDto<boolean>> {
         await this.reseedStandardQuestionsUseCase.execute();

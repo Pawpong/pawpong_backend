@@ -1,4 +1,4 @@
-import { Body, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -14,6 +14,7 @@ export class UserAdminPhoneWhitelistCreateController {
     constructor(private readonly addPhoneWhitelistUseCase: AddPhoneWhitelistUseCase) {}
 
     @Post('phone-whitelist')
+    @HttpCode(HttpStatus.OK)
     @ApiAddPhoneWhitelistAdminEndpoint()
     async addPhoneWhitelist(
         @CurrentUser('userId') adminId: string,

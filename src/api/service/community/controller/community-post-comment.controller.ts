@@ -1,4 +1,4 @@
-import { Body, Delete, Get, Param, Patch, Post, Query } from '@nestjs/common';
+import { Body, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { Public } from '../../../../common/decorator/public.decorator';
@@ -52,6 +52,7 @@ export class CommunityPostCommentController {
     }
 
     @Post('posts/:postId/comments')
+    @HttpCode(HttpStatus.OK)
     @ApiCreateCommentEndpoint()
     async create(
         @Param('postId') postId: string,

@@ -1,6 +1,6 @@
 import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
 import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
-import { Param, Post, Query } from '@nestjs/common';
+import { HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
 
 import { MongoObjectIdPipe } from '../../../../../common/pipe/mongo-object-id.pipe';
 import { PrefetchAllQualitySegmentsUseCase } from '../application/use-cases/prefetch-all-quality-segments.use-case';
@@ -15,6 +15,7 @@ export class FeedVideoPrefetchController {
     constructor(private readonly prefetchAllQualitySegmentsUseCase: PrefetchAllQualitySegmentsUseCase) {}
 
     @Post('videos/stream/:videoId/prefetch')
+    @HttpCode(HttpStatus.OK)
     @ApiPrefetchFeedVideoSegmentsEndpoint()
     async prefetchSegments(
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,

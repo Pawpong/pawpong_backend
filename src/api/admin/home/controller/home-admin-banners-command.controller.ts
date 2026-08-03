@@ -1,4 +1,4 @@
-import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
+import { Body, Delete, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { CreateBannerUseCase } from '../application/use-cases/create-banner.use-case';
@@ -24,6 +24,7 @@ export class HomeAdminBannersCommandController {
     ) {}
 
     @Post('banner')
+    @HttpCode(HttpStatus.OK)
     @ApiCreateBannerAdminEndpoint()
     async createBanner(@Body() data: BannerCreateRequestDto): Promise<ApiResponseDto<BannerResponseDto>> {
         const banner = await this.createBannerUseCase.execute(data);

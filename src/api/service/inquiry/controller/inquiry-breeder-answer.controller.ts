@@ -1,4 +1,4 @@
-import { Body, Param, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -13,6 +13,7 @@ export class InquiryBreederAnswerController {
     constructor(private readonly createInquiryAnswerUseCase: CreateInquiryAnswerUseCase) {}
 
     @Post(':inquiryId/answer')
+    @HttpCode(HttpStatus.OK)
     @ApiCreateInquiryAnswerEndpoint()
     async createAnswer(
         @Param('inquiryId') inquiryId: string,

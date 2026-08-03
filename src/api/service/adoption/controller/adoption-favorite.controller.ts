@@ -1,4 +1,4 @@
-import { Delete, Param, Post } from '@nestjs/common';
+import { Delete, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -20,6 +20,7 @@ export class AdoptionFavoriteController {
     ) {}
 
     @Post(':petId/favorite')
+    @HttpCode(HttpStatus.OK)
     @ApiAddAdoptionFavoriteEndpoint()
     async addFavorite(
         @CurrentUser('userId') userId: string,

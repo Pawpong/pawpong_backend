@@ -1,6 +1,6 @@
 import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
 import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
-import { Param, Post } from '@nestjs/common';
+import { HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 
 import { MongoObjectIdPipe } from '../../../../../common/pipe/mongo-object-id.pipe';
 import { IncrementViewCountUseCase } from '../application/use-cases/increment-view-count.use-case';
@@ -13,6 +13,7 @@ export class FeedVideoViewController {
     constructor(private readonly incrementViewCountUseCase: IncrementViewCountUseCase) {}
 
     @Post('videos/:videoId/view')
+    @HttpCode(HttpStatus.OK)
     @ApiIncrementFeedVideoViewEndpoint()
     async incrementView(
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,

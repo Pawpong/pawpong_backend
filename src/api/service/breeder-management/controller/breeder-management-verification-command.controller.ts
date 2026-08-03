@@ -23,6 +23,7 @@ export class BreederManagementVerificationCommandController {
     ) {}
 
     @Post('verification')
+    @HttpCode(HttpStatus.OK)
     @ApiSubmitBreederManagementVerificationEndpoint()
     async submitVerification(
         @CurrentUser('userId') userId: string,

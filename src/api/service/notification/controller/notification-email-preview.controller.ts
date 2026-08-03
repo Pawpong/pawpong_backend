@@ -1,4 +1,4 @@
-import { Body, Get, Header, Post, Query } from '@nestjs/common';
+import { Body, Get, Header, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import type { NotificationEmailPreviewType } from '../constants/notification-email-preview.constants';
@@ -49,6 +49,7 @@ export class NotificationEmailPreviewController {
     ) {}
 
     @Post('breeder-approval')
+    @HttpCode(HttpStatus.OK)
     @ApiPreviewBreederApprovalEmailEndpoint()
     async testBreederApprovalEmail(
         @Body() body: BreederApprovalEmailPreviewRequestDto,
@@ -58,6 +59,7 @@ export class NotificationEmailPreviewController {
     }
 
     @Post('breeder-rejection')
+    @HttpCode(HttpStatus.OK)
     @ApiPreviewBreederRejectionEmailEndpoint()
     async testBreederRejectionEmail(
         @Body() body: BreederRejectionEmailPreviewRequestDto,
@@ -67,6 +69,7 @@ export class NotificationEmailPreviewController {
     }
 
     @Post('new-application')
+    @HttpCode(HttpStatus.OK)
     @ApiPreviewNewApplicationEmailEndpoint()
     async testNewApplicationEmail(
         @Body() body: NewApplicationEmailPreviewRequestDto,
@@ -76,6 +79,7 @@ export class NotificationEmailPreviewController {
     }
 
     @Post('document-reminder')
+    @HttpCode(HttpStatus.OK)
     @ApiPreviewDocumentReminderEmailEndpoint()
     async testDocumentReminderEmail(
         @Body() body: DocumentReminderEmailPreviewRequestDto,
@@ -85,6 +89,7 @@ export class NotificationEmailPreviewController {
     }
 
     @Post('application-confirmation')
+    @HttpCode(HttpStatus.OK)
     @ApiPreviewApplicationConfirmationEmailEndpoint()
     async testApplicationConfirmationEmail(
         @Body() body: ApplicationConfirmationEmailPreviewRequestDto,
@@ -94,6 +99,7 @@ export class NotificationEmailPreviewController {
     }
 
     @Post('new-review')
+    @HttpCode(HttpStatus.OK)
     @ApiPreviewNewReviewEmailEndpoint()
     async testNewReviewEmail(
         @Body() body: NewReviewEmailPreviewRequestDto,

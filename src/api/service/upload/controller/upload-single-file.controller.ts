@@ -1,4 +1,4 @@
-import { Body, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -14,6 +14,7 @@ export class UploadSingleFileController {
     constructor(private readonly uploadSingleFileUseCase: UploadSingleFileUseCase) {}
 
     @Post('single')
+    @HttpCode(HttpStatus.OK)
     @ApiUploadSingleFileEndpoint()
     @UseInterceptors(FileInterceptor('file'))
     async uploadSingle(

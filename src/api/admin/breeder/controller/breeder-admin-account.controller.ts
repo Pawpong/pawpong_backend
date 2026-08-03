@@ -1,4 +1,4 @@
-import { Body, Param, Patch, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -29,6 +29,7 @@ export class BreederAdminAccountController {
     ) {}
 
     @Post('suspend/:breederId')
+    @HttpCode(HttpStatus.OK)
     @ApiSuspendBreederAdminEndpoint()
     async suspendBreeder(
         @CurrentUser('userId') adminId: string,
@@ -40,6 +41,7 @@ export class BreederAdminAccountController {
     }
 
     @Post('unsuspend/:breederId')
+    @HttpCode(HttpStatus.OK)
     @ApiUnsuspendBreederAdminEndpoint()
     async unsuspendBreeder(
         @CurrentUser('userId') adminId: string,

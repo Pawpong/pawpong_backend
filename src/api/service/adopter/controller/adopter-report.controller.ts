@@ -1,4 +1,4 @@
-import { Body, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -15,6 +15,7 @@ export class AdopterReportController {
     constructor(private readonly createAdopterReportUseCase: CreateAdopterReportUseCase) {}
 
     @Post('report')
+    @HttpCode(HttpStatus.OK)
     @ApiCreateAdopterReportEndpoint()
     async createReport(
         @CurrentUser('userId') userId: string,

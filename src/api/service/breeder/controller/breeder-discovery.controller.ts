@@ -1,4 +1,4 @@
-import { Get, Post, Body, Query } from '@nestjs/common';
+import { Body, Get, HttpCode, HttpStatus, Post, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
@@ -54,6 +54,7 @@ export class BreederExploreController {
     constructor(private readonly exploreBreedersUseCase: ExploreBreedersUseCase) {}
 
     @Post('explore')
+    @HttpCode(HttpStatus.OK)
     @ApiExploreBreedersEndpoint()
     async exploreBreeders(
         @Body() searchDto: SearchBreederRequestDto,

@@ -3,7 +3,7 @@ import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto
 import { HandleCommunityPostReportUseCase } from '../application/use-cases/handle-community-post-report.use-case';
 import { CommunityAdminController } from '../decorator/community-admin-controller.decorator';
 import { CommunityReportAdminActionResponseDto } from '../dto/response/community-report-admin-response.dto';
-import { Param, Post } from '@nestjs/common';
+import { HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 import { ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 
 /**
@@ -14,6 +14,7 @@ export class CommunityReportAdminCommandController {
     constructor(private readonly handleReportUseCase: HandleCommunityPostReportUseCase) {}
 
     @Post('reports/:reportId/resolve')
+    @HttpCode(HttpStatus.OK)
     @ApiEndpoint({
         summary: '커뮤니티 신고 처리 (숨김)',
         description: '신고된 게시글을 숨김(isActive=false) 처리하고 신고 상태를 resolved 로 변경한다.',
@@ -33,6 +34,7 @@ export class CommunityReportAdminCommandController {
     }
 
     @Post('reports/:reportId/dismiss')
+    @HttpCode(HttpStatus.OK)
     @ApiEndpoint({
         summary: '커뮤니티 신고 기각',
         description: '신고를 기각(dismissed) 처리한다. 게시글은 그대로 유지.',

@@ -1,4 +1,4 @@
-import { Body, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -19,6 +19,7 @@ export class BreederPetPostingCreateController {
     constructor(private readonly createUseCase: CreateBreederPetPostingUseCase) {}
 
     @Post()
+    @HttpCode(HttpStatus.OK)
     @ApiCreateBreederPetPostingEndpoint()
     async create(
         @CurrentUser('userId') userId: string,

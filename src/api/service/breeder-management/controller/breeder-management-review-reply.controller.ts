@@ -1,4 +1,4 @@
-import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
+import { Body, Delete, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
 import { ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
@@ -25,6 +25,7 @@ export class BreederManagementReviewReplyController {
     ) {}
 
     @Post('reviews/:reviewId/reply')
+    @HttpCode(HttpStatus.OK)
     @ApiAddBreederManagementReviewReplyEndpoint()
     async addReviewReply(
         @CurrentUser('userId') userId: string,

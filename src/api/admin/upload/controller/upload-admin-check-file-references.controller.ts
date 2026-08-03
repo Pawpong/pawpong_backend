@@ -1,4 +1,4 @@
-import { Body, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { CheckFileReferencesUseCase } from '../application/use-cases/check-file-references.use-case';
@@ -13,6 +13,7 @@ export class UploadAdminCheckFileReferencesController {
     constructor(private readonly checkFileReferencesUseCase: CheckFileReferencesUseCase) {}
 
     @Post('files/check-references')
+    @HttpCode(HttpStatus.OK)
     @ApiCheckFileReferencesAdminEndpoint()
     async checkFileReferences(
         @Body() data: CheckFileReferencesRequestDto,

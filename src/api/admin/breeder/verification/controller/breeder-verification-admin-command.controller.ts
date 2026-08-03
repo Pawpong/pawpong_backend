@@ -1,4 +1,4 @@
-import { Body, Param, Patch, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
@@ -39,6 +39,7 @@ export class BreederVerificationAdminCommandController {
     }
 
     @Post('document-reminders/send')
+    @HttpCode(HttpStatus.OK)
     @ApiSendDocumentRemindersAdminEndpoint()
     async sendDocumentReminders(
         @CurrentUser('userId') adminId: string,

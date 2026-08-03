@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Delete, Param, Patch, Post } from '@nestjs/common';
+import { BadRequestException, Body, Delete, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -27,6 +27,7 @@ export class CommunityPostWriteController {
     ) {}
 
     @Post('posts')
+    @HttpCode(HttpStatus.OK)
     @ApiCreateCommunityPostEndpoint()
     async create(
         @CurrentUser('userId') userId: string,

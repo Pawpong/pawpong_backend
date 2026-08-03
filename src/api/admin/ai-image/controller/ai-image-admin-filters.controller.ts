@@ -1,4 +1,4 @@
-import { Body, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { MongoObjectIdPipe } from '../../../../common/pipe/mongo-object-id.pipe';
@@ -44,6 +44,7 @@ export class AiImageAdminFiltersController {
     }
 
     @Post('filter')
+    @HttpCode(HttpStatus.OK)
     @ApiCreateAiImageFilterEndpoint()
     async createFilter(
         @Body() body: AiImageFilterCreateRequestDto,
@@ -72,6 +73,7 @@ export class AiImageAdminFiltersController {
     }
 
     @Post('filter/preview')
+    @HttpCode(HttpStatus.OK)
     @ApiGenerateAiImageFilterPreviewEndpoint()
     async previewFilter(
         @Body() body: AiImageFilterPreviewRequestDto,

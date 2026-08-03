@@ -1,4 +1,4 @@
-import { Body, Get, Param, Post } from '@nestjs/common';
+import { Body, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
@@ -26,6 +26,7 @@ export class AiImageGenerationController {
     ) {}
 
     @Post('generation')
+    @HttpCode(HttpStatus.OK)
     @ApiRequestAiImageGenerationEndpoint()
     async requestGeneration(
         @CurrentUser('userId') userId: string,
