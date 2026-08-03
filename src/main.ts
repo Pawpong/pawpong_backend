@@ -147,11 +147,18 @@ async function bootstrap(): Promise<void> {
             },
             'JWT-Auth',
         )
-        // ── 서비스 API (도메인별) ──────────────────────────────────────
+        // 태그 선언 순서가 Swagger UI 노출 순서다. 서비스 API 를 위로, 관리자 API 를 아래로 둔다.
+        //
+        // [주의] 이 목록은 실제 라우트의 태그와 정확히 일치해야 한다.
+        //  - 여기에만 있고 라우트가 없으면 → 빈 섹션이 뜬다
+        //  - 라우트에만 있고 여기 없으면  → 목록 맨 뒤에 순서 없이 붙어 admin 이 위로 섞인다
+        // 태그를 새로 만들면 반드시 여기에도 추가한다.
+        //
+        // ── 서비스 API (공개 / 인증) ────────────────────────────────────
         .addTag('인증')
         .addTag('홈페이지')
         .addTag('브리더')
-        .addTag('Feed')
+        .addTag('피드')
         .addTag('커뮤니티')
         .addTag('입양자')
         .addTag('프로필')
@@ -160,6 +167,8 @@ async function bootstrap(): Promise<void> {
         .addTag('입양')
         .addTag('입양 신청')
         .addTag('콘테스트')
+        .addTag('AI 이미지')
+        .addTag('채팅')
         .addTag('알림')
         .addTag('문의')
         .addTag('업로드')
@@ -180,9 +189,13 @@ async function bootstrap(): Promise<void> {
         .addTag('브리더 신고 관리 (Admin)')
         .addTag('브리더 관리 배너 (Admin)')
         .addTag('홈페이지 관리 (Admin)')
+        .addTag('커뮤니티 관리 (Admin)')
+        .addTag('콘테스트 관리 (Admin)')
+        .addTag('AI 이미지 관리 (Admin)')
         .addTag('공지사항 관리 (Admin)')
         .addTag('알림 관리 (Admin)')
         .addTag('알림 이메일 프리뷰 (Admin)')
+        .addTag('알림톡 관리 (Admin)')
         .addTag('플랫폼 관리 (Admin)')
         .addTag('인기 검색어 관리 (Admin)')
         .addTag('품종 관리 (Admin)')
