@@ -171,6 +171,19 @@ feed 가 정확히 같은 이유로 깨져 있었으므로(아래), 이 두 도�
 ## 7. 경계 규칙
 
 - `InjectModel` 은 `repository/` 에만 둔다. adapter 는 repository 를 주입받아 Port 를 구현한다.
+
+  **실측(2026-08-03): 69개 중 59개만 지켜지고 있다.** 아래 10개는 adapter 가 직접
+  `InjectModel` 을 쓴다 — 목표 규약이지 현재 상태가 아니다.
+
+  | 도메인 | 위반 파일 수 |
+  |---|---|
+  | `service/adoption` | 4 |
+  | `service/community` | 2 |
+  | `service/breeder-pet-posting` | 2 |
+  | `service/contest` | 1 |
+  | `service/chat` | 1 |
+
+  신규 코드는 규약을 따르고, 위 목록은 늘리지 않는다.
 - request DTO 를 `application/`·`domain/`·`repository/` 로 넘기지 않는다. 내부 command 타입으로 변환한다.
 - Port 바인딩은 항상 `useExisting`.
 - 도메인 간 직접 서비스 주입 금지. `EventEmitter2` 또는 Port 를 쓴다.
