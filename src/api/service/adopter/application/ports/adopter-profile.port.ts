@@ -26,6 +26,13 @@ export interface AdopterProfileRecord {
     favoriteBreederList?: FavoriteBreederRecord[];
     adoptionApplicationList?: AdopterProfileApplicationRecord[];
     writtenReviewList?: AdopterWrittenReviewEmbeddedRecord[];
+    /** 가입 시 받은 입양 상담 사전 정보. 조사 양식을 건너뛰면 없다. */
+    counselDefaultProfile?: {
+        selfIntroduction?: string;
+        dailyAbsenceHours?: string;
+        livingSpaceDescription?: string;
+        counselPrivacyAgreedAt?: Date;
+    };
     createdAt: Date;
     updatedAt: Date;
 }
