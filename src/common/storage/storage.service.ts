@@ -96,7 +96,7 @@ export class StorageService {
         // HEIC → JPEG 자동 변환 (모든 업로드 경로에서 일관 적용)
         file = await this.convertHeicToJpegIfNeeded(file);
 
-        const fileName = this.generateFileName(file.originalname, folder);
+        const fileName = this.generateFileName(file.originalname, this.normalizeFolder(folder));
 
         if (this.isTestMode) {
             this.inMemoryObjects.set(fileName, {
@@ -120,6 +120,7 @@ export class StorageService {
             });
 
             await this.s3.send(command);
+            await this.assertUploadedObjectExists(fileName);
 
             const cdnUrl = this.getCdnUrl(fileName);
             const storageUrl = cdnUrl; // 스마일서브는 CDN URL과 Storage URL이 동일
@@ -147,15 +148,16 @@ export class StorageService {
      * 파일 삭제
      */
     async deleteFile(fileName: string): Promise<void> {
+        const objectKey = this.normalizeObjectKey(fileName);
         if (this.isTestMode) {
-            this.inMemoryObjects.delete(this.stripBucketPrefix(fileName));
+            this.inMemoryObjects.delete(objectKey);
             return;
         }
 
         try {
             const command = new DeleteObjectCommand({
                 Bucket: this.bucketName,
-                Key: fileName,
+                Key: objectKey,
             });
 
             await this.s3.send(command);
@@ -170,14 +172,15 @@ export class StorageService {
      * 파일 존재 여부 확인
      */
     async fileExists(fileName: string): Promise<boolean> {
+        const objectKey = this.normalizeObjectKey(fileName);
         if (this.isTestMode) {
-            return this.inMemoryObjects.has(this.stripBucketPrefix(fileName));
+            return this.inMemoryObjects.has(objectKey);
         }
 
         try {
             const command = new HeadObjectCommand({
                 Bucket: this.bucketName,
-                Key: fileName,
+                Key: objectKey,
             });
 
             await this.s3.send(command);
@@ -204,7 +207,7 @@ export class StorageService {
      * CDN URL 생성 (스마일서브는 공개 URL 직접 반환)
      */
     getCdnUrl(fileName: string): string {
-        return `${this.cdnBaseUrl}/${fileName}`;
+        return `${this.cdnBaseUrl}/${this.normalizeObjectKey(fileName)}`;
     }
 
     private stripBucketPrefix(filePath: string): string {
@@ -217,6 +220,48 @@ export class StorageService {
         }
 
         return filePath;
+    }
+
+    private normalizeFolder(folder: string): string {
+        return this.normalizeObjectKey(folder).replace(/\/+$/, '');
+    }
+
+    private normalizeObjectKey(filePath: string): string {
+        if (!filePath) {
+            return '';
+        }
+
+        let normalized = filePath.trim().replace(/^\/+/, '');
+
+        if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+            try {
+                const urlObj = new URL(normalized);
+                normalized = urlObj.pathname.replace(/^\/+/, '');
+            } catch {
+                return normalized;
+            }
+        }
+
+        return this.stripBucketPrefix(normalized);
+    }
+
+    private async assertUploadedObjectExists(fileName: string): Promise<void> {
+        const objectKey = this.normalizeObjectKey(fileName);
+        try {
+            await this.s3.send(
+                new HeadObjectCommand({
+                    Bucket: this.bucketName,
+                    Key: objectKey,
+                }),
+            );
+        } catch (error) {
+            this.logger.error(
+                `[StorageService] Upload verification failed - bucket=${this.bucketName}, key=${objectKey}, url=${this.getCdnUrl(
+                    objectKey,
+                )}, reason=${getErrorMessage(error)}`,
+            );
+            throw error;
+        }
     }
 
     /**
@@ -250,7 +295,7 @@ export class StorageService {
 
         // 방어 로직: 파일 경로에 버킷 이름이 접두사로 포함된 경우 제거
         // (이전 버그로 인해 DB에 pawpong_bucket/representative/uuid.jpg 형태로 저장된 데이터 대응)
-        filePath = this.stripBucketPrefix(filePath);
+        filePath = this.normalizeObjectKey(filePath);
 
         // 스마일서브는 공개 버킷이므로 만료 시간 없이 URL 반환
         // 민감한 파일의 경우 향후 Pre-signed URL 구현 가능
