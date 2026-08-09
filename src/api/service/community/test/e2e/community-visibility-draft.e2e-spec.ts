@@ -127,6 +127,32 @@ describe('v2 커뮤니티 공개범위/임시저장 종단간 테스트', () => 
                 .send({ status: 'published' })
                 .expect(400);
         });
+
+        it('draft 수정 시 body 빈 문자열은 본문 삭제로 저장하고 사진은 유지한다', async () => {
+            const a = await seedAdopter();
+            const tok = await token(a);
+            const draftId = await createPost(tok, { status: 'draft', body: '작성 중 본문' });
+
+            const res = await request(app.getHttpServer())
+                .patch(`/api/v2/community/posts/${draftId}`)
+                .set('Authorization', `Bearer ${tok}`)
+                .send({
+                    body: '',
+                    photos: ['community/example.jpg'],
+                    visibility: 'public',
+                    status: 'draft',
+                })
+                .expect(200);
+
+            expect(res.body.data.body).toBe('');
+            expect(res.body.data.photoUrls[0]).toContain('/community/example.jpg');
+            expect(res.body.data.status).toBe('draft');
+
+            const saved = await connection.collection('community_posts').findOne({ _id: new Types.ObjectId(draftId) });
+            expect(saved?.body).toBe('');
+            expect(saved?.photos).toEqual(['community/example.jpg']);
+            expect(saved?.status).toBe('draft');
+        });
     });
 
     describe('나만보기(private)', () => {
