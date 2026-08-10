@@ -37,13 +37,16 @@ export class StorageService {
     private readonly logger = new Logger(StorageService.name);
 
     constructor(private configService: ConfigService) {
-        this.isTestMode =
-            this.configService.get<string>('PAWPONG_TEST_MODE') === 'true' || process.env.PAWPONG_TEST_MODE === 'true';
+        this.isTestMode = this.resolveTestMode();
 
         if (this.isTestMode) {
             this.bucketName = 'pawpong-test';
+            // 이 분기는 NODE_ENV=test 에서만 도달한다(resolveTestMode 가 보장).
+            // 실서버에서는 절대 켜지지 않으므로 여기서 CDN base 를 그대로 써도 안전하다.
             this.cdnBaseUrl = this.configService.get<string>('SMILESERV_CDN_BASE_URL') || 'https://cdn.test';
-            this.logger.log('[StorageService] 테스트 모드 인메모리 스토리지를 사용합니다.');
+            this.logger.warn(
+                '[StorageService] 테스트 모드 인메모리 스토리지를 사용합니다. 업로드는 프로세스 메모리에만 남고 재시작 시 사라집니다.',
+            );
             return;
         }
 
@@ -60,7 +63,13 @@ export class StorageService {
                 throw new Error('SmileServ S3 configuration is incomplete');
             }
 
-            this.logger.log(`[StorageService] SmileServ Config - Endpoint: ${endpoint}, Bucket: ${this.bucketName}`);
+            // 버킷과 CDN base 를 한 줄에 같이 찍는다. 둘이 어긋나면 업로드는 성공하고
+            // 반환 URL 만 404 가 되므로, 사고 조사 때 이 줄만 보고 판별할 수 있어야 한다.
+            this.logger.log(
+                `[StorageService] SmileServ Config - Endpoint: ${endpoint}, Bucket: ${this.bucketName}, CDN: ${this.cdnBaseUrl}`,
+            );
+
+            this.assertBucketMatchesCdnBaseUrl();
 
             // AWS SDK v3 S3 클라이언트 설정 (스마일서브 호환)
             this.s3 = new S3Client({
@@ -78,6 +87,68 @@ export class StorageService {
             this.logger.error('[StorageService] Failed to initialize SmileServ Storage:', error);
             throw error;
         }
+    }
+
+    /**
+     * 인메모리 테스트 스토리지 사용 여부를 결정한다.
+     *
+     * 이 모드는 업로드를 프로세스 메모리 Map 에만 넣고 S3 를 호출하지 않는다.
+     * 실서버에서 켜지면 업로드가 200 을 반환하고 DB 에 파일키까지 남지만 객체는
+     * 어디에도 존재하지 않아 CDN 이 영구히 NoSuchKey 를 낸다. PutObject 후
+     * HeadObject 검증도 이 분기의 early-return 뒤에 있어 우회된다.
+     *
+     * 그래서 NODE_ENV=test 가 아니면 부팅을 거부한다. 조용한 파일 유실보다
+     * 기동 실패가 훨씬 싸다.
+     */
+    private resolveTestMode(): boolean {
+        const requested =
+            this.configService.get<string>('PAWPONG_TEST_MODE') === 'true' || process.env.PAWPONG_TEST_MODE === 'true';
+
+        if (!requested) {
+            return false;
+        }
+
+        const nodeEnv = this.configService.get<string>('NODE_ENV') ?? process.env.NODE_ENV;
+        if (nodeEnv === 'test') {
+            return true;
+        }
+
+        throw new Error(
+            `[StorageService] PAWPONG_TEST_MODE=true 는 NODE_ENV=test 에서만 허용됩니다 (현재 NODE_ENV=${nodeEnv ?? 'undefined'}). ` +
+                '실서버에서 켜지면 업로드가 성공으로 응답하면서 파일이 저장되지 않습니다. 배포 환경 변수에서 PAWPONG_TEST_MODE 를 제거하세요.',
+        );
+    }
+
+    /**
+     * 업로드 대상 버킷과 조회용 CDN base URL 이 같은 버킷을 가리키는지 검증한다.
+     *
+     * 버킷만 교체하고 CDN 주소를 그대로 두면 PutObject/HeadObject 는 새 버킷에서
+     * 성공하고 반환 URL 만 옛 버킷을 가리켜, 검증을 통과한 파일이 404 가 된다.
+     * 마지막 세그먼트가 우리가 쓰는 버킷 이름인데 설정값과 다르면 확실한 오설정이므로 막는다.
+     */
+    private assertBucketMatchesCdnBaseUrl(): void {
+        if (!this.cdnBaseUrl || !this.bucketName) {
+            return;
+        }
+
+        const lastSegment = this.cdnBaseUrl.replace(/\/+$/, '').split('/').pop() ?? '';
+        if (lastSegment === this.bucketName) {
+            return;
+        }
+
+        if (StorageService.LEGACY_BUCKET_NAMES.includes(lastSegment)) {
+            throw new Error(
+                `[StorageService] 버킷과 CDN base URL 이 서로 다른 버킷을 가리킵니다 - ` +
+                    `SMILESERV_S3_BUCKET=${this.bucketName}, SMILESERV_CDN_BASE_URL=${this.cdnBaseUrl}. ` +
+                    '이 상태로 뜨면 업로드는 성공하고 조회 URL 만 404 가 됩니다. 두 값을 같은 버킷으로 맞추세요.',
+            );
+        }
+
+        // 별도 CDN 도메인을 버킷 앞에 둔 구성일 수 있어 단정하지 않고 경고만 남긴다.
+        this.logger.warn(
+            `[StorageService] CDN base URL 의 마지막 세그먼트(${lastSegment})가 버킷명(${this.bucketName})과 다릅니다. ` +
+                '버킷을 직접 노출하는 구성이라면 오설정입니다.',
+        );
     }
 
     // HEIC/HEIF 전용 major brand 목록 (ISOBMFF offset 8-12)

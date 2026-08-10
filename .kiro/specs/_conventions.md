@@ -236,6 +236,15 @@ feed 가 정확히 같은 이유로 깨져 있었으므로(아래), 이 두 도�
 - 단위: `<domain>/test/**`, e2e: `<domain>/test/e2e/*.e2e-spec.ts`
 - e2e 는 MongoDB Memory Server 를 쓴다. `createTestingApp(overrides)` 로 Port 대역 주입.
 - `PAWPONG_TEST_MODE=true` 면 스토리지가 인메모리로 동작한다.
+  **`NODE_ENV=test` 에서만 허용되며, 그 밖에서는 `StorageService` 생성 시 예외를 던져 부팅을 막는다.**
+  이 모드는 `uploadFile` 이 S3 를 호출하지 않고 메모리 Map 에만 넣은 뒤 실제와 똑같은 CDN URL 을
+  반환하므로, 실서버에서 켜지면 업로드가 200 을 주고 DB 에 파일키까지 남지만 객체는 존재하지 않는다.
+  PutObject 뒤의 HeadObject 검증도 이 분기의 early-return 뒤에 있어 우회된다.
+  2026-08-10 dev 서버가 이 상태로 떠 있어 `.env` 의 플래그를 제거했다 (`.env:90`,
+  4/20 첫 부팅부터 줄곧 인메모리였고 SmileServ 초기화 로그가 한 줄도 없었다).
+- 버킷(`SMILESERV_S3_BUCKET`)과 조회 URL(`SMILESERV_CDN_BASE_URL`)이 서로 다른 버킷을 가리키면
+  부팅을 막는다. 버킷만 교체하면 Put/Head 는 새 버킷에서 성공하고 URL 만 옛 버킷을 가리켜
+  검증을 통과한 파일이 404 가 된다.
 - 검증 순서: `pnpm typecheck` → 단위 → e2e → 필요 시 실서버 스팟체크.
 
 **주의**: e2e 를 다른 무거운 작업과 동시에 돌리면 `beforeAll` 의 MongoMemoryServer 기동이
