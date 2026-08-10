@@ -128,5 +128,26 @@ describe('StorageService', () => {
 
             expect(() => new StorageService(config as any)).not.toThrow();
         });
+
+        // 레거시 목록에 없는 임의의 잘못된 버킷명도 막아야 한다.
+        // 엔드포인트와 같은 호스트면 path-style 로 버킷을 직접 노출하는 구성이므로
+        // 마지막 세그먼트가 버킷명과 다른 것 자체가 오설정이다.
+        it.each([
+            ['오타가 섞인 버킷명', 'https://kr.object.iwinv.kr/pawpong-s3'],
+            ['레거시 목록에 없는 새 버킷명', 'https://kr.object.iwinv.kr/pawpong_s3_v2'],
+            ['전혀 다른 버킷명', 'https://kr.object.iwinv.kr/some_other_bucket'],
+            ['버킷 경로 누락', 'https://kr.object.iwinv.kr'],
+            ['상위 경로만 있음', 'https://kr.object.iwinv.kr/pawpong_s3/nested'],
+        ])('같은 호스트에서 %s 이면 생성에 실패한다', (_label, cdnBaseUrl) => {
+            const config = makeLiveConfig({ SMILESERV_CDN_BASE_URL: cdnBaseUrl });
+
+            expect(() => new StorageService(config as any)).toThrow(/StorageService/);
+        });
+
+        it('CDN 호스트가 다르면 임의의 경로는 경고만 남기고 통과한다', () => {
+            const config = makeLiveConfig({ SMILESERV_CDN_BASE_URL: 'https://cdn.pawpong.kr/assets' });
+
+            expect(() => new StorageService(config as any)).not.toThrow();
+        });
     });
 });

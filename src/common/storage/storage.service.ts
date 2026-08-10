@@ -69,7 +69,7 @@ export class StorageService {
                 `[StorageService] SmileServ Config - Endpoint: ${endpoint}, Bucket: ${this.bucketName}, CDN: ${this.cdnBaseUrl}`,
             );
 
-            this.assertBucketMatchesCdnBaseUrl();
+            this.assertBucketMatchesCdnBaseUrl(endpoint);
 
             // AWS SDK v3 S3 클라이언트 설정 (스마일서브 호환)
             this.s3 = new S3Client({
@@ -124,31 +124,68 @@ export class StorageService {
      *
      * 버킷만 교체하고 CDN 주소를 그대로 두면 PutObject/HeadObject 는 새 버킷에서
      * 성공하고 반환 URL 만 옛 버킷을 가리켜, 검증을 통과한 파일이 404 가 된다.
-     * 마지막 세그먼트가 우리가 쓰는 버킷 이름인데 설정값과 다르면 확실한 오설정이므로 막는다.
+     *
+     * 판정 기준은 CDN 호스트다.
+     * - S3 엔드포인트와 같은 호스트 → path-style 로 버킷을 직접 노출하는 구성이므로
+     *   마지막 경로 세그먼트가 버킷명과 다르면(오타·새 버킷명·경로 누락 포함) 전부 막는다.
+     * - 다른 호스트 → 버킷을 감싸는 CDN 도메인일 수 있어 경로만으로 단정하지 않고 경고만 남긴다.
+     *   단, 우리가 쓰던 버킷 이름이 남아 있으면 교체 누락이 확실하므로 막는다.
      */
-    private assertBucketMatchesCdnBaseUrl(): void {
+    private assertBucketMatchesCdnBaseUrl(endpoint: string): void {
         if (!this.cdnBaseUrl || !this.bucketName) {
             return;
         }
 
-        const lastSegment = this.cdnBaseUrl.replace(/\/+$/, '').split('/').pop() ?? '';
+        let cdnUrl: URL;
+        let endpointUrl: URL;
+        try {
+            cdnUrl = new URL(this.cdnBaseUrl);
+            endpointUrl = new URL(endpoint);
+        } catch {
+            this.logger.warn(
+                `[StorageService] CDN base URL 또는 엔드포인트를 URL 로 해석할 수 없어 버킷 정합 검사를 건너뜁니다 - ` +
+                    `SMILESERV_CDN_BASE_URL=${this.cdnBaseUrl}, SMILESERV_S3_ENDPOINT=${endpoint}`,
+            );
+            return;
+        }
+
+        const segments = cdnUrl.pathname.split('/').filter(Boolean);
+        const lastSegment = segments[segments.length - 1] ?? '';
+
         if (lastSegment === this.bucketName) {
             return;
         }
 
-        if (StorageService.LEGACY_BUCKET_NAMES.includes(lastSegment)) {
+        const fail = (detail: string): never => {
             throw new Error(
-                `[StorageService] 버킷과 CDN base URL 이 서로 다른 버킷을 가리킵니다 - ` +
+                `[StorageService] ${detail} - ` +
                     `SMILESERV_S3_BUCKET=${this.bucketName}, SMILESERV_CDN_BASE_URL=${this.cdnBaseUrl}. ` +
                     '이 상태로 뜨면 업로드는 성공하고 조회 URL 만 404 가 됩니다. 두 값을 같은 버킷으로 맞추세요.',
             );
+        };
+
+        // CDN 호스트가 S3 엔드포인트와 같으면 path-style 로 버킷을 직접 노출하는 구성이다.
+        // 이때 마지막 경로 세그먼트는 반드시 버킷명이어야 한다 — 오타든 새 버킷명이든
+        // 다르면 조회 URL 이 다른(또는 없는) 버킷을 가리키므로 예외 없이 막는다.
+        if (cdnUrl.host === endpointUrl.host) {
+            if (segments.length === 0) {
+                fail('CDN base URL 에 버킷 경로가 없습니다');
+            }
+            fail('버킷과 CDN base URL 이 서로 다른 버킷을 가리킵니다');
         }
 
-        // 별도 CDN 도메인을 버킷 앞에 둔 구성일 수 있어 단정하지 않고 경고만 남긴다.
-        this.logger.warn(
-            `[StorageService] CDN base URL 의 마지막 세그먼트(${lastSegment})가 버킷명(${this.bucketName})과 다릅니다. ` +
-                '버킷을 직접 노출하는 구성이라면 오설정입니다.',
-        );
+        // 호스트가 다르면 버킷을 감싸는 별도 CDN 도메인일 수 있어 경로만으로 단정할 수 없다.
+        // 다만 우리가 쓰던 버킷 이름이 남아 있으면 버킷 교체 후 CDN 을 못 고친 경우가 확실하다.
+        if (StorageService.LEGACY_BUCKET_NAMES.includes(lastSegment)) {
+            fail('CDN base URL 이 예전 버킷을 그대로 가리킵니다');
+        }
+
+        if (segments.length > 0) {
+            this.logger.warn(
+                `[StorageService] CDN base URL 의 마지막 세그먼트(${lastSegment})가 버킷명(${this.bucketName})과 다릅니다. ` +
+                    '버킷을 직접 노출하는 구성이라면 오설정입니다.',
+            );
+        }
     }
 
     // HEIC/HEIF 전용 major brand 목록 (ISOBMFF offset 8-12)
