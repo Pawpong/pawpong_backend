@@ -43,7 +43,9 @@ export class StorageService {
             this.bucketName = 'pawpong-test';
             // 이 분기는 NODE_ENV=test 에서만 도달한다(resolveTestMode 가 보장).
             // 실서버에서는 절대 켜지지 않으므로 여기서 CDN base 를 그대로 써도 안전하다.
-            this.cdnBaseUrl = this.configService.get<string>('SMILESERV_CDN_BASE_URL') || 'https://cdn.test';
+            this.cdnBaseUrl = this.normalizeCdnBaseUrl(
+                this.configService.get<string>('SMILESERV_CDN_BASE_URL') || 'https://cdn.test',
+            );
             this.logger.warn(
                 '[StorageService] 테스트 모드 인메모리 스토리지를 사용합니다. 업로드는 프로세스 메모리에만 남고 재시작 시 사라집니다.',
             );
@@ -57,7 +59,7 @@ export class StorageService {
             const accessKeyId = this.configService.get<string>('SMILESERV_S3_ACCESS_KEY');
             const secretAccessKey = this.configService.get<string>('SMILESERV_S3_SECRET_KEY');
             this.bucketName = this.configService.get<string>('SMILESERV_S3_BUCKET') || '';
-            this.cdnBaseUrl = this.configService.get<string>('SMILESERV_CDN_BASE_URL') || '';
+            this.cdnBaseUrl = this.normalizeCdnBaseUrl(this.configService.get<string>('SMILESERV_CDN_BASE_URL') || '');
 
             if (!endpoint || !accessKeyId || !secretAccessKey) {
                 throw new Error('SmileServ S3 configuration is incomplete');
@@ -87,6 +89,17 @@ export class StorageService {
             this.logger.error('[StorageService] Failed to initialize SmileServ Storage:', error);
             throw error;
         }
+    }
+
+    /**
+     * CDN base URL 을 조회 URL 조립에 안전한 형태로 정규화한다.
+     *
+     * `getCdnUrl` 이 `${cdnBaseUrl}/${key}` 로 조립하므로 끝에 슬래시가 남아 있으면
+     * `.../pawpong_s3//community/a.png` 처럼 `//` 가 생긴다. 이 URL 은 업로드한 키와
+     * 다른 객체를 가리켜 조회가 404 가 되므로 입력 단계에서 잘라낸다.
+     */
+    private normalizeCdnBaseUrl(value: string): string {
+        return value.trim().replace(/\/+$/, '');
     }
 
     /**

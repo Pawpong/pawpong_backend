@@ -147,10 +147,23 @@ describe('StorageService', () => {
             expect(() => new StorageService(config as any)).toThrow(/StorageService/);
         });
 
-        it('같은 호스트에서 버킷 한 단계 경로는 통과한다 (끝 슬래시 허용)', () => {
+        // 끝 슬래시는 통과시키되, 통과의 조건은 "예외가 안 난다"가 아니라
+        // "조회 URL 이 정확히 나온다"다. 정규화 없이 통과시키면 getCdnUrl 이
+        // `.../pawpong_s3//community/a.png` 를 만들어 업로드한 키와 다른 객체를 가리킨다.
+        it('끝 슬래시가 붙은 CDN base 는 정규화되어 조회 URL 에 // 가 생기지 않는다', () => {
             const config = makeLiveConfig({ SMILESERV_CDN_BASE_URL: 'https://kr.object.iwinv.kr/pawpong_s3/' });
 
-            expect(() => new StorageService(config as any)).not.toThrow();
+            const service = new StorageService(config as any);
+
+            expect(service.getCdnUrl('community/a.png')).toBe('https://kr.object.iwinv.kr/pawpong_s3/community/a.png');
+        });
+
+        it('끝 슬래시가 여러 개여도 정규화한다', () => {
+            const config = makeLiveConfig({ SMILESERV_CDN_BASE_URL: 'https://kr.object.iwinv.kr/pawpong_s3///' });
+
+            const service = new StorageService(config as any);
+
+            expect(service.getCdnUrl('community/a.png')).toBe('https://kr.object.iwinv.kr/pawpong_s3/community/a.png');
         });
 
         it('CDN 호스트가 다르면 임의의 경로는 경고만 남기고 통과한다', () => {
