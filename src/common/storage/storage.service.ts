@@ -127,7 +127,8 @@ export class StorageService {
      *
      * 판정 기준은 CDN 호스트다.
      * - S3 엔드포인트와 같은 호스트 → path-style 로 버킷을 직접 노출하는 구성이므로
-     *   마지막 경로 세그먼트가 버킷명과 다르면(오타·새 버킷명·경로 누락 포함) 전부 막는다.
+     *   경로가 정확히 `/<bucket>` 한 세그먼트여야 한다. 오타·새 버킷명·경로 누락은 물론
+     *   버킷 앞에 상위 경로가 끼는 경우(`/foo/<bucket>`)도 막는다.
      * - 다른 호스트 → 버킷을 감싸는 CDN 도메인일 수 있어 경로만으로 단정하지 않고 경고만 남긴다.
      *   단, 우리가 쓰던 버킷 이름이 남아 있으면 교체 누락이 확실하므로 막는다.
      */
@@ -152,10 +153,6 @@ export class StorageService {
         const segments = cdnUrl.pathname.split('/').filter(Boolean);
         const lastSegment = segments[segments.length - 1] ?? '';
 
-        if (lastSegment === this.bucketName) {
-            return;
-        }
-
         const fail = (detail: string): never => {
             throw new Error(
                 `[StorageService] ${detail} - ` +
@@ -165,16 +162,27 @@ export class StorageService {
         };
 
         // CDN 호스트가 S3 엔드포인트와 같으면 path-style 로 버킷을 직접 노출하는 구성이다.
-        // 이때 마지막 경로 세그먼트는 반드시 버킷명이어야 한다 — 오타든 새 버킷명이든
-        // 다르면 조회 URL 이 다른(또는 없는) 버킷을 가리키므로 예외 없이 막는다.
+        // 이때 조회 URL 은 https://<host>/<bucket>/<key> 형태여야 하므로 경로는
+        // 정확히 버킷 한 세그먼트다. 앞에 상위 경로가 끼면 버킷명이 마지막에 있어도
+        // 실제 조회 경로가 어긋나므로 세그먼트 개수까지 함께 본다.
         if (cdnUrl.host === endpointUrl.host) {
             if (segments.length === 0) {
                 fail('CDN base URL 에 버킷 경로가 없습니다');
             }
-            fail('버킷과 CDN base URL 이 서로 다른 버킷을 가리킵니다');
+            if (segments.length > 1) {
+                fail(`CDN base URL 의 버킷 경로는 한 단계여야 합니다 (현재 경로: /${segments.join('/')})`);
+            }
+            if (segments[0] !== this.bucketName) {
+                fail('버킷과 CDN base URL 이 서로 다른 버킷을 가리킵니다');
+            }
+            return;
         }
 
         // 호스트가 다르면 버킷을 감싸는 별도 CDN 도메인일 수 있어 경로만으로 단정할 수 없다.
+        if (lastSegment === this.bucketName) {
+            return;
+        }
+
         // 다만 우리가 쓰던 버킷 이름이 남아 있으면 버킷 교체 후 CDN 을 못 고친 경우가 확실하다.
         if (StorageService.LEGACY_BUCKET_NAMES.includes(lastSegment)) {
             fail('CDN base URL 이 예전 버킷을 그대로 가리킵니다');

@@ -137,11 +137,20 @@ describe('StorageService', () => {
             ['레거시 목록에 없는 새 버킷명', 'https://kr.object.iwinv.kr/pawpong_s3_v2'],
             ['전혀 다른 버킷명', 'https://kr.object.iwinv.kr/some_other_bucket'],
             ['버킷 경로 누락', 'https://kr.object.iwinv.kr'],
-            ['상위 경로만 있음', 'https://kr.object.iwinv.kr/pawpong_s3/nested'],
+            ['버킷 뒤에 하위 경로가 붙음', 'https://kr.object.iwinv.kr/pawpong_s3/nested'],
+            // 버킷명이 마지막 세그먼트라도 앞에 상위 경로가 끼면 조회 경로가 어긋난다
+            ['버킷 앞에 상위 경로가 끼어듦', 'https://kr.object.iwinv.kr/wrong_prefix/pawpong_s3'],
+            ['상위 경로가 여러 단계', 'https://kr.object.iwinv.kr/a/b/pawpong_s3'],
         ])('같은 호스트에서 %s 이면 생성에 실패한다', (_label, cdnBaseUrl) => {
             const config = makeLiveConfig({ SMILESERV_CDN_BASE_URL: cdnBaseUrl });
 
             expect(() => new StorageService(config as any)).toThrow(/StorageService/);
+        });
+
+        it('같은 호스트에서 버킷 한 단계 경로는 통과한다 (끝 슬래시 허용)', () => {
+            const config = makeLiveConfig({ SMILESERV_CDN_BASE_URL: 'https://kr.object.iwinv.kr/pawpong_s3/' });
+
+            expect(() => new StorageService(config as any)).not.toThrow();
         });
 
         it('CDN 호스트가 다르면 임의의 경로는 경고만 남기고 통과한다', () => {
