@@ -18,6 +18,11 @@ export class ContestRepository {
         return this.contestModel.findOne({ status: 'active' }).sort({ startDate: -1 }).lean<ContestDocument>().exec();
     }
 
+    findContestById(contestId: string): Promise<ContestDocument | null> {
+        if (!Types.ObjectId.isValid(contestId)) return Promise.resolve(null);
+        return this.contestModel.findById(contestId).lean<ContestDocument>().exec();
+    }
+
     findLatestEndedContest(): Promise<ContestDocument | null> {
         return this.contestModel.findOne({ status: 'ended' }).sort({ endDate: -1 }).lean<ContestDocument>().exec();
     }
@@ -125,18 +130,27 @@ export class ContestRepository {
     }
 
     async vote(data: { contestId: string; entryId: string; voterId: string }): Promise<number> {
-        await this.voteModel.create({
+        const created = await this.voteModel.create({
             contestId: new Types.ObjectId(data.contestId),
             entryId: new Types.ObjectId(data.entryId),
             voterId: data.voterId,
         });
 
-        const updated = await this.entryModel
-            .findByIdAndUpdate(new Types.ObjectId(data.entryId), { $inc: { voteCount: 1 } }, { new: true })
-            .lean<ContestEntryDocument>()
-            .exec();
+        try {
+            const updated = await this.entryModel
+                .findByIdAndUpdate(new Types.ObjectId(data.entryId), { $inc: { voteCount: 1 } }, { new: true })
+                .lean<ContestEntryDocument>()
+                .exec();
 
-        return updated?.voteCount ?? 0;
+            return updated?.voteCount ?? 0;
+        } catch (error) {
+            // 집계 증가 실패 시 투표 기록을 되돌려 기록과 voteCount 의 정합을 지킨다 (보상 처리)
+            await this.voteModel
+                .deleteOne({ _id: created._id })
+                .exec()
+                .catch(() => undefined);
+            throw error;
+        }
     }
 
     /**
@@ -155,16 +169,24 @@ export class ContestRepository {
 
         if (!deleted) return null;
 
-        // voteCount 가 이미 0 이면 감소를 건너뛰어 음수 노출을 막는다 (동시 취소 방어)
-        const updated = await this.entryModel
-            .findOneAndUpdate(
-                { _id: new Types.ObjectId(data.entryId), voteCount: { $gt: 0 } },
-                { $inc: { voteCount: -1 } },
-                { new: true },
-            )
-            .lean<ContestEntryDocument>()
-            .exec();
+        try {
+            // voteCount 가 이미 0 이면 감소를 건너뛰어 음수 노출을 막는다 (동시 취소 방어)
+            const updated = await this.entryModel
+                .findOneAndUpdate(
+                    { _id: new Types.ObjectId(data.entryId), voteCount: { $gt: 0 } },
+                    { $inc: { voteCount: -1 } },
+                    { new: true },
+                )
+                .lean<ContestEntryDocument>()
+                .exec();
 
-        return updated?.voteCount ?? 0;
+            return updated?.voteCount ?? 0;
+        } catch (error) {
+            // 집계 감소 실패 시 삭제한 투표 기록을 복원해 기록과 voteCount 의 정합을 지킨다 (보상 처리)
+            await this.voteModel
+                .create({ contestId: deleted.contestId, entryId: deleted.entryId, voterId: deleted.voterId })
+                .catch(() => undefined);
+            throw error;
+        }
     }
 }

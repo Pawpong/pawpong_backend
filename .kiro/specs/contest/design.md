@@ -51,6 +51,8 @@ contest-weekly-top, contest-yesterday-top, contest-random-entry.
 동일 유저의 동일 출품 중복 투표를 방지하며 집계는 실제 투표 수와 일치한다.
 취소는 "내가 그 항목에 남긴 투표"만 지울 수 있고(다른 항목 지목 시 400), 취소 시 voteCount 를
 음수 없이 되돌리며 unique index(contestId+voterId) 상 재투표가 가능해진다.
+투표/취소 모두 active 콘테스트에서만 허용 — 종료 후 허용하면 명예의 전당/랭킹 확정 결과가 변조된다.
+투표 기록과 voteCount 는 2단계 쓰기이므로, 집계 갱신 실패 시 기록을 되돌리는 보상 처리로 정합을 지킨다.
 **Validates: Requirements 1.1**
 
 ### Property 2: 출품 제약

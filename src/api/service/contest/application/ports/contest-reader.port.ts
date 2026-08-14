@@ -30,6 +30,9 @@ export interface ContestReaderPort {
     /** 현재 active 콘테스트 조회 */
     findActive(): Promise<ContestSnapshot | null>;
 
+    /** ID 로 콘테스트 조회 (투표/취소 시 종료 여부 판정용) */
+    findContestById(contestId: string): Promise<ContestSnapshot | null>;
+
     /** 가장 최근 ended 콘테스트 조회 (저번주 랭킹용) */
     findLatestEnded(): Promise<ContestSnapshot | null>;
 

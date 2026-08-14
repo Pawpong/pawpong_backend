@@ -23,6 +23,15 @@ export class VoteContestEntryUseCase {
             throw new BadRequestException('해당 콘테스트 항목을 찾을 수 없습니다.');
         }
 
+        // 종료된 콘테스트는 결과가 확정된 상태이므로 투표로 집계를 바꿀 수 없다
+        const contest = await this.reader.findContestById(entry.contestId);
+        if (!contest) {
+            throw new BadRequestException('해당 콘테스트를 찾을 수 없습니다.');
+        }
+        if (contest.status !== 'active') {
+            throw new BadRequestException('종료된 콘테스트에는 투표할 수 없습니다.');
+        }
+
         if (entry.userId === voterId) {
             throw new BadRequestException('자신의 항목에는 투표할 수 없습니다.');
         }

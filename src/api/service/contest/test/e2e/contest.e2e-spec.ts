@@ -616,4 +616,47 @@ describe('콘테스트 E2E 테스트', () => {
             expect(new Date(res.body.data.calculatedAt).toString()).not.toBe('Invalid Date');
         });
     });
+
+    // ── 종료된 콘테스트 — 결과 확정 후 투표/취소 차단 ───────────────────────
+    // 종료 후 투표·취소가 허용되면 명예의 전당/랭킹 확정 결과를 변조할 수 있다.
+
+    describe('종료된 콘테스트 — 투표/취소 차단', () => {
+        let endedEntryId: string;
+
+        beforeAll(async () => {
+            const { contestId: endedContestId } = await seedContest(app, {
+                title: '종료된 명예의 전당',
+                status: 'ended',
+                startDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+            });
+            const { entryId } = await seedContestEntry(app, endedContestId, user1Id, { rank: 1 });
+            endedEntryId = entryId;
+            // user2 가 종료 전에 투표해 둔 상태를 재현 (voteCount: 1)
+            await seedContestVote(app, endedContestId, entryId, user2Id);
+        });
+
+        it('POST /vote/:entryId 종료된 콘테스트 → 400', async () => {
+            const res = await request(app.getHttpServer())
+                .post(`/api/v2/contest/vote/${endedEntryId}`)
+                .set('Authorization', `Bearer ${user2Token}`)
+                .expect(400);
+
+            expect(res.body.error).toContain('종료된 콘테스트에는 투표할 수 없습니다');
+        });
+
+        it('DELETE /vote/:entryId 종료된 콘테스트 → 400, voteCount 불변', async () => {
+            const res = await request(app.getHttpServer())
+                .delete(`/api/v2/contest/vote/${endedEntryId}`)
+                .set('Authorization', `Bearer ${user2Token}`)
+                .expect(400);
+
+            expect(res.body.error).toContain('종료된 콘테스트의 투표는 취소할 수 없습니다');
+
+            // 확정된 집계가 실제로 변하지 않았는지 DB 로 확인
+            const conn = app.get<Connection>(getConnectionToken());
+            const doc = await conn.collection('contest_entries').findOne({ _id: new ObjectId(endedEntryId) });
+            expect(doc?.voteCount).toBe(1);
+        });
+    });
 });

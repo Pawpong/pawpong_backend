@@ -18,6 +18,11 @@ export class ContestReaderMongooseAdapter implements ContestReaderPort {
         return doc ? this.toContestSnapshot(doc) : null;
     }
 
+    async findContestById(contestId: string): Promise<ContestSnapshot | null> {
+        const doc = await this.repository.findContestById(contestId);
+        return doc ? this.toContestSnapshot(doc) : null;
+    }
+
     async findLatestEnded(): Promise<ContestSnapshot | null> {
         const doc = await this.repository.findLatestEndedContest();
         return doc ? this.toContestSnapshot(doc) : null;

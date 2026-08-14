@@ -28,6 +28,15 @@ export class CancelContestVoteUseCase {
             throw new BadRequestException('해당 콘테스트 항목을 찾을 수 없습니다.');
         }
 
+        // 종료된 콘테스트는 결과가 확정된 상태이므로 취소로 집계를 바꿀 수 없다 (명예의 전당 변조 방지)
+        const contest = await this.reader.findContestById(entry.contestId);
+        if (!contest) {
+            throw new BadRequestException('해당 콘테스트를 찾을 수 없습니다.');
+        }
+        if (contest.status !== 'active') {
+            throw new BadRequestException('종료된 콘테스트의 투표는 취소할 수 없습니다.');
+        }
+
         const votedEntryId = await this.reader.findVotedEntryId(entry.contestId, voterId);
         if (!votedEntryId) {
             throw new BadRequestException('이번 콘테스트에서 투표한 내역이 없습니다.');

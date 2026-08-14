@@ -23,14 +23,27 @@ const makeEntry = () => ({
     createdAt: new Date(),
 });
 
+const makeContest = (status: 'active' | 'ended' = 'active') => ({
+    id: 'contest-1',
+    title: '이번주 명예의 전당',
+    description: '설명',
+    benefitText: '혜택',
+    startDate: new Date(),
+    endDate: new Date(),
+    status,
+    participantCount: 1,
+    createdAt: new Date(),
+});
+
 describe('CancelContestVoteUseCase', () => {
-    const reader = { findEntryById: jest.fn(), findVotedEntryId: jest.fn() };
+    const reader = { findEntryById: jest.fn(), findContestById: jest.fn(), findVotedEntryId: jest.fn() };
     const writer = { cancelVote: jest.fn() };
 
     const useCase = new CancelContestVoteUseCase(reader as any, writer as any, logger as any);
 
     beforeEach(() => {
         jest.clearAllMocks();
+        reader.findContestById.mockResolvedValue(makeContest('active'));
     });
 
     // ─── 정상 케이스 ───────────────────────────────────────────────
@@ -56,6 +69,25 @@ describe('CancelContestVoteUseCase', () => {
         reader.findEntryById.mockResolvedValue(null);
 
         await expect(useCase.execute('nonexistent', 'voter-1')).rejects.toThrow(BadRequestException);
+        expect(writer.cancelVote).not.toHaveBeenCalled();
+    });
+
+    it('엣지 — 종료된 콘테스트의 투표 취소 시도 → BadRequest (확정 결과 변조 방지)', async () => {
+        reader.findEntryById.mockResolvedValue(makeEntry());
+        reader.findContestById.mockResolvedValue(makeContest('ended'));
+        reader.findVotedEntryId.mockResolvedValue('entry-1');
+
+        await expect(useCase.execute('entry-1', 'voter-1')).rejects.toThrow(
+            '종료된 콘테스트의 투표는 취소할 수 없습니다.',
+        );
+        expect(writer.cancelVote).not.toHaveBeenCalled();
+    });
+
+    it('엣지 — 항목이 가리키는 콘테스트가 없음 → BadRequest', async () => {
+        reader.findEntryById.mockResolvedValue(makeEntry());
+        reader.findContestById.mockResolvedValue(null);
+
+        await expect(useCase.execute('entry-1', 'voter-1')).rejects.toThrow(BadRequestException);
         expect(writer.cancelVote).not.toHaveBeenCalled();
     });
 
