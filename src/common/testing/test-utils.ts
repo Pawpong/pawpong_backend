@@ -330,9 +330,7 @@ export async function ensureActiveTerms(
  *
  * 각 e2e 가 직접 가입을 호출할 때 쓴다.
  */
-export async function agreeAllActiveTerms(
-    app: INestApplication,
-): Promise<Array<{ code: string; version: string }>> {
+export async function agreeAllActiveTerms(app: INestApplication): Promise<Array<{ code: string; version: string }>> {
     const activeTerms = await ensureActiveTerms(app);
     // 필수 약관만 동의한다. 선택 약관(marketing 등)까지 동의하면
     // marketingAgreed 같은 파생 값이 바뀌어 응답 계약 테스트가 흔들린다.
@@ -360,9 +358,7 @@ export async function getAdopterToken(app: INestApplication): Promise<{ token: s
             realName: '테스트입양자',
             phone: `010-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
             profileImage: 'https://example.com/profile.jpg',
-            termsAgreements: activeTerms
-                .filter((t) => t.isRequired)
-                .map((t) => ({ code: t.code, version: t.version })),
+            termsAgreements: activeTerms.filter((t) => t.isRequired).map((t) => ({ code: t.code, version: t.version })),
         });
 
     if (response.status === 200 && response.body.data?.accessToken) {

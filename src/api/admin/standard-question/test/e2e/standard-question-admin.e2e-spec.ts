@@ -1,7 +1,12 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { createTestingApp, cleanupDatabase, seedAdmin, agreeAllActiveTerms } from '../../../../../common/testing/test-utils';
+import {
+    createTestingApp,
+    cleanupDatabase,
+    seedAdmin,
+    agreeAllActiveTerms,
+} from '../../../../../common/testing/test-utils';
 
 /**
  * 기본 질문 관리자 종단간 테스트

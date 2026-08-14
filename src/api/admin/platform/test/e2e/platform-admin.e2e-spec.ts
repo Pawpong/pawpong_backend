@@ -3,7 +3,12 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import request from 'supertest';
 
-import { createTestingApp, cleanupDatabase, seedAdmin, agreeAllActiveTerms } from '../../../../../common/testing/test-utils';
+import {
+    createTestingApp,
+    cleanupDatabase,
+    seedAdmin,
+    agreeAllActiveTerms,
+} from '../../../../../common/testing/test-utils';
 
 /**
  * 플랫폼 관리자 종단간 테스트

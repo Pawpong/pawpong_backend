@@ -35,10 +35,7 @@ const AI_IMAGE_GENERATION_USE_CASE_PROVIDERS = [
 ];
 
 // AiImageObjectKeyService 는 어드민 애셋 업로드와 공유하므로 shared 에서 주입받는다
-const AI_IMAGE_GENERATION_DOMAIN_PROVIDERS = [
-    AiImageQuotaService,
-    AiImageGenerationResultMapperService,
-];
+const AI_IMAGE_GENERATION_DOMAIN_PROVIDERS = [AiImageQuotaService, AiImageGenerationResultMapperService];
 
 const AI_IMAGE_GENERATION_INFRASTRUCTURE_PROVIDERS = [AiImageJobWriterAdapter, AiImageGenerationKafkaPublisherAdapter];
 

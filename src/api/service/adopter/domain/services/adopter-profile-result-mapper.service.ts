@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 
-import type { AdopterCounselDefaultProfileResult, AdopterProfileResult } from '../../application/types/adopter-result.type';
+import type {
+    AdopterCounselDefaultProfileResult,
+    AdopterProfileResult,
+} from '../../application/types/adopter-result.type';
 import type { AdopterProfileRecord } from '../../application/ports/adopter-profile.port';
 import type { AdopterApplicationEmbeddedRecord } from '../../types/adopter-application.type';
 import type { AdopterFavoriteRecord, AdopterWrittenReviewEmbeddedRecord } from '../../types/adopter-profile.type';
@@ -63,9 +66,9 @@ export class AdopterProfileResultMapperService {
 
         const hasAnyAnswer = Boolean(
             counsel.selfIntroduction?.trim() ||
-                counsel.dailyAbsenceHours?.trim() ||
-                counsel.livingSpaceDescription?.trim() ||
-                counsel.counselPrivacyAgreedAt,
+            counsel.dailyAbsenceHours?.trim() ||
+            counsel.livingSpaceDescription?.trim() ||
+            counsel.counselPrivacyAgreedAt,
         );
 
         return hasAnyAnswer ? counsel : null;

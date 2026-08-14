@@ -5,7 +5,10 @@ import {
     type AiImageFileStoragePort,
 } from '../../../../service/ai-image/shared/application/ports/ai-image-file-storage.port';
 import { AiImageObjectKeyService } from '../../../../service/ai-image/shared/domain/services/ai-image-object-key.service';
-import type { AiImageAdminUploadUrlCommand, AiImageAdminUploadUrlResult } from '../types/ai-image-admin-upload-url.type';
+import type {
+    AiImageAdminUploadUrlCommand,
+    AiImageAdminUploadUrlResult,
+} from '../types/ai-image-admin-upload-url.type';
 
 /**
  * presigned URL 유효 시간 (초).

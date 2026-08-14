@@ -26,10 +26,7 @@ import {
 // 소셜 가입 완료 흐름(social-login 슬라이스)이 가입 유스케이스를 Port 토큰으로 소비한다.
 export const AUTH_SIGNUP_MODULE_IMPORTS = [AuthSharedModule, TermsModule, StorageModule, DiscordWebhookModule];
 
-export const AUTH_SIGNUP_MODULE_CONTROLLERS = [
-    AuthSignupController,
-    AuthDuplicateCheckController,
-];
+export const AUTH_SIGNUP_MODULE_CONTROLLERS = [AuthSignupController, AuthDuplicateCheckController];
 
 export const AUTH_SIGNUP_MODULE_PROVIDERS = [
     CreateAdopterFromSocialUseCase,

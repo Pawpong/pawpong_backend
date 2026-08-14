@@ -47,9 +47,9 @@ export class AiImageAgentHealthGrpcAdapter implements AiImageAgentHealthPort, On
     async checkHealth(): Promise<AiImageAgentHealthResult> {
         try {
             const response = await firstValueFrom(
-                (
-                    this.grpcService.healthCheck({}) as import('rxjs').Observable<HealthCheckGrpcResponse>
-                ).pipe(timeout(AiImageAgentHealthGrpcAdapter.CALL_TIMEOUT_MS)),
+                (this.grpcService.healthCheck({}) as import('rxjs').Observable<HealthCheckGrpcResponse>).pipe(
+                    timeout(AiImageAgentHealthGrpcAdapter.CALL_TIMEOUT_MS),
+                ),
             );
 
             return {
