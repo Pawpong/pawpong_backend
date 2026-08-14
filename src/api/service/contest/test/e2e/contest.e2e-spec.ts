@@ -659,4 +659,47 @@ describe('콘테스트 E2E 테스트', () => {
             expect(doc?.voteCount).toBe(1);
         });
     });
+
+    // ── 지연 종료 — status 는 active 지만 endDate 가 지난 콘테스트 ──────────
+    // 스케줄러/운영이 status 를 늦게 바꿔도 endDate 기준으로 투표·취소를 차단해야
+    // 종료 시점 전후의 경쟁으로 확정 결과가 변조되지 않는다.
+
+    describe('지연 종료 콘테스트 — endDate 기준 차단', () => {
+        let expiredEntryId: string;
+
+        beforeAll(async () => {
+            const { contestId: expiredContestId } = await seedContest(app, {
+                title: '만료됐지만 아직 active 인 콘테스트',
+                status: 'active',
+                startDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() - 60 * 1000),
+            });
+            const { entryId } = await seedContestEntry(app, expiredContestId, user1Id);
+            expiredEntryId = entryId;
+            // user2 가 마감 전에 투표해 둔 상태를 재현 (voteCount: 1)
+            await seedContestVote(app, expiredContestId, entryId, user2Id);
+        });
+
+        it('POST /vote/:entryId endDate 경과 → 400', async () => {
+            const res = await request(app.getHttpServer())
+                .post(`/api/v2/contest/vote/${expiredEntryId}`)
+                .set('Authorization', `Bearer ${user2Token}`)
+                .expect(400);
+
+            expect(res.body.error).toContain('종료된 콘테스트에는 투표할 수 없습니다');
+        });
+
+        it('DELETE /vote/:entryId endDate 경과 → 400, voteCount 불변', async () => {
+            const res = await request(app.getHttpServer())
+                .delete(`/api/v2/contest/vote/${expiredEntryId}`)
+                .set('Authorization', `Bearer ${user2Token}`)
+                .expect(400);
+
+            expect(res.body.error).toContain('종료된 콘테스트의 투표는 취소할 수 없습니다');
+
+            const conn = app.get<Connection>(getConnectionToken());
+            const doc = await conn.collection('contest_entries').findOne({ _id: new ObjectId(expiredEntryId) });
+            expect(doc?.voteCount).toBe(1);
+        });
+    });
 });

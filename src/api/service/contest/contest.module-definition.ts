@@ -32,6 +32,7 @@ import { ContestYesterdayTopController } from './controller/contest-yesterday-to
 import { ContestMeController } from './controller/contest-me.controller';
 import { ContestPreviousRankingController } from './controller/contest-previous-ranking.controller';
 import { ContestVoteController } from './controller/contest-vote.controller';
+import { ContestVotingPolicyService } from './domain/services/contest-voting-policy.service';
 import { ContestAssetUrlStorageAdapter } from './infrastructure/contest-asset-url-storage.adapter';
 import { ContestReaderMongooseAdapter } from './infrastructure/contest-reader-mongoose.adapter';
 import { ContestUserInfoMongooseAdapter } from './infrastructure/contest-user-info-mongoose.adapter';
@@ -75,6 +76,8 @@ const CONTEST_USE_CASE_PROVIDERS = [
     GetHallOfFameUseCase,
 ];
 
+const CONTEST_DOMAIN_PROVIDERS = [ContestVotingPolicyService];
+
 const CONTEST_INFRASTRUCTURE_PROVIDERS = [
     ContestRepository,
     ContestReaderMongooseAdapter,
@@ -92,6 +95,7 @@ const CONTEST_PORT_BINDINGS = [
 
 export const CONTEST_MODULE_PROVIDERS = [
     ...CONTEST_USE_CASE_PROVIDERS,
+    ...CONTEST_DOMAIN_PROVIDERS,
     ...CONTEST_INFRASTRUCTURE_PROVIDERS,
     ...CONTEST_PORT_BINDINGS,
 ];

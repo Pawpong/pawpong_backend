@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
+import { ContestVotingPolicyService } from '../../domain/services/contest-voting-policy.service';
 import { CONTEST_READER_PORT, type ContestReaderPort } from '../ports/contest-reader.port';
 import { CONTEST_WRITER_PORT, type ContestWriterPort } from '../ports/contest-writer.port';
 import type { CancelContestVoteResult } from '../types/contest-result.type';
@@ -17,6 +18,7 @@ export class CancelContestVoteUseCase {
         private readonly reader: ContestReaderPort,
         @Inject(CONTEST_WRITER_PORT)
         private readonly writer: ContestWriterPort,
+        private readonly votingPolicy: ContestVotingPolicyService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -33,7 +35,7 @@ export class CancelContestVoteUseCase {
         if (!contest) {
             throw new BadRequestException('해당 콘테스트를 찾을 수 없습니다.');
         }
-        if (contest.status !== 'active') {
+        if (!this.votingPolicy.isOpenForVoting(contest)) {
             throw new BadRequestException('종료된 콘테스트의 투표는 취소할 수 없습니다.');
         }
 
@@ -55,8 +57,25 @@ export class CancelContestVoteUseCase {
             throw new BadRequestException('이번 콘테스트에서 투표한 내역이 없습니다.');
         }
 
+        // 검증과 쓰기 사이에 콘테스트가 종료되는 경쟁을 사후 재검증으로 닫는다.
+        // 종료가 감지되면 방금 지운 투표를 복원해 확정 결과를 보존한다.
+        const contestAfterWrite = await this.reader.findContestById(entry.contestId);
+        if (!contestAfterWrite || !this.votingPolicy.isOpenForVoting(contestAfterWrite)) {
+            await this.restoreVote(entry.contestId, entryId, voterId);
+            throw new BadRequestException('종료된 콘테스트의 투표는 취소할 수 없습니다.');
+        }
+
         this.logger.logSuccess('cancelContestVote', '콘테스트 투표 취소 완료', { entryId, newVoteCount });
 
         return { entryId, newVoteCount };
+    }
+
+    /** 종료 경쟁 감지 시 취소했던 투표를 복원한다. 복원 실패는 로그로 남기고 원 흐름의 400 을 유지한다 */
+    private async restoreVote(contestId: string, entryId: string, voterId: string): Promise<void> {
+        try {
+            await this.writer.vote({ contestId, entryId, voterId });
+        } catch (error) {
+            this.logger.logError('cancelContestVote', '종료 경쟁 보상(투표 복원) 실패', error as Error);
+        }
     }
 }
