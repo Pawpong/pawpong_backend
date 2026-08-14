@@ -40,7 +40,7 @@ const makeContest = (status: 'active' | 'ended' = 'active', endDate = new Date(D
 
 describe('CancelContestVoteUseCase', () => {
     const reader = { findEntryById: jest.fn(), findContestById: jest.fn(), findVotedEntryId: jest.fn() };
-    const writer = { vote: jest.fn(), cancelVote: jest.fn() };
+    const writer = { vote: jest.fn(), cancelVote: jest.fn(), finalizeExpiredContest: jest.fn() };
 
     const useCase = new CancelContestVoteUseCase(
         reader as any,
@@ -91,7 +91,7 @@ describe('CancelContestVoteUseCase', () => {
         expect(writer.cancelVote).not.toHaveBeenCalled();
     });
 
-    it('엣지 — status 는 active 지만 endDate 가 지난 콘테스트 → BadRequest (지연 종료 방어)', async () => {
+    it('엣지 — status 는 active 지만 endDate 가 지난 콘테스트 → 종료 확정(자기 치유) 후 BadRequest', async () => {
         reader.findEntryById.mockResolvedValue(makeEntry());
         reader.findContestById.mockResolvedValue(makeContest('active', new Date(Date.now() - 60 * 1000)));
         reader.findVotedEntryId.mockResolvedValue('entry-1');
@@ -100,6 +100,7 @@ describe('CancelContestVoteUseCase', () => {
             '종료된 콘테스트의 투표는 취소할 수 없습니다.',
         );
         expect(writer.cancelVote).not.toHaveBeenCalled();
+        expect(writer.finalizeExpiredContest).toHaveBeenCalledWith('contest-1');
     });
 
     it('엣지 — 검증-쓰기 사이 콘테스트 종료(경쟁) → 쓰기 게이트가 closed 반환 → BadRequest', async () => {

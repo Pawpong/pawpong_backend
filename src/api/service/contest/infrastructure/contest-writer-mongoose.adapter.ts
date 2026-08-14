@@ -31,4 +31,8 @@ export class ContestWriterMongooseAdapter implements ContestWriterPort {
     updateEntryStatus(entryId: string, status: 'hidden' | 'deleted'): Promise<void> {
         return this.repository.updateEntryStatus(entryId, status);
     }
+
+    finalizeExpiredContest(contestId: string): Promise<void> {
+        return this.repository.finalizeExpiredContest(contestId);
+    }
 }

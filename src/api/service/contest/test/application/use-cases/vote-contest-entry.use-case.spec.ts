@@ -40,7 +40,7 @@ const makeContest = (status: 'active' | 'ended' = 'active', endDate = new Date(D
 
 describe('VoteContestEntryUseCase', () => {
     const reader = { findEntryById: jest.fn(), findContestById: jest.fn(), findVotedEntryId: jest.fn() };
-    const writer = { vote: jest.fn(), cancelVote: jest.fn() };
+    const writer = { vote: jest.fn(), cancelVote: jest.fn(), finalizeExpiredContest: jest.fn() };
 
     const useCase = new VoteContestEntryUseCase(
         reader as any,
@@ -79,14 +79,17 @@ describe('VoteContestEntryUseCase', () => {
 
         await expect(useCase.execute('entry-1', 'voter-1')).rejects.toThrow('종료된 콘테스트에는 투표할 수 없습니다.');
         expect(writer.vote).not.toHaveBeenCalled();
+        // 이미 ended 인 콘테스트는 자기 치유 대상이 아니다
+        expect(writer.finalizeExpiredContest).not.toHaveBeenCalled();
     });
 
-    it('엣지 — status 는 active 지만 endDate 가 지난 콘테스트 → BadRequest (지연 종료 방어)', async () => {
+    it('엣지 — status 는 active 지만 endDate 가 지난 콘테스트 → 종료 확정(자기 치유) 후 BadRequest', async () => {
         reader.findEntryById.mockResolvedValue(makeEntry());
         reader.findContestById.mockResolvedValue(makeContest('active', new Date(Date.now() - 60 * 1000)));
 
         await expect(useCase.execute('entry-1', 'voter-1')).rejects.toThrow('종료된 콘테스트에는 투표할 수 없습니다.');
         expect(writer.vote).not.toHaveBeenCalled();
+        expect(writer.finalizeExpiredContest).toHaveBeenCalledWith('contest-1');
     });
 
     it('엣지 — 검증-쓰기 사이 콘테스트 종료(경쟁) → 쓰기 게이트가 closed 반환 → BadRequest', async () => {

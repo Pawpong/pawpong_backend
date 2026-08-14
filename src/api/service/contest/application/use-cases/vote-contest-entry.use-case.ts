@@ -32,6 +32,11 @@ export class VoteContestEntryUseCase {
             throw new BadRequestException('해당 콘테스트를 찾을 수 없습니다.');
         }
         if (!this.votingPolicy.isOpenForVoting(contest)) {
+            // endDate 가 지났는데 status 가 아직 active 면 이 자리에서 종료를 확정한다.
+            // 확정이 "쓰기"로 진입해야 이후 모든 투표/취소 게이트와 직렬화된다 (지연 종료 자기 치유)
+            if (contest.status === 'active') {
+                await this.writer.finalizeExpiredContest(contest.id);
+            }
             throw new BadRequestException('종료된 콘테스트에는 투표할 수 없습니다.');
         }
 

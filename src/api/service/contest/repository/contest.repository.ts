@@ -173,7 +173,13 @@ export class ContestRepository {
                 result = { status: 'ok', newVoteCount: updated?.voteCount ?? 0 };
             });
         } catch (error) {
-            if (error instanceof ContestWriteAbortSignal) return result;
+            if (error instanceof ContestWriteAbortSignal) {
+                // 게이트 미스가 만료된 active 콘테스트 때문이라면 이 자리에서 종료를 확정한다
+                if (result.status === 'closed') {
+                    await this.finalizeExpiredContest(data.contestId).catch(() => undefined);
+                }
+                return result;
+            }
             // unique index(contestId+voterId) 충돌 — 동시 중복 투표 경합
             if (this.isDuplicateKeyError(error)) return { status: 'duplicate' };
             throw error;
@@ -234,7 +240,13 @@ export class ContestRepository {
                 result = { status: 'ok', newVoteCount: updated?.voteCount ?? 0 };
             });
         } catch (error) {
-            if (error instanceof ContestWriteAbortSignal) return result;
+            if (error instanceof ContestWriteAbortSignal) {
+                // 게이트 미스가 만료된 active 콘테스트 때문이라면 이 자리에서 종료를 확정한다
+                if (result.status === 'closed') {
+                    await this.finalizeExpiredContest(data.contestId).catch(() => undefined);
+                }
+                return result;
+            }
             throw error;
         } finally {
             await session.endSession();
@@ -256,6 +268,21 @@ export class ContestRepository {
                 { new: true, session },
             )
             .lean<ContestDocument>()
+            .exec();
+    }
+
+    /**
+     * 지연 종료 자기 치유. endDate 가 지났는데 아직 active 인 콘테스트를 ended 로 확정한다.
+     * 결과 확정은 이 "쓰기"로만 진입하며, 이후의 투표/취소 트랜잭션은 게이트에서
+     * 이 문서 상태와 직렬화되어 확정 결과를 건드릴 수 없다.
+     */
+    async finalizeExpiredContest(contestId: string): Promise<void> {
+        if (!Types.ObjectId.isValid(contestId)) return;
+        await this.contestModel
+            .updateOne(
+                { _id: new Types.ObjectId(contestId), status: 'active', endDate: { $lte: new Date() } },
+                { $set: { status: 'ended' } },
+            )
             .exec();
     }
 

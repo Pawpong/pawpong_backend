@@ -665,28 +665,36 @@ describe('콘테스트 E2E 테스트', () => {
     // 종료 시점 전후의 경쟁으로 확정 결과가 변조되지 않는다.
 
     describe('지연 종료 콘테스트 — endDate 기준 차단', () => {
+        let expiredContestId: string;
         let expiredEntryId: string;
 
         beforeAll(async () => {
-            const { contestId: expiredContestId } = await seedContest(app, {
+            const seeded = await seedContest(app, {
                 title: '만료됐지만 아직 active 인 콘테스트',
                 status: 'active',
                 startDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
                 endDate: new Date(Date.now() - 60 * 1000),
             });
+            expiredContestId = seeded.contestId;
             const { entryId } = await seedContestEntry(app, expiredContestId, user1Id);
             expiredEntryId = entryId;
             // user2 가 마감 전에 투표해 둔 상태를 재현 (voteCount: 1)
             await seedContestVote(app, expiredContestId, entryId, user2Id);
         });
 
-        it('POST /vote/:entryId endDate 경과 → 400', async () => {
+        it('POST /vote/:entryId endDate 경과 → 400 + 콘테스트가 ended 로 확정됨(자기 치유)', async () => {
             const res = await request(app.getHttpServer())
                 .post(`/api/v2/contest/vote/${expiredEntryId}`)
                 .set('Authorization', `Bearer ${user2Token}`)
                 .expect(400);
 
             expect(res.body.error).toContain('종료된 콘테스트에는 투표할 수 없습니다');
+
+            // 만료된 active 콘테스트를 감지한 순간 status 가 ended 로 쓰였는지 확인.
+            // 이 "쓰기"가 있어야 이후의 모든 투표/취소 게이트가 확정 상태와 직렬화된다.
+            const conn = app.get<Connection>(getConnectionToken());
+            const contestDoc = await conn.collection('contests').findOne({ _id: new ObjectId(expiredContestId) });
+            expect(contestDoc?.status).toBe('ended');
         });
 
         it('DELETE /vote/:entryId endDate 경과 → 400, voteCount 불변', async () => {

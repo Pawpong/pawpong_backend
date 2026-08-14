@@ -31,4 +31,10 @@ export interface ContestWriterPort {
     vote(data: { contestId: string; entryId: string; voterId: string }): Promise<ContestVoteWriteResult>;
     cancelVote(data: { contestId: string; entryId: string; voterId: string }): Promise<ContestVoteCancelWriteResult>;
     updateEntryStatus(entryId: string, status: 'hidden' | 'deleted'): Promise<void>;
+    /**
+     * endDate 가 지났는데 아직 active 인 콘테스트를 ended 로 확정한다 (지연 종료 자기 치유).
+     * 확정은 반드시 콘테스트 문서에 대한 "쓰기"로 진입해야 투표/취소 게이트와 직렬화된다.
+     * 조건 불충족(이미 ended, 아직 미마감)이면 아무것도 하지 않는다.
+     */
+    finalizeExpiredContest(contestId: string): Promise<void>;
 }
