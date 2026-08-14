@@ -59,7 +59,7 @@ describe('CancelContestVoteUseCase', () => {
     it('정상 — 내가 투표한 항목 취소 성공, 취소 후 투표 수 반환', async () => {
         reader.findEntryById.mockResolvedValue(makeEntry());
         reader.findVotedEntryId.mockResolvedValue('entry-1');
-        writer.cancelVote.mockResolvedValue(2);
+        writer.cancelVote.mockResolvedValue({ status: 'ok', newVoteCount: 2 });
 
         const result = await useCase.execute('entry-1', 'voter-1');
 
@@ -102,21 +102,15 @@ describe('CancelContestVoteUseCase', () => {
         expect(writer.cancelVote).not.toHaveBeenCalled();
     });
 
-    it('엣지 — 검증-쓰기 사이 콘테스트 종료(경쟁) → 취소한 투표를 복원하고 BadRequest', async () => {
+    it('엣지 — 검증-쓰기 사이 콘테스트 종료(경쟁) → 쓰기 게이트가 closed 반환 → BadRequest', async () => {
         reader.findEntryById.mockResolvedValue(makeEntry());
         reader.findVotedEntryId.mockResolvedValue('entry-1');
-        // 사전 검증 시점엔 열려 있었지만 쓰기 후 재검증에서 종료 감지
-        reader.findContestById.mockResolvedValueOnce(makeContest('active')).mockResolvedValueOnce(makeContest('ended'));
-        writer.cancelVote.mockResolvedValue(2);
+        // 사전 검증은 통과했지만 트랜잭션 게이트가 종료를 원자적으로 감지한 상황
+        writer.cancelVote.mockResolvedValue({ status: 'closed' });
 
         await expect(useCase.execute('entry-1', 'voter-1')).rejects.toThrow(
             '종료된 콘테스트의 투표는 취소할 수 없습니다.',
         );
-        expect(writer.vote).toHaveBeenCalledWith({
-            contestId: 'contest-1',
-            entryId: 'entry-1',
-            voterId: 'voter-1',
-        });
     });
 
     it('엣지 — 항목이 가리키는 콘테스트가 없음 → BadRequest', async () => {
@@ -145,10 +139,10 @@ describe('CancelContestVoteUseCase', () => {
         expect(writer.cancelVote).not.toHaveBeenCalled();
     });
 
-    it('엣지 — 조회와 삭제 사이 경합으로 이미 취소됨(writer null 반환) → BadRequest', async () => {
+    it('엣지 — 조회와 삭제 사이 경합으로 이미 취소됨(writer not_voted 반환) → BadRequest', async () => {
         reader.findEntryById.mockResolvedValue(makeEntry());
         reader.findVotedEntryId.mockResolvedValue('entry-1');
-        writer.cancelVote.mockResolvedValue(null);
+        writer.cancelVote.mockResolvedValue({ status: 'not_voted' });
 
         await expect(useCase.execute('entry-1', 'voter-1')).rejects.toThrow(BadRequestException);
     });

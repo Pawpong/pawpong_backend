@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { ClientSession, Model, Types } from 'mongoose';
 
 import { Contest, ContestDocument } from '../../../../schema/contest.schema';
 import { ContestEntry, ContestEntryDocument } from '../../../../schema/contest-entry.schema';
 import { ContestVote, ContestVoteDocument } from '../../../../schema/contest-vote.schema';
+import type { ContestVoteCancelWriteResult, ContestVoteWriteResult } from '../application/ports/contest-writer.port';
 
 @Injectable()
 export class ContestRepository {
@@ -129,64 +130,143 @@ export class ContestRepository {
         await this.entryModel.updateOne({ _id: new Types.ObjectId(entryId) }, { $set: { status } }).exec();
     }
 
-    async vote(data: { contestId: string; entryId: string; voterId: string }): Promise<number> {
-        const created = await this.voteModel.create({
-            contestId: new Types.ObjectId(data.contestId),
-            entryId: new Types.ObjectId(data.entryId),
-            voterId: data.voterId,
-        });
+    /**
+     * 투표. 멀티 도큐먼트 트랜잭션으로 게이트-기록-집계를 원자화한다.
+     *
+     * 게이트: 콘테스트 문서를 열림 조건(status=active, endDate 미경과)으로 조건부 갱신한다.
+     * 조건 불충족이면 아무것도 쓰지 않고 'closed' 를 반환하고, 조건을 충족해 쓰기가 진행되는 중에
+     * 종료 flip 이 끼어들면 같은 문서에 대한 쓰기 충돌로 트랜잭션이 재시도되어 'closed' 로 수렴한다.
+     * 부분 반영(기록만 남고 집계 누락 등)은 트랜잭션 특성상 발생하지 않는다.
+     */
+    async vote(data: { contestId: string; entryId: string; voterId: string }): Promise<ContestVoteWriteResult> {
+        const session = await this.contestModel.db.startSession();
+        let result: ContestVoteWriteResult = { status: 'closed' };
 
         try {
-            const updated = await this.entryModel
-                .findByIdAndUpdate(new Types.ObjectId(data.entryId), { $inc: { voteCount: 1 } }, { new: true })
-                .lean<ContestEntryDocument>()
-                .exec();
+            await session.withTransaction(async () => {
+                const gate = await this.acquireOpenContestGate(data.contestId, session);
+                if (!gate) {
+                    result = { status: 'closed' };
+                    throw new ContestWriteAbortSignal();
+                }
 
-            return updated?.voteCount ?? 0;
+                await this.voteModel.create(
+                    [
+                        {
+                            contestId: new Types.ObjectId(data.contestId),
+                            entryId: new Types.ObjectId(data.entryId),
+                            voterId: data.voterId,
+                        },
+                    ],
+                    { session },
+                );
+
+                const updated = await this.entryModel
+                    .findByIdAndUpdate(
+                        new Types.ObjectId(data.entryId),
+                        { $inc: { voteCount: 1 } },
+                        { new: true, session },
+                    )
+                    .lean<ContestEntryDocument>()
+                    .exec();
+
+                result = { status: 'ok', newVoteCount: updated?.voteCount ?? 0 };
+            });
         } catch (error) {
-            // 집계 증가 실패 시 투표 기록을 되돌려 기록과 voteCount 의 정합을 지킨다 (보상 처리)
-            await this.voteModel
-                .deleteOne({ _id: created._id })
-                .exec()
-                .catch(() => undefined);
+            if (error instanceof ContestWriteAbortSignal) return result;
+            // unique index(contestId+voterId) 충돌 — 동시 중복 투표 경합
+            if (this.isDuplicateKeyError(error)) return { status: 'duplicate' };
             throw error;
+        } finally {
+            await session.endSession();
         }
+
+        return result;
     }
 
     /**
-     * 투표 취소. 해당 유저가 그 항목에 남긴 투표 기록을 삭제하고 voteCount 를 되돌린다.
-     * 삭제된 투표가 없으면 null 을 반환해 상위에서 "취소할 투표 없음"으로 처리한다.
+     * 투표 취소. 투표와 동일한 트랜잭션 게이트를 사용해
+     * 종료된(또는 종료 중인) 콘테스트의 확정 집계가 취소로 변조되지 않게 한다.
      */
-    async cancelVote(data: { contestId: string; entryId: string; voterId: string }): Promise<number | null> {
-        const deleted = await this.voteModel
-            .findOneAndDelete({
-                contestId: new Types.ObjectId(data.contestId),
-                entryId: new Types.ObjectId(data.entryId),
-                voterId: data.voterId,
-            })
-            .lean<ContestVoteDocument>()
-            .exec();
-
-        if (!deleted) return null;
+    async cancelVote(data: {
+        contestId: string;
+        entryId: string;
+        voterId: string;
+    }): Promise<ContestVoteCancelWriteResult> {
+        const session = await this.contestModel.db.startSession();
+        let result: ContestVoteCancelWriteResult = { status: 'closed' };
 
         try {
-            // voteCount 가 이미 0 이면 감소를 건너뛰어 음수 노출을 막는다 (동시 취소 방어)
-            const updated = await this.entryModel
-                .findOneAndUpdate(
-                    { _id: new Types.ObjectId(data.entryId), voteCount: { $gt: 0 } },
-                    { $inc: { voteCount: -1 } },
-                    { new: true },
-                )
-                .lean<ContestEntryDocument>()
-                .exec();
+            await session.withTransaction(async () => {
+                const gate = await this.acquireOpenContestGate(data.contestId, session);
+                if (!gate) {
+                    result = { status: 'closed' };
+                    throw new ContestWriteAbortSignal();
+                }
 
-            return updated?.voteCount ?? 0;
+                const deleted = await this.voteModel
+                    .findOneAndDelete(
+                        {
+                            contestId: new Types.ObjectId(data.contestId),
+                            entryId: new Types.ObjectId(data.entryId),
+                            voterId: data.voterId,
+                        },
+                        { session },
+                    )
+                    .lean<ContestVoteDocument>()
+                    .exec();
+
+                if (!deleted) {
+                    result = { status: 'not_voted' };
+                    throw new ContestWriteAbortSignal();
+                }
+
+                // voteCount 가 이미 0 이면 감소를 건너뛰어 음수 노출을 막는다
+                const updated = await this.entryModel
+                    .findOneAndUpdate(
+                        { _id: new Types.ObjectId(data.entryId), voteCount: { $gt: 0 } },
+                        { $inc: { voteCount: -1 } },
+                        { new: true, session },
+                    )
+                    .lean<ContestEntryDocument>()
+                    .exec();
+
+                result = { status: 'ok', newVoteCount: updated?.voteCount ?? 0 };
+            });
         } catch (error) {
-            // 집계 감소 실패 시 삭제한 투표 기록을 복원해 기록과 voteCount 의 정합을 지킨다 (보상 처리)
-            await this.voteModel
-                .create({ contestId: deleted.contestId, entryId: deleted.entryId, voterId: deleted.voterId })
-                .catch(() => undefined);
+            if (error instanceof ContestWriteAbortSignal) return result;
             throw error;
+        } finally {
+            await session.endSession();
         }
+
+        return result;
+    }
+
+    /**
+     * 열린 콘테스트 게이트. 열림 조건을 만족할 때만 콘테스트 문서를 갱신(터치)한다.
+     * 단순 read 가 아닌 write 인 이유: 트랜잭션 안에서 같은 문서를 쓰면
+     * 동시 종료 flip 과 문서 단위 쓰기 충돌이 발생해 두 작업이 직렬화되기 때문이다.
+     */
+    private acquireOpenContestGate(contestId: string, session: ClientSession): Promise<ContestDocument | null> {
+        return this.contestModel
+            .findOneAndUpdate(
+                { _id: new Types.ObjectId(contestId), status: 'active', endDate: { $gt: new Date() } },
+                { $currentDate: { updatedAt: true } },
+                { new: true, session },
+            )
+            .lean<ContestDocument>()
+            .exec();
+    }
+
+    private isDuplicateKeyError(error: unknown): boolean {
+        return typeof error === 'object' && error !== null && (error as { code?: number }).code === 11000;
+    }
+}
+
+/** 트랜잭션을 결과 확정 후 중단시키기 위한 내부 신호 (실제 오류 아님) */
+class ContestWriteAbortSignal extends Error {
+    constructor() {
+        super('contest write aborted');
     }
 }

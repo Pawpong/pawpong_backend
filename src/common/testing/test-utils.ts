@@ -3,14 +3,14 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 import { AppModule } from '../../app.module';
 import { AllExceptionsFilter } from '../filter/http-exception.filter';
 import { HttpStatusInterceptor } from '../interceptor/http-status.interceptor';
 
-/** 테스트용 인메모리 MongoDB 인스턴스 */
-let mongod: MongoMemoryServer;
+/** 테스트용 인메모리 MongoDB 인스턴스 (단일 노드 ReplSet — 멀티 도큐먼트 트랜잭션 지원) */
+let mongod: MongoMemoryReplSet;
 
 /** createTestingApp에 넘길 Provider 오버라이드 항목 */
 export interface ProviderOverride {
@@ -47,8 +47,10 @@ export async function createTestingApp(overrides: ProviderOverride[] = []): Prom
         mongod = undefined as any;
     }
 
-    // 인메모리 MongoDB 서버 시작
-    mongod = await MongoMemoryServer.create();
+    // 인메모리 MongoDB 서버 시작.
+    // standalone 이 아닌 단일 노드 ReplSet 을 쓰는 이유: 콘테스트 투표/취소처럼
+    // 멀티 도큐먼트 트랜잭션을 쓰는 경로가 실서버(Atlas ReplSet)와 동일하게 동작해야 한다.
+    mongod = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
     const mongoUri = mongod.getUri();
 
     // MONGODB_URI 환경변수를 인메모리 서버로 오버라이드

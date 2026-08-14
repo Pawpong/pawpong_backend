@@ -52,9 +52,13 @@ contest-weekly-top, contest-yesterday-top, contest-random-entry.
 취소는 "내가 그 항목에 남긴 투표"만 지울 수 있고(다른 항목 지목 시 400), 취소 시 voteCount 를
 음수 없이 되돌리며 unique index(contestId+voterId) 상 재투표가 가능해진다.
 투표/취소 모두 열린 콘테스트에서만 허용 — 판정은 `status === active` 와 `endDate 미경과` 를 모두 요구한다
-(ContestVotingPolicyService). status 만 보면 스케줄러가 늦게 flip 하는 사이에 확정 결과가 변조된다.
-검증-쓰기 사이 종료 경쟁은 쓰기 후 재검증으로 닫는다: 종료가 감지되면 방금의 쓰기를 역연산으로 되돌리고 400.
-투표 기록과 voteCount 는 2단계 쓰기이므로, 집계 갱신 실패 시 기록을 되돌리는 보상 처리로 정합을 지킨다.
+(ContestVotingPolicyService, 사전 검증). status 만 보면 스케줄러가 늦게 flip 하는 사이에 확정 결과가 변조된다.
+최종 판정은 repository 의 멀티 도큐먼트 트랜잭션이 원자적으로 수행한다: 열림 조건부로 콘테스트 문서를
+갱신하는 게이트 → 투표 기록 생성/삭제 → voteCount 증감이 한 트랜잭션이다. 게이트가 콘테스트 문서에
+쓰기를 걸므로 동시 종료 flip 과는 문서 단위 쓰기 충돌로 직렬화되고, 부분 반영(기록-집계 불일치)은
+트랜잭션 특성상 발생하지 않는다. 결과는 ok/closed/duplicate(취소는 ok/closed/not_voted) 유니언으로
+반환되어 유스케이스가 계약된 400 메시지로 매핑한다.
+e2e 인프라는 이 경로를 실제로 실행하기 위해 MongoMemoryReplSet(단일 노드) 을 사용한다.
 **Validates: Requirements 1.1**
 
 ### Property 2: 출품 제약

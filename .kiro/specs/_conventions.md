@@ -253,9 +253,13 @@ feed 가 정확히 같은 이유로 깨져 있었으므로(아래), 이 두 도�
   `${base}/${key}` 로 조립하므로 남겨두면 `//` 가 생겨 업로드한 키와 다른 객체를 가리킨다.
 - 검증 순서: `pnpm typecheck` → 단위 → e2e → 필요 시 실서버 스팟체크.
 
-**주의**: e2e 를 다른 무거운 작업과 동시에 돌리면 `beforeAll` 의 MongoMemoryServer 기동이
+**주의**: e2e 를 다른 무거운 작업과 동시에 돌리면 `beforeAll` 의 인메모리 MongoDB 기동이
 30초 타임아웃에 걸려 대량 실패한다. 실패 사유가 전부
 `Exceeded timeout of 30000 ms for a hook` 이면 코드가 아니라 자원 문제다.
+
+**e2e 인메모리 DB 는 단일 노드 MongoMemoryReplSet** 이다 (2026-08-15, standalone 에서 전환).
+콘테스트 투표/취소처럼 멀티 도큐먼트 트랜잭션을 쓰는 repository 경로가 실서버(Atlas ReplSet)와
+동일하게 동작해야 하기 때문. 트랜잭션 코드를 새로 쓸 때 standalone 을 가정하지 말 것.
 
 ---
 

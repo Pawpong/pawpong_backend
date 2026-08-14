@@ -59,7 +59,7 @@ describe('VoteContestEntryUseCase', () => {
 
     it('정상 — 열린 콘테스트의 타인 항목 투표 성공', async () => {
         reader.findEntryById.mockResolvedValue(makeEntry());
-        writer.vote.mockResolvedValue(4);
+        writer.vote.mockResolvedValue({ status: 'ok', newVoteCount: 4 });
 
         const result = await useCase.execute('entry-1', 'voter-1');
 
@@ -89,18 +89,19 @@ describe('VoteContestEntryUseCase', () => {
         expect(writer.vote).not.toHaveBeenCalled();
     });
 
-    it('엣지 — 검증-쓰기 사이 콘테스트 종료(경쟁) → 넣은 투표를 되돌리고 BadRequest', async () => {
+    it('엣지 — 검증-쓰기 사이 콘테스트 종료(경쟁) → 쓰기 게이트가 closed 반환 → BadRequest', async () => {
         reader.findEntryById.mockResolvedValue(makeEntry());
-        // 사전 검증 시점엔 열려 있었지만 쓰기 후 재검증에서 종료 감지
-        reader.findContestById.mockResolvedValueOnce(makeContest('active')).mockResolvedValueOnce(makeContest('ended'));
-        writer.vote.mockResolvedValue(4);
+        // 사전 검증은 통과했지만 트랜잭션 게이트가 종료를 원자적으로 감지한 상황
+        writer.vote.mockResolvedValue({ status: 'closed' });
 
         await expect(useCase.execute('entry-1', 'voter-1')).rejects.toThrow('종료된 콘테스트에는 투표할 수 없습니다.');
-        expect(writer.cancelVote).toHaveBeenCalledWith({
-            contestId: 'contest-1',
-            entryId: 'entry-1',
-            voterId: 'voter-1',
-        });
+    });
+
+    it('엣지 — 검증-쓰기 사이 동일 유저 중복 투표 경합 → 쓰기가 duplicate 반환 → BadRequest', async () => {
+        reader.findEntryById.mockResolvedValue(makeEntry());
+        writer.vote.mockResolvedValue({ status: 'duplicate' });
+
+        await expect(useCase.execute('entry-1', 'voter-1')).rejects.toThrow('이번 콘테스트에서 이미 투표하셨습니다.');
     });
 
     it('엣지 — 자신의 항목 투표 → BadRequest', async () => {

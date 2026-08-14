@@ -9,11 +9,26 @@ export interface CreateContestEntryData {
     description: string;
 }
 
+/**
+ * 투표 쓰기 결과.
+ * 쓰기 시점에 콘테스트 열림 여부를 원자적으로 재판정하므로,
+ * 검증-쓰기 사이에 콘테스트가 종료돼도 'closed' 로 안전하게 거부된다.
+ */
+export type ContestVoteWriteResult =
+    | { status: 'ok'; newVoteCount: number }
+    | { status: 'closed' }
+    | { status: 'duplicate' };
+
+/** 투표 취소 쓰기 결과 */
+export type ContestVoteCancelWriteResult =
+    | { status: 'ok'; newVoteCount: number }
+    | { status: 'closed' }
+    | { status: 'not_voted' };
+
 export interface ContestWriterPort {
     createEntry(data: CreateContestEntryData): Promise<string>;
     incrementParticipantCount(contestId: string): Promise<void>;
-    vote(data: { contestId: string; entryId: string; voterId: string }): Promise<number>;
-    /** 투표 취소. 취소할 투표가 없으면 null, 있으면 취소 후 항목의 총 투표 수 반환 */
-    cancelVote(data: { contestId: string; entryId: string; voterId: string }): Promise<number | null>;
+    vote(data: { contestId: string; entryId: string; voterId: string }): Promise<ContestVoteWriteResult>;
+    cancelVote(data: { contestId: string; entryId: string; voterId: string }): Promise<ContestVoteCancelWriteResult>;
     updateEntryStatus(entryId: string, status: 'hidden' | 'deleted'): Promise<void>;
 }
