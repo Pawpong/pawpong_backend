@@ -138,4 +138,33 @@ export class ContestRepository {
 
         return updated?.voteCount ?? 0;
     }
+
+    /**
+     * 투표 취소. 해당 유저가 그 항목에 남긴 투표 기록을 삭제하고 voteCount 를 되돌린다.
+     * 삭제된 투표가 없으면 null 을 반환해 상위에서 "취소할 투표 없음"으로 처리한다.
+     */
+    async cancelVote(data: { contestId: string; entryId: string; voterId: string }): Promise<number | null> {
+        const deleted = await this.voteModel
+            .findOneAndDelete({
+                contestId: new Types.ObjectId(data.contestId),
+                entryId: new Types.ObjectId(data.entryId),
+                voterId: data.voterId,
+            })
+            .lean<ContestVoteDocument>()
+            .exec();
+
+        if (!deleted) return null;
+
+        // voteCount 가 이미 0 이면 감소를 건너뛰어 음수 노출을 막는다 (동시 취소 방어)
+        const updated = await this.entryModel
+            .findOneAndUpdate(
+                { _id: new Types.ObjectId(data.entryId), voteCount: { $gt: 0 } },
+                { $inc: { voteCount: -1 } },
+                { new: true },
+            )
+            .lean<ContestEntryDocument>()
+            .exec();
+
+        return updated?.voteCount ?? 0;
+    }
 }

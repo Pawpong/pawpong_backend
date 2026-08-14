@@ -7,6 +7,7 @@ import { ContestCurrentResponseDto } from '../dto/response/contest-current-respo
 import {
     ContestEntriesResponseDto,
     ContestSubmitResponseDto,
+    ContestVoteCancelResponseDto,
     ContestVoteResponseDto,
 } from '../dto/response/contest-entries-response.dto';
 import { ContestEntryDto } from '../dto/response/contest-entry.dto';
@@ -72,6 +73,15 @@ export function ApiVoteContestEntryEndpoint() {
         summary: '투표하기',
         description: '항목에 투표합니다. 콘테스트당 1회 제한. 자신의 항목에는 투표 불가.',
         responseType: ContestVoteResponseDto,
+    });
+}
+
+export function ApiCancelContestVoteEndpoint() {
+    return ApiEndpoint({
+        summary: '투표 취소',
+        description: `해당 항목에 남긴 내 투표를 취소합니다. 취소 후에는 같은 콘테스트에서 다시 투표할 수 있습니다.
+- 이번 콘테스트에 투표한 내역이 없거나, 내가 투표한 항목이 아닌 경우: 400`,
+        responseType: ContestVoteCancelResponseDto,
     });
 }
 

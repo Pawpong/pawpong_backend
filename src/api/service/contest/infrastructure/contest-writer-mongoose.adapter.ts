@@ -19,6 +19,10 @@ export class ContestWriterMongooseAdapter implements ContestWriterPort {
         return this.repository.vote(data);
     }
 
+    cancelVote(data: { contestId: string; entryId: string; voterId: string }): Promise<number | null> {
+        return this.repository.cancelVote(data);
+    }
+
     updateEntryStatus(entryId: string, status: 'hidden' | 'deleted'): Promise<void> {
         return this.repository.updateEntryStatus(entryId, status);
     }

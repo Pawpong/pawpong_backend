@@ -424,6 +424,95 @@ describe('콘테스트 E2E 테스트', () => {
                     expect(typeof res.body.data.ranking[0].voteRate).toBe('number');
                 });
 
+                // ─── 투표 취소 (user2) ─────────────────────────────────────────
+                // 종료 시점 상태를 취소 전과 동일(user2 가 entryId 에 1표)하게 되돌려
+                // 이후 관리자 API 테스트에 영향을 주지 않는다.
+
+                describe('투표 취소 (user2)', () => {
+                    it('DELETE /vote/:entryId 인증 없음 → 401', async () => {
+                        await request(app.getHttpServer()).delete(`/api/v2/contest/vote/${entryId}`).expect(401);
+                    });
+
+                    it('DELETE /vote/:entryId 투표 안 한 유저(user1) → 400', async () => {
+                        const res = await request(app.getHttpServer())
+                            .delete(`/api/v2/contest/vote/${entryId}`)
+                            .set('Authorization', `Bearer ${user1Token}`)
+                            .expect(400);
+
+                        expect(res.body.error).toContain('투표한 내역이 없습니다');
+                    });
+
+                    it('DELETE /vote/:entryId 존재하지 않는 항목 → 400', async () => {
+                        await request(app.getHttpServer())
+                            .delete(`/api/v2/contest/vote/${new ObjectId().toString()}`)
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(400);
+                    });
+
+                    it('DELETE /vote/:entryId 내가 투표하지 않은 다른 항목 → 400', async () => {
+                        const conn = app.get<Connection>(getConnectionToken());
+                        const { entryId: otherEntryId } = await seedContestEntry(app, contestId, 'other-user-id');
+
+                        try {
+                            const res = await request(app.getHttpServer())
+                                .delete(`/api/v2/contest/vote/${otherEntryId}`)
+                                .set('Authorization', `Bearer ${user2Token}`)
+                                .expect(400);
+
+                            expect(res.body.error).toContain('해당 항목에 투표한 내역이 없습니다');
+                        } finally {
+                            // 단정 실패 여부와 무관하게 임시 항목을 제거해 이후 entries 카운트 테스트를 보호한다
+                            await conn.collection('contest_entries').deleteOne({ _id: new ObjectId(otherEntryId) });
+                        }
+                    });
+
+                    it('DELETE /vote/:entryId 성공 → newVoteCount: 0', async () => {
+                        const res = await request(app.getHttpServer())
+                            .delete(`/api/v2/contest/vote/${entryId}`)
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(200);
+
+                        expect(res.body.data.entryId).toBe(entryId);
+                        expect(res.body.data.newVoteCount).toBe(0);
+                    });
+
+                    it('중복 취소 → 400', async () => {
+                        await request(app.getHttpServer())
+                            .delete(`/api/v2/contest/vote/${entryId}`)
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(400);
+                    });
+
+                    it('취소 후 GET /entries user2 → voteCount 비공개, hasVoted: false', async () => {
+                        const res = await request(app.getHttpServer())
+                            .get('/api/v2/contest/entries')
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(200);
+
+                        const votedEntry = res.body.data.items.find((i: any) => i.id === entryId);
+                        expect(votedEntry.voteCount).toBeNull();
+                        expect(votedEntry.hasVoted).toBe(false);
+                    });
+
+                    it('취소 후 GET /random-entry user2 → alreadyVoted: false (재투표 가능)', async () => {
+                        const res = await request(app.getHttpServer())
+                            .get('/api/v2/contest/random-entry')
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(200);
+
+                        expect(res.body.data.alreadyVoted).toBe(false);
+                    });
+
+                    it('취소 후 재투표 성공 → newVoteCount: 1 (unique index 재투표 허용 확인)', async () => {
+                        const res = await request(app.getHttpServer())
+                            .post(`/api/v2/contest/vote/${entryId}`)
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(200);
+
+                        expect(res.body.data.newVoteCount).toBe(1);
+                    });
+                });
+
                 // ─── 관리자 API ────────────────────────────────────────────────
 
                 describe('관리자 항목 상태 변경', () => {

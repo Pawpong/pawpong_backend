@@ -27,3 +27,11 @@ export class ContestVoteResponseDto {
     @ApiProperty({ description: '투표 후 총 투표 수' })
     newVoteCount: number;
 }
+
+export class ContestVoteCancelResponseDto {
+    @ApiProperty({ description: '투표가 취소된 항목 ID' })
+    entryId: string;
+
+    @ApiProperty({ description: '취소 후 총 투표 수' })
+    newVoteCount: number;
+}

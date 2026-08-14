@@ -14,6 +14,7 @@ import { CONTEST_WRITER_PORT } from './application/ports/contest-writer.port';
 import { GetCurrentContestUseCase } from './application/use-cases/get-current-contest.use-case';
 import { GetContestEntriesUseCase } from './application/use-cases/get-contest-entries.use-case';
 import { SubmitContestEntryUseCase } from './application/use-cases/submit-contest-entry.use-case';
+import { CancelContestVoteUseCase } from './application/use-cases/cancel-contest-vote.use-case';
 import { VoteContestEntryUseCase } from './application/use-cases/vote-contest-entry.use-case';
 import { GetMyContestEntryUseCase } from './application/use-cases/get-my-contest-entry.use-case';
 import { GetPreviousRankingUseCase } from './application/use-cases/get-previous-ranking.use-case';
@@ -68,6 +69,7 @@ const CONTEST_USE_CASE_PROVIDERS = [
     GetYesterdayTopUseCase,
     SubmitContestEntryUseCase,
     VoteContestEntryUseCase,
+    CancelContestVoteUseCase,
     GetMyContestEntryUseCase,
     GetPreviousRankingUseCase,
     GetHallOfFameUseCase,

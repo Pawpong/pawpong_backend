@@ -6,7 +6,8 @@
 명예의 전당/주간·어제·지난주 랭킹, 랜덤 투표 후보, 내 출품을 제공한다.
 관리자(admin)는 출품 숨김/삭제를 담당.
 
-상태: 구현 완료(dev). 최근 보강 — 항목/명예의전당 목록 표준 페이지네이션, 어제/지난주 TOP3, 랜덤 후보.
+상태: 구현 완료(dev). 최근 보강 — 항목/명예의전당 목록 표준 페이지네이션, 어제/지난주 TOP3, 랜덤 후보,
+투표 취소(2026-08-14, 프론트 ContestVoteButton 요청 — 취소 후 같은 콘테스트 재투표 가능).
 
 ## Architecture
 
@@ -32,6 +33,7 @@ admin/                 콘테스트 관리(숨김/삭제)
 | GET | `/api/v2/contest/previous-ranking` | 지난주 랭킹 |
 | GET | `/api/v2/contest/random-entry` | 랜덤 투표 후보 |
 | POST | `/api/v2/contest/vote/{entryId}` | 투표 |
+| DELETE | `/api/v2/contest/vote/{entryId}` | 투표 취소 (내가 투표한 항목만, 취소 후 재투표 가능) |
 | GET | `/api/v2/contest/weekly-top` | 주간 TOP |
 | GET | `/api/v2/contest/yesterday-top` | 어제 TOP3 |
 | PATCH | `/api/contest-admin/entries/{entryId}/status` | 콘테스트 항목 상태 변경 |
@@ -47,6 +49,8 @@ contest-weekly-top, contest-yesterday-top, contest-random-entry.
 
 ### Property 1: 투표 멱등/중복 방지
 동일 유저의 동일 출품 중복 투표를 방지하며 집계는 실제 투표 수와 일치한다.
+취소는 "내가 그 항목에 남긴 투표"만 지울 수 있고(다른 항목 지목 시 400), 취소 시 voteCount 를
+음수 없이 되돌리며 unique index(contestId+voterId) 상 재투표가 가능해진다.
 **Validates: Requirements 1.1**
 
 ### Property 2: 출품 제약
