@@ -6,6 +6,7 @@ import request from 'supertest';
 
 import { StorageService } from '../../../../../common/storage/storage.service';
 import { closeTestingApp, createTestingApp, getAdminToken } from '../../../../../common/testing/test-utils';
+import { ContestFinalizationScheduler } from '../../infrastructure/contest-finalization.scheduler';
 
 // ─── 약관 시드 (v2 회원가입 필수 전제) ──────────────────────────────────────
 
@@ -708,6 +709,23 @@ describe('콘테스트 E2E 테스트', () => {
             const conn = app.get<Connection>(getConnectionToken());
             const doc = await conn.collection('contest_entries').findOne({ _id: new ObjectId(expiredEntryId) });
             expect(doc?.voteCount).toBe(1);
+        });
+
+        it('스케줄러 — 요청이 전혀 없어도 만료된 active 콘테스트를 일괄 확정한다', async () => {
+            // 아무 요청도 받지 않은 만료 콘테스트를 재현
+            const { contestId: untouchedContestId } = await seedContest(app, {
+                title: '요청 없이 만료된 콘테스트',
+                status: 'active',
+                startDate: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() - 2 * 60 * 1000),
+            });
+
+            const scheduler = app.get(ContestFinalizationScheduler);
+            await scheduler.runOnce();
+
+            const conn = app.get<Connection>(getConnectionToken());
+            const doc = await conn.collection('contests').findOne({ _id: new ObjectId(untouchedContestId) });
+            expect(doc?.status).toBe('ended');
         });
     });
 });

@@ -61,7 +61,10 @@ voteCount 증감이 한 트랜잭션이다. 게이트가 콘테스트 문서에 
 
 endDate 는 두 역할을 한다: (1) 사전 필터 — 만료된 콘테스트로의 진입을 게이트 이전에 거부,
 (2) 지연 종료 자기 치유 — 만료됐는데 아직 active 인 콘테스트를 감지한 순간 `finalizeExpiredContest` 가
-status 를 ended 로 확정 write 한다 (flip 을 수행하는 별도 스케줄러가 없어도 확정이 쓰기로 진입함을 보장).
+status 를 ended 로 확정 write 한다.
+확정이 요청 유무에 의존하지 않도록 `ContestFinalizationScheduler` 가 부팅 직후 1회 + 1분 주기로
+만료된 active 콘테스트 전체를 일괄 확정한다 (`finalizeAllExpiredContests`, 조건부 updateMany 라
+다중 인스턴스 동시 실행에도 멱등). 요청 시 자기 치유는 그 사이 구간의 즉시성 보강이다.
 시간 경과 자체는 쓰기가 아니므로 "마감 직전에 게이트를 통과해 마감 수 ms 후 커밋되는 표"는 존재할 수
 있는데, 이는 마감 전에 행사된 표라 정상 집계 대상이다 — 확정(=flip 쓰기) 이후의 커밋은 게이트 직렬화로
 불가능하다는 것이 지켜야 할 불변식이다.

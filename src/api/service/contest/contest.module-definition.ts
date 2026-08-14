@@ -34,6 +34,7 @@ import { ContestPreviousRankingController } from './controller/contest-previous-
 import { ContestVoteController } from './controller/contest-vote.controller';
 import { ContestVotingPolicyService } from './domain/services/contest-voting-policy.service';
 import { ContestAssetUrlStorageAdapter } from './infrastructure/contest-asset-url-storage.adapter';
+import { ContestFinalizationScheduler } from './infrastructure/contest-finalization.scheduler';
 import { ContestReaderMongooseAdapter } from './infrastructure/contest-reader-mongoose.adapter';
 import { ContestUserInfoMongooseAdapter } from './infrastructure/contest-user-info-mongoose.adapter';
 import { ContestWriterMongooseAdapter } from './infrastructure/contest-writer-mongoose.adapter';
@@ -84,6 +85,7 @@ const CONTEST_INFRASTRUCTURE_PROVIDERS = [
     ContestWriterMongooseAdapter,
     ContestAssetUrlStorageAdapter,
     ContestUserInfoMongooseAdapter,
+    ContestFinalizationScheduler,
 ];
 
 const CONTEST_PORT_BINDINGS = [

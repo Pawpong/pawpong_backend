@@ -286,6 +286,18 @@ export class ContestRepository {
             .exec();
     }
 
+    /**
+     * 만료된 모든 active 콘테스트를 일괄 확정한다 (주기 스케줄러용).
+     * 요청 유무와 무관하게 endDate 경과 후 확정이 보장되도록 하는 안전망이며,
+     * 조건부 updateMany 라 여러 인스턴스가 동시에 실행해도 안전(멱등)하다.
+     */
+    async finalizeAllExpiredContests(): Promise<number> {
+        const result = await this.contestModel
+            .updateMany({ status: 'active', endDate: { $lte: new Date() } }, { $set: { status: 'ended' } })
+            .exec();
+        return result.modifiedCount ?? 0;
+    }
+
     private isDuplicateKeyError(error: unknown): boolean {
         return typeof error === 'object' && error !== null && (error as { code?: number }).code === 11000;
     }
