@@ -17,6 +17,7 @@ export type CounselDefaultProfileInput = {
  * v2 입양자 가입 커맨드
  * v1 RegisterAdopterAuthSignupCommand 대비 추가 필드:
  * - realName: 온보딩4 실명
+ * - bio: 다른 사용자에게 공개되는 프로필 한 줄 소개
  * - interestedBreedIds: 온보딩3 관심 품종 ID 배열
  * - counselDefaultProfile: 온보딩4 상담 사전 정보
  * - termsAgreements: 온보딩2 약관 동의 이력 (활성 버전 기준)
@@ -28,6 +29,7 @@ export type RegisterAdopterCommand = {
     tempId: string;
     email: string;
     nickname: string;
+    bio?: string;
     phone?: string;
     profileImage?: string;
     realName: string;

@@ -9,6 +9,7 @@ import {
     IsNotEmpty,
     IsOptional,
     IsString,
+    MaxLength,
     ValidateNested,
 } from 'class-validator';
 
@@ -67,6 +68,17 @@ export class RegisterAdopterFullRequestDto {
     @IsString()
     @IsNotEmpty()
     nickname: string;
+
+    @ApiProperty({
+        description: '공개 프로필 한 줄 소개 (trim 후 최대 200자)',
+        example: '반려동물을 사랑하며 좋은 가족을 기다리고 있어요.',
+        required: false,
+        maxLength: 200,
+    })
+    @IsString()
+    @MaxLength(200)
+    @IsOptional()
+    bio?: string;
 
     @ApiProperty({ description: '실명 (상담 시 표시)', example: '홍길동' })
     @IsString()
