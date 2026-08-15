@@ -45,6 +45,7 @@
     "seed:breeds": "ts-node src/scripts/seed-all.ts --only-breeds",
     "seed:banners": "ts-node src/scripts/seed-all.ts --only-banners",
     "seed:faqs": "ts-node src/scripts/seed-all.ts --only-faqs",
+    "seed:terms:dev": "node --env-file=.env -r ts-node/register src/scripts/seed-development-terms.ts",
     "create:admin": "ts-node scripts/create-admin.ts",
     "prepare": "husky || true"
   },
