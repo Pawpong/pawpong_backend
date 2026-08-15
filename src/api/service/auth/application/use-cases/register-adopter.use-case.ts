@@ -14,6 +14,8 @@ import { AuthPhoneNumberNormalizerService } from '../../domain/services/auth-pho
 import { AuthSignupResultMapperService } from '../../domain/services/auth-signup-result-mapper.service';
 import { AuthSignupValidationService } from '../../domain/services/auth-signup-validation.service';
 import { AuthTermsAgreementValidatorService } from '../../domain/services/auth-terms-agreement-validator.service';
+
+const BIO_MAX_LENGTH = 200;
 import type { RegisterAdopterCommand, RegisterAdopterResult } from '../types/auth-signup-register.type';
 
 @Injectable()
@@ -37,6 +39,11 @@ export class RegisterAdopterUseCase {
 
     async execute(command: RegisterAdopterCommand): Promise<RegisterAdopterResult> {
         const { provider, providerId } = this.authSocialIdentityService.parseRequiredTempId(command.tempId);
+
+        const bio = command.bio?.trim();
+        if (bio && bio.length > BIO_MAX_LENGTH) {
+            throw new BadRequestException(`한 줄 소개는 ${BIO_MAX_LENGTH}자 이내여야 합니다.`);
+        }
 
         const existingAdopter = await this.authRegistrationPort.findAdopterBySocialAuth(provider, providerId);
         this.authSignupValidationService.assertAdopterSocialAccountAvailable(existingAdopter);
@@ -67,6 +74,7 @@ export class RegisterAdopterUseCase {
         const savedAdopter = await this.authRegistrationPort.createAdopter({
             emailAddress: command.email,
             nickname: command.nickname,
+            ...(bio !== undefined ? { bio } : {}),
             phoneNumber: this.authPhoneNumberNormalizerService.normalize(command.phone),
             profileImageFileName: this.authStoredFileNameService.extract(command.profileImage) || '',
             socialAuthInfo: {

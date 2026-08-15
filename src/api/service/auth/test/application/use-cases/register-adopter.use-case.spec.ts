@@ -141,6 +141,30 @@ describe('v2 입양자 회원가입 유스케이스', () => {
         expect(authRegistrationPort.createAdopter).not.toHaveBeenCalled();
     });
 
+    it('공개 프로필 소개를 trim 하여 bio 로 저장한다', async () => {
+        await useCase.execute({
+            ...baseCommand,
+            bio: '  반려동물을 사랑하며 좋은 가족을 기다리고 있어요.  ',
+        });
+
+        expect(authRegistrationPort.createAdopter).toHaveBeenCalledWith(
+            expect.objectContaining({
+                bio: '반려동물을 사랑하며 좋은 가족을 기다리고 있어요.',
+            }),
+        );
+    });
+
+    it('공개 프로필 소개가 200자를 초과하면 가입에 실패한다', async () => {
+        await expect(
+            useCase.execute({
+                ...baseCommand,
+                bio: '가'.repeat(201),
+            }),
+        ).rejects.toThrow('한 줄 소개는 200자 이내여야 합니다.');
+
+        expect(authRegistrationPort.createAdopter).not.toHaveBeenCalled();
+    });
+
     it('marketing 동의가 termsAgreements 에 없으면 marketingAgreed=false 로 저장 (클라 boolean spoof 차단)', async () => {
         await useCase.execute(baseCommand);
 
