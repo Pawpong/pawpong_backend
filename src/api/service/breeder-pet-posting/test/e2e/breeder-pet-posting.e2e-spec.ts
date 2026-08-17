@@ -68,6 +68,39 @@ describe('분양글 (브리더) E2E 테스트', () => {
             draftId = res.body.data.draftId;
         });
 
+        it('POST /drafts 중첩까지 미완성인 폼(쓰다 만 접종 기록·빈 photos·부분 부모 정보) → 200 + 그대로 복원', async () => {
+            const incompleteForm = {
+                name: '중첩 미완성 게코',
+                photos: [],
+                vaccinationStatus: 'completed',
+                // 접종명만 쓰다 만 기록 — 임시저장은 이런 상태를 그대로 받아야 한다
+                vaccinationRecords: [{ name: '종합백신' }],
+                parentPetSnapshots: [{ relation: 'mother' }],
+                breedingEnvironment: { photoFileNames: ['available-pets/e2e/env.jpg'] },
+            };
+
+            const saved = await request(app.getHttpServer())
+                .post('/api/v2/breeder-pet-posting/drafts')
+                .set('Authorization', `Bearer ${breederToken}`)
+                .send(incompleteForm)
+                .expect(200);
+
+            const res = await request(app.getHttpServer())
+                .get(`/api/v2/breeder-pet-posting/drafts/${saved.body.data.draftId}`)
+                .set('Authorization', `Bearer ${breederToken}`)
+                .expect(200);
+
+            expect(res.body.data.form.vaccinationRecords).toEqual([{ name: '종합백신' }]);
+            expect(res.body.data.form.parentPetSnapshots).toEqual([{ relation: 'mother' }]);
+            expect(res.body.data.form.photos).toEqual([]);
+
+            // 다음 테스트(목록/상한)에 영향 없도록 정리
+            await request(app.getHttpServer())
+                .delete(`/api/v2/breeder-pet-posting/drafts/${saved.body.data.draftId}`)
+                .set('Authorization', `Bearer ${breederToken}`)
+                .expect(200);
+        });
+
         it('POST /drafts 인증 없음 → 401', async () => {
             await request(app.getHttpServer())
                 .post('/api/v2/breeder-pet-posting/drafts')

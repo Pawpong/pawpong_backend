@@ -39,8 +39,10 @@ export class SaveBreederPetPostingDraftUseCase {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
         }
 
+        const normalizedForm = this.normalizeForm(form);
+
         if (draftId) {
-            const { updated } = await this.draftPort.updateByOwner(draftId, breeder.breederId, form);
+            const { updated } = await this.draftPort.updateByOwner(draftId, breeder.breederId, normalizedForm);
             if (!updated) {
                 throw new BadRequestException('해당 임시저장 글을 찾을 수 없습니다.');
             }
@@ -52,6 +54,15 @@ export class SaveBreederPetPostingDraftUseCase {
             throw new BadRequestException(`임시저장은 최대 ${MAX_DRAFTS_PER_BREEDER}개까지 보관할 수 있습니다.`);
         }
 
-        return this.draftPort.create(breeder.breederId, form);
+        return this.draftPort.create(breeder.breederId, normalizedForm);
+    }
+
+    /**
+     * DTO 클래스 필드 선언이 만들어내는 `undefined` 프로퍼티를 제거한다.
+     * 제거하지 않으면 Mixed 저장 시 null 로 바뀌어, 복원한 폼에 사용자가 보낸 적 없는
+     * 유령 null 필드(date: null 등)가 생긴다 — "보낸 그대로 복원" 계약을 지키기 위한 정규화.
+     */
+    private normalizeForm(form: BreederPetPostingDraftForm): BreederPetPostingDraftForm {
+        return JSON.parse(JSON.stringify(form)) as BreederPetPostingDraftForm;
     }
 }
