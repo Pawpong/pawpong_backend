@@ -59,6 +59,7 @@ export type AdoptionPetDetailSnapshot = AdoptionPetSnapshot & {
     breedingEnvironment?: {
         description?: string;
         photoFileName?: string;
+        photoFileNames?: string[];
     };
 };
 

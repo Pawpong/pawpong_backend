@@ -60,6 +60,37 @@ describe('BreederPetPostingMapperService', () => {
         expect(empty.breedingEnvironment).toBeUndefined();
     });
 
+    it('breedingEnvironment 레거시 단일 photoFileName 은 배열로 승격된다', () => {
+        const data = mapper.toPersistData('breeder-1', { ...command });
+        expect(data.breedingEnvironment?.photoFileNames).toEqual(['env.jpg']);
+    });
+
+    it('breedingEnvironment photoFileNames 배열이 단일 필드보다 우선하고 첫 장이 photoFileName 에 실린다', () => {
+        const data = mapper.toPersistData('breeder-1', {
+            ...command,
+            breedingEnvironment: {
+                description: '사육장',
+                photoFileName: 'legacy.jpg',
+                photoFileNames: ['env-1.jpg', ' env-2.jpg ', 'env-1.jpg', ''],
+            },
+        });
+        // trim + 중복/빈 값 제거, legacy 단일 필드는 무시
+        expect(data.breedingEnvironment?.photoFileNames).toEqual(['env-1.jpg', 'env-2.jpg']);
+        // 하위 호환 소비자를 위해 첫 장이 단일 필드로도 저장된다
+        expect(data.breedingEnvironment?.photoFileName).toBe('env-1.jpg');
+    });
+
+    it('breedingEnvironment 사진이 5장을 넘으면 5장까지만 저장한다', () => {
+        const data = mapper.toPersistData('breeder-1', {
+            ...command,
+            breedingEnvironment: {
+                photoFileNames: ['1.jpg', '2.jpg', '3.jpg', '4.jpg', '5.jpg', '6.jpg'],
+            },
+        });
+        expect(data.breedingEnvironment?.photoFileNames).toHaveLength(5);
+        expect(data.breedingEnvironment?.photoFileNames).not.toContain('6.jpg');
+    });
+
     it('representativePhotoIndex 미지정 시 기본값 0', () => {
         const data = mapper.toPersistData('breeder-1', { ...command, representativePhotoIndex: undefined });
         expect(data.representativePhotoIndex).toBe(0);

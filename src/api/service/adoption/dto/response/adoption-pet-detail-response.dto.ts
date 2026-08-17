@@ -48,8 +48,11 @@ export class AdoptionPetBreedingEnvironmentDto {
     @ApiProperty({ description: '사육 환경 설명', required: false })
     description?: string;
 
-    @ApiProperty({ description: '사육 환경 사진 signed URL', required: false })
+    @ApiProperty({ description: '사육 환경 사진 signed URL (첫 장 — 하위 호환)', required: false })
     photoUrl?: string;
+
+    @ApiProperty({ description: '사육 환경 사진 signed URL 배열 (최대 5장)', type: [String] })
+    photoUrls: string[];
 }
 
 export class AdoptionPetBreederBlockDto {

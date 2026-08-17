@@ -46,7 +46,9 @@ repository/*            adoption-pet, adopter-pet-favorite, adoption-record
   ageDescription, price, status(available|reserved|adopted), primaryPhotoUrl, photoUrls[],
   inquiryCount, favoriteCount, viewCount, chatCount, isFavorited, isPopular, createdAt
 - `AdoptionPetDetailResponseDto`(상세): 카드 + description?, tags[], birthDate, vaccinationStatus?/records,
-  geneticTestStatus?/records, parents[](relation mother|father), breedingEnvironment?, breeder{breederId,displayName,profileImageUrl?,locationText?,bpm}
+  geneticTestStatus?/records, parents[](relation mother|father),
+  breedingEnvironment?{description?, photoUrl?(첫 장 — 하위 호환), photoUrls[](최대 5장, 2026-08-17 추가)},
+  breeder{breederId,displayName,profileImageUrl?,locationText?,bpm}
 - `AdoptedPetCardResponseDto`: 카드 + adoptedAt
 - `AdoptionFavoriteResponseDto`: petId, favoriteCount, success
 

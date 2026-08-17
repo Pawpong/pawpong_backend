@@ -3,6 +3,10 @@ import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { BreederPetPostingMapperService } from '../../domain/services/breeder-pet-posting-mapper.service';
 import { BreederPetPostingValidatorService } from '../../domain/services/breeder-pet-posting-validator.service';
 import {
+    BREEDER_PET_POSTING_DRAFT_PORT,
+    type BreederPetPostingDraftPort,
+} from '../ports/breeder-pet-posting-draft.port';
+import {
     BREEDER_PET_POSTING_PROFILE_PORT,
     type BreederPetPostingProfilePort,
 } from '../ports/breeder-pet-posting-profile.port';
@@ -30,6 +34,8 @@ export class CreateBreederPetPostingUseCase {
         private readonly profilePort: BreederPetPostingProfilePort,
         @Inject(BREEDER_PET_POSTING_WRITER_PORT)
         private readonly writerPort: BreederPetPostingWriterPort,
+        @Inject(BREEDER_PET_POSTING_DRAFT_PORT)
+        private readonly draftPort: BreederPetPostingDraftPort,
         private readonly validator: BreederPetPostingValidatorService,
         private readonly mapper: BreederPetPostingMapperService,
     ) {}
@@ -44,6 +50,13 @@ export class CreateBreederPetPostingUseCase {
 
         const persistData = this.mapper.toPersistData(breeder.breederId, command);
         const result = await this.writerPort.create(persistData);
+
+        // 임시저장에서 이어서 등록한 경우 draft 를 정리한다.
+        // 등록은 이미 성공했으므로 정리 실패가 응답을 실패로 만들지 않는다 (best effort)
+        if (command.draftId) {
+            await this.draftPort.deleteByOwner(command.draftId, breeder.breederId).catch(() => undefined);
+        }
+
         return { petId: result.petId };
     }
 }

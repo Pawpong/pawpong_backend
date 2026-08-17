@@ -32,6 +32,9 @@ export interface BreederPetPostingParentSnapshotCommand {
 
 export interface BreederPetPostingBreedingEnvironmentCommand {
     description?: string;
+    /** 사육 환경 사진 배열 (최대 5장) — photoFileName 보다 우선 */
+    photoFileNames?: string[];
+    /** [deprecated] 단일 사진 — photoFileNames 도입 전 클라이언트 하위 호환용 */
     photoFileName?: string;
 }
 
@@ -56,6 +59,8 @@ export interface BreederPetPostingCreateCommand {
 
     parentPetSnapshots?: BreederPetPostingParentSnapshotCommand[];
     breedingEnvironment?: BreederPetPostingBreedingEnvironmentCommand;
+    /** 임시저장에서 이어서 등록한 경우 — 등록 성공 시 해당 draft 를 삭제한다 */
+    draftId?: string;
 }
 
 export interface BreederPetPostingVaccinationRecordPersistData {
@@ -104,7 +109,9 @@ export interface BreederPetPostingCreatePersistData {
     parentPetSnapshots: BreederPetPostingParentSnapshotPersistData[];
     breedingEnvironment?: {
         description?: string;
+        /** 하위 호환 — photoFileNames 의 첫 장을 함께 저장 */
         photoFileName?: string;
+        photoFileNames?: string[];
     };
 }
 

@@ -41,12 +41,18 @@ export class GetAdoptionPetDetailUseCase {
         const newViewCount = await this.petWriter.incrementViewCount(input.petId);
         const effectiveViewCount = newViewCount ?? detail.viewCount;
 
-        const [photoUrls, parents, environmentPhotoUrl, breederSummary, favoritedSet] = await Promise.all([
+        // 배열(photoFileNames) 우선, 배열 도입 전 데이터는 단일(photoFileName)을 배열로 승격
+        const environmentFileNames =
+            detail.breedingEnvironment?.photoFileNames && detail.breedingEnvironment.photoFileNames.length > 0
+                ? detail.breedingEnvironment.photoFileNames
+                : detail.breedingEnvironment?.photoFileName
+                  ? [detail.breedingEnvironment.photoFileName]
+                  : [];
+
+        const [photoUrls, parents, environmentPhotoUrls, breederSummary, favoritedSet] = await Promise.all([
             Promise.all(detail.photos.map((fileName) => this.assetUrlPort.generateSignedUrl(fileName))),
             this.resolveParentPhotos(detail.parentPetSnapshots),
-            detail.breedingEnvironment?.photoFileName
-                ? this.assetUrlPort.generateSignedUrl(detail.breedingEnvironment.photoFileName)
-                : Promise.resolve<string | undefined>(undefined),
+            Promise.all(environmentFileNames.map((fileName) => this.assetUrlPort.generateSignedUrl(fileName))),
             this.breederSummaryPort.readSummary(detail.breederId),
             input.adopterId
                 ? this.favoriteReader.findFavoritedPetIds(input.adopterId, [detail.id])
@@ -81,7 +87,8 @@ export class GetAdoptionPetDetailUseCase {
             breedingEnvironment: detail.breedingEnvironment
                 ? {
                       description: detail.breedingEnvironment.description,
-                      photoUrl: environmentPhotoUrl,
+                      photoUrl: environmentPhotoUrls[0],
+                      photoUrls: environmentPhotoUrls,
                   }
                 : undefined,
             breeder: breederBlock,

@@ -52,7 +52,9 @@ export type AdoptionPetDetailResult = AdoptionPetItemResult & {
     }>;
     breedingEnvironment?: {
         description?: string;
+        /** 첫 장 — 하위 호환 */
         photoUrl?: string;
+        photoUrls: string[];
     };
     breeder: {
         breederId: string;

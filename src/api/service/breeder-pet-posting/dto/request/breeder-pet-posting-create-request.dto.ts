@@ -88,7 +88,23 @@ class BreedingEnvironmentRequestDto {
     @MaxLength(1000)
     description?: string;
 
-    @ApiPropertyOptional({ description: '사육 환경 사진 파일명', example: 'available-pets/abc/env.jpg' })
+    @ApiPropertyOptional({
+        description: '사육 환경 사진 파일명 배열 (최대 5장). photoFileName 대신 이 필드를 사용하세요.',
+        type: [String],
+        maxItems: 5,
+        example: ['available-pets/abc/env-1.jpg', 'available-pets/abc/env-2.jpg'],
+    })
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(5)
+    @IsString({ each: true })
+    photoFileNames?: string[];
+
+    @ApiPropertyOptional({
+        description: '[deprecated] 사육 환경 사진 파일명 (단일). photoFileNames 로 대체됨 — 함께 보내면 배열이 우선.',
+        example: 'available-pets/abc/env.jpg',
+        deprecated: true,
+    })
     @IsOptional()
     @IsString()
     photoFileName?: string;
@@ -225,9 +241,21 @@ export class CreateBreederPetPostingRequestDto {
     @Type(() => ParentPetSnapshotRequestDto)
     parentPetSnapshots?: ParentPetSnapshotRequestDto[];
 
-    @ApiPropertyOptional({ description: '사육 환경 (description + 사진 1장)', type: BreedingEnvironmentRequestDto })
+    @ApiPropertyOptional({
+        description: '사육 환경 (description + 사진 최대 5장)',
+        type: BreedingEnvironmentRequestDto,
+    })
     @IsOptional()
     @ValidateNested()
     @Type(() => BreedingEnvironmentRequestDto)
     breedingEnvironment?: BreedingEnvironmentRequestDto;
+
+    @ApiPropertyOptional({
+        description:
+            '임시저장 글 ID — 이 draft 를 불러와 등록한 경우 전달하면 등록 성공 시 해당 임시저장이 삭제됩니다.',
+        example: '507f1f77bcf86cd799439099',
+    })
+    @IsOptional()
+    @IsString()
+    draftId?: string;
 }

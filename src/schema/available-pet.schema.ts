@@ -227,18 +227,21 @@ export class AvailablePet {
     }>;
 
     /**
-     * v2 분양글 — 사육 환경 정보 (description + 사진 1장)
+     * v2 분양글 — 사육 환경 정보 (description + 사진 최대 5장)
+     * photoFileName 은 배열 도입 전 단일 사진 필드 — 하위 호환을 위해 첫 장을 함께 저장한다.
      */
     @Prop({
         type: {
             _id: false,
             description: { type: String, maxlength: 1000 },
             photoFileName: { type: String },
+            photoFileNames: { type: [String], default: undefined },
         },
     })
     breedingEnvironment?: {
         description?: string;
         photoFileName?: string;
+        photoFileNames?: string[];
     };
 }
 
