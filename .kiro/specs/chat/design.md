@@ -53,10 +53,11 @@ socket.io로 전송된 메시지는 영속 저장되어 이후 메시지 조회�
 ## Error Handling
 
 - 없는 방/비참여자: `BadRequestException`(400)/권한 거부.
-- ⚠️ **REST 응답이 표준 봉투를 쓰지 않는다** (실측 2026-08-03).
-  `chat-room-query` / `chat-room-command` 컨트롤러가 `ApiResponseDto` 를 쓰지 않고
-  결과를 그대로 반환한다. 프론트가 `unwrap()` 을 쓰면 실패한다.
-  정리 대상이며 [`_conventions.md`](../_conventions.md#봉투를-쓰지-않는-응답--실측-현황-2026-08-03) 에 기록돼 있다.
+- **REST 응답 표준 봉투 통일 완료** (2026-08-17, 프론트 요청).
+  4개 REST 엔드포인트 모두 `ApiResponseDto`(success/code/data/message/timestamp) 로 래핑한다.
+  ⚠️ breaking change — 프론트는 배포 시점에 채팅 응답을 `data` 언래핑으로 전환해야 한다
+  (다른 도메인과 동일하게 `unwrap()` 사용 가능해짐). Swagger 는 이전부터 봉투로 문서화돼 있어
+  문서-실측 불일치도 함께 해소됐다.
 
 ## Testing Strategy
 

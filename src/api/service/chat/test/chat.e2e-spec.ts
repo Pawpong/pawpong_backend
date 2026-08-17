@@ -25,6 +25,7 @@ import {
  *   POST /api/v2/chat/rooms는 @HttpCode(200) 적용으로 200 반환
  * - RolesGuard는 브리더에게 adopter 권한을 부여하나, 채팅 컨트롤러에서 role 직접 검사하여 브리더 차단 (403)
  * - ChatPolicyService: 방 미존재 → NotFoundException(404), 비참가자 → ForbiddenException(403)
+ * - 응답은 플랫폼 표준 봉투(ApiResponseDto: success/code/data/message/timestamp)로 래핑된다 (2026-08-17 통일)
  */
 describe('Chat API E2E Tests', () => {
     let app: INestApplication;
@@ -70,20 +71,20 @@ describe('Chat API E2E Tests', () => {
                 .send({ breederId })
                 .expect(200); // @HttpCode(200) 적용
 
-            expect(response.body).toBeDefined();
-            expect(response.body.roomId).toBeDefined();
-            expect(response.body.adopterId).toBeUndefined();
-            expect(response.body.breederId).toBeUndefined();
-            expect(response.body.counterpart).toEqual(
+            expect(response.body.data).toBeDefined();
+            expect(response.body.data.roomId).toBeDefined();
+            expect(response.body.data.adopterId).toBeUndefined();
+            expect(response.body.data.breederId).toBeUndefined();
+            expect(response.body.data.counterpart).toEqual(
                 expect.objectContaining({
                     userId: breederId,
                     role: 'breeder',
                     nickname: expect.any(String),
                 }),
             );
-            expect(response.body.unreadCount).toBe(0);
+            expect(response.body.data.unreadCount).toBe(0);
 
-            roomId = response.body.roomId;
+            roomId = response.body.data.roomId;
             console.log('✅ 채팅방 생성 성공:', roomId);
         });
 
@@ -94,7 +95,7 @@ describe('Chat API E2E Tests', () => {
                 .send({ breederId })
                 .expect(200);
 
-            expect(response.body.roomId).toBe(roomId);
+            expect(response.body.data.roomId).toBe(roomId);
             console.log('✅ 기존 채팅방 반환 확인:', roomId);
         });
 
@@ -112,8 +113,8 @@ describe('Chat API E2E Tests', () => {
                 })
                 .expect(200);
 
-            expect(response.body.roomId).toBeDefined();
-            expect(response.body.applicationId).toBe('test-application-id');
+            expect(response.body.data.roomId).toBeDefined();
+            expect(response.body.data.applicationId).toBe('test-application-id');
             console.log('✅ applicationId 포함 채팅방 생성 성공');
         });
 
@@ -158,7 +159,7 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId: anotherBreeder!.breederId })
                 .expect(200);
-            const firstRoomId = createRes.body.roomId;
+            const firstRoomId = createRes.body.data.roomId;
 
             // 채팅방 닫기
             await request(app.getHttpServer())
@@ -173,8 +174,8 @@ describe('Chat API E2E Tests', () => {
                 .send({ breederId: anotherBreeder!.breederId })
                 .expect(200);
 
-            expect(newRes.body.roomId).not.toBe(firstRoomId);
-            console.log('✅ 닫힌 방 이후 재요청 시 새 채팅방 생성 확인:', newRes.body.roomId);
+            expect(newRes.body.data.roomId).not.toBe(firstRoomId);
+            console.log('✅ 닫힌 방 이후 재요청 시 새 채팅방 생성 확인:', newRes.body.data.roomId);
         });
     });
 
@@ -196,19 +197,19 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
-            expect(Array.isArray(response.body)).toBe(true);
-            expect(response.body.length).toBeGreaterThan(0);
-            expect(response.body[0].adopterId).toBeUndefined();
-            expect(response.body[0].breederId).toBeUndefined();
-            expect(response.body[0].counterpart).toEqual(
+            expect(Array.isArray(response.body.data)).toBe(true);
+            expect(response.body.data.length).toBeGreaterThan(0);
+            expect(response.body.data[0].adopterId).toBeUndefined();
+            expect(response.body.data[0].breederId).toBeUndefined();
+            expect(response.body.data[0].counterpart).toEqual(
                 expect.objectContaining({
                     userId: breederId,
                     role: 'breeder',
                     nickname: expect.any(String),
                 }),
             );
-            expect(response.body[0].unreadCount).toEqual(expect.any(Number));
-            console.log('✅ 입양자 채팅방 목록 조회 성공, 건수:', response.body.length);
+            expect(response.body.data[0].unreadCount).toEqual(expect.any(Number));
+            console.log('✅ 입양자 채팅방 목록 조회 성공, 건수:', response.body.data.length);
         });
 
         it('브리더가 자신의 채팅방 목록 조회 성공', async () => {
@@ -217,18 +218,18 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${breederToken}`)
                 .expect(200);
 
-            expect(Array.isArray(response.body)).toBe(true);
-            expect(response.body.length).toBeGreaterThan(0);
-            expect(response.body[0].adopterId).toBeUndefined();
-            expect(response.body[0].breederId).toBeUndefined();
-            expect(response.body[0].counterpart).toEqual(
+            expect(Array.isArray(response.body.data)).toBe(true);
+            expect(response.body.data.length).toBeGreaterThan(0);
+            expect(response.body.data[0].adopterId).toBeUndefined();
+            expect(response.body.data[0].breederId).toBeUndefined();
+            expect(response.body.data[0].counterpart).toEqual(
                 expect.objectContaining({
                     userId: adopterId,
                     role: 'adopter',
                     nickname: expect.any(String),
                 }),
             );
-            console.log('✅ 브리더 채팅방 목록 조회 성공, 건수:', response.body.length);
+            console.log('✅ 브리더 채팅방 목록 조회 성공, 건수:', response.body.data.length);
         });
 
         it('인증 없이 요청 시 401 반환', async () => {
@@ -249,7 +250,7 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId });
 
-            roomId = response.body.roomId;
+            roomId = response.body.data.roomId;
         });
 
         it('입양자가 채팅방 메시지 조회 성공 (빈 목록)', async () => {
@@ -258,7 +259,7 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
-            expect(Array.isArray(response.body)).toBe(true);
+            expect(Array.isArray(response.body.data)).toBe(true);
             console.log('✅ 메시지 목록 조회 성공 (빈 목록)');
         });
 
@@ -268,7 +269,7 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${breederToken}`)
                 .expect(200);
 
-            expect(Array.isArray(response.body)).toBe(true);
+            expect(Array.isArray(response.body.data)).toBe(true);
             console.log('✅ 브리더 메시지 조회 성공');
         });
 
@@ -278,7 +279,7 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
-            expect(Array.isArray(response.body)).toBe(true);
+            expect(Array.isArray(response.body.data)).toBe(true);
             console.log('✅ limit 파라미터 적용 확인');
         });
 
@@ -333,7 +334,7 @@ describe('Chat API E2E Tests', () => {
                 .send({ breederId: freshBreeder!.breederId })
                 .expect(200);
 
-            roomId = response.body.roomId;
+            roomId = response.body.data.roomId;
 
             // 메시지 3개 직접 삽입
             const connection = app.get<Connection>(getConnectionToken());
@@ -384,7 +385,7 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
-            const messages = response.body as Array<{
+            const messages = response.body.data as Array<{
                 messageId: string;
                 roomId: string;
                 senderRole: string;
@@ -421,7 +422,7 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
-            const messages = response.body as Array<{ content: string }>;
+            const messages = response.body.data as Array<{ content: string }>;
 
             expect(Array.isArray(messages)).toBe(true);
             expect(messages.length).toBe(1);
@@ -447,7 +448,7 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .send({ breederId: anotherBreeder!.breederId });
 
-            roomId = response.body.roomId;
+            roomId = response.body.data.roomId;
         });
 
         it('입양자가 채팅방 닫기 성공', async () => {
@@ -456,7 +457,7 @@ describe('Chat API E2E Tests', () => {
                 .set('Authorization', `Bearer ${adopterToken}`)
                 .expect(200);
 
-            expect((response.body as { success: boolean }).success).toBe(true);
+            expect(response.body.success).toBe(true);
             console.log('✅ 입양자 채팅방 닫기 성공:', roomId);
         });
 
@@ -468,14 +469,14 @@ describe('Chat API E2E Tests', () => {
                 .send({ breederId })
                 .expect(200);
 
-            const targetRoomId = (createRes.body as { roomId: string }).roomId;
+            const targetRoomId = (createRes.body.data as { roomId: string }).roomId;
 
             const response = await request(app.getHttpServer())
                 .delete(`/api/v2/chat/rooms/${targetRoomId}`)
                 .set('Authorization', `Bearer ${breederToken}`)
                 .expect(200);
 
-            expect((response.body as { success: boolean }).success).toBe(true);
+            expect(response.body.success).toBe(true);
             console.log('✅ 브리더 채팅방 닫기 성공:', targetRoomId);
         });
 
