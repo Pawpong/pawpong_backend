@@ -93,6 +93,7 @@ export class ProfileMapperService {
             bpm: snapshot.bpm,
             level: snapshot.level,
             addedAt: snapshot.addedAt.toISOString(),
+            isFavorited: true,
         };
     }
 

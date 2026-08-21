@@ -53,5 +53,6 @@ describe('ProfileMapperService', () => {
         });
         expect(dto.addedAt).toBe('2026-04-01T10:00:00.000Z');
         expect(dto.recentPetStatus).toBe('available');
+        expect(dto.isFavorited).toBe(true);
     });
 });
