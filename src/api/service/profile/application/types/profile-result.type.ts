@@ -51,6 +51,7 @@ export interface BreederPublicProfileResult {
     plan: 'basic' | 'pro';
     businessLocation: BusinessLocationResult;
     isFavorited: boolean;
+    isFollowing: boolean;
 }
 
 export interface FavoriteBreederCardResult {

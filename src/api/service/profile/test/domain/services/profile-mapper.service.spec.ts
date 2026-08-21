@@ -21,7 +21,7 @@ describe('ProfileMapperService', () => {
         expect(dto.favoriteBreederCount).toBe(2);
     });
 
-    it('toBreederPublicDto — isFavorited 그대로 전달', () => {
+    it('toBreederPublicDto — isFavorited / isFollowing 그대로 전달', () => {
         const dto = mapper.toBreederPublicDto(
             {
                 breederId: 'b-1',
@@ -36,8 +36,10 @@ describe('ProfileMapperService', () => {
                 businessLocation: { city: '경남', district: '창원시' },
             },
             true,
+            false,
         );
         expect(dto.isFavorited).toBe(true);
+        expect(dto.isFollowing).toBe(false);
         expect(dto.level).toBe('elite');
     });
 

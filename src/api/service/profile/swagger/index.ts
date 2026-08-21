@@ -88,7 +88,8 @@ export function ApiGetBreederProfileEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '브리더 공개 프로필 조회 (브리더홈)',
-            description: '브리더의 공개 프로필. 로그인 입양자는 isFavorited 가 채워진다.',
+            description:
+                '브리더의 공개 프로필. 로그인 입양자는 isFavorited 가, 로그인 사용자는 isFollowing 이 채워진다.',
             responseType: BreederPublicProfileResponseDto,
             isPublic: true,
             supportsOptionalAuth: true,
@@ -118,7 +119,7 @@ export function ApiFollowUserEndpoint() {
         ApiEndpoint({
             summary: '사용자 팔로우 (Figma 678:46565)',
             description: `
-                입양자 유저홈에서 팔로우. 대상은 입양자(Adopter)만 가능.
+                유저홈·브리더홈에서 팔로우. 대상은 입양자(Adopter)·브리더(Breeder) 모두 가능.
                 이미 팔로우 중이면 followed: false 반환 (멱등).
                 자기 자신 팔로우 시 400.
             `,

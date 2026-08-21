@@ -47,8 +47,8 @@ export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
             bio: breeder.bio ?? '',
             longDescription: breeder.profile?.description ?? '',
             bpm: breeder.bpm ?? 0,
-            followerCount: breeder.stats?.totalFavorites ?? 0,
-            followingCount: 0,
+            followerCount: breeder.stats?.followerCount ?? 0,
+            followingCount: breeder.stats?.followingCount ?? 0,
             level: (breeder.verification?.level as 'new' | 'elite') ?? 'new',
             plan: (breeder.verification?.plan as 'basic' | 'pro') ?? 'basic',
             businessLocation: {

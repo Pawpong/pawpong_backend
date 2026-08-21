@@ -53,4 +53,10 @@ export class BreederPublicProfileResponseDto {
         example: true,
     })
     isFavorited: boolean;
+
+    @ApiProperty({
+        description: '현재 로그인 사용자가 이 브리더를 팔로우 중인지 (비로그인/본인 호출 시 false)',
+        example: false,
+    })
+    isFollowing: boolean;
 }

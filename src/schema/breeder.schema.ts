@@ -269,6 +269,19 @@ export class BreederStats {
     totalFavorites: number;
 
     /**
+     * 이 브리더를 팔로우한 사용자 수 (user_follows 의 follow/unfollow 시 원자적으로 갱신).
+     * 즐겨찾기(totalFavorites)와는 별개 관계다.
+     */
+    @Prop({ default: 0 })
+    followerCount: number;
+
+    /**
+     * 이 브리더가 팔로우 중인 사용자 수
+     */
+    @Prop({ default: 0 })
+    followingCount: number;
+
+    /**
      * 완료된 입양 건수
      */
     @Prop({ default: 0 })
