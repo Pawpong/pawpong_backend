@@ -43,7 +43,8 @@ export function ApiGetCurrentContestEndpoint() {
 export function ApiGetContestEntriesEndpoint() {
     return ApiEndpoint({
         summary: '투표 항목 목록 조회',
-        description: '현재 콘테스트의 항목 목록을 voteCount 내림차순으로 반환합니다.',
+        description:
+            '현재 콘테스트의 항목 목록을 voteCount 내림차순으로 반환합니다. 진행 중인 콘테스트가 없으면 빈 목록.',
         responseType: ContestEntriesResponseDto,
         supportsOptionalAuth: true,
     });
