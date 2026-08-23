@@ -6,6 +6,7 @@ import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 import { ChatMessage, ChatMessageSchema } from '../../../schema/chat-message.schema';
 import { ChatRoom, ChatRoomSchema } from '../../../schema/chat-room.schema';
+import { ChatUserBlock, ChatUserBlockSchema } from '../../../schema/chat-user-block.schema';
 import { KafkaModule } from '../../../common/kafka/kafka.module';
 import { LoggerModule } from '../../../common/logger/logger.module';
 import { StorageModule } from '../../../common/storage/storage.module';
@@ -14,6 +15,7 @@ import { CHAT_MESSAGE_BROKER } from './application/ports/chat-message-broker.por
 import { CHAT_MESSAGE_MANAGER } from './application/ports/chat-message-manager.port';
 import { CHAT_PARTICIPANT_READER } from './application/ports/chat-participant-reader.port';
 import { CHAT_ROOM_MANAGER } from './application/ports/chat-room-manager.port';
+import { CHAT_USER_BLOCK_MANAGER } from './application/ports/chat-user-block-manager.port';
 import {
     CLOSE_ROOM_USE_CASE,
     CREATE_OR_GET_ROOM_USE_CASE,
@@ -26,6 +28,8 @@ import { CreateOrGetRoomUseCase } from './application/use-cases/create-or-get-ro
 import { GetMessagesUseCase } from './application/use-cases/get-messages.use-case';
 import { GetMyRoomsUseCase } from './application/use-cases/get-my-rooms.use-case';
 import { SendMessageUseCase } from './application/use-cases/send-message.use-case';
+import { BlockChatUserUseCase } from './application/use-cases/block-chat-user.use-case';
+import { UnblockChatUserUseCase } from './application/use-cases/unblock-chat-user.use-case';
 import { ChatMessageMapperService } from './domain/services/chat-message-mapper.service';
 import { ChatPolicyService } from './domain/services/chat-policy.service';
 import { ChatRoomMapperService } from './domain/services/chat-room-mapper.service';
@@ -33,7 +37,9 @@ import { ChatRoomResponseAssemblerService } from './domain/services/chat-room-re
 import { ChatParticipantMongooseReaderAdapter } from './infrastructure/chat-participant-mongoose-reader.adapter';
 import { KafkaChatMessageBrokerAdapter } from './infrastructure/kafka-chat-message-broker.adapter';
 import { ChatMongooseManagerAdapter } from './infrastructure/chat-mongoose-manager.adapter';
+import { ChatUserBlockMongooseManagerAdapter } from './infrastructure/chat-user-block-mongoose-manager.adapter';
 import { ChatRepository } from './repository/chat.repository';
+import { ChatUserBlockRepository } from './repository/chat-user-block.repository';
 import { ChatGateway } from './chat.gateway';
 import { ChatKafkaConsumer } from './chat-kafka.consumer';
 import { ChatRoomCommandController } from './controller/chat-room-command.controller';
@@ -42,6 +48,7 @@ import { ChatRoomQueryController } from './controller/chat-room-query.controller
 const CHAT_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: ChatRoom.name, schema: ChatRoomSchema },
     { name: ChatMessage.name, schema: ChatMessageSchema },
+    { name: ChatUserBlock.name, schema: ChatUserBlockSchema },
     { name: Adopter.name, schema: AdopterSchema },
     { name: Breeder.name, schema: BreederSchema },
 ]);
@@ -66,6 +73,8 @@ const CHAT_APPLICATION_PROVIDERS = [
     SendMessageUseCase,
     GetMessagesUseCase,
     CloseRoomUseCase,
+    BlockChatUserUseCase,
+    UnblockChatUserUseCase,
 ];
 
 const CHAT_DOMAIN_PROVIDERS = [
@@ -80,6 +89,8 @@ const CHAT_INFRASTRUCTURE_PROVIDERS = [
     ChatMongooseManagerAdapter,
     KafkaChatMessageBrokerAdapter,
     ChatParticipantMongooseReaderAdapter,
+    ChatUserBlockRepository,
+    ChatUserBlockMongooseManagerAdapter,
 ];
 
 const CHAT_PORT_BINDINGS = [
@@ -87,6 +98,7 @@ const CHAT_PORT_BINDINGS = [
     { provide: CHAT_MESSAGE_MANAGER, useExisting: ChatMongooseManagerAdapter },
     { provide: CHAT_MESSAGE_BROKER, useExisting: KafkaChatMessageBrokerAdapter },
     { provide: CHAT_PARTICIPANT_READER, useExisting: ChatParticipantMongooseReaderAdapter },
+    { provide: CHAT_USER_BLOCK_MANAGER, useExisting: ChatUserBlockMongooseManagerAdapter },
 ];
 
 const CHAT_USE_CASE_BINDINGS = [

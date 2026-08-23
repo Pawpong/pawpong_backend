@@ -23,7 +23,7 @@ export class CloseRoomUseCase {
             const room = this.chatPolicyService.requireRoom(await this.chatRoomManager.findRoomById(roomId));
             this.chatPolicyService.requireParticipant(room, userId);
 
-            await this.chatRoomManager.closeRoom(roomId);
+            await this.chatRoomManager.hideRoom(roomId, userId);
 
             await this.chatMessageBroker.publishRoomClosed({
                 roomId,
@@ -31,7 +31,7 @@ export class CloseRoomUseCase {
                 timestamp: new Date(),
             });
 
-            this.logger.logSuccess('closeRoom', '채팅방 종료 완료', { roomId });
+            this.logger.logSuccess('closeRoom', '채팅방 숨김 완료', { roomId, userId });
         } catch (error) {
             this.logger.logError('closeRoom', '채팅방 종료', error);
             throw error;

@@ -17,6 +17,14 @@ import { GetMessagesUseCase } from './application/use-cases/get-messages.use-cas
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
 import { SendMessageRequestDto } from './dto/request/send-message-request.dto';
 import { SenderRole } from '../../../schema/chat-message.schema';
+import { Inject } from '@nestjs/common';
+import { CHAT_ROOM_MANAGER, type ChatRoomManagerPort } from './application/ports/chat-room-manager.port';
+import {
+    CHAT_PARTICIPANT_READER,
+    type ChatParticipantReaderPort,
+} from './application/ports/chat-participant-reader.port';
+import { ChatPolicyService } from './domain/services/chat-policy.service';
+import { UserStatus } from '../../../common/enum/user.enum';
 
 /**
  * 채팅 WebSocket Gateway
@@ -49,6 +57,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     constructor(
         private readonly sendMessageUseCase: SendMessageUseCase,
         private readonly getMessagesUseCase: GetMessagesUseCase,
+        @Inject(CHAT_ROOM_MANAGER)
+        private readonly chatRoomManager: ChatRoomManagerPort,
+        @Inject(CHAT_PARTICIPANT_READER)
+        private readonly participantReader: ChatParticipantReaderPort,
+        private readonly chatPolicyService: ChatPolicyService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
@@ -73,7 +86,16 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
                 secret: this.configService.get<string>('JWT_SECRET'),
             });
 
+            if (!payload.sub || (payload.role !== 'adopter' && payload.role !== 'breeder')) {
+                client.disconnect();
+                return;
+            }
             const role = payload.role === 'adopter' ? SenderRole.ADOPTER : SenderRole.BREEDER;
+            const participant = await this.participantReader.findParticipant(payload.sub, role);
+            if (!participant || participant.accountStatus === UserStatus.DELETED) {
+                client.disconnect();
+                return;
+            }
             this.connectedClients.set(client.id, { userId: payload.sub, role });
 
             this.logger.logSuccess('ChatGateway', `클라이언트 연결: ${client.id} (${payload.sub})`);
@@ -98,8 +120,14 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
             throw new WsException('인증이 필요합니다.');
         }
 
-        client.join(payload.roomId);
-        this.logger.logSuccess('ChatGateway', `${user.userId} 채팅방 입장: ${payload.roomId}`);
+        try {
+            const room = this.chatPolicyService.requireRoom(await this.chatRoomManager.findRoomById(payload.roomId));
+            this.chatPolicyService.requireParticipant(room, user.userId);
+            await client.join(payload.roomId);
+            this.logger.logSuccess('ChatGateway', `${user.userId} 채팅방 입장: ${payload.roomId}`);
+        } catch (error) {
+            throw new WsException(error instanceof Error ? error.message : '채팅방 입장에 실패했습니다.');
+        }
     }
 
     /**
