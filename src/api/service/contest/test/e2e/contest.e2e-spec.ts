@@ -196,8 +196,13 @@ describe('콘테스트 E2E 테스트', () => {
             expect(res.body.data).toBeNull();
         });
 
-        it('GET /entries → 400 (진행 중 콘테스트 없음)', async () => {
-            await request(app.getHttpServer()).get('/api/v2/contest/entries').expect(400);
+        it('GET /entries → 200 + 빈 목록 (진행 중 콘테스트 없음)', async () => {
+            // 같은 상태(콘테스트 없음)를 /current 는 200+null 로 주는데 /entries 만 400 이면
+            // 클라이언트가 정상 빈 상태와 오류를 구분하지 못한다 — 빈 목록으로 통일했다(6f66decb)
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/entries').expect(200);
+
+            expect(res.body.data.items).toEqual([]);
+            expect(res.body.data.pagination.totalItems).toBe(0);
         });
 
         it('GET /yesterday-top → data: null', async () => {
