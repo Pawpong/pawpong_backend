@@ -2,6 +2,8 @@ import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
+import { Partitioners } from 'kafkajs';
+import { hostname } from 'os';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import express from 'express';
 import cookieParser from 'cookie-parser';
@@ -15,6 +17,7 @@ import { CustomLoggerService } from './common/logger/custom-logger.service';
 import { NotifyCriticalErrorUseCase } from './common/discord/application/use-cases/notify-critical-error.use-case';
 
 import { AppModule } from './app.module';
+import { buildKafkaBroadcastConsumerGroupId } from './common/kafka/kafka-consumer-group';
 
 declare const module: any;
 
@@ -231,6 +234,11 @@ async function bootstrap(): Promise<void> {
     const shouldConnectKafka = kafkaEnabled && kafkaBroker.length > 0;
 
     if (shouldConnectKafka) {
+        const kafkaConsumerGroupId = buildKafkaBroadcastConsumerGroupId(
+            configService.get<string>('KAFKA_CONSUMER_GROUP_ID', 'pawpong-backend-consumer-group'),
+            configService.get<string>('CONTAINER_NAME', hostname()),
+        );
+
         app.connectMicroservice<MicroserviceOptions>({
             transport: Transport.KAFKA,
             options: {
@@ -244,10 +252,13 @@ async function bootstrap(): Promise<void> {
                     },
                 },
                 consumer: {
-                    groupId: 'pawpong-backend-consumer-group',
+                    groupId: kafkaConsumerGroupId,
                     allowAutoTopicCreation: true,
                     sessionTimeout: 30000,
                     heartbeatInterval: 3000,
+                },
+                producer: {
+                    createPartitioner: Partitioners.DefaultPartitioner,
                 },
             },
         });

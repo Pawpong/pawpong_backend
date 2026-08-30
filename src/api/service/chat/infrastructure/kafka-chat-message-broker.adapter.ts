@@ -11,15 +11,15 @@ import {
 export class KafkaChatMessageBrokerAdapter implements ChatMessageBrokerPort {
     constructor(private readonly kafkaService: KafkaService) {}
 
-    async publishMessage(payload: ChatMessageBrokerPayload): Promise<void> {
-        await this.kafkaService.emit(KafkaTopic.CHAT_MESSAGE, payload);
+    async publishMessage(payload: ChatMessageBrokerPayload): Promise<boolean> {
+        return this.kafkaService.emit(KafkaTopic.CHAT_MESSAGE, payload);
     }
 
-    async publishRoomCreated(payload: ChatRoomLifecyclePayload): Promise<void> {
-        await this.kafkaService.emit(KafkaTopic.CHAT_ROOM_CREATED, payload);
+    async publishRoomCreated(payload: ChatRoomLifecyclePayload): Promise<boolean> {
+        return this.kafkaService.emit(KafkaTopic.CHAT_ROOM_CREATED, payload);
     }
 
-    async publishRoomClosed(payload: ChatRoomLifecyclePayload): Promise<void> {
-        await this.kafkaService.emit(KafkaTopic.CHAT_ROOM_CLOSED, payload);
+    async publishRoomClosed(payload: ChatRoomLifecyclePayload): Promise<boolean> {
+        return this.kafkaService.emit(KafkaTopic.CHAT_ROOM_CLOSED, payload);
     }
 }

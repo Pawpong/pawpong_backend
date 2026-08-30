@@ -51,9 +51,9 @@ function makeMessageManager(): ChatMessageManagerPort {
 
 function makeBroker(): ChatMessageBrokerPort {
     return {
-        publishMessage: jest.fn().mockResolvedValue(undefined),
-        publishRoomCreated: jest.fn(),
-        publishRoomClosed: jest.fn(),
+        publishMessage: jest.fn().mockResolvedValue(true),
+        publishRoomCreated: jest.fn().mockResolvedValue(true),
+        publishRoomClosed: jest.fn().mockResolvedValue(true),
     };
 }
 
@@ -71,6 +71,7 @@ describe('SendMessageUseCase', () => {
         const useCase = new SendMessageUseCase(makeRoomManager(), messageManager, broker, policy, mapper, makeLogger());
         const result = await useCase.execute('adopter-1', SenderRole.ADOPTER, { roomId: 'room-1', content: '안녕' });
         expect(result.id).toBe('msg-1');
+        expect(result.brokerPublished).toBe(true);
         expect(messageManager.createMessage).toHaveBeenCalledWith(
             expect.objectContaining({ receiverId: 'breeder-1', messageType: MessageType.TEXT }),
         );
