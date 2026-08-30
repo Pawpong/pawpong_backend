@@ -87,9 +87,6 @@ export class AdoptionPetDetailResponseDto extends AdoptionPetResponseDto {
     @ApiProperty({ description: '태그', type: [String], example: ['#개코 도마뱀', '#만다린'] })
     tags: string[];
 
-    @ApiProperty({ description: '출생일 ISO', example: '2025-06-20T00:00:00.000Z' })
-    birthDate: string;
-
     @ApiProperty({
         description: '예방 접종 상태',
         enum: ['completed', 'incomplete'],
