@@ -17,6 +17,30 @@ describe('BreederExploreCriteriaService', () => {
         expect(result.filter.breeds).toEqual({ $in: ['푸들', '말티즈'] });
     });
 
+    it('keyword는 브리더명/품종/지역을 $or 부분 일치로 검색한다', () => {
+        const result = service.build({ petType: 'dog', keyword: '말티즈' } as any);
+        const or = result.filter.$or as Array<Record<string, RegExp>>;
+        expect(or.map((condition) => Object.keys(condition)[0])).toEqual([
+            'name',
+            'breeds',
+            'profile.location.city',
+            'profile.location.district',
+        ]);
+        expect(or[0].name.test('말티즈 브리더')).toBe(true);
+        expect(or[0].name.test('푸들 브리더')).toBe(false);
+    });
+
+    it('keyword의 정규식 메타문자는 리터럴로 취급한다', () => {
+        const result = service.build({ petType: 'dog', keyword: '.*' } as any);
+        const or = result.filter.$or as Array<Record<string, RegExp>>;
+        expect(or[0].name.test('아무 브리더')).toBe(false);
+        expect(or[0].name.test('브리더.*하우스')).toBe(true);
+    });
+
+    it('공백뿐인 keyword는 필터를 만들지 않는다', () => {
+        expect(service.build({ petType: 'dog', keyword: '   ' } as any).filter.$or).toBeUndefined();
+    });
+
     it('province와 city 둘 다 있으면 $and 조건', () => {
         const result = service.build({ petType: 'dog', province: ['서울'], city: ['강남구'] } as any);
         expect(result.filter.$and).toBeDefined();
