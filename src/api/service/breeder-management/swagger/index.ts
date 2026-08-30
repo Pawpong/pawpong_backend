@@ -15,7 +15,7 @@ import { ApplicationStatusUpdateRequestDto } from '../dto/request/application-st
 import { BreederAccountDeleteRequestDto } from '../dto/request/breeder-account-delete-request.dto';
 import { ParentPetAddDto } from '../dto/request/parent-pet-add-request.dto';
 import { ParentPetUpdateDto } from '../dto/request/parent-pet-update-request.dto';
-import { ProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
+import { BreederProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
 import { ReviewReplyRequestDto } from '../dto/request/review-reply-request.dto';
 import { SimpleApplicationFormUpdateRequestDto } from '../dto/request/simple-application-form-update-request.dto';
 import { SubmitDocumentsRequestDto } from '../dto/request/submit-documents-request.dto';
@@ -29,7 +29,7 @@ import {
 } from '../dto/response/application-form-update-response.dto';
 import { ApplicationStatusUpdateResponseDto } from '../dto/response/application-status-update-response.dto';
 import { BreederAccountDeleteResponseDto } from '../dto/response/breeder-account-delete-response.dto';
-import { MyReviewItemDto, MyReviewsListResponseDto } from '../dto/response/my-reviews-list-response.dto';
+import { BreederMyReviewItemDto, MyReviewsListResponseDto } from '../dto/response/my-reviews-list-response.dto';
 import { PetAddResponseDto } from '../dto/response/pet-add-response.dto';
 import { PetRemoveResponseDto } from '../dto/response/pet-remove-response.dto';
 import { PetUpdateResponseDto } from '../dto/response/pet-update-response.dto';
@@ -233,7 +233,7 @@ export const BreederManagementSwaggerDocs = {
         description:
             '브리더 자신에게 작성된 모든 후기를 관리 목적으로 조회합니다. 공개/비공개 후기 모두 확인 가능하며, 신고된 후기 정보도 포함됩니다.',
         responseType: MyReviewsListResponseDto,
-        itemType: MyReviewItemDto,
+        itemType: BreederMyReviewItemDto,
         successDescription: '내게 달린 후기 목록 조회 성공',
         successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.myReviewsRetrieved,
         isPublic: false,
@@ -386,7 +386,7 @@ export const BreederManagementSwaggerDocs = {
 } as const;
 
 export const BreederManagementRequestBodyDtos = {
-    profileUpdate: ProfileUpdateRequestDto,
+    profileUpdate: BreederProfileUpdateRequestDto,
     verificationSubmit: VerificationSubmitRequestDto,
     submitDocuments: SubmitDocumentsRequestDto,
     parentPetAdd: ParentPetAddDto,
@@ -425,7 +425,7 @@ function ApiBreederManagementReviewIdParam() {
 export function ApiUpdateBreederManagementProfileEndpoint() {
     return applyDecorators(
         ApiEndpoint(BreederManagementSwaggerDocs.updateProfile),
-        ApiBody({ type: ProfileUpdateRequestDto }),
+        ApiBody({ type: BreederProfileUpdateRequestDto }),
     );
 }
 

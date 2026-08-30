@@ -111,7 +111,7 @@ export class PriceRangeUpdateDto {
  * 브리더 프로필 수정 요청 DTO
  * 브리더가 자신의 프로필을 업데이트할 때 사용됩니다.
  */
-export class ProfileUpdateRequestDto {
+export class BreederProfileUpdateRequestDto {
     /**
      * 브리더 소개 설명
      * @example "20년 경력의 전문 브리더입니다. 건강하고 성격 좋은 반려동물을 분양합니다."

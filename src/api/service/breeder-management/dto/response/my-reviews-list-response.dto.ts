@@ -5,7 +5,7 @@ import { PaginationResponseDto } from '../../../../../common/dto/pagination/pagi
 /**
  * 브리더 자신의 후기 항목 DTO (관리용)
  */
-export class MyReviewItemDto {
+export class BreederMyReviewItemDto {
     /**
      * 후기 ID
      * @example "507f1f77bcf86cd799439011"
@@ -181,15 +181,15 @@ export class MyReviewItemDto {
 /**
  * 브리더 자신의 후기 목록 응답 DTO
  */
-export class MyReviewsListResponseDto extends PaginationResponseDto<MyReviewItemDto> {
+export class MyReviewsListResponseDto extends PaginationResponseDto<BreederMyReviewItemDto> {
     /**
      * 후기 목록
      */
     @ApiProperty({
         description: '후기 목록',
-        type: [MyReviewItemDto],
+        type: [BreederMyReviewItemDto],
     })
-    declare items: MyReviewItemDto[];
+    declare items: BreederMyReviewItemDto[];
 
     /**
      * 평균 평점
