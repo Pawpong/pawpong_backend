@@ -24,9 +24,10 @@ export class AdoptionFavoriteController {
     @ApiAddAdoptionFavoriteEndpoint()
     async addFavorite(
         @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: 'adopter' | 'breeder',
         @Param('petId') petId: string,
     ): Promise<ApiResponseDto<AdoptionFavoriteResponseDto>> {
-        const result = await this.addUseCase.execute(userId, petId);
+        const result = await this.addUseCase.execute(userId, petId, role);
         return ApiResponseDto.success(
             { petId, favoriteCount: result.favoriteCount, success: result.added },
             ADOPTION_RESPONSE_MESSAGE_EXAMPLES.favoriteAdded,

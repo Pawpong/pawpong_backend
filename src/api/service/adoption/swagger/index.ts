@@ -116,11 +116,18 @@ export function ApiAddAdoptionFavoriteEndpoint() {
         ApiEndpoint({
             summary: '동물 관심 등록',
             description:
-                '입양 가능 동물을 입양자 즐겨찾기에 추가합니다. 이미 등록된 경우에도 200 으로 처리됩니다 (idempotent).',
+                '입양 가능 동물을 관심 목록에 추가합니다. 입양자와 브리더 모두 이용할 수 있지만 브리더 본인의 분양 동물은 등록할 수 없습니다. 이미 등록된 경우에도 200 으로 처리됩니다 (idempotent).',
             responseType: AdoptionFavoriteResponseDto,
             successDescription: '관심 등록 성공',
             successMessageExample: ADOPTION_RESPONSE_MESSAGE_EXAMPLES.favoriteAdded,
-            errorResponses: [PET_NOT_FOUND_RESPONSE],
+            errorResponses: [
+                PET_NOT_FOUND_RESPONSE,
+                {
+                    status: 403,
+                    description: '본인 분양 동물 관심 등록 금지',
+                    errorExample: '본인의 분양 동물에는 관심을 등록할 수 없습니다.',
+                },
+            ],
         }),
         ApiParam({ name: 'petId', description: '동물 ID', example: '507f1f77bcf86cd799439011' }),
     );

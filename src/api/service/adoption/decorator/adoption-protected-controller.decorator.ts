@@ -34,8 +34,8 @@ export function AdoptionProtectedController() {
  * 과거에는 'brand 가 카운터를 spam 하지 못하도록' 이라는 이유로 브리더를 막았으나
  * 그 시나리오는 성립하지 않는다 — adopter_pet_favorites 에 (adopterId, petId) 유니크 인덱스가 있고
  * addAtomic 이 duplicate key 를 멱등 처리해서, 한 계정이 몇 번을 누르든 favoriteCount 는 최대 +1 이다.
- * 실제로 남는 위험은 브리더가 '자기 펫'을 눌러 인기 정렬을 self-boost 하는 쪽이며,
- * 그건 role 차단이 아니라 소유자 검증으로 다뤄야 한다(현재 미구현 — 별도 결정 사항).
+ * 브리더가 '자기 펫'을 눌러 인기 정렬을 self-boost 하는 위험은
+ * AddAdoptionPetFavoriteUseCase 의 소유자 검증으로 차단한다.
  */
 export function AdoptionFavoritesController() {
     return applyDecorators(
