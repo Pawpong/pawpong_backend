@@ -76,4 +76,45 @@ export class VerificationStatusResponseDto {
         required: false,
     })
     submittedByEmail?: boolean;
+
+    @ApiProperty({
+        description: '등급 변경 심사 진행 여부',
+        example: false,
+    })
+    isLevelChangeRequested: boolean;
+
+    @ApiProperty({
+        description: '진행 중인 등급 변경 신청 요약',
+        required: false,
+        example: {
+            previousLevel: 'new',
+            requestedLevel: 'elite',
+            requestedAt: '2026-08-31T00:00:00.000Z',
+            documents: [],
+        },
+    })
+    levelChangeRequest?: {
+        previousLevel: string;
+        requestedLevel: string;
+        requestedAt: Date;
+        documents: Array<{
+            type: string;
+            fileName: string;
+            url: string;
+            uploadedAt?: Date;
+            originalFileName?: string;
+        }>;
+    };
+
+    @ApiProperty({
+        description: '최근 등급 변경 심사 반려 사유',
+        required: false,
+    })
+    levelChangeRejectionReason?: string;
+
+    @ApiProperty({
+        description: '최근 등급 변경 심사 완료 일시',
+        required: false,
+    })
+    levelChangeReviewedAt?: Date;
 }

@@ -32,7 +32,19 @@ describe('BreederVerificationAdminPolicyService', () => {
             expect(policy.resolveAdminAction(VerificationStatus.REJECTED)).toBe(AdminAction.REJECT_BREEDER);
         });
         it('그 외 → REVIEW_BREEDER', () => {
-            expect(policy.resolveAdminAction('pending')).toBe(AdminAction.REVIEW_BREEDER);
+            expect(policy.resolveAdminAction(VerificationStatus.REVIEWING)).toBe(AdminAction.REVIEW_BREEDER);
+        });
+    });
+
+    describe('isLevelChangeDecision', () => {
+        const breeder = { verification: { isLevelChangeRequested: true, levelChangeRequest: {} } } as any;
+
+        it.each([VerificationStatus.APPROVED, VerificationStatus.REJECTED])('%s는 최종 결정이다', (status) => {
+            expect(policy.isLevelChangeDecision(breeder, status)).toBe(true);
+        });
+
+        it('reviewing은 최종 결정이 아니다', () => {
+            expect(policy.isLevelChangeDecision(breeder, VerificationStatus.REVIEWING)).toBe(false);
         });
     });
 

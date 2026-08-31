@@ -19,6 +19,7 @@ import { BreederProfileUpdateRequestDto } from '../dto/request/profile-update-re
 import { ReviewReplyRequestDto } from '../dto/request/review-reply-request.dto';
 import { SimpleApplicationFormUpdateRequestDto } from '../dto/request/simple-application-form-update-request.dto';
 import { SubmitDocumentsRequestDto } from '../dto/request/submit-documents-request.dto';
+import { LevelChangeRequestDto } from '../dto/request/level-change-request.dto';
 import { UploadDocumentsRequestDto } from '../dto/request/upload-documents-request.dto';
 import { VerificationSubmitRequestDto } from '../dto/request/verification-submit-request.dto';
 import { ApplicationFormResponseDto } from '../dto/response/application-form-response.dto';
@@ -162,6 +163,18 @@ export const BreederManagementSwaggerDocs = {
         responseType: VerificationSubmitResponseDto,
         successDescription: '브리더 인증 서류 제출 성공',
         successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationDocumentsSubmitted,
+        isPublic: false,
+        errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
+    },
+    requestLevelChange: {
+        summary: 'Elite 브리더 등급 변경 신청',
+        description: `승인된 New 브리더가 Elite 등급 심사를 신청합니다.
+
+기존 승인 서류는 서버에서 자동으로 재사용하며, 추가 업로드한 입양계약서와 전문성 증빙 서류를 병합합니다.
+이미 심사 중이거나 승인되지 않은 브리더는 신청할 수 없습니다.`,
+        responseType: VerificationSubmitResponseDto,
+        successDescription: '브리더 등급 변경 신청 성공',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.levelChangeRequested,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -389,6 +402,7 @@ export const BreederManagementRequestBodyDtos = {
     profileUpdate: BreederProfileUpdateRequestDto,
     verificationSubmit: VerificationSubmitRequestDto,
     submitDocuments: SubmitDocumentsRequestDto,
+    levelChange: LevelChangeRequestDto,
     parentPetAdd: ParentPetAddDto,
     parentPetUpdate: ParentPetUpdateDto,
     applicationFormUpdate: ApplicationFormUpdateRequestDto,
@@ -440,6 +454,13 @@ export function ApiSubmitBreederManagementVerificationDocumentsEndpoint() {
     return applyDecorators(
         ApiEndpoint(BreederManagementSwaggerDocs.submitVerificationDocuments),
         ApiBody({ type: SubmitDocumentsRequestDto }),
+    );
+}
+
+export function ApiRequestBreederManagementLevelChangeEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.requestLevelChange),
+        ApiBody({ type: LevelChangeRequestDto }),
     );
 }
 

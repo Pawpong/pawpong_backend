@@ -15,4 +15,10 @@ export class BreederManagementVerificationCommandResultMapperService {
             message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationDocumentsSubmittedDetailed,
         };
     }
+
+    toLevelChangeRequestedResult() {
+        return {
+            message: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.levelChangeRequestedDetailed,
+        };
+    }
 }

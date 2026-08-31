@@ -301,6 +301,7 @@ export class DiscordWebhookService {
         phone?: string;
         level: 'new' | 'elite';
         isResubmission: boolean;
+        submissionKind?: 'verification' | 'level_change';
         documents: Array<{
             type: string;
             url: string;
@@ -318,7 +319,12 @@ export class DiscordWebhookService {
 
         try {
             const levelName = data.level === 'new' ? 'New' : 'Elite';
-            const submissionType = data.isResubmission ? '재제출' : '신규 제출';
+            const submissionType =
+                data.submissionKind === 'level_change'
+                    ? '등급 변경 신청'
+                    : data.isResubmission
+                      ? '재제출'
+                      : '신규 제출';
 
             const fields: Array<{ name: string; value: string; inline: boolean }> = [
                 {
@@ -369,10 +375,11 @@ export class DiscordWebhookService {
             });
 
             // 재제출은 주황색, 신규는 보라색
-            const embedColor = data.isResubmission ? 0xff9800 : 0x9c27b0;
+            const embedColor =
+                data.submissionKind === 'level_change' ? 0x2196f3 : data.isResubmission ? 0xff9800 : 0x9c27b0;
 
             const embed = {
-                title: '📝 브리더 입점 서류 제출',
+                title: data.submissionKind === 'level_change' ? '⭐ 브리더 등급 변경 신청' : '📝 브리더 입점 서류 제출',
                 color: embedColor,
                 fields,
                 timestamp: data.submittedAt.toISOString(),

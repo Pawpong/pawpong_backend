@@ -57,7 +57,7 @@ describe('BreederManagementVerificationDocumentPolicyService', () => {
                     ],
                     draftDocuments: [],
                 }),
-            ).toThrow('브리더 인증 서류');
+            ).toThrow('전문성을 증빙하는 서류');
         });
 
         it('breederDogCertificate가 있으면 통과', () => {
@@ -87,6 +87,52 @@ describe('BreederManagementVerificationDocumentPolicyService', () => {
                 currentVerification: { status: VerificationStatus.REJECTED },
             });
             expect(plan.isResubmission).toBe(true);
+        });
+    });
+
+    describe('회원가입 서류와 관리 서류 규격 통합', () => {
+        it('pending 상태의 snake_case 회원가입 서류를 Elite 신청에 재사용한다', () => {
+            const plan = service.buildSubmissionPlan({
+                level: 'elite',
+                submittedDocuments: [
+                    {
+                        type: 'adoptionContractSample',
+                        fileName: 'verification/breeder-id/contract.pdf',
+                    },
+                    {
+                        type: 'ticaCfaDocument',
+                        fileName: 'verification/breeder-id/tica.pdf',
+                    },
+                ],
+                draftDocuments: [],
+                currentVerification: {
+                    status: VerificationStatus.APPROVED,
+                    documents: [
+                        { type: 'id_card', fileName: 'documents/verification/temp/new/id.pdf' },
+                        {
+                            type: 'animal_production_license',
+                            fileName: 'breeder-documents/license.pdf',
+                        },
+                    ],
+                },
+            });
+
+            expect(plan.finalDocuments.map((document) => document.type)).toEqual([
+                'id_card',
+                'animal_production_license',
+                'adoption_contract_sample',
+                'breeder_certification',
+            ]);
+        });
+
+        it('지원하지 않는 서류 타입은 저장 전에 거절한다', () => {
+            expect(() =>
+                service.buildSubmissionPlan({
+                    level: 'new',
+                    submittedDocuments: [{ type: 'unknownDocument', fileName: 'verification/unknown.pdf' }],
+                    draftDocuments: [],
+                }),
+            ).toThrow('지원하지 않는 서류 타입');
         });
     });
 

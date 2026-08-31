@@ -23,8 +23,16 @@ export interface BreederManagementVerificationRecord {
     submittedByEmail?: boolean;
 }
 
+export interface BreederManagementLevelChangeRequestRecord {
+    previousLevel: 'new' | 'elite';
+    requestedLevel: 'new' | 'elite';
+    requestedAt: Date;
+    documents: BreederManagementStoredVerificationDocumentRecord[];
+}
+
 export interface BreederManagementSettingsPort {
     updateVerification(breederId: string, verification: BreederManagementVerificationRecord): Promise<void>;
+    requestLevelChange(breederId: string, request: BreederManagementLevelChangeRequestRecord): Promise<void>;
     updateApplicationForm(
         breederId: string,
         applicationForm: BreederManagementApplicationFormRecord[],

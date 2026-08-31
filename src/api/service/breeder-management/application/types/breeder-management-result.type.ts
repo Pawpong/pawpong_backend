@@ -162,6 +162,15 @@ export type BreederManagementVerificationStatusResult = {
     documents: BreederManagementVerificationStatusDocumentResult[];
     rejectionReason?: string;
     submittedByEmail: boolean;
+    isLevelChangeRequested: boolean;
+    levelChangeRequest?: {
+        previousLevel: string;
+        requestedLevel: string;
+        requestedAt: Date;
+        documents: BreederManagementVerificationStatusDocumentResult[];
+    };
+    levelChangeRejectionReason?: string;
+    levelChangeReviewedAt?: Date;
 };
 
 export type BreederManagementUploadedDocumentResult = {

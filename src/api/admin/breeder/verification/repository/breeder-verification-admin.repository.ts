@@ -151,6 +151,20 @@ export class BreederVerificationAdminRepository {
 
         if (command.rejectionReason !== undefined) {
             $set['verification.rejectionReason'] = command.rejectionReason;
+        } else if (command.verificationStatus === 'approved') {
+            $unset['verification.rejectionReason'] = '';
+        }
+
+        if (command.approvedLevel) {
+            $set['verification.level'] = command.approvedLevel;
+            $set['verification.documents'] = command.approvedDocuments || [];
+            $unset['verification.levelChangeRejectionReason'] = '';
+            $unset['verification.levelChangeReviewedAt'] = '';
+        }
+
+        if (command.levelChangeRejectionReason !== undefined) {
+            $set['verification.levelChangeRejectionReason'] = command.levelChangeRejectionReason;
+            $set['verification.levelChangeReviewedAt'] = command.reviewedAt;
         }
 
         if (command.appendLevelChangeHistory) {

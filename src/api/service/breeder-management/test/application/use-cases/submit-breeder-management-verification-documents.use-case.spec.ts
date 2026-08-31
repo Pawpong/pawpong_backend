@@ -173,11 +173,11 @@ describe('브리더 관리 인증 문서 제출 유스케이스', () => {
         expect(result.message).toContain('입점 서류 제출이 완료되었습니다');
         expect(settingsPort.updatedVerification.documents).toHaveLength(2);
         expect(settingsPort.updatedVerification.documents[0]).toMatchObject({
-            type: 'idCard',
+            type: 'id_card',
             fileName: 'verification/breeder-id/id-card.pdf',
         });
         expect(settingsPort.updatedVerification.documents[1]).toMatchObject({
-            type: 'businessLicense',
+            type: 'animal_production_license',
             fileName: 'verification/breeder-id/business-license.pdf',
         });
     });

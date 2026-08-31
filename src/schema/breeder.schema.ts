@@ -29,11 +29,19 @@ export class VerificationDocument {
             'adoption_contract_sample',
             'recent_pedigree_document',
             'breeder_certification',
+            'recent_association_document',
+            'tica_cfa_document',
             // camelCase 형식 (기존 데이터 호환성)
             'idCard',
+            'animalProductionLicense',
             'businessLicense',
+            'adoptionContractSample',
             'contractSample',
+            'recentAssociationDocument',
+            'recentPedigreeDocument',
             'pedigreeDocument',
+            'ticaCfaDocument',
+            'breederCertification',
             'breederCertificate',
             'breederDogCertificate',
             'breederCatCertificate',
@@ -164,6 +172,12 @@ export class BreederVerification {
         requestedAt: Date;
         documents: VerificationDocument[];
     };
+
+    @Prop()
+    levelChangeRejectionReason?: string;
+
+    @Prop()
+    levelChangeReviewedAt?: Date;
 
     /**
      * 레벨 변경 이력
