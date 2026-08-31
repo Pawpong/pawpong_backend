@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsOptional, IsNumber, Min, Max, IsString } from 'class-validator';
 
@@ -7,7 +7,7 @@ import { BreederSortBy } from '../../constants/breeder-search.enum';
 
 export class SearchBreederRequestDto {
     /**
-     * 반려동물 타입 (강아지/고양이)
+     * 반려동물 타입 (강아지/고양이/파충류)
      * @example "dog"
      */
     @ApiPropertyOptional({

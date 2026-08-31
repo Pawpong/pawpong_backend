@@ -11,7 +11,7 @@ import { SortCriteria } from '../../constants/breeder-search.enum';
  */
 export class BreederSearchRequestDto {
     /**
-     * 반려동물 타입 (강아지/고양이)
+     * 반려동물 타입 (강아지/고양이/파충류)
      * @example "dog"
      */
     @ApiPropertyOptional({

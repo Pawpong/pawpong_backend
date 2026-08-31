@@ -20,6 +20,7 @@ export enum UserRole {
 export enum PetType {
     DOG = 'dog',
     CAT = 'cat',
+    REPTILE = 'reptile',
 }
 
 export enum PetGender {
