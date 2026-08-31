@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsNotEmpty, ArrayMinSize, ArrayMaxSize } from 'class-validator';
+import { IsArray, IsEnum, IsOptional, ArrayMinSize, ArrayMaxSize } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 /**
@@ -7,18 +7,17 @@ import { Transform } from 'class-transformer';
  * Multipart/form-data로 파일과 함께 전송
  */
 export class UploadBreederDocumentsRequestDto {
-    /**
-     * 브리더 레벨
-     * @example "new"
-     */
+    /** @deprecated 구버전 클라이언트 호환 입력. 업로드 정책에는 사용하지 않는다. */
     @ApiProperty({
-        description: '브리더 레벨 (new 또는 elite)',
+        description: '폐기된 브리더 레벨 입력(구버전 호환용, 서버에서 무시)',
         example: 'new',
         enum: ['new', 'elite'],
+        required: false,
+        deprecated: true,
     })
     @IsEnum(['new', 'elite'], { message: '레벨은 "new" 또는 "elite"만 가능합니다.' })
-    @IsNotEmpty({ message: '레벨은 필수입니다.' })
-    level: 'new' | 'elite';
+    @IsOptional()
+    level?: 'new' | 'elite';
 
     /**
      * 서류 타입 배열 (JSON 문자열 또는 배열)

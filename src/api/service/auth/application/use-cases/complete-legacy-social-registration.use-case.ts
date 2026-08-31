@@ -27,6 +27,7 @@ type LegacySocialAdditionalInfo = {
     introduction?: string;
     district?: string;
     breeds?: string[];
+    /** @deprecated 구버전 입력 호환용. 가입 결과에는 반영하지 않는다. */
     level?: string;
     marketingAgreed?: boolean;
 };
@@ -113,7 +114,6 @@ export class CompleteLegacySocialRegistrationUseCase {
             verification: {
                 status: VerificationStatus.PENDING,
                 plan: additionalInfo.plan === 'pro' ? BreederPlan.PRO : BreederPlan.BASIC,
-                level: additionalInfo.level || 'new',
                 documents: [],
             },
             profile: {

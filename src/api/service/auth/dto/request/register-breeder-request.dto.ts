@@ -168,18 +168,17 @@ export class RegisterBreederRequestDto {
     @IsNotEmpty()
     plan: string;
 
-    /**
-     * 브리더 레벨
-     * @example "new"
-     */
+    /** @deprecated 구버전 클라이언트 호환 입력. 서버는 이 값을 무시한다. */
     @ApiProperty({
-        description: '브리더 레벨',
+        description: '폐기된 브리더 레벨 입력(구버전 호환용, 서버에서 무시)',
         enum: ['elite', 'new'],
         example: 'new',
+        required: false,
+        deprecated: true,
     })
     @IsEnum(['elite', 'new'])
-    @IsNotEmpty()
-    level: string;
+    @IsOptional()
+    level?: string;
 
     /**
      * 약관 동의 정보

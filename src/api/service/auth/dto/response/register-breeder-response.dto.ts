@@ -78,17 +78,6 @@ export class RegisterBreederResponseDto {
     plan: string;
 
     /**
-     * 브리더 레벨
-     * @example "new"
-     */
-    @ApiProperty({
-        description: '브리더 레벨',
-        enum: ['elite', 'new'],
-        example: 'new',
-    })
-    level: string;
-
-    /**
      * 인증 상태
      * @example "pending"
      */

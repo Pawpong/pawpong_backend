@@ -61,7 +61,6 @@ export class CompleteSocialRegistrationUseCase {
                 animal: dto.petType!,
                 breeds: dto.breeds!,
                 plan: dto.plan!,
-                level: dto.level!,
                 agreements: {
                     termsOfService: true,
                     privacyPolicy: true,

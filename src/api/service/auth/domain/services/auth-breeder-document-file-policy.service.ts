@@ -4,32 +4,25 @@ import { DomainValidationError } from '../../../../../common/error/domain.error'
 
 @Injectable()
 export class AuthBreederDocumentFilePolicyService {
-    validate(files: Express.Multer.File[], types: string[], level: 'new' | 'elite'): void {
+    validate(files: Express.Multer.File[], types: string[]): void {
         if (!files || files.length === 0) {
             throw new DomainValidationError('파일이 업로드되지 않았습니다.');
         }
 
-        const allowedTypes = {
-            new: ['idCard', 'animalProductionLicense'],
-            elite: [
-                'idCard',
-                'animalProductionLicense',
-                'adoptionContractSample',
-                'recentAssociationDocument',
-                'breederCertification',
-                'ticaCfaDocument',
-            ],
-        } as const;
-
-        if (!['new', 'elite'].includes(level)) {
-            throw new DomainValidationError('레벨은 "new" 또는 "elite"만 가능합니다.');
-        }
-
-        const validTypes = allowedTypes[level] as readonly string[];
+        // 현재 심사는 단일 입점 검증 정책이다. 추가 서류는 구버전 업로드와
+        // 관리자 참고 자료 호환을 위해 허용하되 등급 판정에는 사용하지 않는다.
+        const validTypes: readonly string[] = [
+            'idCard',
+            'animalProductionLicense',
+            'adoptionContractSample',
+            'recentAssociationDocument',
+            'breederCertification',
+            'ticaCfaDocument',
+        ];
         for (const type of types) {
             if (!validTypes.includes(type)) {
                 throw new DomainValidationError(
-                    `${level} 레벨에서 유효하지 않은 서류 타입입니다: ${type}. 허용된 타입: ${validTypes.join(', ')}`,
+                    `유효하지 않은 서류 타입입니다: ${type}. 허용된 타입: ${validTypes.join(', ')}`,
                 );
             }
         }

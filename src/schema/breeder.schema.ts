@@ -129,14 +129,14 @@ export class BreederVerification {
     plan: string;
 
     /**
-     * 브리더 레벨 (new: 뉴, elite: 엘리트)
+     * @deprecated 2026-08-31 등급 정책 폐지 이전 데이터와의 역호환용 필드.
+     * 신규 브리더에는 저장하지 않으며 서비스 정책이나 화면 분기에 사용하지 않는다.
      */
     @Prop({
-        required: true,
+        required: false,
         enum: ['new', 'elite'],
-        default: 'new',
     })
-    level: string;
+    level?: string;
 
     @Prop()
     submittedAt?: Date;

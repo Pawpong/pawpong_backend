@@ -137,8 +137,12 @@ describe('레거시 소셜 가입 완료 유스케이스', () => {
                 }),
                 verification: expect.objectContaining({
                     plan: 'pro',
-                    level: 'elite',
                 }),
+            }),
+        );
+        expect(authRegistrationPort.createBreeder).toHaveBeenCalledWith(
+            expect.not.objectContaining({
+                verification: expect.objectContaining({ level: expect.anything() }),
             }),
         );
         expect(result).toMatchObject({
