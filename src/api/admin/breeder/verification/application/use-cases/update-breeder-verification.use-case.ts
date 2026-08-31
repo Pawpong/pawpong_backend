@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AdminTargetType } from '../../../../../../common/enum/user.enum';
+import { AdminTargetType, VerificationStatus } from '../../../../../../common/enum/user.enum';
 import { BREEDER_VERIFICATION_ADMIN_READER_PORT } from '../ports/breeder-verification-admin-reader.port';
 import { BREEDER_VERIFICATION_ADMIN_WRITER_PORT } from '../ports/breeder-verification-admin-writer.port';
 import { BREEDER_VERIFICATION_ADMIN_NOTIFIER_PORT } from '../ports/breeder-verification-admin-notifier.port';
@@ -45,21 +45,35 @@ export class UpdateBreederVerificationUseCase {
             breeder,
             verificationData.verificationStatus,
         );
+        const isLevelChangeDecision = this.breederVerificationAdminPolicyService.isLevelChangeDecision(
+            breeder,
+            verificationData.verificationStatus,
+        );
         const shouldClearLevelChangeRequest = this.breederVerificationAdminPolicyService.shouldClearLevelChangeRequest(
             breeder,
             verificationData.verificationStatus,
         );
 
         await this.breederVerificationAdminWriter.updateBreederVerification(breederId, {
-            verificationStatus: verificationData.verificationStatus,
+            verificationStatus: isLevelChangeDecision
+                ? VerificationStatus.APPROVED
+                : verificationData.verificationStatus,
             reviewedAt,
-            ...(verificationData.rejectionReason !== undefined
+            ...(!isLevelChangeDecision && verificationData.rejectionReason !== undefined
                 ? {
                       rejectionReason: verificationData.rejectionReason,
                   }
                 : {}),
+            ...(isLevelChangeDecision && verificationData.verificationStatus === VerificationStatus.REJECTED
+                ? {
+                      levelChangeRejectionReason:
+                          verificationData.rejectionReason || '등급 변경 심사가 반려되었습니다.',
+                  }
+                : {}),
             ...(isLevelChangeApproval && breeder.verification?.levelChangeRequest
                 ? {
+                      approvedLevel: breeder.verification.levelChangeRequest.requestedLevel,
+                      approvedDocuments: breeder.verification.levelChangeRequest.documents || [],
                       appendLevelChangeHistory: {
                           previousLevel: breeder.verification.levelChangeRequest.previousLevel,
                           newLevel: breeder.verification.levelChangeRequest.requestedLevel,
@@ -83,7 +97,9 @@ export class UpdateBreederVerificationUseCase {
                 AdminTargetType.BREEDER,
                 breederId,
                 this.breederVerificationAdminPolicyService.getBreederDisplayName(breeder),
-                `Breeder verification ${verificationData.verificationStatus}`,
+                isLevelChangeDecision
+                    ? `Breeder level change ${verificationData.verificationStatus}`
+                    : `Breeder verification ${verificationData.verificationStatus}`,
             ),
         );
 
@@ -93,14 +109,16 @@ export class UpdateBreederVerificationUseCase {
             emailAddress: breeder.emailAddress,
         };
 
-        if (verificationData.verificationStatus === 'approved') {
+        if (verificationData.verificationStatus === VerificationStatus.APPROVED) {
             await this.breederVerificationAdminNotifier.sendApproval(recipient);
-        } else if (verificationData.verificationStatus === 'rejected') {
+        } else if (verificationData.verificationStatus === VerificationStatus.REJECTED) {
             await this.breederVerificationAdminNotifier.sendRejection(recipient, verificationData.rejectionReason);
         }
 
         return {
-            message: `Breeder verification ${verificationData.verificationStatus}`,
+            message: isLevelChangeDecision
+                ? `Breeder level change ${verificationData.verificationStatus}`
+                : `Breeder verification ${verificationData.verificationStatus}`,
         };
     }
 }

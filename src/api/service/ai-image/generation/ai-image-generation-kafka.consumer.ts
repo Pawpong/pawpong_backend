@@ -39,16 +39,12 @@ export class AiImageGenerationKafkaConsumer {
 
     /** 형식이 어긋난 메시지는 재처리해도 성공할 수 없으므로 버린다 */
     private parsePayload(payload: unknown): AiImageGenerationResultEvent | null {
-        const parsed = (typeof payload === 'string' ? JSON.parse(payload) : payload) as
-            | Partial<AiImageGenerationResultEvent>
-            | null;
+        const parsed = (
+            typeof payload === 'string' ? JSON.parse(payload) : payload
+        ) as Partial<AiImageGenerationResultEvent> | null;
 
         if (!parsed?.jobId || (parsed.status !== 'succeeded' && parsed.status !== 'failed')) {
-            this.logger.logWarning(
-                'handleAiImageGenerationResult',
-                'AI 생성 결과 메시지 형식 오류 - 폐기',
-                null,
-            );
+            this.logger.logWarning('handleAiImageGenerationResult', 'AI 생성 결과 메시지 형식 오류 - 폐기', null);
             return null;
         }
 

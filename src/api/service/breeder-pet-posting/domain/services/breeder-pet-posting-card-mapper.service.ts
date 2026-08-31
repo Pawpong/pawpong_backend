@@ -29,6 +29,7 @@ export class BreederPetPostingCardMapperService {
             breed: snapshot.breed,
             petType: snapshot.petType,
             gender: snapshot.gender,
+            birthDate: snapshot.birthDate.toISOString(),
             ageDescription: this.describeAge(snapshot.birthDate),
             price: snapshot.price,
             status: snapshot.status,

@@ -3,6 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { BreederSortBy } from '../../constants/breeder-search.enum';
 import type { BreederExploreQuery } from '../../application/types/breeder-search-query.type';
 
+/** 사용자 입력을 정규식에 넣기 전에 메타문자를 무력화한다 */
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 @Injectable()
 export class BreederExploreCriteriaService {
     build(searchDto: BreederExploreQuery): {
@@ -14,6 +17,7 @@ export class BreederExploreCriteriaService {
     } {
         const {
             petType,
+            keyword,
             breeds,
             province,
             city,
@@ -35,6 +39,19 @@ export class BreederExploreCriteriaService {
         //  petType이 설정된 브리더가 전부 제외되어 결과가 0건이 되는 버그가 있었음)
         if (petType) {
             filter['petType'] = petType;
+        }
+
+        // 검색어는 브리더명/품종/지역을 한 번에 훑는다.
+        // 사용자가 검색바에 브리더 이름을 칠지 "말티즈"나 "부산"을 칠지 구분할 수 없기 때문.
+        const trimmedKeyword = keyword?.trim();
+        if (trimmedKeyword) {
+            const pattern = new RegExp(escapeRegExp(trimmedKeyword), 'i');
+            filter['$or'] = [
+                { name: pattern },
+                { breeds: pattern },
+                { 'profile.location.city': pattern },
+                { 'profile.location.district': pattern },
+            ];
         }
 
         if (breeds && breeds.length > 0) {

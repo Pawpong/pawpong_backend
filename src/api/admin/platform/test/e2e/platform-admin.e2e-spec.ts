@@ -3,7 +3,12 @@ import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import request from 'supertest';
 
-import { createTestingApp, cleanupDatabase, seedAdmin } from '../../../../../common/testing/test-utils';
+import {
+    createTestingApp,
+    cleanupDatabase,
+    seedAdmin,
+    agreeAllActiveTerms,
+} from '../../../../../common/testing/test-utils';
 
 /**
  * 플랫폼 관리자 종단간 테스트
@@ -56,6 +61,8 @@ describe('플랫폼 관리자 종단간 테스트', () => {
                         tempId: `temp_kakao_${providerId}_${timestamp}`,
                         email: `adopter_stats_${timestamp}_${providerId}@test.com`,
                         nickname: `통계입양자${timestamp}`,
+                        realName: '테스트입양자',
+                        termsAgreements: await agreeAllActiveTerms(app),
                         phone: `010-1111-${String(i).padStart(4, '0')}`,
                         profileImage: 'https://example.com/profile.jpg',
                     })
@@ -225,6 +232,8 @@ describe('플랫폼 관리자 종단간 테스트', () => {
                     tempId: `temp_kakao_${providerId}_${timestamp}`,
                     email: `forbidden_stats_${timestamp}_${providerId}@test.com`,
                     nickname: `권한테스트${timestamp}`,
+                    realName: '테스트입양자',
+                    termsAgreements: await agreeAllActiveTerms(app),
                     phone: '010-9999-9999',
                     profileImage: 'https://example.com/profile.jpg',
                 })

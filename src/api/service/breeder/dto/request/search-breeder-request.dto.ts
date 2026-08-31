@@ -20,6 +20,18 @@ export class SearchBreederRequestDto {
     petType?: string;
 
     /**
+     * 검색어 - 브리더명/품종/지역 부분 일치
+     * @example "말티즈"
+     */
+    @ApiPropertyOptional({
+        description: '검색어 (브리더명, 품종, 지역 부분 일치)',
+        example: '말티즈',
+    })
+    @IsOptional()
+    @IsString()
+    keyword?: string;
+
+    /**
      * 강아지 크기 필터 (소형/중형/대형) - 중복 선택 가능
      * @example ["small", "medium"]
      */

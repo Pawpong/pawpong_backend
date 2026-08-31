@@ -3,9 +3,24 @@
 ## Overview
 
 통합 프로필/팔로우 도메인(v2). 내 프로필 조회/수정, 공개 사용자/브리더 프로필 조회,
-내 즐겨찾는 브리더 목록, 사용자 팔로우/언팔로우를 담당한다.
+내 즐겨찾는 브리더 목록, 사용자 팔로우/언팔로우, 팔로워·팔로잉 목록,
+내 팔로워 강제 삭제(맞팔 끊기)를 담당한다.
 
+위치: `src/api/service/profile/` (관리자 기능 없음).
 상태: 구현 완료(dev).
+
+### 팔로우 (Figma 2095-212622)
+
+마이홈 화면의 팔로워/팔로잉 탭과 팔로우 버튼이 쓰는 계약이다.
+입양자·브리더 양쪽이 서로를 팔로우할 수 있어 상대방 표시 정보는 두 컬렉션에서 조립한다.
+
+- `POST/DELETE /profile/users/:userId/follow` — 팔로우·언팔로우 (멱등)
+- `GET /profile/users/:userId/{followers,followings}` — 목록 (프론트는 `segment` 인자 하나로 호출)
+- `DELETE /profile/me/followers/:userId` — 내 팔로워 강제 삭제
+
+**경계 규칙**: repository 는 raw 쿼리 결과만 반환하고, 상대방 프로필 스냅샷 조립은
+adapter 가 담당한다(`ProfileReaderMongooseAdapter` 와 동일 패턴).
+repository 가 스냅샷을 조립하면 도메인 타입이 persistence 계층으로 새어 들어간다.
 
 ## Architecture
 
@@ -24,13 +39,16 @@ infrastructure/* · repository/*  mongoose + storage
 
 | Method | Path | 인증 | 용도 |
 |---|---|---|---|
+| GET | `/api/v2/profile/breeders/{breederId}` | 공개 | 공개 브리더 프로필 |
 | GET | `/api/v2/profile/me` | 인증 | 내 프로필 |
 | PATCH | `/api/v2/profile/me` | 인증 | 내 프로필 수정 |
 | GET | `/api/v2/profile/me/favorite-breeders` | 인증 | 내 즐겨찾는 브리더 |
-| GET | `/api/v2/profile/users/:userId` | 공개 | 공개 사용자 프로필 |
-| GET | `/api/v2/profile/breeders/:breederId` | 공개 | 공개 브리더 프로필 |
-| POST | `/api/v2/profile/users/:userId/follow` | 인증 | 팔로우 |
-| DELETE | `/api/v2/profile/users/:userId/follow` | 인증 | 언팔로우 |
+| DELETE | `/api/v2/profile/me/followers/{userId}` |  | — |
+| GET | `/api/v2/profile/users/{userId}` | 공개 | 공개 사용자 프로필 |
+| POST | `/api/v2/profile/users/{userId}/follow` | 인증 | 팔로우 |
+| DELETE | `/api/v2/profile/users/{userId}/follow` | 인증 | 언팔로우 |
+| GET | `/api/v2/profile/users/{userId}/followers` |  | 팔로워 목록 (친구 목록 모달) |
+| GET | `/api/v2/profile/users/{userId}/followings` |  | 팔로잉 목록 (친구 목록 모달) |
 
 ## Data Models
 

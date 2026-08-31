@@ -1,4 +1,4 @@
-import { Body, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 
@@ -17,6 +17,7 @@ export class NotificationAdminPushSendController {
     constructor(private readonly useCase: SendAdminPushUseCase) {}
 
     @Post('push')
+    @HttpCode(HttpStatus.OK)
     @ApiSendAdminPushEndpoint()
     async send(@Body() body: SendAdminPushRequestDto): Promise<ApiResponseDto<AdminPushResultResponseDto>> {
         const result = await this.useCase.execute({

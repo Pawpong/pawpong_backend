@@ -1,4 +1,4 @@
-import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
+import { Body, Delete, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { CreateBreedUseCase } from '../application/use-cases/create-breed.use-case';
@@ -9,7 +9,11 @@ import { BreedAdminControllerBase } from '../decorator/breed-admin-controller.de
 import { CreateBreedRequestDto } from '../dto/request/create-breed-request.dto';
 import { UpdateBreedRequestDto } from '../dto/request/update-breed-request.dto';
 import { BreedResponseDto } from '../../../service/breed/dto/response/breed-response.dto';
-import { ApiCreateBreedAdminEndpoint, ApiDeleteBreedAdminEndpoint, ApiUpdateBreedAdminEndpoint } from '../swagger/index';
+import {
+    ApiCreateBreedAdminEndpoint,
+    ApiDeleteBreedAdminEndpoint,
+    ApiUpdateBreedAdminEndpoint,
+} from '../swagger/index';
 
 @BreedAdminControllerBase()
 export class BreedAdminCommandController {
@@ -20,6 +24,7 @@ export class BreedAdminCommandController {
     ) {}
 
     @Post()
+    @HttpCode(HttpStatus.OK)
     @ApiCreateBreedAdminEndpoint()
     async createBreed(@Body() dto: CreateBreedRequestDto): Promise<ApiResponseDto<BreedResponseDto>> {
         const result = await this.createBreedUseCase.execute(dto);

@@ -10,6 +10,7 @@ import { GetBreederManagementVerificationStatusUseCase } from '../application/us
 import { SubmitBreederManagementVerificationUseCase } from '../application/use-cases/submit-breeder-management-verification.use-case';
 import { UploadBreederManagementVerificationDocumentsUseCase } from '../application/use-cases/upload-breeder-management-verification-documents.use-case';
 import { SubmitBreederManagementVerificationDocumentsUseCase } from '../application/use-cases/submit-breeder-management-verification-documents.use-case';
+import { RequestBreederManagementLevelChangeUseCase } from '../application/use-cases/request-breeder-management-level-change.use-case';
 import { BreederManagementVerificationStatusAssemblerService } from '../domain/services/breeder-management-verification-status-assembler.service';
 import { BreederManagementVerificationSubmissionMapperService } from '../domain/services/breeder-management-verification-submission-mapper.service';
 import { BreederManagementVerificationOriginalFileNameService } from '../domain/services/breeder-management-verification-original-file-name.service';
@@ -44,6 +45,7 @@ const BREEDER_MANAGEMENT_VERIFICATION_USE_CASE_PROVIDERS = [
     SubmitBreederManagementVerificationUseCase,
     UploadBreederManagementVerificationDocumentsUseCase,
     SubmitBreederManagementVerificationDocumentsUseCase,
+    RequestBreederManagementLevelChangeUseCase,
 ];
 
 const BREEDER_MANAGEMENT_VERIFICATION_DOMAIN_PROVIDERS = [

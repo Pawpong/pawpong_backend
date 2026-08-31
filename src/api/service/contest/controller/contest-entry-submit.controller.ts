@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Post } from '@nestjs/common';
+import { BadRequestException, Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -16,6 +16,7 @@ export class ContestEntrySubmitController {
     constructor(private readonly submitContestEntryUseCase: SubmitContestEntryUseCase) {}
 
     @Post('entry')
+    @HttpCode(HttpStatus.OK)
     @ApiSubmitContestEntryEndpoint()
     async submit(
         @CurrentUser('userId') userId: string,

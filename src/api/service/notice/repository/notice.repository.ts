@@ -4,7 +4,10 @@ import { Model } from 'mongoose';
 
 import { Notice } from '../../../../schema/notice.schema';
 import { NoticeStatus } from '../application/ports/notice-reader.port';
-import type { NoticeCreateCommand, NoticeUpdateCommand } from '../../../admin/notice/application/types/notice-command.type';
+import type {
+    NoticeCreateCommand,
+    NoticeUpdateCommand,
+} from '../../../admin/notice/application/types/notice-command.type';
 
 @Injectable()
 export class NoticeRepository {

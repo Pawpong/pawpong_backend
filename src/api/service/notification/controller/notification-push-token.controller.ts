@@ -22,6 +22,7 @@ export class NotificationPushTokenController {
     ) {}
 
     @Post('push-token')
+    @HttpCode(HttpStatus.OK)
     @ApiRegisterPushDeviceTokenEndpoint()
     async registerPushToken(
         @CurrentUser('userId') userId: string,

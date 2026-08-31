@@ -3,7 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { AiImageFilter, AiImageFilterDocument } from '../../../../schema/ai-image-filter.schema';
-import type { AiImageFilterCreateCommand, AiImageFilterUpdateCommand } from '../application/types/ai-image-admin-filter-command.type';
+import type {
+    AiImageFilterCreateCommand,
+    AiImageFilterUpdateCommand,
+} from '../application/types/ai-image-admin-filter-command.type';
 
 /** AI 필터 쓰기 전용 영속성 (어드민) */
 @Injectable()

@@ -10,7 +10,61 @@
 - 소셜 OAuth는 백엔드 콜백이 기존/신규 분기 후 리다이렉트(토큰 URL 전달).
 - JWT Access + Refresh, 쿠키 기반.
 
-상태: 구현 완료(dev).
+상태: 구현 완료(dev). **실측 기준 2026-08-04.**
+
+### 입양자 회원가입 단일화 (2026-08-04)
+
+입양자 가입 엔드포인트가 둘로 갈라져 있었다.
+
+| 옛 경로 | 태그 | 상태 |
+|---|---|---|
+| `POST v2/auth/register/adopter` | `인증` | 최소 필드(tempId·email·nickname·phone) |
+| `POST v2/auth/register-adopter` | `인증 v2` | 약관·관심품종·상담 사전정보 포함 |
+
+둘 다 `v2/auth` 아래인데 하나만 `인증 v2` 태그를 달아 Swagger 가 두 섹션으로 쪼개져 있었고,
+**operationId 가 `registerAdopter` 로 중복**돼 클라이언트 코드 생성이 깨질 수 있었다.
+관리자 API 를 빼면 전 도메인이 이미 v2 이므로 `v2` 를 별도 축으로 표기할 이유도 없다.
+
+프론트 온보딩 폼(약관 동의 → 계정 정보 → 회원 정보 → 간단한 조사 양식)이 수집하는 필드와
+대조한 결과 후자가 실제 플로우와 일치해, **경로는 `register/adopter`(브리더와 대칭), 계약은 후자**로
+단일화하고 `인증 v2` 태그·`v2/` 슬라이스를 제거했다.
+
+- `RegisterAdopterUseCase` = 단일 가입 유스케이스 (구 v2)
+- `CreateAdopterFromSocialUseCase` = 구 최소 유스케이스. HTTP 경로는 없어졌지만
+  `REGISTER_ADOPTER_AUTH_SIGNUP` 토큰으로 **`social/complete` 가 계속 소비**한다.
+
+#### ⚠️ 파괴적 변경 — 호환 계층 없음
+
+두 가지가 동시에 깨진다. 구버전 클라이언트를 위한 호환 경로를 **두지 않았다.**
+
+| 변경 | 구버전 호출 결과 |
+|---|---|
+| `POST v2/auth/register-adopter` 제거 | **404** |
+| `POST v2/auth/register/adopter` 가 `realName`·`termsAgreements` 를 필수로 요구 | **400** |
+
+400 응답은 누락 필드를 그대로 알려주므로(`realName should not be empty, termsAgreements must contain at least 1 elements`) 호출자가 원인을 바로 안다.
+
+호환 경로를 두지 않은 이유는 그것이 **정확히 이번에 없앤 중복을 되살리기 때문**이다.
+대신 소비자가 없다는 것을 아래 방법으로 확인하고 진행했다 (2026-08-04).
+
+1. 4개 클라이언트 레포(`frontend_2.0`, `frontend`, `rn`, `admin_frontend`) 소스 전수 검색 — 호출 0건
+   (`swagger.json` 사본 1건만 매칭)
+2. 프론트 빌드 산출물(`.next` server+static) 전수 검색 — `register/adopter` 0, `register-adopter` 0.
+   같은 검사에서 **대조군 `social/complete` 는 29개 파일에 매칭**돼 검사 방식이 유효함을 확인
+3. RN 앱은 자체 auth 엔드포인트가 없다 (Firebase 만 사용)
+
+> 배포된 번들을 네트워크로 긁어 확인하려던 첫 시도는 **대조군도 안 잡혀 무효**였다.
+> 라우트별 청크를 못 집었기 때문이며, 빌드 산출물 전수 검색으로 대체했다.
+> 소비자 부재를 주장할 때는 대조군이 잡히는지 먼저 확인해야 한다.
+
+### 남은 중복 — `social/complete`
+
+프론트는 아직 입양자 가입에 `POST v2/auth/social/complete` (`role: 'adopter'`) 를 쓴다.
+이 경로는 최소 필드만 받으므로 폼이 수집한 약관 동의·관심 품종·상담 사전정보가 유실되고,
+자기소개는 가입 후 `PATCH v2/profile/me` 로 따로 저장하는 우회가 들어가 있다.
+
+프론트를 `register/adopter` 로 옮기면 한 번의 호출로 정리되지만, 운영 중인 가입 흐름이라
+프론트 배포와 함께 진행해야 한다. **현재는 두 경로가 공존한다.**
 
 ## Architecture
 
@@ -27,22 +81,29 @@ infrastructure/*        mongoose + redis(인증코드) + storage
 
 | Method | Path | 용도 |
 |---|---|---|
-| POST | `/api/v2/auth/social/check-user` | 소셜 신규/기존 유저 확인 |
-| POST | `/api/v2/auth/social/complete` | 소셜 회원가입 완료(입양자/브리더) |
-| POST | `/api/v2/auth/register/adopter` | 입양자 가입 |
-| POST | `/api/v2/auth/register/breeder` | 브리더 가입 |
-| POST | `/api/v2/auth/register-adopter` | (레거시 호환) 입양자 가입 |
-| POST | `/api/v2/auth/refresh` | 토큰 갱신 |
-| POST | `/api/v2/auth/logout` | 로그아웃 |
+| GET | `/api/auth/google` | 구글 로그인 |
+| GET | `/api/auth/google/callback` | 구글 로그인 콜백 |
+| GET | `/api/auth/kakao` | 카카오 로그인 |
+| GET | `/api/auth/kakao/callback` | 카카오 로그인 콜백 |
+| GET | `/api/auth/naver` | 네이버 로그인 |
+| GET | `/api/auth/naver/callback` | 네이버 로그인 콜백 |
+| POST | `/api/v2/auth/check-breeder-name` | 브리더 상호명 중복 |
 | POST | `/api/v2/auth/check-email` | 이메일 중복 |
 | POST | `/api/v2/auth/check-nickname` | 닉네임 중복 |
-| POST | `/api/v2/auth/check-breeder-name` | 브리더 상호명 중복 |
+| GET | `/api/v2/auth/login-banners` | 로그인 배너 |
+| POST | `/api/v2/auth/logout` | 로그아웃 |
 | POST | `/api/v2/auth/phone/send-code` | 인증코드 발송 |
 | POST | `/api/v2/auth/phone/verify-code` | 인증코드 확인 |
+| POST | `/api/v2/auth/refresh` | 토큰 갱신 |
+| GET | `/api/v2/auth/register-banners` | 가입 배너 |
+| POST | `/api/v2/auth/register/adopter` | 입양자 가입 |
+| POST | `/api/v2/auth/register/breeder` | 브리더 가입 |
+| POST | `/api/v2/auth/social/check-user` | 소셜 신규/기존 유저 확인 |
+| POST | `/api/v2/auth/social/complete` | 소셜 회원가입 완료(입양자/브리더) |
 | POST | `/api/v2/auth/upload-breeder-documents` | 브리더 서류 업로드 |
 | POST | `/api/v2/auth/upload-breeder-profile` | 브리더 프로필 업로드 |
-| GET | `/api/v2/auth/login-banners` | 로그인 배너 |
-| GET | `/api/v2/auth/register-banners` | 가입 배너 |
+| POST | `/api/auth-admin/login` | 관리자 로그인 |
+| POST | `/api/auth-admin/refresh` | 관리자 토큰 갱신 |
 
 ## Data Models
 
@@ -70,6 +131,8 @@ verify-code는 발급된 코드와 유효시간 내에서만 성공한다.
 - 인증 실패: 401. 검증 실패/중복: 400.
 - 탈퇴/정지 계정은 소셜 콜백에서 에러 type으로 리다이렉트.
 - 응답은 `ApiResponseDto<T>` 래핑.
+  단 소셜 로그인 3종(`auth-{google,kakao,naver}-login.controller.ts`)은 **예외** —
+  OAuth 리다이렉트 URL 을 반환하므로 봉투를 쓰지 않는다 (의도된 예외, 실측 확인).
 
 ## Testing Strategy
 

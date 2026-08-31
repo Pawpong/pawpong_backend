@@ -203,10 +203,7 @@ export class UploadAdminFileReferenceRepository {
     }
 
     async readAiImageJobFiles(): Promise<string[]> {
-        const jobs = await this.aiImageJobModel
-            .find({}, { inputObjectKey: 1, outputObjectKey: 1 })
-            .lean()
-            .exec();
+        const jobs = await this.aiImageJobModel.find({}, { inputObjectKey: 1, outputObjectKey: 1 }).lean().exec();
 
         const files: string[] = [];
         jobs.forEach((job) => {

@@ -1,18 +1,20 @@
 import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
-import { ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { SubmitBreederManagementVerificationDocumentsUseCase } from '../application/use-cases/submit-breeder-management-verification-documents.use-case';
 import { SubmitBreederManagementVerificationUseCase } from '../application/use-cases/submit-breeder-management-verification.use-case';
+import { RequestBreederManagementLevelChangeUseCase } from '../application/use-cases/request-breeder-management-level-change.use-case';
 import { BreederManagementProtectedController } from '../decorator/breeder-management-protected-controller.decorator';
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
 import { SubmitDocumentsRequestDto } from '../dto/request/submit-documents-request.dto';
+import { LevelChangeRequestDto } from '../dto/request/level-change-request.dto';
 import { VerificationSubmitRequestDto } from '../dto/request/verification-submit-request.dto';
 import { VerificationSubmitResponseDto } from '../dto/response/verification-submit-response.dto';
 import {
     ApiSubmitBreederManagementVerificationDocumentsEndpoint,
     ApiSubmitBreederManagementVerificationEndpoint,
+    ApiRequestBreederManagementLevelChangeEndpoint,
 } from '../swagger/index';
 
 @BreederManagementProtectedController()
@@ -20,9 +22,11 @@ export class BreederManagementVerificationCommandController {
     constructor(
         private readonly submitBreederManagementVerificationUseCase: SubmitBreederManagementVerificationUseCase,
         private readonly submitBreederManagementVerificationDocumentsUseCase: SubmitBreederManagementVerificationDocumentsUseCase,
+        private readonly requestBreederManagementLevelChangeUseCase: RequestBreederManagementLevelChangeUseCase,
     ) {}
 
     @Post('verification')
+    @HttpCode(HttpStatus.OK)
     @ApiSubmitBreederManagementVerificationEndpoint()
     async submitVerification(
         @CurrentUser('userId') userId: string,
@@ -41,5 +45,16 @@ export class BreederManagementVerificationCommandController {
     ): Promise<ApiResponseDto<VerificationSubmitResponseDto>> {
         const result = await this.submitBreederManagementVerificationDocumentsUseCase.execute(userId, dto);
         return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationDocumentsSubmitted);
+    }
+
+    @Post('verification/level-change')
+    @HttpCode(HttpStatus.OK)
+    @ApiRequestBreederManagementLevelChangeEndpoint()
+    async requestLevelChange(
+        @CurrentUser('userId') userId: string,
+        @Body() dto: LevelChangeRequestDto,
+    ): Promise<ApiResponseDto<VerificationSubmitResponseDto>> {
+        const result = await this.requestBreederManagementLevelChangeUseCase.execute(userId, dto);
+        return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.levelChangeRequested);
     }
 }

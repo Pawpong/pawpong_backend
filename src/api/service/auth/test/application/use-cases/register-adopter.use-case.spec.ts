@@ -1,121 +1,196 @@
-import { DomainConflictError, DomainValidationError } from '../../../../../../common/error/domain.error';
-import { RegisterAdopterUseCase } from '../../../application/use-cases/register-adopter.use-case';
-import { AuthSocialIdentityService } from '../../../domain/services/auth-social-identity.service';
-import { AuthPhoneNumberNormalizerService } from '../../../domain/services/auth-phone-number-normalizer.service';
-import { AuthSignupResultMapperService } from '../../../domain/services/auth-signup-result-mapper.service';
-import { AuthSignupValidationService } from '../../../domain/services/auth-signup-validation.service';
+import { BadRequestException } from '@nestjs/common';
 
-describe('입양자 회원가입 유스케이스', () => {
+import { RegisterAdopterUseCase } from '../../../application/use-cases/register-adopter.use-case';
+import { AuthTermsAgreementValidatorService } from '../../../domain/services/auth-terms-agreement-validator.service';
+
+const ACTIVE_TERMS = [
+    {
+        id: '1',
+        code: 'service' as const,
+        version: 'v1.0',
+        title: '서비스 이용약관',
+        body: '...',
+        isRequired: true,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    },
+    {
+        id: '2',
+        code: 'privacy' as const,
+        version: 'v1.0',
+        title: '개인정보',
+        body: '...',
+        isRequired: true,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    },
+    {
+        id: '3',
+        code: 'marketing' as const,
+        version: 'v1.0',
+        title: '마케팅',
+        body: '...',
+        isRequired: false,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    },
+    {
+        id: '4',
+        code: 'counsel_privacy' as const,
+        version: 'v1.0',
+        title: '상담 개인정보',
+        body: '...',
+        isRequired: false,
+        isActive: true,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    },
+];
+
+describe('v2 입양자 회원가입 유스케이스', () => {
     const authRegistrationPort = {
         findAdopterBySocialAuth: jest.fn(),
         findAdopterByNickname: jest.fn(),
         createAdopter: jest.fn(),
         saveAdopterRefreshToken: jest.fn(),
     };
-    const authRegistrationNotificationPort = {
-        notifyAdopterRegistered: jest.fn(),
-    };
+    const authRegistrationNotificationPort = { notifyAdopterRegistered: jest.fn() };
     const authTokenPort = {
         generateTokens: jest.fn(),
         hashRefreshToken: jest.fn(),
     };
-    const mockStoredFileNameService = {
-        extract: jest.fn().mockReturnValue(undefined),
+    const termsReaderPort = { readActiveAll: jest.fn() };
+    const authSocialIdentityService = {
+        parseRequiredTempId: jest.fn().mockReturnValue({ provider: 'kakao', providerId: '12345' }),
+    };
+    const authStoredFileNameService = { extract: jest.fn().mockReturnValue('') };
+    const authPhoneNumberNormalizerService = { normalize: jest.fn((p) => p ?? '') };
+    const authSignupResultMapperService = {
+        toAdopterResult: jest.fn().mockReturnValue({ adopterId: 'adopter-1' }),
+    };
+    const authSignupValidationService = {
+        assertAdopterSocialAccountAvailable: jest.fn(),
+        ensureAdopterRegistrationInput: jest.fn(),
+        assertAdopterNicknameAvailable: jest.fn(),
     };
 
     const useCase = new RegisterAdopterUseCase(
         authRegistrationPort as any,
         authRegistrationNotificationPort as any,
         authTokenPort as any,
-        new AuthSocialIdentityService(),
-        mockStoredFileNameService as any,
-        new AuthPhoneNumberNormalizerService(),
-        new AuthSignupResultMapperService(),
-        new AuthSignupValidationService(),
+        termsReaderPort as any,
+        authSocialIdentityService as any,
+        authStoredFileNameService as any,
+        authPhoneNumberNormalizerService as any,
+        authSignupResultMapperService as any,
+        authSignupValidationService as any,
+        new AuthTermsAgreementValidatorService(),
     );
 
-    const validTempId = 'temp_google_google-uid-123_ts';
-    const baseDto = {
-        tempId: validTempId,
-        email: 'new@test.com',
-        nickname: '새입양자',
-        phone: '01012345678',
-        profileImage: undefined,
-        marketingAgreed: false,
-    };
-
-    const mockSavedAdopter = {
-        _id: { toString: () => 'adopter-1' },
-        emailAddress: 'new@test.com',
-        nickname: '새입양자',
-        phoneNumber: '01012345678',
-        profileImageFileName: '',
-        accountStatus: 'active',
-        createdAt: new Date('2026-04-01T00:00:00.000Z'),
-    };
+    const baseCommand = {
+        tempId: 'temp_kakao_12345_1',
+        email: 'a@test.com',
+        nickname: '펫러버',
+        realName: '홍길동',
+        termsAgreements: [
+            { code: 'service', version: 'v1.0' },
+            { code: 'privacy', version: 'v1.0' },
+        ],
+    } as any;
 
     beforeEach(() => {
         jest.clearAllMocks();
-        mockStoredFileNameService.extract.mockReturnValue(undefined);
-    });
-
-    it('정상적으로 입양자를 등록한다', async () => {
         authRegistrationPort.findAdopterBySocialAuth.mockResolvedValue(null);
         authRegistrationPort.findAdopterByNickname.mockResolvedValue(null);
-        authRegistrationPort.createAdopter.mockResolvedValue(mockSavedAdopter);
-        authRegistrationPort.saveAdopterRefreshToken.mockResolvedValue(undefined);
-        authTokenPort.generateTokens.mockReturnValue({ accessToken: 'access-token', refreshToken: 'refresh-token' });
-        authTokenPort.hashRefreshToken.mockResolvedValue('hashed-refresh-token');
-        authRegistrationNotificationPort.notifyAdopterRegistered.mockResolvedValue(undefined);
-
-        const result = await useCase.execute(baseDto as any);
-
-        expect(result.adopterId).toBe('adopter-1');
-        expect(result.email).toBe('new@test.com');
-        expect(result.accessToken).toBe('access-token');
+        authRegistrationPort.createAdopter.mockResolvedValue({
+            _id: { toString: () => 'adopter-1' },
+            emailAddress: 'a@test.com',
+            nickname: '펫러버',
+            phoneNumber: '',
+        });
+        authTokenPort.generateTokens.mockReturnValue({ accessToken: 'a', refreshToken: 'r' });
+        authTokenPort.hashRefreshToken.mockResolvedValue('hashed');
+        termsReaderPort.readActiveAll.mockResolvedValue(ACTIVE_TERMS);
     });
 
-    it('유효하지 않은 tempId 형식이면 도메인 검증 예외를 던진다', async () => {
-        await expect(useCase.execute({ ...baseDto, tempId: 'invalid-format' } as any)).rejects.toThrow(
-            DomainValidationError,
-        );
-        await expect(useCase.execute({ ...baseDto, tempId: 'invalid-format' } as any)).rejects.toThrow(
-            '유효하지 않은 임시 ID 형식입니다.',
+    it('필수 약관 누락 시 BadRequestException 으로 가입 실패', async () => {
+        await expect(
+            useCase.execute({
+                ...baseCommand,
+                termsAgreements: [{ code: 'service', version: 'v1.0' }],
+            }),
+        ).rejects.toThrow(BadRequestException);
+
+        expect(authRegistrationPort.createAdopter).not.toHaveBeenCalled();
+    });
+
+    it('counsel_privacy 동의 없이 counselDefaultProfile 만 보내면 가입 실패', async () => {
+        await expect(
+            useCase.execute({
+                ...baseCommand,
+                counselDefaultProfile: {
+                    selfIntroduction: '자기소개',
+                    counselPrivacyAgreed: true,
+                },
+            }),
+        ).rejects.toThrow(/counsel_privacy/);
+
+        expect(authRegistrationPort.createAdopter).not.toHaveBeenCalled();
+    });
+
+    it('공개 프로필 소개를 trim 하여 bio 로 저장한다', async () => {
+        await useCase.execute({
+            ...baseCommand,
+            bio: '  반려동물을 사랑하며 좋은 가족을 기다리고 있어요.  ',
+        });
+
+        expect(authRegistrationPort.createAdopter).toHaveBeenCalledWith(
+            expect.objectContaining({
+                bio: '반려동물을 사랑하며 좋은 가족을 기다리고 있어요.',
+            }),
         );
     });
 
-    it('이미 가입된 소셜 계정이면 도메인 충돌 예외를 던진다', async () => {
-        authRegistrationPort.findAdopterBySocialAuth.mockResolvedValue({ _id: 'existing-adopter' });
+    it('공개 프로필 소개가 200자를 초과하면 가입에 실패한다', async () => {
+        await expect(
+            useCase.execute({
+                ...baseCommand,
+                bio: '가'.repeat(201),
+            }),
+        ).rejects.toThrow('한 줄 소개는 200자 이내여야 합니다.');
 
-        await expect(useCase.execute(baseDto as any)).rejects.toThrow(DomainConflictError);
-        await expect(useCase.execute(baseDto as any)).rejects.toThrow('이미 입양자로 가입된 소셜 계정입니다.');
+        expect(authRegistrationPort.createAdopter).not.toHaveBeenCalled();
     });
 
-    it('이메일이 없으면 도메인 검증 예외를 던진다', async () => {
-        authRegistrationPort.findAdopterBySocialAuth.mockResolvedValue(null);
+    it('marketing 동의가 termsAgreements 에 없으면 marketingAgreed=false 로 저장 (클라 boolean spoof 차단)', async () => {
+        await useCase.execute(baseCommand);
 
-        await expect(useCase.execute({ ...baseDto, email: undefined } as any)).rejects.toThrow(DomainValidationError);
-        await expect(useCase.execute({ ...baseDto, email: undefined } as any)).rejects.toThrow(
-            '이메일 정보가 필요합니다.',
-        );
+        const createdPayload = authRegistrationPort.createAdopter.mock.calls[0][0];
+        expect(createdPayload.marketingAgreed).toBe(false);
     });
 
-    it('닉네임이 없으면 도메인 검증 예외를 던진다', async () => {
-        authRegistrationPort.findAdopterBySocialAuth.mockResolvedValue(null);
+    it('marketing 코드를 termsAgreements 에 포함하면 marketingAgreed=true', async () => {
+        await useCase.execute({
+            ...baseCommand,
+            termsAgreements: [...baseCommand.termsAgreements, { code: 'marketing', version: 'v1.0' }],
+        });
 
-        await expect(useCase.execute({ ...baseDto, nickname: undefined } as any)).rejects.toThrow(
-            DomainValidationError,
-        );
-        await expect(useCase.execute({ ...baseDto, nickname: undefined } as any)).rejects.toThrow(
-            '닉네임이 필요합니다.',
-        );
+        const createdPayload = authRegistrationPort.createAdopter.mock.calls[0][0];
+        expect(createdPayload.marketingAgreed).toBe(true);
     });
 
-    it('닉네임이 이미 사용 중이면 도메인 충돌 예외를 던진다', async () => {
-        authRegistrationPort.findAdopterBySocialAuth.mockResolvedValue(null);
-        authRegistrationPort.findAdopterByNickname.mockResolvedValue({ nickname: '새입양자' });
-
-        await expect(useCase.execute(baseDto as any)).rejects.toThrow(DomainConflictError);
-        await expect(useCase.execute(baseDto as any)).rejects.toThrow('이미 사용 중인 닉네임입니다.');
+    it('약관 버전이 활성 버전과 다르면 가입 실패', async () => {
+        await expect(
+            useCase.execute({
+                ...baseCommand,
+                termsAgreements: [
+                    { code: 'service', version: 'v0.9' },
+                    { code: 'privacy', version: 'v1.0' },
+                ],
+            }),
+        ).rejects.toThrow(/버전이 일치하지 않습니다/);
     });
 });

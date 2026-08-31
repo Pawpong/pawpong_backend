@@ -23,11 +23,10 @@ infrastructure/* · repository/*  mongoose
 
 | Method | Path | 용도 |
 |---|---|---|
-| GET | `/api/chat/rooms` | 채팅방 목록(counterpart, lastMessage, unreadCount 포함) |
-| GET | `/api/chat/rooms/:roomId/messages` | 방 메시지 목록 |
-| POST | `/api/chat/rooms` | 채팅방 생성 |
-| DELETE | `/api/chat/rooms/:roomId` | 채팅방 삭제/나가기 |
-| (ws) | socket.io | 실시간 메시지 송수신 |
+| GET | `/api/v2/chat/rooms` | 내 채팅방 목록 조회 |
+| POST | `/api/v2/chat/rooms` | 채팅방 생성 또는 조회 |
+| DELETE | `/api/v2/chat/rooms/{roomId}` | 채팅방 종료 |
+| GET | `/api/v2/chat/rooms/{roomId}/messages` | 채팅 메시지 내역 조회 |
 
 ## Data Models
 
@@ -54,7 +53,11 @@ socket.io로 전송된 메시지는 영속 저장되어 이후 메시지 조회�
 ## Error Handling
 
 - 없는 방/비참여자: `BadRequestException`(400)/권한 거부.
-- REST 응답은 `ApiResponseDto<T>` 래핑.
+- **REST 응답 표준 봉투 통일 완료** (2026-08-17, 프론트 요청).
+  4개 REST 엔드포인트 모두 `ApiResponseDto`(success/code/data/message/timestamp) 로 래핑한다.
+  ⚠️ breaking change — 프론트는 배포 시점에 채팅 응답을 `data` 언래핑으로 전환해야 한다
+  (다른 도메인과 동일하게 `unwrap()` 사용 가능해짐). Swagger 는 이전부터 봉투로 문서화돼 있어
+  문서-실측 불일치도 함께 해소됐다.
 
 ## Testing Strategy
 

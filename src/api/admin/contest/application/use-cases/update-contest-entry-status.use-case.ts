@@ -1,7 +1,10 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { CONTEST_READER_PORT, type ContestReaderPort } from '../../../../service/contest/application/ports/contest-reader.port';
+import {
+    CONTEST_READER_PORT,
+    type ContestReaderPort,
+} from '../../../../service/contest/application/ports/contest-reader.port';
 import { CONTEST_ADMIN_WRITER_PORT, type ContestAdminWriterPort } from '../ports/contest-admin-writer.port';
 
 @Injectable()

@@ -23,18 +23,18 @@ const NOT_FOUND_RESPONSE = {
 } as const;
 
 export function ApiProfileProtectedController() {
-    return ApiController('프로필 (v2)');
+    return ApiController('프로필');
 }
 
 export function ApiProfilePublicController() {
-    return ApiPublicController('프로필 (v2 공개)');
+    return ApiPublicController('프로필');
 }
 
 export function ApiGetMyProfileEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '내 프로필 조회 (마이홈)',
-            description: '현재 인증된 사용자의 프로필을 반환한다. role 에 따라 입양자/브리더 응답 필드가 다르다.',
+            description: '현재 인증된 사용자의 프로필을 반환합니다. role 에 따라 입양자/브리더 응답 필드가 다릅니다.',
             responseType: MyProfileResponseDto,
             successDescription: '내 프로필 조회 성공',
             successMessageExample: PROFILE_RESPONSE_MESSAGES.myRetrieved,
@@ -48,14 +48,14 @@ export function ApiUpdateMyProfileEndpoint() {
         ApiEndpoint({
             summary: '내 프로필 수정 (마이홈, Figma 278:170 "프로필 편집")',
             description: `
-                현재 인증된 사용자의 프로필을 부분 수정한다. role 에 따라 Adopter/Breeder 도큐먼트에 적용.
+                현재 인증된 사용자의 프로필을 부분 수정합니다. role 에 따라 Adopter/Breeder 도큐먼트에 적용.
 
                 ## 지원 필드
                 - bio (선택): 한 줄 소개. trim 후 200자 이내. 빈 문자열은 한 줄 소개 비움 의도.
 
-                사업장 위치는 이 엔드포인트로 수정할 수 없다.
+                사업장 위치는 이 엔드포인트로 수정할 수 없습니다.
                 PATCH /breeder-management/profile 이 해당 필드의 단독 쓰기 경로다 (locationInfo: cityName/districtName/detailAddress).
-                응답의 businessLocation 은 읽기 전용으로만 노출된다.
+                응답의 businessLocation 은 읽기 전용으로만 노출됩니다.
 
                 ## 응답
                 - 수정 후 GetMyProfile 와 동일한 응답 (계약 일관성)
@@ -88,7 +88,8 @@ export function ApiGetBreederProfileEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '브리더 공개 프로필 조회 (브리더홈)',
-            description: '브리더의 공개 프로필. 로그인 입양자는 isFavorited 가 채워진다.',
+            description:
+                '브리더의 공개 프로필. 로그인 입양자는 isFavorited 가, 로그인 사용자는 isFollowing 이 채워진다.',
             responseType: BreederPublicProfileResponseDto,
             isPublic: true,
             supportsOptionalAuth: true,
@@ -118,7 +119,7 @@ export function ApiFollowUserEndpoint() {
         ApiEndpoint({
             summary: '사용자 팔로우 (Figma 678:46565)',
             description: `
-                입양자 유저홈에서 팔로우. 대상은 입양자(Adopter)만 가능.
+                유저홈·브리더홈에서 팔로우. 대상은 입양자(Adopter)·브리더(Breeder) 모두 가능.
                 이미 팔로우 중이면 followed: false 반환 (멱등).
                 자기 자신 팔로우 시 400.
             `,

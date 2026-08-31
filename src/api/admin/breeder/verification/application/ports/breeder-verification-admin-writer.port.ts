@@ -14,6 +14,14 @@ export interface BreederVerificationAdminUpdateVerificationCommand {
     rejectionReason?: string;
     appendLevelChangeHistory?: BreederVerificationAdminLevelChangeHistoryEntry;
     clearLevelChangeRequest?: boolean;
+    approvedLevel?: string;
+    approvedDocuments?: Array<{
+        type: string;
+        fileName: string;
+        originalFileName?: string;
+        uploadedAt?: Date;
+    }>;
+    levelChangeRejectionReason?: string;
 }
 
 export interface BreederVerificationAdminActivityLogEntry {

@@ -1,4 +1,4 @@
-import { Delete, Get, Param, Post, Query } from '@nestjs/common';
+import { Delete, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -32,6 +32,7 @@ export class CommunityPostBookmarkController {
     ) {}
 
     @Post('posts/:postId/bookmark')
+    @HttpCode(HttpStatus.OK)
     @ApiSaveCommunityPostEndpoint()
     async save(
         @Param('postId') postId: string,

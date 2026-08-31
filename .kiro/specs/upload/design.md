@@ -3,9 +3,37 @@
 ## Overview
 
 파일 업로드 도메인. 단건/다중 이미지 업로드, 분양펫/부모펫/대표 사진 업로드, 삭제를 제공한다.
-스마일서브 S3 호환 스토리지(pawpong_bucket)에 저장하고 signed URL/파일키를 반환한다.
+스마일서브 S3 호환 스토리지에 저장하고 signed URL/파일키를 반환한다.
+관리자 측은 파일 목록·통계·**미참조(고아) 파일 판정**과 정리를 담당한다.
+
+위치: `src/api/service/upload/` (업로드) + `src/api/admin/upload/` (관리·고아 판정).
+버킷: `pawpong_s3` (구 `pawpong_bucket` 에서 변경. DB 에는 파일키만 저장하고
+읽을 때 `SMILESERV_CDN_BASE_URL + fileName` 으로 조립하므로 데이터 마이그레이션은 불필요했다).
 
 상태: 구현 완료(dev).
+
+### 고아 파일 판정 — 새 도메인 추가 시 반드시 등록
+
+미참조 판정은 **컬렉션 화이트리스트** 방식이라, 목록에 없는 키는 `isReferenced:false` 로
+분류돼 관리자 화면에 "삭제 가능"으로 뜬다. 즉 **등록을 빠뜨리면 실제 삭제 사고**가 난다.
+
+현재 등록된 참조 원천:
+
+| 컬렉션 | 필드 |
+|---|---|
+| `breeders` | profileImageFileName, profile.representativePhotos, verification.documents |
+| `available_pets` | photos |
+| `parent_pets` | photoFileName |
+| `adopters` | profileImageFileName |
+| `banners` / `auth_banners` / `counsel_banners` | imageFileName |
+| `ai_image_filters` | thumbnailFileName, referenceImageObjectKeys |
+| `ai_image_jobs` | inputObjectKey, outputObjectKey |
+| `contest_entries` | photoFileName, userProfileImageFileName |
+
+수정 지점 3곳은 [`_conventions.md`](../_conventions.md#8-파일-참조-판정-고아-파일-삭제-방지) 참조.
+
+> `contest_entries` 는 누락돼 있어 콘테스트 출품 사진이 이미 고아로 오분류되고 있었다(`6efe3eff`).
+> **feed video 키(`videos/*`)는 아직 미등록** — 별도 과제로 남아 있다.
 
 ## Architecture
 
@@ -22,12 +50,19 @@ admin/  업로드 관리
 
 | Method | Path | 용도 |
 |---|---|---|
-| POST | `/api/v2/upload/single` | 단건 업로드 |
-| POST | `/api/v2/upload/multiple` | 다중 업로드 |
-| POST | `/api/v2/upload/representative-photos` | 대표 사진 업로드 |
-| POST | `/api/v2/upload/available-pet-photos/:petId` | 분양펫 사진 |
-| POST | `/api/v2/upload/parent-pet-photos/:petId` | 부모펫 사진 |
 | DELETE | `/api/v2/upload` | 파일 삭제 |
+| POST | `/api/v2/upload/available-pet-photos/{petId}` | 분양펫 사진 |
+| POST | `/api/v2/upload/multiple` | 다중 업로드 |
+| POST | `/api/v2/upload/parent-pet-photos/{petId}` | 부모펫 사진 |
+| POST | `/api/v2/upload/representative-photos` | 대표 사진 업로드 |
+| POST | `/api/v2/upload/single` | 단건 업로드 |
+| DELETE | `/api/upload-admin/file` | 단일 파일 삭제 |
+| GET | `/api/upload-admin/files` | 스토리지 파일 목록 조회 |
+| DELETE | `/api/upload-admin/files` | 다중 파일 삭제 |
+| POST | `/api/upload-admin/files/check-references` | 파일 DB 참조 확인 |
+| GET | `/api/upload-admin/files/folder/{folder}` | 특정 폴더의 파일 목록 조회 |
+| GET | `/api/upload-admin/files/referenced` | DB에서 참조 중인 모든 파일 조회 |
+| DELETE | `/api/upload-admin/folder` | 폴더 전체 삭제 |
 
 ## Data Models
 

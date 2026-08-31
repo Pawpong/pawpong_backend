@@ -23,7 +23,11 @@ admin/  안내 CRUD
 | Method | Path | 용도 |
 |---|---|---|
 | GET | `/api/v2/announcement/list` | 안내 목록 |
-| GET | `/api/v2/announcement/:announcementId` | 안내 상세 |
+| GET | `/api/v2/announcement/{announcementId}` | 안내 상세 |
+| POST | `/api/announcement-admin/announcement` | 공지사항 생성 |
+| PATCH | `/api/announcement-admin/announcement/{announcementId}` | 공지사항 수정 |
+| DELETE | `/api/announcement-admin/announcement/{announcementId}` | 공지사항 삭제 |
+| GET | `/api/announcement-admin/announcements` | 공지사항 목록 조회 (관리자) |
 
 ## Data Models
 
@@ -40,7 +44,11 @@ admin/  안내 CRUD
 ## Error Handling
 
 - 없는/비활성 안내: `BadRequestException`(400).
-- 응답은 `ApiResponseDto<T>` 래핑.
+- ⚠️ **응답이 표준 봉투를 쓰지 않는다** (실측 2026-08-03).
+  `GET /api/v2/announcement/list` 는 `{items, pagination}` 을 그대로 반환하고,
+  admin 컨트롤러도 `ApiResponseDto` 를 쓰지 않는다.
+  프론트가 다른 도메인처럼 `unwrap()` 을 쓰면 실패한다 — feed 가 같은 이유로 깨져 있었다.
+  정리 대상이며 [`_conventions.md`](../_conventions.md#봉투를-쓰지-않는-응답--실측-현황-2026-08-03) 에 기록돼 있다.
 
 ## Testing Strategy
 

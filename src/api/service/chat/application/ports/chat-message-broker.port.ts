@@ -24,7 +24,7 @@ export interface ChatRoomLifecyclePayload {
 export const CHAT_MESSAGE_BROKER = Symbol('CHAT_MESSAGE_BROKER');
 
 export interface ChatMessageBrokerPort {
-    publishMessage(payload: ChatMessageBrokerPayload): Promise<void>;
-    publishRoomCreated(payload: ChatRoomLifecyclePayload): Promise<void>;
-    publishRoomClosed(payload: ChatRoomLifecyclePayload): Promise<void>;
+    publishMessage(payload: ChatMessageBrokerPayload): Promise<boolean>;
+    publishRoomCreated(payload: ChatRoomLifecyclePayload): Promise<boolean>;
+    publishRoomClosed(payload: ChatRoomLifecyclePayload): Promise<boolean>;
 }

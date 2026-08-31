@@ -1,4 +1,4 @@
-import { Body, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { MongoObjectIdPipe } from '../../../../common/pipe/mongo-object-id.pipe';
@@ -35,6 +35,7 @@ export class BreederManagementAdminProfileBannersController {
     }
 
     @Post('profile-banner')
+    @HttpCode(HttpStatus.OK)
     @ApiCreateProfileBannerAdminEndpoint()
     async createProfileBanner(
         @Body() data: ProfileBannerCreateRequestDto,

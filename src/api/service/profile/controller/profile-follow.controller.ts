@@ -1,4 +1,4 @@
-import { Delete, Get, Param, Post, Query } from '@nestjs/common';
+import { Delete, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -33,6 +33,7 @@ export class ProfileFollowController {
     ) {}
 
     @Post('users/:userId/follow')
+    @HttpCode(HttpStatus.OK)
     @ApiFollowUserEndpoint()
     async follow(
         @Param('userId') followeeId: string,
@@ -52,7 +53,8 @@ export class ProfileFollowController {
         return ApiResponseDto.success({ followeeId, unfollowed: wasFollowing }, PROFILE_RESPONSE_MESSAGES.unfollowed);
     }
 
-    /** 친구 목록 모달의 팔로워 "삭제" — 상대가 나를 팔로우한 관계를 끊는다 */
+    // 친구 목록 모달의 팔로워 "삭제" — 상대가 나를 팔로우한 관계를 끊는다.
+    // JSDoc 블록으로 쓰면 swagger 플러그인이 ApiOperation 을 덮어써 summary 가 사라진다.
     @Delete('me/followers/:userId')
     @ApiRemoveMyFollowerEndpoint()
     async removeFollower(

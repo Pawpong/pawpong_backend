@@ -44,7 +44,7 @@ export class UpdateCommunityPostUseCase {
         const resultingStatus = sanitizedPatch.status ?? existing.status;
         const resultingBody = sanitizedPatch.body !== undefined ? sanitizedPatch.body : existing.body;
         if (resultingStatus === 'published' && resultingBody.trim().length === 0) {
-            throw new BadRequestException('발행하려면 본문을 작성해 주세요.');
+            throw new BadRequestException('발행 게시글은 본문이 필요합니다.');
         }
 
         await this.writer.updateByAuthor(postId, userId, sanitizedPatch);

@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AI_IMAGE_ASSET_URL_PORT, type AiImageAssetUrlPort } from '../../../../service/ai-image/shared/application/ports/ai-image-asset-url.port';
+import {
+    AI_IMAGE_ASSET_URL_PORT,
+    type AiImageAssetUrlPort,
+} from '../../../../service/ai-image/shared/application/ports/ai-image-asset-url.port';
 import type { AiImageFilterSnapshot } from '../../../../service/ai-image/shared/application/types/ai-image-filter-snapshot.type';
 import type { AiImageAdminFilterResult } from '../../application/types/ai-image-admin-filter-result.type';
 

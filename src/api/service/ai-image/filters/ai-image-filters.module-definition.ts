@@ -8,7 +8,4 @@ export const AI_IMAGE_FILTERS_MODULE_IMPORTS = [AiImageSharedModule];
 
 export const AI_IMAGE_FILTERS_MODULE_CONTROLLERS = [AiImageFiltersController];
 
-export const AI_IMAGE_FILTERS_MODULE_PROVIDERS = [
-    GetActiveAiImageFiltersUseCase,
-    AiImageFilterResultMapperService,
-];
+export const AI_IMAGE_FILTERS_MODULE_PROVIDERS = [GetActiveAiImageFiltersUseCase, AiImageFilterResultMapperService];

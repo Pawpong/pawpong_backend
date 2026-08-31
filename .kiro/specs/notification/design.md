@@ -25,12 +25,15 @@ admin/  알림 발송/이메일 프리뷰
 | Method | Path | 용도 |
 |---|---|---|
 | GET | `/api/v2/notification` | 알림 목록(페이지네이션) |
-| GET | `/api/v2/notification/unread-count` | 미읽음 수 |
-| PATCH | `/api/v2/notification/:id/read` | 단건 읽음 |
-| PATCH | `/api/v2/notification/read-all` | 전체 읽음 |
-| DELETE | `/api/v2/notification/:id` | 알림 삭제 |
 | POST | `/api/v2/notification/push-token` | 푸시 토큰 등록 |
 | DELETE | `/api/v2/notification/push-token` | 푸시 토큰 해제 |
+| PATCH | `/api/v2/notification/read-all` | 전체 읽음 |
+| GET | `/api/v2/notification/unread-count` | 미읽음 수 |
+| DELETE | `/api/v2/notification/{id}` | 알림 삭제 |
+| PATCH | `/api/v2/notification/{id}/read` | 단건 읽음 |
+| GET | `/api/notification-admin/notifications` | 알림 목록 조회 (관리자) |
+| POST | `/api/notification-admin/push` | 어드민 푸시 발송 |
+| GET | `/api/notification-admin/stats` | 알림 통계 조회 (관리자) |
 
 ## Data Models
 

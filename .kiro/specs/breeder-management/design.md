@@ -23,24 +23,37 @@ admin/                 브리더 관리(admin)
 
 | Method | Path | 용도 |
 |---|---|---|
-| GET/PATCH | `/api/v2/breeder-management/profile` | 프로필 조회/수정 |
 | DELETE | `/api/v2/breeder-management/account` | 계정 삭제 |
-| GET | `/api/v2/breeder-management/dashboard` | 대시보드 통계 |
-| GET | `/api/v2/breeder-management/my-pets` | 내 분양펫 목록 |
-| POST | `/api/v2/breeder-management/available-pets` | 분양펫 등록 |
-| PATCH/DELETE | `/api/v2/breeder-management/available-pets/:petId` | 분양펫 수정/삭제 |
-| PATCH | `/api/v2/breeder-management/available-pets/:petId/status` | 분양 상태 변경 |
-| POST | `/api/v2/breeder-management/parent-pets` | 부모펫 등록 |
-| PATCH/DELETE | `/api/v2/breeder-management/parent-pets/:petId` | 부모펫 수정/삭제 |
-| GET | `/api/v2/breeder-management/applications` | 수신 신청 목록 |
-| GET/PATCH | `/api/v2/breeder-management/applications/:applicationId` | 신청 상세/상태 변경 |
-| GET/PATCH | `/api/v2/breeder-management/application-form` | 상담 폼 조회/수정 |
+| GET | `/api/v2/breeder-management/application-form` | 상담 폼 조회/수정 |
+| PATCH | `/api/v2/breeder-management/application-form` | 상담 폼 조회/수정 |
 | PATCH | `/api/v2/breeder-management/application-form/simple` | 상담 폼 간단 수정 |
+| GET | `/api/v2/breeder-management/applications` | 수신 신청 목록 |
+| GET | `/api/v2/breeder-management/applications/{applicationId}` | 신청 상세/상태 변경 |
+| PATCH | `/api/v2/breeder-management/applications/{applicationId}` | 신청 상세/상태 변경 |
+| GET | `/api/v2/breeder-management/dashboard` | 대시보드 통계 |
 | GET | `/api/v2/breeder-management/my-reviews` | 내 후기 목록 |
-| POST/PATCH/DELETE | `/api/v2/breeder-management/reviews/:reviewId/reply` | 후기 답글 |
-| GET/POST | `/api/v2/breeder-management/verification` | 인증 상태 조회/신청 |
+| POST | `/api/v2/breeder-management/parent-pets` | 부모펫 등록 |
+| PATCH | `/api/v2/breeder-management/parent-pets/{petId}` | 부모펫 수정/삭제 |
+| DELETE | `/api/v2/breeder-management/parent-pets/{petId}` | 부모펫 수정/삭제 |
+| GET | `/api/v2/breeder-management/profile` | 프로필 조회/수정 |
+| PATCH | `/api/v2/breeder-management/profile` | 프로필 조회/수정 |
+| POST | `/api/v2/breeder-management/reviews/{reviewId}/reply` | 후기 답글 |
+| PATCH | `/api/v2/breeder-management/reviews/{reviewId}/reply` | 후기 답글 |
+| DELETE | `/api/v2/breeder-management/reviews/{reviewId}/reply` | 후기 답글 |
+| GET | `/api/v2/breeder-management/verification` | 인증 상태 조회/신청 |
+| POST | `/api/v2/breeder-management/verification` | 인증 상태 조회/신청 |
 | POST | `/api/v2/breeder-management/verification/submit` | 인증 제출 |
 | POST | `/api/v2/breeder-management/verification/upload` | 인증 서류 업로드 |
+| POST | `/api/breeder-management-admin/counsel-banner` | 상담 배너 생성 |
+| PATCH | `/api/breeder-management-admin/counsel-banner/{bannerId}` | 상담 배너 수정 |
+| DELETE | `/api/breeder-management-admin/counsel-banner/{bannerId}` | 상담 배너 삭제 |
+| GET | `/api/breeder-management-admin/counsel-banners` | 상담 배너 전체 목록 조회 |
+| GET | `/api/breeder-management-admin/counsel-banners/active` | 활성 상담 배너 목록 조회 |
+| POST | `/api/breeder-management-admin/profile-banner` | 프로필 배너 생성 |
+| PATCH | `/api/breeder-management-admin/profile-banner/{bannerId}` | 프로필 배너 수정 |
+| DELETE | `/api/breeder-management-admin/profile-banner/{bannerId}` | 프로필 배너 삭제 |
+| GET | `/api/breeder-management-admin/profile-banners` | 프로필 배너 전체 목록 조회 |
+| GET | `/api/breeder-management-admin/profile-banners/active` | 활성 프로필 배너 목록 조회 |
 
 ## Data Models
 

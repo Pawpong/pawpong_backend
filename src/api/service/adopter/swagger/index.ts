@@ -8,7 +8,7 @@ import { ADOPTER_FORBIDDEN_RESPONSE } from '../constants/adopter-swagger.constan
 import { AccountDeleteRequestDto } from '../dto/request/account-delete-request.dto';
 import { ApplicationCreateRequestDto } from '../dto/request/application-create-request.dto';
 import { FavoriteAddRequestDto } from '../dto/request/favorite-add-request.dto';
-import { ProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
+import { AdopterProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
 import { ReportCreateRequestDto } from '../dto/request/report-create-request.dto';
 import { ReviewCreateRequestDto } from '../dto/request/review-create-request.dto';
 import { ReviewReportRequestDto } from '../dto/request/review-report-request.dto';
@@ -22,7 +22,7 @@ import { ApplicationListResponseDto } from '../dto/response/application-list-res
 import { FavoriteAddResponseDto } from '../dto/response/favorite-add-response.dto';
 import { FavoriteRemoveResponseDto } from '../dto/response/favorite-remove-response.dto';
 import { MyReviewDetailDto } from '../dto/response/my-review-detail.dto';
-import { MyReviewItemDto } from '../dto/response/my-review-item.dto';
+import { AdopterMyReviewItemDto } from '../dto/response/my-review-item.dto';
 import { ReportCreateResponseDto } from '../dto/response/report-create-response.dto';
 import { ReviewCreateResponseDto } from '../dto/response/review-create-response.dto';
 import { ReviewReportResponseDto } from '../dto/response/review-report-response.dto';
@@ -48,7 +48,6 @@ export function ApiCreateAdopterApplicationEndpoint() {
 - 신청 후 상태는 consultation_pending으로 저장됩니다.`,
             responseType: ApplicationCreateResponseDto,
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-            successStatus: 201,
             successDescription: '입양 신청 생성 성공',
             successMessageExample: ADOPTER_RESPONSE_MESSAGES.applicationCreated,
         }),
@@ -108,7 +107,6 @@ export function ApiCreateAdopterReviewEndpoint() {
 - 동일 신청/후기 유형으로 중복 작성할 수 없습니다.`,
             responseType: ReviewCreateResponseDto,
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
-            successStatus: 201,
             successDescription: '후기 작성 성공',
             successMessageExample: ADOPTER_RESPONSE_MESSAGES.reviewCreated,
         }),
@@ -136,7 +134,7 @@ export function ApiGetAdopterReviewsEndpoint() {
             summary: '내가 작성한 후기 목록 조회',
             description: '입양자가 작성한 후기 목록을 페이지네이션으로 조회합니다.',
             responseType: PaginationResponseDto,
-            itemType: MyReviewItemDto,
+            itemType: AdopterMyReviewItemDto,
             errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
             successDescription: '후기 목록 조회 성공',
             successMessageExample: ADOPTER_RESPONSE_MESSAGES.reviewListRetrieved,
@@ -231,7 +229,7 @@ export function ApiUpdateAdopterProfileEndpoint() {
             successDescription: '입양자 프로필 수정 성공',
             successMessageExample: ADOPTER_RESPONSE_MESSAGES.profileUpdated,
         }),
-        ApiBody({ type: ProfileUpdateRequestDto }),
+        ApiBody({ type: AdopterProfileUpdateRequestDto }),
     );
 }
 

@@ -1,4 +1,4 @@
-import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
+import { Body, Delete, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { PopularKeywordResponseDto } from '../../../service/popular-keyword/dto/response/popular-keyword-response.dto';
@@ -24,6 +24,7 @@ export class PopularKeywordAdminCommandController {
     ) {}
 
     @Post()
+    @HttpCode(HttpStatus.OK)
     @ApiCreatePopularKeywordAdminEndpoint()
     async create(@Body() dto: CreatePopularKeywordRequestDto): Promise<ApiResponseDto<PopularKeywordResponseDto>> {
         const result = await this.createUseCase.execute(dto);

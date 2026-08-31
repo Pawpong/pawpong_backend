@@ -5,7 +5,10 @@ import {
     COMMUNITY_REPORT_ADMIN_READER_PORT,
     type CommunityReportAdminReaderPort,
 } from '../ports/community-report-admin-reader.port';
-import type { CommunityReportAdminItem, CommunityReportStatus } from '../../../../service/community/application/types/community-report.type';
+import type {
+    CommunityReportAdminItem,
+    CommunityReportStatus,
+} from '../../../../service/community/application/types/community-report.type';
 
 interface GetReportsQuery {
     page: number;

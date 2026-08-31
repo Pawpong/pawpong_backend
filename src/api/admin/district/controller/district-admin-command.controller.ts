@@ -1,4 +1,4 @@
-import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
+import { Body, Delete, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { CreateDistrictUseCase } from '../application/use-cases/create-district.use-case';
@@ -25,6 +25,7 @@ export class DistrictAdminCommandController {
     ) {}
 
     @Post()
+    @HttpCode(HttpStatus.OK)
     @ApiCreateDistrictAdminEndpoint()
     async createDistrict(@Body() dto: CreateDistrictRequestDto): Promise<ApiResponseDto<DistrictResponseDto>> {
         const result = await this.createDistrictUseCase.execute(dto);

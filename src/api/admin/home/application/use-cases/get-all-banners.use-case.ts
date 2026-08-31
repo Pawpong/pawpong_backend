@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { HomeBannerCatalogService } from '../../../../service/home/domain/services/home-banner-catalog.service';
-import { HOME_ASSET_URL_PORT, type HomeAssetUrlPort } from '../../../../service/home/application/ports/home-asset-url.port';
+import {
+    HOME_ASSET_URL_PORT,
+    type HomeAssetUrlPort,
+} from '../../../../service/home/application/ports/home-asset-url.port';
 import { HOME_ADMIN_MANAGER_PORT, type HomeAdminManagerPort } from '../ports/home-admin-manager.port';
 import type { HomeBannerResult } from '../../../../service/home/application/types/home-content-result.type';
 

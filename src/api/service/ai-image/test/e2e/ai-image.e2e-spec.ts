@@ -1,7 +1,12 @@
 import { INestApplication } from '@nestjs/common';
 import request from 'supertest';
 
-import { cleanupDatabase, createTestingApp, getAdminToken, getAdopterToken } from '../../../../../common/testing/test-utils';
+import {
+    cleanupDatabase,
+    createTestingApp,
+    getAdminToken,
+    getAdopterToken,
+} from '../../../../../common/testing/test-utils';
 
 /**
  * AI 이미지 사용자 종단간 테스트

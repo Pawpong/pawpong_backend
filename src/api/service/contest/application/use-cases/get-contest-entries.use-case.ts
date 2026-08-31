@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { CONTEST_ASSET_URL_PORT, type ContestAssetUrlPort } from '../ports/contest-asset-url.port';
@@ -24,12 +24,15 @@ export class GetContestEntriesUseCase {
     async execute(command: GetContestEntriesCommand): Promise<GetContestEntriesResult> {
         this.logger.logStart('getContestEntries', '콘테스트 항목 목록 조회');
 
+        const { page, limit, userId } = command;
+
+        // 진행 중인 콘테스트가 없는 것은 잘못된 요청이 아니라 빈 목록이다.
+        // GetCurrentContestUseCase 도 같은 상태를 null 로 반환한다
         const contest = await this.reader.findActive();
         if (!contest) {
-            throw new BadRequestException('현재 진행 중인 콘테스트가 없습니다.');
+            this.logger.logSuccess('getContestEntries', '진행 중인 콘테스트 없음');
+            return { items: [], total: 0, page, limit };
         }
-
-        const { page, limit, userId } = command;
 
         const [entries, total, votedEntryId] = await Promise.all([
             this.reader.findEntries(contest.id, { page, limit }),

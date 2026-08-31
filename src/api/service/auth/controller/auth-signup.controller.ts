@@ -5,7 +5,7 @@ import { RegisterAdopterUseCase } from '../application/use-cases/register-adopte
 import { RegisterBreederUseCase } from '../application/use-cases/register-breeder.use-case';
 import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../constants/auth-response-messages';
 import { AuthPublicController } from '../decorator/auth-public-controller.decorator';
-import { RegisterAdopterRequestDto } from '../dto/request/register-adopter-request.dto';
+import { RegisterAdopterFullRequestDto } from '../dto/request/register-adopter-full-request.dto';
 import { RegisterBreederRequestDto } from '../dto/request/register-breeder-request.dto';
 import { RegisterAdopterResponseDto } from '../dto/response/register-adopter-response.dto';
 import { RegisterBreederResponseDto } from '../dto/response/register-breeder-response.dto';
@@ -21,7 +21,9 @@ export class AuthSignupController {
     @Post('register/adopter')
     @HttpCode(HttpStatus.OK)
     @ApiRegisterAdopterEndpoint()
-    async registerAdopter(@Body() dto: RegisterAdopterRequestDto): Promise<ApiResponseDto<RegisterAdopterResponseDto>> {
+    async registerAdopter(
+        @Body() dto: RegisterAdopterFullRequestDto,
+    ): Promise<ApiResponseDto<RegisterAdopterResponseDto>> {
         const result = await this.registerAdopterUseCase.execute(dto);
         return ApiResponseDto.success(result, AUTH_RESPONSE_MESSAGE_EXAMPLES.adopterSignupCompleted);
     }

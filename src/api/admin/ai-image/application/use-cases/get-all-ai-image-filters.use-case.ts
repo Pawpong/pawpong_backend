@@ -1,6 +1,9 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AI_IMAGE_FILTER_READER_PORT, type AiImageFilterReaderPort } from '../../../../service/ai-image/shared/application/ports/ai-image-filter-reader.port';
+import {
+    AI_IMAGE_FILTER_READER_PORT,
+    type AiImageFilterReaderPort,
+} from '../../../../service/ai-image/shared/application/ports/ai-image-filter-reader.port';
 import { AiImageAdminFilterResultMapperService } from '../../domain/services/ai-image-admin-filter-result-mapper.service';
 import type { AiImageAdminFilterResult } from '../types/ai-image-admin-filter-result.type';
 

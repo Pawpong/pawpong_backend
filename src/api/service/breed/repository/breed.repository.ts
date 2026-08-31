@@ -3,7 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Breed } from '../../../../schema/breed.schema';
-import { type CreateBreedCommand, type UpdateBreedCommand } from '../../../admin/breed/application/types/breed-command.type';
+import {
+    type CreateBreedCommand,
+    type UpdateBreedCommand,
+} from '../../../admin/breed/application/types/breed-command.type';
 
 @Injectable()
 export class BreedRepository {

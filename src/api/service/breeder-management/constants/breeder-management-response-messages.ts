@@ -8,6 +8,8 @@ export const BREEDER_MANAGEMENT_RESPONSE_MESSAGES = {
     verificationDocumentsUploaded: '브리더 인증 서류가 업로드되었습니다.',
     verificationDocumentsSubmitted: '입점 서류 제출이 완료되었습니다.',
     verificationDocumentsSubmittedDetailed: '입점 서류 제출이 완료되었습니다. 관리자 검토 후 결과를 알려드립니다.',
+    levelChangeRequested: '브리더 등급 변경 신청이 접수되었습니다.',
+    levelChangeRequestedDetailed: 'Elite 등급 변경 신청이 접수되었습니다. 관리자 검토 후 결과를 알려드립니다.',
     applicationListRetrieved: '입양 신청 목록이 조회되었습니다.',
     applicationDetailRetrieved: '입양 신청 상세 정보가 조회되었습니다.',
     applicationStatusUpdated: '입양 신청 상태가 성공적으로 변경되었습니다.',

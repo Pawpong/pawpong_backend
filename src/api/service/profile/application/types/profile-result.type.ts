@@ -51,6 +51,7 @@ export interface BreederPublicProfileResult {
     plan: 'basic' | 'pro';
     businessLocation: BusinessLocationResult;
     isFavorited: boolean;
+    isFollowing: boolean;
 }
 
 export interface FavoriteBreederCardResult {
@@ -62,6 +63,8 @@ export interface FavoriteBreederCardResult {
     bpm: number;
     level?: 'new' | 'elite';
     addedAt: string;
+    /** 이 엔드포인트는 즐겨찾기한 브리더만 반환하므로 항상 true (카드 별 상태용 계약) */
+    isFavorited: true;
 }
 
 /** 친구 목록 모달 카드 (응답 계약) */

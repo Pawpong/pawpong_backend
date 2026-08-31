@@ -67,6 +67,12 @@ export interface VoteContestEntryResult {
     newVoteCount: number;
 }
 
+export interface CancelContestVoteResult {
+    entryId: string;
+    /** 취소 반영 후 해당 항목의 총 투표 수 */
+    newVoteCount: number;
+}
+
 export interface GetRandomEntryResult {
     /** 투표 후보 항목. 후보가 없거나 이미 투표한 경우 null */
     entry: ContestEntryItem | null;

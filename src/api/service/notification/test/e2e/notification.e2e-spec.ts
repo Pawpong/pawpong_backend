@@ -98,4 +98,31 @@ describe('알림 종단간 테스트', () => {
             console.log('존재하지 않는 알림 삭제 시 에러 확인');
         });
     });
+
+    // ── 푸시 토큰 라우트가 :id 라우트에 삼켜지지 않는지 (라우트 등록 순서 회귀 방지) ──
+
+    describe('DELETE /api/v2/notification/push-token — 라우트 순서', () => {
+        it('push-token 이 알림 삭제 :id 로 매칭되지 않고 토큰 해제 핸들러에 도달한다', async () => {
+            if (!adopterToken) {
+                console.log('주의: 토큰이 없어서 테스트 스킵');
+                return;
+            }
+
+            // 등록 후 해제 — :id 라우트에 삼켜지면 "알림" 관련 에러가 나온다
+            await request(app.getHttpServer())
+                .post('/api/v2/notification/push-token')
+                .set('Authorization', `Bearer ${adopterToken}`)
+                .send({ token: 'e2e-fcm-token', platform: 'android' })
+                .expect(200);
+
+            const response = await request(app.getHttpServer())
+                .delete('/api/v2/notification/push-token')
+                .set('Authorization', `Bearer ${adopterToken}`)
+                .send({ token: 'e2e-fcm-token' })
+                .expect(200);
+
+            expect(response.body.success).toBe(true);
+            console.log('푸시 토큰 해제가 올바른 핸들러에 도달함 확인');
+        });
+    });
 });

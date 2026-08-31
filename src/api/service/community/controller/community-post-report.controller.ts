@@ -1,4 +1,4 @@
-import { Body, Param, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -17,6 +17,7 @@ export class CommunityPostReportController {
     constructor(private readonly reportUseCase: ReportCommunityPostUseCase) {}
 
     @Post('posts/:postId/report')
+    @HttpCode(HttpStatus.OK)
     @ApiReportCommunityPostEndpoint()
     async report(
         @Param('postId') postId: string,

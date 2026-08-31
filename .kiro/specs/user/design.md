@@ -22,17 +22,17 @@ infrastructure/* · repository/*  mongoose
 
 | Method | Path | 용도 |
 |---|---|---|
-| GET | `/api/v2/user-admin/users` | 사용자 목록 |
-| GET | `/api/v2/user-admin/profile` | 사용자 프로필(관리) |
-| PATCH | `/api/v2/user-admin/users/:userId/status` | 상태 변경(정지 등) |
-| PATCH | `/api/v2/user-admin/users/:userId/hard-delete` | 하드 삭제 |
-| GET | `/api/v2/user-admin/deleted-users` | 탈퇴 사용자 목록 |
-| GET | `/api/v2/user-admin/deleted-users/stats` | 탈퇴 통계 |
-| PATCH | `/api/v2/user-admin/deleted-users/:userId/restore` | 탈퇴 복구 |
-| GET | `/api/v2/user-admin/phone-whitelist` | 화이트리스트 목록 |
-| POST | `/api/v2/user-admin/phone-whitelist` | 화이트리스트 추가 |
-| PATCH | `/api/v2/user-admin/phone-whitelist/:id` | 화이트리스트 수정 |
-| DELETE | `/api/v2/user-admin/phone-whitelist/:id` | 화이트리스트 삭제 |
+| GET | `/api/user-admin/deleted-users` | 탈퇴 사용자 목록 조회 |
+| GET | `/api/user-admin/deleted-users/stats` | 탈퇴 사용자 통계 조회 |
+| PATCH | `/api/user-admin/deleted-users/{userId}/restore` | 탈퇴 사용자 복구 |
+| GET | `/api/user-admin/phone-whitelist` | 전화번호 화이트리스트 목록 조회 |
+| POST | `/api/user-admin/phone-whitelist` | 전화번호 화이트리스트 추가 |
+| PATCH | `/api/user-admin/phone-whitelist/{id}` | 전화번호 화이트리스트 수정 |
+| DELETE | `/api/user-admin/phone-whitelist/{id}` | 전화번호 화이트리스트 삭제 |
+| GET | `/api/user-admin/profile` | 관리자 프로필 조회 |
+| GET | `/api/user-admin/users` | 통합 사용자 목록 조회 |
+| PATCH | `/api/user-admin/users/{userId}/hard-delete` | 사용자 영구 삭제 |
+| PATCH | `/api/user-admin/users/{userId}/status` | 사용자 상태 변경 |
 
 ## Data Models
 

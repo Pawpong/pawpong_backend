@@ -22,6 +22,11 @@ admin/  지역 관리
 | Method | Path | 용도 |
 |---|---|---|
 | GET | `/api/v2/districts` | 지역(시/구) 목록 |
+| GET | `/api/districts-admin` | 모든 지역 조회 (관리자) |
+| POST | `/api/districts-admin` | 지역 생성 |
+| GET | `/api/districts-admin/{id}` | 특정 지역 조회 (관리자) |
+| PATCH | `/api/districts-admin/{id}` | 지역 수정 |
+| DELETE | `/api/districts-admin/{id}` | 지역 삭제 |
 
 ## Data Models
 

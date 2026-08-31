@@ -3,6 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
 import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
+import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
 import { UserFollow, UserFollowDocument } from '../../../../schema/user-follow.schema';
 
 /** 팔로우 관계 조회 방향 — followers: 나를 팔로우 / followings: 내가 팔로우 */
@@ -15,19 +16,17 @@ export class ProfileFollowRepository {
         private readonly followModel: Model<UserFollowDocument>,
         @InjectModel(Adopter.name)
         private readonly adopterModel: Model<AdopterDocument>,
+        @InjectModel(Breeder.name)
+        private readonly breederModel: Model<BreederDocument>,
     ) {}
 
     async follow(followerId: string, followeeId: string): Promise<{ alreadyFollowing: boolean }> {
         try {
             await this.followModel.create({ followerId, followeeId });
-            // followee 의 followerCount 증가 (Adopter 만 팔로우 대상)
-            await this.adopterModel
-                .updateOne({ _id: new Types.ObjectId(followeeId) }, { $inc: { followerCount: 1 } })
-                .exec();
-            // follower 의 followingCount 증가 (팔로잉 탭 카운트)
-            await this.adopterModel
-                .updateOne({ _id: new Types.ObjectId(followerId) }, { $inc: { followingCount: 1 } })
-                .exec();
+            await Promise.all([
+                this.bumpCounter(followeeId, 'followerCount', 1),
+                this.bumpCounter(followerId, 'followingCount', 1),
+            ]);
             return { alreadyFollowing: false };
         } catch (err: unknown) {
             if (typeof err === 'object' && err !== null && (err as { code?: number }).code === 11000) {
@@ -116,16 +115,27 @@ export class ProfileFollowRepository {
     /** 팔로우 해제 시 양쪽 카운터 감소 (0 미만 방지) */
     private async decreaseCounters(followerId: string, followeeId: string): Promise<void> {
         await Promise.all([
+            this.bumpCounter(followeeId, 'followerCount', -1),
+            this.bumpCounter(followerId, 'followingCount', -1),
+        ]);
+    }
+
+    /**
+     * 팔로우 카운터 증감 — 입양자·브리더 어느 쪽도 팔로우 주체/대상이 될 수 있어
+     * 두 컬렉션에 같은 증감을 시도한다 (_id 는 컬렉션 간 겹치지 않으므로 한쪽만 매칭된다).
+     * 브리더는 stats 하위에 카운터를 둔다.
+     */
+    private async bumpCounter(userId: string, field: 'followerCount' | 'followingCount', delta: 1 | -1): Promise<void> {
+        const _id = new Types.ObjectId(userId);
+        const positive = delta < 0 ? { $gt: 0 } : undefined;
+        await Promise.all([
             this.adopterModel
-                .updateOne(
-                    { _id: new Types.ObjectId(followeeId), followerCount: { $gt: 0 } },
-                    { $inc: { followerCount: -1 } },
-                )
+                .updateOne({ _id, ...(positive ? { [field]: positive } : {}) }, { $inc: { [field]: delta } })
                 .exec(),
-            this.adopterModel
+            this.breederModel
                 .updateOne(
-                    { _id: new Types.ObjectId(followerId), followingCount: { $gt: 0 } },
-                    { $inc: { followingCount: -1 } },
+                    { _id, ...(positive ? { [`stats.${field}`]: positive } : {}) },
+                    { $inc: { [`stats.${field}`]: delta } },
                 )
                 .exec(),
         ]);

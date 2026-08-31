@@ -14,6 +14,7 @@ import { CONTEST_WRITER_PORT } from './application/ports/contest-writer.port';
 import { GetCurrentContestUseCase } from './application/use-cases/get-current-contest.use-case';
 import { GetContestEntriesUseCase } from './application/use-cases/get-contest-entries.use-case';
 import { SubmitContestEntryUseCase } from './application/use-cases/submit-contest-entry.use-case';
+import { CancelContestVoteUseCase } from './application/use-cases/cancel-contest-vote.use-case';
 import { VoteContestEntryUseCase } from './application/use-cases/vote-contest-entry.use-case';
 import { GetMyContestEntryUseCase } from './application/use-cases/get-my-contest-entry.use-case';
 import { GetPreviousRankingUseCase } from './application/use-cases/get-previous-ranking.use-case';
@@ -31,7 +32,9 @@ import { ContestYesterdayTopController } from './controller/contest-yesterday-to
 import { ContestMeController } from './controller/contest-me.controller';
 import { ContestPreviousRankingController } from './controller/contest-previous-ranking.controller';
 import { ContestVoteController } from './controller/contest-vote.controller';
+import { ContestVotingPolicyService } from './domain/services/contest-voting-policy.service';
 import { ContestAssetUrlStorageAdapter } from './infrastructure/contest-asset-url-storage.adapter';
+import { ContestFinalizationScheduler } from './infrastructure/contest-finalization.scheduler';
 import { ContestReaderMongooseAdapter } from './infrastructure/contest-reader-mongoose.adapter';
 import { ContestUserInfoMongooseAdapter } from './infrastructure/contest-user-info-mongoose.adapter';
 import { ContestWriterMongooseAdapter } from './infrastructure/contest-writer-mongoose.adapter';
@@ -68,10 +71,13 @@ const CONTEST_USE_CASE_PROVIDERS = [
     GetYesterdayTopUseCase,
     SubmitContestEntryUseCase,
     VoteContestEntryUseCase,
+    CancelContestVoteUseCase,
     GetMyContestEntryUseCase,
     GetPreviousRankingUseCase,
     GetHallOfFameUseCase,
 ];
+
+const CONTEST_DOMAIN_PROVIDERS = [ContestVotingPolicyService];
 
 const CONTEST_INFRASTRUCTURE_PROVIDERS = [
     ContestRepository,
@@ -79,6 +85,7 @@ const CONTEST_INFRASTRUCTURE_PROVIDERS = [
     ContestWriterMongooseAdapter,
     ContestAssetUrlStorageAdapter,
     ContestUserInfoMongooseAdapter,
+    ContestFinalizationScheduler,
 ];
 
 const CONTEST_PORT_BINDINGS = [
@@ -90,6 +97,7 @@ const CONTEST_PORT_BINDINGS = [
 
 export const CONTEST_MODULE_PROVIDERS = [
     ...CONTEST_USE_CASE_PROVIDERS,
+    ...CONTEST_DOMAIN_PROVIDERS,
     ...CONTEST_INFRASTRUCTURE_PROVIDERS,
     ...CONTEST_PORT_BINDINGS,
 ];

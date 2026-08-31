@@ -17,7 +17,8 @@ export class FollowUserUseCase {
             throw new BadRequestException('자기 자신을 팔로우할 수 없습니다.');
         }
 
-        const target = await this.reader.readAdopter(followeeId);
+        // 팔로우 대상은 입양자·브리더 모두 가능하다 (브리더홈 팔로우 버튼)
+        const target = (await this.reader.readAdopter(followeeId)) ?? (await this.reader.readBreeder(followeeId));
         if (!target) {
             throw new BadRequestException('해당 사용자를 찾을 수 없습니다.');
         }

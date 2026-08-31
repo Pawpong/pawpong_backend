@@ -1,5 +1,7 @@
 import { Injectable, Inject, OnModuleInit, OnModuleDestroy, Optional } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ClientKafka } from '@nestjs/microservices';
+import { lastValueFrom } from 'rxjs';
 import { CustomLoggerService } from '../logger/custom-logger.service';
 import { NotifyCriticalErrorUseCase } from '../discord/application/use-cases/notify-critical-error.use-case';
 
@@ -57,14 +59,22 @@ export interface ChatMessage {
 @Injectable()
 export class KafkaService implements OnModuleInit, OnModuleDestroy {
     private isConnected = false;
+    private connectionAttempted = false;
 
     constructor(
         @Inject('KAFKA_SERVICE') private readonly kafkaClient: ClientKafka,
         private readonly logger: CustomLoggerService,
         @Optional() private readonly notifyCriticalErrorUseCase?: NotifyCriticalErrorUseCase,
+        @Optional() private readonly configService?: ConfigService,
     ) {}
 
     async onModuleInit() {
+        if (!this.isKafkaEnabled()) {
+            this.logger.logSuccess('KafkaService', 'Kafka 비활성 설정 확인 - 연결 생략');
+            return;
+        }
+
+        this.connectionAttempted = true;
         try {
             // Producer 전용으로 사용하므로 subscribeToResponseOf 불필요
             // (request-reply 패턴이 아닌 emit 전용)
@@ -75,35 +85,65 @@ export class KafkaService implements OnModuleInit, OnModuleDestroy {
             // Kafka 미연결 시 간단한 경고만 출력 (선택적 기능이므로 앱은 계속 동작)
             this.logger.warn('Kafka 미연결 - 채팅/이벤트 로깅 비활성화 (docker compose up kafka 필요)', 'KafkaService');
             this.isConnected = false;
+            await this.closeClient();
             this.notifyKafkaCriticalError('Kafka 브로커 연결 실패', error);
         }
     }
 
     async onModuleDestroy() {
-        if (this.isConnected) {
-            await this.kafkaClient.close();
-            this.logger.logSuccess('KafkaService', 'Kafka 연결 종료');
-        }
+        await this.closeClient();
     }
 
     /**
      * 메시지 발행 (Producer)
      */
-    async emit(topic: KafkaTopic, message: any): Promise<void> {
+    async emit(topic: KafkaTopic, message: any): Promise<boolean> {
         if (!this.isConnected) {
             this.logger.logWarning('KafkaService', `Kafka 미연결 상태 - 메시지 스킵: ${topic}`, null);
+            return false;
+        }
+
+        try {
+            await lastValueFrom(
+                this.kafkaClient.emit(topic, {
+                    key: message.roomId || message.id || Date.now().toString(),
+                    value: JSON.stringify(message),
+                }),
+            );
+            this.logger.logDbOperation('KafkaService', 'emit', topic, { messageId: message.id });
+            return true;
+        } catch (error) {
+            this.logger.logError('KafkaService', `메시지 발행 실패: ${topic}`, error);
+            this.notifyKafkaCriticalError(`Kafka 메시지 발행 실패: ${topic}`, error, { topic });
+            return false;
+        }
+    }
+
+    private isKafkaEnabled(): boolean {
+        // 직접 생성하는 단위 테스트는 기존 연결 동작을 유지하고, Nest 런타임에서는
+        // KAFKA_ENABLED를 producer와 consumer 양쪽에 동일하게 적용한다.
+        if (!this.configService) {
+            return true;
+        }
+
+        return this.configService.get<string>('KAFKA_ENABLED', 'false').toLowerCase() === 'true';
+    }
+
+    private async closeClient(): Promise<void> {
+        if (!this.connectionAttempted) {
             return;
         }
 
         try {
-            this.kafkaClient.emit(topic, {
-                key: message.roomId || message.id || Date.now().toString(),
-                value: JSON.stringify(message),
-            });
-            this.logger.logDbOperation('KafkaService', 'emit', topic, { messageId: message.id });
+            await this.kafkaClient.close();
+            if (this.isConnected) {
+                this.logger.logSuccess('KafkaService', 'Kafka 연결 종료');
+            }
         } catch (error) {
-            this.logger.logError('KafkaService', `메시지 발행 실패: ${topic}`, error);
-            this.notifyKafkaCriticalError(`Kafka 메시지 발행 실패: ${topic}`, error, { topic });
+            this.logger.logError('KafkaService', 'Kafka 연결 종료 실패', error);
+        } finally {
+            this.connectionAttempted = false;
+            this.isConnected = false;
         }
     }
 

@@ -1,7 +1,7 @@
 import { applyDecorators } from '@nestjs/common';
 import { ApiBody, ApiParam, ApiProduces, ApiQuery, getSchemaPath } from '@nestjs/swagger';
 
-import { ApiPublicController, ApiRawEndpoint } from '../../../../../common/decorator/swagger.decorator';
+import { ApiEndpoint, ApiPublicController, ApiRawEndpoint } from '../../../../../common/decorator/swagger.decorator';
 import { CreateCommentRequestDto, UpdateCommentRequestDto } from '../../comment/dto/request/comment-request.dto';
 import {
     CommentCreateResponseDto,
@@ -74,12 +74,13 @@ function ApiLimitQuery(example: number) {
 }
 
 export function ApiFeedVideoController() {
-    return ApiPublicController('Feed');
+    // 태그는 전 도메인 한글 통일 (47개 중 여기만 영문이었다)
+    return ApiPublicController('피드');
 }
 
 export function ApiGetFeedVideosEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '동영상 피드 조회',
             description: `
                 공개된 동영상 목록을 최신순으로 조회합니다.
@@ -91,6 +92,7 @@ export function ApiGetFeedVideosEndpoint() {
             responseType: FeedResponseDto,
             isPublic: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.feedListed,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.feedListed,
         }),
         ApiPageQuery(),
         ApiLimitQuery(20),
@@ -99,7 +101,7 @@ export function ApiGetFeedVideosEndpoint() {
 
 export function ApiGetPopularFeedVideosEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '인기 동영상 조회',
             description: `
                 조회수 기준 인기 동영상을 조회합니다.
@@ -111,6 +113,7 @@ export function ApiGetPopularFeedVideosEndpoint() {
             responseType: [PopularVideoItemDto],
             isPublic: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.popularVideosListed,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.popularVideosListed,
         }),
         ApiLimitQuery(10),
     );
@@ -149,7 +152,7 @@ export function ApiStreamFeedVideoEndpoint() {
 
 export function ApiPrefetchFeedVideoSegmentsEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: 'HLS 세그먼트 프리페치',
             description: `
                 현재 세그먼트 기준으로 여러 화질의 세그먼트를 미리 캐시합니다.
@@ -161,6 +164,7 @@ export function ApiPrefetchFeedVideoSegmentsEndpoint() {
             responseType: SegmentPrefetchResponseDto,
             isPublic: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.segmentsPrefetched,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.segmentsPrefetched,
             errorResponses: [FEED_VIDEO_NOT_FOUND_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -183,7 +187,7 @@ export function ApiPrefetchFeedVideoSegmentsEndpoint() {
 
 export function ApiGetFeedVideoMetaEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '동영상 상세 조회',
             description: `
                 동영상 메타데이터와 재생 URL을 조회합니다.
@@ -194,7 +198,8 @@ export function ApiGetFeedVideoMetaEndpoint() {
             `,
             isPublic: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoMetaRetrieved,
-            responseSchema: {
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoMetaRetrieved,
+            dataSchema: {
                 oneOf: [
                     { $ref: getSchemaPath(VideoMetaResponseDto) },
                     { $ref: getSchemaPath(PendingVideoMetaResponseDto) },
@@ -209,7 +214,7 @@ export function ApiGetFeedVideoMetaEndpoint() {
 
 export function ApiIncrementFeedVideoViewEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '조회수 증가',
             description: `
                 동영상 재생 시작 시 조회수를 증가시킵니다.
@@ -221,6 +226,7 @@ export function ApiIncrementFeedVideoViewEndpoint() {
             responseType: VideoActionSuccessResponseDto,
             isPublic: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoViewIncremented,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoViewIncremented,
         }),
         ApiFeedVideoIdParam(),
     );
@@ -228,7 +234,7 @@ export function ApiIncrementFeedVideoViewEndpoint() {
 
 export function ApiGetFeedVideoUploadUrlEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '동영상 업로드 URL 발급',
             description: `
                 클라이언트가 직접 스토리지로 업로드할 수 있는 Presigned URL을 발급합니다.
@@ -239,6 +245,7 @@ export function ApiGetFeedVideoUploadUrlEndpoint() {
             `,
             responseType: UploadUrlResponseDto,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.uploadUrlIssued,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.uploadUrlIssued,
         }),
         ApiBody({ type: UploadVideoRequestDto }),
     );
@@ -246,7 +253,7 @@ export function ApiGetFeedVideoUploadUrlEndpoint() {
 
 export function ApiCompleteFeedVideoUploadEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '업로드 완료 알림',
             description: `
                 파일 업로드가 끝난 뒤 인코딩 작업을 시작합니다.
@@ -257,6 +264,7 @@ export function ApiCompleteFeedVideoUploadEndpoint() {
             `,
             responseType: UploadCompleteResponseDto,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.uploadCompleted,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.uploadCompleted,
             errorResponses: [FEED_VIDEO_NOT_FOUND_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -265,7 +273,7 @@ export function ApiCompleteFeedVideoUploadEndpoint() {
 
 export function ApiGetMyFeedVideosEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '내 동영상 목록 조회',
             description: `
                 내가 업로드한 동영상 목록을 조회합니다.
@@ -276,6 +284,7 @@ export function ApiGetMyFeedVideosEndpoint() {
             `,
             responseType: MyVideoListResponseDto,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.myVideosListed,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.myVideosListed,
         }),
         ApiPageQuery(),
         ApiLimitQuery(20),
@@ -284,7 +293,7 @@ export function ApiGetMyFeedVideosEndpoint() {
 
 export function ApiDeleteFeedVideoEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '동영상 삭제',
             description: `
                 내가 업로드한 동영상을 삭제합니다.
@@ -295,6 +304,7 @@ export function ApiDeleteFeedVideoEndpoint() {
             `,
             responseType: VideoActionSuccessResponseDto,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoDeleted,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videoDeleted,
             errorResponses: [FEED_VIDEO_ACCESS_DENIED_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -303,7 +313,7 @@ export function ApiDeleteFeedVideoEndpoint() {
 
 export function ApiToggleFeedVideoVisibilityEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '동영상 공개 상태 전환',
             description: `
                 동영상의 공개/비공개 상태를 전환합니다.
@@ -314,6 +324,7 @@ export function ApiToggleFeedVideoVisibilityEndpoint() {
             `,
             responseType: VideoVisibilityResponseDto,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.visibilityToggled,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.visibilityToggled,
             errorResponses: [FEED_VIDEO_ACCESS_DENIED_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -322,7 +333,7 @@ export function ApiToggleFeedVideoVisibilityEndpoint() {
 
 export function ApiToggleFeedVideoLikeEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '좋아요 토글',
             description: `
                 동영상에 좋아요를 추가하거나 취소합니다.
@@ -333,6 +344,7 @@ export function ApiToggleFeedVideoLikeEndpoint() {
             `,
             responseType: LikeToggleResponseDto,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.likeToggled,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.likeToggled,
             errorResponses: [FEED_VIDEO_NOT_FOUND_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -341,7 +353,7 @@ export function ApiToggleFeedVideoLikeEndpoint() {
 
 export function ApiGetFeedVideoLikeStatusEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '좋아요 상태 조회',
             description: `
                 현재 사용자가 해당 동영상에 좋아요를 눌렀는지 조회합니다.
@@ -351,6 +363,7 @@ export function ApiGetFeedVideoLikeStatusEndpoint() {
             `,
             responseType: LikeStatusResponseDto,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.likeStatusRetrieved,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.likeStatusRetrieved,
         }),
         ApiFeedVideoIdParam(),
     );
@@ -358,7 +371,7 @@ export function ApiGetFeedVideoLikeStatusEndpoint() {
 
 export function ApiGetMyLikedFeedVideosEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '좋아요한 동영상 목록 조회',
             description: `
                 내가 좋아요한 동영상 목록을 페이지네이션으로 조회합니다.
@@ -369,6 +382,7 @@ export function ApiGetMyLikedFeedVideosEndpoint() {
             `,
             responseType: MyLikedVideosResponseDto,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.myLikedVideosListed,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.myLikedVideosListed,
         }),
         ApiPageQuery(),
         ApiLimitQuery(20),
@@ -377,7 +391,7 @@ export function ApiGetMyLikedFeedVideosEndpoint() {
 
 export function ApiCreateFeedVideoCommentEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '댓글 작성',
             description: `
                 동영상에 댓글 또는 대댓글을 작성합니다.
@@ -388,6 +402,7 @@ export function ApiCreateFeedVideoCommentEndpoint() {
             `,
             responseType: CommentCreateResponseDto,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentCreated,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentCreated,
             errorResponses: [FEED_COMMENT_NOT_FOUND_RESPONSE],
         }),
         ApiFeedVideoIdParam(),
@@ -397,7 +412,7 @@ export function ApiCreateFeedVideoCommentEndpoint() {
 
 export function ApiGetFeedVideoCommentsEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '댓글 목록 조회',
             description: `
                 동영상의 최상위 댓글 목록을 조회합니다.
@@ -411,6 +426,7 @@ export function ApiGetFeedVideoCommentsEndpoint() {
             isPublic: true,
             supportsOptionalAuth: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentsListed,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentsListed,
         }),
         ApiFeedVideoIdParam(),
         ApiPageQuery(),
@@ -420,7 +436,7 @@ export function ApiGetFeedVideoCommentsEndpoint() {
 
 export function ApiGetFeedVideoRepliesEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '대댓글 조회',
             description: `
                 특정 댓글의 대댓글 목록을 조회합니다.
@@ -434,6 +450,7 @@ export function ApiGetFeedVideoRepliesEndpoint() {
             isPublic: true,
             supportsOptionalAuth: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.repliesListed,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.repliesListed,
         }),
         ApiFeedCommentIdParam(),
         ApiPageQuery(),
@@ -443,7 +460,7 @@ export function ApiGetFeedVideoRepliesEndpoint() {
 
 export function ApiUpdateFeedVideoCommentEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '댓글 수정',
             description: `
                 내가 작성한 댓글을 수정합니다.
@@ -454,6 +471,7 @@ export function ApiUpdateFeedVideoCommentEndpoint() {
             `,
             responseType: CommentUpdateResponseDto,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentUpdated,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentUpdated,
             errorResponses: [FEED_COMMENT_NOT_FOUND_RESPONSE],
         }),
         ApiFeedCommentIdParam(),
@@ -463,7 +481,7 @@ export function ApiUpdateFeedVideoCommentEndpoint() {
 
 export function ApiDeleteFeedVideoCommentEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '댓글 삭제',
             description: `
                 내가 작성한 댓글을 삭제합니다.
@@ -474,6 +492,7 @@ export function ApiDeleteFeedVideoCommentEndpoint() {
             `,
             responseType: VideoActionSuccessResponseDto,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentDeleted,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentDeleted,
             errorResponses: [FEED_COMMENT_NOT_FOUND_RESPONSE],
         }),
         ApiFeedCommentIdParam(),
@@ -482,7 +501,7 @@ export function ApiDeleteFeedVideoCommentEndpoint() {
 
 export function ApiSearchFeedVideosByTagEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '해시태그 검색',
             description: `
                 해시태그로 동영상을 검색합니다.
@@ -494,6 +513,7 @@ export function ApiSearchFeedVideosByTagEndpoint() {
             responseType: TagSearchResponseDto,
             isPublic: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videosSearchedByTag,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.videosSearchedByTag,
             errorResponses: [FEED_TAG_REQUIRED_RESPONSE],
         }),
         ApiQuery({
@@ -510,7 +530,7 @@ export function ApiSearchFeedVideosByTagEndpoint() {
 
 export function ApiGetPopularFeedTagsEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '인기 해시태그 조회',
             description: `
                 가장 많이 사용된 해시태그 목록을 조회합니다.
@@ -522,6 +542,7 @@ export function ApiGetPopularFeedTagsEndpoint() {
             responseType: [PopularTagItemDto],
             isPublic: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.popularTagsListed,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.popularTagsListed,
         }),
         ApiLimitQuery(20),
     );
@@ -529,7 +550,7 @@ export function ApiGetPopularFeedTagsEndpoint() {
 
 export function ApiSuggestFeedTagsEndpoint() {
     return applyDecorators(
-        ApiRawEndpoint({
+        ApiEndpoint({
             summary: '태그 자동완성',
             description: `
                 검색어에 맞는 태그를 자동완성으로 추천합니다.
@@ -541,6 +562,7 @@ export function ApiSuggestFeedTagsEndpoint() {
             responseType: [TagSuggestionItemDto],
             isPublic: true,
             successDescription: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.tagSuggestionsListed,
+            successMessageExample: FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.tagSuggestionsListed,
         }),
         ApiQuery({
             name: 'q',

@@ -6,6 +6,7 @@ import request from 'supertest';
 
 import { StorageService } from '../../../../../common/storage/storage.service';
 import { closeTestingApp, createTestingApp, getAdminToken } from '../../../../../common/testing/test-utils';
+import { ContestFinalizationScheduler } from '../../infrastructure/contest-finalization.scheduler';
 
 // ─── 약관 시드 (v2 회원가입 필수 전제) ──────────────────────────────────────
 
@@ -55,7 +56,7 @@ async function registerAdopterV2(app: INestApplication): Promise<{ token: string
     const providerId = Math.random().toString().slice(2, 12);
 
     const res = await request(app.getHttpServer())
-        .post('/api/v2/auth/register-adopter')
+        .post('/api/v2/auth/register/adopter')
         .send({
             tempId: `temp_kakao_${providerId}_${timestamp}`,
             email: `adopter_${timestamp}_${providerId}@test.com`,
@@ -195,8 +196,13 @@ describe('콘테스트 E2E 테스트', () => {
             expect(res.body.data).toBeNull();
         });
 
-        it('GET /entries → 400 (진행 중 콘테스트 없음)', async () => {
-            await request(app.getHttpServer()).get('/api/v2/contest/entries').expect(400);
+        it('GET /entries → 200 + 빈 목록 (진행 중 콘테스트 없음)', async () => {
+            // 같은 상태(콘테스트 없음)를 /current 는 200+null 로 주는데 /entries 만 400 이면
+            // 클라이언트가 정상 빈 상태와 오류를 구분하지 못한다 — 빈 목록으로 통일했다(6f66decb)
+            const res = await request(app.getHttpServer()).get('/api/v2/contest/entries').expect(200);
+
+            expect(res.body.data.items).toEqual([]);
+            expect(res.body.data.pagination.totalItems).toBe(0);
         });
 
         it('GET /yesterday-top → data: null', async () => {
@@ -424,6 +430,95 @@ describe('콘테스트 E2E 테스트', () => {
                     expect(typeof res.body.data.ranking[0].voteRate).toBe('number');
                 });
 
+                // ─── 투표 취소 (user2) ─────────────────────────────────────────
+                // 종료 시점 상태를 취소 전과 동일(user2 가 entryId 에 1표)하게 되돌려
+                // 이후 관리자 API 테스트에 영향을 주지 않는다.
+
+                describe('투표 취소 (user2)', () => {
+                    it('DELETE /vote/:entryId 인증 없음 → 401', async () => {
+                        await request(app.getHttpServer()).delete(`/api/v2/contest/vote/${entryId}`).expect(401);
+                    });
+
+                    it('DELETE /vote/:entryId 투표 안 한 유저(user1) → 400', async () => {
+                        const res = await request(app.getHttpServer())
+                            .delete(`/api/v2/contest/vote/${entryId}`)
+                            .set('Authorization', `Bearer ${user1Token}`)
+                            .expect(400);
+
+                        expect(res.body.error).toContain('투표한 내역이 없습니다');
+                    });
+
+                    it('DELETE /vote/:entryId 존재하지 않는 항목 → 400', async () => {
+                        await request(app.getHttpServer())
+                            .delete(`/api/v2/contest/vote/${new ObjectId().toString()}`)
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(400);
+                    });
+
+                    it('DELETE /vote/:entryId 내가 투표하지 않은 다른 항목 → 400', async () => {
+                        const conn = app.get<Connection>(getConnectionToken());
+                        const { entryId: otherEntryId } = await seedContestEntry(app, contestId, 'other-user-id');
+
+                        try {
+                            const res = await request(app.getHttpServer())
+                                .delete(`/api/v2/contest/vote/${otherEntryId}`)
+                                .set('Authorization', `Bearer ${user2Token}`)
+                                .expect(400);
+
+                            expect(res.body.error).toContain('해당 항목에 투표한 내역이 없습니다');
+                        } finally {
+                            // 단정 실패 여부와 무관하게 임시 항목을 제거해 이후 entries 카운트 테스트를 보호한다
+                            await conn.collection('contest_entries').deleteOne({ _id: new ObjectId(otherEntryId) });
+                        }
+                    });
+
+                    it('DELETE /vote/:entryId 성공 → newVoteCount: 0', async () => {
+                        const res = await request(app.getHttpServer())
+                            .delete(`/api/v2/contest/vote/${entryId}`)
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(200);
+
+                        expect(res.body.data.entryId).toBe(entryId);
+                        expect(res.body.data.newVoteCount).toBe(0);
+                    });
+
+                    it('중복 취소 → 400', async () => {
+                        await request(app.getHttpServer())
+                            .delete(`/api/v2/contest/vote/${entryId}`)
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(400);
+                    });
+
+                    it('취소 후 GET /entries user2 → voteCount 비공개, hasVoted: false', async () => {
+                        const res = await request(app.getHttpServer())
+                            .get('/api/v2/contest/entries')
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(200);
+
+                        const votedEntry = res.body.data.items.find((i: any) => i.id === entryId);
+                        expect(votedEntry.voteCount).toBeNull();
+                        expect(votedEntry.hasVoted).toBe(false);
+                    });
+
+                    it('취소 후 GET /random-entry user2 → alreadyVoted: false (재투표 가능)', async () => {
+                        const res = await request(app.getHttpServer())
+                            .get('/api/v2/contest/random-entry')
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(200);
+
+                        expect(res.body.data.alreadyVoted).toBe(false);
+                    });
+
+                    it('취소 후 재투표 성공 → newVoteCount: 1 (unique index 재투표 허용 확인)', async () => {
+                        const res = await request(app.getHttpServer())
+                            .post(`/api/v2/contest/vote/${entryId}`)
+                            .set('Authorization', `Bearer ${user2Token}`)
+                            .expect(200);
+
+                        expect(res.body.data.newVoteCount).toBe(1);
+                    });
+                });
+
                 // ─── 관리자 API ────────────────────────────────────────────────
 
                 describe('관리자 항목 상태 변경', () => {
@@ -525,6 +620,117 @@ describe('콘테스트 E2E 테스트', () => {
             const res = await request(app.getHttpServer()).get('/api/v2/contest/weekly-top').expect(200);
 
             expect(new Date(res.body.data.calculatedAt).toString()).not.toBe('Invalid Date');
+        });
+    });
+
+    // ── 종료된 콘테스트 — 결과 확정 후 투표/취소 차단 ───────────────────────
+    // 종료 후 투표·취소가 허용되면 명예의 전당/랭킹 확정 결과를 변조할 수 있다.
+
+    describe('종료된 콘테스트 — 투표/취소 차단', () => {
+        let endedEntryId: string;
+
+        beforeAll(async () => {
+            const { contestId: endedContestId } = await seedContest(app, {
+                title: '종료된 명예의 전당',
+                status: 'ended',
+                startDate: new Date(Date.now() - 21 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() - 14 * 24 * 60 * 60 * 1000),
+            });
+            const { entryId } = await seedContestEntry(app, endedContestId, user1Id, { rank: 1 });
+            endedEntryId = entryId;
+            // user2 가 종료 전에 투표해 둔 상태를 재현 (voteCount: 1)
+            await seedContestVote(app, endedContestId, entryId, user2Id);
+        });
+
+        it('POST /vote/:entryId 종료된 콘테스트 → 400', async () => {
+            const res = await request(app.getHttpServer())
+                .post(`/api/v2/contest/vote/${endedEntryId}`)
+                .set('Authorization', `Bearer ${user2Token}`)
+                .expect(400);
+
+            expect(res.body.error).toContain('종료된 콘테스트에는 투표할 수 없습니다');
+        });
+
+        it('DELETE /vote/:entryId 종료된 콘테스트 → 400, voteCount 불변', async () => {
+            const res = await request(app.getHttpServer())
+                .delete(`/api/v2/contest/vote/${endedEntryId}`)
+                .set('Authorization', `Bearer ${user2Token}`)
+                .expect(400);
+
+            expect(res.body.error).toContain('종료된 콘테스트의 투표는 취소할 수 없습니다');
+
+            // 확정된 집계가 실제로 변하지 않았는지 DB 로 확인
+            const conn = app.get<Connection>(getConnectionToken());
+            const doc = await conn.collection('contest_entries').findOne({ _id: new ObjectId(endedEntryId) });
+            expect(doc?.voteCount).toBe(1);
+        });
+    });
+
+    // ── 지연 종료 — status 는 active 지만 endDate 가 지난 콘테스트 ──────────
+    // 스케줄러/운영이 status 를 늦게 바꿔도 endDate 기준으로 투표·취소를 차단해야
+    // 종료 시점 전후의 경쟁으로 확정 결과가 변조되지 않는다.
+
+    describe('지연 종료 콘테스트 — endDate 기준 차단', () => {
+        let expiredContestId: string;
+        let expiredEntryId: string;
+
+        beforeAll(async () => {
+            const seeded = await seedContest(app, {
+                title: '만료됐지만 아직 active 인 콘테스트',
+                status: 'active',
+                startDate: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() - 60 * 1000),
+            });
+            expiredContestId = seeded.contestId;
+            const { entryId } = await seedContestEntry(app, expiredContestId, user1Id);
+            expiredEntryId = entryId;
+            // user2 가 마감 전에 투표해 둔 상태를 재현 (voteCount: 1)
+            await seedContestVote(app, expiredContestId, entryId, user2Id);
+        });
+
+        it('POST /vote/:entryId endDate 경과 → 400 + 콘테스트가 ended 로 확정됨(자기 치유)', async () => {
+            const res = await request(app.getHttpServer())
+                .post(`/api/v2/contest/vote/${expiredEntryId}`)
+                .set('Authorization', `Bearer ${user2Token}`)
+                .expect(400);
+
+            expect(res.body.error).toContain('종료된 콘테스트에는 투표할 수 없습니다');
+
+            // 만료된 active 콘테스트를 감지한 순간 status 가 ended 로 쓰였는지 확인.
+            // 이 "쓰기"가 있어야 이후의 모든 투표/취소 게이트가 확정 상태와 직렬화된다.
+            const conn = app.get<Connection>(getConnectionToken());
+            const contestDoc = await conn.collection('contests').findOne({ _id: new ObjectId(expiredContestId) });
+            expect(contestDoc?.status).toBe('ended');
+        });
+
+        it('DELETE /vote/:entryId endDate 경과 → 400, voteCount 불변', async () => {
+            const res = await request(app.getHttpServer())
+                .delete(`/api/v2/contest/vote/${expiredEntryId}`)
+                .set('Authorization', `Bearer ${user2Token}`)
+                .expect(400);
+
+            expect(res.body.error).toContain('종료된 콘테스트의 투표는 취소할 수 없습니다');
+
+            const conn = app.get<Connection>(getConnectionToken());
+            const doc = await conn.collection('contest_entries').findOne({ _id: new ObjectId(expiredEntryId) });
+            expect(doc?.voteCount).toBe(1);
+        });
+
+        it('스케줄러 — 요청이 전혀 없어도 만료된 active 콘테스트를 일괄 확정한다', async () => {
+            // 아무 요청도 받지 않은 만료 콘테스트를 재현
+            const { contestId: untouchedContestId } = await seedContest(app, {
+                title: '요청 없이 만료된 콘테스트',
+                status: 'active',
+                startDate: new Date(Date.now() - 9 * 24 * 60 * 60 * 1000),
+                endDate: new Date(Date.now() - 2 * 60 * 1000),
+            });
+
+            const scheduler = app.get(ContestFinalizationScheduler);
+            await scheduler.runOnce();
+
+            const conn = app.get<Connection>(getConnectionToken());
+            const doc = await conn.collection('contests').findOne({ _id: new ObjectId(untouchedContestId) });
+            expect(doc?.status).toBe('ended');
         });
     });
 });

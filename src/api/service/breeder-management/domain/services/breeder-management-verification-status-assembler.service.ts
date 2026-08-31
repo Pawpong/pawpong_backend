@@ -18,30 +18,8 @@ export class BreederManagementVerificationStatusAssemblerService {
             `[toResponse] breederId: ${String(breeder._id)}, documents count: ${verification?.documents?.length || 0}`,
         );
 
-        const documents =
-            verification?.documents
-                ?.map((doc) => {
-                    const isValidFileName =
-                        doc.fileName &&
-                        (doc.fileName.startsWith('verification/') ||
-                            doc.fileName.startsWith('documents/verification/'));
-
-                    if (!isValidFileName) {
-                        this.logger.warn(
-                            `Invalid verification fileName detected - type: ${doc.type}, fileName: ${doc.fileName}`,
-                        );
-                        return null;
-                    }
-
-                    return {
-                        type: doc.type,
-                        fileName: doc.fileName,
-                        url: fileUrlPort.generateOne(doc.fileName, 60),
-                        originalFileName: doc.originalFileName,
-                        uploadedAt: doc.uploadedAt,
-                    };
-                })
-                .filter((doc): doc is NonNullable<typeof doc> => doc !== null) || [];
+        const documents = this.toDocuments(verification?.documents || [], fileUrlPort);
+        const levelChangeRequest = verification?.levelChangeRequest;
 
         return {
             status: verification?.status || 'pending',
@@ -52,6 +30,49 @@ export class BreederManagementVerificationStatusAssemblerService {
             documents,
             rejectionReason: verification?.rejectionReason,
             submittedByEmail: verification?.submittedByEmail || false,
+            isLevelChangeRequested: verification?.isLevelChangeRequested || false,
+            levelChangeRejectionReason: verification?.levelChangeRejectionReason,
+            levelChangeReviewedAt: verification?.levelChangeReviewedAt,
+            ...(levelChangeRequest
+                ? {
+                      levelChangeRequest: {
+                          previousLevel: levelChangeRequest.previousLevel,
+                          requestedLevel: levelChangeRequest.requestedLevel,
+                          requestedAt: levelChangeRequest.requestedAt,
+                          documents: this.toDocuments(levelChangeRequest.documents || [], fileUrlPort),
+                      },
+                  }
+                : {}),
         };
+    }
+
+    private toDocuments(
+        documents: NonNullable<BreederManagementBreederRecord['verification']>['documents'],
+        fileUrlPort: BreederManagementFileUrlPort,
+    ) {
+        return (documents || [])
+            .map((doc) => {
+                const isValidFileName =
+                    doc.fileName &&
+                    (doc.fileName.startsWith('verification/') ||
+                        doc.fileName.startsWith('documents/verification/') ||
+                        doc.fileName.startsWith('breeder-documents/'));
+
+                if (!isValidFileName) {
+                    this.logger.warn(
+                        `Invalid verification fileName detected - type: ${doc.type}, fileName: ${doc.fileName}`,
+                    );
+                    return null;
+                }
+
+                return {
+                    type: doc.type,
+                    fileName: doc.fileName,
+                    url: fileUrlPort.generateOne(doc.fileName, 60),
+                    originalFileName: doc.originalFileName,
+                    uploadedAt: doc.uploadedAt,
+                };
+            })
+            .filter((doc): doc is NonNullable<typeof doc> => doc !== null);
     }
 }

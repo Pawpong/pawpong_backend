@@ -91,13 +91,23 @@ export class BreederPetPostingMapperService {
             return undefined;
         }
         const description = environment.description?.trim();
-        const photoFileName = environment.photoFileName?.trim();
-        if (!description && !photoFileName) {
+        // 배열이 우선, 없으면 레거시 단일 필드를 배열로 승격. 공백 제거 + 중복 제거 + 최대 5장.
+        const rawNames =
+            environment.photoFileNames && environment.photoFileNames.length > 0
+                ? environment.photoFileNames
+                : environment.photoFileName
+                  ? [environment.photoFileName]
+                  : [];
+        const photoFileNames = [...new Set(rawNames.map((name) => name.trim()).filter(Boolean))].slice(0, 5);
+
+        if (!description && photoFileNames.length === 0) {
             return undefined;
         }
         return {
             description: description || undefined,
-            photoFileName: photoFileName || undefined,
+            // photoFileName 은 하위 호환 소비자(기존 조회 응답)를 위해 첫 장을 함께 저장한다
+            photoFileName: photoFileNames[0],
+            photoFileNames: photoFileNames.length > 0 ? photoFileNames : undefined,
         };
     }
 

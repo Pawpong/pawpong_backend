@@ -1,4 +1,4 @@
-import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
+import { Body, Delete, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -11,7 +11,11 @@ import { NOTICE_RESPONSE_MESSAGE_EXAMPLES } from '../../../service/notice/consta
 import { NoticeCreateRequestDto } from '../../../service/notice/dto/request/notice-create-request.dto';
 import { NoticeUpdateRequestDto } from '../../../service/notice/dto/request/notice-update-request.dto';
 import { NoticeResponseDto } from '../../../service/notice/dto/response/notice-response.dto';
-import { ApiCreateNoticeAdminEndpoint, ApiDeleteNoticeAdminEndpoint, ApiUpdateNoticeAdminEndpoint } from '../swagger/index';
+import {
+    ApiCreateNoticeAdminEndpoint,
+    ApiDeleteNoticeAdminEndpoint,
+    ApiUpdateNoticeAdminEndpoint,
+} from '../swagger/index';
 
 @NoticeAdminProtectedController()
 export class NoticeAdminCommandController {
@@ -22,6 +26,7 @@ export class NoticeAdminCommandController {
     ) {}
 
     @Post()
+    @HttpCode(HttpStatus.OK)
     @ApiCreateNoticeAdminEndpoint()
     async createNotice(
         @CurrentUser('userId') adminId: string,

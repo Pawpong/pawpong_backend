@@ -27,10 +27,10 @@ export class LoggingInterceptor implements NestInterceptor {
         this.logger.log(`▶ ${method} ${url}`, 'HTTP');
         this.logger.log(`  ├─ IP: ${ip}`, 'HTTP');
 
-        // Bearer 토큰
+        // Bearer 토큰은 존재 여부만 남긴다. JWT 원문은 로그 수집기와 터미널 기록에
+        // 장기간 보관될 수 있으므로 어떤 환경에서도 출력하지 않는다.
         if (headers.authorization?.startsWith('Bearer ')) {
-            const token = headers.authorization.substring(7);
-            this.logger.log(`  ├─ Token: ${token}`, 'HTTP');
+            this.logger.log('  ├─ Token: [REDACTED]', 'HTTP');
         }
 
         // 쿠키 역할

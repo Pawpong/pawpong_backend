@@ -29,11 +29,19 @@ export class VerificationDocument {
             'adoption_contract_sample',
             'recent_pedigree_document',
             'breeder_certification',
+            'recent_association_document',
+            'tica_cfa_document',
             // camelCase 형식 (기존 데이터 호환성)
             'idCard',
+            'animalProductionLicense',
             'businessLicense',
+            'adoptionContractSample',
             'contractSample',
+            'recentAssociationDocument',
+            'recentPedigreeDocument',
             'pedigreeDocument',
+            'ticaCfaDocument',
+            'breederCertification',
             'breederCertificate',
             'breederDogCertificate',
             'breederCatCertificate',
@@ -165,6 +173,12 @@ export class BreederVerification {
         documents: VerificationDocument[];
     };
 
+    @Prop()
+    levelChangeRejectionReason?: string;
+
+    @Prop()
+    levelChangeReviewedAt?: Date;
+
     /**
      * 레벨 변경 이력
      */
@@ -267,6 +281,19 @@ export class BreederStats {
      */
     @Prop({ default: 0 })
     totalFavorites: number;
+
+    /**
+     * 이 브리더를 팔로우한 사용자 수 (user_follows 의 follow/unfollow 시 원자적으로 갱신).
+     * 즐겨찾기(totalFavorites)와는 별개 관계다.
+     */
+    @Prop({ default: 0 })
+    followerCount: number;
+
+    /**
+     * 이 브리더가 팔로우 중인 사용자 수
+     */
+    @Prop({ default: 0 })
+    followingCount: number;
 
     /**
      * 완료된 입양 건수

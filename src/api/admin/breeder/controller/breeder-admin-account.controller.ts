@@ -1,4 +1,4 @@
-import { Body, Param, Patch, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -10,7 +10,10 @@ import { BreederSuspendRequestDto } from '../dto/request/breeder-suspend-request
 import { SetTestAccountRequestDto } from '../dto/request/set-test-account-request.dto';
 import { BreederSuspendResponseDto } from '../dto/response/breeder-suspend-response.dto';
 import { SetTestAccountResponseDto } from '../dto/response/set-test-account-response.dto';
-import { BREEDER_RESPONSE_MESSAGES, buildBreederTestAccountMessage } from '../../../service/breeder/constants/breeder-response-messages';
+import {
+    BREEDER_RESPONSE_MESSAGES,
+    buildBreederTestAccountMessage,
+} from '../../../service/breeder/constants/breeder-response-messages';
 import {
     ApiSetBreederTestAccountAdminEndpoint,
     ApiSuspendBreederAdminEndpoint,
@@ -26,6 +29,7 @@ export class BreederAdminAccountController {
     ) {}
 
     @Post('suspend/:breederId')
+    @HttpCode(HttpStatus.OK)
     @ApiSuspendBreederAdminEndpoint()
     async suspendBreeder(
         @CurrentUser('userId') adminId: string,
@@ -37,6 +41,7 @@ export class BreederAdminAccountController {
     }
 
     @Post('unsuspend/:breederId')
+    @HttpCode(HttpStatus.OK)
     @ApiUnsuspendBreederAdminEndpoint()
     async unsuspendBreeder(
         @CurrentUser('userId') adminId: string,

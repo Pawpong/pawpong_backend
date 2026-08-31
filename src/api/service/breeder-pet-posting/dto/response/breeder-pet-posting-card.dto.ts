@@ -19,6 +19,9 @@ export class BreederPetPostingCardResponseDto {
     @ApiProperty({ description: '성별', enum: ['male', 'female'] })
     gender: 'male' | 'female';
 
+    @ApiProperty({ description: '출생일 (ISO 8601)', example: '2020-03-15T00:00:00.000Z' })
+    birthDate: string;
+
     @ApiProperty({ description: '나이 표현 (예: "6개월", "2살 3개월")', example: '6개월' })
     ageDescription: string;
 

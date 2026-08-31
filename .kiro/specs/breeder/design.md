@@ -24,12 +24,16 @@ infrastructure/* · repository/*  mongoose 접근 + storage url
 | POST | `/api/v2/breeder/explore` | 브리더 탐색(필터 바디) |
 | GET | `/api/v2/breeder/popular` | 인기 브리더 |
 | GET | `/api/v2/breeder/search` | 브리더 검색 |
-| GET | `/api/v2/breeder/:id` | 브리더 상세/프로필 |
-| GET | `/api/v2/breeder/:id/pets` | 보유 분양 펫 목록 |
-| GET | `/api/v2/breeder/:id/pet/:petId` | 보유 펫 단건 |
-| GET | `/api/v2/breeder/:id/parent-pets` | 부모펫 목록 |
-| GET | `/api/v2/breeder/:id/reviews` | 후기 목록 |
-| GET | `/api/v2/breeder/:id/application-form` | 공개 상담 폼 |
+| GET | `/api/v2/breeder/{id}` | 브리더 상세/프로필 |
+| GET | `/api/v2/breeder/{id}/application-form` | 공개 상담 폼 |
+| GET | `/api/v2/breeder/{id}/parent-pets` | 부모펫 목록 |
+| GET | `/api/v2/breeder/{id}/pet/{petId}` | 보유 펫 단건 |
+| GET | `/api/v2/breeder/{id}/pets` | 보유 분양 펫 목록 |
+| GET | `/api/v2/breeder/{id}/reviews` | 후기 목록 |
+| POST | `/api/breeder-admin/remind` | 리마인드 알림 발송 |
+| POST | `/api/breeder-admin/suspend/{breederId}` | 브리더 제재 처리 (영구정지) |
+| PATCH | `/api/breeder-admin/test-account/{breederId}` | 테스트 계정 설정 |
+| POST | `/api/breeder-admin/unsuspend/{breederId}` | 브리더 정지 해제 |
 
 ## Data Models
 

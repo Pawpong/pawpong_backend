@@ -1,4 +1,4 @@
-import { Param, Post } from '@nestjs/common';
+import { HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
@@ -15,6 +15,7 @@ export class CommunityPostViewCountController {
     constructor(private readonly incrementViewCountUseCase: IncrementViewCountUseCase) {}
 
     @Post('posts/:postId/view')
+    @HttpCode(HttpStatus.OK)
     @ApiIncrementViewCountEndpoint()
     async view(@Param('postId') postId: string, @CurrentUser('userId') userId?: string): Promise<ApiResponseDto<null>> {
         await this.incrementViewCountUseCase.execute(postId, userId);

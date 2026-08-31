@@ -23,3 +23,8 @@ export type BreederManagementVerificationDocumentsSubmitCommand = {
     documents: BreederManagementVerificationDocumentInfoCommand[];
     submittedByEmail?: boolean;
 };
+
+export type BreederManagementLevelChangeRequestCommand = {
+    requestedLevel: 'elite';
+    documents: BreederManagementVerificationDocumentInfoCommand[];
+};

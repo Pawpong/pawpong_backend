@@ -1,4 +1,4 @@
-import { Body, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { Body, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { MongoObjectIdPipe } from '../../../../common/pipe/mongo-object-id.pipe';
@@ -11,7 +11,10 @@ import { AiImageAdminController } from '../decorator/ai-image-admin-controller.d
 import { AiImageFilterCreateRequestDto } from '../dto/request/ai-image-filter-create-request.dto';
 import { AiImageFilterUpdateRequestDto } from '../dto/request/ai-image-filter-update-request.dto';
 import { AiImageFilterPreviewRequestDto } from '../dto/request/ai-image-filter-preview-request.dto';
-import type { AiImageAdminFilterResponseDto, AiImageFilterDeleteResponseDto } from '../dto/response/ai-image-admin-filter-response.dto';
+import type {
+    AiImageAdminFilterResponseDto,
+    AiImageFilterDeleteResponseDto,
+} from '../dto/response/ai-image-admin-filter-response.dto';
 import type { AiImageFilterPreviewResponseDto } from '../dto/response/ai-image-filter-preview-response.dto';
 import { GenerateAiImageFilterPreviewUseCase } from '../application/use-cases/generate-ai-image-filter-preview.use-case';
 import {
@@ -41,6 +44,7 @@ export class AiImageAdminFiltersController {
     }
 
     @Post('filter')
+    @HttpCode(HttpStatus.OK)
     @ApiCreateAiImageFilterEndpoint()
     async createFilter(
         @Body() body: AiImageFilterCreateRequestDto,
@@ -69,6 +73,7 @@ export class AiImageAdminFiltersController {
     }
 
     @Post('filter/preview')
+    @HttpCode(HttpStatus.OK)
     @ApiGenerateAiImageFilterPreviewEndpoint()
     async previewFilter(
         @Body() body: AiImageFilterPreviewRequestDto,

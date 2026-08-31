@@ -1,4 +1,4 @@
-import { Body, Delete, Patch, Param, Post } from '@nestjs/common';
+import { Body, Delete, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -25,6 +25,7 @@ export class AppVersionAdminCommandController {
     ) {}
 
     @Post()
+    @HttpCode(HttpStatus.OK)
     @ApiCreateAppVersionAdminEndpoint()
     async createAppVersion(
         @CurrentUser('userId') userId: string,

@@ -3,7 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { Faq, FaqDocument } from '../../../../schema/faq.schema';
-import type { HomeFaqCommand, HomeFaqUpdateCommand } from '../../../admin/home/application/types/home-admin-command.type';
+import type {
+    HomeFaqCommand,
+    HomeFaqUpdateCommand,
+} from '../../../admin/home/application/types/home-admin-command.type';
 
 @Injectable()
 export class FaqRepository {

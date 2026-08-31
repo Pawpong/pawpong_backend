@@ -27,7 +27,11 @@ export class SendMessageUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(senderId: string, senderRole: SenderRole, command: SendMessageCommand): Promise<ChatMessageSnapshot> {
+    async execute(
+        senderId: string,
+        senderRole: SenderRole,
+        command: SendMessageCommand,
+    ): Promise<ChatMessageSnapshot & { brokerPublished: boolean }> {
         this.logger.logStart('sendMessage', '채팅 메시지 전송 시작', { roomId: command.roomId, senderId });
 
         try {
@@ -47,10 +51,12 @@ export class SendMessageUseCase {
             });
 
             await this.chatRoomManager.updateRoomLastMessage(command.roomId, command.content);
-            await this.chatMessageBroker.publishMessage(this.chatMessageMapperService.toBroadcastPayload(message));
+            const brokerPublished = await this.chatMessageBroker.publishMessage(
+                this.chatMessageMapperService.toBroadcastPayload(message),
+            );
 
             this.logger.logSuccess('sendMessage', '채팅 메시지 전송 완료', { messageId: message.id });
-            return message;
+            return { ...message, brokerPublished };
         } catch (error) {
             this.logger.logError('sendMessage', '채팅 메시지 전송', error);
             throw error;

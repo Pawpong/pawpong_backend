@@ -3,14 +3,14 @@ import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { getConnectionToken } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { MongoMemoryServer } from 'mongodb-memory-server';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
 
 import { AppModule } from '../../app.module';
 import { AllExceptionsFilter } from '../filter/http-exception.filter';
 import { HttpStatusInterceptor } from '../interceptor/http-status.interceptor';
 
-/** 테스트용 인메모리 MongoDB 인스턴스 */
-let mongod: MongoMemoryServer;
+/** 테스트용 인메모리 MongoDB 인스턴스 (단일 노드 ReplSet — 멀티 도큐먼트 트랜잭션 지원) */
+let mongod: MongoMemoryReplSet;
 
 /** createTestingApp에 넘길 Provider 오버라이드 항목 */
 export interface ProviderOverride {
@@ -21,6 +21,7 @@ export interface ProviderOverride {
 function applyTestingEnvironment(): void {
     process.env.PAWPONG_TEST_MODE = 'true';
     process.env.PAWPONG_SUPPRESS_EXTERNAL_WARNINGS = 'true';
+    process.env.KAFKA_ENABLED = 'false';
 
     // 테스트 환경에서는 외부 알림 서비스 비활성화 (실제 채널로 알림 발송 방지)
     process.env.DISCORD_SIGN_WEBHOOK_URL = '';
@@ -47,8 +48,10 @@ export async function createTestingApp(overrides: ProviderOverride[] = []): Prom
         mongod = undefined as any;
     }
 
-    // 인메모리 MongoDB 서버 시작
-    mongod = await MongoMemoryServer.create();
+    // 인메모리 MongoDB 서버 시작.
+    // standalone 이 아닌 단일 노드 ReplSet 을 쓰는 이유: 콘테스트 투표/취소처럼
+    // 멀티 도큐먼트 트랜잭션을 쓰는 경로가 실서버(Atlas ReplSet)와 동일하게 동작해야 한다.
+    mongod = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
     const mongoUri = mongod.getUri();
 
     // MONGODB_URI 환경변수를 인메모리 서버로 오버라이드
@@ -279,12 +282,75 @@ export async function getAdminToken(app: INestApplication, password: string = 'a
 }
 
 /**
+ * 입양자 가입에 필요한 활성 약관을 보장한다.
+ *
+ * 가입은 활성 약관이 하나도 없으면 400 으로 거부되고(AuthTermsAgreementValidatorService),
+ * 필수 약관을 모두 동의해야 통과한다. 인메모리 DB 는 비어 있으므로 여기서 심는다.
+ * 이미 있으면 그대로 두고 현재 활성 목록을 돌려준다.
+ */
+export async function ensureActiveTerms(
+    app: INestApplication,
+): Promise<Array<{ code: string; version: string; isRequired: boolean }>> {
+    const connection = app.get<Connection>(getConnectionToken());
+    const collection = connection.collection('terms');
+
+    const existing = await collection.find({ isActive: true }).toArray();
+    if (existing.length > 0) {
+        return existing.map((t) => ({
+            code: String(t.code),
+            version: String(t.version),
+            isRequired: Boolean(t.isRequired),
+        }));
+    }
+
+    const seeds = [
+        { code: 'service', isRequired: true },
+        { code: 'privacy', isRequired: true },
+        { code: 'age_14plus', isRequired: true },
+        { code: 'marketing', isRequired: false },
+        { code: 'counsel_privacy', isRequired: false },
+    ];
+    const now = new Date();
+    await collection.insertMany(
+        seeds.map((s) => ({
+            code: s.code,
+            version: '1.0.0',
+            title: `${s.code} 약관`,
+            body: '테스트용 약관 본문',
+            isRequired: s.isRequired,
+            isActive: true,
+            activatedAt: now,
+            createdAt: now,
+            updatedAt: now,
+        })),
+    );
+
+    return seeds.map((s) => ({ code: s.code, version: '1.0.0', isRequired: s.isRequired }));
+}
+
+/**
+ * 활성 약관을 보장하고, 가입 payload 에 그대로 넣을 동의 배열을 만든다.
+ *
+ * 각 e2e 가 직접 가입을 호출할 때 쓴다.
+ */
+export async function agreeAllActiveTerms(app: INestApplication): Promise<Array<{ code: string; version: string }>> {
+    const activeTerms = await ensureActiveTerms(app);
+    // 필수 약관만 동의한다. 선택 약관(marketing 등)까지 동의하면
+    // marketingAgreed 같은 파생 값이 바뀌어 응답 계약 테스트가 흔들린다.
+    return activeTerms.filter((t) => t.isRequired).map((t) => ({ code: t.code, version: t.version }));
+}
+
+/**
  * 입양자 등록 API를 통해 토큰 반환
+ *
+ * 가입 계약이 약관 동의를 요구하므로 활성 약관을 먼저 보장하고 전부 동의한 payload 를 보낸다.
  */
 export async function getAdopterToken(app: INestApplication): Promise<{ token: string; adopterId: string } | null> {
     const request = require('supertest');
     const timestamp = Date.now();
     const providerId = Math.random().toString().substr(2, 10);
+
+    const activeTerms = await ensureActiveTerms(app);
 
     const response = await request(app.getHttpServer())
         .post('/api/v2/auth/register/adopter')
@@ -292,8 +358,10 @@ export async function getAdopterToken(app: INestApplication): Promise<{ token: s
             tempId: `temp_kakao_${providerId}_${timestamp}`,
             email: `adopter_${timestamp}_${providerId}@test.com`,
             nickname: `테스트입양자${timestamp}`,
+            realName: '테스트입양자',
             phone: `010-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
             profileImage: 'https://example.com/profile.jpg',
+            termsAgreements: activeTerms.filter((t) => t.isRequired).map((t) => ({ code: t.code, version: t.version })),
         });
 
     if (response.status === 200 && response.body.data?.accessToken) {

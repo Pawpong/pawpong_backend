@@ -1,4 +1,4 @@
-import { Body, Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -14,6 +14,7 @@ export class UploadMultipleFilesController {
     constructor(private readonly uploadMultipleFilesUseCase: UploadMultipleFilesUseCase) {}
 
     @Post('multiple')
+    @HttpCode(HttpStatus.OK)
     @ApiUploadMultipleFilesEndpoint()
     @UseInterceptors(FilesInterceptor('files', 10))
     async uploadMultiple(

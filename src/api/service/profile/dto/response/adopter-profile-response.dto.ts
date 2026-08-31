@@ -28,7 +28,7 @@ export class AdopterPublicProfileResponseDto {
     followingCount: number;
 
     @ApiProperty({
-        description: '현재 로그인 사용자가 이 입양자를 팔로우 중인지 (입양자→입양자 follow 시스템 미구현 — 항상 false)',
+        description: '현재 로그인 사용자가 이 입양자를 팔로우 중인지 (비로그인 또는 본인 조회는 false)',
         example: false,
     })
     isFollowing: boolean;

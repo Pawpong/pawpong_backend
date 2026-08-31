@@ -21,14 +21,14 @@ infrastructure/* · repository/*  mongoose + mail(답변 알림)
 
 | Method | Path | 용도 |
 |---|---|---|
-| POST | `/api/v2/inquiry` | 문의 생성 |
 | GET | `/api/v2/inquiry` | 문의 목록 |
-| GET | `/api/v2/inquiry/my` | 내 문의 |
+| POST | `/api/v2/inquiry` | 문의 생성 |
 | GET | `/api/v2/inquiry/breeder` | 브리더 문의 |
-| GET | `/api/v2/inquiry/:inquiryId` | 문의 상세 |
-| PATCH | `/api/v2/inquiry/:inquiryId` | 문의 수정 |
-| DELETE | `/api/v2/inquiry/:inquiryId` | 문의 삭제 |
-| POST | `/api/v2/inquiry/:inquiryId/answer` | 답변 등록 |
+| GET | `/api/v2/inquiry/my` | 내 문의 |
+| GET | `/api/v2/inquiry/{inquiryId}` | 문의 상세 |
+| PATCH | `/api/v2/inquiry/{inquiryId}` | 문의 수정 |
+| DELETE | `/api/v2/inquiry/{inquiryId}` | 문의 삭제 |
+| POST | `/api/v2/inquiry/{inquiryId}/answer` | 답변 등록 |
 
 ## Data Models
 

@@ -21,9 +21,9 @@ infrastructure/* · repository/*  mongoose 집계
 
 | Method | Path | 용도 |
 |---|---|---|
-| GET | `/api/v2/platform-admin/mvp-stats` | MVP 핵심 지표 |
-| GET | `/api/v2/platform-admin/stats` | 전체 통계 |
-| GET | `/api/v2/platform-admin/system-health` | 시스템 헬스/서버 현황 |
+| GET | `/api/platform-admin/mvp-stats` | MVP 통계 조회 |
+| GET | `/api/platform-admin/stats` | 플랫폼 통계 조회 |
+| GET | `/api/platform-admin/system-health` | — |
 
 ## Data Models
 

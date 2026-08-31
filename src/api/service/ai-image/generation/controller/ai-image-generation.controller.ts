@@ -1,4 +1,4 @@
-import { Body, Get, Param, Post } from '@nestjs/common';
+import { Body, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
@@ -26,6 +26,7 @@ export class AiImageGenerationController {
     ) {}
 
     @Post('generation')
+    @HttpCode(HttpStatus.OK)
     @ApiRequestAiImageGenerationEndpoint()
     async requestGeneration(
         @CurrentUser('userId') userId: string,
@@ -66,7 +67,8 @@ export class AiImageGenerationController {
     @Get('generation/:jobId')
     @ApiGetAiImageGenerationEndpoint()
     async getGeneration(
-        @Param('jobId', new MongoObjectIdPipe('AI 생성 요청', '올바르지 않은 AI 생성 요청 ID 형식입니다.')) jobId: string,
+        @Param('jobId', new MongoObjectIdPipe('AI 생성 요청', '올바르지 않은 AI 생성 요청 ID 형식입니다.'))
+        jobId: string,
         @CurrentUser('userId') userId: string,
     ): Promise<ApiResponseDto<AiImageGenerationResponseDto>> {
         const result = await this.getAiImageGenerationUseCase.execute(jobId, userId);

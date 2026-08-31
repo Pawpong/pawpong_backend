@@ -48,8 +48,11 @@ export class AdoptionPetBreedingEnvironmentDto {
     @ApiProperty({ description: '사육 환경 설명', required: false })
     description?: string;
 
-    @ApiProperty({ description: '사육 환경 사진 signed URL', required: false })
+    @ApiProperty({ description: '사육 환경 사진 signed URL (첫 장 — 하위 호환)', required: false })
     photoUrl?: string;
+
+    @ApiProperty({ description: '사육 환경 사진 signed URL 배열 (최대 5장)', type: [String] })
+    photoUrls: string[];
 }
 
 export class AdoptionPetBreederBlockDto {
@@ -83,9 +86,6 @@ export class AdoptionPetDetailResponseDto extends AdoptionPetResponseDto {
 
     @ApiProperty({ description: '태그', type: [String], example: ['#개코 도마뱀', '#만다린'] })
     tags: string[];
-
-    @ApiProperty({ description: '출생일 ISO', example: '2025-06-20T00:00:00.000Z' })
-    birthDate: string;
 
     @ApiProperty({
         description: '예방 접종 상태',

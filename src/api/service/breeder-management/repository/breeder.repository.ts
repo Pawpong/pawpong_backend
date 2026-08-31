@@ -9,7 +9,10 @@ import type {
     BreederManagementApplicationFormRecord,
     BreederManagementBreederStatsRecord,
 } from '../application/ports/breeder-management-profile.port';
-import type { BreederManagementVerificationRecord } from '../application/ports/breeder-management-settings.port';
+import type {
+    BreederManagementLevelChangeRequestRecord,
+    BreederManagementVerificationRecord,
+} from '../application/ports/breeder-management-settings.port';
 import type {
     BreederManagementBreederDocumentRecord,
     BreederManagementBreederFilterRecord,
@@ -139,6 +142,23 @@ export class BreederRepository {
                 $set: {
                     verification: verificationData,
                     updatedAt: new Date(),
+                },
+            })
+            .exec();
+    }
+
+    async requestLevelChange(breederId: string, request: BreederManagementLevelChangeRequestRecord): Promise<void> {
+        await this.breederModel
+            .findByIdAndUpdate(breederId, {
+                $set: {
+                    'verification.isLevelChangeRequested': true,
+                    'verification.levelChangeRequest': request,
+                    updatedAt: new Date(),
+                },
+                $unset: {
+                    'verification.rejectionReason': '',
+                    'verification.levelChangeRejectionReason': '',
+                    'verification.levelChangeReviewedAt': '',
                 },
             })
             .exec();

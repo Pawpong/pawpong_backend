@@ -1,4 +1,4 @@
-import { Body, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -15,6 +15,7 @@ export class AdopterApplicationCommandController {
     constructor(private readonly createAdopterApplicationUseCase: CreateAdopterApplicationUseCase) {}
 
     @Post('application')
+    @HttpCode(HttpStatus.OK)
     @ApiCreateAdopterApplicationEndpoint()
     async createApplication(
         @CurrentUser('userId') userId: string,

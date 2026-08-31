@@ -15,12 +15,22 @@ export class BreederManagementVerificationNotificationPayloadFactoryService {
         breeder: BreederManagementBreederRecord;
         level: 'new' | 'elite';
         isResubmission: boolean;
+        submissionKind?: 'verification' | 'level_change';
         submittedAt: Date;
         finalDocuments: BreederManagementStoredVerificationDocumentRecord[];
         draftDocuments: BreederManagementVerificationDraftDocument[];
         fileUrlPort: BreederManagementFileUrlPort;
     }): BreederManagementVerificationSubmissionNotification {
-        const { breeder, level, isResubmission, submittedAt, finalDocuments, draftDocuments, fileUrlPort } = params;
+        const {
+            breeder,
+            level,
+            isResubmission,
+            submissionKind,
+            submittedAt,
+            finalDocuments,
+            draftDocuments,
+            fileUrlPort,
+        } = params;
 
         return {
             breederId: String(breeder._id),
@@ -29,6 +39,7 @@ export class BreederManagementVerificationNotificationPayloadFactoryService {
             phone: breeder.phoneNumber,
             level,
             isResubmission,
+            submissionKind: submissionKind || 'verification',
             submittedAt,
             documents: finalDocuments.map((document) =>
                 this.toNotificationDocument(document, draftDocuments, fileUrlPort),

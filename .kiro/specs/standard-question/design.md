@@ -22,11 +22,11 @@ infrastructure/* · repository/*  mongoose
 
 | Method | Path | 용도 |
 |---|---|---|
-| GET | `/api/v2/standard-question-admin` | 표준 질문 목록 |
-| PATCH | `/api/v2/standard-question-admin/:id` | 질문 수정 |
-| PATCH | `/api/v2/standard-question-admin/:id/status` | 질문 활성/비활성 |
-| POST | `/api/v2/standard-question-admin/reorder` | 순서 변경 |
-| POST | `/api/v2/standard-question-admin/reseed` | 시드 재적용 |
+| GET | `/api/standard-question-admin` | 표준 질문 목록 조회 (관리자용) |
+| POST | `/api/standard-question-admin/reorder` | 표준 질문 순서 변경 |
+| POST | `/api/standard-question-admin/reseed` | 표준 질문 재시딩 |
+| PATCH | `/api/standard-question-admin/{id}` | 표준 질문 수정 |
+| PATCH | `/api/standard-question-admin/{id}/status` | 표준 질문 활성화/비활성화 |
 
 ## Data Models
 

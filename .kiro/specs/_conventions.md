@@ -1,0 +1,270 @@
+# Conventions — 전 도메인 공통 계약
+
+각 도메인 `design.md` 가 반복해서 적지 않도록 여기에 한 번만 정의한다.
+
+**실측 기준: 2026-08-03.**
+출처는 배포된 실서버 스펙(`https://dev-api.pawpong.kr/docs-json`)과 리포지토리 소스이며,
+소스 측정 범위는 **`src/**/*.ts` 전체**(`.spec.ts` 제외)다. `src/api` 만 보면 `src/common` 의
+사례가 빠져 수치가 어긋난다 — 실제로 이 문서 초판이 그 실수를 했다.
+
+아래 수치는 전부 스크립트로 대조했다. 코드가 바뀌면 수치도 다시 재야 한다.
+
+| 주장 | 실측값 |
+|---|---|
+| `InjectModel` 이 `repository/` 에 있는 비율 | 72개 중 60개 |
+| Port 바인딩 `useExisting` / `useClass` | 193 / 1 |
+| 봉투를 쓰지 않는 컨트롤러 | 9개 |
+| 소스에서 `throw new NotFoundException` | 0건 |
+| 관리자 라우트에 `v2` 접두사 | 0건 |
+| `@Post` 중 `@HttpCode` 200 누락 | 0건 |
+| 도메인 스펙 디렉토리 | 33개 (실서버 도메인 수와 일치) |
+
+---
+
+## 1. 디렉토리 구조 (2026-07-26 이후)
+
+`src/api/` 최상위가 **service / admin 미러 구조**로 분리돼 있다.
+도메인별 폴더 안에 `admin/` 을 중첩하던 이전 방식은 더 이상 쓰지 않는다.
+
+```
+src/api/
+├── service/<domain>/     사용자·공개 API
+└── admin/<domain>/       관리자 API
+```
+
+- 관리자 기능이 없는 도메인은 `service/` 에만 존재한다.
+  (`adoption-application`, `adoption`, `breeder-pet-posting`, `chat`, `feed`,
+  `filter-options`, `health`, `inquiry`, `profile`, `terms`)
+- 관리자 전용 도메인은 `admin/` 에만 존재한다. (`user`, `platform`)
+- 두 트리는 도메인 이름을 그대로 미러링한다.
+
+**두 트리 밖에 있는 것** (실측 2026-08-03):
+
+| 도메인 | 실제 위치 | 이유 |
+|---|---|---|
+| `alimtalk` | `src/common/alimtalk/` (+ `admin/`) | 발송 기능을 여러 도메인이 공유하는 인프라 |
+| `notification-email-preview` | `src/api/service/notification/` | notification 도메인의 관리자 슬라이스 |
+| `breeder-verification` | `src/api/admin/breeder/verification/` | breeder 관리자 트리의 슬라이스 |
+| `breeder-report` | `src/api/admin/breeder/report/` | 〃 |
+
+라우트 prefix 는 독립돼 있으나(`alimtalk-admin` 등) 물리 위치는 위와 같다.
+`standard-question` 은 `service/` 와 `admin/` 양쪽에 있다.
+
+각 도메인 내부 계층은 동일하다.
+
+```
+<domain>/
+├── controller/            얇은 컨트롤러 (라우팅·바인딩·유스케이스 호출만)
+├── application/
+│   ├── use-cases/         요청 하나를 처리하는 진입점
+│   ├── ports/             외부 의존성 경계 (Symbol 토큰)
+│   └── types/             command·result·snapshot 내부 타입
+├── domain/services/       정책·검증·응답 조립
+├── repository/            Mongoose 접근 캡슐화 (InjectModel 은 여기에만)
+├── infrastructure/        port 구현 adapter (mongoose·redis·storage·외부 API)
+├── dto/{request,response} HTTP 경계 전용 DTO
+├── decorator/             컨트롤러 공통 Guard·prefix·Swagger tag
+├── swagger/               긴 API 명세 분리
+└── test/                  unit · e2e
+```
+
+규모가 큰 도메인은 기능축 **버티컬 슬라이스**로 다시 나눈다
+(예: `breeder-management/{account,pets,profile,reviews,shared}`,
+`ai-image/{shared,filters,generation,admin}`).
+슬라이스마다 `<slice>.module.ts` + `<slice>.module-definition.ts` 가 DI 를 소유하고,
+공통 Port·Repository 는 `shared` 슬라이스가 소유해 재노출한다.
+
+---
+
+## 2. 라우트 규칙
+
+| 종류 | prefix | 예 |
+|---|---|---|
+| 사용자·공개 | `/api/v2/<domain>` | `/api/v2/community/posts` |
+| 관리자 | `/api/<domain>-admin` (**v2 없음**) | `/api/community-report-admin` |
+
+- 전역 prefix 는 `api`.
+- 관리자 라우트에 `v2` 를 붙이지 않는 것은 기존 계약이며, 바꾸지 않는다.
+- 경로 파라미터가 ObjectId 면 `MongoObjectIdPipe` 로 검증한다.
+
+---
+
+## 3. 응답 봉투 (필수)
+
+모든 JSON 응답은 `ApiResponseDto` 봉투를 쓴다. 컨트롤러가 `ApiResponseDto.success(data, message)` 로 감싼다.
+
+```jsonc
+{
+  "success": true,
+  "code": 200,
+  "data": { },            // 실제 페이로드
+  "message": "조회 성공",
+  "timestamp": "2026-08-03T00:00:00.000Z"
+}
+```
+
+페이지네이션은 `data` 안에 `{ items, pagination }` 으로 넣는다.
+
+```jsonc
+"data": {
+  "items": [],
+  "pagination": {
+    "currentPage": 1, "pageSize": 20, "totalItems": 0,
+    "totalPages": 0, "hasNextPage": false, "hasPrevPage": false
+  }
+}
+```
+
+### 봉투를 쓰지 않는 응답 — 실측 현황 (2026-08-03)
+
+두 종류가 있다. **의도된 예외**와 **아직 정리 안 된 이탈**을 구분해야 한다.
+
+#### 의도된 예외 (봉투를 씌우면 안 됨)
+
+| 엔드포인트 | 반환 | 이유 |
+|---|---|---|
+| `GET /api/v2/feed/videos/stream/{videoId}/{filename}` | HLS manifest·segment | 바이너리. 감싸면 재생이 깨진다 |
+| `GET /api/notification-email-preview-admin/render` | `text/html` 문자열 | 브라우저로 직접 여는 미리보기 |
+| `GET /api/auth/{google,kakao,naver}` 및 `/callback` | 소셜 로그인 리다이렉트 | OAuth 플로우 |
+
+#### 아직 봉투를 쓰지 않는 도메인 (정리 대상)
+
+| 도메인 | 상태 |
+|---|---|
+| `announcement` (service·admin) | raw `{items, pagination}` 반환 — 실측 확인 |
+
+프론트가 다른 도메인처럼 `unwrap()` 을 쓰면 이 도메인은 **런타임에 실패한다.**
+feed 가 정확히 같은 이유로 깨져 있었으므로(아래), 같은 사고가 날 수 있다.
+**신규 엔드포인트는 반드시 봉투를 쓴다.** 위 목록은 늘어나면 안 된다.
+
+> chat 은 2026-08-17 프론트 요청으로 봉투 통일 완료 (breaking — 프론트 data 언래핑 전환 필요).
+
+> feed 는 2026-08-02 까지 21개 엔드포인트 전부가 raw 를 반환했고,
+> 프론트가 `unwrap()` 을 쓰다 댓글·태그 조회가 실패했다.
+> `FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES` 에 전 엔드포인트 메시지가 이미 정의돼 있었고
+> 컨트롤러 배선만 빠져 있던 상태라, 봉투로 통일해 해소했다(`128cc572`).
+
+---
+
+## 4. 성공 상태 코드는 항상 200
+
+- `HttpStatusInterceptor` 가 POST 201 → 200, PUT/PATCH 204 → 200 으로 정규화한다.
+- **모든 `@Post` 핸들러에 `@HttpCode(HttpStatus.OK)` 를 붙인다.**
+  붙이지 않으면 `@nestjs/swagger` CLI 플러그인이 **빌드 시점에** 문서에 201 을 추가해,
+  실제로 발생하지 않는 코드를 `/docs` 가 광고하게 된다.
+  jest 는 플러그인을 거치지 않아 이 불일치를 로컬 테스트로 잡을 수 없다(`1159384f`).
+- Swagger 는 `successStatus` 를 지정하지 않는다(기본 200).
+
+회귀 방지: `src/common/test/e2e/swagger-status-code-contract.e2e-spec.ts` 가
+① 문서에 200 이외 2xx 가 없는지 ② 파라미터 없는 GET 의 실응답과 문서가 일치하는지
+③ 모든 `@Post` 에 `@HttpCode` 200 이 있는지 ④ 공개 POST 가 실제로 200 인지를 검사한다.
+
+---
+
+## 5. 에러 처리
+
+- **404 사용 최소화.** 데이터가 없으면 `BadRequestException`(400) 을 우선한다.
+- 메시지는 한국어로, 사용자가 다음 행동을 알 수 있게 쓴다.
+- `HttpExceptionFilter` / `AllExceptionsFilter` 가 아래 형태로 통일한다.
+
+```jsonc
+{ "success": false, "code": 400, "error": "사용자 정보가 올바르지 않습니다.", "timestamp": "..." }
+```
+
+---
+
+## 6. Swagger 작성
+
+- 긴 명세는 컨트롤러가 아니라 도메인 `swagger/index.ts` 에 `ApiXxxEndpoint()` 로 분리한다.
+- 봉투를 표기하는 `ApiEndpoint` / `ApiPaginatedEndpoint` 를 쓴다.
+  `ApiRawEndpoint` 는 **봉투를 쓰지 않는 응답 전용**이며 현재 HLS 스트림 1건뿐이다.
+- `successMessageExample` 은 컨트롤러가 실제로 넣는 메시지 상수와 같은 값을 쓴다.
+
+회귀 방지: `src/api/service/feed/test/e2e/feed-swagger-contract.e2e-spec.ts` 가
+생성된 OpenAPI 스키마와 실응답의 키 집합·`message`·`code` 를 직접 대조한다.
+
+---
+
+## 7. 경계 규칙
+
+- `InjectModel` 은 `repository/` 에만 둔다. adapter 는 repository 를 주입받아 Port 를 구현한다.
+
+  **실측(2026-08-03): `src/` 전체에서 `InjectModel` 사용 파일 72개 중 60개만 `repository/` 에 있다.**
+  (측정 범위: `src/**/*.ts`, `.spec.ts` 제외)
+  나머지 12개는 규약을 벗어난다 — 목표 규약이지 현재 상태가 아니다.
+
+  | 위치 | 파일 수 | 비고 |
+  |---|---|---|
+  | `service/adoption/infrastructure` | 4 | adapter 가 직접 모델 주입 |
+  | `service/community/infrastructure` | 2 | author-reader, follow-reader |
+  | `service/breeder-pet-posting/infrastructure` | 2 | profile, reader |
+  | `service/contest/infrastructure` | 1 | user-info |
+  | `service/chat/infrastructure` | 1 | participant-reader |
+  | `common/strategy/infrastructure` | 1 | jwt-user-status (인증 경로) |
+  | `common/alimtalk/admin` | 1 | `alimtalk-admin.service.ts` — adapter 도 아닌 service 에서 직접 |
+
+  신규 코드는 규약을 따르고, 위 목록은 늘리지 않는다.
+- request DTO 를 `application/`·`domain/`·`repository/` 로 넘기지 않는다. 내부 command 타입으로 변환한다.
+- Port 바인딩은 `useExisting` 을 쓴다.
+  실측(2026-08-03): `useExisting` 193건 / `useClass` 1건
+  (`common/discord/discord-webhook.module.ts` 의 `DISCORD_ERROR_ALERT_PORT` — 유일한 예외).
+  `useClass` 를 쓰면 같은 클래스가 토큰별로 별도 인스턴스가 되어 상태를 공유하지 못한다.
+- 도메인 간 직접 서비스 주입 금지. `EventEmitter2` 또는 Port 를 쓴다.
+- NestJS DI: 다른 모듈에서 온 토큰은 재노출할 수 없다. **모듈 자체**를 `exports` 한다.
+  Mongoose 모델을 공유하려면 `MongooseModule` 을 재노출한다.
+
+---
+
+## 8. 파일 참조 판정 (고아 파일 삭제 방지)
+
+`upload-admin` 의 미참조 파일 판정은 **컬렉션 화이트리스트** 방식이다.
+목록에 없는 키는 `isReferenced:false` 로 분류돼 관리자 화면에서 삭제 가능으로 노출된다.
+
+**새 도메인이 S3 파일키를 저장하면 반드시 아래 3곳을 함께 수정한다.**
+
+1. `admin/upload/repository/upload-admin-file-reference.repository.ts` — 모델 주입 + count/read 메서드
+2. `admin/upload/upload-admin.module-definition.ts` — `MongooseModule.forFeature` 에 스키마 추가
+3. `admin/upload/infrastructure/upload-admin-file-reference-reader.adapter.ts` —
+   `findReferences` 와 `readAllReferencedFiles` **양쪽**
+
+> 실제로 `contest_entries.photoFileName` 이 누락돼 콘테스트 출품 사진이 고아로
+> 오분류되고 있었다(`6efe3eff`). feed video 키(`videos/*`)는 **아직 미등록 상태**다.
+
+---
+
+## 9. 테스트
+
+- 단위: `<domain>/test/**`, e2e: `<domain>/test/e2e/*.e2e-spec.ts`
+- e2e 는 MongoDB Memory Server 를 쓴다. `createTestingApp(overrides)` 로 Port 대역 주입.
+- `PAWPONG_TEST_MODE=true` 면 스토리지가 인메모리로 동작한다.
+  **`NODE_ENV=test` 에서만 허용되며, 그 밖에서는 `StorageService` 생성 시 예외를 던져 부팅을 막는다.**
+  이 모드는 `uploadFile` 이 S3 를 호출하지 않고 메모리 Map 에만 넣은 뒤 실제와 똑같은 CDN URL 을
+  반환하므로, 실서버에서 켜지면 업로드가 200 을 주고 DB 에 파일키까지 남지만 객체는 존재하지 않는다.
+  PutObject 뒤의 HeadObject 검증도 이 분기의 early-return 뒤에 있어 우회된다.
+  2026-08-10 dev 서버가 이 상태로 떠 있어 `.env` 의 플래그를 제거했다 (`.env:90`,
+  4/20 첫 부팅부터 줄곧 인메모리였고 SmileServ 초기화 로그가 한 줄도 없었다).
+- 버킷(`SMILESERV_S3_BUCKET`)과 조회 URL(`SMILESERV_CDN_BASE_URL`)이 서로 다른 버킷을 가리키면
+  부팅을 막는다. 버킷만 교체하면 Put/Head 는 새 버킷에서 성공하고 URL 만 옛 버킷을 가리켜
+  검증을 통과한 파일이 404 가 된다. 판정 기준은 CDN 호스트다 —
+  `SMILESERV_S3_ENDPOINT` 와 같은 호스트면 path-style 로 버킷을 직접 노출하는 구성이므로
+  경로가 정확히 `/<bucket>` 한 세그먼트여야 한다 — 오타·새 버킷명·경로 누락은 물론
+  버킷 앞뒤에 다른 경로가 끼는 경우(`/foo/<bucket>`, `/<bucket>/foo`)도 막는다.
+  호스트가 다르면(버킷을 감싸는 CDN 도메인) 경로로 단정할 수 없어 경고만 남긴다.
+  `SMILESERV_CDN_BASE_URL` 의 끝 슬래시는 생성 시 제거한다. `getCdnUrl` 이
+  `${base}/${key}` 로 조립하므로 남겨두면 `//` 가 생겨 업로드한 키와 다른 객체를 가리킨다.
+- 검증 순서: `pnpm typecheck` → 단위 → e2e → 필요 시 실서버 스팟체크.
+
+**주의**: e2e 를 다른 무거운 작업과 동시에 돌리면 `beforeAll` 의 인메모리 MongoDB 기동이
+30초 타임아웃에 걸려 대량 실패한다. 실패 사유가 전부
+`Exceeded timeout of 30000 ms for a hook` 이면 코드가 아니라 자원 문제다.
+
+**e2e 인메모리 DB 는 단일 노드 MongoMemoryReplSet** 이다 (2026-08-15, standalone 에서 전환).
+콘테스트 투표/취소처럼 멀티 도큐먼트 트랜잭션을 쓰는 repository 경로가 실서버(Atlas ReplSet)와
+동일하게 동작해야 하기 때문. 트랜잭션 코드를 새로 쓸 때 standalone 을 가정하지 말 것.
+
+---
+
+## 10. 커밋 전 자동 포맷
+
+husky + lint-staged 가 스테이징된 `src/**/*.ts` 에 `prettier --write` 를 건다.
+`pnpm install` 시 `prepare` 스크립트로 훅이 설치된다.

@@ -162,6 +162,30 @@ export class AdopterProfileResponseDto {
     }>;
 
     /**
+     * 가입 시 조사 양식으로 받은 입양 상담 사전 정보.
+     *
+     * 조사 양식을 건너뛴 사용자는 null 이다.
+     * 클라이언트가 "조사 완료 여부"를 로컬 플래그가 아니라 서버 기준으로 판정할 수 있게
+     * 노출한다. (가입 요청에만 존재하고 조회 응답에는 없어 판정 근거가 없던 것을 보완)
+     */
+    @ApiProperty({
+        description: '입양 상담 사전 정보 (조사 양식). 건너뛴 사용자는 null',
+        nullable: true,
+        example: {
+            selfIntroduction: '반려동물과 오래 함께한 경험이 있습니다.',
+            dailyAbsenceHours: '4시간 이하',
+            livingSpaceDescription: '아파트 전용 84㎡, 마당 없음',
+            counselPrivacyAgreedAt: '2024-01-10T08:15:00.000Z',
+        },
+    })
+    counselDefaultProfile: {
+        selfIntroduction?: string;
+        dailyAbsenceHours?: string;
+        livingSpaceDescription?: string;
+        counselPrivacyAgreedAt?: Date;
+    } | null;
+
+    /**
      * 계정 생성 일시
      * @example "2024-01-10T08:15:00.000Z"
      */

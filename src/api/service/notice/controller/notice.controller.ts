@@ -22,9 +22,9 @@ export class NoticeController {
         private readonly getNoticeDetailUseCase: GetNoticeDetailUseCase,
     ) {}
 
-    /**
-     * 공지사항 목록 조회 (공개)
-     */
+    // 공지사항 목록 조회 (공개)
+    // JSDoc 블록으로 쓰면 swagger 플러그인(introspectComments)이 이 문구로
+    // ApiOperation 을 덮어써 summary 가 사라진다. 문서는 swagger/index.ts 가 소유한다.
     @Get()
     @ApiGetNoticeListEndpoint()
     async getNoticeList(
@@ -37,9 +37,7 @@ export class NoticeController {
         );
     }
 
-    /**
-     * 공지사항 상세 조회 (공개)
-     */
+    // 공지사항 상세 조회 (공개)
     @Get(':noticeId')
     @ApiGetNoticeDetailEndpoint()
     async getNoticeDetail(

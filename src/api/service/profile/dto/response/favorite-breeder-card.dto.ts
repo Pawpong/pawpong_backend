@@ -31,4 +31,10 @@ export class FavoriteBreederCardResponseDto {
 
     @ApiProperty({ description: '즐겨찾기 추가 일시 (ISO 8601)', example: '2026-04-01T10:00:00.000Z' })
     addedAt: string;
+
+    @ApiProperty({
+        description: '즐겨찾기 등록 여부 — 이 목록은 등록된 브리더만 반환하므로 항상 true',
+        example: true,
+    })
+    isFavorited: boolean;
 }

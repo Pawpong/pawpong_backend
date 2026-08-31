@@ -66,7 +66,11 @@ export class ProfileMapperService {
         };
     }
 
-    toBreederPublicDto(snapshot: BreederProfileSnapshot, isFavorited: boolean): BreederPublicProfileResult {
+    toBreederPublicDto(
+        snapshot: BreederProfileSnapshot,
+        isFavorited: boolean,
+        isFollowing: boolean,
+    ): BreederPublicProfileResult {
         return {
             breederId: snapshot.breederId,
             nickname: snapshot.nickname,
@@ -80,6 +84,7 @@ export class ProfileMapperService {
             plan: snapshot.plan,
             businessLocation: snapshot.businessLocation,
             isFavorited,
+            isFollowing,
         };
     }
 
@@ -93,6 +98,7 @@ export class ProfileMapperService {
             bpm: snapshot.bpm,
             level: snapshot.level,
             addedAt: snapshot.addedAt.toISOString(),
+            isFavorited: true,
         };
     }
 

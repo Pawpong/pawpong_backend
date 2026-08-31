@@ -105,6 +105,9 @@ jobs:
                     echo "[deploy] pnpm install (프로덕션 의존성, 플랫폼 바이너리 포함)"
                     pnpm install --prod --frozen-lockfile
 
+                    echo "[deploy] 개발용 활성 약관 시딩"
+                    PAWPONG_ALLOW_DEV_TERMS_SEED=true node --env-file=.env dist/scripts/seed-development-terms.js
+
                     echo "[deploy] pm2 restart pawpong-backend"
                     pm2 restart pawpong-backend --update-env || pm2 start dist/main.js --name pawpong-backend \
                       --output /home/colding/pawpong.log --error /home/colding/pawpong.log --merge-logs --time

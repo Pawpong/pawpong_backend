@@ -24,7 +24,7 @@ export function ApiAdoptionPublicController() {
 }
 
 export function ApiAdoptionProtectedController() {
-    return ApiController('입양 (인증)');
+    return ApiController('입양');
 }
 
 export function ApiGetAdoptionListEndpoint() {

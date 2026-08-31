@@ -7,7 +7,7 @@ import request from 'supertest';
 
 import { DiscordWebhookService } from '../../../../../common/discord/discord-webhook.service';
 import { StorageService } from '../../../../../common/storage/storage.service';
-import { closeTestingApp, createTestingApp } from '../../../../../common/testing/test-utils';
+import { closeTestingApp, createTestingApp, agreeAllActiveTerms } from '../../../../../common/testing/test-utils';
 
 export type BreederManagementE2eContext = {
     app: INestApplication;
@@ -81,6 +81,8 @@ export async function createBreederManagementE2eContext(): Promise<BreederManage
             tempId: `temp_kakao_${adopterProviderId}_${timestamp}`,
             email: adopterEmail,
             nickname: adopterName,
+            realName: '테스트입양자',
+            termsAgreements: await agreeAllActiveTerms(app),
             phone: '010-7777-6666',
             profileImage: 'https://example.com/adopter.jpg',
         })

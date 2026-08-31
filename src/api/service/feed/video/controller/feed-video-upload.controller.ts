@@ -1,4 +1,6 @@
-import { Body, Param, Post } from '@nestjs/common';
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
+import { Body, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 
 import { CurrentActorType, type ActorType } from '../../../../../common/decorator/current-actor-type.decorator';
 import { CurrentUser } from '../../../../../common/decorator/current-user.decorator';
@@ -19,27 +21,35 @@ export class FeedVideoUploadController {
     ) {}
 
     @Post('videos/upload-url')
+    @HttpCode(HttpStatus.OK)
     @ApiGetFeedVideoUploadUrlEndpoint()
     async getUploadUrl(
         @CurrentUser('userId') userId: string,
         @CurrentActorType() actorType: ActorType,
         @Body() dto: UploadVideoRequestDto,
-    ): Promise<UploadUrlResponseDto> {
-        return (await this.getUploadUrlUseCase.execute(
-            userId,
-            actorType,
-            dto.title,
-            dto.description,
-            dto.tags,
-        )) as UploadUrlResponseDto & FeedVideoUploadUrlResult;
+    ): Promise<ApiResponseDto<UploadUrlResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.getUploadUrlUseCase.execute(
+                userId,
+                actorType,
+                dto.title,
+                dto.description,
+                dto.tags,
+            )) as UploadUrlResponseDto & FeedVideoUploadUrlResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.uploadUrlIssued,
+        );
     }
 
     @Post('videos/:videoId/upload-complete')
+    @HttpCode(HttpStatus.OK)
     @ApiCompleteFeedVideoUploadEndpoint()
     async completeUpload(
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
         @CurrentUser('userId') userId: string,
-    ): Promise<UploadCompleteResponseDto> {
-        return this.completeUploadUseCase.execute(videoId, userId);
+    ): Promise<ApiResponseDto<UploadCompleteResponseDto>> {
+        return ApiResponseDto.success(
+            await this.completeUploadUseCase.execute(videoId, userId),
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.uploadCompleted,
+        );
     }
 }

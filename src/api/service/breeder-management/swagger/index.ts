@@ -15,10 +15,11 @@ import { ApplicationStatusUpdateRequestDto } from '../dto/request/application-st
 import { BreederAccountDeleteRequestDto } from '../dto/request/breeder-account-delete-request.dto';
 import { ParentPetAddDto } from '../dto/request/parent-pet-add-request.dto';
 import { ParentPetUpdateDto } from '../dto/request/parent-pet-update-request.dto';
-import { ProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
+import { BreederProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
 import { ReviewReplyRequestDto } from '../dto/request/review-reply-request.dto';
 import { SimpleApplicationFormUpdateRequestDto } from '../dto/request/simple-application-form-update-request.dto';
 import { SubmitDocumentsRequestDto } from '../dto/request/submit-documents-request.dto';
+import { LevelChangeRequestDto } from '../dto/request/level-change-request.dto';
 import { UploadDocumentsRequestDto } from '../dto/request/upload-documents-request.dto';
 import { VerificationSubmitRequestDto } from '../dto/request/verification-submit-request.dto';
 import { ApplicationFormResponseDto } from '../dto/response/application-form-response.dto';
@@ -29,7 +30,7 @@ import {
 } from '../dto/response/application-form-update-response.dto';
 import { ApplicationStatusUpdateResponseDto } from '../dto/response/application-status-update-response.dto';
 import { BreederAccountDeleteResponseDto } from '../dto/response/breeder-account-delete-response.dto';
-import { MyReviewItemDto, MyReviewsListResponseDto } from '../dto/response/my-reviews-list-response.dto';
+import { BreederMyReviewItemDto, MyReviewsListResponseDto } from '../dto/response/my-reviews-list-response.dto';
 import { PetAddResponseDto } from '../dto/response/pet-add-response.dto';
 import { PetRemoveResponseDto } from '../dto/response/pet-remove-response.dto';
 import { PetUpdateResponseDto } from '../dto/response/pet-update-response.dto';
@@ -165,6 +166,18 @@ export const BreederManagementSwaggerDocs = {
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
+    requestLevelChange: {
+        summary: 'Elite 브리더 등급 변경 신청',
+        description: `승인된 New 브리더가 Elite 등급 심사를 신청합니다.
+
+기존 승인 서류는 서버에서 자동으로 재사용하며, 추가 업로드한 입양계약서와 전문성 증빙 서류를 병합합니다.
+이미 심사 중이거나 승인되지 않은 브리더는 신청할 수 없습니다.`,
+        responseType: VerificationSubmitResponseDto,
+        successDescription: '브리더 등급 변경 신청 성공',
+        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.levelChangeRequested,
+        isPublic: false,
+        errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
+    },
     addParentPet: {
         summary: '부모견/부모묘 추가',
         description: '새로운 부모 반려동물을 등록합니다.',
@@ -233,7 +246,7 @@ export const BreederManagementSwaggerDocs = {
         description:
             '브리더 자신에게 작성된 모든 후기를 관리 목적으로 조회합니다. 공개/비공개 후기 모두 확인 가능하며, 신고된 후기 정보도 포함됩니다.',
         responseType: MyReviewsListResponseDto,
-        itemType: MyReviewItemDto,
+        itemType: BreederMyReviewItemDto,
         successDescription: '내게 달린 후기 목록 조회 성공',
         successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.myReviewsRetrieved,
         isPublic: false,
@@ -386,9 +399,10 @@ export const BreederManagementSwaggerDocs = {
 } as const;
 
 export const BreederManagementRequestBodyDtos = {
-    profileUpdate: ProfileUpdateRequestDto,
+    profileUpdate: BreederProfileUpdateRequestDto,
     verificationSubmit: VerificationSubmitRequestDto,
     submitDocuments: SubmitDocumentsRequestDto,
+    levelChange: LevelChangeRequestDto,
     parentPetAdd: ParentPetAddDto,
     parentPetUpdate: ParentPetUpdateDto,
     applicationFormUpdate: ApplicationFormUpdateRequestDto,
@@ -425,7 +439,7 @@ function ApiBreederManagementReviewIdParam() {
 export function ApiUpdateBreederManagementProfileEndpoint() {
     return applyDecorators(
         ApiEndpoint(BreederManagementSwaggerDocs.updateProfile),
-        ApiBody({ type: ProfileUpdateRequestDto }),
+        ApiBody({ type: BreederProfileUpdateRequestDto }),
     );
 }
 
@@ -440,6 +454,13 @@ export function ApiSubmitBreederManagementVerificationDocumentsEndpoint() {
     return applyDecorators(
         ApiEndpoint(BreederManagementSwaggerDocs.submitVerificationDocuments),
         ApiBody({ type: SubmitDocumentsRequestDto }),
+    );
+}
+
+export function ApiRequestBreederManagementLevelChangeEndpoint() {
+    return applyDecorators(
+        ApiEndpoint(BreederManagementSwaggerDocs.requestLevelChange),
+        ApiBody({ type: LevelChangeRequestDto }),
     );
 }
 

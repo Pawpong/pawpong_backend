@@ -3,7 +3,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
 import { District } from '../../../../schema/district.schema';
-import { CreateDistrictCommand, UpdateDistrictCommand } from '../../../admin/district/application/types/district-command.type';
+import {
+    CreateDistrictCommand,
+    UpdateDistrictCommand,
+} from '../../../admin/district/application/types/district-command.type';
 
 @Injectable()
 export class DistrictRepository {

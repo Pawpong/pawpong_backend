@@ -24,11 +24,7 @@ export class AiImageFilterRepository {
     }
 
     findAll(): Promise<AiImageFilterDocument[]> {
-        return this.filterModel
-            .find()
-            .sort({ sortOrder: 1, createdAt: 1 })
-            .lean<AiImageFilterDocument[]>()
-            .exec();
+        return this.filterModel.find().sort({ sortOrder: 1, createdAt: 1 }).lean<AiImageFilterDocument[]>().exec();
     }
 
     findById(filterId: string): Promise<AiImageFilterDocument | null> {

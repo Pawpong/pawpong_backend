@@ -5,7 +5,7 @@ import { AI_IMAGE_RESPONSE_MESSAGES } from '../../constants/ai-image-response-me
 import { AiImageFilterResponseDto } from '../dto/response/ai-image-filter-response.dto';
 
 export function ApiAiImagePublicController() {
-    return ApiPublicController('AI 이미지 (v2)');
+    return ApiPublicController('AI 이미지');
 }
 
 export function ApiGetActiveAiImageFiltersEndpoint() {
@@ -14,7 +14,7 @@ export function ApiGetActiveAiImageFiltersEndpoint() {
             summary: 'AI 필터 목록 (사용자)',
             description: `
                 사용자가 선택할 수 있는 활성 필터 목록. 정렬 순서 오름차순.
-                프롬프트·모델 등 운영 정보는 응답에 포함되지 않는다.
+                프롬프트·모델 등 운영 정보는 응답에 포함되지 않습니다.
             `,
             responseType: [AiImageFilterResponseDto],
             isPublic: true,

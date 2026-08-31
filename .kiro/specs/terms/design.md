@@ -21,7 +21,7 @@ infrastructure/* · repository/*  mongoose
 | Method | Path | 용도 |
 |---|---|---|
 | GET | `/api/v2/terms` | 약관 목록 |
-| GET | `/api/v2/terms/:code` | 코드별 약관 본문 |
+| GET | `/api/v2/terms/{code}` | 코드별 약관 본문 |
 
 ## Data Models
 

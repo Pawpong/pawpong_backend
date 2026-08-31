@@ -19,6 +19,8 @@ const existingPost = {
     commentCount: 0,
     saveCount: 0,
     viewCount: 0,
+    visibility: 'public' as const,
+    status: 'published' as const,
     createdAt: new Date(),
 };
 
@@ -65,5 +67,56 @@ describe('UpdateCommunityPostUseCase', () => {
             expect.objectContaining({ body: '수정된 본문' }),
         );
         expect(result.body).toBe('수정된 본문');
+    });
+
+    it('body 미전달은 기존 본문을 유지하고 status 만 갱신한다', async () => {
+        reader.readPostById.mockResolvedValueOnce({ ...existingPost, status: 'draft' });
+        reader.readPostById.mockResolvedValueOnce({ ...existingPost, body: '원본', status: 'published' });
+
+        await useCase.execute('a-1', 'p-1', { status: 'published' });
+
+        expect(writer.updateByAuthor).toHaveBeenCalledWith(
+            'p-1',
+            'a-1',
+            expect.objectContaining({ body: undefined, status: 'published' }),
+        );
+    });
+
+    it('draft 저장이면 body 빈 문자열로 기존 본문을 삭제할 수 있다', async () => {
+        reader.readPostById.mockResolvedValueOnce({ ...existingPost, status: 'draft' });
+        reader.readPostById.mockResolvedValueOnce({
+            ...existingPost,
+            body: '',
+            status: 'draft',
+            photos: ['community/a.png'],
+        });
+
+        const result = await useCase.execute('a-1', 'p-1', {
+            body: '',
+            photos: ['community/a.png'],
+            visibility: 'public',
+            status: 'draft',
+        });
+
+        expect(writer.updateByAuthor).toHaveBeenCalledWith(
+            'p-1',
+            'a-1',
+            expect.objectContaining({
+                body: '',
+                photos: ['community/a.png'],
+                visibility: 'public',
+                status: 'draft',
+            }),
+        );
+        expect(result.body).toBe('');
+    });
+
+    it('published 저장이면 body 빈 문자열을 거부한다', async () => {
+        reader.readPostById.mockResolvedValueOnce({ ...existingPost, status: 'draft' });
+
+        await expect(useCase.execute('a-1', 'p-1', { body: '', status: 'published' })).rejects.toThrow(
+            '발행 게시글은 본문이 필요합니다.',
+        );
+        expect(writer.updateByAuthor).not.toHaveBeenCalled();
     });
 });

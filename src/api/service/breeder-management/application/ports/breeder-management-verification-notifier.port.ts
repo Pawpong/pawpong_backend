@@ -11,6 +11,7 @@ export type BreederManagementVerificationSubmissionNotification = {
     phone?: string;
     level: 'new' | 'elite';
     isResubmission: boolean;
+    submissionKind?: 'verification' | 'level_change';
     submittedAt: Date;
     documents: BreederManagementVerificationNotificationDocument[];
 };

@@ -49,6 +49,15 @@ export interface BreederManagementBreederRecord {
         rejectionReason?: string;
         documents?: BreederManagementVerificationDocumentRecord[];
         submittedByEmail?: boolean;
+        isLevelChangeRequested?: boolean;
+        levelChangeRequest?: {
+            previousLevel: string;
+            requestedLevel: string;
+            requestedAt: Date;
+            documents: BreederManagementVerificationDocumentRecord[];
+        };
+        levelChangeRejectionReason?: string;
+        levelChangeReviewedAt?: Date;
         [key: string]: unknown;
     };
     profile?: {

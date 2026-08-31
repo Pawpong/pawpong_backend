@@ -4,7 +4,7 @@ import {
     AI_IMAGE_FILE_STORAGE_PORT,
     type AiImageFileStoragePort,
 } from '../../../shared/application/ports/ai-image-file-storage.port';
-import { AiImageObjectKeyService } from '../../domain/services/ai-image-object-key.service';
+import { AiImageObjectKeyService } from '../../../shared/domain/services/ai-image-object-key.service';
 import type { AiImageUploadUrlResult } from '../types/ai-image-upload-url-result.type';
 
 /** presigned URL 기본 유효 시간 (초) */

@@ -28,6 +28,14 @@ export type AdopterProfileWrittenReviewResult = {
     createdAt: Date;
 };
 
+/** 가입 시 받은 입양 상담 사전 정보 (조사 양식) */
+export type AdopterCounselDefaultProfileResult = {
+    selfIntroduction?: string;
+    dailyAbsenceHours?: string;
+    livingSpaceDescription?: string;
+    counselPrivacyAgreedAt?: Date;
+};
+
 export type AdopterProfileResult = {
     adopterId: string;
     emailAddress: string;
@@ -40,6 +48,11 @@ export type AdopterProfileResult = {
     favoriteBreederList: AdopterProfileFavoriteResult[];
     adoptionApplicationList: AdopterProfileApplicationResult[];
     writtenReviewList: AdopterProfileWrittenReviewResult[];
+    /**
+     * 가입 시 조사 양식으로 받은 상담 사전 정보.
+     * 건너뛴 사용자는 null 이라, 클라이언트가 조사 완료 여부를 서버 기준으로 판정할 수 있다.
+     */
+    counselDefaultProfile: AdopterCounselDefaultProfileResult | null;
     createdAt: Date;
     updatedAt: Date;
 };

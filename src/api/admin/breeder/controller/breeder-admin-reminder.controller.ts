@@ -1,4 +1,4 @@
-import { Body, Post } from '@nestjs/common';
+import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -13,6 +13,7 @@ export class BreederAdminReminderController {
     constructor(private readonly sendBreederRemindNotificationsUseCase: SendBreederRemindNotificationsUseCase) {}
 
     @Post('remind')
+    @HttpCode(HttpStatus.OK)
     @ApiSendBreederRemindNotificationsAdminEndpoint()
     async sendRemindNotifications(
         @CurrentUser('userId') adminId: string,

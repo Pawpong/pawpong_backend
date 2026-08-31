@@ -1,4 +1,4 @@
-import { Body, Delete, Param, Patch, Post } from '@nestjs/common';
+import { Body, Delete, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/common';
 
 import { AnnouncementCreateRequestDto } from '../../../service/announcement/dto/request/announcement-create-request.dto';
 import { AnnouncementUpdateRequestDto } from '../../../service/announcement/dto/request/announcement-update-request.dto';
@@ -23,6 +23,7 @@ export class AnnouncementAdminCommandController {
     ) {}
 
     @Post('announcement')
+    @HttpCode(HttpStatus.OK)
     @ApiCreateAnnouncementAdminEndpoint()
     async createAnnouncement(@Body() createDto: AnnouncementCreateRequestDto): Promise<AnnouncementResponseDto> {
         const result = await this.createAnnouncementUseCase.execute(createDto);

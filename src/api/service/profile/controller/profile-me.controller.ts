@@ -16,7 +16,11 @@ import { FavoriteBreedersQueryDto } from '../dto/request/favorite-breeders-query
 import { UpdateMyProfileRequestDto } from '../dto/request/update-my-profile-request.dto';
 import { FavoriteBreederCardResponseDto } from '../dto/response/favorite-breeder-card.dto';
 import { MyProfileResponseDto } from '../dto/response/my-profile-response.dto';
-import { ApiGetMyFavoriteBreedersEndpoint, ApiGetMyProfileEndpoint, ApiUpdateMyProfileEndpoint } from '../swagger/index';
+import {
+    ApiGetMyFavoriteBreedersEndpoint,
+    ApiGetMyProfileEndpoint,
+    ApiUpdateMyProfileEndpoint,
+} from '../swagger/index';
 
 /**
  * GET / PATCH /v2/profile/me (인증 필수, role 무관)

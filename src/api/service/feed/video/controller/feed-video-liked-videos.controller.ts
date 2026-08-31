@@ -1,3 +1,5 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Get, Inject, Query } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../../common/decorator/current-user.decorator';
@@ -21,11 +23,11 @@ export class FeedVideoLikedVideosController {
     async getMyLikedVideos(
         @CurrentUser('userId') userId: string,
         @Query() query: FeedPaginationQueryDto,
-    ): Promise<MyLikedVideosResponseDto> {
-        return (await this.getMyLikedVideosUseCase.execute(
-            userId,
-            query.page,
-            query.limit,
-        )) as MyLikedVideosResponseDto & FeedMyLikedVideosResult;
+    ): Promise<ApiResponseDto<MyLikedVideosResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.getMyLikedVideosUseCase.execute(userId, query.page, query.limit)) as MyLikedVideosResponseDto &
+                FeedMyLikedVideosResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.myLikedVideosListed,
+        );
     }
 }
