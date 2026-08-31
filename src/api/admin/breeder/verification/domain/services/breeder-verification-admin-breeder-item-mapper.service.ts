@@ -14,7 +14,6 @@ export class BreederVerificationAdminBreederItemMapperService {
         return this.breederVerificationAdminListItemMapperService.toResult(breeder, {
             verificationStatus: breeder.verification?.status || 'pending',
             subscriptionPlan: breeder.verification?.plan || 'basic',
-            level: breeder.verification?.level || 'new',
             submittedAt: this.breederVerificationAdminListItemMapperService.resolveSubmittedAt(breeder.verification),
             isSubmittedByEmail: breeder.verification?.submittedByEmail || false,
         });

@@ -13,10 +13,8 @@ import {
     BREEDER_VERIFICATION_ADMIN_NOT_FOUND_RESPONSE,
 } from '../../constants/breeder-admin-swagger.constants';
 import { BreederDetailResponseDto } from '../dto/response/breeder-detail-response.dto';
-import { BreederLevelChangeResponseDto } from '../dto/response/breeder-level-change-response.dto';
 import { BreederStatsResponseDto } from '../dto/response/breeder-stats-response.dto';
 import { BreederVerificationResponseDto } from '../dto/response/breeder-verification-response.dto';
-import { BreederLevelChangeRequestDto } from '../dto/request/breeder-level-change-request.dto';
 import { BreederVerificationRequestDto } from '../dto/request/breeder-verification-request.dto';
 
 function buildBreederSearchQueries() {
@@ -63,21 +61,6 @@ export function ApiGetPendingBreederVerificationsAdminEndpoint() {
             errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
             successDescription: '인증 대기 브리더 목록 조회 성공',
             successMessageExample: BREEDER_RESPONSE_MESSAGES.pendingBreederListRetrieved,
-        }),
-        ...buildBreederSearchQueries(),
-    );
-}
-
-export function ApiGetLevelChangeRequestsAdminEndpoint() {
-    return applyDecorators(
-        ApiPaginatedEndpoint({
-            summary: '레벨 변경 신청 목록 조회',
-            description: '승인된 브리더가 제출한 레벨 변경 신청 목록을 조회합니다 (New ↔ Elite).',
-            responseType: PaginationResponseDto,
-            itemType: BreederVerificationResponseDto,
-            errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
-            successDescription: '레벨 변경 요청 목록 조회 성공',
-            successMessageExample: BREEDER_RESPONSE_MESSAGES.levelChangeRequestListRetrieved,
         }),
         ...buildBreederSearchQueries(),
     );
@@ -132,7 +115,7 @@ export function ApiUpdateBreederVerificationAdminEndpoint() {
 export function ApiGetBreederStatsAdminEndpoint() {
     return ApiEndpoint({
         summary: '승인된 브리더 통계 조회',
-        description: '전체 승인된 브리더의 레벨별 통계를 조회합니다 (전체/엘리트/뉴).',
+        description: '인증이 승인된 전체 브리더 수를 조회합니다.',
         responseType: BreederStatsResponseDto,
         errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
         successDescription: '브리더 통계 조회 성공',
@@ -161,23 +144,4 @@ export function ApiSendDocumentRemindersAdminEndpoint() {
         successMessageExample: buildBreederDocumentReminderMessage(3),
         errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE],
     });
-}
-
-export function ApiChangeBreederLevelAdminEndpoint() {
-    return applyDecorators(
-        ApiEndpoint({
-            summary: '브리더 레벨 변경',
-            description: '승인된 브리더의 레벨을 뉴 ↔ 엘리트로 변경합니다.',
-            responseType: BreederLevelChangeResponseDto,
-            errorResponses: [BREEDER_ADMIN_FORBIDDEN_RESPONSE, BREEDER_VERIFICATION_ADMIN_NOT_FOUND_RESPONSE],
-            successDescription: '브리더 레벨 변경 성공',
-            successMessageExample: BREEDER_RESPONSE_MESSAGES.breederLevelChanged,
-        }),
-        ApiParam({
-            name: 'breederId',
-            description: '레벨을 변경할 브리더 ID',
-            example: '507f1f77bcf86cd799439011',
-        }),
-        ApiBody({ type: BreederLevelChangeRequestDto }),
-    );
 }

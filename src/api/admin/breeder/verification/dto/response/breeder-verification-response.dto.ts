@@ -120,11 +120,8 @@ export class BreederVerificationResponseDto {
     verificationInfo: {
         verificationStatus: string;
         subscriptionPlan: string;
-        level: string;
         submittedAt?: Date;
         isSubmittedByEmail?: boolean;
-        previousLevel?: string; // 레벨 변경 시 이전 레벨
-        isLevelChange?: boolean; // 레벨 변경 신청 여부
     };
 
     /**

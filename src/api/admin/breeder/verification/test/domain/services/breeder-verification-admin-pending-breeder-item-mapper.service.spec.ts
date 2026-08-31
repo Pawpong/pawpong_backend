@@ -14,7 +14,6 @@ describe('브리더 인증 관리자 승인 대기 항목 매퍼', () => {
             verification: {
                 status: 'pending',
                 plan: 'pro',
-                level: 'new',
                 submittedByEmail: true,
                 submittedAt: new Date('2026-04-09T00:00:00.000Z'),
             },
@@ -27,7 +26,6 @@ describe('브리더 인증 관리자 승인 대기 항목 매퍼', () => {
             verificationInfo: {
                 verificationStatus: 'pending',
                 subscriptionPlan: 'pro',
-                level: 'new',
                 isSubmittedByEmail: true,
             },
         });

@@ -15,24 +15,4 @@ export class BreederStatsResponseDto {
         example: 43,
     })
     totalApproved: number;
-
-    /**
-     * 엘리트 등급으로 승인된 브리더 수
-     * @example 5
-     */
-    @ApiProperty({
-        description: '엘리트 등급으로 승인된 브리더 수',
-        example: 5,
-    })
-    eliteCount: number;
-
-    /**
-     * 승인된 브리더 중 엘리트가 아닌 뉴 브리더 수
-     * @example 38
-     */
-    @ApiProperty({
-        description: '승인된 브리더 중 엘리트가 아닌 뉴 브리더 수',
-        example: 38,
-    })
-    newCount: number;
 }

@@ -32,16 +32,6 @@ export class BreederVerificationAdminMongooseRepositoryAdapter
             : null;
     }
 
-    async getLevelChangeRequests(
-        criteria: BreederVerificationAdminSearchCriteria,
-    ): Promise<BreederVerificationAdminListResultSnapshot> {
-        const result = await this.breederVerificationAdminRepository.getLevelChangeRequests(criteria);
-        return {
-            items: result.items.map((breeder) => this.toBreederSnapshot(breeder)),
-            total: result.total,
-        };
-    }
-
     async getPendingBreeders(
         criteria: BreederVerificationAdminSearchCriteria,
     ): Promise<BreederVerificationAdminListResultSnapshot> {
@@ -68,14 +58,10 @@ export class BreederVerificationAdminMongooseRepositoryAdapter
     }
 
     async getApprovedBreederStats(): Promise<BreederVerificationAdminStatsSnapshot> {
-        const [totalApproved, eliteCount] = await Promise.all([
-            this.breederVerificationAdminRepository.countApprovedBreeders(),
-            this.breederVerificationAdminRepository.countApprovedEliteBreeders(),
-        ]);
+        const totalApproved = await this.breederVerificationAdminRepository.countApprovedBreeders();
 
         return {
             totalApproved,
-            eliteCount,
         };
     }
 
@@ -92,10 +78,6 @@ export class BreederVerificationAdminMongooseRepositoryAdapter
         command: BreederVerificationAdminUpdateVerificationCommand,
     ): Promise<void> {
         await this.breederVerificationAdminRepository.updateBreederVerification(breederId, command);
-    }
-
-    async updateBreederLevel(breederId: string, newLevel: string): Promise<void> {
-        await this.breederVerificationAdminRepository.updateBreederLevel(breederId, newLevel);
     }
 
     async appendAdminActivityLog(adminId: string, logEntry: BreederVerificationAdminActivityLogEntry): Promise<void> {

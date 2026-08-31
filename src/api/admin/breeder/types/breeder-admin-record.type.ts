@@ -1,8 +1,6 @@
 import type { BreederAdminActivityLogEntry } from '../application/ports/breeder-admin-writer.port';
 import type {
     BreederVerificationAdminDocumentSnapshot,
-    BreederVerificationAdminLevelChangeHistorySnapshot,
-    BreederVerificationAdminLevelChangeRequestSnapshot,
     BreederVerificationAdminProfileSnapshot,
     BreederVerificationAdminVerificationSnapshot,
 } from '../verification/application/ports/breeder-verification-admin-reader.port';
@@ -24,8 +22,6 @@ export type BreederAdminAdminDocumentRecord = {
 
 export type BreederAdminBreederVerificationRecord = BreederVerificationAdminVerificationSnapshot & {
     documents?: BreederVerificationAdminDocumentSnapshot[];
-    levelChangeRequest?: BreederVerificationAdminLevelChangeRequestSnapshot;
-    levelChangeHistory?: BreederVerificationAdminLevelChangeHistorySnapshot[];
 };
 
 export type BreederAdminBreederDocumentRecord = {
