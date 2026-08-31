@@ -179,7 +179,6 @@ describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
             const response = await request(context.app.getHttpServer())
                 .post(`/api/v2/auth/upload-breeder-documents?tempId=temp-docs-${Date.now()}`)
                 .field('types', JSON.stringify(['idCard', 'animalProductionLicense']))
-                .field('level', 'new')
                 .attach('files', context.uploadTestFileBuffer, context.uploadTestFileName)
                 .attach('files', context.uploadTestFileBuffer, context.uploadTestFileName)
                 .expect(200);
@@ -188,7 +187,7 @@ describe('인증 중복 체크와 소셜 업로드 종단간 테스트', () => {
             expect(response.body.data.uploadedDocuments).toHaveLength(2);
             expect(response.body.data.allDocuments).toHaveLength(2);
             expect(response.body.message).toBe(
-                'new 레벨 브리더 인증 서류 2개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.',
+                '브리더 인증 서류 2개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.',
             );
         });
     });

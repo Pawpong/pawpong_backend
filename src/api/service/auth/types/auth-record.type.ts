@@ -10,7 +10,6 @@ export type AuthSocialAuthInfoRecord = {
 
 export type AuthVerificationRecord = {
     plan?: string;
-    level?: string;
     status?: string;
     submittedAt?: Date;
 };

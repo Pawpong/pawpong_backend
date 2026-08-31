@@ -93,7 +93,6 @@ export function createBreederRegisterData(overrides: Record<string, unknown> = {
         animal: 'dog',
         breeds: ['포메라니안', '말티즈'],
         plan: 'basic',
-        level: 'new',
         agreements: {
             termsOfService: true,
             privacyPolicy: true,

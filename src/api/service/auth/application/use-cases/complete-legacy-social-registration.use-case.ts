@@ -27,8 +27,6 @@ type LegacySocialAdditionalInfo = {
     introduction?: string;
     district?: string;
     breeds?: string[];
-    /** @deprecated 구버전 입력 호환용. 가입 결과에는 반영하지 않는다. */
-    level?: string;
     marketingAgreed?: boolean;
 };
 
