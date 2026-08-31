@@ -16,12 +16,14 @@ export interface ProfileReaderPort {
     readBreeder(breederId: string): Promise<BreederProfileSnapshot | null>;
     /**
      * 본인 마이홈 — 즐겨찾는 브리더 카드 페이지네이션.
-     * 입양자의 favoriteBreederList 임베디드 배열을 페이지로 잘라
+     * 사용자의 favoriteBreederList 임베디드 배열을 페이지로 잘라
      * 브리더 본 도큐먼트의 nickname/profileImageFileName/level/bpm 으로 채워준다.
+     * userRole 은 원본 배열의 위치를 가른다 — 입양자는 Adopter, 브리더는 Breeder 도큐먼트다.
      */
     listFavoriteBreeders(
-        adopterId: string,
+        userId: string,
         pagination: { page: number; pageSize: number },
+        userRole?: string,
     ): Promise<FavoriteBreedersPageResult>;
 
     /**

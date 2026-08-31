@@ -7,7 +7,6 @@ export const BREEDER_RESPONSE_MESSAGES = {
     reviewsRetrieved: '후기 목록이 조회되었습니다.',
     petsRetrieved: '개체 목록이 조회되었습니다.',
     parentPetsRetrieved: '부모견/부모묘 목록이 조회되었습니다.',
-    petDetailRetrieved: '개체 상세 정보가 조회되었습니다.',
     accountSuspended: '브리더 계정이 영구정지 처리되었습니다.',
     accountUnsuspended: '브리더 계정 정지가 해제되었습니다.',
     breederDetailRetrieved: '브리더 상세 정보가 조회되었습니다.',

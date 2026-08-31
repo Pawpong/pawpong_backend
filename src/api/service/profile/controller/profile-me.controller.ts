@@ -63,10 +63,11 @@ export class ProfileMeController {
 }
 
 /**
- * GET /v2/profile/me/favorite-breeders (입양자 전용 — StrictRolesGuard)
+ * GET /v2/profile/me/favorite-breeders (입양자·브리더 — StrictRolesGuard)
  *
- * 별도 컨트롤러로 분리: 본 라우트만 'adopter' role 강제가 필요해서
+ * 별도 컨트롤러로 분리: 본 라우트만 role 화이트리스트가 필요해서
  * /me 와 같은 컨트롤러에 두면 role 가드를 메서드 단위로 흩뿌리게 된다.
+ * 브리더도 즐겨찾기를 담을 수 있으므로(POST /v2/adopter/favorite) 조회도 함께 허용한다.
  */
 @ProfileFavoritesController()
 export class ProfileFavoriteBreedersController {
@@ -76,9 +77,10 @@ export class ProfileFavoriteBreedersController {
     @ApiGetMyFavoriteBreedersEndpoint()
     async getFavorites(
         @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
         @Query() query: FavoriteBreedersQueryDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<FavoriteBreederCardResponseDto>>> {
-        const result = await this.getMyFavoriteBreedersUseCase.execute(userId, query.page, query.pageSize);
+        const result = await this.getMyFavoriteBreedersUseCase.execute(userId, query.page, query.pageSize, role);
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result),
             PROFILE_RESPONSE_MESSAGES.favoriteBreedersRetrieved,

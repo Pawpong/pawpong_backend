@@ -5,14 +5,14 @@ import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto
 import { AddAdoptionPetFavoriteUseCase } from '../application/use-cases/add-adoption-pet-favorite.use-case';
 import { RemoveAdoptionPetFavoriteUseCase } from '../application/use-cases/remove-adoption-pet-favorite.use-case';
 import { ADOPTION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/adoption-response-messages';
-import { AdoptionProtectedController } from '../decorator/adoption-protected-controller.decorator';
+import { AdoptionFavoritesController } from '../decorator/adoption-protected-controller.decorator';
 import { AdoptionFavoriteResponseDto } from '../dto/response/adoption-pet-response.dto';
 import { ApiAddAdoptionFavoriteEndpoint, ApiRemoveAdoptionFavoriteEndpoint } from '../swagger/index';
 
 /**
- * 입양 페이지 — 동물 단위 관심있어요 토글 (입양자 전용)
+ * 입양 페이지 — 동물 단위 관심있어요 토글 (입양자·브리더)
  */
-@AdoptionProtectedController()
+@AdoptionFavoritesController()
 export class AdoptionFavoriteController {
     constructor(
         private readonly addUseCase: AddAdoptionPetFavoriteUseCase,
