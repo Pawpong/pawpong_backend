@@ -8,9 +8,16 @@ describe('FAQ 정책 데이터', () => {
         }
     });
 
-    it('폐기된 New/Elite 등급을 안내하지 않는다', () => {
+    it('폐기된 브리더 등급이나 내부 상태값을 사용자 안내에 노출하지 않는다', () => {
         const searchable = faqData.map(({ question, answer }) => `${question}\n${answer}`).join('\n');
-        expect(searchable).not.toMatch(/뉴 레벨|엘리트 레벨|Elite 등급|New 등급/);
+        expect(searchable).not.toMatch(/\bnew\b|\belite\b|뉴\s*(브리더|레벨|등급)|엘리트\s*(브리더|레벨|등급)/i);
+        expect(searchable).not.toMatch(/\bpending\b|\breviewing\b|\bapproved\b|\brejected\b/i);
+    });
+
+    it('분양 상세의 실제 개별 분양가 흐름만 안내한다', () => {
+        const priceFaq = faqData.find((faq) => faq.question === '분양 비용은 어떻게 확인하나요?');
+        expect(priceFaq?.answer).toContain('각 분양글에 입력한 분양가');
+        expect(priceFaq?.answer).not.toMatch(/가격 범위|상담 후 공개/);
     });
 
     it('입양자와 브리더 모두에게 파충류 흐름을 안내한다', () => {

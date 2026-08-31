@@ -106,7 +106,7 @@ export const faqData: readonly FaqSeedItem[] = [
     },
     {
         question: '분양 비용은 어떻게 확인하나요?',
-        answer: '브리더가 공개한 가격 또는 가격 범위는 분양 상세에서 확인할 수 있고, 상담 후 공개로 설정된 경우에는 채팅에서 문의할 수 있어요. 최종 비용과 포함 항목은 계약 전에 브리더와 서면으로 확인해 주세요.',
+        answer: '브리더가 각 분양글에 입력한 분양가는 분양 상세에서 확인할 수 있어요. 화면의 금액과 별도로 이동·용품 등 추가 비용이 있는지, 어떤 항목이 포함되는지는 계약 전에 브리더와 서면으로 확인해 주세요. 포퐁은 결제나 분양 계약의 당사자가 아닙니다.',
         category: 'payment',
         userType: 'adopter',
         order: 12,
@@ -114,7 +114,7 @@ export const faqData: readonly FaqSeedItem[] = [
     },
     {
         question: '브리더 가입과 입점 검증은 어떻게 진행되나요?',
-        answer: '회원가입에서 브리딩 동물, 프로필과 사업장 정보를 입력하고 검증 서류를 제출해 주세요. 포퐁이 자료를 검토한 뒤 pending, reviewing, approved, rejected 상태로 결과를 관리합니다. 현재 New·Elite 같은 브리더 등급은 운영하지 않습니다.',
+        answer: '회원가입에서 브리딩 동물, 프로필과 사업장 정보를 입력하고 검증 서류를 제출해 주세요. 제출이 접수되면 담당자가 자료를 검토하고 승인 또는 반려 결과를 안내합니다. 반려된 경우에는 사유를 확인한 뒤 필요한 자료를 보완해 다시 제출할 수 있습니다.',
         category: 'breeder',
         userType: 'breeder',
         order: 1,
