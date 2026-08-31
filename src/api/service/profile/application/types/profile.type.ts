@@ -27,9 +27,9 @@ export interface BreederProfileSnapshot {
     bio: string;
     longDescription: string;
     bpm: number;
-    /** 브리더 followerCount = stats.totalFavorites (즐겨찾기 입양자 수) */
+    /** 이 브리더를 팔로우한 수 = stats.followerCount. 즐겨찾기(stats.totalFavorites)와는 별개 관계다 */
     followerCount: number;
-    /** 브리더는 팔로우 주체 카운터를 두지 않으므로 항상 0 (계약 통일용) */
+    /** 이 브리더가 팔로우 중인 수 = stats.followingCount. 브리더도 팔로우 주체가 될 수 있어 0 이 아닐 수 있다 */
     followingCount: number;
     level: 'new' | 'elite';
     plan: 'basic' | 'pro';
