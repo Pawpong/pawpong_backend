@@ -60,16 +60,18 @@ export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
     }
 
     async listFavoriteBreeders(
-        adopterId: string,
+        userId: string,
         pagination: { page: number; pageSize: number },
+        userRole?: string,
     ): Promise<FavoriteBreedersPageResult> {
         // 즐겨찾기 원본 데이터(favoriteBreederList) 조회·페이지네이션·정렬(addedAt DESC)은
         // adopter 도메인이 소유한 ADOPTER_FAVORITE_READER_PORT 에 위임한다 —
         // 여기서 Mongo 쿼리를 직접 재구현하지 않는다.
         const { favorites: slice, total: totalItems } = await this.adopterFavoriteReaderPort.findFavoriteList(
-            adopterId,
+            userId,
             pagination.page,
             pagination.pageSize,
+            userRole,
         );
 
         if (slice.length === 0) {

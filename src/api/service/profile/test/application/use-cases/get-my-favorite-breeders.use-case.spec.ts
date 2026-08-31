@@ -52,6 +52,14 @@ describe('GetMyFavoriteBreedersUseCase', () => {
     it('reader 에 정확한 page/size 가 전달된다', async () => {
         reader.listFavoriteBreeders.mockResolvedValueOnce({ items: [], totalItems: 0 });
         await useCase.execute('a-1', 3, 5);
-        expect(reader.listFavoriteBreeders).toHaveBeenCalledWith('a-1', { page: 3, pageSize: 5 });
+        expect(reader.listFavoriteBreeders).toHaveBeenCalledWith('a-1', { page: 3, pageSize: 5 }, undefined);
+    });
+
+    // 브리더가 담은 즐겨찾기는 Breeder.favoriteBreederList 에 저장되므로 role 이 reader 까지 내려가야 한다.
+    // (role 이 유실되면 adopters 컬렉션을 보게 되어 목록이 항상 비어 나온다)
+    it('userRole 을 reader 로 그대로 전달한다', async () => {
+        reader.listFavoriteBreeders.mockResolvedValueOnce({ items: [], totalItems: 0 });
+        await useCase.execute('b-1', 1, 10, 'breeder');
+        expect(reader.listFavoriteBreeders).toHaveBeenCalledWith('b-1', { page: 1, pageSize: 10 }, 'breeder');
     });
 });
