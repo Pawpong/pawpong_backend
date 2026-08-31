@@ -188,23 +188,6 @@ export class BreederSwaggerDocs {
         `,
     };
 
-    static readonly getPetDetail = {
-        summary: '분양 개체 상세 정보 조회',
-        description: `
-            특정 개체(반려동물)의 상세 정보를 조회합니다.
-            
-            ## 주요 정보
-            - 기본 정보 (이름, 성별, 생년월일 등)
-            - 백신 접종 기록
-            - 건강 기록
-            - 부모 정보 (부모견/묘)
-            
-            ## 인증
-            - 인증 없이 호출 가능합니다.
-            - Authorization Bearer 토큰은 선택 사항이며, 전달 시 사용자 맞춤 정보가 함께 계산될 수 있습니다.
-        `,
-    };
-
     static readonly getParentPets = {
         summary: '브리더의 부모견/부모묘 목록 조회',
         description: `

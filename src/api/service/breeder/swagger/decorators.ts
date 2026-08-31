@@ -10,7 +10,6 @@ import { BreederCardResponseDto } from '../dto/response/breeder-card-response.dt
 import { BreederProfileResponseDto } from '../dto/response/breeder-profile-response.dto';
 import { BreederReviewsResponseDto, BreederReviewItemDto } from '../dto/response/breeder-reviews-response.dto';
 import { PetsListResponseDto, PetItemDto } from '../dto/response/pets-list-response.dto';
-import { PetDetailResponseDto } from '../dto/response/pet-detail-response.dto';
 import { ParentPetListResponseDto } from '../dto/response/parent-pet-list.dto';
 import { PublicApplicationFormResponseDto } from '../dto/response/public-application-form.dto';
 import { BREEDER_RESPONSE_MESSAGES } from '../constants/breeder-response-messages';
@@ -23,14 +22,6 @@ function ApiBreederIdParam() {
         name: 'id',
         description: '브리더 ID',
         example: '507f1f77bcf86cd799439011',
-    });
-}
-
-function ApiBreederPetIdParam() {
-    return ApiParam({
-        name: 'petId',
-        description: '분양 개체 ID',
-        example: '507f1f77bcf86cd799439012',
     });
 }
 
@@ -217,20 +208,6 @@ export function ApiGetBreederPetsEndpoint() {
         }),
         ApiPageQuery(1),
         ApiLimitQuery(20),
-    );
-}
-
-export function ApiGetBreederPetDetailEndpoint() {
-    return applyDecorators(
-        ApiEndpoint({
-            ...BreederSwaggerDocs.getPetDetail,
-            responseType: PetDetailResponseDto,
-            isPublic: true,
-            successDescription: '분양 반려동물 상세 조회 성공',
-            successMessageExample: BREEDER_RESPONSE_MESSAGES.petDetailRetrieved,
-        }),
-        ApiBreederIdParam(),
-        ApiBreederPetIdParam(),
     );
 }
 
