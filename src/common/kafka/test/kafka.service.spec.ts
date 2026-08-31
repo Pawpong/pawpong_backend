@@ -33,6 +33,7 @@ describe('KafkaService', () => {
 
     afterEach(() => {
         process.env.NODE_ENV = originalNodeEnv;
+        jest.useRealTimers();
     });
 
     it('운영 환경에서 Kafka 연결 실패 시 critical 에러 알림을 요청해야 한다', async () => {
@@ -55,6 +56,7 @@ describe('KafkaService', () => {
             }),
         );
         expect(kafkaClient.close).toHaveBeenCalledTimes(1);
+        await service.onModuleDestroy();
     });
 
     it('개발 환경에서 Kafka 연결 실패 시 Discord 알림을 보내지 않아야 한다', async () => {
@@ -71,6 +73,7 @@ describe('KafkaService', () => {
 
         expect(notifyCriticalErrorUseCase.execute).not.toHaveBeenCalled();
         expect(kafkaClient.close).toHaveBeenCalledTimes(1);
+        await service.onModuleDestroy();
     });
 
     it('KAFKA_ENABLED가 false면 producer 연결을 시도하지 않아야 한다', async () => {
@@ -122,5 +125,33 @@ describe('KafkaService', () => {
             '메시지 발행 실패: chat.message',
             expect.any(Error),
         );
+        await service.onModuleDestroy();
+    });
+
+    it('브로커가 늦게 준비되면 producer 연결을 자동 재시도한다', async () => {
+        jest.useFakeTimers();
+        kafkaClient.connect.mockRejectedValueOnce(new Error('connect ECONNREFUSED')).mockResolvedValueOnce(undefined);
+        const configService = {
+            get: jest.fn((key: string, fallback: string) => {
+                if (key === 'KAFKA_ENABLED') return 'true';
+                if (key === 'KAFKA_RECONNECT_INTERVAL_MS') return '1000';
+                return fallback;
+            }),
+        } as unknown as ConfigService;
+        const service = new KafkaService(
+            kafkaClient as any,
+            logger as unknown as CustomLoggerService,
+            notifyCriticalErrorUseCase as unknown as NotifyCriticalErrorUseCase,
+            configService,
+        );
+
+        await service.onModuleInit();
+        expect(service.isKafkaConnected()).toBe(false);
+
+        await jest.advanceTimersByTimeAsync(1000);
+
+        expect(kafkaClient.connect).toHaveBeenCalledTimes(2);
+        expect(service.isKafkaConnected()).toBe(true);
+        await service.onModuleDestroy();
     });
 });

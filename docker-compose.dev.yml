@@ -13,6 +13,7 @@
 # .env 에 필요한 값:
 #   KAFKA_ENABLED=true
 #   KAFKA_BROKER=localhost:9092
+#   KAFKA_RECONNECT_INTERVAL_MS=10000  # 선택, 기본 10초
 #   AI_AGENT_GRPC_URL=localhost:50051
 #   REDIS_HOST=localhost / REDIS_PORT=6379
 #
@@ -30,6 +31,7 @@ services:
         command: redis-server --appendonly yes
         volumes:
             - dev_redis_data:/data
+        restart: unless-stopped
         healthcheck:
             test: ['CMD', 'redis-cli', 'ping']
             interval: 10s
@@ -61,6 +63,7 @@ services:
             CLUSTER_ID: 'pawpong-dev-cluster-01'
         volumes:
             - dev_kafka_data:/var/lib/kafka/data
+        restart: unless-stopped
         healthcheck:
             test: ['CMD-SHELL', 'kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1']
             interval: 15s
@@ -82,6 +85,7 @@ services:
             KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:29092
             DYNAMIC_CONFIG_ENABLED: 'true'
             JAVA_OPTS: '-Xmx256m -Xms128m'
+        restart: unless-stopped
 
     ai-agent:
         build:
