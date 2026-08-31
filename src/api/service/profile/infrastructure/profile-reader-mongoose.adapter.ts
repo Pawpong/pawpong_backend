@@ -49,7 +49,6 @@ export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
             bpm: breeder.bpm ?? 0,
             followerCount: breeder.stats?.followerCount ?? 0,
             followingCount: breeder.stats?.followingCount ?? 0,
-            level: (breeder.verification?.level as 'new' | 'elite') ?? 'new',
             plan: (breeder.verification?.plan as 'basic' | 'pro') ?? 'basic',
             businessLocation: {
                 city: breeder.profile?.location?.city ?? '',
@@ -94,7 +93,6 @@ export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
                 breederLocation: entry.breederLocation ?? '',
                 recentPetStatus: recentPetStatusMap.get(entry.favoriteBreederId),
                 bpm: breeder?.bpm ?? 0,
-                level: (breeder?.verification?.level as 'new' | 'elite' | undefined) ?? undefined,
                 addedAt: entry.addedAt,
             };
         });

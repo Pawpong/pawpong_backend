@@ -46,7 +46,6 @@ export class ProfileMapperService {
             bpm: snapshot.bpm,
             followerCount: snapshot.followerCount,
             followingCount: snapshot.followingCount,
-            level: snapshot.level,
             plan: snapshot.plan,
             businessLocation: snapshot.businessLocation,
             longDescription: snapshot.longDescription,
@@ -80,7 +79,6 @@ export class ProfileMapperService {
             bpm: snapshot.bpm,
             followerCount: snapshot.followerCount,
             followingCount: snapshot.followingCount,
-            level: snapshot.level,
             plan: snapshot.plan,
             businessLocation: snapshot.businessLocation,
             isFavorited,
@@ -96,7 +94,6 @@ export class ProfileMapperService {
             breederLocation: snapshot.breederLocation,
             recentPetStatus: snapshot.recentPetStatus,
             bpm: snapshot.bpm,
-            level: snapshot.level,
             addedAt: snapshot.addedAt.toISOString(),
             isFavorited: true,
         };

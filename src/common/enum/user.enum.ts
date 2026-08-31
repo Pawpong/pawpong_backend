@@ -58,14 +58,6 @@ export enum BreederPlan {
 }
 
 /**
- * 브리더 레벨 열거형
- */
-export enum BreederLevel {
-    NEW = 'new', // 뉴 브리더
-    ELITE = 'elite', // 엘리트 브리더
-}
-
-/**
  * 반려동물 크기 열거형 (강아지)
  */
 export enum PetSize {

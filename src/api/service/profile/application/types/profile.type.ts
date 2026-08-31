@@ -31,7 +31,6 @@ export interface BreederProfileSnapshot {
     followerCount: number;
     /** 이 브리더가 팔로우 중인 수 = stats.followingCount. 브리더도 팔로우 주체가 될 수 있어 0 이 아닐 수 있다 */
     followingCount: number;
-    level: 'new' | 'elite';
     plan: 'basic' | 'pro';
     businessLocation: ProfileBusinessLocation;
 }
@@ -44,7 +43,6 @@ export interface FavoriteBreederCardSnapshot {
     /** 가장 최근 활성 분양 펫의 status. 분양 진행중 / 분양 완료 / 없음 */
     recentPetStatus?: 'available' | 'reserved' | 'adopted';
     bpm: number;
-    level?: 'new' | 'elite';
     addedAt: Date;
 }
 
