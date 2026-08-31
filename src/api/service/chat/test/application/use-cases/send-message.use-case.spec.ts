@@ -1,14 +1,15 @@
 import { SendMessageUseCase } from '../../../application/use-cases/send-message.use-case';
 import { ChatPolicyService } from '../../../domain/services/chat-policy.service';
 import { ChatMessageMapperService } from '../../../domain/services/chat-message-mapper.service';
-import { ChatRoomManagerPort } from '../../../application/ports/chat-room-manager.port';
-import { ChatMessageManagerPort } from '../../../application/ports/chat-message-manager.port';
+import { ChatRoomManagerPort, ChatRoomSnapshot } from '../../../application/ports/chat-room-manager.port';
+import { ChatMessageManagerPort, ChatMessageSnapshot } from '../../../application/ports/chat-message-manager.port';
 import { ChatMessageBrokerPort } from '../../../application/ports/chat-message-broker.port';
 import { ChatRoomStatus } from '../../../../../../schema/chat-room.schema';
 import { MessageType, SenderRole } from '../../../../../../schema/chat-message.schema';
 import { DomainAuthorizationError, DomainNotFoundError } from '../../../../../../common/error/domain.error';
+import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 
-const room = {
+const room: ChatRoomSnapshot = {
     id: 'room-1',
     adopterId: 'adopter-1',
     breederId: 'breeder-1',
@@ -16,7 +17,7 @@ const room = {
     createdAt: new Date(),
 };
 
-const message = {
+const message: ChatMessageSnapshot = {
     id: 'msg-1',
     roomId: 'room-1',
     senderId: 'adopter-1',
@@ -28,7 +29,7 @@ const message = {
     createdAt: new Date(),
 };
 
-function makeRoomManager(findResult: any = room): ChatRoomManagerPort {
+function makeRoomManager(findResult: ChatRoomSnapshot | null = room): ChatRoomManagerPort {
     return {
         findRoomById: jest.fn().mockResolvedValue(findResult),
         findRoomByParticipants: jest.fn(),
@@ -40,25 +41,45 @@ function makeRoomManager(findResult: any = room): ChatRoomManagerPort {
     };
 }
 
-function makeMessageManager(): ChatMessageManagerPort {
+function makeMessageManager(): {
+    manager: ChatMessageManagerPort;
+    createMessage: jest.MockedFunction<ChatMessageManagerPort['createMessage']>;
+} {
+    const createMessage = jest.fn() as jest.MockedFunction<ChatMessageManagerPort['createMessage']>;
+    createMessage.mockResolvedValue(message);
     return {
-        createMessage: jest.fn().mockResolvedValue(message),
-        findMessagesByRoomId: jest.fn(),
-        markMessagesAsRead: jest.fn(),
-        countUnreadMessages: jest.fn().mockResolvedValue(0),
+        manager: {
+            createMessage,
+            findMessagesByRoomId: jest.fn(),
+            markMessagesAsRead: jest.fn(),
+            countUnreadMessages: jest.fn().mockResolvedValue(0),
+        },
+        createMessage,
     };
 }
 
-function makeBroker(): ChatMessageBrokerPort {
+function makeBroker(): {
+    broker: ChatMessageBrokerPort;
+    publishMessage: jest.MockedFunction<ChatMessageBrokerPort['publishMessage']>;
+} {
+    const publishMessage = jest.fn() as jest.MockedFunction<ChatMessageBrokerPort['publishMessage']>;
+    publishMessage.mockResolvedValue(true);
     return {
-        publishMessage: jest.fn().mockResolvedValue(true),
-        publishRoomCreated: jest.fn().mockResolvedValue(true),
-        publishRoomClosed: jest.fn().mockResolvedValue(true),
+        broker: {
+            publishMessage,
+            publishRoomCreated: jest.fn().mockResolvedValue(true),
+            publishRoomClosed: jest.fn().mockResolvedValue(true),
+        },
+        publishMessage,
     };
 }
 
-function makeLogger() {
-    return { logStart: jest.fn(), logSuccess: jest.fn(), logError: jest.fn() } as any;
+function makeLogger(): CustomLoggerService {
+    return {
+        logStart: jest.fn(),
+        logSuccess: jest.fn(),
+        logError: jest.fn(),
+    } as unknown as CustomLoggerService;
 }
 
 describe('SendMessageUseCase', () => {
@@ -66,25 +87,23 @@ describe('SendMessageUseCase', () => {
     const mapper = new ChatMessageMapperService();
 
     it('메시지를 저장하고 브로커로 발행한다 (adopter→breeder)', async () => {
-        const messageManager = makeMessageManager();
-        const broker = makeBroker();
+        const { manager: messageManager, createMessage } = makeMessageManager();
+        const { broker, publishMessage } = makeBroker();
         const useCase = new SendMessageUseCase(makeRoomManager(), messageManager, broker, policy, mapper, makeLogger());
         const result = await useCase.execute('adopter-1', SenderRole.ADOPTER, { roomId: 'room-1', content: '안녕' });
         expect(result.id).toBe('msg-1');
         expect(result.brokerPublished).toBe(true);
-        expect(messageManager.createMessage).toHaveBeenCalledWith(
+        expect(createMessage).toHaveBeenCalledWith(
             expect.objectContaining({ receiverId: 'breeder-1', messageType: MessageType.TEXT }),
         );
-        expect(broker.publishMessage).toHaveBeenCalledWith(
-            expect.objectContaining({ messageId: 'msg-1', roomId: 'room-1' }),
-        );
+        expect(publishMessage).toHaveBeenCalledWith(expect.objectContaining({ messageId: 'msg-1', roomId: 'room-1' }));
     });
 
     it('방이 없으면 DomainNotFoundError', async () => {
         const useCase = new SendMessageUseCase(
             makeRoomManager(null),
-            makeMessageManager(),
-            makeBroker(),
+            makeMessageManager().manager,
+            makeBroker().broker,
             policy,
             mapper,
             makeLogger(),
@@ -97,8 +116,8 @@ describe('SendMessageUseCase', () => {
     it('참여자가 아니면 DomainAuthorizationError', async () => {
         const useCase = new SendMessageUseCase(
             makeRoomManager(),
-            makeMessageManager(),
-            makeBroker(),
+            makeMessageManager().manager,
+            makeBroker().broker,
             policy,
             mapper,
             makeLogger(),
@@ -109,18 +128,39 @@ describe('SendMessageUseCase', () => {
     });
 
     it('messageType 미지정 시 TEXT 기본값', async () => {
-        const messageManager = makeMessageManager();
+        const { manager: messageManager, createMessage } = makeMessageManager();
         const useCase = new SendMessageUseCase(
             makeRoomManager(),
             messageManager,
-            makeBroker(),
+            makeBroker().broker,
             policy,
             mapper,
             makeLogger(),
         );
         await useCase.execute('adopter-1', SenderRole.ADOPTER, { roomId: 'room-1', content: '안녕' });
-        expect(messageManager.createMessage).toHaveBeenCalledWith(
-            expect.objectContaining({ messageType: MessageType.TEXT }),
+        expect(createMessage).toHaveBeenCalledWith(expect.objectContaining({ messageType: MessageType.TEXT }));
+    });
+
+    it('위치 메시지 타입과 본문을 변경하지 않고 저장한다', async () => {
+        const { manager: messageManager, createMessage } = makeMessageManager();
+        const useCase = new SendMessageUseCase(
+            makeRoomManager(),
+            messageManager,
+            makeBroker().broker,
+            policy,
+            mapper,
+            makeLogger(),
+        );
+        const content = '__PAWPONG_ATTACHMENT_V1__{"kind":"location","latitude":37.5665,"longitude":126.978}';
+
+        await useCase.execute('adopter-1', SenderRole.ADOPTER, {
+            roomId: 'room-1',
+            content,
+            messageType: MessageType.LOCATION,
+        });
+
+        expect(createMessage).toHaveBeenCalledWith(
+            expect.objectContaining({ content, messageType: MessageType.LOCATION }),
         );
     });
 });
