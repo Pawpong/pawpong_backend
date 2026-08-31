@@ -6,16 +6,17 @@ import { PaginationResponseDto } from '../../../../common/dto/pagination/paginat
 
 import { GetMyAdoptionFavoritesUseCase } from '../application/use-cases/get-my-adoption-favorites.use-case';
 import { ADOPTION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/adoption-response-messages';
-import { AdoptionProtectedController } from '../decorator/adoption-protected-controller.decorator';
+import { AdoptionFavoritesController } from '../decorator/adoption-protected-controller.decorator';
 import { AdoptionMyFavoritesQueryDto } from '../dto/request/adoption-my-favorites-query.dto';
 import { AdoptionPetResponseDto } from '../dto/response/adoption-pet-response.dto';
 import { ApiGetMyAdoptionFavoritesEndpoint } from '../swagger/index';
 
 /**
- * GET /v2/adoption/me/favorites — 입양자 본인 즐겨찾기 펫 페이지네이션.
- * AdoptionProtectedController = StrictRolesGuard('adopter') 재사용.
+ * GET /v2/adoption/me/favorites — 본인 즐겨찾기 펫 페이지네이션.
+ * 토글과 같은 AdoptionFavoritesController(adopter·breeder) 를 쓴다 —
+ * 토글만 열고 목록을 막으면 담기는 되는데 목록은 비어 보이는 상태가 된다.
  */
-@AdoptionProtectedController()
+@AdoptionFavoritesController()
 export class AdoptionMyFavoritesController {
     constructor(private readonly useCase: GetMyAdoptionFavoritesUseCase) {}
 
