@@ -101,17 +101,6 @@ export class ApplicationListItemResponseDto {
     processedAt?: string;
 
     /**
-     * 브리더 등급
-     * @example "elite"
-     */
-    @ApiProperty({
-        description: '브리더 등급',
-        example: 'elite',
-        enum: ['elite', 'new'],
-    })
-    breederLevel: 'elite' | 'new';
-
-    /**
      * 브리더 프로필 이미지 URL
      * @example "https://example.com/breeder-profile.jpg"
      */

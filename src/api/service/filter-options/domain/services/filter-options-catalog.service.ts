@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 
-export type BreederLevelValue = 'elite' | 'new';
 export type SortOptionValue = 'latest' | 'favorite' | 'review' | 'price_asc' | 'price_desc';
 export type DogSizeValue = 'small' | 'medium' | 'large';
 export type CatFurLengthValue = 'short' | 'long';
@@ -11,14 +10,12 @@ export type FilterOptionItem<T extends string | boolean> = Readonly<{
     description: string;
 }>;
 
-export type BreederLevelFilterOption = FilterOptionItem<BreederLevelValue>;
 export type SortFilterOption = FilterOptionItem<SortOptionValue>;
 export type DogSizeFilterOption = FilterOptionItem<DogSizeValue>;
 export type CatFurLengthFilterOption = FilterOptionItem<CatFurLengthValue>;
 export type AdoptionStatusFilterOption = FilterOptionItem<boolean>;
 
 export type AllFilterOptionsSnapshot = Readonly<{
-    breederLevels: BreederLevelFilterOption[];
     sortOptions: SortFilterOption[];
     dogSizes: DogSizeFilterOption[];
     catFurLengths: CatFurLengthFilterOption[];
@@ -29,27 +26,11 @@ export type AllFilterOptionsSnapshot = Readonly<{
 export class FilterOptionsCatalogService {
     getAll(): AllFilterOptionsSnapshot {
         return {
-            breederLevels: this.getBreederLevels(),
             sortOptions: this.getSortOptions(),
             dogSizes: this.getDogSizes(),
             catFurLengths: this.getCatFurLengths(),
             adoptionStatus: this.getAdoptionStatus(),
         };
-    }
-
-    getBreederLevels(): BreederLevelFilterOption[] {
-        return [
-            {
-                value: 'elite',
-                label: '엘리트',
-                description: '인증된 전문 브리더',
-            },
-            {
-                value: 'new',
-                label: '뉴',
-                description: '신규 브리더',
-            },
-        ];
     }
 
     getSortOptions(): SortFilterOption[] {

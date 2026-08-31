@@ -53,16 +53,6 @@ export class MyReviewDetailDto {
     breederProfileImage: string | null;
 
     /**
-     * 브리더 레벨
-     * @example "gold"
-     */
-    @ApiProperty({
-        description: '브리더 레벨 (new, bronze, silver, gold, platinum)',
-        example: 'gold',
-    })
-    breederLevel: string;
-
-    /**
      * 브리딩 동물 종류
      * @example "dog"
      */

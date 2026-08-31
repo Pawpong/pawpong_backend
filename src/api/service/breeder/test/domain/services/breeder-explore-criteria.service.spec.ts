@@ -51,11 +51,6 @@ describe('BreederExploreCriteriaService', () => {
         expect(result.filter['profile.location.city']).toEqual({ $in: ['서울'] });
     });
 
-    it('breederLevel 배열은 $in 필터', () => {
-        const result = service.build({ petType: 'dog', breederLevel: ['elite', 'new'] } as any);
-        expect(result.filter['verification.level']).toEqual({ $in: ['elite', 'new'] });
-    });
-
     it('sortBy에 따라 정렬이 변경된다', () => {
         expect(service.build({ petType: 'dog', sortBy: BreederSortBy.FAVORITE } as any).sortOrder).toEqual({
             'stats.totalFavorites': -1,

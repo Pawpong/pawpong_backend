@@ -24,7 +24,6 @@ export class BreederExploreCardMapperService {
         return {
             breederId: String(breeder._id),
             breederName: breeder.name,
-            breederLevel: breeder.verification?.level || 'new',
             petType: breeder.petType || 'dog',
             location: breeder.profile?.location
                 ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
@@ -54,7 +53,6 @@ export class BreederExploreCardMapperService {
         return {
             breederId: String(breeder._id),
             breederName: breeder.name,
-            breederLevel: breeder.verification?.level || 'new',
             petType: breeder.petType || 'dog',
             location: breeder.profile?.location
                 ? `${breeder.profile.location.city} ${breeder.profile.location.district}`

@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsEnum, IsOptional, IsNumber, Min, Max, IsString } from 'class-validator';
 
-import { PetType, PetSize, FurLength, BreederLevel } from '../../../../../common/enum/user.enum';
+import { PetType, PetSize, FurLength } from '../../../../../common/enum/user.enum';
 import { BreederSortBy } from '../../constants/breeder-search.enum';
 
 export class SearchBreederRequestDto {
@@ -114,21 +114,6 @@ export class SearchBreederRequestDto {
     @IsOptional()
     @Type(() => Boolean)
     isAdoptionAvailable?: boolean;
-
-    /**
-     * 브리더 레벨 필터 - 중복 선택 가능
-     * @example ["new", "elite"]
-     */
-    @ApiPropertyOptional({
-        description: '브리더 레벨 필터',
-        enum: BreederLevel,
-        isArray: true,
-        example: ['new'],
-    })
-    @IsOptional()
-    @IsEnum(BreederLevel, { each: true })
-    @Type(() => String)
-    breederLevel?: string[];
 
     /**
      * 정렬 기준

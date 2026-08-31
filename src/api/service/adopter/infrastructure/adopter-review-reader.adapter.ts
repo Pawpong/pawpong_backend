@@ -54,7 +54,6 @@ export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {
                 breederProfileImageFileName: breeder?.profileImageFileName
                     ? this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60) || null
                     : null,
-                breederLevel: breeder?.verification?.level || null,
                 breedingPetType: breeder?.petType || null,
                 content: review.content,
                 reviewType: review.type,
@@ -83,7 +82,6 @@ export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {
             breederProfileImageFileName: breeder?.profileImageFileName
                 ? this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60) || null
                 : null,
-            breederLevel: breeder?.verification?.level || null,
             breedingPetType: breeder?.petType || null,
             content: review.content,
             reviewType: review.type,

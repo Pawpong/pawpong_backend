@@ -4,7 +4,6 @@ import { FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES } from '../constants/filter-op
 import {
     AdoptionStatusOptionDto,
     AllFilterOptionsResponseDto,
-    BreederLevelOptionDto,
     CatFurLengthOptionDto,
     DogSizeOptionDto,
     SortOptionDto,
@@ -22,17 +21,6 @@ export function ApiGetAllFilterOptionsEndpoint() {
         isPublic: true,
         successDescription: '전체 필터 옵션 조회 성공',
         successMessageExample: FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES.allFilterOptionsRetrieved,
-    });
-}
-
-export function ApiGetBreederLevelsEndpoint() {
-    return ApiEndpoint({
-        summary: '브리더 레벨 옵션 조회',
-        description: '브리더 레벨 필터 옵션 목록을 조회합니다.',
-        responseType: [BreederLevelOptionDto],
-        isPublic: true,
-        successDescription: '브리더 레벨 옵션 조회 성공',
-        successMessageExample: FILTER_OPTIONS_RESPONSE_MESSAGE_EXAMPLES.breederLevelsRetrieved,
     });
 }
 

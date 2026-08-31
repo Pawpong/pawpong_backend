@@ -12,7 +12,6 @@ export class AdopterReviewDetailMapperService {
             breederId: review.breederId,
             breederNickname: review.breederNickname || '알 수 없음',
             breederProfileImage: review.breederProfileImageFileName,
-            breederLevel: review.breederLevel || 'new',
             breedingPetType: review.breedingPetType || 'unknown',
             content: review.content,
             reviewType: review.reviewType,

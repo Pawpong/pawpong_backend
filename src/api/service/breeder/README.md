@@ -37,7 +37,6 @@
     "province": ["서울특별시", "경기도"],
     "city": ["강남구", "파주시"],
     "isAdoptionAvailable": true,
-    "breederLevel": ["elite"],
     "sortBy": "latest",
     "page": 1,
     "take": 20

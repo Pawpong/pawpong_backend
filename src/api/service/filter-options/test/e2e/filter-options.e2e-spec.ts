@@ -22,18 +22,6 @@ describe('필터 옵션 종단간 테스트', () => {
                 success: true,
                 code: 200,
                 data: {
-                    breederLevels: [
-                        {
-                            value: 'elite',
-                            label: '엘리트',
-                            description: '인증된 전문 브리더',
-                        },
-                        {
-                            value: 'new',
-                            label: '뉴',
-                            description: '신규 브리더',
-                        },
-                    ],
                     sortOptions: [
                         {
                             value: 'latest',
@@ -99,33 +87,6 @@ describe('필터 옵션 종단간 테스트', () => {
                     ],
                 },
                 message: '필터 옵션이 조회되었습니다.',
-                timestamp: expect.any(String),
-            });
-        });
-    });
-
-    describe('GET /api/v2/filter-options/breeder-levels', () => {
-        it('브리더 레벨 옵션 조회 성공', async () => {
-            const response = await request(app.getHttpServer())
-                .get('/api/v2/filter-options/breeder-levels')
-                .expect(200);
-
-            expect(response.body).toEqual({
-                success: true,
-                code: 200,
-                data: [
-                    {
-                        value: 'elite',
-                        label: '엘리트',
-                        description: '인증된 전문 브리더',
-                    },
-                    {
-                        value: 'new',
-                        label: '뉴',
-                        description: '신규 브리더',
-                    },
-                ],
-                message: '브리더 레벨 옵션이 조회되었습니다.',
                 timestamp: expect.any(String),
             });
         });

@@ -1,4 +1,4 @@
-import { BreederLevel, FurLength, PetSize, PetType } from '../../../../../common/enum/user.enum';
+import { FurLength, PetSize, PetType } from '../../../../../common/enum/user.enum';
 import { BreederSortBy, SortCriteria } from '../../constants/breeder-search.enum';
 
 export type BreederSearchQuery = {
@@ -23,7 +23,6 @@ export type BreederExploreQuery = {
     province?: string[];
     city?: string[];
     isAdoptionAvailable?: boolean;
-    breederLevel?: Array<BreederLevel | string>;
     sortBy?: BreederSortBy | string;
     page?: number;
     limit?: number;

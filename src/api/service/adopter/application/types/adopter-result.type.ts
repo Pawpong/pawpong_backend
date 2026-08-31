@@ -75,7 +75,6 @@ export type AdopterApplicationListItemResult = {
     status: string;
     appliedAt: string;
     processedAt?: string;
-    breederLevel: 'elite' | 'new';
     profileImage?: string | null;
     animalType: 'cat' | 'dog';
     applicationDate: string;
@@ -116,7 +115,6 @@ export type AdopterReviewItemResult = {
     breederId: string | null;
     breederNickname: string;
     breederProfileImage: string | null;
-    breederLevel: string;
     breedingPetType: string;
     content: string;
     reviewType: string;
@@ -131,7 +129,6 @@ export type AdopterReviewDetailResult = {
     breederId: string | null;
     breederNickname: string;
     breederProfileImage: string | null;
-    breederLevel: string;
     breedingPetType: string;
     content: string;
     reviewType: string;

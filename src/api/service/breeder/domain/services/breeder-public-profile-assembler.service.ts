@@ -38,7 +38,6 @@ export class BreederPublicProfileAssemblerService {
             breederName: breeder.name,
             breederEmail: breeder.emailAddress,
             authProvider: breeder.socialAuthInfo?.authProvider || 'local',
-            breederLevel: breeder.verification?.level || 'new',
             petType: breeder.petType || 'dog',
             detailBreed: breeder.detailBreed,
             breeds: breeder.breeds || [],
