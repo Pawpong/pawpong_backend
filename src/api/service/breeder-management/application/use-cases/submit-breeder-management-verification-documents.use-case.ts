@@ -54,7 +54,6 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
 
         const draftDocuments = await this.breederManagementVerificationDraftStorePort.get(userId);
         const submissionPlan = this.breederManagementVerificationDocumentPolicyService.buildSubmissionPlan({
-            level: dto.level,
             submittedDocuments: dto.documents,
             draftDocuments,
             currentVerification: breeder.verification,
@@ -62,7 +61,6 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
 
         await this.breederManagementSettingsPort.updateVerification(userId, {
             status: VerificationStatus.REVIEWING,
-            level: dto.level,
             submittedAt: submissionPlan.submittedAt,
             documents: submissionPlan.finalDocuments,
             submittedByEmail: dto.submittedByEmail || false,
@@ -71,7 +69,6 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
         await this.breederManagementVerificationNotifierPort.notifySubmission(
             this.breederManagementVerificationNotificationPayloadFactoryService.create({
                 breeder,
-                level: dto.level,
                 isResubmission: submissionPlan.isResubmission,
                 submittedAt: submissionPlan.submittedAt,
                 finalDocuments: submissionPlan.finalDocuments,

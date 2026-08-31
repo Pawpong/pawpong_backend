@@ -45,14 +45,14 @@ describe('브리더 관리 인증 종단간 테스트', () => {
             .post('/api/v2/breeder-management/verification/upload')
             .set('Authorization', `Bearer ${context.breederToken}`)
             .field('types', JSON.stringify(['idCard', 'businessLicense']))
-            .field('level', 'new')
             .attach('files', context.verificationUploadTestFileBuffer, context.verificationUploadTestFileName)
             .attach('files', context.verificationUploadTestFileBuffer, context.verificationUploadTestFileName)
             .expect(200);
 
         expect(response.body.success).toBe(true);
-        expect(response.body.message).toBe('new 레벨 브리더 인증 서류 2개가 업로드되었습니다.');
+        expect(response.body.message).toBe('브리더 인증 서류 2개가 업로드되었습니다.');
         expect(response.body.data.count).toBe(2);
+        expect(response.body.data).not.toHaveProperty('level');
         expect(response.body.data.documents).toHaveLength(2);
         uploadedDocuments = response.body.data.documents;
     });
@@ -62,7 +62,6 @@ describe('브리더 관리 인증 종단간 테스트', () => {
             .post('/api/v2/breeder-management/verification/submit')
             .set('Authorization', `Bearer ${context.breederToken}`)
             .send({
-                level: 'new',
                 documents: uploadedDocuments.map((document) => ({
                     type: document.type,
                     fileName: document.fileName,

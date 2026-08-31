@@ -47,20 +47,13 @@ export class UploadDocumentsResponseDto {
     count: number;
 
     @ApiProperty({
-        description: '브리더 레벨',
-        example: 'new',
-    })
-    level: string;
-
-    @ApiProperty({
         description: '업로드된 문서 목록',
         type: [UploadedDocumentDto],
     })
     documents: UploadedDocumentDto[];
 
-    constructor(count: number, level: string, documents: UploadedDocumentDto[]) {
+    constructor(count: number, documents: UploadedDocumentDto[]) {
         this.count = count;
-        this.level = level;
         this.documents = documents;
     }
 }

@@ -19,7 +19,6 @@ import { BreederProfileUpdateRequestDto } from '../dto/request/profile-update-re
 import { ReviewReplyRequestDto } from '../dto/request/review-reply-request.dto';
 import { SimpleApplicationFormUpdateRequestDto } from '../dto/request/simple-application-form-update-request.dto';
 import { SubmitDocumentsRequestDto } from '../dto/request/submit-documents-request.dto';
-import { LevelChangeRequestDto } from '../dto/request/level-change-request.dto';
 import { UploadDocumentsRequestDto } from '../dto/request/upload-documents-request.dto';
 import { VerificationSubmitRequestDto } from '../dto/request/verification-submit-request.dto';
 import { ApplicationFormResponseDto } from '../dto/response/application-form-response.dto';
@@ -51,20 +50,18 @@ export function ApiUploadBreederManagementVerificationDocumentsEndpoint() {
             summary: '브리더 인증 서류 업로드',
             description: `브리더 입점 인증 서류를 업로드합니다.
 
-**New 레벨 (필수 2개):**
+**필수 서류:**
 - idCard: 신분증 사본
 - businessLicense: 동물생산업 등록증
 
-**Elite 레벨 (필수 4개):**
-- idCard: 신분증 사본
-- businessLicense: 동물생산업 등록증
+**선택 서류:**
 - contractSample: 표준 입양계약서 샘플
-- breederCertificate: 브리더 인증 서류 (강아지: breederDogCertificate, 고양이: breederCatCertificate)
+- recentPedigreeDocument: 최근 혈통 증빙
+- breederCertificate: 브리더 관련 자격·협회 증빙
 
 **요청 형식:**
 - files: 파일 배열
 - types: 서류 타입 JSON 배열 (예: ["idCard","businessLicense"])
-- level: 브리더 레벨 ("new" 또는 "elite")
 
 **응답:**
 - fileName: 파일 경로 (서류 제출 시 사용)
@@ -90,13 +87,8 @@ export function ApiUploadBreederManagementVerificationDocumentsEndpoint() {
                         type: 'string',
                         example: '["idCard","businessLicense"]',
                     },
-                    level: {
-                        type: 'string',
-                        enum: ['new', 'elite'],
-                        example: 'new',
-                    },
                 },
-                required: ['files', 'types', 'level'],
+                required: ['files', 'types'],
             },
         }),
     );
@@ -158,23 +150,10 @@ export const BreederManagementSwaggerDocs = {
 2. 이 엔드포인트로 fileName들을 제출
 
 **요청 형식:**
-- level: 브리더 레벨 ("new" 또는 "elite")
 - documents: 서류 목록 [{ type, fileName }]`,
         responseType: VerificationSubmitResponseDto,
         successDescription: '브리더 인증 서류 제출 성공',
         successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.verificationDocumentsSubmitted,
-        isPublic: false,
-        errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
-    },
-    requestLevelChange: {
-        summary: 'Elite 브리더 등급 변경 신청',
-        description: `승인된 New 브리더가 Elite 등급 심사를 신청합니다.
-
-기존 승인 서류는 서버에서 자동으로 재사용하며, 추가 업로드한 입양계약서와 전문성 증빙 서류를 병합합니다.
-이미 심사 중이거나 승인되지 않은 브리더는 신청할 수 없습니다.`,
-        responseType: VerificationSubmitResponseDto,
-        successDescription: '브리더 등급 변경 신청 성공',
-        successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.levelChangeRequested,
         isPublic: false,
         errorResponses: [BREEDER_MANAGEMENT_BAD_REQUEST_RESPONSE, BREEDER_MANAGEMENT_FORBIDDEN_RESPONSE],
     },
@@ -402,7 +381,6 @@ export const BreederManagementRequestBodyDtos = {
     profileUpdate: BreederProfileUpdateRequestDto,
     verificationSubmit: VerificationSubmitRequestDto,
     submitDocuments: SubmitDocumentsRequestDto,
-    levelChange: LevelChangeRequestDto,
     parentPetAdd: ParentPetAddDto,
     parentPetUpdate: ParentPetUpdateDto,
     applicationFormUpdate: ApplicationFormUpdateRequestDto,
@@ -454,13 +432,6 @@ export function ApiSubmitBreederManagementVerificationDocumentsEndpoint() {
     return applyDecorators(
         ApiEndpoint(BreederManagementSwaggerDocs.submitVerificationDocuments),
         ApiBody({ type: SubmitDocumentsRequestDto }),
-    );
-}
-
-export function ApiRequestBreederManagementLevelChangeEndpoint() {
-    return applyDecorators(
-        ApiEndpoint(BreederManagementSwaggerDocs.requestLevelChange),
-        ApiBody({ type: LevelChangeRequestDto }),
     );
 }
 

@@ -89,7 +89,6 @@ describe('브리더 관리 후기와 계정 종단간 테스트', () => {
                     animal: 'dog',
                     breeds: ['비숑프리제'],
                     plan: 'basic',
-                    level: 'new',
                     agreements: {
                         termsOfService: true,
                         privacyPolicy: true,

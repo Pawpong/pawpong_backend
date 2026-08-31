@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { BreederRepository } from '../repository/breeder.repository';
 import type {
     BreederManagementSettingsPort,
-    BreederManagementLevelChangeRequestRecord,
     BreederManagementVerificationRecord,
 } from '../application/ports/breeder-management-settings.port';
 import type {
@@ -17,10 +16,6 @@ export class BreederManagementSettingsAdapter implements BreederManagementSettin
 
     updateVerification(breederId: string, verification: BreederManagementVerificationRecord): Promise<void> {
         return this.breederRepository.updateVerification(breederId, verification);
-    }
-
-    requestLevelChange(breederId: string, request: BreederManagementLevelChangeRequestRecord): Promise<void> {
-        return this.breederRepository.requestLevelChange(breederId, request);
     }
 
     updateApplicationForm(

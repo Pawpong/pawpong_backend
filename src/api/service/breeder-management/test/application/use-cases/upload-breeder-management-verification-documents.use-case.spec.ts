@@ -60,14 +60,13 @@ describe('브리더 관리 인증 문서 업로드 유스케이스', () => {
 
     it('업로드 응답 계약을 유지하고 임시 문서를 저장한다', async () => {
         const files = [
-            { originalname: '신분증.pdf', size: 1234 } as Express.Multer.File,
-            { originalname: '등록증.pdf', size: 5678 } as Express.Multer.File,
+            { originalname: '신분증.pdf', size: 1234, mimetype: 'application/pdf' } as Express.Multer.File,
+            { originalname: '등록증.pdf', size: 5678, mimetype: 'application/pdf' } as Express.Multer.File,
         ];
 
-        const result = await useCase.execute('breeder-id', files, ['idCard', 'businessLicense'], 'new');
+        const result = await useCase.execute('breeder-id', files, ['idCard', 'businessLicense']);
 
         expect(result.count).toBe(2);
-        expect(result.level).toBe('new');
         expect(result.documents[0]).toMatchObject({
             type: 'idCard',
             fileName: 'verification/breeder-id/신분증.pdf',
@@ -82,9 +81,14 @@ describe('브리더 관리 인증 문서 업로드 유스케이스', () => {
         await expect(
             useCase.execute(
                 'breeder-id',
-                [{ originalname: '신분증.pdf', size: 1234 } as Express.Multer.File],
+                [
+                    {
+                        originalname: '신분증.pdf',
+                        size: 1234,
+                        mimetype: 'application/pdf',
+                    } as Express.Multer.File,
+                ],
                 ['idCard', 'businessLicense'],
-                'new',
             ),
         ).rejects.toThrow('파일 수와 타입 수가 일치하지 않습니다.');
     });

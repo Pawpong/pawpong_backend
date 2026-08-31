@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsArray, IsEnum, ValidateNested, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsArray, ValidateNested, IsOptional } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 
@@ -37,20 +37,6 @@ export class DocumentInfoDto {
  * 인증된 브리더가 서류를 제출할 때 사용 (간소화된 버전)
  */
 export class SubmitDocumentsRequestDto {
-    /**
-     * 브리더 레벨
-     * @example "new"
-     */
-    @ApiProperty({
-        description: '브리더 레벨',
-        example: 'new',
-        enum: ['new', 'elite'],
-    })
-    @IsString()
-    @IsNotEmpty()
-    @IsEnum(['new', 'elite'])
-    level: 'new' | 'elite';
-
     /**
      * 제출 서류 목록
      */

@@ -19,30 +19,14 @@ export class BreederManagementVerificationStatusAssemblerService {
         );
 
         const documents = this.toDocuments(verification?.documents || [], fileUrlPort);
-        const levelChangeRequest = verification?.levelChangeRequest;
-
         return {
             status: verification?.status || 'pending',
             plan: verification?.plan,
-            level: verification?.level,
             submittedAt: verification?.submittedAt,
             reviewedAt: verification?.reviewedAt,
             documents,
             rejectionReason: verification?.rejectionReason,
             submittedByEmail: verification?.submittedByEmail || false,
-            isLevelChangeRequested: verification?.isLevelChangeRequested || false,
-            levelChangeRejectionReason: verification?.levelChangeRejectionReason,
-            levelChangeReviewedAt: verification?.levelChangeReviewedAt,
-            ...(levelChangeRequest
-                ? {
-                      levelChangeRequest: {
-                          previousLevel: levelChangeRequest.previousLevel,
-                          requestedLevel: levelChangeRequest.requestedLevel,
-                          requestedAt: levelChangeRequest.requestedAt,
-                          documents: this.toDocuments(levelChangeRequest.documents || [], fileUrlPort),
-                      },
-                  }
-                : {}),
         };
     }
 
