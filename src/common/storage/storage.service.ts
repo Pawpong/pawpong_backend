@@ -342,13 +342,25 @@ export class StorageService {
     private stripBucketPrefix(filePath: string): string {
         const bucketNames = new Set([this.bucketName, ...StorageService.LEGACY_BUCKET_NAMES].filter(Boolean));
 
-        for (const bucketName of bucketNames) {
-            if (filePath.startsWith(`${bucketName}/`)) {
-                return filePath.slice(`${bucketName}/`.length);
+        let normalized = filePath;
+        let stripped = true;
+
+        // 과거 URL→키 변환 오류로 버킷명이 여러 번 중첩된 데이터도 한 번의
+        // 응답 변환에서 정상 객체 키로 복구한다. 한 단계만 제거하면 API를
+        // 거칠 때마다 `pawpong_bucket/`이 남아 잘못된 CDN URL을 계속 만든다.
+        while (stripped) {
+            stripped = false;
+
+            for (const bucketName of bucketNames) {
+                if (normalized.startsWith(`${bucketName}/`)) {
+                    normalized = normalized.slice(`${bucketName}/`.length);
+                    stripped = true;
+                    break;
+                }
             }
         }
 
-        return filePath;
+        return normalized;
     }
 
     private normalizeFolder(folder: string): string {
@@ -398,6 +410,8 @@ export class StorageService {
      * 기존 GCP CDN Signed URL 호환을 위해 메서드 유지
      */
     generateSignedUrl(fileName: string, expirationMinutes: number = 60): string {
+        // 공개 버킷 전환 후 만료값은 사용하지 않지만 기존 포트 호환을 위해 인자는 유지한다.
+        void expirationMinutes;
         let filePath = fileName;
 
         // URL인 경우 파일 경로만 추출
