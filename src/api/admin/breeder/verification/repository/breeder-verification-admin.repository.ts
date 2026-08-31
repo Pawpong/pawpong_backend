@@ -4,6 +4,7 @@ import { FilterQuery, Model } from 'mongoose';
 
 import { Admin, AdminDocument } from '../../../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../../../schema/breeder.schema';
+import { BreederLevel, VerificationStatus } from '../../../../../common/enum/user.enum';
 import { BreederVerificationAdminSearchCriteria } from '../application/ports/breeder-verification-admin-reader.port';
 import {
     BreederVerificationAdminActivityLogEntry,
@@ -116,13 +117,13 @@ export class BreederVerificationAdminRepository {
     }
 
     countApprovedBreeders() {
-        return this.breederModel.countDocuments({ 'verification.status': 'approved' });
+        return this.breederModel.countDocuments({ 'verification.status': VerificationStatus.APPROVED });
     }
 
     countApprovedEliteBreeders() {
         return this.breederModel.countDocuments({
-            'verification.status': 'approved',
-            'verification.plan': 'premium',
+            'verification.status': VerificationStatus.APPROVED,
+            'verification.level': BreederLevel.ELITE,
         });
     }
 
