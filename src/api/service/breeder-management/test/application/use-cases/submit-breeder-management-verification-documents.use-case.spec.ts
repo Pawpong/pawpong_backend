@@ -115,6 +115,11 @@ describe('브리더 관리 인증 문서 제출 유스케이스', () => {
                 fileName: 'verification/breeder-id/id-card.pdf',
                 originalFileName: '신분증.pdf',
             },
+            {
+                type: 'businessLicense',
+                fileName: 'verification/breeder-id/business-license.pdf',
+                originalFileName: '등록증.pdf',
+            },
         ];
 
         const result = await useCase.execute('breeder-id', {
@@ -153,13 +158,20 @@ describe('브리더 관리 인증 문서 제출 유스케이스', () => {
                 },
             ],
         };
+        draftStore.documents = [
+            {
+                type: 'businessLicense',
+                fileName: 'verification/breeder-id/business-license.pdf',
+                originalFileName: '등록증.pdf',
+            },
+        ];
 
         const result = await useCase.execute('breeder-id', {
             level: 'new',
             documents: [
                 {
                     type: 'idCard',
-                    fileName: 'keep-existing-id-card.pdf',
+                    fileName: 'keep-existing',
                     originalFileName: '기존신분증.pdf',
                 },
                 {

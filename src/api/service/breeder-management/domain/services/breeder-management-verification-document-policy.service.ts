@@ -49,16 +49,51 @@ const DOCUMENT_TYPE_ALIASES: Record<string, string> = {
 const REQUIRED_NEW_DOCUMENT_TYPES = ['id_card', 'animal_production_license'] as const;
 const REQUIRED_ELITE_DOCUMENT_TYPES = [...REQUIRED_NEW_DOCUMENT_TYPES, 'adoption_contract_sample'] as const;
 const ELITE_PROFESSIONAL_DOCUMENT_TYPES = ['recent_pedigree_document', 'breeder_certification'] as const;
+const MAX_DOCUMENT_SIZE_BYTES = 20 * 1024 * 1024;
+const ALLOWED_DOCUMENT_MIME_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
+const ALLOWED_DOCUMENT_EXTENSIONS = new Set(['pdf', 'jpg', 'jpeg', 'png', 'webp']);
 
 @Injectable()
 export class BreederManagementVerificationDocumentPolicyService {
-    validateUploadRequest(files: Express.Multer.File[], types: string[]): void {
+    validateUploadRequest(files: Express.Multer.File[], types: string[], level: 'new' | 'elite'): void {
         if (!files || files.length === 0) {
             throw new DomainValidationError('업로드할 파일이 없습니다.');
         }
 
         if (files.length !== types.length) {
             throw new DomainValidationError('파일 수와 타입 수가 일치하지 않습니다.');
+        }
+
+        const normalizedTypes = types.map((type) => {
+            const normalizedType = this.normalizeDocumentType(type);
+            this.assertSupportedDocumentType(type, normalizedType);
+            return normalizedType;
+        });
+
+        if (new Set(normalizedTypes).size !== normalizedTypes.length) {
+            throw new DomainValidationError('중복된 서류 타입이 있습니다. 각 서류는 한 번만 업로드해야 합니다.');
+        }
+
+        const allowedTypes =
+            level === 'new'
+                ? new Set<string>(REQUIRED_NEW_DOCUMENT_TYPES)
+                : new Set<string>([...REQUIRED_ELITE_DOCUMENT_TYPES, ...ELITE_PROFESSIONAL_DOCUMENT_TYPES]);
+        const invalidType = normalizedTypes.find((type) => !allowedTypes.has(type));
+        if (invalidType) {
+            throw new DomainValidationError(`${level} 등급에서 제출할 수 없는 서류 타입입니다: ${invalidType}`);
+        }
+
+        for (const file of files) {
+            if (file.size > MAX_DOCUMENT_SIZE_BYTES) {
+                throw new DomainValidationError(`파일 "${file.originalname}"의 크기는 20MB를 초과할 수 없습니다.`);
+            }
+
+            const extension = file.originalname.split('.').pop()?.toLowerCase() || '';
+            if (!ALLOWED_DOCUMENT_MIME_TYPES.has(file.mimetype) || !ALLOWED_DOCUMENT_EXTENSIONS.has(extension)) {
+                throw new DomainValidationError(
+                    `파일 "${file.originalname}"은(는) 지원되지 않는 형식입니다. (지원: PDF, JPG, PNG, WEBP)`,
+                );
+            }
         }
     }
 
@@ -85,15 +120,39 @@ export class BreederManagementVerificationDocumentPolicyService {
             const normalizedType = this.normalizeDocumentType(document.type);
             this.assertSupportedDocumentType(document.type, normalizedType);
 
-            if (this.isValidStoredPath(document.fileName)) {
-                const draftDocument = draftDocuments.find((draft) => draft.fileName === document.fileName);
-                documentsByType.set(normalizedType, {
-                    type: normalizedType,
-                    fileName: document.fileName,
-                    originalFileName: document.originalFileName || draftDocument?.originalFileName,
-                    uploadedAt: new Date(),
-                });
+            const existingDocument = existingDocuments.find(
+                (existing) => existing.type === normalizedType && existing.fileName === document.fileName,
+            );
+            if (existingDocument) {
+                documentsByType.set(normalizedType, existingDocument);
+                continue;
             }
+
+            if (document.fileName === 'keep-existing') {
+                if (!documentsByType.has(normalizedType)) {
+                    throw new DomainValidationError(`유지할 기존 서류가 없습니다: ${document.type}`);
+                }
+                continue;
+            }
+
+            if (!this.isValidStoredPath(document.fileName)) {
+                throw new DomainValidationError(`유효하지 않은 서류 파일 경로입니다: ${document.type}`);
+            }
+
+            const draftDocument = draftDocuments.find(
+                (draft) =>
+                    draft.fileName === document.fileName && this.normalizeDocumentType(draft.type) === normalizedType,
+            );
+            if (!draftDocument) {
+                throw new DomainValidationError(`업로드가 확인되지 않은 서류입니다: ${document.type}`);
+            }
+
+            documentsByType.set(normalizedType, {
+                type: normalizedType,
+                fileName: document.fileName,
+                originalFileName: document.originalFileName || draftDocument.originalFileName,
+                uploadedAt: new Date(),
+            });
         }
 
         const finalDocuments = [...documentsByType.values()];

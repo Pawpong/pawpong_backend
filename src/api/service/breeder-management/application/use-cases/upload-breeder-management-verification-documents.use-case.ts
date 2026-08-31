@@ -43,7 +43,7 @@ export class UploadBreederManagementVerificationDocumentsUseCase {
             throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
         }
 
-        this.breederManagementVerificationDocumentPolicyService.validateUploadRequest(files, types);
+        this.breederManagementVerificationDocumentPolicyService.validateUploadRequest(files, types, level);
 
         const uploadedDocuments: BreederManagementUploadedDocumentResult[] = [];
         const draftDocuments: BreederManagementVerificationDraftDocument[] = [];

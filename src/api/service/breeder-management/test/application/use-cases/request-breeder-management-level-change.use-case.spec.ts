@@ -43,7 +43,10 @@ describe('브리더 등급 변경 신청 유스케이스', () => {
     beforeEach(() => {
         jest.clearAllMocks();
         profilePort.findById.mockResolvedValue(structuredClone(approvedNewBreeder));
-        draftStore.get.mockResolvedValue([]);
+        draftStore.get.mockResolvedValue([
+            { type: 'adoptionContractSample', fileName: 'verification/breeder-1/contract.pdf' },
+            { type: 'breederCertification', fileName: 'verification/breeder-1/certificate.pdf' },
+        ]);
     });
 
     it('기존 승인 문서와 추가 서류를 병합해 Elite 심사를 요청한다', async () => {
