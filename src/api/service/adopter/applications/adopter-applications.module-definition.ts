@@ -6,6 +6,7 @@ import { AvailablePet, AvailablePetSchema } from '../../../../schema/available-p
 
 import { NotificationModule } from '../../notification/notification.module';
 import { AdopterSharedModule } from '../shared/adopter-shared.module';
+import { AdopterReviewsModule } from '../reviews/adopter-reviews.module';
 import { AdopterApplicationCommandController } from '../controller/adopter-application-command.controller';
 import { AdopterApplicationQueryController } from '../controller/adopter-application-query.controller';
 import { CreateAdopterApplicationUseCase } from '../application/use-cases/create-adopter-application.use-case';
@@ -36,6 +37,7 @@ const ADOPTER_APPLICATIONS_SCHEMA_IMPORTS = MongooseModule.forFeature([
 export const ADOPTER_APPLICATIONS_MODULE_IMPORTS = [
     ADOPTER_APPLICATIONS_SCHEMA_IMPORTS,
     AdopterSharedModule,
+    AdopterReviewsModule,
     MailModule,
     NotificationModule,
 ];

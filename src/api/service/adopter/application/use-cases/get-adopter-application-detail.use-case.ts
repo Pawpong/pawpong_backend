@@ -4,9 +4,11 @@ import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { ADOPTER_APPLICATION_READER_PORT } from '../ports/adopter-application-reader.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
+import { ADOPTER_REVIEW_READER_PORT } from '../ports/adopter-review-reader.port';
 import type { AdopterApplicationReaderPort } from '../ports/adopter-application-reader.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
+import type { AdopterReviewReaderPort } from '../ports/adopter-review-reader.port';
 import { AdopterApplicationDetailAssemblerService } from '../../domain/services/adopter-application-detail-assembler.service';
 import type { AdopterApplicationDetailResult } from '../types/adopter-result.type';
 
@@ -19,6 +21,8 @@ export class GetAdopterApplicationDetailUseCase {
         private readonly adopterApplicationReaderPort: AdopterApplicationReaderPort,
         @Inject(ADOPTER_BREEDER_READER_PORT)
         private readonly adopterBreederReaderPort: AdopterBreederReaderPort,
+        @Inject(ADOPTER_REVIEW_READER_PORT)
+        private readonly adopterReviewReaderPort: AdopterReviewReaderPort,
         private readonly adopterApplicationDetailAssemblerService: AdopterApplicationDetailAssemblerService,
     ) {}
 
@@ -34,6 +38,7 @@ export class GetAdopterApplicationDetailUseCase {
         }
 
         const breeder = await this.adopterBreederReaderPort.findById(application.breederId.toString());
-        return this.adopterApplicationDetailAssemblerService.toResponse(application, breeder);
+        const reviewId = await this.adopterReviewReaderPort.findIdByApplicationId(applicationId);
+        return this.adopterApplicationDetailAssemblerService.toResponse(application, breeder, reviewId);
     }
 }

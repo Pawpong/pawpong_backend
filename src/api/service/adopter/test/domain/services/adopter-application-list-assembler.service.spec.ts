@@ -34,12 +34,13 @@ describe('AdopterApplicationListAssemblerService', () => {
             profile: { specialization: ['cat'] },
         } as any;
 
-        const result = service.toItem(application, breeder, fileUrlPort);
+        const result = service.toItem(application, breeder, fileUrlPort, 'review-1');
         expect(result.breederName).toBe('닉');
         expect(result.breederLevel).toBe('elite');
         expect(result.profileImage).toBe('https://signed.example.com/img.png');
         expect(result.animalType).toBe('cat');
         expect(result.applicationDate).toBe('2026. 01. 05.');
+        expect(result.reviewId).toBe('review-1');
     });
 
     it('breeder가 없으면 기본값을 사용한다', () => {
@@ -49,7 +50,7 @@ describe('AdopterApplicationListAssemblerService', () => {
             status: 'pending',
             appliedAt: new Date('2026-01-01'),
         } as any;
-        const result = service.toItem(application, null, fileUrlPort);
+        const result = service.toItem(application, null, fileUrlPort, null);
         expect(result.breederName).toBe('알 수 없음');
         expect(result.breederLevel).toBe('new');
         expect(result.profileImage).toBeNull();

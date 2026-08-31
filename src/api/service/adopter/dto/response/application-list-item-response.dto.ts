@@ -17,6 +17,13 @@ export class ApplicationListItemResponseDto {
     })
     applicationId: string;
 
+    @ApiProperty({
+        description: '이 신청으로 작성한 후기 ID (후기가 없으면 null)',
+        example: '507f1f77bcf86cd799439077',
+        nullable: true,
+    })
+    reviewId: string | null;
+
     /**
      * 신청한 브리더 ID
      * @example "507f1f77bcf86cd799439011"

@@ -20,6 +20,23 @@ export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {
         return this.adopterReviewRepository.countByAdopterId(adopterId);
     }
 
+    async findIdByApplicationId(applicationId: string): Promise<string | null> {
+        const review = await this.adopterReviewRepository.findReviewByApplicationId(applicationId);
+        return review?._id?.toString() || null;
+    }
+
+    async findIdsByApplicationIds(applicationIds: string[]): Promise<Map<string, string>> {
+        const reviews = await this.adopterReviewRepository.findReviewsByApplicationIds(applicationIds);
+
+        return reviews.reduce((reviewIds, review) => {
+            const applicationId = review.applicationId?.toString();
+            if (applicationId && !reviewIds.has(applicationId)) {
+                reviewIds.set(applicationId, review._id.toString());
+            }
+            return reviewIds;
+        }, new Map<string, string>());
+    }
+
     async findPagedByAdopterId(adopterId: string, page: number, limit: number): Promise<AdopterReviewListRecord[]> {
         const reviews = (await this.adopterReviewRepository.findPagedByAdopterId(
             adopterId,

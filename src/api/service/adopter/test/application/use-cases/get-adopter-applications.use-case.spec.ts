@@ -12,6 +12,7 @@ describe('입양자 상담 신청 목록 조회 유스케이스', () => {
     };
     const adopterBreederReaderPort = { findById: jest.fn() };
     const adopterFileUrlPort = { generateOneSafe: jest.fn().mockReturnValue('https://cdn.test/image.jpg') };
+    const adopterReviewReaderPort = { findIdsByApplicationIds: jest.fn() };
 
     const assemblerService = new AdopterApplicationListAssemblerService(new AdopterPaginationAssemblerService());
 
@@ -20,6 +21,7 @@ describe('입양자 상담 신청 목록 조회 유스케이스', () => {
         adopterApplicationReaderPort as any,
         adopterBreederReaderPort as any,
         adopterFileUrlPort as any,
+        adopterReviewReaderPort as any,
         assemblerService,
     );
 
@@ -45,6 +47,7 @@ describe('입양자 상담 신청 목록 조회 유스케이스', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        adopterReviewReaderPort.findIdsByApplicationIds.mockResolvedValue(new Map());
     });
 
     it('신청 목록을 페이지네이션으로 정상 조회한다', async () => {
@@ -52,12 +55,14 @@ describe('입양자 상담 신청 목록 조회 유스케이스', () => {
         adopterApplicationReaderPort.countByAdopterId.mockResolvedValue(1);
         adopterApplicationReaderPort.findPagedByAdopterId.mockResolvedValue([mockApplication]);
         adopterBreederReaderPort.findById.mockResolvedValue(mockBreeder);
+        adopterReviewReaderPort.findIdsByApplicationIds.mockResolvedValue(new Map([['app-1', 'review-1']]));
 
         const result = await useCase.execute('user-1', 1, 10);
 
         expect(result.items).toHaveLength(1);
         expect(result.pagination.totalItems).toBe(1);
         expect(result.items[0].applicationId).toBe('app-1');
+        expect(result.items[0].reviewId).toBe('review-1');
     });
 
     it('입양자 정보가 없으면 DomainNotFoundError를 던진다', async () => {

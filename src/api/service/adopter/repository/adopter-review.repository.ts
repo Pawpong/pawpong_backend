@@ -41,6 +41,21 @@ export class AdopterReviewRepository {
         return this.breederReviewModel.findOne({ applicationId }).select('_id').lean().exec();
     }
 
+    findReviewsByApplicationIds(applicationIds: string[]) {
+        const validIds = applicationIds.filter((applicationId) => Types.ObjectId.isValid(applicationId));
+        if (validIds.length === 0) {
+            return Promise.resolve([]);
+        }
+
+        // 과거 중복 데이터가 있더라도 최초 작성 후기 하나로 일관되게 연결한다.
+        return this.breederReviewModel
+            .find({ applicationId: { $in: validIds } })
+            .select('_id applicationId writtenAt')
+            .sort({ writtenAt: 1, _id: 1 })
+            .lean()
+            .exec();
+    }
+
     async markAsReported(
         reviewId: string,
         reporterId: string,

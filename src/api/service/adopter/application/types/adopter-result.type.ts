@@ -66,6 +66,7 @@ export type AdopterApplicationCustomResponseResult = {
 
 export type AdopterApplicationListItemResult = {
     applicationId: string;
+    reviewId: string | null;
     breederId: string;
     adopterId: string | null;
     breederName: string;
@@ -85,6 +86,7 @@ export type AdopterApplicationPageResult = PageResult<AdopterApplicationListItem
 
 export type AdopterApplicationDetailResult = {
     applicationId: string;
+    reviewId: string | null;
     breederId: string;
     breederName: string;
     petId?: string;

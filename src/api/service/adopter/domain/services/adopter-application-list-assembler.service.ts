@@ -21,9 +21,11 @@ export class AdopterApplicationListAssemblerService {
         application: AdopterApplicationRecord,
         breeder: AdopterBreederRecord | null,
         adopterFileUrlPort: AdopterFileUrlPort,
+        reviewId: string | null,
     ): AdopterApplicationListItemResult {
         return {
             applicationId: application._id.toString(),
+            reviewId,
             breederId: application.breederId.toString(),
             adopterId: this.toAdopterId(application.adopterId),
             breederName: breeder?.nickname || breeder?.name || '알 수 없음',
