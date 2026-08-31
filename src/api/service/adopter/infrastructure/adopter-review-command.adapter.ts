@@ -26,6 +26,12 @@ export class AdopterReviewCommandAdapter implements AdopterReviewCommandPort {
         return (await this.adopterReviewRepository.create(command)) as AdopterReviewCreatedRecord;
     }
 
+    async findReviewByApplicationId(applicationId: string): Promise<AdopterReviewRecord | null> {
+        return (await this.adopterReviewRepository.findReviewByApplicationId(
+            applicationId,
+        )) as AdopterReviewRecord | null;
+    }
+
     incrementBreederReviewCount(breederId: string): Promise<void> {
         return this.breederRepository.incrementReviewCount(breederId);
     }

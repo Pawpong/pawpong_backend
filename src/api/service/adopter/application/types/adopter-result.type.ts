@@ -125,6 +125,8 @@ export type AdopterReviewPageResult = PageResult<AdopterReviewItemResult>;
 
 export type AdopterReviewDetailResult = {
     reviewId: string;
+    applicationId: string | null;
+    breederId: string | null;
     breederNickname: string;
     breederProfileImage: string | null;
     breederLevel: string;

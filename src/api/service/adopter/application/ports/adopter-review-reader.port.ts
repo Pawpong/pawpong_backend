@@ -13,6 +13,8 @@ export type AdopterReviewListRecord = {
 
 export type AdopterReviewDetailRecord = {
     reviewId: string;
+    applicationId: string | null;
+    breederId: string | null;
     breederNickname: string | null;
     breederProfileImageFileName: string | null;
     breederLevel: string | null;

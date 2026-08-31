@@ -6,6 +6,8 @@ describe('입양자 후기 상세 매퍼', () => {
     it('후기 상세 레코드를 응답 결과로 변환한다', () => {
         const result = service.toResult({
             reviewId: 'review-id',
+            applicationId: 'application-id',
+            breederId: 'breeder-id',
             breederNickname: null,
             breederProfileImageFileName: 'profile.jpg',
             breederLevel: null,
@@ -18,6 +20,8 @@ describe('입양자 후기 상세 매퍼', () => {
 
         expect(result).toEqual({
             reviewId: 'review-id',
+            applicationId: 'application-id',
+            breederId: 'breeder-id',
             breederNickname: '알 수 없음',
             breederProfileImage: 'profile.jpg',
             breederLevel: 'new',

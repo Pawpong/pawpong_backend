@@ -5,7 +5,6 @@ import { PaginationResponseDto } from '../../../../common/dto/pagination/paginat
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { GetAdopterApplicationDetailUseCase } from '../application/use-cases/get-adopter-application-detail.use-case';
 import { GetAdopterApplicationsUseCase } from '../application/use-cases/get-adopter-applications.use-case';
-import type { AdopterApplicationDetailResult } from '../application/types/adopter-result.type';
 import { AdopterProtectedController } from '../decorator/adopter-protected-controller.decorator';
 import { AdopterApplicationsQueryRequestDto } from '../dto/request/adopter-pagination-query-request.dto';
 import { ApplicationDetailResponseDto } from '../dto/response/application-detail-response.dto';
@@ -33,7 +32,7 @@ export class AdopterApplicationQueryController {
             query.animalType,
         );
         return ApiResponseDto.success(
-            PaginationResponseDto.fromPageResult(result) as ApplicationListResponseDto,
+            PaginationResponseDto.fromPageResult(result),
             ADOPTER_RESPONSE_MESSAGES.applicationListRetrieved,
         );
     }
@@ -45,9 +44,6 @@ export class AdopterApplicationQueryController {
         @Param('id') applicationId: string,
     ): Promise<ApiResponseDto<ApplicationDetailResponseDto>> {
         const result = await this.getAdopterApplicationDetailUseCase.execute(userId, applicationId);
-        return ApiResponseDto.success(
-            result as ApplicationDetailResponseDto & AdopterApplicationDetailResult,
-            ADOPTER_RESPONSE_MESSAGES.applicationDetailRetrieved,
-        );
+        return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.applicationDetailRetrieved);
     }
 }

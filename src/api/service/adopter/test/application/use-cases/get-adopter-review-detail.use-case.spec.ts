@@ -1,6 +1,7 @@
 import { DomainNotFoundError } from '../../../../../../common/error/domain.error';
 import { GetAdopterReviewDetailUseCase } from '../../../application/use-cases/get-adopter-review-detail.use-case';
 import { AdopterReviewDetailMapperService } from '../../../domain/services/adopter-review-detail-mapper.service';
+import type { AdopterReviewReaderPort } from '../../../application/ports/adopter-review-reader.port';
 
 describe('입양자 후기 상세 조회 유스케이스', () => {
     const adopterReviewReaderPort = {
@@ -8,7 +9,7 @@ describe('입양자 후기 상세 조회 유스케이스', () => {
     };
 
     const useCase = new GetAdopterReviewDetailUseCase(
-        adopterReviewReaderPort as any,
+        adopterReviewReaderPort as unknown as AdopterReviewReaderPort,
         new AdopterReviewDetailMapperService(),
     );
 
@@ -19,6 +20,8 @@ describe('입양자 후기 상세 조회 유스케이스', () => {
     it('후기가 존재하면 상세 정보를 반환한다', async () => {
         adopterReviewReaderPort.findDetailByAdopterId.mockResolvedValue({
             reviewId: 'review-1',
+            applicationId: 'application-1',
+            breederId: 'breeder-1',
             breederNickname: '행복브리더',
             breederProfileImageFileName: 'profile.jpg',
             breederLevel: 'elite',
@@ -46,6 +49,8 @@ describe('입양자 후기 상세 조회 유스케이스', () => {
     it('userId와 reviewId를 포트에 정확히 전달한다', async () => {
         adopterReviewReaderPort.findDetailByAdopterId.mockResolvedValue({
             reviewId: 'review-99',
+            applicationId: 'application-99',
+            breederId: 'breeder-99',
             breederNickname: null,
             breederProfileImageFileName: null,
             breederLevel: null,

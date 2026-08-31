@@ -112,8 +112,9 @@ export class ApplicationListItemResponseDto {
         description: '브리더 프로필 이미지 URL',
         example: 'https://example.com/breeder-profile.jpg',
         required: false,
+        nullable: true,
     })
-    profileImage?: string;
+    profileImage?: string | null;
 
     /**
      * 동물 타입 (고양이 또는 강아지)

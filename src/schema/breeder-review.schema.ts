@@ -8,7 +8,7 @@ export type BreederReviewDocument = BreederReview & Document;
  *
  * 참조 방식으로 설계:
  * - 별도 컬렉션으로만 관리 (임베디드 없음)
- * - 입양 신청과 연결하여 상담 완료 후 작성 가능
+ * - 입양 신청과 연결하여 상담 완료 또는 입양 승인 후 작성 가능
  * - 조회 시 populate로 추가 정보 가져오기
  */
 @Schema({
@@ -18,7 +18,7 @@ export type BreederReviewDocument = BreederReview & Document;
 export class BreederReview {
     /**
      * 입양 신청 ID (참조)
-     * 상담 완료 후 작성하는 후기이므로 신청과 1:1 매칭
+     * 신청 한 건당 한 번만 작성하는 후기이므로 신청과 1:1 매칭
      */
     @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'AdoptionApplication', required: true })
     applicationId: MongooseSchema.Types.ObjectId;
@@ -113,7 +113,9 @@ export class BreederReview {
 export const BreederReviewSchema = SchemaFactory.createForClass(BreederReview);
 
 // 인덱스 설정
-BreederReviewSchema.index({ applicationId: 1 }); // 신청별 후기 조회 (유니크 제거 - 여러 후기 허용)
+// 기존 dev 데이터에 중복 신청 후기 1건이 남아 있어 DB 유니크 인덱스는 정리 마이그레이션 뒤 적용한다.
+// 애플리케이션 계층에서는 생성 전에 중복을 차단한다.
+BreederReviewSchema.index({ applicationId: 1 });
 BreederReviewSchema.index({ breederId: 1, isVisible: 1, writtenAt: -1 }); // 브리더별 최신 후기 조회
 BreederReviewSchema.index({ adopterId: 1, writtenAt: -1 }); // 입양자별 작성 후기 조회
 BreederReviewSchema.index({ breederId: 1, type: 1 }); // 브리더별 후기 타입 필터링

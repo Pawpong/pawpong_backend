@@ -7,7 +7,7 @@ import type {
 } from '../application/ports/adopter-review-reader.port';
 import type { AdopterReviewReaderPort } from '../application/ports/adopter-review-reader.port';
 import { AdopterReviewRepository } from '../repository/adopter-review.repository';
-import type { AdopterReviewRepositoryBreederRecord, AdopterReviewRepositoryRecord } from '../types/adopter-review.type';
+import type { AdopterReviewRepositoryRecord } from '../types/adopter-review.type';
 
 @Injectable()
 export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {
@@ -60,6 +60,8 @@ export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {
 
         return {
             reviewId: review._id.toString(),
+            applicationId: review.applicationId?.toString() || null,
+            breederId: breeder?._id?.toString() || null,
             breederNickname: breeder?.nickname || null,
             breederProfileImageFileName: breeder?.profileImageFileName
                 ? this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60) || null

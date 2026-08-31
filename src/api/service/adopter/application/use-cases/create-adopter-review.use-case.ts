@@ -1,7 +1,10 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
-import { ApplicationStatus } from '../../../../../common/enum/user.enum';
+import {
+    DomainConflictError,
+    DomainNotFoundError,
+    DomainValidationError,
+} from '../../../../../common/error/domain.error';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
@@ -39,10 +42,17 @@ export class CreateAdopterReviewUseCase {
             throw new DomainValidationError('본인의 입양 신청에 대해서만 후기를 작성할 수 있습니다.');
         }
 
-        if (application.status !== ApplicationStatus.CONSULTATION_COMPLETED) {
+        const requiredStatus = dto.reviewType === 'adoption' ? 'adoption_approved' : 'consultation_completed';
+
+        if (application.status !== requiredStatus) {
             throw new DomainValidationError(
-                '상담이 완료된 신청에 대해서만 후기를 작성할 수 있습니다. 현재 상태: ' + application.status,
+                `${dto.reviewType === 'adoption' ? '입양 승인' : '상담 완료'} 상태의 신청에 대해서만 후기를 작성할 수 있습니다. 현재 상태: ${application.status}`,
             );
+        }
+
+        const existingReview = await this.adopterReviewCommandPort.findReviewByApplicationId(dto.applicationId);
+        if (existingReview) {
+            throw new DomainConflictError('이미 후기를 작성한 신청입니다.');
         }
 
         const breeder = await this.adopterBreederReaderPort.findById(application.breederId.toString());

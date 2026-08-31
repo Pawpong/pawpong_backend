@@ -18,6 +18,7 @@ export type AdopterApplicationStandardResponsesRecord = {
     preferredPetDescription?: string;
     desiredAdoptionTiming?: string;
     additionalNotes?: string;
+    adoptionPlan?: string;
 };
 
 export type AdopterApplicationCustomQuestionRecord = {

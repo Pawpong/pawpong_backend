@@ -34,6 +34,13 @@ export class AdopterReviewRepository {
         return this.breederReviewModel.findById(reviewId).exec();
     }
 
+    findReviewByApplicationId(applicationId: string) {
+        if (!Types.ObjectId.isValid(applicationId)) {
+            return Promise.resolve(null);
+        }
+        return this.breederReviewModel.findOne({ applicationId }).select('_id').lean().exec();
+    }
+
     async markAsReported(
         reviewId: string,
         reporterId: string,

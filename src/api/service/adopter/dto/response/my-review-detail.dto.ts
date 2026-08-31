@@ -17,6 +17,20 @@ export class MyReviewDetailDto {
     })
     reviewId: string;
 
+    @ApiProperty({
+        description: '후기가 연결된 입양 신청 ID',
+        example: '507f1f77bcf86cd799439012',
+        nullable: true,
+    })
+    applicationId: string | null;
+
+    @ApiProperty({
+        description: '후기 대상 브리더 ID',
+        example: '507f1f77bcf86cd799439011',
+        nullable: true,
+    })
+    breederId: string | null;
+
     /**
      * 브리더 닉네임
      * @example "사랑스러운강아지"

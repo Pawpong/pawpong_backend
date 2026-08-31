@@ -8,6 +8,8 @@ export class AdopterReviewDetailMapperService {
     toResult(review: AdopterReviewDetailRecord): AdopterReviewDetailResult {
         return {
             reviewId: review.reviewId,
+            applicationId: review.applicationId,
+            breederId: review.breederId,
             breederNickname: review.breederNickname || '알 수 없음',
             breederProfileImage: review.breederProfileImageFileName,
             breederLevel: review.breederLevel || 'new',
