@@ -1,10 +1,11 @@
 import { GetSocialLoginRedirectUrlUseCase } from '../../../application/use-cases/get-social-login-redirect-url.use-case';
+import { AuthSocialRedirectPathService } from '../../../domain/services/auth-social-redirect-path.service';
 
 describe('소셜 로그인 리다이렉트 URL 생성 유스케이스', () => {
     let useCase: GetSocialLoginRedirectUrlUseCase;
 
     beforeEach(() => {
-        useCase = new GetSocialLoginRedirectUrlUseCase();
+        useCase = new GetSocialLoginRedirectUrlUseCase(new AuthSocialRedirectPathService());
         process.env.GOOGLE_CLIENT_ID = 'google-client-id';
         process.env.GOOGLE_CALLBACK_URL = 'https://api.example.com/auth/google/callback';
         process.env.NAVER_CLIENT_ID = 'naver-client-id';
@@ -33,7 +34,12 @@ describe('소셜 로그인 리다이렉트 URL 생성 유스케이스', () => {
 
     it('returnUrl이 있으면 state에 인코딩하여 포함한다', () => {
         const url = useCase.execute('google', 'https://example.com', undefined, '/dashboard');
-        expect(url).toContain('state=');
+        expect(new URL(url).searchParams.get('state')).toBe('https://example.com|/dashboard');
+    });
+
+    it('외부 returnUrl은 OAuth state에서 제외한다', () => {
+        const url = useCase.execute('google', 'https://example.com', undefined, 'https://evil.example');
+        expect(new URL(url).searchParams.get('state')).toBe('https://example.com');
     });
 
     it('referer가 없으면 origin을 사용한다', () => {

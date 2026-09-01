@@ -29,34 +29,45 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
     resolveFrontendUrl(referer?: string, origin?: string): string {
         const nodeEnv = this.configService.get<string>('NODE_ENV') || 'development';
         const isLocalEnv = nodeEnv === 'development';
-        const refererStr = referer || origin || '';
+        const fallback = isLocalEnv
+            ? this.configService.get<string>('FRONTEND_URL_LOCAL') || 'http://localhost:3000'
+            : this.configService.get<string>('FRONTEND_URL_PROD') || 'https://pawpong.kr';
+        const configuredOrigins = [
+            fallback,
+            this.configService.get<string>('FRONTEND_URL_LOCAL'),
+            this.configService.get<string>('FRONTEND_URL_PROD'),
+            'http://localhost:3000',
+            'http://127.0.0.1:3000',
+            'http://local.pawpong.kr:3000',
+            'https://dev.pawpong.kr',
+            'https://pawpong.kr',
+            'https://www.pawpong.kr',
+        ];
+        const allowedOrigins = new Set(
+            configuredOrigins
+                .map((value) => this.parseHttpOrigin(value))
+                .filter((value): value is string => Boolean(value)),
+        );
+        const requestOrigin = this.parseHttpOrigin(referer) ?? this.parseHttpOrigin(origin);
 
-        if (refererStr.includes('dev.pawpong.kr')) {
-            return 'https://dev.pawpong.kr';
+        if (requestOrigin && allowedOrigins.has(requestOrigin)) {
+            return requestOrigin === 'https://www.pawpong.kr' ? 'https://pawpong.kr' : requestOrigin;
         }
 
-        if (refererStr.includes('pawpong.kr') && !refererStr.includes('local.pawpong.kr')) {
-            return 'https://pawpong.kr';
-        }
+        return this.parseHttpOrigin(fallback) ?? (isLocalEnv ? 'http://localhost:3000' : 'https://pawpong.kr');
+    }
 
-        if (refererStr.includes('localhost') || refererStr.includes('127.0.0.1')) {
-            try {
-                const url = new URL(refererStr);
-                return `${url.protocol}//${url.host}`;
-            } catch {
-                return 'http://localhost:3000';
-            }
-        }
+    private parseHttpOrigin(value: string | undefined): string | null {
+        if (!value) return null;
 
-        if (refererStr.includes('local.pawpong.kr')) {
-            return 'http://local.pawpong.kr:3000';
+        try {
+            const stateOrigin = value.split('|', 1)[0];
+            const url = new URL(stateOrigin);
+            if (url.protocol !== 'http:' && url.protocol !== 'https:') return null;
+            return url.origin;
+        } catch {
+            return null;
         }
-
-        if (isLocalEnv) {
-            return this.configService.get<string>('FRONTEND_URL_LOCAL') || 'http://localhost:3000';
-        }
-
-        return this.configService.get<string>('FRONTEND_URL_PROD') || 'https://pawpong.kr';
     }
 
     resolveCookieOptions() {
