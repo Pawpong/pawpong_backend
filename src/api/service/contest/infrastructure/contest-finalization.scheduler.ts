@@ -1,6 +1,7 @@
 import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
+import { DatabaseReadinessService } from '../../../../common/database/database-readiness.service';
 import { ContestRepository } from '../repository/contest.repository';
 
 /** 만료 콘테스트 확정 주기 (1분 — endDate 경과 후 확정까지의 최대 지연) */
@@ -17,10 +18,13 @@ const CONTEST_FINALIZATION_INTERVAL_MS = 60 * 1000;
 @Injectable()
 export class ContestFinalizationScheduler implements OnModuleInit, OnModuleDestroy {
     private timer: NodeJS.Timeout | null = null;
+    private activeRun: Promise<void> | null = null;
+    private consecutiveFailures = 0;
 
     constructor(
         private readonly repository: ContestRepository,
         private readonly logger: CustomLoggerService,
+        private readonly databaseReadinessService: DatabaseReadinessService,
     ) {}
 
     async onModuleInit(): Promise<void> {
@@ -42,15 +46,50 @@ export class ContestFinalizationScheduler implements OnModuleInit, OnModuleDestr
     }
 
     /** 만료된 active 콘테스트를 일괄 확정한다. 스케줄러 틱과 테스트에서 직접 호출한다 */
-    async runOnce(): Promise<void> {
+    runOnce(): Promise<void> {
+        if (this.activeRun) return this.activeRun;
+
+        const activeRun = this.executeOnce();
+        this.activeRun = activeRun;
+        void activeRun.finally(() => {
+            if (this.activeRun === activeRun) this.activeRun = null;
+        });
+
+        return activeRun;
+    }
+
+    private async executeOnce(): Promise<void> {
         try {
+            const database = await this.databaseReadinessService.check();
+            if (database.status === 'unhealthy') {
+                this.recordFailure(new Error(`MongoDB readiness unavailable (${database.connectionState})`));
+                return;
+            }
+
             const finalized = await this.repository.finalizeAllExpiredContests();
+            this.recordRecovery();
             if (finalized > 0) {
                 this.logger.logSuccess('finalizeExpiredContests', '만료 콘테스트 확정 완료', { finalized });
             }
         } catch (error) {
             // 다음 틱에서 재시도되므로 오류는 기록만 하고 삼킨다
-            this.logger.logError('finalizeExpiredContests', '만료 콘테스트 확정 실패', error as Error);
+            this.recordFailure(error as Error);
+        }
+    }
+
+    private recordFailure(error: Error): void {
+        this.consecutiveFailures += 1;
+        if (this.consecutiveFailures === 1 || this.consecutiveFailures % 5 === 0) {
+            this.logger.logError('finalizeExpiredContests', '만료 콘테스트 확정 실패', error);
+        }
+    }
+
+    private recordRecovery(): void {
+        if (this.consecutiveFailures > 0) {
+            this.logger.logSuccess('finalizeExpiredContests', 'MongoDB 연결 복구 후 만료 콘테스트 확정 재개', {
+                failedAttempts: this.consecutiveFailures,
+            });
+            this.consecutiveFailures = 0;
         }
     }
 }

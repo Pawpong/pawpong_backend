@@ -337,6 +337,7 @@ async function bootstrap(): Promise<void> {
     logger.log(`[bootstrap] Pawpong Backend Server running on: http://localhost:${port}`);
     logger.log(`[bootstrap] API Documentation available at: http://localhost:${port}/docs`);
     logger.log(`[bootstrap] Health check endpoint: http://localhost:${port}/api/health`);
+    logger.log(`[bootstrap] Readiness endpoint: http://localhost:${port}/api/health/ready`);
     logger.log(`[bootstrap] Static files served from: http://localhost:${port}/uploads/`);
     logger.log(`[bootstrap] Environment: ${process.env.NODE_ENV || 'development'}`);
 
