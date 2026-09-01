@@ -209,12 +209,7 @@ async function bootstrap(): Promise<void> {
         .build();
 
     const document: OpenAPIObject = SwaggerModule.createDocument(app, config, {
-        // operationId 는 문서 전체에서 유일해야 한다(OpenAPI 스펙). 메서드명만 쓰면
-        // getProfile / updateProfile / getApplicationDetail 처럼 여러 컨트롤러가 겹쳐
-        // 문서가 무효해지고 클라이언트 타입 생성(openapi-typescript)이 깨진다.
-        // 컨트롤러명을 접두사로 붙이되 'Controller' 접미사는 떼어 UI 가독성을 유지한다.
-        operationIdFactory: (controllerKey: string, methodKey: string) =>
-            `${controllerKey.replace(/Controller$/, '')}_${methodKey}`,
+        operationIdFactory: (_controllerKey: string, methodKey: string) => methodKey,
     });
 
     SwaggerModule.setup('docs', app, document, {
