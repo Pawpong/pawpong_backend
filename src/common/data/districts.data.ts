@@ -233,3 +233,25 @@ export const KOREA_DISTRICTS = [
         districts: ['서귀포시', '제주시'],
     },
 ];
+
+/**
+ * 표시용 지역 문자열.
+ *
+ * 특별시·광역시·세종은 하위 지역이 자기 자신을 반복하는 항목 하나뿐이라
+ * (`서울특별시` → `['서울시']`) 그대로 이어 붙이면 `서울특별시 서울시` 가 된다.
+ * 하위 지역이 하나뿐인 시·도는 district 를 생략한다.
+ * 제주특별자치도처럼 실제로 둘 이상인 곳은 그대로 이어 붙인다.
+ */
+const SINGLE_DISTRICT_CITIES = new Set(
+    KOREA_DISTRICTS.filter((entry) => entry.districts.length === 1).map((entry) => entry.city),
+);
+
+export const formatLocationLabel = (city?: string, district?: string): string => {
+    const cityName = city?.trim() ?? '';
+    const districtName = district?.trim() ?? '';
+
+    if (!cityName) return districtName;
+    if (!districtName || SINGLE_DISTRICT_CITIES.has(cityName)) return cityName;
+
+    return `${cityName} ${districtName}`;
+};
