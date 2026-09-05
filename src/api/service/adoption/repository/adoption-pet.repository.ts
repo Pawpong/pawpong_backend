@@ -27,11 +27,10 @@ export class AdoptionPetRepository {
         if (input.breederId && !Types.ObjectId.isValid(input.breederId)) {
             return { isActive: true, breederId: { $in: [] } };
         }
-        // 페이지를 자른 뒤 숨기면 개수와 페이지가 어긋난다. 소유자가 없거나 테스트인 펫은
+        // 페이지를 자른 뒤 숨기면 개수와 페이지가 어긋난다. 소유자가 없는 펫은
         // 목록·상세 모두 DB 조회 조건에서 제외하며 원본 데이터는 변경하지 않는다.
         const breederIds = await this.breederModel
             .distinct('_id', {
-                isTestAccount: { $ne: true },
                 ...(input.breederId ? { _id: input.breederId } : {}),
             })
             .exec();

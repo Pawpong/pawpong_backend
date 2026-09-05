@@ -69,7 +69,7 @@ export class AdoptionApplicationRepository implements OnModuleInit {
             .lean<AvailablePetDocument>()
             .exec();
         if (!pet) return null;
-        const owner = await this.breederModel.exists({ _id: pet.breederId, isTestAccount: { $ne: true } });
+        const owner = await this.breederModel.exists({ _id: pet.breederId });
         return owner ? pet : null;
     }
 

@@ -21,8 +21,6 @@ export interface AdopterProfileSnapshot {
 }
 
 export interface BreederProfileSnapshot {
-    /** 공개 프로필 차단용 내부 필드. 응답 DTO에는 포함하지 않는다. */
-    isTestAccount?: boolean;
     breederId: string;
     nickname: string;
     profileImageFileName?: string;

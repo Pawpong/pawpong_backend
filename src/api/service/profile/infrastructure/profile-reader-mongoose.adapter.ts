@@ -42,7 +42,6 @@ export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
 
         return {
             breederId: String(breeder._id),
-            isTestAccount: breeder.isTestAccount === true,
             nickname: breeder.nickname,
             profileImageFileName: breeder.profileImageFileName ?? undefined,
             bio: breeder.bio ?? '',

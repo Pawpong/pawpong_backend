@@ -75,7 +75,6 @@ export class AdopterPetFavoriteRepository {
                 { $match: petMatch },
                 { $lookup: { from: 'breeders', localField: 'pet.breederId', foreignField: '_id', as: 'owner' } },
                 { $unwind: '$owner' },
-                { $match: { 'owner.isTestAccount': { $ne: true } } },
                 { $sort: { createdAt: -1 } },
                 {
                     $facet: {
