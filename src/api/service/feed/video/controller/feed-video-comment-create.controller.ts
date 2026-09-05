@@ -1,0 +1,43 @@
+import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
+import { Body, HttpCode, HttpStatus, Inject, Param, Post } from '@nestjs/common';
+
+import { CurrentActorType, type ActorType } from '../../../../../common/decorator/current-actor-type.decorator';
+import { CurrentUser } from '../../../../../common/decorator/current-user.decorator';
+import { MongoObjectIdPipe } from '../../../../../common/pipe/mongo-object-id.pipe';
+import type { CreateFeedVideoCommentUseCasePort } from '../../comment/application/ports/feed-comment-interaction.port';
+import { CREATE_FEED_VIDEO_COMMENT_USE_CASE } from '../../comment/application/tokens/feed-comment-interaction.token';
+import type { FeedCommentCreateResult } from '../../comment/application/types/feed-comment-result.type';
+import { CreateCommentRequestDto } from '../../comment/dto/request/comment-request.dto';
+import { CommentCreateResponseDto } from '../../comment/dto/response/comment-response.dto';
+import { FeedProtectedController } from '../decorator/feed-video-controller.decorator';
+import { ApiCreateFeedVideoCommentEndpoint } from '../swagger/index';
+
+@FeedProtectedController()
+export class FeedVideoCommentCreateController {
+    constructor(
+        @Inject(CREATE_FEED_VIDEO_COMMENT_USE_CASE)
+        private readonly createCommentUseCase: CreateFeedVideoCommentUseCasePort,
+    ) {}
+
+    @Post('comment/:videoId')
+    @HttpCode(HttpStatus.OK)
+    @ApiCreateFeedVideoCommentEndpoint()
+    async createComment(
+        @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,
+        @CurrentUser('userId') userId: string,
+        @CurrentActorType() actorType: ActorType,
+        @Body() dto: CreateCommentRequestDto,
+    ): Promise<ApiResponseDto<CommentCreateResponseDto>> {
+        return ApiResponseDto.success(
+            (await this.createCommentUseCase.execute(
+                videoId,
+                userId,
+                actorType,
+                dto.content,
+                dto.parentId,
+            )) as CommentCreateResponseDto & FeedCommentCreateResult,
+            FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES.commentCreated,
+        );
+    }
+}

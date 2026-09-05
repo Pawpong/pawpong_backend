@@ -2,20 +2,25 @@
 # Pawpong Backend - Docker Compose (8GB 인스턴스 최적화)
 # =============================================================================
 # 메모리 배분 (8GB 기준):
-#   - 시스템 예약: ~1GB
-#   - Blue/Green (하나만 활성): 1.5GB
-#   - Redis: 512MB
-#   - Grafana: 256MB
-#   - Loki: 256MB
-#   - Promtail: 128MB
-#   - Kafka (옵션): Zookeeper 256MB + Kafka 512MB + UI 128MB
-#   - 여유: ~1-2GB (FFmpeg 인코딩, 버퍼 등)
+#   - 시스템 예약:                    ~1.0GB
+#   - Blue/Green (평시 하나만 활성):   1.5GB
+#   - Redis:                          512MB
+#   - Grafana 256 + Loki 256 + Promtail 128: 640MB
+#   - Kafka 프로필: Zookeeper 256 + Kafka 512 + AI Agent 768: 1.5GB
+#   ------------------------------------------------------------
+#   평시 합계: ~5.2GB
+#   Blue-Green 스왑 순간 +1.5GB = ~6.7GB — 8GB 안이지만 여유가 크지 않다.
+#   그래서 kafka-ui(256MB)는 운영 기본 프로필에서 뺐다(profile: kafka-ui).
 #
 # 사용법:
 #   전체 실행: docker-compose up -d
 #   앱만 실행: docker-compose up -d blue redis
 #   모니터링 포함: docker-compose up -d blue redis loki grafana promtail
-#   Kafka 포함: docker-compose --profile kafka up -d
+#   Kafka + AI Agent: docker-compose --profile kafka up -d
+#   Kafka UI까지(임시 점검용): docker-compose --profile kafka --profile kafka-ui up -d
+#
+# 로컬 개발은 이 파일이 아니라 docker-compose.dev.yml 을 쓴다
+# (MongoDB·NestJS 없이 인프라만 띄우고 앱은 호스트에서 핫리로드).
 # =============================================================================
 
 services:
@@ -34,6 +39,8 @@ services:
             - NODE_ENV=production
             - PORT=8080
             - CONTAINER_NAME=blue
+            - NODE_OPTIONS=--max-old-space-size=1024
+            - AI_AGENT_GRPC_URL=ai-agent:50051
         volumes:
             - ./logs:/app/logs
             - ./gcp-service-account.json:/app/gcp-service-account.json:ro
@@ -76,6 +83,8 @@ services:
             - NODE_ENV=production
             - PORT=8080
             - CONTAINER_NAME=green
+            - NODE_OPTIONS=--max-old-space-size=1024
+            - AI_AGENT_GRPC_URL=ai-agent:50051
         volumes:
             - ./logs:/app/logs
             - ./gcp-service-account.json:/app/gcp-service-account.json:ro
@@ -287,11 +296,14 @@ services:
             retries: 5
             start_period: 60s
 
+    # kafka-ui 는 운영 프로필에서 제외한다 (profile: kafka-ui).
+    # Blue-Green 스왑 순간 앱이 2개 뜨므로 8GB 에서 256M 도 아깝고,
+    # 브로커 내용을 들여다볼 일은 로컬 docker-compose.dev.yml 에서 처리한다.
     kafka-ui:
         image: provectuslabs/kafka-ui:latest
         container_name: kafka-ui
         profiles:
-            - kafka
+            - kafka-ui
         depends_on:
             - kafka
         ports:
@@ -310,6 +322,46 @@ services:
                     memory: 256M
                 reservations:
                     memory: 128M
+
+    # =========================================================================
+    # AI 이미지 변환 에이전트 (Python)
+    # =========================================================================
+    # Kafka 컨슈머 + gRPC 서버. OpenAI 왕복 대기가 대부분이라 CPU 는 거의 쓰지 않는다.
+    # kafka 프로필에 묶어둔 이유: 이 에이전트는 Kafka 없이는 할 일이 없다.
+    ai-agent:
+        image: pawpong-ai-agent:latest
+        build:
+            # proto/ 를 NestJS 와 공유하므로 빌드 컨텍스트는 리포 루트다
+            context: .
+            dockerfile: ai-agent/Dockerfile
+        container_name: pawpong_ai_agent
+        profiles:
+            - kafka
+        depends_on:
+            kafka:
+                condition: service_healthy
+        env_file:
+            - .env.production
+        environment:
+            KAFKA_BROKER: kafka:29092
+            AI_AGENT_GRPC_PORT: '50051'
+            # 2 vCPU 공유 인스턴스다. 동시 생성 1건으로 묶어 앱 응답을 지키고,
+            # 대기분은 Kafka 파티션에 그대로 남겨둔다
+            AI_CONCURRENCY: '1'
+        restart: unless-stopped
+        networks:
+            - pawpong_network
+        deploy:
+            resources:
+                limits:
+                    memory: 768M
+                reservations:
+                    memory: 384M
+        logging:
+            driver: 'json-file'
+            options:
+                max-size: '10m'
+                max-file: '3'
 
 networks:
     pawpong_network:

@@ -28,8 +28,15 @@ export class NotifyCriticalErrorUseCase {
 
     /**
      * 운영자가 즉시 알아야 하는 에러를 Discord로 알립니다.
+     *
+     * 운영 환경(NODE_ENV=production)에서만 실제 발송한다.
+     * 로컬/테스트에서 prod webhook 환경변수를 갖고 있어도 운영 채널 노이즈를 만들지 않게 차단.
      */
     async execute(request: DiscordErrorAlertRequest, now: Date = new Date()): Promise<NotifyCriticalErrorResult> {
+        if (process.env.NODE_ENV !== 'production') {
+            return { sent: false, reason: 'filtered' };
+        }
+
         if (!this.policyService.shouldNotify(request)) {
             return { sent: false, reason: 'filtered' };
         }

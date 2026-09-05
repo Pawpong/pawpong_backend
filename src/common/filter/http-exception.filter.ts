@@ -3,6 +3,7 @@ import { Request, Response } from 'express';
 
 import { ApiResponseDto } from '../dto/response/api-response.dto';
 import { NotifyCriticalErrorUseCase } from '../discord/application/use-cases/notify-critical-error.use-case';
+import { DomainError } from '../error/domain.error';
 
 /**
  * HTTP 예외 필터
@@ -90,9 +91,16 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const response = ctx.getResponse<Response>();
         const request = ctx.getRequest<Request>();
 
-        const status = exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
+        // DomainError 는 도메인이 선언한 statusCode 를 그대로 사용한다.
+        const status =
+            exception instanceof DomainError
+                ? exception.statusCode
+                : exception instanceof HttpException
+                  ? exception.getStatus()
+                  : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        const message = exception instanceof Error ? exception.message : 'Internal server error';
+        // HttpException 은 Nest 가 만든 응답 본문의 message/error 를 우선 사용한다 (ValidationPipe 배열 메시지 지원).
+        const message = this.resolveMessage(exception);
 
         // 에러 로깅
         this.logger.error(`[${request.method}] ${request.url} - ${status} - ${message}`, exception.stack);
@@ -128,5 +136,33 @@ export class AllExceptionsFilter implements ExceptionFilter {
             .catch((error) => {
                 this.logger.error('[notifyCriticalError] Discord 에러 알림 실패', error.stack);
             });
+    }
+
+    /**
+     * HttpException 은 ValidationPipe 배열 메시지 등 구조화된 응답 본문을 가지고 있으므로
+     * getResponse() 를 우선 분석해 실제 메시지 문자열을 추출한다.
+     */
+    private resolveMessage(exception: unknown): string {
+        if (exception instanceof HttpException) {
+            const body = exception.getResponse();
+            if (typeof body === 'string') {
+                return body;
+            }
+            if (typeof body === 'object' && body !== null) {
+                const bag = body as { message?: unknown; error?: unknown };
+                const raw = bag.message ?? bag.error;
+                if (Array.isArray(raw)) {
+                    return raw.join(', ');
+                }
+                if (typeof raw === 'string') {
+                    return raw;
+                }
+            }
+            return exception.message;
+        }
+        if (exception instanceof Error) {
+            return exception.message;
+        }
+        return 'Internal server error';
     }
 }

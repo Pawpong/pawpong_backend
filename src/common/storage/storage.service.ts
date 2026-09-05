@@ -13,6 +13,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 import * as fs from 'fs';
 import { Readable } from 'stream';
 import convert from 'heic-convert';
+import { getErrorMessage, getErrorStatusCode, hasErrorName } from '../utils/error.util';
 
 /**
  * 스마일서브 오브젝트 스토리지 서비스
@@ -20,12 +21,37 @@ import convert from 'heic-convert';
  */
 @Injectable()
 export class StorageService {
+    private static readonly LEGACY_BUCKET_NAMES = ['pawpong_bucket', 'pawpong_s3'];
     private s3: S3Client;
     private bucketName: string;
     private cdnBaseUrl: string;
+    private readonly isTestMode: boolean;
+    private readonly inMemoryObjects = new Map<
+        string,
+        {
+            body: Buffer;
+            contentType: string;
+            lastModified: Date;
+        }
+    >();
     private readonly logger = new Logger(StorageService.name);
 
     constructor(private configService: ConfigService) {
+        this.isTestMode = this.resolveTestMode();
+
+        if (this.isTestMode) {
+            this.bucketName = 'pawpong-test';
+            // 이 분기는 NODE_ENV=test 에서만 도달한다(resolveTestMode 가 보장).
+            // 실서버에서는 절대 켜지지 않으므로 여기서 CDN base 를 그대로 써도 안전하다.
+            this.cdnBaseUrl = this.normalizeCdnBaseUrl(
+                this.configService.get<string>('SMILESERV_CDN_BASE_URL') || 'https://cdn.test',
+            );
+            this.logger.warn(
+                '[StorageService] 테스트 모드 인메모리 스토리지를 사용합니다. 업로드는 프로세스 메모리에만 남고 재시작 시 사라집니다.',
+            );
+            return;
+        }
+
         try {
             this.logger.log('[StorageService] Initializing SmileServ Object Storage...');
 
@@ -33,13 +59,19 @@ export class StorageService {
             const accessKeyId = this.configService.get<string>('SMILESERV_S3_ACCESS_KEY');
             const secretAccessKey = this.configService.get<string>('SMILESERV_S3_SECRET_KEY');
             this.bucketName = this.configService.get<string>('SMILESERV_S3_BUCKET') || '';
-            this.cdnBaseUrl = this.configService.get<string>('SMILESERV_CDN_BASE_URL') || '';
+            this.cdnBaseUrl = this.normalizeCdnBaseUrl(this.configService.get<string>('SMILESERV_CDN_BASE_URL') || '');
 
             if (!endpoint || !accessKeyId || !secretAccessKey) {
                 throw new Error('SmileServ S3 configuration is incomplete');
             }
 
-            this.logger.log(`[StorageService] SmileServ Config - Endpoint: ${endpoint}, Bucket: ${this.bucketName}`);
+            // 버킷과 CDN base 를 한 줄에 같이 찍는다. 둘이 어긋나면 업로드는 성공하고
+            // 반환 URL 만 404 가 되므로, 사고 조사 때 이 줄만 보고 판별할 수 있어야 한다.
+            this.logger.log(
+                `[StorageService] SmileServ Config - Endpoint: ${endpoint}, Bucket: ${this.bucketName}, CDN: ${this.cdnBaseUrl}`,
+            );
+
+            this.assertBucketMatchesCdnBaseUrl(endpoint);
 
             // AWS SDK v3 S3 클라이언트 설정 (스마일서브 호환)
             this.s3 = new S3Client({
@@ -59,9 +91,123 @@ export class StorageService {
         }
     }
 
-    // 레거시 버킷명 (rename 이전: pawpong_bucket → 현재 pawpong_s3).
-    // 옛 데이터의 'pawpong_bucket/' 키 접두사 보정용.
-    private static readonly LEGACY_BUCKET_NAME = 'pawpong_bucket';
+    /**
+     * CDN base URL 을 조회 URL 조립에 안전한 형태로 정규화한다.
+     *
+     * `getCdnUrl` 이 `${cdnBaseUrl}/${key}` 로 조립하므로 끝에 슬래시가 남아 있으면
+     * `.../pawpong_s3//community/a.png` 처럼 `//` 가 생긴다. 이 URL 은 업로드한 키와
+     * 다른 객체를 가리켜 조회가 404 가 되므로 입력 단계에서 잘라낸다.
+     */
+    private normalizeCdnBaseUrl(value: string): string {
+        return value.trim().replace(/\/+$/, '');
+    }
+
+    /**
+     * 인메모리 테스트 스토리지 사용 여부를 결정한다.
+     *
+     * 이 모드는 업로드를 프로세스 메모리 Map 에만 넣고 S3 를 호출하지 않는다.
+     * 실서버에서 켜지면 업로드가 200 을 반환하고 DB 에 파일키까지 남지만 객체는
+     * 어디에도 존재하지 않아 CDN 이 영구히 NoSuchKey 를 낸다. PutObject 후
+     * HeadObject 검증도 이 분기의 early-return 뒤에 있어 우회된다.
+     *
+     * 그래서 NODE_ENV=test 가 아니면 부팅을 거부한다. 조용한 파일 유실보다
+     * 기동 실패가 훨씬 싸다.
+     */
+    private resolveTestMode(): boolean {
+        const requested =
+            this.configService.get<string>('PAWPONG_TEST_MODE') === 'true' || process.env.PAWPONG_TEST_MODE === 'true';
+
+        if (!requested) {
+            return false;
+        }
+
+        const nodeEnv = this.configService.get<string>('NODE_ENV') ?? process.env.NODE_ENV;
+        if (nodeEnv === 'test') {
+            return true;
+        }
+
+        throw new Error(
+            `[StorageService] PAWPONG_TEST_MODE=true 는 NODE_ENV=test 에서만 허용됩니다 (현재 NODE_ENV=${nodeEnv ?? 'undefined'}). ` +
+                '실서버에서 켜지면 업로드가 성공으로 응답하면서 파일이 저장되지 않습니다. 배포 환경 변수에서 PAWPONG_TEST_MODE 를 제거하세요.',
+        );
+    }
+
+    /**
+     * 업로드 대상 버킷과 조회용 CDN base URL 이 같은 버킷을 가리키는지 검증한다.
+     *
+     * 버킷만 교체하고 CDN 주소를 그대로 두면 PutObject/HeadObject 는 새 버킷에서
+     * 성공하고 반환 URL 만 옛 버킷을 가리켜, 검증을 통과한 파일이 404 가 된다.
+     *
+     * 판정 기준은 CDN 호스트다.
+     * - S3 엔드포인트와 같은 호스트 → path-style 로 버킷을 직접 노출하는 구성이므로
+     *   경로가 정확히 `/<bucket>` 한 세그먼트여야 한다. 오타·새 버킷명·경로 누락은 물론
+     *   버킷 앞에 상위 경로가 끼는 경우(`/foo/<bucket>`)도 막는다.
+     * - 다른 호스트 → 버킷을 감싸는 CDN 도메인일 수 있어 경로만으로 단정하지 않고 경고만 남긴다.
+     *   단, 우리가 쓰던 버킷 이름이 남아 있으면 교체 누락이 확실하므로 막는다.
+     */
+    private assertBucketMatchesCdnBaseUrl(endpoint: string): void {
+        if (!this.cdnBaseUrl || !this.bucketName) {
+            return;
+        }
+
+        let cdnUrl: URL;
+        let endpointUrl: URL;
+        try {
+            cdnUrl = new URL(this.cdnBaseUrl);
+            endpointUrl = new URL(endpoint);
+        } catch {
+            this.logger.warn(
+                `[StorageService] CDN base URL 또는 엔드포인트를 URL 로 해석할 수 없어 버킷 정합 검사를 건너뜁니다 - ` +
+                    `SMILESERV_CDN_BASE_URL=${this.cdnBaseUrl}, SMILESERV_S3_ENDPOINT=${endpoint}`,
+            );
+            return;
+        }
+
+        const segments = cdnUrl.pathname.split('/').filter(Boolean);
+        const lastSegment = segments[segments.length - 1] ?? '';
+
+        const fail = (detail: string): never => {
+            throw new Error(
+                `[StorageService] ${detail} - ` +
+                    `SMILESERV_S3_BUCKET=${this.bucketName}, SMILESERV_CDN_BASE_URL=${this.cdnBaseUrl}. ` +
+                    '이 상태로 뜨면 업로드는 성공하고 조회 URL 만 404 가 됩니다. 두 값을 같은 버킷으로 맞추세요.',
+            );
+        };
+
+        // CDN 호스트가 S3 엔드포인트와 같으면 path-style 로 버킷을 직접 노출하는 구성이다.
+        // 이때 조회 URL 은 https://<host>/<bucket>/<key> 형태여야 하므로 경로는
+        // 정확히 버킷 한 세그먼트다. 앞에 상위 경로가 끼면 버킷명이 마지막에 있어도
+        // 실제 조회 경로가 어긋나므로 세그먼트 개수까지 함께 본다.
+        if (cdnUrl.host === endpointUrl.host) {
+            if (segments.length === 0) {
+                fail('CDN base URL 에 버킷 경로가 없습니다');
+            }
+            if (segments.length > 1) {
+                fail(`CDN base URL 의 버킷 경로는 한 단계여야 합니다 (현재 경로: /${segments.join('/')})`);
+            }
+            if (segments[0] !== this.bucketName) {
+                fail('버킷과 CDN base URL 이 서로 다른 버킷을 가리킵니다');
+            }
+            return;
+        }
+
+        // 호스트가 다르면 버킷을 감싸는 별도 CDN 도메인일 수 있어 경로만으로 단정할 수 없다.
+        if (lastSegment === this.bucketName) {
+            return;
+        }
+
+        // 다만 우리가 쓰던 버킷 이름이 남아 있으면 버킷 교체 후 CDN 을 못 고친 경우가 확실하다.
+        if (StorageService.LEGACY_BUCKET_NAMES.includes(lastSegment)) {
+            fail('CDN base URL 이 예전 버킷을 그대로 가리킵니다');
+        }
+
+        if (segments.length > 0) {
+            this.logger.warn(
+                `[StorageService] CDN base URL 의 마지막 세그먼트(${lastSegment})가 버킷명(${this.bucketName})과 다릅니다. ` +
+                    '버킷을 직접 노출하는 구성이라면 오설정입니다.',
+            );
+        }
+    }
 
     // HEIC/HEIF 전용 major brand 목록 (ISOBMFF offset 8-12)
     private static readonly HEIC_BRANDS = ['heic', 'heix', 'hevc', 'hevx', 'heim', 'heis', 'mif1'];
@@ -79,7 +225,18 @@ export class StorageService {
         // HEIC → JPEG 자동 변환 (모든 업로드 경로에서 일관 적용)
         file = await this.convertHeicToJpegIfNeeded(file);
 
-        const fileName = this.generateFileName(file.originalname, folder);
+        const fileName = this.generateFileName(file.originalname, this.normalizeFolder(folder));
+
+        if (this.isTestMode) {
+            this.inMemoryObjects.set(fileName, {
+                body: Buffer.from(file.buffer || []),
+                contentType: file.mimetype,
+                lastModified: new Date(),
+            });
+
+            const cdnUrl = this.getCdnUrl(fileName);
+            return { fileName, cdnUrl, storageUrl: cdnUrl };
+        }
 
         try {
             const command = new PutObjectCommand({
@@ -92,6 +249,7 @@ export class StorageService {
             });
 
             await this.s3.send(command);
+            await this.assertUploadedObjectExists(fileName);
 
             const cdnUrl = this.getCdnUrl(fileName);
             const storageUrl = cdnUrl; // 스마일서브는 CDN URL과 Storage URL이 동일
@@ -99,7 +257,7 @@ export class StorageService {
             this.logger.log(`File uploaded: ${fileName}`);
             return { fileName, cdnUrl, storageUrl };
         } catch (error) {
-            this.logger.error(`Upload failed: ${error.message}`);
+            this.logger.error(`Upload failed: ${getErrorMessage(error)}`);
             throw error;
         }
     }
@@ -119,16 +277,22 @@ export class StorageService {
      * 파일 삭제
      */
     async deleteFile(fileName: string): Promise<void> {
+        const objectKey = this.normalizeObjectKey(fileName);
+        if (this.isTestMode) {
+            this.inMemoryObjects.delete(objectKey);
+            return;
+        }
+
         try {
             const command = new DeleteObjectCommand({
                 Bucket: this.bucketName,
-                Key: fileName,
+                Key: objectKey,
             });
 
             await this.s3.send(command);
             this.logger.log(`File deleted: ${fileName}`);
         } catch (error) {
-            this.logger.error(`Delete failed: ${error.message}`);
+            this.logger.error(`Delete failed: ${getErrorMessage(error)}`);
             throw error;
         }
     }
@@ -137,19 +301,24 @@ export class StorageService {
      * 파일 존재 여부 확인
      */
     async fileExists(fileName: string): Promise<boolean> {
+        const objectKey = this.normalizeObjectKey(fileName);
+        if (this.isTestMode) {
+            return this.inMemoryObjects.has(objectKey);
+        }
+
         try {
             const command = new HeadObjectCommand({
                 Bucket: this.bucketName,
-                Key: fileName,
+                Key: objectKey,
             });
 
             await this.s3.send(command);
             return true;
         } catch (error) {
-            if (error.name === 'NotFound' || error.$metadata?.httpStatusCode === 404) {
+            if (hasErrorName(error, 'NotFound') || getErrorStatusCode(error) === 404) {
                 return false;
             }
-            this.logger.error(`Check file existence failed: ${error.message}`);
+            this.logger.error(`Check file existence failed: ${getErrorMessage(error)}`);
             return false;
         }
     }
@@ -167,7 +336,73 @@ export class StorageService {
      * CDN URL 생성 (스마일서브는 공개 URL 직접 반환)
      */
     getCdnUrl(fileName: string): string {
-        return `${this.cdnBaseUrl}/${fileName}`;
+        return `${this.cdnBaseUrl}/${this.normalizeObjectKey(fileName)}`;
+    }
+
+    private stripBucketPrefix(filePath: string): string {
+        const bucketNames = new Set([this.bucketName, ...StorageService.LEGACY_BUCKET_NAMES].filter(Boolean));
+
+        let normalized = filePath;
+        let stripped = true;
+
+        // 과거 URL→키 변환 오류로 버킷명이 여러 번 중첩된 데이터도 한 번의
+        // 응답 변환에서 정상 객체 키로 복구한다. 한 단계만 제거하면 API를
+        // 거칠 때마다 `pawpong_bucket/`이 남아 잘못된 CDN URL을 계속 만든다.
+        while (stripped) {
+            stripped = false;
+
+            for (const bucketName of bucketNames) {
+                if (normalized.startsWith(`${bucketName}/`)) {
+                    normalized = normalized.slice(`${bucketName}/`.length);
+                    stripped = true;
+                    break;
+                }
+            }
+        }
+
+        return normalized;
+    }
+
+    private normalizeFolder(folder: string): string {
+        return this.normalizeObjectKey(folder).replace(/\/+$/, '');
+    }
+
+    private normalizeObjectKey(filePath: string): string {
+        if (!filePath) {
+            return '';
+        }
+
+        let normalized = filePath.trim().replace(/^\/+/, '');
+
+        if (normalized.startsWith('http://') || normalized.startsWith('https://')) {
+            try {
+                const urlObj = new URL(normalized);
+                normalized = urlObj.pathname.replace(/^\/+/, '');
+            } catch {
+                return normalized;
+            }
+        }
+
+        return this.stripBucketPrefix(normalized);
+    }
+
+    private async assertUploadedObjectExists(fileName: string): Promise<void> {
+        const objectKey = this.normalizeObjectKey(fileName);
+        try {
+            await this.s3.send(
+                new HeadObjectCommand({
+                    Bucket: this.bucketName,
+                    Key: objectKey,
+                }),
+            );
+        } catch (error) {
+            this.logger.error(
+                `[StorageService] Upload verification failed - bucket=${this.bucketName}, key=${objectKey}, url=${this.getCdnUrl(
+                    objectKey,
+                )}, reason=${getErrorMessage(error)}`,
+            );
+            throw error;
+        }
     }
 
     /**
@@ -175,15 +410,9 @@ export class StorageService {
      * 기존 GCP CDN Signed URL 호환을 위해 메서드 유지
      */
     generateSignedUrl(fileName: string, expirationMinutes: number = 60): string {
+        // 공개 버킷 전환 후 만료값은 사용하지 않지만 기존 포트 호환을 위해 인자는 유지한다.
+        void expirationMinutes;
         let filePath = fileName;
-
-        // 제거 대상 버킷 접두사 = 현재 버킷명 + 레거시 버킷명.
-        // 버킷 rename(pawpong_bucket → pawpong_s3) 이전에 업로드되어 DB에
-        // 'pawpong_bucket/pets/...' 형태로 키가 박제된 레거시 데이터를 함께 보정한다.
-        // (현재 버킷명만 제거하면 레거시 접두사가 남아 .../pawpong_s3/pawpong_bucket/... 로 404 발생)
-        const bucketPrefixes = Array.from(
-            new Set([this.bucketName, StorageService.LEGACY_BUCKET_NAME].filter(Boolean)),
-        );
 
         // URL인 경우 파일 경로만 추출
         if (fileName.startsWith('http://') || fileName.startsWith('https://')) {
@@ -191,11 +420,10 @@ export class StorageService {
                 const urlObj = new URL(fileName);
                 // 스마일서브 도메인인 경우 경로 추출
                 if (urlObj.hostname.includes('object.iwinv.kr')) {
-                    // pathname 선두의 버킷명(현재/레거시)을 연속으로 모두 제거
-                    // 예) /pawpong_s3/pawpong_bucket/pets/x.jpg -> pets/x.jpg
+                    // pathname에서 버킷 이름 제거: /pawpong_bucket/path/file.jpg -> path/file.jpg
                     const pathParts = urlObj.pathname.split('/').filter((p) => p);
-                    while (pathParts.length > 0 && bucketPrefixes.includes(pathParts[0])) {
-                        pathParts.shift();
+                    if (pathParts[0] && this.stripBucketPrefix(`${pathParts[0]}/x`) !== `${pathParts[0]}/x`) {
+                        pathParts.shift(); // 버킷 이름 제거
                     }
                     filePath = pathParts.join('/');
                 } else {
@@ -208,18 +436,9 @@ export class StorageService {
             }
         }
 
-        // 방어 로직: 파일 경로 선두에 버킷명(현재/레거시) 접두사가 붙은 경우 모두 제거
+        // 방어 로직: 파일 경로에 버킷 이름이 접두사로 포함된 경우 제거
         // (이전 버그로 인해 DB에 pawpong_bucket/representative/uuid.jpg 형태로 저장된 데이터 대응)
-        let stripped = true;
-        while (stripped) {
-            stripped = false;
-            for (const prefix of bucketPrefixes) {
-                if (filePath.startsWith(`${prefix}/`)) {
-                    filePath = filePath.slice(`${prefix}/`.length);
-                    stripped = true;
-                }
-            }
-        }
+        filePath = this.normalizeObjectKey(filePath);
 
         // 스마일서브는 공개 버킷이므로 만료 시간 없이 URL 반환
         // 민감한 파일의 경우 향후 Pre-signed URL 구현 가능
@@ -252,6 +471,24 @@ export class StorageService {
      * 버킷 내 파일 목록 조회 (Admin용)
      */
     async listObjects(prefix?: string, maxKeys: number = 1000) {
+        if (this.isTestMode) {
+            const keys = [...this.inMemoryObjects.entries()]
+                .filter(([fileName]) => !prefix || fileName.startsWith(prefix))
+                .slice(0, maxKeys);
+
+            return {
+                Contents: keys.map(([fileName, object]) => ({
+                    Key: fileName,
+                    Size: object.body.length,
+                    LastModified: object.lastModified,
+                    ETag: `"${fileName}"`,
+                })),
+                IsTruncated: this.inMemoryObjects.size > maxKeys,
+                KeyCount: keys.length,
+                $metadata: {},
+            };
+        }
+
         const command = new ListObjectsV2Command({
             Bucket: this.bucketName,
             Prefix: prefix || '',
@@ -276,6 +513,10 @@ export class StorageService {
      * @returns Presigned URL
      */
     async generatePresignedUploadUrl(fileKey: string, expirationSeconds: number = 600): Promise<string> {
+        if (this.isTestMode) {
+            return `https://upload.test/${fileKey}?expiresIn=${expirationSeconds}`;
+        }
+
         const command = new PutObjectCommand({
             Bucket: this.bucketName,
             Key: fileKey,
@@ -296,6 +537,12 @@ export class StorageService {
      * @param localPath 로컬 저장 경로
      */
     async downloadFile(fileKey: string, localPath: string): Promise<void> {
+        if (this.isTestMode) {
+            const object = this.inMemoryObjects.get(this.stripBucketPrefix(fileKey));
+            fs.writeFileSync(localPath, object?.body || Buffer.alloc(0));
+            return;
+        }
+
         try {
             const command = new GetObjectCommand({
                 Bucket: this.bucketName,
@@ -333,6 +580,15 @@ export class StorageService {
         fileKey: string,
         contentType: string = 'application/octet-stream',
     ): Promise<void> {
+        if (this.isTestMode) {
+            this.inMemoryObjects.set(fileKey, {
+                body: fs.readFileSync(localPath),
+                contentType,
+                lastModified: new Date(),
+            });
+            return;
+        }
+
         try {
             const fileContent = fs.readFileSync(localPath);
 
@@ -360,6 +616,11 @@ export class StorageService {
      * @returns Readable 스트림
      */
     async getFileStream(fileKey: string): Promise<Readable> {
+        if (this.isTestMode) {
+            const object = this.inMemoryObjects.get(this.stripBucketPrefix(fileKey));
+            return Readable.from(object?.body || Buffer.alloc(0));
+        }
+
         try {
             const command = new GetObjectCommand({
                 Bucket: this.bucketName,
@@ -419,7 +680,7 @@ export class StorageService {
 
             this.logger.log(`[StorageService] JPEG 변환 완료: ${file.originalname} (${file.size} bytes)`);
         } catch (error) {
-            this.logger.warn(`[StorageService] HEIC 변환 실패, 원본 업로드: ${error.message}`);
+            this.logger.warn(`[StorageService] HEIC 변환 실패, 원본 업로드: ${getErrorMessage(error)}`);
         }
 
         return file;

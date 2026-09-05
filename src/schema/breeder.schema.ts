@@ -29,11 +29,19 @@ export class VerificationDocument {
             'adoption_contract_sample',
             'recent_pedigree_document',
             'breeder_certification',
+            'recent_association_document',
+            'tica_cfa_document',
             // camelCase 형식 (기존 데이터 호환성)
             'idCard',
+            'animalProductionLicense',
             'businessLicense',
+            'adoptionContractSample',
             'contractSample',
+            'recentAssociationDocument',
+            'recentPedigreeDocument',
             'pedigreeDocument',
+            'ticaCfaDocument',
+            'breederCertification',
             'breederCertificate',
             'breederDogCertificate',
             'breederCatCertificate',
@@ -121,14 +129,14 @@ export class BreederVerification {
     plan: string;
 
     /**
-     * 브리더 레벨 (new: 뉴, elite: 엘리트)
+     * @deprecated 2026-08-31 등급 정책 폐지 이전 데이터와의 역호환용 필드.
+     * 신규 브리더에는 저장하지 않으며 서비스 정책이나 화면 분기에 사용하지 않는다.
      */
     @Prop({
-        required: true,
+        required: false,
         enum: ['new', 'elite'],
-        default: 'new',
     })
-    level: string;
+    level?: string;
 
     @Prop()
     submittedAt?: Date;
@@ -148,15 +156,11 @@ export class BreederVerification {
     @Prop()
     submittedByEmail?: boolean;
 
-    /**
-     * 레벨 변경 신청 중 여부
-     */
+    /** @deprecated 폐지된 등급 변경 신청의 기존 데이터 보존용. 새 코드에서 읽거나 기록하지 않는다. */
     @Prop({ default: false })
     isLevelChangeRequested?: boolean;
 
-    /**
-     * 레벨 변경 신청 정보 (신청 중일 때만 존재)
-     */
+    /** @deprecated 폐지된 등급 변경 신청의 기존 데이터 보존용. */
     @Prop({ type: Object, required: false })
     levelChangeRequest?: {
         previousLevel: string;
@@ -165,9 +169,13 @@ export class BreederVerification {
         documents: VerificationDocument[];
     };
 
-    /**
-     * 레벨 변경 이력
-     */
+    @Prop()
+    levelChangeRejectionReason?: string;
+
+    @Prop()
+    levelChangeReviewedAt?: Date;
+
+    /** @deprecated 폐지된 등급 변경 이력의 기존 데이터 보존용. */
     @Prop({ type: [LevelChangeHistory], default: [] })
     levelChangeHistory?: LevelChangeHistory[];
 }
@@ -210,9 +218,9 @@ export class BreederProfile {
     representativePhotos: string[];
 
     /**
-     * 전문 분야 (강아지, 고양이)
+     * 전문 분야 (강아지, 고양이, 파충류)
      */
-    @Prop({ required: true, type: [String], enum: ['dog', 'cat'] })
+    @Prop({ required: true, type: [String], enum: ['dog', 'cat', 'reptile'] })
     specialization: string[];
 
     /**
@@ -267,6 +275,19 @@ export class BreederStats {
      */
     @Prop({ default: 0 })
     totalFavorites: number;
+
+    /**
+     * 이 브리더를 팔로우한 사용자 수 (user_follows 의 follow/unfollow 시 원자적으로 갱신).
+     * 즐겨찾기(totalFavorites)와는 별개 관계다.
+     */
+    @Prop({ default: 0 })
+    followerCount: number;
+
+    /**
+     * 이 브리더가 팔로우 중인 사용자 수
+     */
+    @Prop({ default: 0 })
+    followingCount: number;
 
     /**
      * 완료된 입양 건수
@@ -408,9 +429,9 @@ export class Breeder extends User {
     name: string;
 
     /**
-     * 반려동물 타입 (강아지/고양이)
+     * 반려동물 타입 (강아지/고양이/파충류)
      */
-    @Prop({ required: true, enum: ['dog', 'cat'] })
+    @Prop({ required: true, enum: ['dog', 'cat', 'reptile'] })
     petType: string;
 
     /**
@@ -448,6 +469,19 @@ export class Breeder extends User {
      */
     @Prop({ type: [FavoriteBreederInfo], default: [] })
     favoriteBreederList: FavoriteBreederInfo[];
+
+    /**
+     * v2 브리더홈 — 한 줄 소개 (BreederProfile.description 의 긴 소개와 별개로 카드/헤더에 노출)
+     */
+    @Prop({ type: String, trim: true, maxlength: 200, default: '' })
+    bio?: string;
+
+    /**
+     * v2 브리더홈 — BPM (활동 점수, Pawpong 자체 지표)
+     * 산정 로직은 별도 세션에서 구현하며 여기서는 필드만 미리 둔다.
+     */
+    @Prop({ type: Number, default: 0, min: 0 })
+    bpm: number;
 
     /**
      * 받은 신고 내역

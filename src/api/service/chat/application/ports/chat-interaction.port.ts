@@ -1,0 +1,36 @@
+import { ChatRoomSnapshot } from './chat-room-manager.port';
+import { ChatMessageSnapshot } from './chat-message-manager.port';
+import { SenderRole } from '../../../../../schema/chat-message.schema';
+import type { CreateRoomCommand, SendMessageCommand } from '../types/chat-command.type';
+import type { GetMessagesQuery } from '../types/chat-command.type';
+import type { ChatRoomResult } from '../types/chat-room-result.type';
+
+export const CREATE_OR_GET_ROOM_USE_CASE = Symbol('CREATE_OR_GET_ROOM_USE_CASE');
+export const GET_MY_ROOMS_USE_CASE = Symbol('GET_MY_ROOMS_USE_CASE');
+export const SEND_MESSAGE_USE_CASE = Symbol('SEND_MESSAGE_USE_CASE');
+export const GET_MESSAGES_USE_CASE = Symbol('GET_MESSAGES_USE_CASE');
+export const CLOSE_ROOM_USE_CASE = Symbol('CLOSE_ROOM_USE_CASE');
+
+export interface CreateOrGetRoomUseCasePort {
+    execute(userId: string, role: SenderRole, command: CreateRoomCommand): Promise<ChatRoomSnapshot>;
+}
+
+export interface GetMyRoomsUseCasePort {
+    execute(userId: string): Promise<ChatRoomResult[]>;
+}
+
+export interface SendMessageUseCasePort {
+    execute(
+        senderId: string,
+        senderRole: SenderRole,
+        command: SendMessageCommand,
+    ): Promise<ChatMessageSnapshot & { brokerPublished: boolean }>;
+}
+
+export interface GetMessagesUseCasePort {
+    execute(userId: string, query: GetMessagesQuery): Promise<ChatMessageSnapshot[]>;
+}
+
+export interface CloseRoomUseCasePort {
+    execute(userId: string, roomId: string): Promise<void>;
+}

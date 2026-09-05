@@ -13,6 +13,7 @@ import { CustomLoggerService } from '../logger/custom-logger.service';
 export class DiscordWebhookService {
     private readonly signWebhookUrl: string;
     private readonly documentWebhookUrl: string;
+    private readonly suppressExternalWarnings: boolean;
 
     constructor(
         private readonly configService: ConfigService,
@@ -20,12 +21,21 @@ export class DiscordWebhookService {
     ) {
         this.signWebhookUrl = this.configService.get<string>('DISCORD_SIGN_WEBHOOK_URL') || '';
         this.documentWebhookUrl = this.configService.get<string>('DISCORD_DOCUMENT_WEBHOOK_URL') || '';
+        this.suppressExternalWarnings =
+            this.configService.get<string>('PAWPONG_SUPPRESS_EXTERNAL_WARNINGS') === 'true' ||
+            process.env.PAWPONG_SUPPRESS_EXTERNAL_WARNINGS === 'true';
 
-        if (!this.signWebhookUrl) {
+        if (!this.signWebhookUrl && !this.suppressExternalWarnings) {
             this.logger.logWarning('DiscordWebhookService', '디스코드 가입 웹훅 URL이 설정되지 않았습니다.');
         }
-        if (!this.documentWebhookUrl) {
+        if (!this.documentWebhookUrl && !this.suppressExternalWarnings) {
             this.logger.logWarning('DiscordWebhookService', '디스코드 서류 웹훅 URL이 설정되지 않았습니다.');
+        }
+    }
+
+    private warnIfWebhookMissing(methodName: string, description: string): void {
+        if (!this.suppressExternalWarnings) {
+            this.logger.logWarning(methodName, description);
         }
     }
 
@@ -44,7 +54,7 @@ export class DiscordWebhookService {
         provider?: string;
     }): Promise<void> {
         if (!this.signWebhookUrl) {
-            this.logger.logWarning(
+            this.warnIfWebhookMissing(
                 'notifyAdopterRegistration',
                 '디스코드 가입 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
             );
@@ -115,7 +125,7 @@ export class DiscordWebhookService {
         provider?: string;
     }): Promise<void> {
         if (!this.signWebhookUrl) {
-            this.logger.logWarning(
+            this.warnIfWebhookMissing(
                 'notifyBreederRegistration',
                 '디스코드 가입 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
             );
@@ -192,7 +202,7 @@ export class DiscordWebhookService {
         }>;
     }): Promise<void> {
         if (!this.documentWebhookUrl) {
-            this.logger.logWarning(
+            this.warnIfWebhookMissing(
                 'notifyRegistrationDocuments',
                 '디스코드 서류 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
             );
@@ -289,7 +299,6 @@ export class DiscordWebhookService {
         breederName: string;
         email: string;
         phone?: string;
-        level: 'new' | 'elite';
         isResubmission: boolean;
         documents: Array<{
             type: string;
@@ -299,7 +308,7 @@ export class DiscordWebhookService {
         submittedAt: Date;
     }): Promise<void> {
         if (!this.documentWebhookUrl) {
-            this.logger.logWarning(
+            this.warnIfWebhookMissing(
                 'notifyBreederVerificationSubmission',
                 '디스코드 서류 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
             );
@@ -307,7 +316,6 @@ export class DiscordWebhookService {
         }
 
         try {
-            const levelName = data.level === 'new' ? 'New' : 'Elite';
             const submissionType = data.isResubmission ? '재제출' : '신규 제출';
 
             const fields: Array<{ name: string; value: string; inline: boolean }> = [
@@ -329,11 +337,6 @@ export class DiscordWebhookService {
                 {
                     name: '전화번호',
                     value: data.phone || '미설정',
-                    inline: true,
-                },
-                {
-                    name: '입점 레벨',
-                    value: levelName,
                     inline: true,
                 },
                 {
@@ -494,7 +497,10 @@ export class DiscordWebhookService {
      */
     async sendNotification(title: string, message: string, color: number = 0x9e9e9e): Promise<void> {
         if (!this.signWebhookUrl) {
-            this.logger.logWarning('sendNotification', '디스코드 가입 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.');
+            this.warnIfWebhookMissing(
+                'sendNotification',
+                '디스코드 가입 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
+            );
             return;
         }
 

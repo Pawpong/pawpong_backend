@@ -12,7 +12,7 @@ import { CustomLoggerService } from '../logger/custom-logger.service';
 export class LoggingInterceptor implements NestInterceptor {
     constructor(private readonly logger: CustomLoggerService) {}
 
-    intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
+    intercept(context: ExecutionContext, next: CallHandler): Observable<unknown> {
         if (context.getType() !== 'http') {
             return next.handle();
         }
@@ -27,10 +27,10 @@ export class LoggingInterceptor implements NestInterceptor {
         this.logger.log(`▶ ${method} ${url}`, 'HTTP');
         this.logger.log(`  ├─ IP: ${ip}`, 'HTTP');
 
-        // Bearer 토큰
+        // Bearer 토큰은 존재 여부만 남긴다. JWT 원문은 로그 수집기와 터미널 기록에
+        // 장기간 보관될 수 있으므로 어떤 환경에서도 출력하지 않는다.
         if (headers.authorization?.startsWith('Bearer ')) {
-            const token = headers.authorization.substring(7);
-            this.logger.log(`  ├─ Token: ${token}`, 'HTTP');
+            this.logger.log('  ├─ Token: [REDACTED]', 'HTTP');
         }
 
         // 쿠키 역할
@@ -38,11 +38,19 @@ export class LoggingInterceptor implements NestInterceptor {
             this.logger.log(`  ├─ Role: ${cookies.userRole}`, 'HTTP');
         }
 
-        // Body 로깅 (POST, PUT, PATCH만)
+        // Body 로깅 (POST, PUT, PATCH) — 민감 필드 마스킹
+        // DELETE 는 기존대로 body 로깅 대상에서 제외한다 (기존 DELETE 엔드포인트들의 프라이버시 계약 유지).
         if (['POST', 'PUT', 'PATCH'].includes(method) && body && Object.keys(body).length > 0) {
-            const safeBody = { ...body };
+            const safeBody: Record<string, unknown> = { ...(body as Record<string, unknown>) };
+            // 자유 입력 문의에는 개인정보가 포함될 수 있으므로 원문을 저장하지 않는다.
+            if (url.split('?')[0].replace(/\/$/, '') === '/api/v2/home/support/inquiry') {
+                for (const key of Object.keys(safeBody)) safeBody[key] = '[REDACTED]';
+            }
             if (safeBody.password) safeBody.password = '***';
-            if (safeBody.refreshToken) safeBody.refreshToken = safeBody.refreshToken.substring(0, 20) + '...';
+            if (typeof safeBody.refreshToken === 'string')
+                safeBody.refreshToken = safeBody.refreshToken.substring(0, 12) + '...';
+            // FCM 푸시 디바이스 토큰은 영구 재사용되므로 앞자리만 남기고 마스킹
+            if (typeof safeBody.token === 'string') safeBody.token = safeBody.token.substring(0, 8) + '...';
             this.logger.log(`  └─ Body: ${JSON.stringify(safeBody)}`, 'HTTP');
         } else {
             this.logger.log(`  └─ Body: (none)`, 'HTTP');

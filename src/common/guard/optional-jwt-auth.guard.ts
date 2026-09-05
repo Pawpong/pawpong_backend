@@ -1,6 +1,8 @@
 import { Injectable, ExecutionContext } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
+import type { AuthGuardInfo, AuthenticatedRequestUser } from '../types/authenticated-request-user.type';
+
 /**
  * Optional JWT 인증 가드
  * 토큰이 있으면 검증하고, 없으면 통과시킵니다.
@@ -9,14 +11,22 @@ import { AuthGuard } from '@nestjs/passport';
 @Injectable()
 export class OptionalJwtAuthGuard extends AuthGuard('jwt') {
     canActivate(context: ExecutionContext) {
-        console.log('[OptionalJwtAuthGuard] canActivate called');
         return super.canActivate(context);
     }
 
-    handleRequest(err: any, user: any, info: any, context: ExecutionContext) {
+    handleRequest<TUser = AuthenticatedRequestUser | undefined>(
+        err: unknown,
+        user: AuthenticatedRequestUser | false | null,
+        info: AuthGuardInfo | undefined,
+        context: ExecutionContext,
+        status?: unknown,
+    ): TUser {
         // 토큰이 없거나 유효하지 않아도 에러를 던지지 않음
         // user가 undefined이면 비로그인 사용자로 처리
-        console.log('[OptionalJwtAuthGuard] handleRequest - user:', JSON.stringify(user));
-        return user;
+        void err;
+        void info;
+        void context;
+        void status;
+        return (user || undefined) as TUser;
     }
 }

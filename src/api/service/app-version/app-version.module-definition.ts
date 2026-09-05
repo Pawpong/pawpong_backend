@@ -1,0 +1,80 @@
+import { MongooseModule } from '@nestjs/mongoose';
+
+import { AppVersion, AppVersionSchema } from '../../../schema/app-version.schema';
+import { LoggerModule } from '../../../common/logger/logger.module';
+
+import { APP_VERSION_READER_PORT } from './application/ports/app-version-reader.port';
+import { CheckAppVersionUseCase } from './application/use-cases/check-app-version.use-case';
+import { AppVersionAdminCommandController } from '../../admin/app-version/controller/app-version-admin-command.controller';
+import { AppVersionAdminQueryController } from '../../admin/app-version/controller/app-version-admin-query.controller';
+import { APP_VERSION_ADMIN_READER_PORT } from '../../admin/app-version/application/ports/app-version-admin-reader.port';
+import { APP_VERSION_WRITER_PORT } from '../../admin/app-version/application/ports/app-version-writer.port';
+import { CreateAppVersionUseCase } from '../../admin/app-version/application/use-cases/create-app-version.use-case';
+import { DeleteAppVersionUseCase } from '../../admin/app-version/application/use-cases/delete-app-version.use-case';
+import { GetAppVersionListUseCase } from '../../admin/app-version/application/use-cases/get-app-version-list.use-case';
+import { UpdateAppVersionUseCase } from '../../admin/app-version/application/use-cases/update-app-version.use-case';
+import { AppVersionAdminCommandPolicyService } from '../../admin/app-version/domain/services/app-version-admin-command-policy.service';
+import { AppVersionAdminItemMapperService } from '../../admin/app-version/domain/services/app-version-admin-item-mapper.service';
+import { AppVersionAdminPageAssemblerService } from '../../admin/app-version/domain/services/app-version-admin-page-assembler.service';
+import { AppVersionAdminPaginationAssemblerService } from '../../admin/app-version/domain/services/app-version-admin-pagination-assembler.service';
+import { AppVersionMongooseAdminReaderAdapter } from '../../admin/app-version/infrastructure/app-version-mongoose-admin-reader.adapter';
+import { AppVersionMongooseWriterAdapter } from '../../admin/app-version/infrastructure/app-version-mongoose-writer.adapter';
+import { AppVersionController } from './controller/app-version.controller';
+import { AppVersionPolicyService } from './domain/services/app-version-policy.service';
+import { AppVersionMongooseReaderAdapter } from './infrastructure/app-version-mongoose-reader.adapter';
+import { AppVersionRepository } from './repository/app-version.repository';
+
+const APP_VERSION_SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: AppVersion.name, schema: AppVersionSchema }]);
+
+export const APP_VERSION_MODULE_IMPORTS = [APP_VERSION_SCHEMA_IMPORTS, LoggerModule];
+
+export const APP_VERSION_MODULE_CONTROLLERS = [
+    AppVersionController,
+    AppVersionAdminQueryController,
+    AppVersionAdminCommandController,
+];
+
+const APP_VERSION_USE_CASE_PROVIDERS = [
+    CheckAppVersionUseCase,
+    CreateAppVersionUseCase,
+    GetAppVersionListUseCase,
+    UpdateAppVersionUseCase,
+    DeleteAppVersionUseCase,
+];
+
+const APP_VERSION_DOMAIN_PROVIDERS = [
+    AppVersionPolicyService,
+    AppVersionAdminCommandPolicyService,
+    AppVersionAdminItemMapperService,
+    AppVersionAdminPageAssemblerService,
+    AppVersionAdminPaginationAssemblerService,
+];
+
+const APP_VERSION_INFRASTRUCTURE_PROVIDERS = [
+    AppVersionRepository,
+    AppVersionMongooseReaderAdapter,
+    AppVersionMongooseAdminReaderAdapter,
+    AppVersionMongooseWriterAdapter,
+];
+
+const APP_VERSION_PORT_BINDINGS = [
+    {
+        provide: APP_VERSION_READER_PORT,
+        useExisting: AppVersionMongooseReaderAdapter,
+    },
+    {
+        provide: APP_VERSION_ADMIN_READER_PORT,
+        useExisting: AppVersionMongooseAdminReaderAdapter,
+    },
+    {
+        provide: APP_VERSION_WRITER_PORT,
+        useExisting: AppVersionMongooseWriterAdapter,
+    },
+];
+
+export const APP_VERSION_MODULE_PROVIDERS = [
+    ...APP_VERSION_USE_CASE_PROVIDERS,
+    ...APP_VERSION_DOMAIN_PROVIDERS,
+    ...APP_VERSION_INFRASTRUCTURE_PROVIDERS,
+    ...APP_VERSION_PORT_BINDINGS,
+];

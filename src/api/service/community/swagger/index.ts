@@ -1,0 +1,334 @@
+import { applyDecorators } from '@nestjs/common';
+import { ApiParam } from '@nestjs/swagger';
+
+import {
+    ApiController,
+    ApiEndpoint,
+    ApiPaginatedEndpoint,
+    ApiPublicController,
+} from '../../../../common/decorator/swagger.decorator';
+import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
+import { COMMUNITY_RESPONSE_MESSAGES } from '../constants/community-response-messages';
+import {
+    CommunityBookmarkResponseDto,
+    CommunityUnsaveResponseDto,
+} from '../dto/response/community-bookmark-response.dto';
+import { CommunityPostReportResponseDto } from '../dto/response/community-post-report-response.dto';
+import { CommunityLikeResponseDto, CommunityUnlikeResponseDto } from '../dto/response/community-like-response.dto';
+import { CommunityPostCardResponseDto } from '../dto/response/community-post-card.dto';
+import { CommunityPostCommentResponseDto } from '../dto/response/community-post-comment.dto';
+import { CommunityPostDeleteResponseDto } from '../dto/response/community-post-delete-response.dto';
+import { CommunityPostDetailResponseDto } from '../dto/response/community-post-detail.dto';
+
+const POST_NOT_FOUND_RESPONSE = {
+    status: 400,
+    description: '게시글 없음',
+    errorExample: '해당 게시글을 찾을 수 없습니다.',
+} as const;
+
+export function ApiCommunityPublicController() {
+    return ApiPublicController('커뮤니티');
+}
+
+export function ApiGetCommunityPostListEndpoint() {
+    return applyDecorators(
+        ApiPaginatedEndpoint({
+            summary: '커뮤니티 게시글 목록',
+            description: `
+                Figma 21:2 — 커뮤니티 메인 피드.
+
+                ## 필터 / 정렬
+                - petType (선택): dog / cat / reptile
+                - category (선택): 자유 텍스트 정확 일치 (예: "레오파드")
+                - authorId (선택): ObjectId 또는 "me" — "me" 는 인증 토큰 필요 (마이홈 게시글 탭, Figma 278:170)
+                - search (선택): 제목·본문 키워드 검색 (대소문자 무시). 위 필터들과 AND 로 결합
+                  · 예) ?search=레오파드&sort=latest&page=1
+                - sort: latest(기본) / popular(likeCount desc)
+
+                ## 응답
+                - 카드 단위: 본문 발췌(최대 120자) + 첫 사진 primary URL + 전체 사진 URL 배열
+                - commentPreview: 카드에 한 줄로 노출할 최신 댓글. 상세 응답과 같은 형태이며 최신 1건만 담긴다.
+                  댓글이 없으면 빈 배열. 카드마다 상세를 다시 호출하지 않도록 목록 응답에 포함합니다
+                  · 작성자 닉네임은 commentPreview[].author.nickname, 본문은 commentPreview[].body
+                - 카테고리 사이드바 카운트는 별도 endpoint (이번 slice 미포함)
+            `,
+            responseType: PaginationResponseDto,
+            itemType: CommunityPostCardResponseDto,
+            isPublic: true,
+            supportsOptionalAuth: true,
+            successDescription: '커뮤니티 게시글 목록 조회 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.listRetrieved,
+        }),
+    );
+}
+
+export function ApiGetCommunityPostDetailEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 상세',
+            description: `
+                Figma 315:5433 — 게시글 상세.
+
+                ## 응답
+                - 본문 전문 + 사진 signed URL 배열
+                - commentPreview: 첫 5개 댓글 (더 보기는 GET /:postId/comments 페이지네이션)
+            `,
+            responseType: CommunityPostDetailResponseDto,
+            isPublic: true,
+            supportsOptionalAuth: true,
+            successDescription: '커뮤니티 게시글 상세 조회 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.detailRetrieved,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiGetCommunityPostCommentsEndpoint() {
+    return applyDecorators(
+        ApiPaginatedEndpoint({
+            summary: '커뮤니티 게시글 댓글 페이지네이션',
+            description: `
+                작성일 asc 정렬 (오래된 댓글이 먼저). 답글(parentCommentId 있음)도 같은 목록에 포함되며,
+                프론트에서 parentCommentId 기준으로 트리를 구성합니다.
+            `,
+            responseType: PaginationResponseDto,
+            itemType: CommunityPostCommentResponseDto,
+            isPublic: true,
+            supportsOptionalAuth: true,
+            successDescription: '댓글 조회 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.commentsRetrieved,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiCommunityProtectedController() {
+    return ApiController('커뮤니티');
+}
+
+const POST_FORBIDDEN_RESPONSE = {
+    status: 403,
+    description: '본인 게시글이 아님',
+    errorExample: '본인 게시글만 수정할 수 있습니다.',
+} as const;
+
+export function ApiCreateCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 작성 (v2)',
+            description: `
+                입양자/브리더 모두 작성 가능. JWT role 로 authorModel(Adopter/Breeder) 분기.
+                body 필수(≤2000), trim 후 비어있을 수 없음. title/photos/petType/category 선택 (photos ≤10).
+                생성된 게시글 상세 + 빈 commentPreview 반환.
+            `,
+            responseType: CommunityPostDetailResponseDto,
+            successDescription: '게시글 등록 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.created,
+        }),
+    );
+}
+
+export function ApiUpdateCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 수정 (v2)',
+            description: '작성자 본인만 가능. body 를 비우는 수정은 거부. 갱신 후 게시글 상세 반환.',
+            responseType: CommunityPostDetailResponseDto,
+            successDescription: '게시글 수정 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.updated,
+            errorResponses: [POST_NOT_FOUND_RESPONSE, POST_FORBIDDEN_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiDeleteCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 삭제 (v2, 소프트)',
+            description: '작성자 본인만 가능. isActive=false 로 소프트 삭제. 목록/상세에 더 이상 노출되지 않습니다.',
+            responseType: CommunityPostDeleteResponseDto,
+            successDescription: '게시글 삭제 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.deleted,
+            errorResponses: [POST_NOT_FOUND_RESPONSE, POST_FORBIDDEN_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiSaveCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 저장 (북마크)',
+            description: `
+                Figma 711:59266 — 저장 피드 탭.
+                이미 저장된 경우 saved: false 를 반환하며 오류가 아닌 멱등 처리.
+                저장 시 게시글의 saveCount += 1.
+            `,
+            responseType: CommunityBookmarkResponseDto,
+            successDescription: '게시글 저장 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.saved,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiUnsaveCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 저장 취소',
+            description: `
+                저장되지 않은 게시글에 취소 요청 시 unsaved: false 반환 (멱등).
+                취소 시 게시글의 saveCount -= 1 (0 미만 방지).
+            `,
+            responseType: CommunityUnsaveResponseDto,
+            successDescription: '게시글 저장 취소 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.unsaved,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiCreateCommentEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 댓글/답글 작성',
+            description: 'parentCommentId 있으면 답글. body 공백 trim 후 비어있으면 400.',
+            responseType: Object,
+            successDescription: '댓글 작성 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.commentCreated,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiUpdateCommentEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 댓글 수정',
+            description: '본인 댓글만 수정 가능.',
+            responseType: Object,
+            successDescription: '댓글 수정 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.commentUpdated,
+            errorResponses: [
+                POST_NOT_FOUND_RESPONSE,
+                { status: 403, description: '타인 댓글', errorExample: '본인 댓글만 수정할 수 있습니다.' },
+            ],
+        }),
+        ApiParam({ name: 'commentId', description: '댓글 ID', example: '507f1f77bcf86cd799439044' }),
+    );
+}
+
+export function ApiDeleteCommentEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 댓글 삭제',
+            description: '본인 댓글만 삭제 가능. isActive=false 소프트 삭제.',
+            responseType: Object,
+            successDescription: '댓글 삭제 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.commentDeleted,
+            errorResponses: [
+                POST_NOT_FOUND_RESPONSE,
+                { status: 403, description: '타인 댓글', errorExample: '본인 댓글만 삭제할 수 있습니다.' },
+            ],
+        }),
+        ApiParam({ name: 'commentId', description: '댓글 ID', example: '507f1f77bcf86cd799439044' }),
+    );
+}
+
+export function ApiLikeCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 좋아요',
+            description: '이미 좋아요한 경우 liked: false 반환 (멱등). 신규 좋아요 시 likeCount += 1.',
+            responseType: CommunityLikeResponseDto,
+            successDescription: '좋아요 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.liked,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiUnlikeCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 좋아요 취소',
+            description:
+                '좋아요 안 한 게시글 취소 시 unliked: false 반환 (멱등). 취소 시 likeCount -= 1 (0 미만 방지).',
+            responseType: CommunityUnlikeResponseDto,
+            successDescription: '좋아요 취소 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.unliked,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiReportCommunityPostEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 신고',
+            description: '동일 유저가 같은 게시글을 중복 신고하면 reported: false 반환 (멱등). 비활성 게시글은 400.',
+            responseType: CommunityPostReportResponseDto,
+            successDescription: '신고 접수 성공',
+            successMessageExample: '신고가 접수되었습니다.',
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiIncrementViewCountEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '커뮤니티 게시글 조회 수 증가',
+            description: '게시글 상세 진입 시 호출. 단순 증가(dedup 없음). 비활성 게시글은 400.',
+            responseType: Object,
+            isPublic: true,
+            successDescription: '조회 수 반영 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.viewCounted,
+            errorResponses: [POST_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'postId', description: '게시글 ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
+export function ApiGetMyDraftCommunityPostsEndpoint() {
+    return applyDecorators(
+        ApiPaginatedEndpoint({
+            summary: '내 임시저장 게시글 목록',
+            description: `
+                작성 중 임시저장(status=draft) 한 본인 게시글 목록.
+                작성자 본인에게만 노출되며 피드/상세에는 나타나지 않습니다. 최신순 정렬.
+            `,
+            responseType: PaginationResponseDto,
+            itemType: CommunityPostCardResponseDto,
+            isPublic: false,
+            successDescription: '임시저장 게시글 목록 조회 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.draftListRetrieved,
+        }),
+    );
+}
+
+export function ApiGetMySavedCommunityPostsEndpoint() {
+    return applyDecorators(
+        ApiPaginatedEndpoint({
+            summary: '내가 저장한 커뮤니티 게시글 목록',
+            description: `
+                Figma 711:59266 — 저장 피드 탭.
+                저장일 내림차순 정렬. 소프트 삭제된 게시글은 결과에서 제외.
+            `,
+            responseType: PaginationResponseDto,
+            itemType: CommunityPostCardResponseDto,
+            isPublic: false,
+            successDescription: '저장한 게시글 목록 조회 성공',
+            successMessageExample: COMMUNITY_RESPONSE_MESSAGES.savedListRetrieved,
+        }),
+    );
+}

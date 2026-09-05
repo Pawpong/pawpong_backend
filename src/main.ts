@@ -2,6 +2,8 @@ import { INestApplication, Logger, ValidationPipe } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 import { ConfigService } from '@nestjs/config';
+import { Partitioners } from 'kafkajs';
+import { hostname } from 'os';
 import { DocumentBuilder, OpenAPIObject, SwaggerModule } from '@nestjs/swagger';
 import express from 'express';
 import cookieParser from 'cookie-parser';
@@ -15,6 +17,8 @@ import { CustomLoggerService } from './common/logger/custom-logger.service';
 import { NotifyCriticalErrorUseCase } from './common/discord/application/use-cases/notify-critical-error.use-case';
 
 import { AppModule } from './app.module';
+import { buildKafkaBroadcastConsumerGroupId } from './common/kafka/kafka-consumer-group';
+import { KafkaStartupRetry } from './common/kafka/kafka-startup-retry';
 
 declare const module: any;
 
@@ -147,6 +151,62 @@ async function bootstrap(): Promise<void> {
             },
             'JWT-Auth',
         )
+        // 태그 선언 순서가 Swagger UI 노출 순서다. 서비스 API 를 위로, 관리자 API 를 아래로 둔다.
+        //
+        // [주의] 이 목록은 실제 라우트의 태그와 정확히 일치해야 한다.
+        //  - 여기에만 있고 라우트가 없으면 → 빈 섹션이 뜬다
+        //  - 라우트에만 있고 여기 없으면  → 목록 맨 뒤에 순서 없이 붙어 admin 이 위로 섞인다
+        // 태그를 새로 만들면 반드시 여기에도 추가한다.
+        //
+        // ── 서비스 API (공개 / 인증) ────────────────────────────────────
+        .addTag('인증')
+        .addTag('홈페이지')
+        .addTag('브리더')
+        .addTag('피드')
+        .addTag('커뮤니티')
+        .addTag('입양자')
+        .addTag('프로필')
+        .addTag('브리더 관리')
+        .addTag('분양글 (브리더)')
+        .addTag('입양')
+        .addTag('입양 신청')
+        .addTag('콘테스트')
+        .addTag('AI 이미지')
+        .addTag('채팅')
+        .addTag('알림')
+        .addTag('문의')
+        .addTag('업로드')
+        .addTag('약관')
+        .addTag('공지사항')
+        .addTag('필터 옵션')
+        .addTag('품종')
+        .addTag('지역')
+        .addTag('인기 검색어')
+        .addTag('앱 버전')
+        .addTag('시스템')
+        // ── 관리자 API (Admin) ─────────────────────────────────────────
+        .addTag('인증 관리 (Admin)')
+        .addTag('사용자 관리 (Admin)')
+        .addTag('입양자 관리 (Admin)')
+        .addTag('브리더 관리 (Admin)')
+        .addTag('브리더 인증 관리 (Admin)')
+        .addTag('브리더 신고 관리 (Admin)')
+        .addTag('브리더 관리 배너 (Admin)')
+        .addTag('홈페이지 관리 (Admin)')
+        .addTag('커뮤니티 관리 (Admin)')
+        .addTag('콘테스트 관리 (Admin)')
+        .addTag('AI 이미지 관리 (Admin)')
+        .addTag('공지사항 관리 (Admin)')
+        .addTag('알림 관리 (Admin)')
+        .addTag('알림 이메일 프리뷰 (Admin)')
+        .addTag('알림톡 관리 (Admin)')
+        .addTag('플랫폼 관리 (Admin)')
+        .addTag('인기 검색어 관리 (Admin)')
+        .addTag('품종 관리 (Admin)')
+        .addTag('지역 관리 (Admin)')
+        .addTag('앱 버전 관리 (Admin)')
+        .addTag('입양 신청 질문 (Admin)')
+        .addTag('업로드 관리 (Admin)')
         .build();
 
     const document: OpenAPIObject = SwaggerModule.createDocument(app, config, {
@@ -168,28 +228,80 @@ async function bootstrap(): Promise<void> {
     const configService: ConfigService = app.get(ConfigService);
 
     // Kafka Consumer 마이크로서비스 연결 (채팅 메시지 broadcast용)
-    // Kafka가 없어도 앱은 정상 동작 (startAllMicroservices는 별도 try-catch)
-    const kafkaBroker = configService.get<string>('KAFKA_BROKER', 'kafka:29092');
-    app.connectMicroservice<MicroserviceOptions>({
-        transport: Transport.KAFKA,
-        options: {
-            client: {
-                clientId: 'pawpong-chat-consumer',
-                brokers: [kafkaBroker],
-                requestTimeout: 30000,
-                retry: {
-                    initialRetryTime: 300,
-                    retries: 10,
+    // KAFKA_ENABLED=true && KAFKA_BROKER 지정된 경우에만 연결 시도함
+    // 그 외에는 Kafka 관련 bootstrap을 skip하여 부팅 지연(최대 ~2분)을 방지함
+    const kafkaBroker = configService.get<string>('KAFKA_BROKER', '');
+    const kafkaEnabled = configService.get<string>('KAFKA_ENABLED', 'false').toLowerCase() === 'true';
+    const shouldConnectKafka = kafkaEnabled && kafkaBroker.length > 0;
+    let kafkaConsumerStartup: KafkaStartupRetry | undefined;
+
+    if (shouldConnectKafka) {
+        const kafkaConsumerGroupId = buildKafkaBroadcastConsumerGroupId(
+            configService.get<string>('KAFKA_CONSUMER_GROUP_ID', 'pawpong-backend-consumer-group'),
+            configService.get<string>('CONTAINER_NAME', hostname()),
+        );
+
+        app.connectMicroservice<MicroserviceOptions>({
+            transport: Transport.KAFKA,
+            options: {
+                client: {
+                    clientId: 'pawpong-backend-consumer',
+                    brokers: [kafkaBroker],
+                    requestTimeout: 30000,
+                    retry: {
+                        initialRetryTime: 300,
+                        retries: 3,
+                    },
+                },
+                consumer: {
+                    groupId: kafkaConsumerGroupId,
+                    allowAutoTopicCreation: true,
+                    sessionTimeout: 30000,
+                    heartbeatInterval: 3000,
+                },
+                producer: {
+                    createPartitioner: Partitioners.DefaultPartitioner,
                 },
             },
-            consumer: {
-                groupId: 'pawpong-chat-consumer-group',
-                allowAutoTopicCreation: true,
-                sessionTimeout: 30000,
-                heartbeatInterval: 3000,
+        });
+
+        const configuredRetryDelay = Number(configService.get<string>('KAFKA_RECONNECT_INTERVAL_MS', '10000'));
+        const retryDelayMs = Number.isFinite(configuredRetryDelay) ? Math.max(1000, configuredRetryDelay) : 10000;
+        let outageNotified = false;
+
+        kafkaConsumerStartup = new KafkaStartupRetry({
+            start: async () => {
+                await app.startAllMicroservices();
             },
-        },
-    });
+            retryDelayMs,
+            onStarted: () => {
+                logger.log('[bootstrap] Kafka chat consumer started');
+                outageNotified = false;
+            },
+            onFailure: (error, delayMs) => {
+                logger.warn(`[bootstrap] Kafka consumer 시작 실패 - HTTP는 계속 제공하며 ${delayMs}ms 후 재시도합니다`);
+
+                if (outageNotified) return;
+                outageNotified = true;
+                void notifyCriticalErrorUseCase
+                    .execute({
+                        severity: 'critical',
+                        context: 'Bootstrap',
+                        message: `Kafka chat consumer 시작 실패 (브로커: ${kafkaBroker}): ${error instanceof Error ? error.message : String(error)}`,
+                        stack: error instanceof Error ? error.stack : undefined,
+                    })
+                    .catch((notifyErr: unknown) => {
+                        logger.warn(
+                            `[bootstrap] Discord 긴급 알림 전송 실패: ${notifyErr instanceof Error ? notifyErr.message : String(notifyErr)}`,
+                        );
+                    });
+            },
+        });
+    } else {
+        logger.warn(
+            '[bootstrap] Kafka microservice 연결 건너뜀 - 활성화하려면 KAFKA_ENABLED=true 와 KAFKA_BROKER 값을 지정',
+        );
+    }
 
     // 프로덕션 환경 체크
     const isProduction = process.env.NODE_ENV === 'production';
@@ -215,13 +327,8 @@ async function bootstrap(): Promise<void> {
 
     let isShuttingDown = false;
 
-    // Kafka Consumer 시작 (실패해도 HTTP 서버는 계속 동작)
-    try {
-        await app.startAllMicroservices();
-        logger.log('[bootstrap] Kafka chat consumer started');
-    } catch {
-        logger.warn('[bootstrap] Kafka consumer failed to start - messages will be skipped until Kafka is available');
-    }
+    // 최초 실패 시에도 HTTP 서버는 뜨며, 브로커가 준비되면 background에서 다시 합류한다.
+    await kafkaConsumerStartup?.start();
 
     // 서버 시작
     const server = await app.listen(port);
@@ -230,6 +337,7 @@ async function bootstrap(): Promise<void> {
     logger.log(`[bootstrap] Pawpong Backend Server running on: http://localhost:${port}`);
     logger.log(`[bootstrap] API Documentation available at: http://localhost:${port}/docs`);
     logger.log(`[bootstrap] Health check endpoint: http://localhost:${port}/api/health`);
+    logger.log(`[bootstrap] Readiness endpoint: http://localhost:${port}/api/health/ready`);
     logger.log(`[bootstrap] Static files served from: http://localhost:${port}/uploads/`);
     logger.log(`[bootstrap] Environment: ${process.env.NODE_ENV || 'development'}`);
 
@@ -243,6 +351,7 @@ async function bootstrap(): Promise<void> {
     process.on('SIGTERM', async () => {
         if (isShuttingDown) return;
         isShuttingDown = true;
+        kafkaConsumerStartup?.stop();
 
         logger.warn('[bootstrap] Received SIGTERM signal. Starting graceful shutdown...');
 
@@ -262,6 +371,7 @@ async function bootstrap(): Promise<void> {
     process.on('SIGINT', async () => {
         if (isShuttingDown) return;
         isShuttingDown = true;
+        kafkaConsumerStartup?.stop();
 
         logger.warn('[bootstrap] Received SIGINT signal. Starting graceful shutdown...');
 
@@ -281,7 +391,10 @@ async function bootstrap(): Promise<void> {
     if (module.hot) {
         logger.log('[bootstrap] Hot Module Replacement enabled');
         module.hot.accept();
-        module.hot.dispose(() => app.close());
+        module.hot.dispose(() => {
+            kafkaConsumerStartup?.stop();
+            return app.close();
+        });
     }
 
     // 개발 환경 추가 로그

@@ -1,9 +1,13 @@
 import { Module, Global, Logger, Injectable, OnModuleDestroy } from '@nestjs/common';
 import { CacheModule } from '@nestjs/cache-manager';
-import { redisStore } from 'cache-manager-ioredis-yet';
 import { BullModule } from '@nestjs/bullmq';
 import { ConfigService } from '@nestjs/config';
 import Redis from 'ioredis';
+import { createKeyvNonBlocking } from '@keyv/redis';
+import { Keyv } from 'keyv';
+import { KeyvCacheableMemory } from 'cacheable';
+import { getErrorMessage } from '../utils/error.util';
+import { REDIS_SERVICE_TOKEN } from './redis.token';
 
 /**
  * 직접 ioredis를 사용하는 Redis 서비스
@@ -22,6 +26,10 @@ export class RedisService implements OnModuleDestroy {
     private memoryCache = new Map<string, { value: string; expireAt?: number }>();
 
     constructor() {
+        if (process.env.PAWPONG_TEST_MODE === 'true') {
+            return;
+        }
+
         const host = process.env.REDIS_HOST || 'localhost';
         const port = parseInt(process.env.REDIS_PORT || '6379', 10);
         const password = process.env.REDIS_PASSWORD;
@@ -158,28 +166,35 @@ export class RedisService implements OnModuleDestroy {
                 const host = configService.get('REDIS_HOST', 'localhost');
                 const port = configService.get('REDIS_PORT', 6379);
                 const password = configService.get('REDIS_PASSWORD');
+                const isTestMode = configService.get('PAWPONG_TEST_MODE', 'false') === 'true';
+                const memoryStore = new Keyv({
+                    store: new KeyvCacheableMemory({ ttl: 300_000, lruSize: 5_000 }),
+                });
 
-                try {
-                    const store = await redisStore({
-                        host,
-                        port,
-                        password: password || undefined,
-                        ttl: 300, // 기본 5분 캐싱
-                        db: 0, // 캐싱용 DB
-                        lazyConnect: false,
-                    });
-
-                    logger.log(`[Redis] 캐시 연결 성공 - ${host}:${port}`);
-                    return { store };
-                } catch (error) {
-                    logger.error(`[Redis] 캐시 연결 실패 - ${host}:${port}:`, error.message);
-                    logger.warn('[Redis] 인메모리 캐시로 폴백합니다 (개발 환경)');
-
-                    // 로컬 개발 환경에서 Redis 없이도 동작 (인메모리 캐시)
+                if (isTestMode) {
                     return {
-                        ttl: 300,
+                        stores: [memoryStore],
+                        ttl: 300_000,
                     };
                 }
+
+                const credentials = password ? `:${encodeURIComponent(password)}@` : '';
+                const redisUrl = `redis://${credentials}${host}:${port}/0`;
+                const redisStore = createKeyvNonBlocking(redisUrl, {
+                    namespace: 'pawpong-cache',
+                    connectionTimeout: 1_000,
+                });
+
+                redisStore.on('error', (error) => {
+                    logger.warn(`[Redis] 공유 캐시 오류 - 메모리 캐시로 계속 동작: ${getErrorMessage(error)}`);
+                });
+                logger.log(`[Redis] L1 메모리 + L2 공유 캐시 설정 - ${host}:${port}`);
+
+                return {
+                    stores: [memoryStore, redisStore],
+                    ttl: 300_000,
+                    nonBlocking: true,
+                };
             },
             inject: [ConfigService],
             isGlobal: true,
@@ -218,7 +233,13 @@ export class RedisService implements OnModuleDestroy {
             inject: [ConfigService],
         }),
     ],
-    providers: [RedisService],
-    exports: [CacheModule, BullModule, RedisService],
+    providers: [
+        RedisService,
+        {
+            provide: REDIS_SERVICE_TOKEN,
+            useExisting: RedisService,
+        },
+    ],
+    exports: [CacheModule, BullModule, REDIS_SERVICE_TOKEN, RedisService],
 })
 export class RedisModule {}

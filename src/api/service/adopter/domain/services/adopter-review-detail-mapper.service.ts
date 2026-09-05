@@ -1,0 +1,22 @@
+import { Injectable } from '@nestjs/common';
+
+import type { AdopterReviewDetailRecord } from '../../application/ports/adopter-review-reader.port';
+import type { AdopterReviewDetailResult } from '../../application/types/adopter-result.type';
+
+@Injectable()
+export class AdopterReviewDetailMapperService {
+    toResult(review: AdopterReviewDetailRecord): AdopterReviewDetailResult {
+        return {
+            reviewId: review.reviewId,
+            applicationId: review.applicationId,
+            breederId: review.breederId,
+            breederNickname: review.breederNickname || '알 수 없음',
+            breederProfileImage: review.breederProfileImageFileName,
+            breedingPetType: review.breedingPetType || 'unknown',
+            content: review.content,
+            reviewType: review.reviewType,
+            writtenAt: review.writtenAt,
+            isVisible: review.isVisible,
+        };
+    }
+}

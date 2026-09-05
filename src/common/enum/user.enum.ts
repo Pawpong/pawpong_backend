@@ -20,6 +20,7 @@ export enum UserRole {
 export enum PetType {
     DOG = 'dog',
     CAT = 'cat',
+    REPTILE = 'reptile',
 }
 
 export enum PetGender {
@@ -55,14 +56,6 @@ export enum VerificationStatus {
 export enum BreederPlan {
     BASIC = 'basic',
     PRO = 'pro',
-}
-
-/**
- * 브리더 레벨 열거형
- */
-export enum BreederLevel {
-    NEW = 'new', // 뉴 브리더
-    ELITE = 'elite', // 엘리트 브리더
 }
 
 /**
@@ -161,11 +154,17 @@ export enum NotificationType {
     DOCUMENT_REMINDER = 'document_reminder', // 서류 미제출 리마인드 (입점 심사 독촉)
     PROFILE_COMPLETION_REMINDER = 'profile_completion_reminder', // 프로필 완성 독려
 
+    // 어드민 broadcast/개별 푸시 (공지/이벤트/CS)
+    ADMIN_BROADCAST = 'admin_broadcast',
+
     // 후기 관련
     NEW_REVIEW_REGISTERED = 'new_review_registered', // 새로운 후기 등록
 
     // 반려동물 등록
     NEW_PET_REGISTERED = 'new_pet_registered', // 새 반려동물 등록
+
+    // 커뮤니티
+    COMMUNITY_POST_LIKED = 'community_post_liked', // 커뮤니티 게시글 좋아요
 }
 
 export enum RecipientType {

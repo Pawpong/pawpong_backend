@@ -3,6 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-naver';
 
+import type {
+    NaverOAuthProfile,
+    OAuthStateRequest,
+    SocialAuthDoneCallback,
+    SocialOAuthUser,
+} from '../types/social-oauth.type';
+
 @Injectable()
 export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
     constructor(private readonly configService: ConfigService) {
@@ -14,21 +21,29 @@ export class NaverStrategy extends PassportStrategy(Strategy, 'naver') {
         });
     }
 
-    async validate(req: any, accessToken: string, refreshToken: string, profile: any, done: any): Promise<any> {
+    async validate(
+        req: OAuthStateRequest,
+        accessToken: string,
+        refreshToken: string,
+        profile: NaverOAuthProfile,
+        done: SocialAuthDoneCallback,
+    ): Promise<void> {
         const { id, email, nickname, profile_image } = profile._json;
 
         // state 파라미터에서 origin 정보 추출 (OAuth 시작 시 전달됨)
         const originFromState = req.query?.state || '';
 
-        const user = {
+        const user: SocialOAuthUser = {
             provider: 'naver',
             providerId: id,
-            email: email,
+            email,
             name: nickname || email.split('@')[0],
             profileImage: profile_image,
             originUrl: originFromState, // 원래 origin 정보 전달
         };
 
+        void accessToken;
+        void refreshToken;
         done(null, user);
     }
 }

@@ -1,12 +1,15 @@
-# 빌드 스테이지 - Node.js 20.19.5 사용
-FROM node:20.19.5-alpine AS builder
+# 빌드 스테이지 - Node.js 22 (LTS jod) + pnpm via corepack
+FROM node:22-alpine AS builder
 WORKDIR /app
 
-# 캐시 레이어 최적화를 위해 종속성 관련 파일만 먼저 복사
-COPY package.json yarn.lock ./
+# corepack 으로 pnpm 활성화 — package.json.packageManager 의 버전 사용
+RUN corepack enable
 
-# 프로덕션 빌드에 필요한 패키지만 설치
-RUN yarn install --production=false --frozen-lockfile --network-timeout 1000000
+# 캐시 레이어 최적화: lockfile + manifest 만 먼저 복사
+COPY package.json pnpm-lock.yaml .npmrc ./
+
+# 프로덕션 빌드에 필요한 패키지(dev 포함) 설치
+RUN pnpm install --frozen-lockfile
 
 # TypeScript 설정 파일 복사
 COPY tsconfig*.json ./
@@ -15,12 +18,16 @@ COPY nest-cli.json ./
 # 소스 코드만 복사
 COPY src ./src
 
+# gRPC 계약 — nest-cli.json 에 assets 설정이 없어 dist 로 복사되지 않으므로
+# 런타임에서 process.cwd()/proto 로 읽을 수 있도록 이미지에 그대로 포함시킨다
+COPY proto ./proto
+
 # 빌드 시 메모리 최적화 옵션 추가
 ENV NODE_OPTIONS="--max-old-space-size=3072"
-RUN yarn build
+RUN pnpm build
 
-# 실행 스테이지 - Node.js 20.19.5 사용
-FROM node:20.19.5-alpine
+# 실행 스테이지 - Node.js 22 (LTS jod)
+FROM node:22-alpine
 
 # 보안을 위해 비루트 사용자 생성
 RUN addgroup -g 1001 -S nodejs && \
@@ -32,6 +39,9 @@ WORKDIR /app
 COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
 COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
 COPY --chown=nodejs:nodejs package*.json ./
+
+# gRPC 계약 — 런타임에 process.cwd()/proto 로 읽으므로 실행 이미지에도 있어야 한다
+COPY --from=builder --chown=nodejs:nodejs /app/proto ./proto
 
 # 로그 디렉토리 생성
 RUN mkdir -p /app/logs && chown nodejs:nodejs /app/logs
@@ -51,4 +61,3 @@ EXPOSE 8080
 
 # 애플리케이션 시작
 CMD ["node", "dist/main.js"]
-

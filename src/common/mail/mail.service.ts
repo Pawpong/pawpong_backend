@@ -18,8 +18,12 @@ export interface MailOptions {
 export class MailService {
     private readonly logger = new Logger(MailService.name);
     private transporter: nodemailer.Transporter;
+    private readonly suppressExternalWarnings: boolean;
 
     constructor(private configService: ConfigService) {
+        this.suppressExternalWarnings =
+            this.configService.get<string>('PAWPONG_SUPPRESS_EXTERNAL_WARNINGS') === 'true' ||
+            process.env.PAWPONG_SUPPRESS_EXTERNAL_WARNINGS === 'true';
         this.initializeTransporter();
     }
 
@@ -30,7 +34,9 @@ export class MailService {
         const pass = this.configService.get<string>('MAIL_PASSWORD');
 
         if (!user || !pass) {
-            this.logger.warn('메일 설정이 누락되었습니다. 이메일 발송이 비활성화됩니다.');
+            if (!this.suppressExternalWarnings) {
+                this.logger.warn('메일 설정이 누락되었습니다. 이메일 발송이 비활성화됩니다.');
+            }
             return;
         }
 
@@ -55,13 +61,15 @@ export class MailService {
      */
     async sendMail(options: MailOptions): Promise<boolean> {
         if (!this.transporter) {
-            this.logger.warn('메일 트랜스포터가 초기화되지 않았습니다. 이메일 발송을 건너뜁니다.');
+            if (!this.suppressExternalWarnings) {
+                this.logger.warn('메일 트랜스포터가 초기화되지 않았습니다. 이메일 발송을 건너뜁니다.');
+            }
             return false;
         }
 
         try {
             const fromName = this.configService.get<string>('MAIL_FROM_NAME', '포퐁');
-            const fromEmail = this.configService.get<string>('MAIL_FROM_EMAIL', 'pawriendsofficial@gmail.com');
+            const fromEmail = this.configService.get<string>('MAIL_FROM_EMAIL', 'coldingcontact@gmail.com');
 
             await this.transporter.sendMail({
                 from: `"${fromName}" <${fromEmail}>`,

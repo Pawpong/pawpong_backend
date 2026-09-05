@@ -3,6 +3,8 @@ import { ConfigModule } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { AlimtalkService } from './alimtalk.service';
+import { ALIMTALK_SERVICE_TOKEN } from './alimtalk.token';
+import { AlimtalkTemplateRepository } from './repository/alimtalk-template.repository';
 
 import { AlimtalkTemplate, AlimtalkTemplateSchema } from '../../schema/alimtalk-template.schema';
 
@@ -34,7 +36,14 @@ import { AlimtalkTemplate, AlimtalkTemplateSchema } from '../../schema/alimtalk-
         ConfigModule,
         MongooseModule.forFeature([{ name: AlimtalkTemplate.name, schema: AlimtalkTemplateSchema }]),
     ],
-    providers: [AlimtalkService],
-    exports: [AlimtalkService],
+    providers: [
+        AlimtalkTemplateRepository,
+        AlimtalkService,
+        {
+            provide: ALIMTALK_SERVICE_TOKEN,
+            useExisting: AlimtalkService,
+        },
+    ],
+    exports: [ALIMTALK_SERVICE_TOKEN, AlimtalkService],
 })
 export class AlimtalkModule {}

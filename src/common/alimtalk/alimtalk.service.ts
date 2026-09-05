@@ -1,15 +1,10 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
 import CoolsmsMessageService from 'coolsms-node-sdk';
 
-import {
-    AlimtalkTemplate as AlimtalkTemplateSchema,
-    AlimtalkTemplateDocument,
-} from '../../schema/alimtalk-template.schema';
-
 import { AlimtalkTemplateCodeEnum } from '../../common/enum/alimtalk-template-code.enum';
+import { getErrorMessage, getErrorStack } from '../utils/error.util';
+import { AlimtalkTemplateRepository } from './repository/alimtalk-template.repository';
 
 /**
  * 템플릿 캐시용 인터페이스
@@ -63,21 +58,32 @@ export interface AlimtalkOptions {
     buttons?: AlimtalkButton[];
 }
 
+type AlimtalkKakaoOptions = {
+    pfId: string;
+    templateId: string;
+    variables: Record<string, string>;
+    adFlag: boolean;
+    disableSms: boolean;
+};
+
 @Injectable()
 export class AlimtalkService implements OnModuleInit {
     private readonly messageService: CoolsmsMessageService;
     private readonly logger = new Logger(AlimtalkService.name);
     private readonly senderPhone: string;
     private readonly pfId: string; // 카카오 채널 ID
+    private readonly suppressExternalWarnings: boolean;
 
     // 템플릿 캐시 (DB 조회 최소화)
     private templateCache: Map<string, CachedTemplate> = new Map();
 
     constructor(
         private readonly configService: ConfigService,
-        @InjectModel(AlimtalkTemplateSchema.name)
-        private readonly alimtalkTemplateModel: Model<AlimtalkTemplateDocument>,
+        private readonly alimtalkTemplateRepository: AlimtalkTemplateRepository,
     ) {
+        this.suppressExternalWarnings =
+            this.configService.get<string>('PAWPONG_SUPPRESS_EXTERNAL_WARNINGS') === 'true' ||
+            process.env.PAWPONG_SUPPRESS_EXTERNAL_WARNINGS === 'true';
         const apiKey = this.configService.get<string>('COOLSMS_API_KEY');
         const apiSecret = this.configService.get<string>('COOLSMS_API_SECRET');
         this.senderPhone = this.configService.get<string>('COOLSMS_SENDER_PHONE') || '';
@@ -86,7 +92,7 @@ export class AlimtalkService implements OnModuleInit {
         if (apiKey && apiSecret) {
             this.messageService = new CoolsmsMessageService(apiKey, apiSecret);
             this.logger.log('[AlimtalkService] CoolSMS 서비스 초기화 완료');
-        } else {
+        } else if (!this.suppressExternalWarnings) {
             this.logger.warn('[AlimtalkService] CoolSMS API 키가 설정되지 않았습니다.');
         }
     }
@@ -103,7 +109,7 @@ export class AlimtalkService implements OnModuleInit {
      */
     async refreshTemplateCache(): Promise<void> {
         try {
-            const templates = await this.alimtalkTemplateModel.find({ isActive: true }).lean().exec();
+            const templates = await this.alimtalkTemplateRepository.findAllActive();
 
             this.templateCache.clear();
             for (const template of templates) {
@@ -122,7 +128,7 @@ export class AlimtalkService implements OnModuleInit {
 
             this.logger.log(`[refreshTemplateCache] 템플릿 캐시 갱신 완료: ${templates.length}개`);
         } catch (error) {
-            this.logger.error(`[refreshTemplateCache] 템플릿 캐시 갱신 실패: ${error.message}`);
+            this.logger.error(`[refreshTemplateCache] 템플릿 캐시 갱신 실패: ${getErrorMessage(error)}`);
         }
     }
 
@@ -136,7 +142,7 @@ export class AlimtalkService implements OnModuleInit {
         }
 
         // 캐시에 없으면 DB 조회
-        const template = await this.alimtalkTemplateModel.findOne({ templateCode, isActive: true }).lean().exec();
+        const template = await this.alimtalkTemplateRepository.findActiveByCode(templateCode);
 
         if (template) {
             const cached: CachedTemplate = {
@@ -186,7 +192,7 @@ export class AlimtalkService implements OnModuleInit {
             // 알림톡 발송 요청
             // 중요: 강조 타입 템플릿은 템플릿 자체에 이미 강조 구조가 설정되어 있어서
             // API 호출 시에는 variables만 전달하면 됩니다.
-            const kakaoOptions: any = {
+            const kakaoOptions: AlimtalkKakaoOptions = {
                 pfId: this.pfId,
                 templateId: templateId,
                 variables: variables,
@@ -209,10 +215,10 @@ export class AlimtalkService implements OnModuleInit {
                 messageId: response.messageId || response.groupId,
             };
         } catch (error) {
-            this.logger.error(`[send] 알림톡 발송 실패: ${error.message}`, error.stack);
+            this.logger.error(`[send] 알림톡 발송 실패: ${getErrorMessage(error)}`, getErrorStack(error));
             return {
                 success: false,
-                error: error.message,
+                error: getErrorMessage(error),
             };
         }
     }
@@ -250,11 +256,6 @@ export class AlimtalkService implements OnModuleInit {
             fallbackToSms: template.fallbackToSms,
         });
     }
-
-    // ============================================
-    // 비즈니스 로직별 편의 메서드
-    // ============================================
-
     /**
      * 회원가입 인증번호 알림톡 발송
      * 중요: CoolSMS/Solapi API는 변수 키를 "#{변수명}" 형식으로 전달해야 합니다.
@@ -342,8 +343,8 @@ export class AlimtalkService implements OnModuleInit {
             this.logger.log(`[sendSmsDirect] SMS 발송 성공: ${normalizedPhone}`);
             return { success: true, messageId: response.messageId || response.groupId };
         } catch (error) {
-            this.logger.error(`[sendSmsDirect] SMS 발송 실패: ${error.message}`, error.stack);
-            return { success: false, error: error.message };
+            this.logger.error(`[sendSmsDirect] SMS 발송 실패: ${getErrorMessage(error)}`, getErrorStack(error));
+            return { success: false, error: getErrorMessage(error) };
         }
     }
 

@@ -102,6 +102,147 @@ export class AvailablePet {
      */
     @Prop()
     reservedAt?: Date;
+
+    /**
+     * 입양 페이지 카드 통계 — 문의 수
+     * 상담 신청 생성 시 도메인 이벤트로 증가시킨다.
+     */
+    @Prop({ type: Number, default: 0 })
+    inquiryCount: number;
+
+    /**
+     * 입양 페이지 카드 통계 — 관심 등록 수
+     * adopter-pet-favorite 추가/제거 시 도메인 이벤트로 증감한다.
+     */
+    @Prop({ type: Number, default: 0 })
+    favoriteCount: number;
+
+    /**
+     * 입양 페이지 카드 통계 — 조회 수
+     * 상세 페이지 진입 시 증가시킨다.
+     */
+    @Prop({ type: Number, default: 0 })
+    viewCount: number;
+
+    /**
+     * 동물 종류 (강아지/고양이/도마뱀)
+     * 입양 페이지 카테고리 탭 필터링용.
+     * 기존 데이터 호환을 위해 optional 로 선언한다 (마이그레이션 시 채움).
+     */
+    @Prop({ type: String, enum: ['dog', 'cat', 'reptile'] })
+    petType?: 'dog' | 'cat' | 'reptile';
+
+    /**
+     * v2 분양글 — photos 배열 내 대표 사진 인덱스
+     * 0 부터 시작하며 photos.length 미만이어야 한다.
+     */
+    @Prop({ type: Number, default: 0 })
+    representativePhotoIndex?: number;
+
+    /**
+     * v2 분양글 — 예방 접종 상태 ('completed' | 'incomplete')
+     * incomplete 인 경우 vaccinationIncompleteReason 필수, vaccinationRecords 비어있어야 한다.
+     */
+    @Prop({ type: String, enum: ['completed', 'incomplete'] })
+    vaccinationStatus?: 'completed' | 'incomplete';
+
+    /**
+     * v2 분양글 — 예방 접종 기록 (다회차)
+     * vaccinationStatus = 'completed' 인 경우에만 채워진다.
+     */
+    @Prop({
+        type: [
+            {
+                _id: false,
+                name: { type: String, required: true },
+                date: { type: Date, required: true },
+                round: { type: Number, required: true, min: 1 },
+            },
+        ],
+        default: [],
+    })
+    vaccinationRecords?: Array<{ name: string; date: Date; round: number }>;
+
+    /**
+     * v2 분양글 — 예방 접종 미완료 사유
+     * vaccinationStatus = 'incomplete' 인 경우에만 채워진다.
+     */
+    @Prop({ type: String, maxlength: 500 })
+    vaccinationIncompleteReason?: string;
+
+    /**
+     * v2 분양글 — 유전병 검사 상태 ('completed' | 'incomplete')
+     */
+    @Prop({ type: String, enum: ['completed', 'incomplete'] })
+    geneticTestStatus?: 'completed' | 'incomplete';
+
+    /**
+     * v2 분양글 — 유전병 검사 기록 (다회차)
+     * geneticTestStatus = 'completed' 인 경우에만 채워진다.
+     */
+    @Prop({
+        type: [
+            {
+                _id: false,
+                date: { type: Date, required: true },
+                institution: { type: String, required: true },
+                testName: { type: String, required: true },
+                result: { type: String, required: true },
+            },
+        ],
+        default: [],
+    })
+    geneticTestRecords?: Array<{ date: Date; institution: string; testName: string; result: string }>;
+
+    /**
+     * v2 분양글 — 유전병 검사 미완료 사유
+     */
+    @Prop({ type: String, maxlength: 500 })
+    geneticTestIncompleteReason?: string;
+
+    /**
+     * v2 분양글 — 부모 정보 스냅샷 (분양글 작성 시 inline 입력)
+     * ParentPet 도큐먼트 참조(parentInfo) 와 별개로,
+     * 분양글 폼에서 입력한 단순 부모 정보를 그대로 보존한다 (관계/품종/이름/생년월일/사진).
+     */
+    @Prop({
+        type: [
+            {
+                _id: false,
+                relation: { type: String, enum: ['mother', 'father'], required: true },
+                breed: { type: String, required: true },
+                name: { type: String, required: true },
+                birthDate: { type: Date },
+                photoFileName: { type: String },
+            },
+        ],
+        default: [],
+    })
+    parentPetSnapshots?: Array<{
+        relation: 'mother' | 'father';
+        breed: string;
+        name: string;
+        birthDate?: Date;
+        photoFileName?: string;
+    }>;
+
+    /**
+     * v2 분양글 — 사육 환경 정보 (description + 사진 최대 5장)
+     * photoFileName 은 배열 도입 전 단일 사진 필드 — 하위 호환을 위해 첫 장을 함께 저장한다.
+     */
+    @Prop({
+        type: {
+            _id: false,
+            description: { type: String, maxlength: 1000 },
+            photoFileName: { type: String },
+            photoFileNames: { type: [String], default: undefined },
+        },
+    })
+    breedingEnvironment?: {
+        description?: string;
+        photoFileName?: string;
+        photoFileNames?: string[];
+    };
 }
 
 export const AvailablePetSchema = SchemaFactory.createForClass(AvailablePet);
@@ -110,3 +251,7 @@ export const AvailablePetSchema = SchemaFactory.createForClass(AvailablePet);
 AvailablePetSchema.index({ breederId: 1, isActive: 1, status: 1 });
 AvailablePetSchema.index({ breederId: 1, breed: 1 });
 AvailablePetSchema.index({ status: 1, price: 1 });
+
+// v2 입양 페이지 — petType + status + isActive 필터 + 정렬용 인덱스
+AvailablePetSchema.index({ petType: 1, status: 1, isActive: 1, createdAt: -1 });
+AvailablePetSchema.index({ petType: 1, status: 1, isActive: 1, favoriteCount: -1 });

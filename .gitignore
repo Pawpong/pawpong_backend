@@ -8,8 +8,7 @@ logs
 *.log
 npm-debug.log*
 pnpm-debug.log*
-yarn-debug.log*
-yarn-error.log*
+.pnpm-store/
 lerna-debug.log*
 
 # OS
@@ -39,13 +38,9 @@ lerna-debug.log*
 .env
 .env.*
 
-# GCP / Firebase Service Account Keys
+# GCP Service Account Keys
 gcp-service-account.json
 *-service-account.json
-*-firebase-adminsdk-*.json
-
-# Local test scripts
-test-push.mjs
 
 # temp directory
 .temp
@@ -69,7 +64,26 @@ swagger.json
 # MCP server config (local dev tool, machine-specific)
 .mcp.json
 package-lock.json
-yarn.lock
-docs/
+docs/*
 
+# Firebase/FCM 자격 증명 (로컬 개발 + 프로덕션 환경변수)
+secrets/
+*-firebase-adminsdk-*.json
+google-services.json
+GoogleService-Info.plist
+
+# Serena MCP (로컬 AI 코딩 어시스턴트 도구, 머신별 설정)
 .serena/
+
+# scripts/ 빌드 산출물 (TS 원본만 유지)
+scripts/*.js
+scripts/*.js.map
+scripts/*.d.ts
+test-push.mjs
+
+# 로컬 하이브리드 개발용 인프라 compose (앱은 host, 인프라만 docker)
+docker-compose.infra.yml
+
+# gRPC 생성 스텁 (빌드 시점 생성)
+ai-agent/app/ai_agent_pb2*.py
+ai-agent/app/ai_agent_pb2*.pyi

@@ -1,0 +1,732 @@
+import { Test } from '@nestjs/testing';
+import { INestApplication, ValidationPipe } from '@nestjs/common';
+import { getConnectionToken } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
+import { ObjectId } from 'mongodb';
+import { MongoMemoryReplSet } from 'mongodb-memory-server';
+
+import { AppModule } from '../../app.module';
+import { AllExceptionsFilter } from '../filter/http-exception.filter';
+import { HttpStatusInterceptor } from '../interceptor/http-status.interceptor';
+
+/** 테스트용 인메모리 MongoDB 인스턴스 (단일 노드 ReplSet — 멀티 도큐먼트 트랜잭션 지원) */
+let mongod: MongoMemoryReplSet;
+
+/** createTestingApp에 넘길 Provider 오버라이드 항목 */
+export interface ProviderOverride {
+    provide: any;
+    useValue: any;
+}
+
+function applyTestingEnvironment(): void {
+    process.env.PAWPONG_TEST_MODE = 'true';
+    process.env.PAWPONG_SUPPRESS_EXTERNAL_WARNINGS = 'true';
+    process.env.KAFKA_ENABLED = 'false';
+
+    // 테스트 환경에서는 외부 알림 서비스 비활성화 (실제 채널로 알림 발송 방지)
+    process.env.DISCORD_SIGN_WEBHOOK_URL = '';
+    process.env.DISCORD_DOCUMENT_WEBHOOK_URL = '';
+    process.env.DISCORD_WITHDRAWAL_WEBHOOK_URL = '';
+    process.env.COOLSMS_API_KEY = '';
+    process.env.COOLSMS_API_SECRET = '';
+    process.env.MAIL_USER = '';
+    process.env.MAIL_PASSWORD = '';
+}
+
+/**
+ * E2E 테스트용 NestJS 애플리케이션 생성
+ *
+ * @description
+ * 모든 E2E 테스트에서 사용하는 통일된 테스트 앱 생성 함수입니다.
+ * MongoDBMemoryServer를 사용하여 외부 DB 의존 없이 독립 실행 가능합니다.
+ * - 글로벌 프리픽스: /api
+ * - 글로벌 파이프: ValidationPipe (transform, whitelist 활성화)
+ */
+export async function createTestingApp(overrides: ProviderOverride[] = []): Promise<INestApplication> {
+    if (mongod) {
+        await mongod.stop();
+        mongod = undefined as any;
+    }
+
+    // 인메모리 MongoDB 서버 시작.
+    // standalone 이 아닌 단일 노드 ReplSet 을 쓰는 이유: 콘테스트 투표/취소처럼
+    // 멀티 도큐먼트 트랜잭션을 쓰는 경로가 실서버(Atlas ReplSet)와 동일하게 동작해야 한다.
+    mongod = await MongoMemoryReplSet.create({ replSet: { count: 1 } });
+    const mongoUri = mongod.getUri();
+
+    // MONGODB_URI 환경변수를 인메모리 서버로 오버라이드
+    process.env.MONGODB_URI = mongoUri;
+    applyTestingEnvironment();
+
+    let builder = Test.createTestingModule({
+        imports: [AppModule],
+    });
+
+    for (const override of overrides) {
+        builder = builder.overrideProvider(override.provide).useValue(override.useValue);
+    }
+
+    const moduleFixture = await builder.compile();
+
+    const app = moduleFixture.createNestApplication();
+
+    // 글로벌 프리픽스 설정 (/api)
+    app.setGlobalPrefix('api');
+
+    // 글로벌 파이프 설정 (DTO 검증)
+    app.useGlobalPipes(
+        new ValidationPipe({
+            transform: true, // DTO 자동 변환
+            whitelist: true, // DTO에 정의되지 않은 속성 제거
+            forbidNonWhitelisted: true, // DTO에 정의되지 않은 속성 있으면 에러
+        }),
+    );
+
+    // 실제 앱과 동일하게 예외 응답 형식을 통일한다.
+    app.useGlobalFilters(new AllExceptionsFilter());
+
+    // 실제 앱과 동일하게 POST 생성 응답을 200으로 정규화한다.
+    app.useGlobalInterceptors(new HttpStatusInterceptor());
+
+    await app.init();
+    // 요청마다 Supertest가 서버를 열고 닫지 않도록 앱 수명 동안 포트를 유지한다.
+    // Node의 keep-alive 연결이 닫힌 임시 서버를 재사용하는 불안정성을 방지한다.
+    await app.listen(0, '127.0.0.1');
+
+    const originalClose = app.close.bind(app);
+    let closed = false;
+
+    app.close = async () => {
+        if (closed) {
+            return;
+        }
+
+        closed = true;
+        await originalClose();
+
+        if (mongod) {
+            await mongod.stop();
+            mongod = undefined as any;
+        }
+    };
+
+    return app;
+}
+
+/**
+ * E2E 테스트용 NestJS 애플리케이션 종료
+ *
+ * @description
+ * createTestingApp으로 생성한 앱과 인메모리 MongoDB를 함께 종료합니다.
+ */
+export async function closeTestingApp(app: INestApplication): Promise<void> {
+    await app.close();
+}
+
+/**
+ * 테스트 데이터베이스의 모든 컬렉션 데이터 삭제
+ *
+ * @description
+ * 각 테스트 전후로 데이터베이스를 깨끗하게 정리합니다.
+ * Districts 컬렉션은 시딩 데이터이므로 삭제하지 않습니다.
+ *
+ * @example
+ * ```typescript
+ * beforeEach(async () => {
+ *   await cleanupDatabase(app);
+ * });
+ * ```
+ */
+export async function cleanupDatabase(app: INestApplication): Promise<void> {
+    try {
+        const connection = app.get<Connection>(getConnectionToken());
+
+        // Districts는 시딩 데이터이므로 삭제하지 않음
+        const excludedCollections = ['districts', 'breeds'];
+
+        const collections = connection.collections;
+
+        for (const key in collections) {
+            const collection = collections[key];
+
+            // 제외 목록에 없는 컬렉션만 삭제
+            if (!excludedCollections.includes(collection.collectionName)) {
+                await collection.deleteMany({});
+            }
+        }
+    } catch {
+        // 연결이 이미 닫힌 경우 무시
+    }
+}
+
+/**
+ * 특정 컬렉션의 데이터만 삭제
+ *
+ * @description
+ * 특정 도메인의 데이터만 삭제하고 싶을 때 사용합니다.
+ *
+ * @example
+ * ```typescript
+ * beforeEach(async () => {
+ *   await cleanupCollections(app, ['adopters', 'breeders']);
+ * });
+ * ```
+ */
+export async function cleanupCollections(app: INestApplication, collectionNames: string[]): Promise<void> {
+    const connection = app.get<Connection>(getConnectionToken());
+
+    for (const collectionName of collectionNames) {
+        const collection = connection.collection(collectionName);
+        await collection.deleteMany({});
+    }
+}
+
+/**
+ * 테스트용 타임스탬프 생성
+ *
+ * @description
+ * 유니크한 이메일, 닉네임 등을 생성할 때 사용합니다.
+ *
+ * @example
+ * ```typescript
+ * const timestamp = getTestTimestamp();
+ * const email = `test_${timestamp}@test.com`;
+ * ```
+ */
+export function getTestTimestamp(): number {
+    return Date.now();
+}
+
+/**
+ * 테스트용 랜덤 문자열 생성
+ *
+ * @description
+ * 유니크한 데이터를 생성할 때 사용합니다.
+ *
+ * @example
+ * ```typescript
+ * const randomId = getRandomString(10);
+ * ```
+ */
+export function getRandomString(length: number = 10): string {
+    return Math.random()
+        .toString(36)
+        .substring(2, 2 + length);
+}
+
+/**
+ * 테스트용 관리자 시드 데이터 생성
+ *
+ * @description
+ * 관리자 계정을 생성합니다. 비밀번호는 bcrypt로 해시됩니다.
+ *
+ * @param app - NestJS 애플리케이션
+ * @param password - 관리자 비밀번호 (기본값: 'admin1234')
+ * @returns 생성된 관리자 ID와 이메일
+ *
+ * @example
+ * ```typescript
+ * const { adminId, email } = await seedAdmin(app);
+ * ```
+ */
+export async function seedAdmin(
+    app: INestApplication,
+    password: string = 'admin1234',
+): Promise<{ adminId: string; email: string }> {
+    const bcrypt = require('bcryptjs');
+    const connection = app.get<Connection>(getConnectionToken());
+    const adminCollection = connection.collection('admins');
+
+    const timestamp = Date.now();
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const admin = {
+        name: '테스트관리자',
+        email: `admin_${timestamp}@test.com`,
+        password: hashedPassword,
+        status: 'active',
+        adminLevel: 'super_admin',
+        permissions: {
+            canManageUsers: true,
+            canManageBreeders: true,
+            canManageReports: true,
+            canViewStatistics: true,
+            canManageAdmins: true,
+        },
+        activityLogs: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
+    const result = await adminCollection.insertOne(admin);
+    return {
+        adminId: result.insertedId.toString(),
+        email: admin.email,
+    };
+}
+
+/**
+ * 관리자 계정 생성 + 로그인하여 JWT 토큰 반환
+ *
+ * @description
+ * seedAdmin + auth-admin/login을 연결하여 바로 사용 가능한 토큰을 반환합니다.
+ * 실패 시 null을 반환합니다.
+ */
+export async function getAdminToken(app: INestApplication, password: string = 'admin1234'): Promise<string | null> {
+    const request = require('supertest');
+    const { email } = await seedAdmin(app, password);
+
+    const loginResponse = await request(app.getHttpServer()).post('/api/auth-admin/login').send({ email, password });
+
+    if (loginResponse.status === 200 && loginResponse.body.data?.accessToken) {
+        return loginResponse.body.data.accessToken;
+    }
+    return null;
+}
+
+/**
+ * 입양자 가입에 필요한 활성 약관을 보장한다.
+ *
+ * 가입은 활성 약관이 하나도 없으면 400 으로 거부되고(AuthTermsAgreementValidatorService),
+ * 필수 약관을 모두 동의해야 통과한다. 인메모리 DB 는 비어 있으므로 여기서 심는다.
+ * 이미 있으면 그대로 두고 현재 활성 목록을 돌려준다.
+ */
+export async function ensureActiveTerms(
+    app: INestApplication,
+): Promise<Array<{ code: string; version: string; isRequired: boolean }>> {
+    const connection = app.get<Connection>(getConnectionToken());
+    const collection = connection.collection('terms');
+
+    const existing = await collection.find({ isActive: true }).toArray();
+    if (existing.length > 0) {
+        return existing.map((t) => ({
+            code: String(t.code),
+            version: String(t.version),
+            isRequired: Boolean(t.isRequired),
+        }));
+    }
+
+    const seeds = [
+        { code: 'service', isRequired: true },
+        { code: 'privacy', isRequired: true },
+        { code: 'age_14plus', isRequired: true },
+        { code: 'marketing', isRequired: false },
+        { code: 'counsel_privacy', isRequired: false },
+    ];
+    const now = new Date();
+    await collection.insertMany(
+        seeds.map((s) => ({
+            code: s.code,
+            version: '1.0.0',
+            title: `${s.code} 약관`,
+            body: '테스트용 약관 본문',
+            isRequired: s.isRequired,
+            isActive: true,
+            activatedAt: now,
+            createdAt: now,
+            updatedAt: now,
+        })),
+    );
+
+    return seeds.map((s) => ({ code: s.code, version: '1.0.0', isRequired: s.isRequired }));
+}
+
+/**
+ * 활성 약관을 보장하고, 가입 payload 에 그대로 넣을 동의 배열을 만든다.
+ *
+ * 각 e2e 가 직접 가입을 호출할 때 쓴다.
+ */
+export async function agreeAllActiveTerms(app: INestApplication): Promise<Array<{ code: string; version: string }>> {
+    const activeTerms = await ensureActiveTerms(app);
+    // 필수 약관만 동의한다. 선택 약관(marketing 등)까지 동의하면
+    // marketingAgreed 같은 파생 값이 바뀌어 응답 계약 테스트가 흔들린다.
+    return activeTerms.filter((t) => t.isRequired).map((t) => ({ code: t.code, version: t.version }));
+}
+
+/**
+ * 입양자 등록 API를 통해 토큰 반환
+ *
+ * 가입 계약이 약관 동의를 요구하므로 활성 약관을 먼저 보장하고 전부 동의한 payload 를 보낸다.
+ */
+export async function getAdopterToken(app: INestApplication): Promise<{ token: string; adopterId: string } | null> {
+    const request = require('supertest');
+    const timestamp = Date.now();
+    const providerId = Math.random().toString().substr(2, 10);
+
+    const activeTerms = await ensureActiveTerms(app);
+
+    const response = await request(app.getHttpServer())
+        .post('/api/v2/auth/register/adopter')
+        .send({
+            tempId: `temp_kakao_${providerId}_${timestamp}`,
+            email: `adopter_${timestamp}_${providerId}@test.com`,
+            nickname: `테스트입양자${timestamp}`,
+            realName: '테스트입양자',
+            phone: `010-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+            profileImage: 'https://example.com/profile.jpg',
+            termsAgreements: activeTerms.filter((t) => t.isRequired).map((t) => ({ code: t.code, version: t.version })),
+        });
+
+    if (response.status === 200 && response.body.data?.accessToken) {
+        return {
+            token: response.body.data.accessToken,
+            adopterId: response.body.data.adopterId,
+        };
+    }
+    return null;
+}
+
+/**
+ * 브리더 등록 API를 통해 토큰 반환
+ */
+export async function getBreederToken(app: INestApplication): Promise<{ token: string; breederId: string } | null> {
+    const request = require('supertest');
+    const timestamp = Date.now();
+
+    const response = await request(app.getHttpServer())
+        .post('/api/v2/auth/register/breeder')
+        .send({
+            email: `breeder_${timestamp}@test.com`,
+            phoneNumber: `010-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+            breederName: `테스트브리더${timestamp}`,
+            breederLocation: { city: '서울특별시', district: '강남구' },
+            animal: 'dog',
+            breeds: ['포메라니안'],
+            plan: 'basic',
+            agreements: { termsOfService: true, privacyPolicy: true, marketingConsent: false },
+        });
+
+    if (response.status === 200 && response.body.data?.accessToken) {
+        return {
+            token: response.body.data.accessToken,
+            breederId: response.body.data.breederId,
+        };
+    }
+    return null;
+}
+
+/**
+ * 테스트용 입양자 시드 데이터 생성
+ *
+ * @description
+ * 입양자 계정을 생성합니다.
+ *
+ * @param app - NestJS 애플리케이션
+ * @returns 생성된 입양자 ID와 이메일
+ *
+ * @example
+ * ```typescript
+ * const { adopterId, email } = await seedAdopter(app);
+ * ```
+ */
+export async function seedAdopter(app: INestApplication): Promise<{ adopterId: string; email: string }> {
+    const connection = app.get<Connection>(getConnectionToken());
+    const adopterCollection = connection.collection('adopters');
+
+    const timestamp = Date.now();
+    const providerId = getRandomString(10);
+
+    const adopter = {
+        tempId: `temp_kakao_${providerId}_${timestamp}`,
+        email: `adopter_${timestamp}_${providerId}@test.com`,
+        nickname: `테스트입양자${timestamp}`,
+        phone: `010-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+        profileImage: 'https://example.com/profile.jpg',
+        provider: 'kakao',
+        providerId: providerId,
+        status: 'active',
+        role: 'adopter',
+        favoriteBreeder: [],
+        adoptionApplications: [],
+        reviews: [],
+        reports: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
+    const result = await adopterCollection.insertOne(adopter);
+    return {
+        adopterId: result.insertedId.toString(),
+        email: adopter.email,
+    };
+}
+
+/**
+ * 테스트용 브리더 시드 데이터 생성
+ *
+ * @description
+ * 브리더 계정을 생성합니다.
+ *
+ * @param app - NestJS 애플리케이션
+ * @param verificationStatus - 인증 상태 (기본값: 'approved')
+ * @returns 생성된 브리더 ID와 이메일
+ *
+ * @example
+ * ```typescript
+ * const { breederId, email } = await seedBreeder(app, 'approved');
+ * ```
+ */
+export async function seedBreeder(
+    app: INestApplication,
+    verificationStatus: string = 'approved',
+): Promise<{ breederId: string; email: string }> {
+    const connection = app.get<Connection>(getConnectionToken());
+    const breederCollection = connection.collection('breeders');
+
+    const timestamp = Date.now();
+
+    const breeder = {
+        email: `breeder_${timestamp}@test.com`,
+        phoneNumber: `010-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}-${String(Math.floor(Math.random() * 10000)).padStart(4, '0')}`,
+        breederName: `테스트브리더${timestamp}`,
+        breederLocation: {
+            city: '서울특별시',
+            district: '강남구',
+        },
+        animal: 'dog',
+        breeds: ['포메라니안'],
+        plan: 'basic',
+        level: 'new',
+        status: 'active',
+        role: 'breeder',
+        verification: {
+            status: verificationStatus,
+            documents: [],
+            appliedAt: new Date(),
+            approvedAt: verificationStatus === 'approved' ? new Date() : null,
+        },
+        profile: {
+            description: '테스트 브리더입니다',
+            photoUrls: [],
+        },
+        parentPets: [],
+        availablePets: [],
+        applicationForm: {
+            questions: [],
+        },
+        receivedApplications: [],
+        reviews: [],
+        stats: {
+            totalReviews: 0,
+            averageRating: 0,
+            totalAdoptions: 0,
+        },
+        reports: [],
+        agreements: {
+            termsOfService: true,
+            privacyPolicy: true,
+            marketingConsent: false,
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
+    const result = await breederCollection.insertOne(breeder);
+    return {
+        breederId: result.insertedId.toString(),
+        email: breeder.email,
+    };
+}
+
+/**
+ * 테스트용 분양 가능 반려동물 시드 데이터 생성
+ *
+ * @description
+ * 브리더의 분양 가능한 반려동물을 생성합니다.
+ *
+ * @param app - NestJS 애플리케이션
+ * @param breederId - 브리더 ID
+ * @returns 생성된 반려동물 ID
+ *
+ * @example
+ * ```typescript
+ * const { petId } = await seedAvailablePet(app, breederId);
+ * ```
+ */
+export async function seedAvailablePet(app: INestApplication, breederId: string): Promise<{ petId: string }> {
+    const connection = app.get<Connection>(getConnectionToken());
+    const breederCollection = connection.collection('breeders');
+
+    const petId = `pet_${Date.now()}_${getRandomString(6)}`;
+
+    const availablePet = {
+        petId,
+        name: `테스트강아지${Date.now()}`,
+        breed: '포메라니안',
+        birthDate: new Date(),
+        gender: 'male',
+        price: 1500000,
+        photoUrls: ['https://example.com/pet.jpg'],
+        description: '건강한 강아지입니다',
+        vaccinations: [],
+        availableFrom: new Date(),
+        isAvailable: true,
+    };
+
+    await breederCollection.updateOne({ _id: new ObjectId(breederId) }, {
+        $push: { availablePets: availablePet },
+    } as any);
+
+    return { petId };
+}
+
+/**
+ * 테스트용 입양 신청 시드 데이터 생성
+ *
+ * @description
+ * 입양 신청을 생성합니다.
+ *
+ * @param app - NestJS 애플리케이션
+ * @param adopterId - 입양자 ID
+ * @param breederId - 브리더 ID
+ * @param petId - 반려동물 ID (선택사항)
+ * @returns 생성된 신청 ID
+ *
+ * @example
+ * ```typescript
+ * const { applicationId } = await seedAdoptionApplication(app, adopterId, breederId);
+ * ```
+ */
+export async function seedAdoptionApplication(
+    app: INestApplication,
+    adopterId: string,
+    breederId: string,
+    petId?: string,
+): Promise<{ applicationId: string }> {
+    const connection = app.get<Connection>(getConnectionToken());
+    const applicationCollection = connection.collection('adoption-applications');
+
+    const applicationId = `app_${Date.now()}_${getRandomString(6)}`;
+
+    const application = {
+        applicationId,
+        adopterId,
+        breederId,
+        petId: petId || null,
+        status: 'pending',
+        applicationData: {
+            reason: '반려동물을 정말 사랑합니다',
+            experience: '5년 경력',
+        },
+        appliedAt: new Date(),
+        updatedAt: new Date(),
+    };
+
+    await applicationCollection.insertOne(application);
+
+    return { applicationId };
+}
+
+/**
+ * 테스트용 브리더 후기 시드 데이터 생성
+ *
+ * @description
+ * 브리더에 대한 후기를 생성합니다.
+ *
+ * @param app - NestJS 애플리케이션
+ * @param adopterId - 입양자 ID
+ * @param breederId - 브리더 ID
+ * @returns 생성된 후기 ID
+ *
+ * @example
+ * ```typescript
+ * const { reviewId } = await seedBreederReview(app, adopterId, breederId);
+ * ```
+ */
+export async function seedBreederReview(
+    app: INestApplication,
+    adopterId: string,
+    breederId: string,
+): Promise<{ reviewId: string }> {
+    const connection = app.get<Connection>(getConnectionToken());
+    const reviewCollection = connection.collection('breeder-reviews');
+
+    const reviewId = `review_${Date.now()}_${getRandomString(6)}`;
+
+    const review = {
+        reviewId,
+        breederId,
+        adopterId,
+        rating: 5,
+        content: '정말 좋은 브리더입니다!',
+        petHealthRating: 5,
+        communicationRating: 5,
+        photoUrls: [],
+        createdAt: new Date(),
+        updatedAt: new Date(),
+    };
+
+    await reviewCollection.insertOne(review);
+
+    return { reviewId };
+}
+
+/**
+ * 테스트용 즐겨찾기 시드 데이터 생성
+ *
+ * @description
+ * 입양자의 즐겨찾기 브리더를 생성합니다.
+ *
+ * @param app - NestJS 애플리케이션
+ * @param adopterId - 입양자 ID
+ * @param breederId - 브리더 ID
+ * @returns 성공 여부
+ *
+ * @example
+ * ```typescript
+ * await seedFavorite(app, adopterId, breederId);
+ * ```
+ */
+export async function seedFavorite(app: INestApplication, adopterId: string, breederId: string): Promise<void> {
+    const connection = app.get<Connection>(getConnectionToken());
+    const favoriteCollection = connection.collection('favorites');
+
+    const favorite = {
+        adopterId,
+        breederId,
+        addedAt: new Date(),
+    };
+
+    await favoriteCollection.insertOne(favorite);
+}
+
+/**
+ * 테스트용 브리더 신고 시드 데이터 생성
+ *
+ * @description
+ * 브리더에 대한 신고를 생성합니다.
+ *
+ * @param app - NestJS 애플리케이션
+ * @param adopterId - 신고자 ID
+ * @param breederId - 브리더 ID
+ * @returns 생성된 신고 ID
+ *
+ * @example
+ * ```typescript
+ * const { reportId } = await seedBreederReport(app, adopterId, breederId);
+ * ```
+ */
+export async function seedBreederReport(
+    app: INestApplication,
+    adopterId: string,
+    breederId: string,
+): Promise<{ reportId: string }> {
+    const connection = app.get<Connection>(getConnectionToken());
+    const reportCollection = connection.collection('breeder-reports');
+
+    const reportId = `report_${Date.now()}_${getRandomString(6)}`;
+
+    const report = {
+        reportId,
+        breederId,
+        reporterId: adopterId,
+        reason: 'inappropriate',
+        description: '부적절한 행동이 있었습니다',
+        status: 'pending',
+        reportedAt: new Date(),
+    };
+
+    await reportCollection.insertOne(report);
+
+    return { reportId };
+}

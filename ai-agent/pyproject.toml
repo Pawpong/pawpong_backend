@@ -1,0 +1,18 @@
+[project]
+name = "pawpong-ai-agent"
+version = "1.0.0"
+description = "Pawpong AI 이미지 변환 에이전트 (Kafka consumer + gRPC server)"
+requires-python = ">=3.12"
+
+dependencies = [
+    "aiokafka==0.12.0",
+    "boto3==1.35.99",
+    "grpcio==1.68.1",
+    "protobuf==5.29.2",
+    "langgraph==0.2.60",
+    "openai==1.59.7",
+    "pillow==11.1.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["app*"]

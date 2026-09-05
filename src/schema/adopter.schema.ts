@@ -5,13 +5,13 @@ import { User } from './user.schema';
 export type AdopterDocument = Adopter & Document;
 
 /**
- * ❌ 제거됨: AdoptionApplicationInfo
+ * 제거됨: AdoptionApplicationInfo
  * 이유: AdoptionApplication 별도 컬렉션에서 참조 방식으로 관리
  * 조회: AdoptionApplication.find({ adopterId })
  */
 
 /**
- * ❌ 제거됨: WrittenReviewInfo
+ * 제거됨: WrittenReviewInfo
  * 이유: BreederReview 별도 컬렉션에서 참조 방식으로 관리
  * 조회: BreederReview.find({ adopterId })
  */
@@ -118,6 +118,41 @@ export class SubmittedReportInfo {
 }
 
 /**
+ * 입양 상담용 사전 정보 (v2 온보딩4 응답)
+ * 가입 후 첫 상담 신청 시 자동으로 prefill 되어 매번 재입력하지 않도록 한다.
+ */
+@Schema({ _id: false })
+export class CounselDefaultProfile {
+    @Prop({ trim: true, default: '' })
+    selfIntroduction: string;
+
+    @Prop({ trim: true })
+    dailyAbsenceHours?: string;
+
+    @Prop({ trim: true })
+    livingSpaceDescription?: string;
+
+    @Prop({ type: Date })
+    counselPrivacyAgreedAt?: Date;
+}
+
+/**
+ * 약관 동의 이력 (v2 온보딩2 동의 결과)
+ * 가입 시점의 약관 코드/버전/동의시각을 보관한다.
+ */
+@Schema({ _id: false })
+export class TermsAgreementRecord {
+    @Prop({ required: true })
+    code: string;
+
+    @Prop({ required: true })
+    version: string;
+
+    @Prop({ required: true, default: Date.now })
+    agreedAt: Date;
+}
+
+/**
  * 알림 설정 스키마 (camelCase)
  */
 @Schema({ _id: false })
@@ -182,13 +217,13 @@ export class Adopter extends User {
     preferredLocation?: string;
 
     /**
-     * ❌ 제거: adoptionApplicationList
+     * 제거: adoptionApplicationList
      * 대체: AdoptionApplication 컬렉션에서 참조
      * 조회: AdoptionApplication.find({ adopterId })
      */
 
     /**
-     * ❌ 제거: writtenReviewList
+     * 제거: writtenReviewList
      * 대체: BreederReview 컬렉션에서 참조
      * 조회: BreederReview.find({ adopterId })
      */
@@ -212,6 +247,54 @@ export class Adopter extends User {
      */
     @Prop({ type: NotificationSettings, default: () => ({}) })
     notificationSettings: NotificationSettings;
+
+    /**
+     * 실명 (v2 온보딩4 입력 — 상담 시 표시되는 이름)
+     */
+    @Prop({ trim: true, default: '' })
+    realName?: string;
+
+    /**
+     * 입양 상담용 사전 정보 (v2 온보딩4)
+     * 첫 상담 신청 시 자동으로 prefill 되어 매번 재입력 부담을 줄임
+     */
+    @Prop({ type: CounselDefaultProfile, default: () => ({}) })
+    counselDefaultProfile?: CounselDefaultProfile;
+
+    /**
+     * 약관 동의 이력 (v2 온보딩2)
+     * 코드별 활성 버전과 동의 시각을 가입 시점 기준으로 누적
+     */
+    @Prop({ type: [TermsAgreementRecord], default: [] })
+    termsAgreementHistory: TermsAgreementRecord[];
+
+    /**
+     * v2 유저홈/마이홈 — 한 줄 소개 (프로필 카드 표시용)
+     * 회원가입 직후에는 비어있을 수 있다.
+     */
+    @Prop({ type: String, trim: true, maxlength: 200, default: '' })
+    bio?: string;
+
+    /**
+     * v2 유저홈 — BPM (활동 점수, Pawpong 자체 지표)
+     * 산정 로직은 별도 세션에서 구현하며 여기서는 필드만 미리 둔다.
+     */
+    @Prop({ type: Number, default: 0, min: 0 })
+    bpm: number;
+
+    /**
+     * v2 유저홈 — 팔로워 수 (나를 팔로우하는 사용자 수)
+     * user_follows 컬렉션의 follow/unfollow 시 원자적으로 갱신된다.
+     */
+    @Prop({ type: Number, default: 0, min: 0 })
+    followerCount: number;
+
+    /**
+     * v2 유저홈 — 팔로잉 수 (내가 팔로우하는 사용자 수)
+     * 친구 목록 모달의 "팔로잉" 탭 카운트로 사용된다.
+     */
+    @Prop({ type: Number, default: 0, min: 0 })
+    followingCount: number;
 }
 
 export const AdopterSchema = SchemaFactory.createForClass(Adopter);

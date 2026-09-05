@@ -1,4 +1,4 @@
-name: Deploy to Development Server
+name: Deploy to Development Server (Mac Mini)
 
 on:
     push:
@@ -9,141 +9,185 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - uses: actions/checkout@v3
+            - name: Checkout code
+              uses: actions/checkout@v4
 
-            - name: Configure SSH Connection
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 9.15.4
+                  run_install: false
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: '22'
+                  cache: 'pnpm'
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Format (prettier)
+              # 배포되는 산출물이 항상 포맷된 소스에서 빌드되도록 보장한다.
+              # 포맷 차이가 있었다면 로그에 남겨 로컬에서 pnpm format 을 누락했는지 확인할 수 있게 한다.
               run: |
-                  # Secrets 확인
-                  if [ -z "${{ secrets.DEV_SERVER_HOST }}" ]; then
-                    echo "Error: DEV_SERVER_HOST secret is not set"
-                    exit 1
-                  fi
-                  # Dev와 Prod가 같은 SSH 키를 사용하므로 PROD_SSH_KEY 사용
-                  if [ -z "${{ secrets.PROD_SSH_KEY }}" ]; then
-                    echo "Error: PROD_SSH_KEY secret is not set"
-                    exit 1
+                  pnpm format
+                  if [ -n "$(git status --porcelain)" ]; then
+                    echo "⚠️ 포맷되지 않은 파일이 있어 CI 에서 정리했습니다 (로컬에서 pnpm format 실행 권장):"
+                    git status --porcelain
+                  else
+                    echo "✅ 이미 포맷 상태입니다"
                   fi
 
-                  mkdir -p ~/.ssh/
-                  echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/deploy_key
+            - name: Build
+              env:
+                  NODE_OPTIONS: '--max-old-space-size=3072'
+              run: pnpm build
+
+            - name: Configure SSH
+              run: |
+                  mkdir -p ~/.ssh
+                  echo "${{ secrets.DEV_SSH_KEY }}" > ~/.ssh/deploy_key
                   chmod 600 ~/.ssh/deploy_key
-                  ssh-keyscan -H ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts
+                  ssh-keyscan -p ${{ secrets.DEV_SERVER_PORT }} -H ${{ secrets.DEV_SERVER_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
-                  echo "=== SSH Configuration Complete ==="
-                  echo "Target host: ${{ secrets.DEV_SERVER_HOST }}"
-                  echo "SSH key configured successfully"
-
-            - name: Test SSH Connection
+            - name: Verify remote prerequisites (node22·rsync·pm2·pnpm)
               run: |
-                  echo "=== Testing SSH Connection ==="
-                  ssh -v -i ~/.ssh/deploy_key root@${{ secrets.DEV_SERVER_HOST }} 'echo "SSH connection successful!"' 2>&1 | tee ssh_test.log
+                  SERVER="${{ secrets.DEV_SERVER_USER }}@${{ secrets.DEV_SERVER_HOST }}"
+                  PORT="${{ secrets.DEV_SERVER_PORT }}"
+                  # Mac Mini 원격에서 Node 22 LTS + pnpm 9.15.4 를 강제. node 22 미만이면 빌드된 dist
+                  # (Node 22 toolchain 기준)와 런타임 ABI 가 어긋나 native modules(sharp/firebase-admin 등)이
+                  # 깨질 수 있어 deploy 자체를 fail-fast.
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${PORT} ${SERVER} \
+                    "command -v rsync >/dev/null || sudo apt-get install -y rsync; \
+                     command -v pm2 >/dev/null || sudo npm install -g pm2; \
+                     NODE_MAJOR=\$(node -v 2>/dev/null | sed -E 's/^v([0-9]+).*/\1/' || echo 0); \
+                     if [ \"\${NODE_MAJOR}\" -lt 22 ]; then \
+                       echo \"❌ remote node 버전이 22 미만 (현재: \$(node -v 2>/dev/null || echo 'missing')). nvm/asdf 등으로 22 LTS 활성화 필요\"; exit 1; \
+                     fi; \
+                     command -v pnpm >/dev/null || sudo npm install -g pnpm@9.15.4; \
+                     PNPM_MAJOR=\$(pnpm --version 2>/dev/null | cut -d. -f1 || echo 0); \
+                     if [ \"\${PNPM_MAJOR}\" -lt 9 ]; then \
+                       sudo npm install -g pnpm@9.15.4; \
+                     fi; \
+                     rsync --version | head -1; pm2 --version; node --version; pnpm --version"
 
-            - name: Deploy to Development Server
+            - name: Transfer artifacts to Mac Mini (rsync with tar fallback)
               run: |
-                  echo "=== Starting Deployment ==="
-                  ssh -v -i ~/.ssh/deploy_key root@${{ secrets.DEV_SERVER_HOST }} << 'EOF'
-                    echo "Connected to server as: $(whoami)"
-                    echo "Current directory: $(pwd)"
-                    echo "Home directory: $HOME"
+                  SERVER="${{ secrets.DEV_SERVER_USER }}@${{ secrets.DEV_SERVER_HOST }}"
+                  PORT="${{ secrets.DEV_SERVER_PORT }}"
+                  SSH_OPTS="-i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${PORT}"
+                  REMOTE_DIR="/home/colding/pawpong_backend"
 
-                    export NVM_DIR="$HOME/.nvm"
-                    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-                    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
+                  # proto/ 는 반드시 함께 보낸다.
+                  # nest-cli 에 assets 설정이 없어 .proto 가 dist 로 복사되지 않고,
+                  # gRPC 클라이언트가 process.cwd()/proto 를 읽으므로 없으면 부팅이 실패한다.
+                  if rsync -avz --delete -e "ssh ${SSH_OPTS}" dist/ "${SERVER}:${REMOTE_DIR}/dist/" \
+                     && rsync -avz --delete -e "ssh ${SSH_OPTS}" proto/ "${SERVER}:${REMOTE_DIR}/proto/" \
+                     && rsync -avz -e "ssh ${SSH_OPTS}" package.json pnpm-lock.yaml .npmrc "${SERVER}:${REMOTE_DIR}/"; then
+                    echo "✅ rsync 전송 성공"
+                  else
+                    echo "⚠️ rsync 실패 → tar+ssh fallback 시도"
+                    tar czf - dist proto package.json pnpm-lock.yaml .npmrc | \
+                      ssh ${SSH_OPTS% -p*} -p ${PORT} ${SERVER} \
+                        "cd ${REMOTE_DIR} && rm -rf dist proto && tar xzf -"
+                  fi
 
-                    echo "Node.js version: $(node --version)"
-                    echo "npm version: $(npm --version)"
-                    echo "yarn version: $(yarn --version)"
+            - name: Install & Restart on Mac Mini
+              run: |
+                  SERVER="${{ secrets.DEV_SERVER_USER }}@${{ secrets.DEV_SERVER_HOST }}"
+                  PORT="${{ secrets.DEV_SERVER_PORT }}"
 
-                    cd /root/pawpong_backend/ || { echo "❌ Directory not found"; exit 1; }
-                    echo "Changed to project directory: $(pwd)"
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${PORT} ${SERVER} << 'EOF'
+                    set -e
+                    cd /home/colding/pawpong_backend
 
-                    git checkout dev
-                    git pull origin dev
-                    echo "Git checkout and pull completed"
+                    echo "[deploy] pnpm install (프로덕션 의존성, 플랫폼 바이너리 포함)"
+                    pnpm install --prod --frozen-lockfile
 
-                    yarn install
-                    echo "Dependencies installed"
+                    echo "[deploy] 개발용 활성 약관 시딩"
+                    PAWPONG_ALLOW_DEV_TERMS_SEED=true node --env-file=.env dist/scripts/seed-development-terms.js
 
-                    yarn build
-                    echo "Build completed"
+                    echo "[deploy] pm2 restart pawpong-backend"
+                    pm2 restart pawpong-backend --update-env || pm2 start dist/main.js --name pawpong-backend \
+                      --output /home/colding/pawpong.log --error /home/colding/pawpong.log --merge-logs --time
+                    pm2 save --force
 
-                    pm2 delete pawpong-api || echo "No PM2 process to delete"
-                    echo "PM2 process deleted"
-
-                    pm2 restart ecosystem.config.js --env production || pm2 start ecosystem.config.js --env production
-                    echo "PM2 restart/start completed"
-
-                    pm2 save
-                    echo "PM2 configuration saved"
+                    echo "[deploy] 앱 부팅 대기 + 헬스체크 (최대 150초 - Kafka retry 포함)"
+                    HEALTH_OK=0
+                    for i in $(seq 1 75); do
+                      if curl -sf http://localhost:8080/api/health > /dev/null 2>&1; then
+                        echo "✅ 헬스체크 통과 ($((i * 2))초 경과)"
+                        HEALTH_OK=1
+                        break
+                      fi
+                      sleep 2
+                    done
+                    if [ "$HEALTH_OK" != "1" ]; then
+                      echo "❌ 150초 내에 헬스체크 응답 없음 - 최근 pm2 로그 40줄:"
+                      pm2 logs pawpong-backend --lines 40 --nostream 2>&1 | tail -40
+                      exit 1
+                    fi
                   EOF
-                  2>&1 | tee deployment.log
 
-            - name: Send Discord Notification (Success)
+            - name: Remote health check (external HTTPS)
+              run: |
+                  for i in $(seq 1 12); do
+                    RESP=$(curl -sf -o /dev/null -w "%{http_code}" https://dev-api.pawpong.kr/api/health || echo "fail")
+                    if [ "$RESP" = "200" ]; then
+                      echo "✅ 외부 헬스체크 성공 (HTTPS 200)"
+                      exit 0
+                    fi
+                    echo "재시도 ($i/12) - response: $RESP"
+                    sleep 5
+                  done
+                  echo "❌ 외부 헬스체크 실패"
+                  exit 1
+
+            - name: Discord Notification (Success)
               if: success()
               run: |
-                  COMMIT_MSG=$(git log -1 --pretty=%B)
+                  COMMIT_MSG=$(git log -1 --pretty=%B | head -1)
                   COMMIT_AUTHOR=$(git log -1 --pretty=%an)
                   COMMIT_SHA=$(git rev-parse --short HEAD)
 
-                  curl -H "Content-Type: application/json" \
-                       -X POST \
-                       -d "{
-                         \"embeds\": [{
-                           \"title\": \"개발 서버 배포 성공\",
-                           \"description\": \"Dev 브랜치가 개발 서버에 성공적으로 배포되었습니다.\",
-                           \"color\": 5763719,
-                           \"fields\": [
-                             {\"name\": \"서버\", \"value\": \"115.68.179.77\", \"inline\": true},
-                             {\"name\": \"배포 방식\", \"value\": \"PM2\", \"inline\": true},
-                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
-                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
-                             {\"name\": \"커밋 메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false}
-                           ],
-                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                         }]
-                       }" \
-                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+                  curl -H "Content-Type: application/json" -X POST \
+                    -d "{
+                      \"embeds\": [{
+                        \"title\": \"✅ Dev 서버 배포 성공\",
+                        \"description\": \"Dev 브랜치가 Mac Mini(ubuntu-pawpong)에 배포되었습니다.\",
+                        \"color\": 5763719,
+                        \"fields\": [
+                          {\"name\": \"URL\", \"value\": \"https://dev-api.pawpong.kr\", \"inline\": true},
+                          {\"name\": \"서버\", \"value\": \"Mac Mini (colding)\", \"inline\": true},
+                          {\"name\": \"커밋\", \"value\": \"\`$COMMIT_SHA\` by $COMMIT_AUTHOR\", \"inline\": false},
+                          {\"name\": \"메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false}
+                        ],
+                        \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                      }]
+                    }" \
+                    ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
 
-            - name: Send Discord Notification (Failure)
+            - name: Discord Notification (Failure)
               if: failure()
               run: |
-                  COMMIT_MSG=$(git log -1 --pretty=%B)
+                  COMMIT_MSG=$(git log -1 --pretty=%B | head -1)
                   COMMIT_AUTHOR=$(git log -1 --pretty=%an)
                   COMMIT_SHA=$(git rev-parse --short HEAD)
 
-                  curl -H "Content-Type: application/json" \
-                       -X POST \
-                       -d "{
-                         \"embeds\": [{
-                           \"title\": \"개발 서버 배포 실패\",
-                           \"description\": \"Dev 브랜치 배포 중 오류가 발생했습니다.\",
-                           \"color\": 15158332,
-                           \"fields\": [
-                             {\"name\": \"서버\", \"value\": \"115.68.179.77\", \"inline\": true},
-                             {\"name\": \"배포 방식\", \"value\": \"PM2\", \"inline\": true},
-                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
-                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
-                             {\"name\": \"커밋 메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false},
-                             {\"name\": \"로그 확인\", \"value\": \"[GitHub Actions 로그 보기](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
-                           ],
-                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                         }]
-                       }" \
-                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
-
-            - name: Check deployment status
-              if: failure()
-              run: |
-                  echo "=== Deployment Failed - Debug Info ==="
-                  echo "SSH test log:"
-                  if [ -f ssh_test.log ]; then
-                    cat ssh_test.log
-                  else
-                    echo "No ssh_test.log file found"
-                  fi
-                  echo "Deployment log:"
-                  if [ -f deployment.log ]; then
-                    cat deployment.log
-                  else
-                    echo "No deployment.log file found"
-                  fi
+                  curl -H "Content-Type: application/json" -X POST \
+                    -d "{
+                      \"embeds\": [{
+                        \"title\": \"❌ Dev 서버 배포 실패\",
+                        \"description\": \"Dev 브랜치 배포 중 오류 발생.\",
+                        \"color\": 15158332,
+                        \"fields\": [
+                          {\"name\": \"서버\", \"value\": \"Mac Mini (colding)\", \"inline\": true},
+                          {\"name\": \"커밋\", \"value\": \"\`$COMMIT_SHA\` by $COMMIT_AUTHOR\", \"inline\": false},
+                          {\"name\": \"메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false},
+                          {\"name\": \"Actions 로그\", \"value\": \"[보기](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
+                        ],
+                        \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                      }]
+                    }" \
+                    ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
