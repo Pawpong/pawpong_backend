@@ -1,8 +1,7 @@
-import { Injectable, Inject } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 
 import { CHAT_ROOM_MANAGER, type ChatRoomManagerPort } from '../ports/chat-room-manager.port';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
-import { SenderRole } from '../../../../../schema/chat-message.schema';
 import { ChatRoomResponseAssemblerService } from '../../domain/services/chat-room-response-assembler.service';
 import type { ChatRoomResult } from '../types/chat-room-result.type';
 
@@ -15,17 +14,13 @@ export class GetMyRoomsUseCase {
         private readonly logger: CustomLoggerService,
     ) {}
 
-    async execute(userId: string, role: SenderRole): Promise<ChatRoomResult[]> {
-        this.logger.logStart('getMyRooms', '내 채팅방 목록 조회 시작', { userId, role });
+    async execute(userId: string): Promise<ChatRoomResult[]> {
+        this.logger.logStart('getMyRooms', '내 채팅방 목록 조회 시작', { userId });
 
         try {
-            const rooms =
-                role === SenderRole.ADOPTER
-                    ? await this.chatRoomManager.findRoomsByAdopterId(userId)
-                    : await this.chatRoomManager.findRoomsByBreederId(userId);
-
+            const rooms = await this.chatRoomManager.findRoomsByParticipantId(userId);
             this.logger.logSuccess('getMyRooms', '내 채팅방 목록 조회 완료', { userId, count: rooms.length });
-            return this.chatRoomResponseAssembler.toResults(rooms, userId, role);
+            return this.chatRoomResponseAssembler.toResults(rooms, userId);
         } catch (error) {
             this.logger.logError('getMyRooms', '내 채팅방 목록 조회', error);
             throw error;

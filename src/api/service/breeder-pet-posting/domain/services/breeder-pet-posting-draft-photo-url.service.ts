@@ -13,7 +13,10 @@ import type {
  */
 @Injectable()
 export class BreederPetPostingDraftPhotoUrlService {
-    toPhotoUrls(form: BreederPetPostingDraftForm, toUrl: (fileName: string) => string): BreederPetPostingDraftPhotoUrls {
+    toPhotoUrls(
+        form: BreederPetPostingDraftForm,
+        toUrl: (fileName: string) => string,
+    ): BreederPetPostingDraftPhotoUrls {
         return {
             pet: this.asFileNames(form.photos).map(toUrl),
             parents: this.asRecords(form.parentPetSnapshots).map((parent) => {
@@ -24,10 +27,7 @@ export class BreederPetPostingDraftPhotoUrlService {
         };
     }
 
-    private resolveBreedingEnvironmentUrl(
-        value: unknown,
-        toUrl: (fileName: string) => string,
-    ): string | null {
+    private resolveBreedingEnvironmentUrl(value: unknown, toUrl: (fileName: string) => string): string | null {
         if (!this.isRecord(value)) {
             return null;
         }

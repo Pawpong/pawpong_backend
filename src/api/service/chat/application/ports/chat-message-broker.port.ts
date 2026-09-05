@@ -14,6 +14,9 @@ export interface ChatMessageBrokerPayload {
 
 export interface ChatRoomLifecyclePayload {
     roomId: string;
+    participantIds?: string[];
+    participants?: Array<{ userId: string; role: SenderRole }>;
+    applicationIds?: string[];
     adopterId?: string;
     breederId?: string;
     applicationId?: string;

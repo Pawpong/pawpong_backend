@@ -1,6 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
 
+import { SenderRole } from './chat-message.schema';
+
 export type ChatRoomDocument = ChatRoom & Document;
 
 export enum ChatRoomStatus {
@@ -8,51 +10,110 @@ export enum ChatRoomStatus {
     CLOSED = 'closed',
 }
 
+@Schema({ _id: false })
+export class ChatRoomParticipant {
+    @Prop({ required: true })
+    userId: string;
+
+    @Prop({ required: true, type: String, enum: SenderRole })
+    role: SenderRole;
+}
+
+const ChatRoomParticipantSchema = SchemaFactory.createForClass(ChatRoomParticipant);
+
+@Schema({ _id: false })
+export class ChatRoomParticipantState {
+    @Prop({ required: true })
+    userId: string;
+
+    @Prop()
+    lastReadMessageId?: string;
+
+    @Prop()
+    lastReadAt?: Date;
+
+    /** 목록에서만 숨긴 시각. 방과 메시지는 삭제하지 않는다. */
+    @Prop()
+    hiddenAt?: Date;
+}
+
+const ChatRoomParticipantStateSchema = SchemaFactory.createForClass(ChatRoomParticipantState);
+
 /**
- * 채팅방 스키마
- * - adopter ↔ breeder 1:1 채팅방
- * - applicationId 기반으로 생성됨 (입양 상담 신청 연결)
+ * 1:1 사용자 DM 채팅방.
+ *
+ * participantKey는 participantIds를 정렬해 만든 값이며, 두 사용자 사이에 방이
+ * 하나만 존재하도록 보장한다. adopterId/breederId/applicationId/lastReadMessageId는
+ * 마이그레이션 전 문서를 무중단으로 읽기 위한 legacy 필드다.
  */
 @Schema({ collection: 'chat_rooms', timestamps: true })
 export class ChatRoom {
-    @Prop({ required: true })
-    adopterId: string;
+    @Prop({
+        type: [String],
+        default: undefined,
+        validate: {
+            validator: (value?: string[]) => value === undefined || value.length === 2,
+            message: 'participantIds must contain exactly 2 users',
+        },
+    })
+    participantIds?: string[];
 
-    @Prop({ required: true })
-    breederId: string;
+    @Prop({
+        type: [ChatRoomParticipantSchema],
+        default: undefined,
+        validate: {
+            validator: (value?: ChatRoomParticipant[]) => value === undefined || value.length === 2,
+            message: 'participants must contain exactly 2 users',
+        },
+    })
+    participants?: ChatRoomParticipant[];
 
-    /**
-     * 연결된 입양 상담 신청 ID (optional)
-     */
     @Prop()
-    applicationId?: string;
+    participantKey?: string;
+
+    @Prop({ type: [String], default: undefined })
+    applicationIds?: string[];
+
+    @Prop({ type: [ChatRoomParticipantStateSchema], default: undefined })
+    participantStates?: ChatRoomParticipantState[];
 
     @Prop({ required: true, enum: ChatRoomStatus, default: ChatRoomStatus.ACTIVE })
     status: ChatRoomStatus;
-
-    /**
-     * 각 참여자의 마지막 읽은 메시지 ID
-     */
-    @Prop({ type: Object, default: {} })
-    lastReadMessageId: {
-        adopter?: string;
-        breeder?: string;
-    };
 
     @Prop()
     lastMessage?: string;
 
     @Prop()
     lastMessageAt?: Date;
+
+    // ── legacy adopter ↔ breeder fields ────────────────────────────────────
+
+    @Prop()
+    adopterId?: string;
+
+    @Prop()
+    breederId?: string;
+
+    @Prop()
+    applicationId?: string;
+
+    @Prop({ type: Object, default: undefined })
+    lastReadMessageId?: {
+        adopter?: string;
+        breeder?: string;
+    };
 }
 
 export const ChatRoomSchema = SchemaFactory.createForClass(ChatRoom);
 
-// 복합 인덱스: ACTIVE 상태인 방에 한해 동일 adopter-breeder 쌍 중복 방지
-// CLOSED 방은 중복 허용 → 재채팅 시 새 방 생성 가능
+// 상태와 무관하게 동일한 두 사용자 사이에는 평생 하나의 방만 허용한다.
 ChatRoomSchema.index(
-    { adopterId: 1, breederId: 1 },
-    { unique: true, partialFilterExpression: { status: ChatRoomStatus.ACTIVE } },
+    { participantKey: 1 },
+    {
+        name: 'uniq_chat_room_participant_key',
+        unique: true,
+        partialFilterExpression: { participantKey: { $type: 'string' } },
+    },
 );
-ChatRoomSchema.index({ adopterId: 1, status: 1 });
-ChatRoomSchema.index({ breederId: 1, status: 1 });
+ChatRoomSchema.index({ participantIds: 1, lastMessageAt: -1 });
+ChatRoomSchema.index({ 'participantStates.userId': 1, 'participantStates.hiddenAt': 1 });

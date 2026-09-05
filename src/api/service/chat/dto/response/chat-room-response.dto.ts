@@ -20,6 +20,10 @@ export class ChatRoomResponseDto {
     @ApiProperty()
     roomId: string;
 
+    @ApiProperty({ type: [String], description: '이 방에 연결된 입양 신청 ID 목록' })
+    applicationIds: string[];
+
+    /** @deprecated applicationIds를 사용한다. */
     @ApiProperty({ required: false })
     applicationId?: string;
 

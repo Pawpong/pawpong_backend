@@ -5,11 +5,20 @@ import { Model, Types } from 'mongoose';
 import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
 import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
 import { SenderRole } from '../../../../schema/chat-message.schema';
+import { UserStatus } from '../../../../common/enum/user.enum';
 import { StorageService } from '../../../../common/storage/storage.service';
 import {
     ChatParticipantProfileSnapshot,
     ChatParticipantReaderPort,
 } from '../application/ports/chat-participant-reader.port';
+
+type ParticipantRecord = {
+    _id: Types.ObjectId;
+    nickname?: string;
+    name?: string;
+    profileImageFileName?: string;
+    accountStatus?: UserStatus;
+};
 
 @Injectable()
 export class ChatParticipantMongooseReaderAdapter implements ChatParticipantReaderPort {
@@ -19,32 +28,42 @@ export class ChatParticipantMongooseReaderAdapter implements ChatParticipantRead
         private readonly storageService: StorageService,
     ) {}
 
-    async findProfile(userId: string, role: SenderRole): Promise<ChatParticipantProfileSnapshot | null> {
+    async findParticipant(userId: string, role?: SenderRole): Promise<ChatParticipantProfileSnapshot | null> {
         if (!Types.ObjectId.isValid(userId)) return null;
 
-        let user: { _id: Types.ObjectId; nickname?: string; name?: string; profileImageFileName?: string } | null;
-
-        if (role === SenderRole.BREEDER) {
-            user = await this.breederModel
-                .findById(userId)
-                .select({ nickname: 1, name: 1, profileImageFileName: 1 })
-                .lean<{ _id: Types.ObjectId; nickname?: string; name?: string; profileImageFileName?: string }>()
-                .exec();
-        } else {
-            user = await this.adopterModel
-                .findById(userId)
-                .select({ nickname: 1, profileImageFileName: 1 })
-                .lean<{ _id: Types.ObjectId; nickname?: string; profileImageFileName?: string }>()
-                .exec();
+        if (role) {
+            const user = await this.findByRole(userId, role);
+            return user ? this.toSnapshot(userId, role, user) : null;
         }
 
-        if (!user) return null;
+        const [adopter, breeder] = await Promise.all([
+            this.findByRole(userId, SenderRole.ADOPTER),
+            this.findByRole(userId, SenderRole.BREEDER),
+        ]);
+        if (adopter) return this.toSnapshot(userId, SenderRole.ADOPTER, adopter);
+        if (breeder) return this.toSnapshot(userId, SenderRole.BREEDER, breeder);
+        return null;
+    }
 
+    private async findByRole(userId: string, role: SenderRole): Promise<ParticipantRecord | null> {
+        const projection = { nickname: 1, name: 1, profileImageFileName: 1, accountStatus: 1 };
+        if (role === SenderRole.BREEDER) {
+            return this.breederModel.findById(userId).select(projection).lean<ParticipantRecord>().exec();
+        }
+        return this.adopterModel.findById(userId).select(projection).lean<ParticipantRecord>().exec();
+    }
+
+    private toSnapshot(userId: string, role: SenderRole, user: ParticipantRecord): ChatParticipantProfileSnapshot {
+        const accountStatus = user.accountStatus ?? UserStatus.ACTIVE;
+        const isDeleted = accountStatus === UserStatus.DELETED;
         return {
             userId,
             role,
-            nickname: user.name || user.nickname || '알 수 없음',
-            profileImageUrl: this.storageService.generateSignedUrlSafe(user.profileImageFileName, 60),
+            nickname: isDeleted ? '탈퇴한 사용자' : user.name || user.nickname || '알 수 없음',
+            profileImageUrl: isDeleted
+                ? undefined
+                : this.storageService.generateSignedUrlSafe(user.profileImageFileName, 60),
+            accountStatus,
         };
     }
 }

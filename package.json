@@ -47,6 +47,7 @@
         "seed:banners": "ts-node src/scripts/seed-all.ts --only-banners",
         "seed:faqs": "ts-node src/scripts/seed-all.ts --only-faqs",
         "seed:terms:dev": "node --env-file=.env -r ts-node/register src/scripts/seed-development-terms.ts",
+        "migrate:chat-participants": "node --env-file=.env -r ts-node/register src/scripts/migrate-chat-participants.ts",
         "sync:faqs:dev": "node --env-file=.env -r ts-node/register src/scripts/sync-development-faqs.ts",
         "create:admin": "ts-node scripts/create-admin.ts",
         "prepare": "husky || true"
