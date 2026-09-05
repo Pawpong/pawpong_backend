@@ -81,6 +81,9 @@ jobs:
                   COMMIT_SHA: ${{ github.sha }}
               run: |
                   echo "🚀 Starting deployment to production server..."
+                  # Keep potentially large Docker pull logs out of the process environment.
+                  # Print the log even when SSH/deployment fails.
+                  trap 'cat deploy.log' EXIT
                   ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no colding@${{ secrets.PROD_SERVER_HOST }} << ENDSSH > deploy.log 2>&1
                   set -e
 
@@ -109,10 +112,6 @@ jobs:
 
                   echo "✅ Deployment completed successfully!"
                   ENDSSH
-                  cat deploy.log
-                  echo "DEPLOY_LOG<<EOF" >> $GITHUB_ENV
-                  cat deploy.log >> $GITHUB_ENV
-                  echo "EOF" >> $GITHUB_ENV
 
             - name: Send Discord Notification (Success)
               if: success()
@@ -122,8 +121,8 @@ jobs:
                   COMMIT_SHA=$(git rev-parse --short HEAD)
 
                   # 배포 로그에서 활성 컨테이너 추출
-                  ACTIVE_CONTAINER=$(echo "$DEPLOY_LOG" | grep -oP 'Active Container: \K(blue|green)' || echo "unknown")
-                  ACTIVE_PORT=$(echo "$DEPLOY_LOG" | grep -oP 'Active Container: (?:blue|green) \(port \K[0-9]+' || echo "unknown")
+                  ACTIVE_CONTAINER=$(grep -oP 'Active Container: \K(blue|green)' deploy.log | tail -n 1 || echo "unknown")
+                  ACTIVE_PORT=$(grep -oP 'Active Container: (?:blue|green) \(port \K[0-9]+' deploy.log | tail -n 1 || echo "unknown")
 
                   # JSON 특수문자 이스케이프
                   COMMIT_MSG_ESCAPED=$(echo "$COMMIT_MSG" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/\\t/g')
@@ -156,8 +155,8 @@ jobs:
                   COMMIT_SHA=$(git rev-parse --short HEAD)
 
                   # 배포 로그에서 실패한 컨테이너 추출
-                  FAILED_CONTAINER=$(echo "$DEPLOY_LOG" | grep -oP '(blue|green) deployment failed' | grep -oP '(blue|green)' || echo "unknown")
-                  ROLLBACK_CONTAINER=$(echo "$DEPLOY_LOG" | grep -oP 'Rolling back to \K(blue|green)' || echo "unknown")
+                  FAILED_CONTAINER=$(grep -oP '(blue|green) deployment failed' deploy.log | grep -oP '(blue|green)' | tail -n 1 || echo "unknown")
+                  ROLLBACK_CONTAINER=$(grep -oP 'Rolling back to \K(blue|green)' deploy.log | tail -n 1 || echo "unknown")
 
                   # 실패한 컨테이너 정보
                   if [ "$FAILED_CONTAINER" != "unknown" ]; then
