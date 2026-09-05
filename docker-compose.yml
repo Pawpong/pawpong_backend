@@ -159,6 +159,11 @@ services:
     # 모니터링 스택 (Loki + Grafana + Promtail)
     # =========================================================================
     loki:
+        logging: &bounded-logging
+            driver: json-file
+            options:
+                max-size: '10m'
+                max-file: '3'
         image: grafana/loki:2.9.0
         container_name: loki
         ports:
@@ -184,6 +189,7 @@ services:
                     memory: 128M
 
     grafana:
+        logging: *bounded-logging
         image: grafana/grafana:10.2.0
         container_name: grafana
         ports:
@@ -211,6 +217,7 @@ services:
                     memory: 128M
 
     promtail:
+        logging: *bounded-logging
         image: grafana/promtail:3.0.0
         container_name: promtail
         volumes:
@@ -236,6 +243,7 @@ services:
     # 사용: docker-compose --profile kafka up -d
     # =========================================================================
     zookeeper:
+        logging: *bounded-logging
         image: confluentinc/cp-zookeeper:7.5.0
         container_name: zookeeper
         profiles:
@@ -257,6 +265,7 @@ services:
                     memory: 128M
 
     kafka:
+        logging: *bounded-logging
         image: confluentinc/cp-kafka:7.5.0
         container_name: kafka
         profiles:
@@ -300,6 +309,7 @@ services:
     # Blue-Green 스왑 순간 앱이 2개 뜨므로 8GB 에서 256M 도 아깝고,
     # 브로커 내용을 들여다볼 일은 로컬 docker-compose.dev.yml 에서 처리한다.
     kafka-ui:
+        logging: *bounded-logging
         image: provectuslabs/kafka-ui:latest
         container_name: kafka-ui
         profiles:
