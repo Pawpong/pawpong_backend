@@ -80,6 +80,8 @@ if [ "$AGENT_READY" != true ]; then
 fi
 
 # 새 컨테이너 배포
+docker compose run --rm --no-deps -T ${NEW_CONTAINER} node dist/scripts/migrate-chat-participants.js --dry-run
+docker compose run --rm --no-deps -T ${NEW_CONTAINER} node dist/scripts/migrate-chat-participants.js
 docker compose up -d --no-deps --no-build ${NEW_CONTAINER}
 
 echo -e "${YELLOW}Waiting for ${NEW_CONTAINER} to start (40 seconds)...${NC}"
@@ -106,10 +108,10 @@ if [ "$HEALTHY" = true ]; then
     if [ -f /etc/nginx/sites-available/pawpong ]; then
         echo -e "${BLUE}Updating Nginx configuration...${NC}"
         # Nginx에서 upstream 포트를 새 포트로 변경
-        sudo cp -p /etc/nginx/sites-available/pawpong "/etc/nginx/sites-available/pawpong.before-${IMAGE_TAG}"
+        cp /etc/nginx/sites-available/pawpong "/home/colding/pawpong_backend/.nginx-before-${IMAGE_TAG}"
         sudo sed -i "/upstream pawpong_backend {/,/}/ s/localhost:${CURRENT_PORT}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
         if ! sudo nginx -t || ! sudo systemctl reload nginx; then
-            sudo cp -p "/etc/nginx/sites-available/pawpong.before-${IMAGE_TAG}" /etc/nginx/sites-available/pawpong
+            sudo sed -i "/upstream pawpong_backend {/,/}/ s/localhost:${NEW_PORT}/localhost:${CURRENT_PORT}/" /etc/nginx/sites-available/pawpong
             sudo nginx -t && sudo systemctl reload nginx
             docker compose stop "${NEW_CONTAINER}"
             exit 1
