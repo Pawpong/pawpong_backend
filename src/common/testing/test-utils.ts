@@ -390,7 +390,6 @@ export async function getBreederToken(app: INestApplication): Promise<{ token: s
             animal: 'dog',
             breeds: ['포메라니안'],
             plan: 'basic',
-            level: 'new',
             agreements: { termsOfService: true, privacyPolicy: true, marketingConsent: false },
         });
 

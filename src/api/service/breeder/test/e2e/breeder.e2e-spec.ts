@@ -34,7 +34,6 @@ describe('브리더 종단간 테스트', () => {
                 animal: 'dog',
                 breeds: ['포메라니안', '말티즈'],
                 plan: 'basic',
-                level: 'new',
                 agreements: {
                     termsOfService: true,
                     privacyPolicy: true,
