@@ -7,6 +7,7 @@ import { AdoptionApplication, AdoptionApplicationDocument } from '../../../../sc
 import { Adopter } from '../../../../schema/adopter.schema';
 import type { AdopterDocument } from '../../../../schema/adopter.schema';
 import { AvailablePet, AvailablePetDocument } from '../../../../schema/available-pet.schema';
+import { Breeder } from '../../../../schema/breeder.schema';
 import type { AdoptionApplicationPersistData } from '../application/types/adoption-application.type';
 
 /**
@@ -31,6 +32,8 @@ export class AdoptionApplicationRepository implements OnModuleInit {
         private readonly availablePetModel: Model<AvailablePetDocument>,
         @InjectModel(Adopter.name)
         private readonly adopterModel: Model<AdopterDocument>,
+        @InjectModel(Breeder.name)
+        private readonly breederModel: Model<Breeder>,
     ) {}
 
     /**
@@ -61,10 +64,13 @@ export class AdoptionApplicationRepository implements OnModuleInit {
      */
     async findApplicablePet(petId: string): Promise<AvailablePetDocument | null> {
         if (!Types.ObjectId.isValid(petId)) return null;
-        return this.availablePetModel
+        const pet = await this.availablePetModel
             .findOne({ _id: new Types.ObjectId(petId), isActive: true, status: 'available' })
             .lean<AvailablePetDocument>()
             .exec();
+        if (!pet) return null;
+        const owner = await this.breederModel.exists({ _id: pet.breederId, isTestAccount: { $ne: true } });
+        return owner ? pet : null;
     }
 
     async findAdopter(adopterId: string): Promise<AdopterDocument | null> {

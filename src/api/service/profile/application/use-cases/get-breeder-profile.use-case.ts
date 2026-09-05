@@ -22,7 +22,7 @@ export class GetBreederProfileUseCase {
 
     async execute(breederId: string, viewerUserId?: string, viewerRole?: string): Promise<BreederPublicProfileResult> {
         const breeder = await this.reader.readBreeder(breederId);
-        if (!breeder) throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
+        if (!breeder || breeder.isTestAccount) throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
 
         const [isFavorited, isFollowing] = await Promise.all([
             viewerUserId && viewerRole === 'adopter'

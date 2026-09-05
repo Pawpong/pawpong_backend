@@ -80,8 +80,12 @@ if [ "$AGENT_READY" != true ]; then
 fi
 
 # 새 컨테이너 배포
-docker compose run --rm --no-deps -T ${NEW_CONTAINER} node dist/scripts/migrate-chat-participants.js --dry-run
-docker compose run --rm --no-deps -T ${NEW_CONTAINER} node dist/scripts/migrate-chat-participants.js
+if [ "${RUN_CHAT_PARTICIPANT_MIGRATION:-false}" = "true" ]; then
+    docker compose run --rm --no-deps -T ${NEW_CONTAINER} node dist/scripts/migrate-chat-participants.js --dry-run
+    docker compose run --rm --no-deps -T ${NEW_CONTAINER} node dist/scripts/migrate-chat-participants.js
+else
+    echo "Skipping data migration (explicit RUN_CHAT_PARTICIPANT_MIGRATION=true required)."
+fi
 docker compose up -d --no-deps --no-build ${NEW_CONTAINER}
 
 echo -e "${YELLOW}Waiting for ${NEW_CONTAINER} to start (40 seconds)...${NC}"

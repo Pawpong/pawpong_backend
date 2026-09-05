@@ -4,7 +4,7 @@ import { AdoptionApplicationRepository } from '../../repository/adoption-applica
 
 describe('AdoptionApplicationRepository — stale index 방어층', () => {
     function buildRepository(applicationModel: any) {
-        return new AdoptionApplicationRepository(applicationModel as any, {} as any, {} as any);
+        return new AdoptionApplicationRepository(applicationModel as any, {} as any, {} as any, {} as any);
     }
 
     it('create() 가 E11000 을 ConflictException 으로 흡수 (stale unique 인덱스 잔존 대응)', async () => {

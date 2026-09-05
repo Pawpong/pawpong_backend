@@ -60,7 +60,7 @@ export class BreederPublicRepository {
 
     findPublicBreederById(breederId: string): Promise<BreederPublicBreederRecord | null> {
         return this.breederModel
-            .findById(breederId)
+            .findOne({ _id: breederId, isTestAccount: { $ne: true } })
             .select('-password -socialAuth -receivedApplications -reports')
             .lean()
             .exec() as Promise<BreederPublicBreederRecord | null>;
