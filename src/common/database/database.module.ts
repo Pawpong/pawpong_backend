@@ -4,10 +4,12 @@ import { ConfigService } from '@nestjs/config';
 import { InjectConnection } from '@nestjs/mongoose';
 import { Connection } from 'mongoose';
 
+import { DatabaseReadinessService } from './database-readiness.service';
+
 @Module({
     imports: [
         MongooseModule.forRootAsync({
-            useFactory: async (configService: ConfigService) => {
+            useFactory: (configService: ConfigService) => {
                 const uri = configService.get<string>('MONGODB_URI');
                 return {
                     uri: uri,
@@ -21,7 +23,8 @@ import { Connection } from 'mongoose';
             inject: [ConfigService],
         }),
     ],
-    exports: [MongooseModule],
+    providers: [DatabaseReadinessService],
+    exports: [MongooseModule, DatabaseReadinessService],
 })
 export class DatabaseModule implements OnModuleInit {
     private readonly logger = new Logger('Database');

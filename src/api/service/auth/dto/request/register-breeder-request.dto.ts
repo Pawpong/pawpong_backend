@@ -70,11 +70,11 @@ export class AgreementsDto {
  *
  * 프론트엔드 회원가입 플로우:
  * 1. UserTypeSection: userType 선택 (breeder)
- * 2. AnimalSection: animal 선택 (cat/dog)
+ * 2. AnimalSection: animal 선택
  * 3. PlanSection: plan 선택 (basic/pro)
  * 4. UserInfoSection: email, phoneNumber, agreements 입력
  * 5. BreederInfoSection: breederName, breederLocation, breeds, photo 입력
- * 6. DocumentSection: level 선택 및 서류 업로드 (MVP에서는 skip)
+ * 6. DocumentSection: 인증 서류 업로드
  * 7. SignupComplete: 완료
  */
 export class RegisterBreederRequestDto {
@@ -167,19 +167,6 @@ export class RegisterBreederRequestDto {
     @IsEnum(['basic', 'pro'])
     @IsNotEmpty()
     plan: string;
-
-    /**
-     * 브리더 레벨
-     * @example "new"
-     */
-    @ApiProperty({
-        description: '브리더 레벨',
-        enum: ['elite', 'new'],
-        example: 'new',
-    })
-    @IsEnum(['elite', 'new'])
-    @IsNotEmpty()
-    level: string;
 
     /**
      * 약관 동의 정보

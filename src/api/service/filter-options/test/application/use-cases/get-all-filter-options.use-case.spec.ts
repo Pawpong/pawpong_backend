@@ -11,18 +11,6 @@ describe('전체 필터 옵션 조회 유스케이스', () => {
     it('전체 필터 옵션 카탈로그를 반환한다', async () => {
         const result = await useCase.execute();
 
-        expect(result.breederLevels).toEqual([
-            {
-                value: 'elite',
-                label: '엘리트',
-                description: '인증된 전문 브리더',
-            },
-            {
-                value: 'new',
-                label: '뉴',
-                description: '신규 브리더',
-            },
-        ]);
         expect(result.sortOptions).toHaveLength(5);
         expect(result.dogSizes).toHaveLength(3);
         expect(result.catFurLengths).toHaveLength(2);

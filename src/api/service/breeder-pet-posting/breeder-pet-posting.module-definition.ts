@@ -26,6 +26,7 @@ import { BreederPetPostingListController } from './controller/breeder-pet-postin
 import { BreederPetPostingUpdateController } from './controller/breeder-pet-posting-update.controller';
 import { BreederPetPostingCardMapperService } from './domain/services/breeder-pet-posting-card-mapper.service';
 import { BreederPetPostingDraftCardMapperService } from './domain/services/breeder-pet-posting-draft-card-mapper.service';
+import { BreederPetPostingDraftPhotoUrlService } from './domain/services/breeder-pet-posting-draft-photo-url.service';
 import { BreederPetPostingMapperService } from './domain/services/breeder-pet-posting-mapper.service';
 import { BreederPetPostingValidatorService } from './domain/services/breeder-pet-posting-validator.service';
 import { BreederPetPostingAssetUrlStorageAdapter } from './infrastructure/breeder-pet-posting-asset-url-storage.adapter';
@@ -70,6 +71,7 @@ const BREEDER_PET_POSTING_DOMAIN_PROVIDERS = [
     BreederPetPostingMapperService,
     BreederPetPostingCardMapperService,
     BreederPetPostingDraftCardMapperService,
+    BreederPetPostingDraftPhotoUrlService,
 ];
 
 const BREEDER_PET_POSTING_INFRASTRUCTURE_PROVIDERS = [

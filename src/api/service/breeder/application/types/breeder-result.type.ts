@@ -4,7 +4,6 @@ import type { PageResult } from '../../../../../common/types/page-result.type';
 export type BreederCardResult = {
     breederId: string;
     breederName: string;
-    breederLevel: string;
     petType: string;
     location: string;
     mainBreed: string;
@@ -88,7 +87,6 @@ export type BreederProfileResult = {
     breederName: string;
     breederEmail: string;
     authProvider: string;
-    breederLevel: string;
     petType: string;
     detailBreed?: string;
     breeds: string[];

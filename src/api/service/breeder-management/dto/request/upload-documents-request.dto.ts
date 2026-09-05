@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsArray, IsEnum } from 'class-validator';
+import { IsString, IsArray } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
@@ -17,10 +17,11 @@ export class UploadDocumentsRequestDto {
     })
     @IsArray()
     @IsString({ each: true })
-    @Transform(({ value }) => {
+    @Transform(({ value }: { value: unknown }): unknown => {
         if (typeof value === 'string') {
             try {
-                return JSON.parse(value);
+                const parsedValue: unknown = JSON.parse(value);
+                return parsedValue;
             } catch {
                 return [value];
             }
@@ -28,18 +29,4 @@ export class UploadDocumentsRequestDto {
         return value;
     })
     types: string[];
-
-    /**
-     * 브리더 레벨
-     * @example "new"
-     */
-    @ApiProperty({
-        description: '브리더 레벨',
-        example: 'new',
-        enum: ['new', 'elite'],
-    })
-    @IsString()
-    @IsNotEmpty()
-    @IsEnum(['new', 'elite'])
-    level: 'new' | 'elite';
 }

@@ -8,6 +8,11 @@ import {
     BREEDER_PET_POSTING_PROFILE_PORT,
     type BreederPetPostingProfilePort,
 } from '../ports/breeder-pet-posting-profile.port';
+import {
+    BREEDER_PET_POSTING_ASSET_URL_PORT,
+    type BreederPetPostingAssetUrlPort,
+} from '../ports/breeder-pet-posting-asset-url.port';
+import { BreederPetPostingDraftPhotoUrlService } from '../../domain/services/breeder-pet-posting-draft-photo-url.service';
 import type { BreederPetPostingDraftDetailResult } from '../types/breeder-pet-posting-draft.type';
 
 /**
@@ -20,6 +25,9 @@ export class GetBreederPetPostingDraftUseCase {
         private readonly profilePort: BreederPetPostingProfilePort,
         @Inject(BREEDER_PET_POSTING_DRAFT_PORT)
         private readonly draftPort: BreederPetPostingDraftPort,
+        @Inject(BREEDER_PET_POSTING_ASSET_URL_PORT)
+        private readonly assetUrlPort: BreederPetPostingAssetUrlPort,
+        private readonly draftPhotoUrlService: BreederPetPostingDraftPhotoUrlService,
     ) {}
 
     async execute(userId: string, draftId: string): Promise<BreederPetPostingDraftDetailResult> {
@@ -35,7 +43,12 @@ export class GetBreederPetPostingDraftUseCase {
 
         return {
             draftId: draft.draftId,
+            // form 은 파일키 그대로 — 재저장·발행 시 그 키를 다시 보내야 한다
             form: draft.form,
+            // 미리보기용 URL 은 같은 순서로 따로 내려준다 (클라이언트는 키를 URL 로 바꿀 수 없다)
+            photoUrls: this.draftPhotoUrlService.toPhotoUrls(draft.form, (fileName) =>
+                this.assetUrlPort.toSignedUrl(fileName),
+            ),
             updatedAt: draft.updatedAt.toISOString(),
         };
     }

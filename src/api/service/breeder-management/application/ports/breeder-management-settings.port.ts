@@ -15,7 +15,6 @@ export interface BreederManagementStoredVerificationDocumentRecord {
 export interface BreederManagementVerificationRecord {
     status: string;
     plan?: string;
-    level?: string;
     submittedAt?: Date;
     reviewedAt?: Date;
     rejectionReason?: string;

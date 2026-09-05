@@ -4,6 +4,7 @@ import { FilterQuery, Model } from 'mongoose';
 
 import { Admin, AdminDocument } from '../../../../../schema/admin.schema';
 import { Breeder, BreederDocument } from '../../../../../schema/breeder.schema';
+import { VerificationStatus } from '../../../../../common/enum/user.enum';
 import { BreederVerificationAdminSearchCriteria } from '../application/ports/breeder-verification-admin-reader.port';
 import {
     BreederVerificationAdminActivityLogEntry,
@@ -29,37 +30,11 @@ export class BreederVerificationAdminRepository {
             .exec();
     }
 
-    getLevelChangeRequests(
-        criteria: BreederVerificationAdminSearchCriteria,
-    ): Promise<{ items: BreederAdminBreederDocumentRecord[]; total: number }> {
-        const { cityName, searchKeyword, pageNumber, itemsPerPage } = criteria;
-        const query: FilterQuery<BreederDocument> = {
-            'verification.isLevelChangeRequested': true,
-            'verification.status': 'reviewing',
-        };
-
-        if (cityName) {
-            query['profile.location.city'] = cityName;
-        }
-
-        if (searchKeyword) {
-            query.$or = [
-                { nickname: { $regex: searchKeyword, $options: 'i' } },
-                { emailAddress: { $regex: searchKeyword, $options: 'i' } },
-                { phoneNumber: { $regex: searchKeyword, $options: 'i' } },
-            ];
-        }
-
-        return this.search(query, pageNumber, itemsPerPage, { 'verification.submittedAt': -1 });
-    }
-
     getPendingBreeders(
         criteria: BreederVerificationAdminSearchCriteria,
     ): Promise<{ items: BreederAdminBreederDocumentRecord[]; total: number }> {
         const { verificationStatus, cityName, searchKeyword, pageNumber, itemsPerPage } = criteria;
-        const query: FilterQuery<BreederDocument> = {
-            'verification.isLevelChangeRequested': { $ne: true },
-        };
+        const query: FilterQuery<BreederDocument> = {};
 
         if (verificationStatus) {
             query['verification.status'] = verificationStatus;
@@ -116,14 +91,7 @@ export class BreederVerificationAdminRepository {
     }
 
     countApprovedBreeders() {
-        return this.breederModel.countDocuments({ 'verification.status': 'approved' });
-    }
-
-    countApprovedEliteBreeders() {
-        return this.breederModel.countDocuments({
-            'verification.status': 'approved',
-            'verification.plan': 'premium',
-        });
+        return this.breederModel.countDocuments({ 'verification.status': VerificationStatus.APPROVED });
     }
 
     findApprovedBreedersMissingDocuments(reviewedBefore: Date): Promise<BreederAdminBreederDocumentRecord[]> {
@@ -147,19 +115,11 @@ export class BreederVerificationAdminRepository {
             'verification.reviewedAt': command.reviewedAt,
         };
         const $unset: Record<string, ''> = {};
-        const $push: Record<string, unknown> = {};
 
         if (command.rejectionReason !== undefined) {
             $set['verification.rejectionReason'] = command.rejectionReason;
-        }
-
-        if (command.appendLevelChangeHistory) {
-            $push['verification.levelChangeHistory'] = command.appendLevelChangeHistory;
-        }
-
-        if (command.clearLevelChangeRequest) {
-            $set['verification.isLevelChangeRequested'] = false;
-            $unset['verification.levelChangeRequest'] = '';
+        } else if (command.verificationStatus === 'approved') {
+            $unset['verification.rejectionReason'] = '';
         }
 
         const update: Record<string, Record<string, unknown>> = {};
@@ -169,15 +129,7 @@ export class BreederVerificationAdminRepository {
         if (Object.keys($unset).length > 0) {
             update.$unset = $unset;
         }
-        if (Object.keys($push).length > 0) {
-            update.$push = $push;
-        }
-
         await this.breederModel.updateOne({ _id: breederId }, update);
-    }
-
-    async updateBreederLevel(breederId: string, newLevel: string): Promise<void> {
-        await this.breederModel.updateOne({ _id: breederId }, { $set: { 'verification.level': newLevel } });
     }
 
     async appendAdminActivityLog(adminId: string, logEntry: BreederVerificationAdminActivityLogEntry): Promise<void> {

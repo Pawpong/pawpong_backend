@@ -17,6 +17,13 @@ export class ApplicationListItemResponseDto {
     })
     applicationId: string;
 
+    @ApiProperty({
+        description: '이 신청으로 작성한 후기 ID (후기가 없으면 null)',
+        example: '507f1f77bcf86cd799439077',
+        nullable: true,
+    })
+    reviewId: string | null;
+
     /**
      * 신청한 브리더 ID
      * @example "507f1f77bcf86cd799439011"
@@ -94,17 +101,6 @@ export class ApplicationListItemResponseDto {
     processedAt?: string;
 
     /**
-     * 브리더 등급
-     * @example "elite"
-     */
-    @ApiProperty({
-        description: '브리더 등급',
-        example: 'elite',
-        enum: ['elite', 'new'],
-    })
-    breederLevel: 'elite' | 'new';
-
-    /**
      * 브리더 프로필 이미지 URL
      * @example "https://example.com/breeder-profile.jpg"
      */
@@ -112,8 +108,9 @@ export class ApplicationListItemResponseDto {
         description: '브리더 프로필 이미지 URL',
         example: 'https://example.com/breeder-profile.jpg',
         required: false,
+        nullable: true,
     })
-    profileImage?: string;
+    profileImage?: string | null;
 
     /**
      * 동물 타입 (고양이 또는 강아지)

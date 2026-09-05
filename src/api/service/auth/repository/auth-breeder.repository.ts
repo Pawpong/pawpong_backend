@@ -94,28 +94,4 @@ export class AuthBreederRepository {
     async updateProfileImage(id: string, fileName: string): Promise<void> {
         await this.breederModel.findByIdAndUpdate(id, { profileImageFileName: fileName }).exec();
     }
-
-    /**
-     * 브리더 인증 서류 업데이트
-     */
-    async updateVerificationDocuments(
-        id: string,
-        documents: Array<{ type: string; url: string; uploadedAt: Date }>,
-        level: string,
-        status: string,
-        submittedAt: Date,
-    ): Promise<BreederDocument | null> {
-        return this.breederModel
-            .findByIdAndUpdate(
-                id,
-                {
-                    'verification.documents': documents,
-                    'verification.level': level,
-                    'verification.status': status,
-                    'verification.submittedAt': submittedAt,
-                },
-                { new: true },
-            )
-            .exec();
-    }
 }

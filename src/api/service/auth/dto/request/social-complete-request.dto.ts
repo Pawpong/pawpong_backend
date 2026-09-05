@@ -216,18 +216,4 @@ export class SocialCompleteRequestDto {
     @IsString({ each: true })
     @IsOptional()
     breeds?: string[];
-
-    /**
-     * 브리더 레벨 (브리더 전용)
-     * @example "new"
-     */
-    @ApiProperty({
-        description: '브리더 레벨 (브리더 전용)',
-        enum: ['elite', 'new'],
-        example: 'new',
-        required: false,
-    })
-    @IsEnum(['elite', 'new'])
-    @IsOptional()
-    level?: string;
 }

@@ -14,6 +14,7 @@ import { ConfigService } from '@nestjs/config';
 
 import { SendMessageUseCase } from './application/use-cases/send-message.use-case';
 import { GetMessagesUseCase } from './application/use-cases/get-messages.use-case';
+import { ChatMessageMapperService } from './domain/services/chat-message-mapper.service';
 import { CustomLoggerService } from '../../../common/logger/custom-logger.service';
 import { SendMessageRequestDto } from './dto/request/send-message-request.dto';
 import { SenderRole } from '../../../schema/chat-message.schema';
@@ -62,6 +63,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         @Inject(CHAT_PARTICIPANT_READER)
         private readonly participantReader: ChatParticipantReaderPort,
         private readonly chatPolicyService: ChatPolicyService,
+        private readonly chatMessageMapperService: ChatMessageMapperService,
         private readonly jwtService: JwtService,
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
@@ -143,10 +145,11 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
      * 메시지 전송
      * payload: SendMessageRequestDto
      *
-     * DB 저장 + Kafka emit까지만 수행.
-     * 실제 WebSocket broadcast는 ChatKafkaConsumer → broadcastNewMessage()가 담당.
+     * DB 저장 + Kafka emit을 수행한다.
+     * 정상 경로의 WebSocket broadcast는 ChatKafkaConsumer → broadcastNewMessage()가 담당하고,
+     * Kafka 장애 시에는 이 gateway가 같은 payload를 현재 인스턴스에 직접 broadcast한다.
      * 이렇게 하면 서버가 여러 대일 때도 모든 인스턴스의 Consumer가 동일 메시지를 받아
-     * 각자 연결된 클라이언트에게 전달할 수 있음.
+     * 각자 연결된 클라이언트에게 전달할 수 있으며, 단일 인스턴스 개발 환경도 중단되지 않는다.
      */
     @SubscribeMessage('send_message')
     async handleSendMessage(@ConnectedSocket() client: Socket, @MessageBody() dto: SendMessageRequestDto) {
@@ -156,11 +159,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
         }
 
         try {
-            await this.sendMessageUseCase.execute(user.userId, user.role, {
+            const result = await this.sendMessageUseCase.execute(user.userId, user.role, {
                 roomId: dto.roomId,
                 content: dto.content,
                 messageType: dto.messageType,
             });
+
+            // 로컬 개발이나 Kafka 장애 중에도 단일 인스턴스 채팅은 끊기지 않게 한다.
+            // Kafka 발행 성공 시에는 consumer가 동일 payload를 브로드캐스트한다.
+            if (!result.brokerPublished) {
+                this.broadcastNewMessage(this.chatMessageMapperService.toBroadcastPayload(result));
+            }
         } catch (error) {
             client.emit('error', { message: error.message });
         }

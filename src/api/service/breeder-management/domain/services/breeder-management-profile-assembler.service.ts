@@ -16,8 +16,14 @@ export class BreederManagementProfileAssemblerService {
         availablePets: BreederManagementAvailablePetRecord[],
         fileUrlPort: BreederManagementFileUrlPort,
     ): BreederManagementProfileResult {
+        const verification = breeder.verification;
         const verificationWithSignedUrls = {
-            ...breeder.verification,
+            status: verification?.status,
+            plan: verification?.plan,
+            submittedAt: verification?.submittedAt,
+            reviewedAt: verification?.reviewedAt,
+            rejectionReason: verification?.rejectionReason,
+            submittedByEmail: verification?.submittedByEmail,
             documents: (breeder.verification?.documents || []).map((document) => ({
                 type: document.type,
                 url: fileUrlPort.generateOne(document.fileName, 60),

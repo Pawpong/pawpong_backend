@@ -41,6 +41,7 @@ describe('브리더 인증 상태 조회 유스케이스', () => {
         const result = await useCase.execute('breeder-1');
 
         expect(result).toBeDefined();
+        expect(result).not.toHaveProperty('level');
         expect(breederManagementProfilePort.findById).toHaveBeenCalledWith('breeder-1');
     });
 

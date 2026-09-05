@@ -12,11 +12,15 @@ describe('입양자 상담 신청 상세 조회 유스케이스', () => {
     const adopterBreederReaderPort = {
         findById: jest.fn(),
     };
+    const adopterReviewReaderPort = {
+        findIdByApplicationId: jest.fn(),
+    };
 
     const useCase = new GetAdopterApplicationDetailUseCase(
         adopterProfilePort as any,
         adopterApplicationReaderPort as any,
         adopterBreederReaderPort as any,
+        adopterReviewReaderPort as any,
         new AdopterApplicationDetailAssemblerService(),
     );
 
@@ -38,18 +42,21 @@ describe('입양자 상담 신청 상세 조회 유스케이스', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
+        adopterReviewReaderPort.findIdByApplicationId.mockResolvedValue(null);
     });
 
     it('신청 상세 정보를 정상 조회한다', async () => {
         adopterProfilePort.findById.mockResolvedValue({ userId: 'user-1' });
         adopterApplicationReaderPort.findByIdForAdopter.mockResolvedValue(mockApplication);
         adopterBreederReaderPort.findById.mockResolvedValue(mockBreeder);
+        adopterReviewReaderPort.findIdByApplicationId.mockResolvedValue('review-1');
 
         const result = await useCase.execute('user-1', 'app-1');
 
         expect(result.applicationId).toBe('app-1');
         expect(result.breederName).toBe('행복브리더');
         expect(result.status).toBe('consultation_pending');
+        expect(result.reviewId).toBe('review-1');
     });
 
     it('입양자 정보가 없으면 DomainNotFoundError를 던진다', async () => {

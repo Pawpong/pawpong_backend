@@ -29,11 +29,19 @@ export class VerificationDocument {
             'adoption_contract_sample',
             'recent_pedigree_document',
             'breeder_certification',
+            'recent_association_document',
+            'tica_cfa_document',
             // camelCase 형식 (기존 데이터 호환성)
             'idCard',
+            'animalProductionLicense',
             'businessLicense',
+            'adoptionContractSample',
             'contractSample',
+            'recentAssociationDocument',
+            'recentPedigreeDocument',
             'pedigreeDocument',
+            'ticaCfaDocument',
+            'breederCertification',
             'breederCertificate',
             'breederDogCertificate',
             'breederCatCertificate',
@@ -121,14 +129,14 @@ export class BreederVerification {
     plan: string;
 
     /**
-     * 브리더 레벨 (new: 뉴, elite: 엘리트)
+     * @deprecated 2026-08-31 등급 정책 폐지 이전 데이터와의 역호환용 필드.
+     * 신규 브리더에는 저장하지 않으며 서비스 정책이나 화면 분기에 사용하지 않는다.
      */
     @Prop({
-        required: true,
+        required: false,
         enum: ['new', 'elite'],
-        default: 'new',
     })
-    level: string;
+    level?: string;
 
     @Prop()
     submittedAt?: Date;
@@ -148,15 +156,11 @@ export class BreederVerification {
     @Prop()
     submittedByEmail?: boolean;
 
-    /**
-     * 레벨 변경 신청 중 여부
-     */
+    /** @deprecated 폐지된 등급 변경 신청의 기존 데이터 보존용. 새 코드에서 읽거나 기록하지 않는다. */
     @Prop({ default: false })
     isLevelChangeRequested?: boolean;
 
-    /**
-     * 레벨 변경 신청 정보 (신청 중일 때만 존재)
-     */
+    /** @deprecated 폐지된 등급 변경 신청의 기존 데이터 보존용. */
     @Prop({ type: Object, required: false })
     levelChangeRequest?: {
         previousLevel: string;
@@ -165,9 +169,13 @@ export class BreederVerification {
         documents: VerificationDocument[];
     };
 
-    /**
-     * 레벨 변경 이력
-     */
+    @Prop()
+    levelChangeRejectionReason?: string;
+
+    @Prop()
+    levelChangeReviewedAt?: Date;
+
+    /** @deprecated 폐지된 등급 변경 이력의 기존 데이터 보존용. */
     @Prop({ type: [LevelChangeHistory], default: [] })
     levelChangeHistory?: LevelChangeHistory[];
 }

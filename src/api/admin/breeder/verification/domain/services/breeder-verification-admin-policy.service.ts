@@ -40,7 +40,7 @@ export class BreederVerificationAdminPolicyService {
         return breeder;
     }
 
-    resolveAdminAction(verificationStatus: string): AdminAction {
+    resolveAdminAction(verificationStatus: VerificationStatus): AdminAction {
         if (verificationStatus === VerificationStatus.APPROVED) {
             return AdminAction.APPROVE_BREEDER;
         }
@@ -50,24 +50,6 @@ export class BreederVerificationAdminPolicyService {
         }
 
         return AdminAction.REVIEW_BREEDER;
-    }
-
-    isLevelChangeApproval(breeder: BreederVerificationAdminBreederSnapshot, verificationStatus: string): boolean {
-        return (
-            !!breeder.verification?.isLevelChangeRequested &&
-            !!breeder.verification?.levelChangeRequest &&
-            verificationStatus === VerificationStatus.APPROVED
-        );
-    }
-
-    shouldClearLevelChangeRequest(
-        breeder: BreederVerificationAdminBreederSnapshot,
-        verificationStatus: string,
-    ): boolean {
-        return (
-            !!breeder.verification?.isLevelChangeRequested &&
-            (verificationStatus === VerificationStatus.APPROVED || verificationStatus === VerificationStatus.REJECTED)
-        );
     }
 
     getBreederDisplayName(breeder: BreederVerificationAdminBreederSnapshot): string {

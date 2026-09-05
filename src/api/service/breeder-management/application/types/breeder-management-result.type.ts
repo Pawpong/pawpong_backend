@@ -10,7 +10,6 @@ export type BreederManagementVerificationDocumentResult = {
 export type BreederManagementVerificationInfoResult = {
     status?: string;
     plan?: string;
-    level?: string;
     submittedAt?: Date;
     reviewedAt?: Date;
     rejectionReason?: string;
@@ -156,7 +155,6 @@ export type BreederManagementVerificationStatusDocumentResult = {
 export type BreederManagementVerificationStatusResult = {
     status: string;
     plan?: string;
-    level?: string;
     submittedAt?: Date;
     reviewedAt?: Date;
     documents: BreederManagementVerificationStatusDocumentResult[];
@@ -174,6 +172,5 @@ export type BreederManagementUploadedDocumentResult = {
 
 export type BreederManagementUploadDocumentsResult = {
     count: number;
-    level: string;
     documents: BreederManagementUploadedDocumentResult[];
 };

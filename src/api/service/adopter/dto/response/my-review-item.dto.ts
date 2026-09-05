@@ -6,7 +6,7 @@ import { ApiProperty } from '@nestjs/swagger';
  * GET /api/adopter/reviews (목록)
  * 입양자가 작성한 후기 목록의 개별 아이템 정보를 담는 DTO입니다.
  */
-export class MyReviewItemDto {
+export class AdopterMyReviewItemDto {
     /**
      * 후기 고유 ID
      * @example "507f1f77bcf86cd799439011"
@@ -37,16 +37,6 @@ export class MyReviewItemDto {
         nullable: true,
     })
     breederProfileImage: string | null;
-
-    /**
-     * 브리더 레벨
-     * @example "gold"
-     */
-    @ApiProperty({
-        description: '브리더 레벨 (new, bronze, silver, gold, platinum)',
-        example: 'gold',
-    })
-    breederLevel: string;
 
     /**
      * 브리딩 동물 종류

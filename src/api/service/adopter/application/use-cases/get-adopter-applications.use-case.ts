@@ -5,10 +5,12 @@ import { ADOPTER_APPLICATION_READER_PORT } from '../ports/adopter-application-re
 import { ADOPTER_BREEDER_READER_PORT } from '../ports/adopter-breeder-reader.port';
 import { ADOPTER_FILE_URL_PORT } from '../ports/adopter-file-url.port';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
+import { ADOPTER_REVIEW_READER_PORT } from '../ports/adopter-review-reader.port';
 import type { AdopterApplicationReaderPort } from '../ports/adopter-application-reader.port';
 import type { AdopterBreederReaderPort } from '../ports/adopter-breeder-reader.port';
 import type { AdopterFileUrlPort } from '../ports/adopter-file-url.port';
 import type { AdopterProfilePort } from '../ports/adopter-profile.port';
+import type { AdopterReviewReaderPort } from '../ports/adopter-review-reader.port';
 import { AdopterApplicationListAssemblerService } from '../../domain/services/adopter-application-list-assembler.service';
 import type { AdopterApplicationPageResult } from '../types/adopter-result.type';
 
@@ -23,6 +25,8 @@ export class GetAdopterApplicationsUseCase {
         private readonly adopterBreederReaderPort: AdopterBreederReaderPort,
         @Inject(ADOPTER_FILE_URL_PORT)
         private readonly adopterFileUrlPort: AdopterFileUrlPort,
+        @Inject(ADOPTER_REVIEW_READER_PORT)
+        private readonly adopterReviewReaderPort: AdopterReviewReaderPort,
         private readonly adopterApplicationListAssemblerService: AdopterApplicationListAssemblerService,
     ) {}
 
@@ -52,6 +56,8 @@ export class GetAdopterApplicationsUseCase {
             limit,
             breederIds,
         );
+        const applicationIds = applications.map((application) => application._id.toString());
+        const reviewIds = await this.adopterReviewReaderPort.findIdsByApplicationIds(applicationIds);
 
         const items = await Promise.all(
             applications.map(async (application) => {
@@ -60,6 +66,7 @@ export class GetAdopterApplicationsUseCase {
                     application,
                     breeder,
                     this.adopterFileUrlPort,
+                    reviewIds.get(application._id.toString()) || null,
                 );
             }),
         );

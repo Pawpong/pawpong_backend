@@ -3,6 +3,9 @@ import { Injectable } from '@nestjs/common';
 import { BreederSortBy } from '../../constants/breeder-search.enum';
 import type { BreederExploreQuery } from '../../application/types/breeder-search-query.type';
 
+/** 사용자 입력을 정규식에 넣기 전에 메타문자를 무력화한다 */
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 @Injectable()
 export class BreederExploreCriteriaService {
     build(searchDto: BreederExploreQuery): {
@@ -14,11 +17,11 @@ export class BreederExploreCriteriaService {
     } {
         const {
             petType,
+            keyword,
             breeds,
             province,
             city,
             isAdoptionAvailable,
-            breederLevel,
             sortBy,
             page = 1,
             limit = 20,
@@ -37,6 +40,19 @@ export class BreederExploreCriteriaService {
             filter['petType'] = petType;
         }
 
+        // 검색어는 브리더명/품종/지역을 한 번에 훑는다.
+        // 사용자가 검색바에 브리더 이름을 칠지 "말티즈"나 "부산"을 칠지 구분할 수 없기 때문.
+        const trimmedKeyword = keyword?.trim();
+        if (trimmedKeyword) {
+            const pattern = new RegExp(escapeRegExp(trimmedKeyword), 'i');
+            filter['$or'] = [
+                { name: pattern },
+                { breeds: pattern },
+                { 'profile.location.city': pattern },
+                { 'profile.location.district': pattern },
+            ];
+        }
+
         if (breeds && breeds.length > 0) {
             filter['breeds'] = { $in: breeds };
         }
@@ -50,10 +66,6 @@ export class BreederExploreCriteriaService {
             filter['profile.location.city'] = { $in: province };
         } else if (city && city.length > 0) {
             filter['profile.location.district'] = { $in: city };
-        }
-
-        if (breederLevel && breederLevel.length > 0) {
-            filter['verification.level'] = { $in: breederLevel };
         }
 
         let sortOrder: Record<string, 1 | -1>;

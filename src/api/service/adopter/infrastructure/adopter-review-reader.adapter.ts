@@ -7,7 +7,7 @@ import type {
 } from '../application/ports/adopter-review-reader.port';
 import type { AdopterReviewReaderPort } from '../application/ports/adopter-review-reader.port';
 import { AdopterReviewRepository } from '../repository/adopter-review.repository';
-import type { AdopterReviewRepositoryBreederRecord, AdopterReviewRepositoryRecord } from '../types/adopter-review.type';
+import type { AdopterReviewRepositoryRecord } from '../types/adopter-review.type';
 
 @Injectable()
 export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {
@@ -18,6 +18,23 @@ export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {
 
     countByAdopterId(adopterId: string): Promise<number> {
         return this.adopterReviewRepository.countByAdopterId(adopterId);
+    }
+
+    async findIdByApplicationId(applicationId: string): Promise<string | null> {
+        const review = await this.adopterReviewRepository.findReviewByApplicationId(applicationId);
+        return review?._id?.toString() || null;
+    }
+
+    async findIdsByApplicationIds(applicationIds: string[]): Promise<Map<string, string>> {
+        const reviews = await this.adopterReviewRepository.findReviewsByApplicationIds(applicationIds);
+
+        return reviews.reduce((reviewIds, review) => {
+            const applicationId = review.applicationId?.toString();
+            if (applicationId && !reviewIds.has(applicationId)) {
+                reviewIds.set(applicationId, review._id.toString());
+            }
+            return reviewIds;
+        }, new Map<string, string>());
     }
 
     async findPagedByAdopterId(adopterId: string, page: number, limit: number): Promise<AdopterReviewListRecord[]> {
@@ -37,7 +54,6 @@ export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {
                 breederProfileImageFileName: breeder?.profileImageFileName
                     ? this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60) || null
                     : null,
-                breederLevel: breeder?.verification?.level || null,
                 breedingPetType: breeder?.petType || null,
                 content: review.content,
                 reviewType: review.type,
@@ -60,11 +76,12 @@ export class AdopterReviewReaderAdapter implements AdopterReviewReaderPort {
 
         return {
             reviewId: review._id.toString(),
+            applicationId: review.applicationId?.toString() || null,
+            breederId: breeder?._id?.toString() || null,
             breederNickname: breeder?.nickname || null,
             breederProfileImageFileName: breeder?.profileImageFileName
                 ? this.storageService.generateSignedUrlSafe(breeder.profileImageFileName, 60) || null
                 : null,
-            breederLevel: breeder?.verification?.level || null,
             breedingPetType: breeder?.petType || null,
             content: review.content,
             reviewType: review.type,

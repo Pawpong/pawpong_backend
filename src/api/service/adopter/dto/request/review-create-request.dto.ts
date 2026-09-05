@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsEnum, IsString, IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
@@ -34,9 +34,9 @@ export class ReviewCreateRequestDto {
         example: 'adoption',
         enum: ['consultation', 'adoption'],
     })
-    @IsString()
+    @IsEnum(['consultation', 'adoption'])
     @IsNotEmpty()
-    reviewType: string;
+    reviewType: 'consultation' | 'adoption';
 
     /**
      * 후기 내용

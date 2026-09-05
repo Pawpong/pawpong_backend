@@ -25,6 +25,7 @@ export class AdoptionPetMapperService {
             breed: pet.breed,
             petType: pet.petType,
             gender: pet.gender,
+            birthDate: pet.birthDate.toISOString(),
             ageDescription: this.describeAge(pet.birthDate),
             price: pet.price,
             status: pet.status,

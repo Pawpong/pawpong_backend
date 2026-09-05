@@ -9,6 +9,8 @@ export type AdoptionPetItemResult = {
     breed: string;
     petType?: AdoptionPetType;
     gender: 'male' | 'female';
+    /** 출생일 ISO 문자열 — 카드에서 나이 대신 생년월일을 노출할 때 사용한다 */
+    birthDate: string;
     ageDescription: string;
     price: number;
     status: AdoptionPetStatus;

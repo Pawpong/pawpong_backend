@@ -26,7 +26,6 @@ export class BreederVerificationAdminDetailMapperService {
             verificationInfo: {
                 verificationStatus: breeder.verification?.status || 'pending',
                 subscriptionPlan: breeder.verification?.plan || 'basic',
-                level: breeder.verification?.level || 'new',
                 submittedAt: this.resolveSubmittedAt(breeder.verification),
                 processedAt: breeder.verification?.reviewedAt,
                 isSubmittedByEmail: breeder.verification?.submittedByEmail || false,

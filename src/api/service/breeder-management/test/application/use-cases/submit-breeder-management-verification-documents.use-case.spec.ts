@@ -115,10 +115,14 @@ describe('브리더 관리 인증 문서 제출 유스케이스', () => {
                 fileName: 'verification/breeder-id/id-card.pdf',
                 originalFileName: '신분증.pdf',
             },
+            {
+                type: 'businessLicense',
+                fileName: 'verification/breeder-id/business-license.pdf',
+                originalFileName: '등록증.pdf',
+            },
         ];
 
         const result = await useCase.execute('breeder-id', {
-            level: 'new',
             documents: [
                 {
                     type: 'idCard',
@@ -153,13 +157,19 @@ describe('브리더 관리 인증 문서 제출 유스케이스', () => {
                 },
             ],
         };
+        draftStore.documents = [
+            {
+                type: 'businessLicense',
+                fileName: 'verification/breeder-id/business-license.pdf',
+                originalFileName: '등록증.pdf',
+            },
+        ];
 
         const result = await useCase.execute('breeder-id', {
-            level: 'new',
             documents: [
                 {
                     type: 'idCard',
-                    fileName: 'keep-existing-id-card.pdf',
+                    fileName: 'keep-existing',
                     originalFileName: '기존신분증.pdf',
                 },
                 {
@@ -173,11 +183,11 @@ describe('브리더 관리 인증 문서 제출 유스케이스', () => {
         expect(result.message).toContain('입점 서류 제출이 완료되었습니다');
         expect(settingsPort.updatedVerification.documents).toHaveLength(2);
         expect(settingsPort.updatedVerification.documents[0]).toMatchObject({
-            type: 'idCard',
+            type: 'id_card',
             fileName: 'verification/breeder-id/id-card.pdf',
         });
         expect(settingsPort.updatedVerification.documents[1]).toMatchObject({
-            type: 'businessLicense',
+            type: 'animal_production_license',
             fileName: 'verification/breeder-id/business-license.pdf',
         });
     });

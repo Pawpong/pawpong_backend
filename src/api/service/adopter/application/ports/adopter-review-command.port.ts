@@ -31,6 +31,7 @@ export const ADOPTER_REVIEW_COMMAND_PORT = Symbol('ADOPTER_REVIEW_COMMAND_PORT')
 
 export interface AdopterReviewCommandPort {
     findApplicationById(applicationId: string): Promise<AdopterReviewApplicationRecord | null>;
+    findReviewByApplicationId(applicationId: string): Promise<AdopterReviewRecord | null>;
     create(command: AdopterReviewCreateCommand): Promise<AdopterReviewCreatedRecord>;
     incrementBreederReviewCount(breederId: string): Promise<void>;
     findReviewById(reviewId: string): Promise<AdopterReviewRecord | null>;

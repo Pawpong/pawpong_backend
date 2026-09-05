@@ -15,24 +15,4 @@ export class BreederStatsResponseDto {
         example: 43,
     })
     totalApproved: number;
-
-    /**
-     * 엘리트 브리더 수 (premium 플랜)
-     * @example 5
-     */
-    @ApiProperty({
-        description: '엘리트 브리더 수 (premium 플랜)',
-        example: 5,
-    })
-    eliteCount: number;
-
-    /**
-     * 뉴 브리더 수 (basic 플랜)
-     * @example 38
-     */
-    @ApiProperty({
-        description: '뉴 브리더 수 (basic 플랜)',
-        example: 38,
-    })
-    newCount: number;
 }

@@ -32,45 +32,7 @@ describe('BreederVerificationAdminPolicyService', () => {
             expect(policy.resolveAdminAction(VerificationStatus.REJECTED)).toBe(AdminAction.REJECT_BREEDER);
         });
         it('그 외 → REVIEW_BREEDER', () => {
-            expect(policy.resolveAdminAction('pending')).toBe(AdminAction.REVIEW_BREEDER);
-        });
-    });
-
-    describe('isLevelChangeApproval', () => {
-        it('isLevelChangeRequested + levelChangeRequest + APPROVED → true', () => {
-            const breeder = { verification: { isLevelChangeRequested: true, levelChangeRequest: {} } } as any;
-            expect(policy.isLevelChangeApproval(breeder, VerificationStatus.APPROVED)).toBe(true);
-        });
-        it('상태 다르면 false', () => {
-            const breeder = { verification: { isLevelChangeRequested: true, levelChangeRequest: {} } } as any;
-            expect(policy.isLevelChangeApproval(breeder, VerificationStatus.REJECTED)).toBe(false);
-        });
-        it('플래그 없으면 false', () => {
-            expect(policy.isLevelChangeApproval({ verification: {} } as any, VerificationStatus.APPROVED)).toBe(false);
-        });
-    });
-
-    describe('shouldClearLevelChangeRequest', () => {
-        it('APPROVED이면서 요청 있으면 true', () => {
-            expect(
-                policy.shouldClearLevelChangeRequest(
-                    { verification: { isLevelChangeRequested: true } } as any,
-                    VerificationStatus.APPROVED,
-                ),
-            ).toBe(true);
-        });
-        it('REJECTED여도 true', () => {
-            expect(
-                policy.shouldClearLevelChangeRequest(
-                    { verification: { isLevelChangeRequested: true } } as any,
-                    VerificationStatus.REJECTED,
-                ),
-            ).toBe(true);
-        });
-        it('요청 없으면 false', () => {
-            expect(policy.shouldClearLevelChangeRequest({ verification: {} } as any, VerificationStatus.APPROVED)).toBe(
-                false,
-            );
+            expect(policy.resolveAdminAction(VerificationStatus.REVIEWING)).toBe(AdminAction.REVIEW_BREEDER);
         });
     });
 

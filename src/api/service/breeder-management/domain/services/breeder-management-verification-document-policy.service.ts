@@ -22,6 +22,36 @@ type BreederManagementVerificationSubmissionPlan = {
     finalDocuments: BreederManagementStoredVerificationDocumentRecord[];
 };
 
+const DOCUMENT_TYPE_ALIASES: Record<string, string> = {
+    idCard: 'id_card',
+    id_card: 'id_card',
+    animalProductionLicense: 'animal_production_license',
+    businessLicense: 'animal_production_license',
+    animal_production_license: 'animal_production_license',
+    adoptionContractSample: 'adoption_contract_sample',
+    contractSample: 'adoption_contract_sample',
+    adoption_contract_sample: 'adoption_contract_sample',
+    recentAssociationDocument: 'recent_pedigree_document',
+    recent_association_document: 'recent_pedigree_document',
+    recentPedigreeDocument: 'recent_pedigree_document',
+    pedigreeDocument: 'recent_pedigree_document',
+    pedigree: 'recent_pedigree_document',
+    recent_pedigree_document: 'recent_pedigree_document',
+    breederCertification: 'breeder_certification',
+    breederCertificate: 'breeder_certification',
+    breederDogCertificate: 'breeder_certification',
+    breederCatCertificate: 'breeder_certification',
+    ticaCfaDocument: 'breeder_certification',
+    tica_cfa_document: 'breeder_certification',
+    breeder_certification: 'breeder_certification',
+};
+
+const REQUIRED_DOCUMENT_TYPES = ['id_card', 'animal_production_license'] as const;
+const SUPPORTED_DOCUMENT_TYPES = new Set(Object.values(DOCUMENT_TYPE_ALIASES));
+const MAX_DOCUMENT_SIZE_BYTES = 20 * 1024 * 1024;
+const ALLOWED_DOCUMENT_MIME_TYPES = new Set(['application/pdf', 'image/jpeg', 'image/png', 'image/webp']);
+const ALLOWED_DOCUMENT_EXTENSIONS = new Set(['pdf', 'jpg', 'jpeg', 'png', 'webp']);
+
 @Injectable()
 export class BreederManagementVerificationDocumentPolicyService {
     validateUploadRequest(files: Express.Multer.File[], types: string[]): void {
@@ -32,60 +62,91 @@ export class BreederManagementVerificationDocumentPolicyService {
         if (files.length !== types.length) {
             throw new DomainValidationError('파일 수와 타입 수가 일치하지 않습니다.');
         }
+
+        const normalizedTypes = types.map((type) => {
+            const normalizedType = this.normalizeDocumentType(type);
+            this.assertSupportedDocumentType(type, normalizedType);
+            return normalizedType;
+        });
+
+        if (new Set(normalizedTypes).size !== normalizedTypes.length) {
+            throw new DomainValidationError('중복된 서류 타입이 있습니다. 각 서류는 한 번만 업로드해야 합니다.');
+        }
+
+        for (const file of files) {
+            if (file.size > MAX_DOCUMENT_SIZE_BYTES) {
+                throw new DomainValidationError(`파일 "${file.originalname}"의 크기는 20MB를 초과할 수 없습니다.`);
+            }
+
+            const extension = file.originalname.split('.').pop()?.toLowerCase() || '';
+            if (!ALLOWED_DOCUMENT_MIME_TYPES.has(file.mimetype) || !ALLOWED_DOCUMENT_EXTENSIONS.has(extension)) {
+                throw new DomainValidationError(
+                    `파일 "${file.originalname}"은(는) 지원되지 않는 형식입니다. (지원: PDF, JPG, PNG, WEBP)`,
+                );
+            }
+        }
     }
 
     buildSubmissionPlan(params: {
-        level: 'new' | 'elite';
         submittedDocuments: BreederManagementSubmittedVerificationDocument[];
         draftDocuments: BreederManagementVerificationDraftDocument[];
         currentVerification?: BreederManagementVerificationState;
     }): BreederManagementVerificationSubmissionPlan {
-        const { level, submittedDocuments, draftDocuments, currentVerification } = params;
-        const existingDocuments = currentVerification?.documents || [];
+        const { submittedDocuments, draftDocuments, currentVerification } = params;
+        const existingDocuments = (currentVerification?.documents || [])
+            .filter((document) => this.isValidStoredPath(document.fileName))
+            .map((document) => ({
+                ...document,
+                type: this.normalizeDocumentType(document.type),
+            }));
         const isResubmission =
             currentVerification?.status === VerificationStatus.REVIEWING ||
             currentVerification?.status === VerificationStatus.REJECTED;
 
-        const submittedTypes = submittedDocuments.map((document) => document.type);
-        const existingTypes = isResubmission ? existingDocuments.map((document) => document.type) : [];
-        const allTypes = [...new Set([...submittedTypes, ...existingTypes])];
-
-        this.validateRequiredDocumentTypes(level, allTypes);
-
-        const newDocuments: BreederManagementStoredVerificationDocumentRecord[] = [];
-        const typesToKeepFromExisting: string[] = [];
+        const documentsByType = new Map(existingDocuments.map((document) => [document.type, document] as const));
 
         for (const document of submittedDocuments) {
-            if (this.isValidStoredPath(document.fileName)) {
-                const draftDocument = draftDocuments.find((draft) => draft.fileName === document.fileName);
-                newDocuments.push({
-                    type: document.type,
-                    fileName: document.fileName,
-                    originalFileName: document.originalFileName || draftDocument?.originalFileName,
-                    uploadedAt: new Date(),
-                });
+            const normalizedType = this.normalizeDocumentType(document.type);
+            this.assertSupportedDocumentType(document.type, normalizedType);
+
+            const existingDocument = existingDocuments.find(
+                (existing) => existing.type === normalizedType && existing.fileName === document.fileName,
+            );
+            if (existingDocument) {
+                documentsByType.set(normalizedType, existingDocument);
                 continue;
             }
 
-            typesToKeepFromExisting.push(document.type);
+            if (document.fileName === 'keep-existing') {
+                if (!documentsByType.has(normalizedType)) {
+                    throw new DomainValidationError(`유지할 기존 서류가 없습니다: ${document.type}`);
+                }
+                continue;
+            }
+
+            if (!this.isValidStoredPath(document.fileName)) {
+                throw new DomainValidationError(`유효하지 않은 서류 파일 경로입니다: ${document.type}`);
+            }
+
+            const draftDocument = draftDocuments.find(
+                (draft) =>
+                    draft.fileName === document.fileName && this.normalizeDocumentType(draft.type) === normalizedType,
+            );
+            if (!draftDocument) {
+                throw new DomainValidationError(`업로드가 확인되지 않은 서류입니다: ${document.type}`);
+            }
+
+            documentsByType.set(normalizedType, {
+                type: normalizedType,
+                fileName: document.fileName,
+                originalFileName: document.originalFileName || draftDocument.originalFileName,
+                uploadedAt: new Date(),
+            });
         }
 
-        const mergedExistingDocuments = !isResubmission
-            ? []
-            : existingDocuments.filter((existingDocument) => {
-                  const isBeingReplaced = newDocuments.some(
-                      (newDocument) => newDocument.type === existingDocument.type,
-                  );
-                  const shouldKeep = typesToKeepFromExisting.includes(existingDocument.type);
-                  return !isBeingReplaced && shouldKeep && this.isValidStoredPath(existingDocument.fileName);
-              });
+        const finalDocuments = [...documentsByType.values()];
 
-        const finalDocuments = [...mergedExistingDocuments, ...newDocuments];
-
-        this.validateRequiredDocumentTypes(
-            level,
-            finalDocuments.map((document) => document.type),
-        );
+        this.validateRequiredDocumentTypes(finalDocuments.map((document) => document.type));
 
         return {
             isResubmission,
@@ -94,26 +155,31 @@ export class BreederManagementVerificationDocumentPolicyService {
         };
     }
 
-    private validateRequiredDocumentTypes(level: 'new' | 'elite', documentTypes: string[]): void {
-        const requiredTypes =
-            level === 'new' ? ['idCard', 'businessLicense'] : ['idCard', 'businessLicense', 'contractSample'];
-        const missingTypes = requiredTypes.filter((type) => !documentTypes.includes(type));
+    normalizeDocumentType(type: string): string {
+        return DOCUMENT_TYPE_ALIASES[type] || type;
+    }
+
+    private validateRequiredDocumentTypes(documentTypes: string[]): void {
+        const normalizedTypes = new Set(documentTypes.map((type) => this.normalizeDocumentType(type)));
+        const missingTypes = REQUIRED_DOCUMENT_TYPES.filter((type) => !normalizedTypes.has(type));
 
         if (missingTypes.length > 0) {
             throw new DomainValidationError(`필수 서류가 누락되었습니다: ${missingTypes.join(', ')}`);
         }
+    }
 
-        if (level === 'elite') {
-            const hasBreederCertificate =
-                documentTypes.includes('breederCatCertificate') || documentTypes.includes('breederDogCertificate');
-
-            if (!hasBreederCertificate) {
-                throw new DomainValidationError('Elite 레벨은 브리더 인증 서류가 필수입니다.');
-            }
+    private assertSupportedDocumentType(inputType: string, normalizedType: string): void {
+        if (!SUPPORTED_DOCUMENT_TYPES.has(normalizedType)) {
+            throw new DomainValidationError(`지원하지 않는 서류 타입입니다: ${inputType}`);
         }
     }
 
     private isValidStoredPath(fileName?: string): boolean {
-        return !!fileName && fileName.startsWith('verification/');
+        return (
+            !!fileName &&
+            (fileName.startsWith('verification/') ||
+                fileName.startsWith('documents/verification/') ||
+                fileName.startsWith('breeder-documents/'))
+        );
     }
 }

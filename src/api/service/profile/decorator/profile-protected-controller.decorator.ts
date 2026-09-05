@@ -14,15 +14,19 @@ export function ProfileMeController() {
 }
 
 /**
- * GET /v2/profile/me/favorite-breeders — 입양자 전용.
- * 표준 RolesGuard 의 brand → adopter fallback 을 차단하기 위해 StrictRolesGuard 사용.
+ * GET /v2/profile/me/favorite-breeders — 입양자·브리더 모두 조회 가능.
+ *
+ * 쓰기(POST/DELETE /v2/adopter/favorite)는 RolesGuard 의 breeder → adopter fallback 으로
+ * 이미 브리더에게 열려 있고 Breeder.favoriteBreederList 에 저장된다. 읽기만 막으면
+ * 담기는 되는데 목록은 늘 비어 보이므로 두 role 을 명시적으로 허용한다.
+ * StrictRolesGuard 를 유지하는 이유는 암묵적 fallback 대신 화이트리스트를 코드에 드러내기 위함이다.
  */
 export function ProfileFavoritesController() {
     return applyDecorators(
         ApiProfileProtectedController(),
         Controller('v2/profile'),
         UseGuards(JwtAuthGuard, StrictRolesGuard),
-        Roles('adopter'),
+        Roles('adopter', 'breeder'),
     );
 }
 

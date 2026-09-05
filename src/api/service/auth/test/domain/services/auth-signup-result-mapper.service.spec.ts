@@ -48,7 +48,7 @@ describe('AuthSignupResultMapperService', () => {
                     petType: 'dog',
                     breeds: ['푸들'],
                     profile: { location: { city: '서울', district: '강남구' } },
-                    verification: { plan: 'pro', level: 'elite', status: 'reviewing' },
+                    verification: { plan: 'pro', status: 'reviewing' },
                     accountStatus: 'active',
                 } as any,
                 tokens,

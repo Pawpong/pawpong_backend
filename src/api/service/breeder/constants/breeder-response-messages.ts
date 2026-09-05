@@ -7,15 +7,12 @@ export const BREEDER_RESPONSE_MESSAGES = {
     reviewsRetrieved: '후기 목록이 조회되었습니다.',
     petsRetrieved: '개체 목록이 조회되었습니다.',
     parentPetsRetrieved: '부모견/부모묘 목록이 조회되었습니다.',
-    petDetailRetrieved: '개체 상세 정보가 조회되었습니다.',
     accountSuspended: '브리더 계정이 영구정지 처리되었습니다.',
     accountUnsuspended: '브리더 계정 정지가 해제되었습니다.',
     breederDetailRetrieved: '브리더 상세 정보가 조회되었습니다.',
     breederStatsRetrieved: '브리더 통계가 조회되었습니다.',
     pendingBreederListRetrieved: '승인 대기 브리더 목록이 조회되었습니다.',
-    levelChangeRequestListRetrieved: '레벨 변경 신청 목록이 조회되었습니다.',
     verificationUpdated: '브리더 인증 처리가 완료되었습니다.',
-    breederLevelChanged: '브리더 레벨이 변경되었습니다.',
     breederReportListRetrieved: '브리더 신고 목록이 조회되었습니다.',
 } as const;
 

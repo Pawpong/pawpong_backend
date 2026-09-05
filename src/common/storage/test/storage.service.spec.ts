@@ -1,4 +1,5 @@
 import { StorageService } from '../storage.service';
+import { Readable } from 'stream';
 
 jest.mock('uuid', () => ({ v4: () => '00000000-0000-4000-8000-000000000000' }));
 
@@ -37,7 +38,7 @@ function makeFile(originalname = 'photo.png'): Express.Multer.File {
         destination: '',
         filename: originalname,
         path: '',
-        stream: null as any,
+        stream: Readable.from([]),
     };
 }
 
@@ -67,6 +68,14 @@ describe('StorageService', () => {
         expect(service.generateSignedUrl('pawpong_bucket/community/a.png')).toBe(
             'https://cdn.test/pawpong_s3/community/a.png',
         );
+        expect(service.generateSignedUrl('pawpong_bucket/pawpong_s3/pawpong_bucket/community/a.png')).toBe(
+            'https://cdn.test/pawpong_s3/community/a.png',
+        );
+        expect(
+            service.generateSignedUrl(
+                'https://kr.object.iwinv.kr/pawpong_s3/pawpong_bucket/pawpong_bucket/community/a.png',
+            ),
+        ).toBe('https://cdn.test/pawpong_s3/community/a.png');
     });
 
     describe('테스트 모드 오사용 차단', () => {

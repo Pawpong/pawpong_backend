@@ -29,8 +29,8 @@ export class AuthBreederDocumentsUploadController {
         @Body() dto: UploadBreederDocumentsRequestDto,
         @Query('tempId') tempId?: string,
     ): Promise<ApiResponseDto<VerificationDocumentsResponseDto>> {
-        const result = await this.uploadAuthBreederDocumentsUseCase.execute(files, dto.types, dto.level, tempId);
-        const message = buildAuthBreederDocumentsUploadMessage(dto.level, result.count, tempId);
+        const result = await this.uploadAuthBreederDocumentsUseCase.execute(files, dto.types, tempId);
+        const message = buildAuthBreederDocumentsUploadMessage(result.count, tempId);
         return ApiResponseDto.success(result.response, message);
     }
 }

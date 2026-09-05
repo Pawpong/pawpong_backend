@@ -1,6 +1,7 @@
 import { IsString, IsNotEmpty, IsOptional, IsEnum, IsArray, IsBoolean } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
+import { BreederPlan } from '../../../../../common/enum/user.enum';
 
 /**
  * 브리더 인증 신청 요청 DTO
@@ -33,15 +34,15 @@ export class VerificationSubmitRequestDto {
 
     /**
      * 구독 플랜
-     * @example "premium"
+     * @example "pro"
      */
     @ApiProperty({
         description: '구독 플랜',
-        example: 'premium',
-        enum: ['basic', 'premium', 'enterprise'],
+        example: BreederPlan.PRO,
+        enum: BreederPlan,
     })
-    @IsEnum(['basic', 'premium', 'enterprise'])
-    plan: 'basic' | 'premium' | 'enterprise';
+    @IsEnum(BreederPlan)
+    plan: BreederPlan;
 
     /**
      * 제출 서류 URL 배열
@@ -132,7 +133,7 @@ export class VerificationSubmitRequestDto {
         if (typeof value === 'string') {
             return value === 'true';
         }
-        return value;
+        return typeof value === 'boolean' ? value : undefined;
     })
     submittedByEmail?: boolean;
 

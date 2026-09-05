@@ -20,7 +20,11 @@ export interface GetMyRoomsUseCasePort {
 }
 
 export interface SendMessageUseCasePort {
-    execute(senderId: string, senderRole: SenderRole, command: SendMessageCommand): Promise<ChatMessageSnapshot>;
+    execute(
+        senderId: string,
+        senderRole: SenderRole,
+        command: SendMessageCommand,
+    ): Promise<ChatMessageSnapshot & { brokerPublished: boolean }>;
 }
 
 export interface GetMessagesUseCasePort {

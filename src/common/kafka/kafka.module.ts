@@ -1,6 +1,7 @@
 import { Module, Global } from '@nestjs/common';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Partitioners } from 'kafkajs';
 import { KafkaService } from './kafka.service';
 
 /**
@@ -21,11 +22,11 @@ import { KafkaService } from './kafka.service';
                         client: {
                             clientId: 'pawpong-backend',
                             brokers: [configService.get<string>('KAFKA_BROKER', 'kafka:29092')],
-                            connectionTimeout: 10000,
-                            requestTimeout: 30000,
+                            connectionTimeout: 5000,
+                            requestTimeout: 5000,
                             retry: {
                                 initialRetryTime: 100,
-                                retries: 8,
+                                retries: 3,
                             },
                         },
                         consumer: {
@@ -34,7 +35,11 @@ import { KafkaService } from './kafka.service';
                         },
                         producer: {
                             allowAutoTopicCreation: true,
+                            createPartitioner: Partitioners.DefaultPartitioner,
                         },
+                        // 이 ClientKafka는 이벤트 발행 전용이다. 별도 consumer를 만들지 않아
+                        // 테스트 종료 핸들과 불필요한 consumer group 연결을 남기지 않는다.
+                        producerOnlyMode: true,
                     },
                 }),
                 inject: [ConfigService],

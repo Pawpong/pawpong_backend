@@ -299,7 +299,6 @@ export class DiscordWebhookService {
         breederName: string;
         email: string;
         phone?: string;
-        level: 'new' | 'elite';
         isResubmission: boolean;
         documents: Array<{
             type: string;
@@ -317,7 +316,6 @@ export class DiscordWebhookService {
         }
 
         try {
-            const levelName = data.level === 'new' ? 'New' : 'Elite';
             const submissionType = data.isResubmission ? '재제출' : '신규 제출';
 
             const fields: Array<{ name: string; value: string; inline: boolean }> = [
@@ -339,11 +337,6 @@ export class DiscordWebhookService {
                 {
                     name: '전화번호',
                     value: data.phone || '미설정',
-                    inline: true,
-                },
-                {
-                    name: '입점 레벨',
-                    value: levelName,
                     inline: true,
                 },
                 {

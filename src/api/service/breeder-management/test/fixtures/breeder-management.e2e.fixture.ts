@@ -63,7 +63,6 @@ export async function createBreederManagementE2eContext(): Promise<BreederManage
             animal: 'dog',
             breeds: ['포메라니안', '말티즈'],
             plan: 'basic',
-            level: 'new',
             agreements: {
                 termsOfService: true,
                 privacyPolicy: true,

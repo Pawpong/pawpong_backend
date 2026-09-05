@@ -60,7 +60,6 @@ describe('AuthSignupValidationService', () => {
             petType: 'dog',
             breeds: ['푸들'],
             plan: 'pro',
-            level: 'new',
         };
         it('모든 필드가 있으면 통과', () => {
             expect(() => service.ensureCompleteSocialBreederInput(valid as any)).not.toThrow();

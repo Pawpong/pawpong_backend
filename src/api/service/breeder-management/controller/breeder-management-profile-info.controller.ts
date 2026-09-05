@@ -9,7 +9,7 @@ import { UpdateBreederManagementProfileUseCase } from '../application/use-cases/
 import type { BreederManagementProfileResult } from '../application/types/breeder-management-result.type';
 import { BreederManagementProtectedController } from '../decorator/breeder-management-protected-controller.decorator';
 import { BREEDER_MANAGEMENT_RESPONSE_MESSAGES } from '../constants/breeder-management-response-messages';
-import { ProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
+import { BreederProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
 import { BreederProfileUpdateResponseDto } from '../dto/response/profile-update-response.dto';
 import { ApiUpdateBreederManagementProfileEndpoint, BreederManagementSwaggerDocs } from '../swagger/index';
 
@@ -34,7 +34,7 @@ export class BreederManagementProfileInfoController {
     @ApiUpdateBreederManagementProfileEndpoint()
     async updateProfile(
         @CurrentUser('userId') userId: string,
-        @Body() updateData: ProfileUpdateRequestDto,
+        @Body() updateData: BreederProfileUpdateRequestDto,
     ): Promise<ApiResponseDto<BreederProfileUpdateResponseDto>> {
         const result = await this.updateBreederManagementProfileUseCase.execute(userId, updateData);
         return ApiResponseDto.success(result, BREEDER_MANAGEMENT_RESPONSE_MESSAGES.profileUpdated);

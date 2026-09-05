@@ -45,9 +45,6 @@ export class MyProfileResponseDto {
     favoriteBreederCount?: number;
 
     // === Breeder only ===
-    @ApiPropertyOptional({ description: '(브리더) 인증 레벨', enum: ['new', 'elite'], example: 'elite' })
-    level?: 'new' | 'elite';
-
     @ApiPropertyOptional({ description: '(브리더) 요금제', enum: ['basic', 'pro'], example: 'pro' })
     plan?: 'basic' | 'pro';
 

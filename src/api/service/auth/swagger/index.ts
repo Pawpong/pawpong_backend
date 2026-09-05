@@ -212,7 +212,6 @@ export function ApiCompleteSocialRegistrationEndpoint() {
                 - petType
                 - breeds
                 - plan
-                - level
             `,
             dataSchema: {
                 oneOf: [
@@ -449,7 +448,7 @@ export function ApiUploadBreederDocumentsEndpoint() {
                 ## 주요 기능
                 - 응답의 uploadedDocuments/allDocuments 안 filename 값을 documentUrls로 저장하는 계약입니다.
                 - tempId가 있으면 임시 업로드 저장소에 문서 메타데이터를 보관합니다.
-                - 필수 서류 여부와 레벨별 허용 조합은 유스케이스에서 검증합니다.
+                - 허용 서류 타입과 파일 형식은 업로드 정책에서 검증합니다.
             `,
             responseType: VerificationDocumentsResponseDto,
             isPublic: true,
@@ -467,12 +466,6 @@ export function ApiUploadBreederDocumentsEndpoint() {
             schema: {
                 type: 'object',
                 properties: {
-                    level: {
-                        type: 'string',
-                        enum: ['new', 'elite'],
-                        description: '브리더 레벨',
-                        example: 'new',
-                    },
                     types: {
                         type: 'string',
                         description: 'JSON 문자열 배열 형태의 서류 타입 목록',
@@ -487,7 +480,7 @@ export function ApiUploadBreederDocumentsEndpoint() {
                         },
                     },
                 },
-                required: ['level', 'types', 'files'],
+                required: ['types', 'files'],
             },
         }),
     );

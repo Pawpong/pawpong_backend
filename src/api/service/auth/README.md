@@ -2,33 +2,30 @@
 
 ## 개요
 
-사용자 인증 및 회원가입을 담당하는 모듈입니다. 일반 로그인, 소셜 로그인 (Google, Naver, Kakao), SMS 인증을 지원합니다.
+사용자 인증 및 회원가입을 담당하는 모듈입니다. Google, Naver, Kakao 소셜 로그인과 전화번호 인증을 지원합니다.
 
 ## 주요 기능
 
 ### 1. 회원가입
 
-#### 입양자 회원가입 (`POST /api/auth/register/adopter`)
+#### 입양자 회원가입 (`POST /api/v2/auth/register/adopter`)
 
 - 이메일, 닉네임, 전화번호 중복 체크
-- 비밀번호 bcrypt 해싱
 - 전화번호 자동 정규화 (하이픈 제거)
 - 프로필 이미지 업로드 (선택사항)
 
-#### 브리더 회원가입 (`POST /api/auth/register/breeder`)
+#### 브리더 회원가입 (`POST /api/v2/auth/register/breeder`)
 
 - 이메일, 전화번호 중복 체크
-- 비밀번호 bcrypt 해싱
 - 필수 약관 동의 체크 (서비스 이용약관, 개인정보 처리방침)
 - 지역 정보 파싱 (location 문자열 -> city, district 분리)
 - 프로필 이미지 업로드 (선택사항)
 - 품종 목록 최대 5개 제한
 - 요금제 선택 (basic, pro)
-- 브리더 레벨 선택 (new, elite)
+- 단일 입점 검증 절차 적용
 
 ### 2. 로그인
 
-- 일반 로그인 (`POST /api/auth/login`)
 - 소셜 로그인 (Google, Naver, Kakao)
 - JWT Access Token (1시간) + Refresh Token (7일) 발급
 
@@ -56,28 +53,22 @@
 5. POST /api/auth/social/complete (추가 정보 입력)
 ```
 
-### 5. 브리더 서류 제출
+### 5. 브리더 인증 서류 업로드
 
-#### 브리더 레벨별 필수 서류
+`POST /api/v2/auth/upload-breeder-documents`에서 서류를 임시 업로드하고, 회원가입 요청의
+`documentUrls`/`documentTypes` 또는 `tempId`로 가입 정보에 연결합니다.
 
-**New 레벨** (`POST /api/auth/breeder/submit-documents`):
+기본 검증 자료:
 
-- 신분증 사본 (idCardUrl) - 필수
-- 동물생산업 등록증 (animalProductionLicenseUrl) - 필수
+- 신분증 사본 (`idCard`)
+- 동물생산업 등록증 (`animalProductionLicense`)
 
-**Elite 레벨** (`POST /api/auth/breeder/submit-documents`):
-
-- 신분증 사본 (idCardUrl) - 필수
-- 동물생산업 등록증 (animalProductionLicenseUrl) - 필수
-- 표준 입양계약서 샘플 (adoptionContractSampleUrl) - 필수
-- 최근 발급한 협회 서류 (recentAssociationDocumentUrl) - 필수
-- 고양이 브리더 인증 서류 (breederCertificationUrl) - 필수
-- TICA 또는 CFA 서류 (ticaCfaDocumentUrl) - 선택사항
+계약서 샘플, 협회 서류, 브리더 인증서 등은 추가 확인 자료로 업로드할 수 있습니다.
+브리더 등급은 운영하지 않으며 모든 신청은 같은 입점 검증 절차를 따릅니다.
 
 서류 제출 후:
 
 - 검증 상태: `pending` → `reviewing` → `approved` / `rejected`
-- 예상 처리 시간: 3-5 영업일
 - 관리자 승인 후 브리더 활동 가능
 
 ## 파일 구조
@@ -141,7 +132,6 @@ private async hashRefreshToken(refreshToken: string)
 ```typescript
 async registerAdopter(dto: RegisterAdopterRequestDto, profileImageFile?: Express.Multer.File)
 async registerBreeder(dto: RegisterBreederRequestDto, profileImageFile?: Express.Multer.File)
-async login(dto: LoginRequestDto)
 async refreshToken(dto: RefreshTokenRequestDto)
 async logout(userId: string, role: string)
 async handleSocialLogin(profile: SocialProfile)
@@ -149,7 +139,6 @@ async completeSocialRegistration(profile: SocialProfile, additionalInfo: Additio
 async completeSocialRegistrationWithTempId(dto: TempIdDto)
 async checkEmailDuplicate(email: string)
 async checkNicknameDuplicate(nickname: string)
-async submitBreederDocuments(userId: string, breederLevel: 'elite' | 'new', documents: DocumentUrls)
 async generateSocialLoginTokens(user: any)
 ```
 

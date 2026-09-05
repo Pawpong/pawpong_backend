@@ -9,7 +9,6 @@ export type BreederManagementVerificationSubmissionNotification = {
     breederName: string;
     email: string;
     phone?: string;
-    level: 'new' | 'elite';
     isResubmission: boolean;
     submittedAt: Date;
     documents: BreederManagementVerificationNotificationDocument[];

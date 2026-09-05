@@ -17,9 +17,6 @@ export type AdopterBreederRecord = {
     favoriteBreederList?: AdopterFavoriteRecord[];
     petType?: string;
     breeds?: string[];
-    verification?: {
-        level?: string;
-    };
     stats?: {
         averageRating?: number;
         totalReviews?: number;

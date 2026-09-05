@@ -1,7 +1,5 @@
 import type {
     BreederManagementApplicationFormRecord,
-    BreederManagementAvailablePetRecord,
-    BreederManagementParentPetRecord,
     BreederManagementRecentApplicationRecord,
     BreederManagementBreederStatsRecord,
     BreederManagementVerificationDocumentRecord,
@@ -60,7 +58,6 @@ export type BreederManagementReviewDocumentRecord = BreederManagementReviewRecor
 export type BreederManagementVerificationRecord = {
     status?: string;
     plan?: string;
-    level?: string;
     submittedAt?: Date;
     reviewedAt?: Date;
     rejectionReason?: string;

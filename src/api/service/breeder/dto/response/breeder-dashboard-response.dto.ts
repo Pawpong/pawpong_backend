@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { BreederPlan, VerificationStatus } from '../../../../../common/enum/user.enum';
 
 /**
  * 브리더 인증 정보 DTO
@@ -11,20 +12,20 @@ export class BreederVerificationInfoDto {
     @ApiProperty({
         description: '인증 상태',
         example: 'approved',
-        enum: ['pending', 'approved', 'rejected'],
+        enum: VerificationStatus,
     })
-    verificationStatus: string;
+    verificationStatus: VerificationStatus;
 
     /**
      * 구독 플랜
-     * @example "premium"
+     * @example "pro"
      */
     @ApiProperty({
         description: '구독 플랜',
-        example: 'premium',
-        enum: ['basic', 'premium', 'enterprise'],
+        example: BreederPlan.PRO,
+        enum: BreederPlan,
     })
-    subscriptionPlan: string;
+    subscriptionPlan: BreederPlan;
 
     /**
      * 인증 신청 일시

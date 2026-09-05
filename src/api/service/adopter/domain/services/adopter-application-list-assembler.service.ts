@@ -21,9 +21,11 @@ export class AdopterApplicationListAssemblerService {
         application: AdopterApplicationRecord,
         breeder: AdopterBreederRecord | null,
         adopterFileUrlPort: AdopterFileUrlPort,
+        reviewId: string | null,
     ): AdopterApplicationListItemResult {
         return {
             applicationId: application._id.toString(),
+            reviewId,
             breederId: application.breederId.toString(),
             adopterId: this.toAdopterId(application.adopterId),
             breederName: breeder?.nickname || breeder?.name || '알 수 없음',
@@ -32,7 +34,6 @@ export class AdopterApplicationListAssemblerService {
             status: application.status,
             appliedAt: application.appliedAt.toISOString(),
             processedAt: application.processedAt?.toISOString(),
-            breederLevel: (breeder?.verification?.level || 'new') as 'elite' | 'new',
             profileImage: breeder?.profileImageFileName
                 ? adopterFileUrlPort.generateOneSafe(breeder.profileImageFileName, 60)
                 : null,

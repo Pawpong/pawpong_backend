@@ -21,6 +21,7 @@ export interface ProviderOverride {
 function applyTestingEnvironment(): void {
     process.env.PAWPONG_TEST_MODE = 'true';
     process.env.PAWPONG_SUPPRESS_EXTERNAL_WARNINGS = 'true';
+    process.env.KAFKA_ENABLED = 'false';
 
     // 테스트 환경에서는 외부 알림 서비스 비활성화 (실제 채널로 알림 발송 방지)
     process.env.DISCORD_SIGN_WEBHOOK_URL = '';

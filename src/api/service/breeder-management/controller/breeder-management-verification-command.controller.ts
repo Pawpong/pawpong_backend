@@ -1,7 +1,6 @@
 import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
-import { ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { SubmitBreederManagementVerificationDocumentsUseCase } from '../application/use-cases/submit-breeder-management-verification-documents.use-case';
 import { SubmitBreederManagementVerificationUseCase } from '../application/use-cases/submit-breeder-management-verification.use-case';

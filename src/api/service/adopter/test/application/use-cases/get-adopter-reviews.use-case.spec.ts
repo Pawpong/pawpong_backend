@@ -22,7 +22,6 @@ describe('입양자 후기 목록 조회 유스케이스', () => {
         breederId: 'breeder-1',
         breederNickname: '행복브리더',
         breederProfileImageFileName: null,
-        breederLevel: 'new',
         breedingPetType: 'dog',
         content: '좋았어요.',
         reviewType: 'positive',

@@ -13,7 +13,6 @@ const breederSnapshot = {
     bpm: 60,
     followerCount: 1600,
     followingCount: 0,
-    level: 'elite' as const,
     plan: 'pro' as const,
     businessLocation: { city: '경상남도', district: '창원시' },
 };
@@ -25,9 +24,16 @@ describe('GetBreederProfileUseCase', () => {
         listFavoriteBreeders: jest.fn(),
         isFavoritedBy: jest.fn(),
     };
-    const follow = { isFollowing: jest.fn() };
-    const mapper = new ProfileMapperService(assetUrl as any);
-    const useCase = new GetBreederProfileUseCase(reader as any, follow as any, mapper);
+    const follow = {
+        follow: jest.fn(),
+        unfollow: jest.fn(),
+        isFollowing: jest.fn(),
+        listFollowers: jest.fn(),
+        listFollowings: jest.fn(),
+        removeFollower: jest.fn(),
+    };
+    const mapper = new ProfileMapperService(assetUrl);
+    const useCase = new GetBreederProfileUseCase(reader, follow, mapper);
 
     beforeEach(() => {
         jest.clearAllMocks();
@@ -45,6 +51,7 @@ describe('GetBreederProfileUseCase', () => {
         const result = await useCase.execute('b-1');
         expect(result.isFavorited).toBe(false);
         expect(result.isFollowing).toBe(false);
+        expect(result).not.toHaveProperty('level');
         expect(reader.isFavoritedBy).not.toHaveBeenCalled();
         expect(follow.isFollowing).not.toHaveBeenCalled();
     });

@@ -2,6 +2,8 @@ import type { BreederManagementProfileUpdateCommand } from '../types/breeder-man
 
 export const BREEDER_MANAGEMENT_PROFILE_PORT = Symbol('BREEDER_MANAGEMENT_PROFILE_PORT');
 
+export type BreederManagementEntityId = string | { toString(): string };
+
 export interface BreederManagementVerificationDocumentRecord {
     type: string;
     fileName: string;
@@ -28,7 +30,7 @@ export interface BreederManagementApplicationFormRecord {
 }
 
 export interface BreederManagementBreederRecord {
-    _id: unknown;
+    _id: BreederManagementEntityId;
     name: string;
     nickname?: string;
     emailAddress: string;
@@ -43,7 +45,6 @@ export interface BreederManagementBreederRecord {
     verification?: {
         status?: string;
         plan?: string;
-        level?: string;
         submittedAt?: Date;
         reviewedAt?: Date;
         rejectionReason?: string;
@@ -76,7 +77,7 @@ export interface BreederManagementBreederRecord {
 }
 
 export interface BreederManagementParentPetRecord {
-    _id?: unknown;
+    _id?: BreederManagementEntityId;
     petId?: string;
     name?: string;
     breed?: string;
@@ -94,7 +95,7 @@ export interface BreederManagementParentPetRecord {
 }
 
 export interface BreederManagementAvailablePetRecord {
-    _id?: unknown;
+    _id?: BreederManagementEntityId;
     petId?: string;
     name?: string;
     breed?: string;
@@ -115,7 +116,7 @@ export interface BreederManagementAvailablePetRecord {
 }
 
 export interface BreederManagementRecentApplicationRecord {
-    _id?: unknown;
+    _id?: BreederManagementEntityId;
     adopterName?: string;
     petName?: string;
     status?: string;

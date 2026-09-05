@@ -9,6 +9,7 @@ import type {
 } from '../../application/ports/breeder-public-reader.port';
 import type { BreederProfileParentCardResult, BreederProfileResult } from '../../application/types/breeder-result.type';
 import { BreederBirthDateFormatterService } from './breeder-birth-date-formatter.service';
+import { formatLocationLabel } from '../../../../../common/data/districts.data';
 
 @Injectable()
 export class BreederPublicProfileAssemblerService {
@@ -38,13 +39,10 @@ export class BreederPublicProfileAssemblerService {
             breederName: breeder.name,
             breederEmail: breeder.emailAddress,
             authProvider: breeder.socialAuthInfo?.authProvider || 'local',
-            breederLevel: breeder.verification?.level || 'new',
             petType: breeder.petType || 'dog',
             detailBreed: breeder.detailBreed,
             breeds: breeder.breeds || [],
-            location: breeder.profile?.location
-                ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
-                : '',
+            location: formatLocationLabel(breeder.profile?.location?.city, breeder.profile?.location?.district),
             priceRange: {
                 min: profilePrice.min || 0,
                 max: profilePrice.max || 0,

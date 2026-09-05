@@ -1,5 +1,24 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import { BreederPlan, VerificationStatus } from '../../../../../common/enum/user.enum';
+
+export class VerificationDocumentResponseDto {
+    @ApiProperty({ example: 'adoption_contract_sample' })
+    type: string;
+
+    @ApiProperty({ example: 'verification/breeder123/adoptionContract_uuid.pdf' })
+    fileName: string;
+
+    @ApiProperty({ example: 'https://kr.object.iwinv.kr/pawpong_s3/verification/...' })
+    url: string;
+
+    @ApiProperty({ required: false, example: '2026-08-31T00:00:00.000Z' })
+    uploadedAt?: Date;
+
+    @ApiProperty({ required: false, example: '입양계약서.pdf' })
+    originalFileName?: string;
+}
+
 /**
  * 브리더 인증 상태 응답 DTO
  */
@@ -7,25 +26,17 @@ export class VerificationStatusResponseDto {
     @ApiProperty({
         description: '인증 상태',
         example: 'approved',
-        enum: ['pending', 'reviewing', 'approved', 'rejected'],
+        enum: VerificationStatus,
     })
-    status: string;
+    status: VerificationStatus;
 
     @ApiProperty({
         description: '구독 플랜',
-        example: 'premium',
-        enum: ['basic', 'premium', 'enterprise'],
+        example: BreederPlan.BASIC,
+        enum: BreederPlan,
         required: false,
     })
-    plan?: string;
-
-    @ApiProperty({
-        description: '브리더 레벨',
-        example: 'advanced',
-        enum: ['new', 'intermediate', 'advanced', 'expert'],
-        required: false,
-    })
-    level?: string;
+    plan?: BreederPlan;
 
     @ApiProperty({
         description: '제출 일시',
@@ -43,26 +54,10 @@ export class VerificationStatusResponseDto {
 
     @ApiProperty({
         description: '인증 문서 정보',
-        type: 'array',
-        items: {
-            type: 'object',
-            properties: {
-                type: { type: 'string', example: 'business_license' },
-                fileName: { type: 'string', example: 'verification/breeder123/idCard_uuid.pdf' },
-                url: { type: 'string', example: 'https://storage.googleapis.com/...' },
-                uploadedAt: { type: 'string', example: '2024-01-15T10:30:00.000Z' },
-                originalFileName: { type: 'string', example: '신분증.pdf' },
-            },
-        },
+        type: () => [VerificationDocumentResponseDto],
         required: false,
     })
-    documents?: Array<{
-        type: string;
-        fileName: string;
-        url: string;
-        uploadedAt?: Date;
-        originalFileName?: string;
-    }>;
+    documents?: VerificationDocumentResponseDto[];
 
     @ApiProperty({
         description: '거절 사유',

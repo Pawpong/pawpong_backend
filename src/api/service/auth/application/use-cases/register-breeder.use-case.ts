@@ -110,7 +110,6 @@ export class RegisterBreederUseCase {
             verification: {
                 status: VerificationStatus.PENDING,
                 plan: dto.plan === 'pro' ? BreederPlan.PRO : BreederPlan.BASIC,
-                level: dto.level,
                 documents: verificationDocuments,
             },
             profile: {

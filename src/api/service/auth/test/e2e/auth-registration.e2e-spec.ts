@@ -93,7 +93,6 @@ describe('인증 회원가입 종단간 테스트', () => {
                 animal: 'cat',
                 breeds: ['페르시안', '샴'],
                 plan: 'pro',
-                level: 'elite',
                 agreements: {
                     termsOfService: true,
                     privacyPolicy: true,

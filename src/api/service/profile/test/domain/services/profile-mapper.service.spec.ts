@@ -3,7 +3,7 @@ import { ProfileMapperService } from '../../../domain/services/profile-mapper.se
 const assetUrl = { toProfileImageUrl: (n?: string | null) => (n ? `signed/${n}` : undefined) };
 
 describe('ProfileMapperService', () => {
-    const mapper = new ProfileMapperService(assetUrl as any);
+    const mapper = new ProfileMapperService(assetUrl);
 
     it('toMyAdopterDto — 필수 필드 채움', () => {
         const dto = mapper.toMyAdopterDto({
@@ -31,7 +31,6 @@ describe('ProfileMapperService', () => {
                 bpm: 60,
                 followerCount: 1600,
                 followingCount: 0,
-                level: 'elite',
                 plan: 'pro',
                 businessLocation: { city: '경남', district: '창원시' },
             },
@@ -40,7 +39,7 @@ describe('ProfileMapperService', () => {
         );
         expect(dto.isFavorited).toBe(true);
         expect(dto.isFollowing).toBe(false);
-        expect(dto.level).toBe('elite');
+        expect(dto).not.toHaveProperty('level');
     });
 
     it('toFavoriteBreederCardDto — addedAt 이 ISO string 으로 직렬화된다', () => {
@@ -50,11 +49,11 @@ describe('ProfileMapperService', () => {
             breederLocation: '경남 창원',
             recentPetStatus: 'available',
             bpm: 60,
-            level: 'elite',
             addedAt: new Date('2026-04-01T10:00:00.000Z'),
         });
         expect(dto.addedAt).toBe('2026-04-01T10:00:00.000Z');
         expect(dto.recentPetStatus).toBe('available');
         expect(dto.isFavorited).toBe(true);
+        expect(dto).not.toHaveProperty('level');
     });
 });

@@ -1,7 +1,9 @@
+import type { BreederPlan } from '../../../../../common/enum/user.enum';
+
 export type BreederManagementVerificationSubmitCommand = {
     businessNumber: string;
     businessName: string;
-    plan: 'basic' | 'premium' | 'enterprise';
+    plan: BreederPlan;
     documents: string[];
     businessAddress: string;
     experienceYears: string;
@@ -19,7 +21,6 @@ export type BreederManagementVerificationDocumentInfoCommand = {
 };
 
 export type BreederManagementVerificationDocumentsSubmitCommand = {
-    level: 'new' | 'elite';
     documents: BreederManagementVerificationDocumentInfoCommand[];
     submittedByEmail?: boolean;
 };

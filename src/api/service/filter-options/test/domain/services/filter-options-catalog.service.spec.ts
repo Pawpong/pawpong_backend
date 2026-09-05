@@ -5,16 +5,10 @@ describe('FilterOptionsCatalogService', () => {
 
     it('모든 옵션 카테고리를 포함한다', () => {
         const result = service.getAll();
-        expect(result).toHaveProperty('breederLevels');
         expect(result).toHaveProperty('sortOptions');
         expect(result).toHaveProperty('dogSizes');
         expect(result).toHaveProperty('catFurLengths');
         expect(result).toHaveProperty('adoptionStatus');
-    });
-
-    it('breederLevels는 elite와 new 2개를 포함한다', () => {
-        const result = service.getBreederLevels();
-        expect(result.map((o) => o.value)).toEqual(['elite', 'new']);
     });
 
     it('sortOptions은 5가지 정렬을 포함한다', () => {
@@ -39,9 +33,9 @@ describe('FilterOptionsCatalogService', () => {
     });
 
     it('각 옵션은 value/label/description 필드를 가진다', () => {
-        const level = service.getBreederLevels()[0];
-        expect(level).toHaveProperty('value');
-        expect(level).toHaveProperty('label');
-        expect(level).toHaveProperty('description');
+        const option = service.getSortOptions()[0];
+        expect(option).toHaveProperty('value');
+        expect(option).toHaveProperty('label');
+        expect(option).toHaveProperty('description');
     });
 });

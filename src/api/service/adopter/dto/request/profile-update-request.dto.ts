@@ -1,7 +1,7 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
-export class ProfileUpdateRequestDto {
+export class AdopterProfileUpdateRequestDto {
     @ApiPropertyOptional({
         description: '입양자 이름',
         example: '홍길동',

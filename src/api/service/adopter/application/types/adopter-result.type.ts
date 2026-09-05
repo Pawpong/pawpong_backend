@@ -66,6 +66,7 @@ export type AdopterApplicationCustomResponseResult = {
 
 export type AdopterApplicationListItemResult = {
     applicationId: string;
+    reviewId: string | null;
     breederId: string;
     adopterId: string | null;
     breederName: string;
@@ -74,7 +75,6 @@ export type AdopterApplicationListItemResult = {
     status: string;
     appliedAt: string;
     processedAt?: string;
-    breederLevel: 'elite' | 'new';
     profileImage?: string | null;
     animalType: 'cat' | 'dog';
     applicationDate: string;
@@ -85,6 +85,7 @@ export type AdopterApplicationPageResult = PageResult<AdopterApplicationListItem
 
 export type AdopterApplicationDetailResult = {
     applicationId: string;
+    reviewId: string | null;
     breederId: string;
     breederName: string;
     petId?: string;
@@ -114,7 +115,6 @@ export type AdopterReviewItemResult = {
     breederId: string | null;
     breederNickname: string;
     breederProfileImage: string | null;
-    breederLevel: string;
     breedingPetType: string;
     content: string;
     reviewType: string;
@@ -125,9 +125,10 @@ export type AdopterReviewPageResult = PageResult<AdopterReviewItemResult>;
 
 export type AdopterReviewDetailResult = {
     reviewId: string;
+    applicationId: string | null;
+    breederId: string | null;
     breederNickname: string;
     breederProfileImage: string | null;
-    breederLevel: string;
     breedingPetType: string;
     content: string;
     reviewType: string;

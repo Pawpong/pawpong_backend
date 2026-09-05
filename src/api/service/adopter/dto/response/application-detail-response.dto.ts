@@ -90,6 +90,54 @@ export class ApplicationFormDataDto {
         required: false,
     })
     previousPetExperience?: string;
+
+    @ApiProperty({ description: '기본 케어 책임 가능 여부', example: true })
+    canProvideBasicCare: boolean;
+
+    @ApiProperty({ description: '예상치 못한 치료비 감당 가능 여부', example: true })
+    canAffordMedicalExpenses: boolean;
+
+    @ApiProperty({
+        description: '마음에 둔 아이 또는 원하는 특징',
+        example: '중형견, 차분한 성격',
+        required: false,
+    })
+    preferredPetDescription?: string;
+
+    @ApiProperty({ description: '원하는 입양 시기', example: '3개월 이내', required: false })
+    desiredAdoptionTiming?: string;
+
+    @ApiProperty({
+        description: '추가 문의사항 또는 남기고 싶은 말',
+        example: '방문 상담 가능 시간을 알려주세요.',
+        required: false,
+    })
+    additionalNotes?: string;
+
+    @ApiProperty({
+        description: '간소화된 입양 계획',
+        example: '생활패턴, 주거환경, 입양 시기를 포함한 계획입니다.',
+        required: false,
+    })
+    adoptionPlan?: string;
+}
+
+export class ApplicationCustomResponseDto {
+    @ApiProperty({ description: '질문 ID', example: 'custom_1' })
+    questionId: string;
+
+    @ApiProperty({ description: '질문 문구 스냅샷', example: '방문 가능한 시간대는 언제인가요?' })
+    questionLabel: string;
+
+    @ApiProperty({ description: '질문 유형', example: 'select' })
+    questionType: string;
+
+    @ApiProperty({
+        description: '응답 값',
+        oneOf: [{ type: 'string' }, { type: 'array', items: { type: 'string' } }],
+        example: '주말 오후',
+    })
+    answer: string | string[];
 }
 
 /**
@@ -107,6 +155,13 @@ export class ApplicationDetailResponseDto {
         example: '507f1f77bcf86cd799439088',
     })
     applicationId: string;
+
+    @ApiProperty({
+        description: '이 신청으로 작성한 후기 ID (후기가 없으면 null)',
+        example: '507f1f77bcf86cd799439077',
+        nullable: true,
+    })
+    reviewId: string | null;
 
     /**
      * 신청한 브리더 ID
@@ -162,13 +217,20 @@ export class ApplicationDetailResponseDto {
     status: string;
 
     /**
-     * 입양 신청서 상세 데이터
+     * 입양 신청서 표준 응답
      */
     @ApiProperty({
-        description: '입양 신청서 상세 데이터',
+        description: '입양 신청서 표준 응답',
         type: ApplicationFormDataDto,
+        required: false,
     })
-    applicationData: ApplicationFormDataDto;
+    standardResponses?: ApplicationFormDataDto;
+
+    @ApiProperty({
+        description: '브리더가 추가한 질문에 대한 응답',
+        type: [ApplicationCustomResponseDto],
+    })
+    customResponses: ApplicationCustomResponseDto[];
 
     /**
      * 신청 접수 일시

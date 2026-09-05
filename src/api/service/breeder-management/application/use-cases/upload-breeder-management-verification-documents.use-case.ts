@@ -36,7 +36,6 @@ export class UploadBreederManagementVerificationDocumentsUseCase {
         userId: string,
         files: Express.Multer.File[],
         types: string[],
-        level: 'new' | 'elite',
     ): Promise<BreederManagementUploadDocumentsResult> {
         const breeder = await this.breederManagementProfilePort.findById(userId);
         if (!breeder) {
@@ -78,7 +77,6 @@ export class UploadBreederManagementVerificationDocumentsUseCase {
 
         return {
             count: uploadedDocuments.length,
-            level,
             documents: uploadedDocuments,
         };
     }

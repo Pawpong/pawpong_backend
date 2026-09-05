@@ -5,6 +5,7 @@ import type {
     RegisterBreederAuthSignupResult,
 } from '../../application/types/auth-signup.type';
 import type { AuthRegistrationRecord } from '../../types/auth-record.type';
+import { formatLocationLabel } from '../../../../../common/data/districts.data';
 
 type AuthSignupTokenPair = {
     accessToken: string;
@@ -46,7 +47,6 @@ export class AuthSignupResultMapperService {
             animal: savedBreeder.petType || '',
             breeds: savedBreeder.breeds || [],
             plan: savedBreeder.verification?.plan || '',
-            level: savedBreeder.verification?.level || '',
             verificationStatus: savedBreeder.verification?.status || '',
             createdAt: savedBreeder.createdAt?.toISOString() || new Date().toISOString(),
             accessToken: tokens.accessToken,
@@ -55,6 +55,6 @@ export class AuthSignupResultMapperService {
     }
 
     private formatBreederLocation(city: string, district?: string): string {
-        return `${city} ${district || ''}`.trim();
+        return formatLocationLabel(city, district);
     }
 }

@@ -18,7 +18,6 @@ export type RegisterBreederAuthSignupCommand = {
     animal: string;
     breeds: string[];
     plan: string;
-    level: string;
     agreements: {
         termsOfService: boolean;
         privacyPolicy: boolean;
@@ -52,7 +51,6 @@ export type RegisterBreederAuthSignupResult = {
     animal: string;
     breeds: string[];
     plan: string;
-    level: string;
     verificationStatus: string;
     createdAt: string;
     accessToken: string;
@@ -76,5 +74,4 @@ export type CompleteSocialRegistrationCommand = {
     city?: string;
     district?: string;
     breeds?: string[];
-    level?: string;
 };

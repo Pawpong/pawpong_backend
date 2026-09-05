@@ -29,8 +29,16 @@ describe('브리더 인증 관리자 전체 목록 항목 매퍼', () => {
             verificationInfo: {
                 verificationStatus: 'approved',
                 subscriptionPlan: 'basic',
-                level: 'verified',
             },
         });
+        expect(
+            service.toResponse({
+                id: 'breeder-3',
+                nickname: '전체브리더',
+                emailAddress: 'all@test.com',
+                verification: { level: 'verified' },
+                createdAt: new Date('2026-04-07T00:00:00.000Z'),
+            } as any).verificationInfo,
+        ).not.toHaveProperty('level');
     });
 });

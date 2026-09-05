@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { AdminTargetType } from '../../../../../../common/enum/user.enum';
+import { AdminTargetType, VerificationStatus } from '../../../../../../common/enum/user.enum';
 import { BREEDER_VERIFICATION_ADMIN_READER_PORT } from '../ports/breeder-verification-admin-reader.port';
 import { BREEDER_VERIFICATION_ADMIN_WRITER_PORT } from '../ports/breeder-verification-admin-writer.port';
 import { BREEDER_VERIFICATION_ADMIN_NOTIFIER_PORT } from '../ports/breeder-verification-admin-notifier.port';
@@ -41,37 +41,12 @@ export class UpdateBreederVerificationUseCase {
         );
 
         const reviewedAt = new Date();
-        const isLevelChangeApproval = this.breederVerificationAdminPolicyService.isLevelChangeApproval(
-            breeder,
-            verificationData.verificationStatus,
-        );
-        const shouldClearLevelChangeRequest = this.breederVerificationAdminPolicyService.shouldClearLevelChangeRequest(
-            breeder,
-            verificationData.verificationStatus,
-        );
-
         await this.breederVerificationAdminWriter.updateBreederVerification(breederId, {
             verificationStatus: verificationData.verificationStatus,
             reviewedAt,
             ...(verificationData.rejectionReason !== undefined
                 ? {
                       rejectionReason: verificationData.rejectionReason,
-                  }
-                : {}),
-            ...(isLevelChangeApproval && breeder.verification?.levelChangeRequest
-                ? {
-                      appendLevelChangeHistory: {
-                          previousLevel: breeder.verification.levelChangeRequest.previousLevel,
-                          newLevel: breeder.verification.levelChangeRequest.requestedLevel,
-                          requestedAt: breeder.verification.levelChangeRequest.requestedAt,
-                          approvedAt: reviewedAt,
-                          approvedBy: adminId,
-                      },
-                  }
-                : {}),
-            ...(shouldClearLevelChangeRequest
-                ? {
-                      clearLevelChangeRequest: true,
                   }
                 : {}),
         });
@@ -93,9 +68,9 @@ export class UpdateBreederVerificationUseCase {
             emailAddress: breeder.emailAddress,
         };
 
-        if (verificationData.verificationStatus === 'approved') {
+        if (verificationData.verificationStatus === VerificationStatus.APPROVED) {
             await this.breederVerificationAdminNotifier.sendApproval(recipient);
-        } else if (verificationData.verificationStatus === 'rejected') {
+        } else if (verificationData.verificationStatus === VerificationStatus.REJECTED) {
             await this.breederVerificationAdminNotifier.sendRejection(recipient, verificationData.rejectionReason);
         }
 

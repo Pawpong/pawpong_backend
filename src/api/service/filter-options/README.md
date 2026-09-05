@@ -14,13 +14,12 @@
 ## 주요 기능
 
 - 전체 필터 옵션 한번에 조회
-- 브리더 레벨 옵션 조회
 - 정렬 옵션 조회
 - 강아지 크기 옵션 조회
 - 고양이 털 길이 옵션 조회
 - 입양 가능 여부 옵션 조회
 
-## API 엔드포인트 (6개)
+## API 엔드포인트 (5개)
 
 ### 1. 전체 필터 옵션 조회 GET /api/filter-options
 
@@ -33,10 +32,6 @@
   "success": true,
   "code": 200,
   "data": {
-    "breederLevels": [
-      { "value": "new", "label": "일반", "description": "신규 브리더" },
-      { "value": "elite", "label": "엘리트", "description": "검증된 브리더" }
-    ],
     "sortOptions": [
       { "value": "latest", "label": "최신순" },
       { "value": "favorite", "label": "인기순" },
@@ -63,26 +58,7 @@
 }
 ```
 
-### 2. 브리더 레벨 옵션 조회 GET /api/filter-options/breeder-levels
-
-브리더 레벨 필터 옵션 목록을 조회합니다.
-
-**Response:**
-
-```json
-{
-  "success": true,
-  "code": 200,
-  "data": [
-    { "value": "new", "label": "일반", "description": "신규 브리더" },
-    { "value": "elite", "label": "엘리트", "description": "검증된 브리더" }
-  ],
-  "message": "브리더 레벨 옵션이 조회되었습니다.",
-  "timestamp": "2025-01-15T10:30:00.000Z"
-}
-```
-
-### 3. 정렬 옵션 조회 GET /api/filter-options/sort-options
+### 2. 정렬 옵션 조회 GET /api/filter-options/sort-options
 
 브리더 목록 정렬 옵션을 조회합니다.
 
@@ -104,7 +80,7 @@
 }
 ```
 
-### 4. 강아지 크기 옵션 조회 GET /api/filter-options/dog-sizes
+### 3. 강아지 크기 옵션 조회 GET /api/filter-options/dog-sizes
 
 강아지 크기 필터 옵션을 조회합니다.
 
@@ -124,7 +100,7 @@
 }
 ```
 
-### 5. 고양이 털 길이 옵션 조회 GET /api/filter-options/cat-fur-lengths
+### 4. 고양이 털 길이 옵션 조회 GET /api/filter-options/cat-fur-lengths
 
 고양이 털 길이 필터 옵션을 조회합니다.
 
@@ -143,7 +119,7 @@
 }
 ```
 
-### 6. 입양 가능 여부 옵션 조회 GET /api/filter-options/adoption-status
+### 5. 입양 가능 여부 옵션 조회 GET /api/filter-options/adoption-status
 
 입양 가능 여부 필터 옵션을 조회합니다.
 

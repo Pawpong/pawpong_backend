@@ -5,6 +5,7 @@ import {
     ADOPTER_REVIEWS_MODULE_IMPORTS,
     ADOPTER_REVIEWS_MODULE_PROVIDERS,
 } from './adopter-reviews.module-definition';
+import { ADOPTER_REVIEW_READER_PORT } from '../application/ports/adopter-review-reader.port';
 
 /**
  * 입양자 > 후기 슬라이스
@@ -15,5 +16,6 @@ import {
     imports: ADOPTER_REVIEWS_MODULE_IMPORTS,
     controllers: ADOPTER_REVIEWS_MODULE_CONTROLLERS,
     providers: ADOPTER_REVIEWS_MODULE_PROVIDERS,
+    exports: [ADOPTER_REVIEW_READER_PORT],
 })
 export class AdopterReviewsModule {}

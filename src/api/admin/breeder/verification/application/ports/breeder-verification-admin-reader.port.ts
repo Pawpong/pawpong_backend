@@ -13,33 +13,14 @@ export interface BreederVerificationAdminDocumentSnapshot {
     originalFileName?: string;
 }
 
-export interface BreederVerificationAdminLevelChangeRequestSnapshot {
-    previousLevel: string;
-    requestedLevel: string;
-    requestedAt: Date;
-    documents?: BreederVerificationAdminDocumentSnapshot[];
-}
-
-export interface BreederVerificationAdminLevelChangeHistorySnapshot {
-    previousLevel: string;
-    newLevel: string;
-    requestedAt: Date;
-    approvedAt?: Date;
-    approvedBy?: string;
-}
-
 export interface BreederVerificationAdminVerificationSnapshot {
     status?: string;
     plan?: string;
-    level?: string;
     submittedAt?: Date;
     reviewedAt?: Date;
     rejectionReason?: string;
     submittedByEmail?: boolean;
     documents?: BreederVerificationAdminDocumentSnapshot[];
-    isLevelChangeRequested?: boolean;
-    levelChangeRequest?: BreederVerificationAdminLevelChangeRequestSnapshot;
-    levelChangeHistory?: BreederVerificationAdminLevelChangeHistorySnapshot[];
 }
 
 export interface BreederVerificationAdminProfileSnapshot {
@@ -83,16 +64,12 @@ export interface BreederVerificationAdminListResultSnapshot {
 
 export interface BreederVerificationAdminStatsSnapshot {
     totalApproved: number;
-    eliteCount: number;
 }
 
 export const BREEDER_VERIFICATION_ADMIN_READER_PORT = Symbol('BREEDER_VERIFICATION_ADMIN_READER_PORT');
 
 export interface BreederVerificationAdminReaderPort {
     findAdminById(adminId: string): Promise<BreederVerificationAdminAdminSnapshot | null>;
-    getLevelChangeRequests(
-        criteria: BreederVerificationAdminSearchCriteria,
-    ): Promise<BreederVerificationAdminListResultSnapshot>;
     getPendingBreeders(
         criteria: BreederVerificationAdminSearchCriteria,
     ): Promise<BreederVerificationAdminListResultSnapshot>;

@@ -27,8 +27,8 @@ export class GetMyFavoriteBreedersUseCase {
         private readonly mapper: ProfileMapperService,
     ) {}
 
-    async execute(adopterId: string, page = 1, pageSize = 10): Promise<FavoriteBreedersPage> {
-        const result = await this.reader.listFavoriteBreeders(adopterId, { page, pageSize });
+    async execute(userId: string, page = 1, pageSize = 10, userRole?: string): Promise<FavoriteBreedersPage> {
+        const result = await this.reader.listFavoriteBreeders(userId, { page, pageSize }, userRole);
         const items = result.items.map((snapshot) => this.mapper.toFavoriteBreederCardDto(snapshot));
         const totalPages = Math.max(1, Math.ceil(result.totalItems / pageSize));
         return {

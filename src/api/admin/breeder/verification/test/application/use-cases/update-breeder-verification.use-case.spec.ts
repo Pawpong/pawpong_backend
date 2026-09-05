@@ -1,4 +1,5 @@
 import { DomainValidationError } from '../../../../../../../common/error/domain.error';
+import { VerificationStatus } from '../../../../../../../common/enum/user.enum';
 import { UpdateBreederVerificationUseCase } from '../../../application/use-cases/update-breeder-verification.use-case';
 import { BreederVerificationAdminActivityLogFactoryService } from '../../../domain/services/breeder-verification-admin-activity-log-factory.service';
 import { BreederVerificationAdminPolicyService } from '../../../domain/services/breeder-verification-admin-policy.service';
@@ -29,7 +30,7 @@ describe('브리더 인증 수정 유스케이스', () => {
         jest.clearAllMocks();
     });
 
-    it('레벨 변경 승인 시 이력과 승인 알림을 함께 처리한다', async () => {
+    it('인증 승인 상태와 승인 알림을 함께 처리한다', async () => {
         reader.findAdminById.mockResolvedValue({
             id: 'admin-1',
             name: '관리자',
@@ -41,29 +42,17 @@ describe('브리더 인증 수정 유스케이스', () => {
             emailAddress: 'breeder@test.com',
             verification: {
                 status: 'reviewing',
-                isLevelChangeRequested: true,
-                levelChangeRequest: {
-                    previousLevel: 'new',
-                    requestedLevel: 'elite',
-                    requestedAt: new Date('2024-01-01T00:00:00.000Z'),
-                },
             },
         });
 
         const result = await useCase.execute('admin-1', 'breeder-1', {
-            verificationStatus: 'approved' as any,
+            verificationStatus: VerificationStatus.APPROVED,
         });
 
         expect(writer.updateBreederVerification).toHaveBeenCalledWith(
             'breeder-1',
             expect.objectContaining({
                 verificationStatus: 'approved',
-                clearLevelChangeRequest: true,
-                appendLevelChangeHistory: expect.objectContaining({
-                    previousLevel: 'new',
-                    newLevel: 'elite',
-                    approvedBy: 'admin-1',
-                }),
             }),
         );
         expect(notifier.sendApproval).toHaveBeenCalledWith({
@@ -72,6 +61,44 @@ describe('브리더 인증 수정 유스케이스', () => {
             emailAddress: 'breeder@test.com',
         });
         expect(result).toEqual({ message: 'Breeder verification approved' });
+    });
+
+    it('인증 반려 상태와 사유를 저장하고 반려 알림을 보낸다', async () => {
+        reader.findAdminById.mockResolvedValue({
+            id: 'admin-1',
+            name: '관리자',
+            permissions: { canManageBreeders: true },
+        });
+        reader.findBreederById.mockResolvedValue({
+            id: 'breeder-1',
+            nickname: '행복브리더',
+            emailAddress: 'breeder@test.com',
+            verification: {
+                status: 'reviewing',
+            },
+        });
+
+        const result = await useCase.execute('admin-1', 'breeder-1', {
+            verificationStatus: VerificationStatus.REJECTED,
+            rejectionReason: '추가 증빙이 필요합니다.',
+        });
+
+        expect(writer.updateBreederVerification).toHaveBeenCalledWith(
+            'breeder-1',
+            expect.objectContaining({
+                verificationStatus: 'rejected',
+                rejectionReason: '추가 증빙이 필요합니다.',
+            }),
+        );
+        expect(notifier.sendRejection).toHaveBeenCalledWith(
+            {
+                breederId: 'breeder-1',
+                breederName: '행복브리더',
+                emailAddress: 'breeder@test.com',
+            },
+            '추가 증빙이 필요합니다.',
+        );
+        expect(result).toEqual({ message: 'Breeder verification rejected' });
     });
 
     it('검증 정보가 없으면 예외를 던진다', async () => {
@@ -88,7 +115,7 @@ describe('브리더 인증 수정 유스케이스', () => {
 
         await expect(
             useCase.execute('admin-1', 'breeder-1', {
-                verificationStatus: 'approved' as any,
+                verificationStatus: VerificationStatus.APPROVED,
             }),
         ).rejects.toThrow(new DomainValidationError('No verification request found'));
     });

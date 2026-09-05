@@ -12,9 +12,9 @@ describe('GetMyProfileUseCase', () => {
         listFavoriteBreeders: jest.fn(),
         isFavoritedBy: jest.fn(),
     };
-    const mapper = new ProfileMapperService(assetUrl as any);
+    const mapper = new ProfileMapperService(assetUrl);
 
-    const useCase = new GetMyProfileUseCase(reader as any, mapper);
+    const useCase = new GetMyProfileUseCase(reader, mapper);
 
     beforeEach(() => jest.clearAllMocks());
 
@@ -35,7 +35,7 @@ describe('GetMyProfileUseCase', () => {
         expect(result.userId).toBe('a-1');
         expect(result.profileImageUrl).toBe('https://signed/pf.jpg');
         expect(result.favoriteBreederCount).toBe(3);
-        expect(result.level).toBeUndefined();
+        expect(result).not.toHaveProperty('level');
     });
 
     it('breeder role 이면 readBreeder 결과를 매핑한다', async () => {
@@ -47,7 +47,6 @@ describe('GetMyProfileUseCase', () => {
             longDescription: '긴 소개',
             bpm: 80,
             followerCount: 1600,
-            level: 'elite',
             plan: 'pro',
             businessLocation: { city: '경상남도', district: '창원시' },
         });
@@ -55,7 +54,7 @@ describe('GetMyProfileUseCase', () => {
         const result = await useCase.execute('b-1', 'breeder');
 
         expect(result.role).toBe('breeder');
-        expect(result.level).toBe('elite');
+        expect(result).not.toHaveProperty('level');
         expect(result.plan).toBe('pro');
         expect(result.businessLocation?.city).toBe('경상남도');
         expect(result.profileImageUrl).toBeUndefined();

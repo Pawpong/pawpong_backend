@@ -15,7 +15,7 @@ import { ApplicationStatusUpdateRequestDto } from '../dto/request/application-st
 import { BreederAccountDeleteRequestDto } from '../dto/request/breeder-account-delete-request.dto';
 import { ParentPetAddDto } from '../dto/request/parent-pet-add-request.dto';
 import { ParentPetUpdateDto } from '../dto/request/parent-pet-update-request.dto';
-import { ProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
+import { BreederProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
 import { ReviewReplyRequestDto } from '../dto/request/review-reply-request.dto';
 import { SimpleApplicationFormUpdateRequestDto } from '../dto/request/simple-application-form-update-request.dto';
 import { SubmitDocumentsRequestDto } from '../dto/request/submit-documents-request.dto';
@@ -29,7 +29,7 @@ import {
 } from '../dto/response/application-form-update-response.dto';
 import { ApplicationStatusUpdateResponseDto } from '../dto/response/application-status-update-response.dto';
 import { BreederAccountDeleteResponseDto } from '../dto/response/breeder-account-delete-response.dto';
-import { MyReviewItemDto, MyReviewsListResponseDto } from '../dto/response/my-reviews-list-response.dto';
+import { BreederMyReviewItemDto, MyReviewsListResponseDto } from '../dto/response/my-reviews-list-response.dto';
 import { PetAddResponseDto } from '../dto/response/pet-add-response.dto';
 import { PetRemoveResponseDto } from '../dto/response/pet-remove-response.dto';
 import { PetUpdateResponseDto } from '../dto/response/pet-update-response.dto';
@@ -50,20 +50,18 @@ export function ApiUploadBreederManagementVerificationDocumentsEndpoint() {
             summary: '브리더 인증 서류 업로드',
             description: `브리더 입점 인증 서류를 업로드합니다.
 
-**New 레벨 (필수 2개):**
+**필수 서류:**
 - idCard: 신분증 사본
 - businessLicense: 동물생산업 등록증
 
-**Elite 레벨 (필수 4개):**
-- idCard: 신분증 사본
-- businessLicense: 동물생산업 등록증
+**선택 서류:**
 - contractSample: 표준 입양계약서 샘플
-- breederCertificate: 브리더 인증 서류 (강아지: breederDogCertificate, 고양이: breederCatCertificate)
+- recentPedigreeDocument: 최근 혈통 증빙
+- breederCertificate: 브리더 관련 자격·협회 증빙
 
 **요청 형식:**
 - files: 파일 배열
 - types: 서류 타입 JSON 배열 (예: ["idCard","businessLicense"])
-- level: 브리더 레벨 ("new" 또는 "elite")
 
 **응답:**
 - fileName: 파일 경로 (서류 제출 시 사용)
@@ -89,13 +87,8 @@ export function ApiUploadBreederManagementVerificationDocumentsEndpoint() {
                         type: 'string',
                         example: '["idCard","businessLicense"]',
                     },
-                    level: {
-                        type: 'string',
-                        enum: ['new', 'elite'],
-                        example: 'new',
-                    },
                 },
-                required: ['files', 'types', 'level'],
+                required: ['files', 'types'],
             },
         }),
     );
@@ -157,7 +150,6 @@ export const BreederManagementSwaggerDocs = {
 2. 이 엔드포인트로 fileName들을 제출
 
 **요청 형식:**
-- level: 브리더 레벨 ("new" 또는 "elite")
 - documents: 서류 목록 [{ type, fileName }]`,
         responseType: VerificationSubmitResponseDto,
         successDescription: '브리더 인증 서류 제출 성공',
@@ -233,7 +225,7 @@ export const BreederManagementSwaggerDocs = {
         description:
             '브리더 자신에게 작성된 모든 후기를 관리 목적으로 조회합니다. 공개/비공개 후기 모두 확인 가능하며, 신고된 후기 정보도 포함됩니다.',
         responseType: MyReviewsListResponseDto,
-        itemType: MyReviewItemDto,
+        itemType: BreederMyReviewItemDto,
         successDescription: '내게 달린 후기 목록 조회 성공',
         successMessageExample: BREEDER_MANAGEMENT_RESPONSE_MESSAGES.myReviewsRetrieved,
         isPublic: false,
@@ -386,7 +378,7 @@ export const BreederManagementSwaggerDocs = {
 } as const;
 
 export const BreederManagementRequestBodyDtos = {
-    profileUpdate: ProfileUpdateRequestDto,
+    profileUpdate: BreederProfileUpdateRequestDto,
     verificationSubmit: VerificationSubmitRequestDto,
     submitDocuments: SubmitDocumentsRequestDto,
     parentPetAdd: ParentPetAddDto,
@@ -425,7 +417,7 @@ function ApiBreederManagementReviewIdParam() {
 export function ApiUpdateBreederManagementProfileEndpoint() {
     return applyDecorators(
         ApiEndpoint(BreederManagementSwaggerDocs.updateProfile),
-        ApiBody({ type: ProfileUpdateRequestDto }),
+        ApiBody({ type: BreederProfileUpdateRequestDto }),
     );
 }
 

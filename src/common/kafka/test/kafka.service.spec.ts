@@ -1,6 +1,8 @@
 import { KafkaService } from '../kafka.service';
 import { CustomLoggerService } from '../../logger/custom-logger.service';
 import { NotifyCriticalErrorUseCase } from '../../discord/application/use-cases/notify-critical-error.use-case';
+import { ConfigService } from '@nestjs/config';
+import { of, throwError } from 'rxjs';
 
 describe('KafkaService', () => {
     const originalNodeEnv = process.env.NODE_ENV;
@@ -31,6 +33,7 @@ describe('KafkaService', () => {
 
     afterEach(() => {
         process.env.NODE_ENV = originalNodeEnv;
+        jest.useRealTimers();
     });
 
     it('운영 환경에서 Kafka 연결 실패 시 critical 에러 알림을 요청해야 한다', async () => {
@@ -52,6 +55,8 @@ describe('KafkaService', () => {
                 message: expect.stringContaining('Kafka 브로커 연결 실패'),
             }),
         );
+        expect(kafkaClient.close).toHaveBeenCalledTimes(1);
+        await service.onModuleDestroy();
     });
 
     it('개발 환경에서 Kafka 연결 실패 시 Discord 알림을 보내지 않아야 한다', async () => {
@@ -67,5 +72,86 @@ describe('KafkaService', () => {
         await service.onModuleInit();
 
         expect(notifyCriticalErrorUseCase.execute).not.toHaveBeenCalled();
+        expect(kafkaClient.close).toHaveBeenCalledTimes(1);
+        await service.onModuleDestroy();
+    });
+
+    it('KAFKA_ENABLED가 false면 producer 연결을 시도하지 않아야 한다', async () => {
+        const configService = {
+            get: jest.fn((_key: string, fallback: string) => fallback),
+        } as unknown as ConfigService;
+        const service = new KafkaService(
+            kafkaClient as any,
+            logger as unknown as CustomLoggerService,
+            notifyCriticalErrorUseCase as unknown as NotifyCriticalErrorUseCase,
+            configService,
+        );
+
+        await service.onModuleInit();
+
+        expect(kafkaClient.connect).not.toHaveBeenCalled();
+        expect(kafkaClient.close).not.toHaveBeenCalled();
+    });
+
+    it('Kafka 발행 완료를 기다리고 성공 여부를 반환해야 한다', async () => {
+        kafkaClient.emit.mockReturnValue(of(undefined));
+        const service = new KafkaService(
+            kafkaClient as any,
+            logger as unknown as CustomLoggerService,
+            notifyCriticalErrorUseCase as unknown as NotifyCriticalErrorUseCase,
+        );
+
+        await service.onModuleInit();
+        await expect(service.emit('chat.message' as any, { id: 'message-1', roomId: 'room-1' })).resolves.toBe(true);
+        await service.onModuleDestroy();
+
+        expect(kafkaClient.emit).toHaveBeenCalledTimes(1);
+        expect(kafkaClient.close).toHaveBeenCalledTimes(1);
+    });
+
+    it('Kafka 발행이 실패하면 false를 반환해 WebSocket fallback을 허용한다', async () => {
+        kafkaClient.emit.mockReturnValue(throwError(() => new Error('broker unavailable')));
+        const service = new KafkaService(
+            kafkaClient as any,
+            logger as unknown as CustomLoggerService,
+            notifyCriticalErrorUseCase as unknown as NotifyCriticalErrorUseCase,
+        );
+
+        await service.onModuleInit();
+        await expect(service.emit('chat.message' as any, { id: 'message-1', roomId: 'room-1' })).resolves.toBe(false);
+
+        expect(logger.logError).toHaveBeenCalledWith(
+            'KafkaService',
+            '메시지 발행 실패: chat.message',
+            expect.any(Error),
+        );
+        await service.onModuleDestroy();
+    });
+
+    it('브로커가 늦게 준비되면 producer 연결을 자동 재시도한다', async () => {
+        jest.useFakeTimers();
+        kafkaClient.connect.mockRejectedValueOnce(new Error('connect ECONNREFUSED')).mockResolvedValueOnce(undefined);
+        const configService = {
+            get: jest.fn((key: string, fallback: string) => {
+                if (key === 'KAFKA_ENABLED') return 'true';
+                if (key === 'KAFKA_RECONNECT_INTERVAL_MS') return '1000';
+                return fallback;
+            }),
+        } as unknown as ConfigService;
+        const service = new KafkaService(
+            kafkaClient as any,
+            logger as unknown as CustomLoggerService,
+            notifyCriticalErrorUseCase as unknown as NotifyCriticalErrorUseCase,
+            configService,
+        );
+
+        await service.onModuleInit();
+        expect(service.isKafkaConnected()).toBe(false);
+
+        await jest.advanceTimersByTimeAsync(1000);
+
+        expect(kafkaClient.connect).toHaveBeenCalledTimes(2);
+        expect(service.isKafkaConnected()).toBe(true);
+        await service.onModuleDestroy();
     });
 });

@@ -1,14 +1,19 @@
 import { Injectable, Logger } from '@nestjs/common';
 
+import { AuthSocialRedirectPathService } from '../../domain/services/auth-social-redirect-path.service';
+
 type SocialLoginProvider = 'google' | 'naver' | 'kakao';
 
 @Injectable()
 export class GetSocialLoginRedirectUrlUseCase {
     private readonly logger = new Logger(GetSocialLoginRedirectUrlUseCase.name);
 
+    constructor(private readonly authSocialRedirectPathService: AuthSocialRedirectPathService) {}
+
     execute(provider: SocialLoginProvider, referer?: string, origin?: string, returnUrl?: string): string {
         const originUrl = referer || origin || '';
-        const stateValue = returnUrl ? `${originUrl}|${returnUrl}` : originUrl;
+        const safeReturnUrl = this.authSocialRedirectPathService.normalize(returnUrl);
+        const stateValue = safeReturnUrl ? `${originUrl}|${safeReturnUrl}` : originUrl;
         const encodedState = encodeURIComponent(stateValue);
 
         this.logger.log(`[${provider}Login] referer: ${referer || ''}`);

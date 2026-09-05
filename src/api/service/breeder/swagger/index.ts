@@ -16,7 +16,6 @@ export class BreederExploreSwaggerDocs {
             - **크기/털길이**: 강아지는 크기별, 고양이는 털길이별 필터 - **중복 선택 가능**
             - **지역**: 광역시/도 + 시군구 단위 필터 - **중복 선택 가능**
             - **입양 가능 여부**: 체크 안 함(전체), 체크(입양 가능한 개체 1마리 이상)
-            - **브리더 레벨**: NEW 또는 ELITE - **중복 선택 가능**
             
             ## 정렬 기준
             - latest: 최신 등록순
@@ -32,7 +31,6 @@ export class BreederExploreSwaggerDocs {
             ## 중복 선택 가능 필터 사용 예시
             - 강아지 크기: ?dogSize[]=small&dogSize[]=medium
             - 지역: ?province[]=경기도&province[]=서울특별시&city[]=파주시&city[]=강남구
-            - 브리더 레벨: ?breederLevel[]=new&breederLevel[]=elite
         `,
         responseType: PaginationResponseDto<BreederCardResponseDto>,
     };
@@ -59,7 +57,7 @@ export class BreederExploreSwaggerDocs {
             특정 브리더의 상세 프로필을 조회합니다.
             
             ## 포함 정보
-            - 기본 정보 (이름, 지역, 레벨, 품종)
+            - 기본 정보 (이름, 지역, 품종)
             - 대표 사진 (최대 3장)
             - 브리더 소개글
             - 분양 중인 아이들
@@ -181,23 +179,6 @@ export class BreederSwaggerDocs {
             - **status**: 분양 상태 필터링 ('available', 'reserved', 'completed')
             - **page**: 페이지 번호 (기본값: 1)
             - **limit**: 페이지 당 항목 수 (기본값: 20)
-            
-            ## 인증
-            - 인증 없이 호출 가능합니다.
-            - Authorization Bearer 토큰은 선택 사항이며, 전달 시 사용자 맞춤 정보가 함께 계산될 수 있습니다.
-        `,
-    };
-
-    static readonly getPetDetail = {
-        summary: '분양 개체 상세 정보 조회',
-        description: `
-            특정 개체(반려동물)의 상세 정보를 조회합니다.
-            
-            ## 주요 정보
-            - 기본 정보 (이름, 성별, 생년월일 등)
-            - 백신 접종 기록
-            - 건강 기록
-            - 부모 정보 (부모견/묘)
             
             ## 인증
             - 인증 없이 호출 가능합니다.
