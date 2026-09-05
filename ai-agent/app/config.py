@@ -33,6 +33,7 @@ class Settings:
     # --- OpenAI ---
     openai_api_key: str = field(default_factory=lambda: os.getenv("OPENAI_API_KEY", ""))
     openai_image_model: str = field(default_factory=lambda: os.getenv("OPENAI_IMAGE_MODEL", "gpt-image-1"))
+    openai_support_model: str = field(default_factory=lambda: os.getenv("OPENAI_SUPPORT_MODEL", "gpt-4o-mini"))
     openai_timeout_seconds: int = field(default_factory=lambda: _int_env("OPENAI_TIMEOUT_SECONDS", 180))
 
     # --- S3 호환 스토리지 (iwinv / OpenStack Swift) ---

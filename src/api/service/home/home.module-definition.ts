@@ -1,4 +1,6 @@
 import { MongooseModule } from '@nestjs/mongoose';
+import { SUPPORT_GRPC_IMPORT, SUPPORT_PROVIDERS } from './support.module-definition';
+import { HomeSupportController } from './controller/home-support.controller';
 
 import { AvailablePet, AvailablePetSchema } from '../../../schema/available-pet.schema';
 import { Banner, BannerSchema } from '../../../schema/banner.schema';
@@ -30,9 +32,14 @@ const HOME_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: AvailablePet.name, schema: AvailablePetSchema },
 ]);
 
-export const HOME_MODULE_IMPORTS = [HOME_SCHEMA_IMPORTS, StorageModule];
+export const HOME_MODULE_IMPORTS = [HOME_SCHEMA_IMPORTS, StorageModule, SUPPORT_GRPC_IMPORT];
 
-export const HOME_MODULE_CONTROLLERS = [HomeBannersController, HomeFaqsController, HomeAvailablePetsController];
+export const HOME_MODULE_CONTROLLERS = [
+    HomeBannersController,
+    HomeFaqsController,
+    HomeAvailablePetsController,
+    HomeSupportController,
+];
 
 const HOME_USE_CASE_PROVIDERS = [GetActiveBannersUseCase, GetFaqsUseCase, GetAvailablePetsUseCase];
 
@@ -58,6 +65,7 @@ const HOME_PORT_BINDINGS = [
 ];
 
 export const HOME_MODULE_PROVIDERS = [
+    ...SUPPORT_PROVIDERS,
     ...HOME_USE_CASE_PROVIDERS,
     ...HOME_DOMAIN_PROVIDERS,
     ...HOME_INFRASTRUCTURE_PROVIDERS,

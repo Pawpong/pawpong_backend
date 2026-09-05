@@ -4,6 +4,7 @@
 """
 
 import logging
+import asyncio
 import time
 import uuid
 from typing import Optional
@@ -14,6 +15,7 @@ from . import ai_agent_pb2, ai_agent_pb2_grpc
 from .adapters import pixel
 from .adapters.openai_image import OpenAiImageAdapter, OpenAiImageError
 from .adapters.storage import StorageAdapter
+from .adapters.support import select_faqs
 from .config import settings
 
 logger = logging.getLogger(__name__)
@@ -27,6 +29,23 @@ class AiAgentServicer(ai_agent_pb2_grpc.AiAgentServiceServicer):
         self._consumer = consumer
         self._storage = StorageAdapter()
         self._openai = OpenAiImageAdapter()
+        self._support_slots = asyncio.Semaphore(2)
+
+    async def AnswerSupportInquiry(self, request, context):  # noqa: N802
+        """문의는 이미지 큐와 독립적이며 무제한 대기·외부 오류 노출을 막는다."""
+        if not request.question.strip() or len(request.question) > 2000 or len(request.faqs) > 60:
+            await context.abort(grpc.StatusCode.INVALID_ARGUMENT, "Invalid inquiry")
+        if self._support_slots.locked():
+            await context.abort(grpc.StatusCode.RESOURCE_EXHAUSTED, "Support busy")
+        async with self._support_slots:
+            try:
+                faqs = [{"faq_id": faq.faq_id, "question": faq.question, "answer": faq.answer} for faq in request.faqs]
+                async with asyncio.timeout(18):
+                    ids = await select_faqs(request.question, faqs)
+                return ai_agent_pb2.SupportInquiryResponse(faq_ids=ids)
+            except Exception:
+                logger.warning("[supportInquiry] AI 문의 응답 실패")
+                await context.abort(grpc.StatusCode.UNAVAILABLE, "Support unavailable")
 
     async def HealthCheck(self, request, context):  # noqa: N802 — proto 규약
         kafka_connected = bool(self._consumer and self._consumer.connected)
