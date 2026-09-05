@@ -39,6 +39,7 @@ services:
             - NODE_ENV=production
             - PORT=8080
             - CONTAINER_NAME=blue
+            - NODE_OPTIONS=--max-old-space-size=1024
             - AI_AGENT_GRPC_URL=ai-agent:50051
         volumes:
             - ./logs:/app/logs
@@ -82,6 +83,7 @@ services:
             - NODE_ENV=production
             - PORT=8080
             - CONTAINER_NAME=green
+            - NODE_OPTIONS=--max-old-space-size=1024
             - AI_AGENT_GRPC_URL=ai-agent:50051
         volumes:
             - ./logs:/app/logs
