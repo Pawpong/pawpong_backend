@@ -21,7 +21,6 @@ export interface MyProfileResult {
     // adopter only
     favoriteBreederCount?: number;
     // breeder only
-    level?: 'new' | 'elite';
     plan?: 'basic' | 'pro';
     businessLocation?: BusinessLocationResult;
     longDescription?: string;
@@ -47,7 +46,6 @@ export interface BreederPublicProfileResult {
     bpm: number;
     followerCount: number;
     followingCount: number;
-    level: 'new' | 'elite';
     plan: 'basic' | 'pro';
     businessLocation: BusinessLocationResult;
     isFavorited: boolean;
@@ -61,7 +59,6 @@ export interface FavoriteBreederCardResult {
     breederLocation: string;
     recentPetStatus?: 'available' | 'reserved' | 'adopted';
     bpm: number;
-    level?: 'new' | 'elite';
     addedAt: string;
     /** 이 엔드포인트는 즐겨찾기한 브리더만 반환하므로 항상 true (카드 별 상태용 계약) */
     isFavorited: true;

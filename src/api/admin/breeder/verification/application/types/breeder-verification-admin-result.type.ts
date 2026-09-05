@@ -14,11 +14,8 @@ export type BreederVerificationProfileInfoResult = {
 export type BreederVerificationInfoResult = {
     verificationStatus: string;
     subscriptionPlan: string;
-    level: string;
     submittedAt?: Date;
     isSubmittedByEmail?: boolean;
-    previousLevel?: string;
-    isLevelChange?: boolean;
 };
 
 export type BreederVerificationListItemResult = {
@@ -52,7 +49,6 @@ export type BreederDetailResult = {
     verificationInfo: {
         verificationStatus: string;
         subscriptionPlan: string;
-        level: string;
         submittedAt?: Date;
         processedAt?: Date;
         isSubmittedByEmail?: boolean;
@@ -71,19 +67,8 @@ export type BreederDetailResult = {
     updatedAt: Date;
 };
 
-export type BreederLevelChangeResult = {
-    breederId: string;
-    breederName: string;
-    previousLevel: string;
-    newLevel: string;
-    changedAt: Date;
-    changedBy: string;
-};
-
 export type BreederStatsResult = {
     totalApproved: number;
-    eliteCount: number;
-    newCount: number;
 };
 
 export type BreederDocumentReminderResult = {

@@ -10,6 +10,8 @@ export type ChatRoomCounterpartResult = {
 
 export type ChatRoomResult = {
     roomId: string;
+    applicationIds: string[];
+    /** @deprecated applicationIds를 사용한다. */
     applicationId?: string;
     status: ChatRoomStatus;
     counterpart: ChatRoomCounterpartResult;

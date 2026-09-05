@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-import { BreederLevel, BreederPlan, VerificationStatus } from '../../../../../common/enum/user.enum';
+import { BreederPlan, VerificationStatus } from '../../../../../common/enum/user.enum';
 
 export class VerificationDocumentResponseDto {
     @ApiProperty({ example: 'adoption_contract_sample' })
@@ -17,20 +17,6 @@ export class VerificationDocumentResponseDto {
 
     @ApiProperty({ required: false, example: '입양계약서.pdf' })
     originalFileName?: string;
-}
-
-export class LevelChangeRequestResponseDto {
-    @ApiProperty({ enum: BreederLevel, example: BreederLevel.NEW })
-    previousLevel: BreederLevel;
-
-    @ApiProperty({ enum: BreederLevel, example: BreederLevel.ELITE })
-    requestedLevel: BreederLevel;
-
-    @ApiProperty({ example: '2026-08-31T00:00:00.000Z' })
-    requestedAt: Date;
-
-    @ApiProperty({ type: () => [VerificationDocumentResponseDto] })
-    documents: VerificationDocumentResponseDto[];
 }
 
 /**
@@ -51,14 +37,6 @@ export class VerificationStatusResponseDto {
         required: false,
     })
     plan?: BreederPlan;
-
-    @ApiProperty({
-        description: '브리더 레벨',
-        example: BreederLevel.NEW,
-        enum: BreederLevel,
-        required: false,
-    })
-    level?: BreederLevel;
 
     @ApiProperty({
         description: '제출 일시',
@@ -93,29 +71,4 @@ export class VerificationStatusResponseDto {
         required: false,
     })
     submittedByEmail?: boolean;
-
-    @ApiProperty({
-        description: '등급 변경 심사 진행 여부',
-        example: false,
-    })
-    isLevelChangeRequested: boolean;
-
-    @ApiProperty({
-        description: '진행 중인 등급 변경 신청 요약',
-        required: false,
-        type: () => LevelChangeRequestResponseDto,
-    })
-    levelChangeRequest?: LevelChangeRequestResponseDto;
-
-    @ApiProperty({
-        description: '최근 등급 변경 심사 반려 사유',
-        required: false,
-    })
-    levelChangeRejectionReason?: string;
-
-    @ApiProperty({
-        description: '최근 등급 변경 심사 완료 일시',
-        required: false,
-    })
-    levelChangeReviewedAt?: Date;
 }

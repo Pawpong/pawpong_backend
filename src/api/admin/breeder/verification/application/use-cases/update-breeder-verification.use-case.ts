@@ -41,51 +41,12 @@ export class UpdateBreederVerificationUseCase {
         );
 
         const reviewedAt = new Date();
-        const isLevelChangeApproval = this.breederVerificationAdminPolicyService.isLevelChangeApproval(
-            breeder,
-            verificationData.verificationStatus,
-        );
-        const isLevelChangeDecision = this.breederVerificationAdminPolicyService.isLevelChangeDecision(
-            breeder,
-            verificationData.verificationStatus,
-        );
-        const shouldClearLevelChangeRequest = this.breederVerificationAdminPolicyService.shouldClearLevelChangeRequest(
-            breeder,
-            verificationData.verificationStatus,
-        );
-
         await this.breederVerificationAdminWriter.updateBreederVerification(breederId, {
-            verificationStatus: isLevelChangeDecision
-                ? VerificationStatus.APPROVED
-                : verificationData.verificationStatus,
+            verificationStatus: verificationData.verificationStatus,
             reviewedAt,
-            ...(!isLevelChangeDecision && verificationData.rejectionReason !== undefined
+            ...(verificationData.rejectionReason !== undefined
                 ? {
                       rejectionReason: verificationData.rejectionReason,
-                  }
-                : {}),
-            ...(isLevelChangeDecision && verificationData.verificationStatus === VerificationStatus.REJECTED
-                ? {
-                      levelChangeRejectionReason:
-                          verificationData.rejectionReason || '등급 변경 심사가 반려되었습니다.',
-                  }
-                : {}),
-            ...(isLevelChangeApproval && breeder.verification?.levelChangeRequest
-                ? {
-                      approvedLevel: breeder.verification.levelChangeRequest.requestedLevel,
-                      approvedDocuments: breeder.verification.levelChangeRequest.documents || [],
-                      appendLevelChangeHistory: {
-                          previousLevel: breeder.verification.levelChangeRequest.previousLevel,
-                          newLevel: breeder.verification.levelChangeRequest.requestedLevel,
-                          requestedAt: breeder.verification.levelChangeRequest.requestedAt,
-                          approvedAt: reviewedAt,
-                          approvedBy: adminId,
-                      },
-                  }
-                : {}),
-            ...(shouldClearLevelChangeRequest
-                ? {
-                      clearLevelChangeRequest: true,
                   }
                 : {}),
         });
@@ -97,9 +58,7 @@ export class UpdateBreederVerificationUseCase {
                 AdminTargetType.BREEDER,
                 breederId,
                 this.breederVerificationAdminPolicyService.getBreederDisplayName(breeder),
-                isLevelChangeDecision
-                    ? `Breeder level change ${verificationData.verificationStatus}`
-                    : `Breeder verification ${verificationData.verificationStatus}`,
+                `Breeder verification ${verificationData.verificationStatus}`,
             ),
         );
 
@@ -116,9 +75,7 @@ export class UpdateBreederVerificationUseCase {
         }
 
         return {
-            message: isLevelChangeDecision
-                ? `Breeder level change ${verificationData.verificationStatus}`
-                : `Breeder verification ${verificationData.verificationStatus}`,
+            message: `Breeder verification ${verificationData.verificationStatus}`,
         };
     }
 }

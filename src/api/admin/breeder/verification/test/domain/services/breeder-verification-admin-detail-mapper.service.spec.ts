@@ -38,6 +38,7 @@ describe('BreederVerificationAdminDetailMapperService', () => {
         const result = service.toResult(breeder);
         expect(result.breederId).toBe('b-1');
         expect(result.verificationInfo.verificationStatus).toBe('approved');
+        expect(result.verificationInfo).not.toHaveProperty('level');
         expect(result.verificationInfo.documents![0].fileUrl).toBe('https://cdn/id.pdf');
         expect(result.profileInfo!.location).toBe('서울');
     });
@@ -53,7 +54,7 @@ describe('BreederVerificationAdminDetailMapperService', () => {
         const result = service.toResult(breeder);
         expect(result.verificationInfo.verificationStatus).toBe('pending');
         expect(result.verificationInfo.subscriptionPlan).toBe('basic');
-        expect(result.verificationInfo.level).toBe('new');
+        expect(result.verificationInfo).not.toHaveProperty('level');
     });
 
     it('submittedAt이 없으면 documents의 최초 uploadedAt을 사용한다', () => {

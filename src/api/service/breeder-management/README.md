@@ -40,8 +40,7 @@
   "data": {
     "breederInfo": {
       "breederId": "...",
-      "name": "해피독 브리더",
-      "level": "elite"
+      "name": "해피독 브리더"
     },
     "statistics": {
       "totalPets": 10,

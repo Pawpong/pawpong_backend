@@ -17,10 +17,11 @@ interface BroadcastMessage {
     messageId: string;
     roomId: string;
     content: string;
+    messageType: string;
 }
 
 interface MessageEnvelope {
-    data?: Array<{ messageId: string; content: string }>;
+    data?: Array<{ messageId: string; content: string; messageType: string }>;
 }
 
 const CHAT_TOPIC = 'chat.message';
@@ -82,7 +83,14 @@ const main = async (): Promise<void> => {
     await connection.asPromise();
     const rooms = connection.collection<ChatRoomRecord>('chat_rooms');
     const messages = connection.collection('chat_messages');
-    const room = await rooms.findOne({ status: 'active' }, { sort: { lastMessageAt: -1, updatedAt: -1 } });
+    const requestedRoomId = process.env.CHAT_SMOKE_ROOM_ID;
+    if (requestedRoomId && !Types.ObjectId.isValid(requestedRoomId)) {
+        await connection.close();
+        throw new Error('CHAT_SMOKE_ROOM_ID가 유효한 ObjectId가 아닙니다.');
+    }
+    const room = requestedRoomId
+        ? await rooms.findOne({ _id: new Types.ObjectId(requestedRoomId), status: 'active' })
+        : await rooms.findOne({ status: 'active' }, { sort: { lastMessageAt: -1, updatedAt: -1 } });
 
     if (!room) {
         await connection.close();
@@ -104,7 +112,21 @@ const main = async (): Promise<void> => {
     const admin = kafka.admin();
     const sockets: Socket[] = [];
     const received = { adopter: [] as BroadcastMessage[], breeder: [] as BroadcastMessage[] };
-    const content = `chat-kafka-smoke-${Date.now()}`;
+    const messageType = process.env.CHAT_SMOKE_MESSAGE_TYPE ?? 'text';
+    if (!['text', 'image', 'file', 'location'].includes(messageType)) {
+        throw new Error(`지원하지 않는 CHAT_SMOKE_MESSAGE_TYPE: ${messageType}`);
+    }
+    const smokeId = Date.now();
+    const content =
+        messageType === 'location'
+            ? `__PAWPONG_ATTACHMENT_V1__${JSON.stringify({
+                  kind: 'location',
+                  latitude: 37.5665,
+                  longitude: 126.978,
+                  accuracy: 15,
+                  smokeId,
+              })}`
+            : `chat-kafka-smoke-${smokeId}`;
     let messageId: string | undefined;
 
     try {
@@ -125,7 +147,7 @@ const main = async (): Promise<void> => {
         adopterSocket.emit('join_room', { roomId });
         breederSocket.emit('join_room', { roomId });
         await delay(200);
-        adopterSocket.emit('send_message', { roomId, content, messageType: 'text' });
+        adopterSocket.emit('send_message', { roomId, content, messageType });
 
         await waitFor(
             () => received.adopter.length > 0 && received.breeder.length > 0,
@@ -143,6 +165,9 @@ const main = async (): Promise<void> => {
         if (!messageId || received.breeder[0].messageId !== messageId) {
             throw new Error('두 소켓의 messageId가 일치하지 않습니다.');
         }
+        if (received.adopter[0].messageType !== messageType || received.breeder[0].messageType !== messageType) {
+            throw new Error('두 소켓의 messageType이 요청과 일치하지 않습니다.');
+        }
 
         await waitFor(async () => (await sumTopicOffsets(admin)) > offsetBefore, 'Kafka offset이 증가하지 않았습니다.');
         const offsetAfter = await sumTopicOffsets(admin);
@@ -150,13 +175,15 @@ const main = async (): Promise<void> => {
             headers: { Authorization: `Bearer ${adopterToken}` },
         });
         const body = (await response.json()) as MessageEnvelope;
-        const stored = body.data?.filter((message) => message.messageId === messageId) ?? [];
+        const stored =
+            body.data?.filter((message) => message.messageId === messageId && message.messageType === messageType) ??
+            [];
 
         if (!response.ok || stored.length !== 1) {
             throw new Error(`REST 메시지 재조회 실패: status=${response.status}, count=${stored.length}`);
         }
 
-        console.log(`[chat-kafka-smoke] room=${roomId}`);
+        console.log(`[chat-kafka-smoke] room=${roomId} type=${messageType}`);
         console.log('[chat-kafka-smoke] Socket.IO new_message adopter=1 breeder=1');
         console.log(`[chat-kafka-smoke] Kafka ${CHAT_TOPIC} offset ${offsetBefore} -> ${offsetAfter}`);
         console.log('[chat-kafka-smoke] REST persisted message count=1');

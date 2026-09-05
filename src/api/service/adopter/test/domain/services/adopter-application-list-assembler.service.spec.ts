@@ -30,13 +30,11 @@ describe('AdopterApplicationListAssemblerService', () => {
         const breeder = {
             nickname: '닉',
             profileImageFileName: 'p.png',
-            verification: { level: 'elite' },
             profile: { specialization: ['cat'] },
         } as any;
 
         const result = service.toItem(application, breeder, fileUrlPort, 'review-1');
         expect(result.breederName).toBe('닉');
-        expect(result.breederLevel).toBe('elite');
         expect(result.profileImage).toBe('https://signed.example.com/img.png');
         expect(result.animalType).toBe('cat');
         expect(result.applicationDate).toBe('2026. 01. 05.');
@@ -52,7 +50,6 @@ describe('AdopterApplicationListAssemblerService', () => {
         } as any;
         const result = service.toItem(application, null, fileUrlPort, null);
         expect(result.breederName).toBe('알 수 없음');
-        expect(result.breederLevel).toBe('new');
         expect(result.profileImage).toBeNull();
         expect(result.animalType).toBe('dog');
     });

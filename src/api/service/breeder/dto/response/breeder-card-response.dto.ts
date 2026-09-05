@@ -27,17 +27,6 @@ export class BreederCardResponseDto {
     breederName: string;
 
     /**
-     * 브리더 레벨
-     * @example "new"
-     */
-    @ApiProperty({
-        description: '브리더 레벨',
-        enum: ['new', 'elite'],
-        example: 'new',
-    })
-    breederLevel: string;
-
-    /**
      * 반려동물 타입
      * @example "dog"
      */

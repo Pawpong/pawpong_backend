@@ -42,6 +42,10 @@ export class LoggingInterceptor implements NestInterceptor {
         // DELETE 는 기존대로 body 로깅 대상에서 제외한다 (기존 DELETE 엔드포인트들의 프라이버시 계약 유지).
         if (['POST', 'PUT', 'PATCH'].includes(method) && body && Object.keys(body).length > 0) {
             const safeBody: Record<string, unknown> = { ...(body as Record<string, unknown>) };
+            // 자유 입력 문의에는 개인정보가 포함될 수 있으므로 원문을 저장하지 않는다.
+            if (url.split('?')[0].replace(/\/$/, '') === '/api/v2/home/support/inquiry') {
+                for (const key of Object.keys(safeBody)) safeBody[key] = '[REDACTED]';
+            }
             if (safeBody.password) safeBody.password = '***';
             if (typeof safeBody.refreshToken === 'string')
                 safeBody.refreshToken = safeBody.refreshToken.substring(0, 12) + '...';

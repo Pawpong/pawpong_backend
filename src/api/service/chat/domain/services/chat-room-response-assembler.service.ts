@@ -1,6 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { SenderRole } from '../../../../../schema/chat-message.schema';
 import { type ChatRoomSnapshot } from '../../application/ports/chat-room-manager.port';
 import { CHAT_MESSAGE_MANAGER, type ChatMessageManagerPort } from '../../application/ports/chat-message-manager.port';
 import {
@@ -18,24 +17,32 @@ export class ChatRoomResponseAssemblerService {
         private readonly participantReader: ChatParticipantReaderPort,
     ) {}
 
-    async toResult(room: ChatRoomSnapshot, viewerId: string, viewerRole: SenderRole): Promise<ChatRoomResult> {
-        const counterpartRole = viewerRole === SenderRole.ADOPTER ? SenderRole.BREEDER : SenderRole.ADOPTER;
-        const counterpartId = counterpartRole === SenderRole.BREEDER ? room.breederId : room.adopterId;
+    async toResult(room: ChatRoomSnapshot, viewerId: string): Promise<ChatRoomResult> {
+        const counterpart = room.participants.find(({ userId }) => userId !== viewerId);
+        if (!counterpart) throw new Error('1:1 채팅방의 상대 사용자를 확인할 수 없습니다.');
 
         const [counterpartProfile, unreadCount] = await Promise.all([
-            this.participantReader.findProfile(counterpartId, counterpartRole),
+            this.participantReader.findParticipant(counterpart.userId, counterpart.role),
             this.chatMessageManager.countUnreadMessages(room.id, viewerId),
         ]);
 
         return {
             roomId: room.id,
+            applicationIds: room.applicationIds,
             applicationId: room.applicationId,
             status: room.status,
-            counterpart: counterpartProfile ?? {
-                userId: counterpartId,
-                role: counterpartRole,
-                nickname: '알 수 없음',
-            },
+            counterpart: counterpartProfile
+                ? {
+                      userId: counterpartProfile.userId,
+                      role: counterpartProfile.role,
+                      nickname: counterpartProfile.nickname,
+                      profileImageUrl: counterpartProfile.profileImageUrl,
+                  }
+                : {
+                      userId: counterpart.userId,
+                      role: counterpart.role,
+                      nickname: '알 수 없음',
+                  },
             lastMessage: room.lastMessage,
             lastMessageAt: room.lastMessageAt?.toISOString(),
             unreadCount,
@@ -43,7 +50,7 @@ export class ChatRoomResponseAssemblerService {
         };
     }
 
-    async toResults(rooms: ChatRoomSnapshot[], viewerId: string, viewerRole: SenderRole): Promise<ChatRoomResult[]> {
-        return Promise.all(rooms.map((room) => this.toResult(room, viewerId, viewerRole)));
+    async toResults(rooms: ChatRoomSnapshot[], viewerId: string): Promise<ChatRoomResult[]> {
+        return Promise.all(rooms.map((room) => this.toResult(room, viewerId)));
     }
 }

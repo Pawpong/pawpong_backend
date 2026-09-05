@@ -28,7 +28,6 @@ function makeReader(
 ): BreederVerificationAdminReaderPort {
     return {
         findAdminById: jest.fn().mockResolvedValue(admin),
-        getLevelChangeRequests: jest.fn(),
         getPendingBreeders: jest.fn().mockResolvedValue({ items, total }),
         getBreeders: jest.fn(),
         findBreederById: jest.fn(),

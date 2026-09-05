@@ -7,12 +7,9 @@ describe('브리더 인증 관리자 통계 결과 매퍼', () => {
         expect(
             service.toResult({
                 totalApproved: 10,
-                eliteCount: 4,
             }),
         ).toEqual({
             totalApproved: 10,
-            eliteCount: 4,
-            newCount: 6,
         });
     });
 });

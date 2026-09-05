@@ -89,6 +89,9 @@ export async function createTestingApp(overrides: ProviderOverride[] = []): Prom
     app.useGlobalInterceptors(new HttpStatusInterceptor());
 
     await app.init();
+    // 요청마다 Supertest가 서버를 열고 닫지 않도록 앱 수명 동안 포트를 유지한다.
+    // Node의 keep-alive 연결이 닫힌 임시 서버를 재사용하는 불안정성을 방지한다.
+    await app.listen(0, '127.0.0.1');
 
     const originalClose = app.close.bind(app);
     let closed = false;
@@ -390,7 +393,6 @@ export async function getBreederToken(app: INestApplication): Promise<{ token: s
             animal: 'dog',
             breeds: ['포메라니안'],
             plan: 'basic',
-            level: 'new',
             agreements: { termsOfService: true, privacyPolicy: true, marketingConsent: false },
         });
 

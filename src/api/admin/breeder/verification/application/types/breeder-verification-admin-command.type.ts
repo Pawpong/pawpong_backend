@@ -1,4 +1,4 @@
-import { BreederLevel, VerificationStatus } from '../../../../../../common/enum/user.enum';
+import { VerificationStatus } from '../../../../../../common/enum/user.enum';
 
 export type BreederVerificationAdminSearchQuery = {
     verificationStatus?: VerificationStatus;
@@ -11,8 +11,4 @@ export type BreederVerificationAdminSearchQuery = {
 export type BreederVerificationUpdateCommand = {
     verificationStatus: VerificationStatus;
     rejectionReason?: string;
-};
-
-export type BreederLevelChangeCommand = {
-    newLevel: BreederLevel;
 };

@@ -28,7 +28,6 @@ describe('브리더 관리 응답 계약 종단간 테스트', () => {
                 animal: 'dog',
                 breeds: ['포메라니안', '말티즈'],
                 plan: 'basic',
-                level: 'new',
                 agreements: {
                     termsOfService: true,
                     privacyPolicy: true,
@@ -79,6 +78,7 @@ describe('브리더 관리 응답 계약 종단간 테스트', () => {
                 availablePetCount: expect.any(Number),
             }),
         );
+        expect(response.body.data.profileInfo.verificationInfo).not.toHaveProperty('level');
     });
 
     it('응답 계약을 유지한다', async () => {
@@ -110,6 +110,7 @@ describe('브리더 관리 응답 계약 종단간 테스트', () => {
                 availablePetInfo: expect.any(Array),
             }),
         );
+        expect(response.body.data.verificationInfo).not.toHaveProperty('level');
     });
 
     it('응답 계약을 유지한다', async () => {
@@ -132,5 +133,7 @@ describe('브리더 관리 응답 계약 종단간 테스트', () => {
                 documents: expect.any(Array),
             }),
         );
+        expect(response.body.data).not.toHaveProperty('level');
+        expect(response.body.data).not.toHaveProperty('levelChange');
     });
 });

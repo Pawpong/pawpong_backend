@@ -1,7 +1,9 @@
 import { MessageType } from '../../../../../schema/chat-message.schema';
 
 export interface CreateRoomCommand {
-    breederId: string;
+    counterpartUserId?: string;
+    /** @deprecated counterpartUserId로 전환한다. */
+    breederId?: string;
     applicationId?: string;
 }
 

@@ -36,56 +36,6 @@ describe('BreederVerificationAdminPolicyService', () => {
         });
     });
 
-    describe('isLevelChangeDecision', () => {
-        const breeder = { verification: { isLevelChangeRequested: true, levelChangeRequest: {} } } as any;
-
-        it.each([VerificationStatus.APPROVED, VerificationStatus.REJECTED])('%s는 최종 결정이다', (status) => {
-            expect(policy.isLevelChangeDecision(breeder, status)).toBe(true);
-        });
-
-        it('reviewing은 최종 결정이 아니다', () => {
-            expect(policy.isLevelChangeDecision(breeder, VerificationStatus.REVIEWING)).toBe(false);
-        });
-    });
-
-    describe('isLevelChangeApproval', () => {
-        it('isLevelChangeRequested + levelChangeRequest + APPROVED → true', () => {
-            const breeder = { verification: { isLevelChangeRequested: true, levelChangeRequest: {} } } as any;
-            expect(policy.isLevelChangeApproval(breeder, VerificationStatus.APPROVED)).toBe(true);
-        });
-        it('상태 다르면 false', () => {
-            const breeder = { verification: { isLevelChangeRequested: true, levelChangeRequest: {} } } as any;
-            expect(policy.isLevelChangeApproval(breeder, VerificationStatus.REJECTED)).toBe(false);
-        });
-        it('플래그 없으면 false', () => {
-            expect(policy.isLevelChangeApproval({ verification: {} } as any, VerificationStatus.APPROVED)).toBe(false);
-        });
-    });
-
-    describe('shouldClearLevelChangeRequest', () => {
-        it('APPROVED이면서 요청 있으면 true', () => {
-            expect(
-                policy.shouldClearLevelChangeRequest(
-                    { verification: { isLevelChangeRequested: true } } as any,
-                    VerificationStatus.APPROVED,
-                ),
-            ).toBe(true);
-        });
-        it('REJECTED여도 true', () => {
-            expect(
-                policy.shouldClearLevelChangeRequest(
-                    { verification: { isLevelChangeRequested: true } } as any,
-                    VerificationStatus.REJECTED,
-                ),
-            ).toBe(true);
-        });
-        it('요청 없으면 false', () => {
-            expect(policy.shouldClearLevelChangeRequest({ verification: {} } as any, VerificationStatus.APPROVED)).toBe(
-                false,
-            );
-        });
-    });
-
     describe('getBreederDisplayName', () => {
         it('nickname > name > 브리더', () => {
             expect(policy.getBreederDisplayName({ nickname: '닉' } as any)).toBe('닉');

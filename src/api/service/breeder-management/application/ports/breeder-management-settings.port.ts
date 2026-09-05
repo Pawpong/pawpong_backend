@@ -15,7 +15,6 @@ export interface BreederManagementStoredVerificationDocumentRecord {
 export interface BreederManagementVerificationRecord {
     status: string;
     plan?: string;
-    level?: string;
     submittedAt?: Date;
     reviewedAt?: Date;
     rejectionReason?: string;
@@ -23,16 +22,8 @@ export interface BreederManagementVerificationRecord {
     submittedByEmail?: boolean;
 }
 
-export interface BreederManagementLevelChangeRequestRecord {
-    previousLevel: 'new' | 'elite';
-    requestedLevel: 'new' | 'elite';
-    requestedAt: Date;
-    documents: BreederManagementStoredVerificationDocumentRecord[];
-}
-
 export interface BreederManagementSettingsPort {
     updateVerification(breederId: string, verification: BreederManagementVerificationRecord): Promise<void>;
-    requestLevelChange(breederId: string, request: BreederManagementLevelChangeRequestRecord): Promise<void>;
     updateApplicationForm(
         breederId: string,
         applicationForm: BreederManagementApplicationFormRecord[],

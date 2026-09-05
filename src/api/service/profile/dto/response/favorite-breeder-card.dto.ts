@@ -26,9 +26,6 @@ export class FavoriteBreederCardResponseDto {
     @ApiProperty({ description: 'BPM', example: 60 })
     bpm: number;
 
-    @ApiPropertyOptional({ description: '인증 레벨', enum: ['new', 'elite'], example: 'elite' })
-    level?: 'new' | 'elite';
-
     @ApiProperty({ description: '즐겨찾기 추가 일시 (ISO 8601)', example: '2026-04-01T10:00:00.000Z' })
     addedAt: string;
 

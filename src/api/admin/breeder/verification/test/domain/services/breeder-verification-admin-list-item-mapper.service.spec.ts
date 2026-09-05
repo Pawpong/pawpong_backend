@@ -6,7 +6,6 @@ describe('BreederVerificationAdminListItemMapperService', () => {
     const verificationInfo: any = {
         verificationStatus: 'pending',
         subscriptionPlan: 'basic',
-        level: 'new',
         submittedAt: undefined,
         isSubmittedByEmail: false,
     };

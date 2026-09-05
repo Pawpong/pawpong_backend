@@ -9,7 +9,8 @@ export function ApiCreateOrGetRoomEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '채팅방 생성 또는 조회',
-            description: '동일 adopter-breeder 쌍이면 기존 방을 반환합니다.',
+            description:
+                '역할과 무관한 1:1 DM입니다. 동일한 두 사용자면 숨기거나 종료했던 방도 기존 roomId로 다시 활성화합니다.',
             responseType: ChatRoomResponseDto,
             successDescription: '채팅방 조회 성공',
             successMessageExample: CHAT_RESPONSE_MESSAGES.roomReady,
@@ -43,12 +44,36 @@ export function ApiGetMessagesEndpoint() {
 export function ApiCloseRoomEndpoint() {
     return applyDecorators(
         ApiEndpoint({
-            summary: '채팅방 종료',
-            description: '채팅방을 종료(CLOSED) 처리합니다. 종료 후 같은 상대와 다시 문의하면 새 방이 생성됩니다.',
+            summary: '내 채팅방 목록에서 숨기기',
+            description:
+                '요청자 목록에서만 숨깁니다. 상대방 방과 메시지는 유지되며 다시 대화하면 같은 방이 표시됩니다.',
             // 응답 data 는 null — 실제 응답과 문서를 일치시킨다
             nullableData: true,
             successDescription: '채팅방 종료 성공',
             successMessageExample: CHAT_RESPONSE_MESSAGES.roomClosed,
+        }),
+    );
+}
+
+export function ApiBlockChatUserEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '채팅 사용자 차단',
+            description: '기존 대화 기록은 유지하고 두 사용자 사이의 새 대화·메시지 송신을 양방향으로 막습니다.',
+            nullableData: true,
+            successDescription: '사용자 차단 성공',
+            successMessageExample: CHAT_RESPONSE_MESSAGES.userBlocked,
+        }),
+    );
+}
+
+export function ApiUnblockChatUserEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '채팅 사용자 차단 해제',
+            nullableData: true,
+            successDescription: '사용자 차단 해제 성공',
+            successMessageExample: CHAT_RESPONSE_MESSAGES.userUnblocked,
         }),
     );
 }

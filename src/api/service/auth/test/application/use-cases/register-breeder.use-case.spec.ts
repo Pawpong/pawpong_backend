@@ -52,7 +52,6 @@ describe('브리더 회원가입 유스케이스', () => {
         breeds: ['말티즈'],
         breederLocation: { city: '서울', district: '강남구' },
         plan: 'basic',
-        level: 'new',
         documentUrls: [],
         documentTypes: [],
     };
@@ -66,7 +65,7 @@ describe('브리더 회원가입 유스케이스', () => {
         profileImageFileName: '',
         petType: 'dog',
         breeds: ['말티즈'],
-        verification: { plan: 'basic', level: 'new', status: 'pending' },
+        verification: { plan: 'basic', status: 'pending' },
         profile: { location: { city: '서울', district: '강남구' }, specialization: ['dog'] },
         accountStatus: 'active',
         createdAt: new Date('2026-04-01T00:00:00.000Z'),

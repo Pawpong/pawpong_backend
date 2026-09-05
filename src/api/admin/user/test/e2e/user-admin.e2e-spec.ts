@@ -114,7 +114,6 @@ describe('사용자 관리자 종단간 테스트', () => {
                     animal: 'dog',
                     breeds: ['포메라니안'],
                     plan: 'basic',
-                    level: 'new',
                     agreements: {
                         termsOfService: true,
                         privacyPolicy: true,

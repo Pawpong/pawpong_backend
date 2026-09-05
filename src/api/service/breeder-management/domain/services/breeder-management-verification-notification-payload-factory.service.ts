@@ -13,33 +13,20 @@ import type { BreederManagementStoredVerificationDocumentRecord } from '../../ap
 export class BreederManagementVerificationNotificationPayloadFactoryService {
     create(params: {
         breeder: BreederManagementBreederRecord;
-        level: 'new' | 'elite';
         isResubmission: boolean;
-        submissionKind?: 'verification' | 'level_change';
         submittedAt: Date;
         finalDocuments: BreederManagementStoredVerificationDocumentRecord[];
         draftDocuments: BreederManagementVerificationDraftDocument[];
         fileUrlPort: BreederManagementFileUrlPort;
     }): BreederManagementVerificationSubmissionNotification {
-        const {
-            breeder,
-            level,
-            isResubmission,
-            submissionKind,
-            submittedAt,
-            finalDocuments,
-            draftDocuments,
-            fileUrlPort,
-        } = params;
+        const { breeder, isResubmission, submittedAt, finalDocuments, draftDocuments, fileUrlPort } = params;
 
         return {
             breederId: String(breeder._id),
             breederName: breeder.name || '이름 미설정',
             email: breeder.emailAddress,
             phone: breeder.phoneNumber,
-            level,
             isResubmission,
-            submissionKind: submissionKind || 'verification',
             submittedAt,
             documents: finalDocuments.map((document) =>
                 this.toNotificationDocument(document, draftDocuments, fileUrlPort),

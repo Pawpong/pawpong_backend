@@ -21,12 +21,6 @@ export type BreederManagementVerificationDocumentInfoCommand = {
 };
 
 export type BreederManagementVerificationDocumentsSubmitCommand = {
-    level: 'new' | 'elite';
     documents: BreederManagementVerificationDocumentInfoCommand[];
     submittedByEmail?: boolean;
-};
-
-export type BreederManagementLevelChangeRequestCommand = {
-    requestedLevel: 'elite';
-    documents: BreederManagementVerificationDocumentInfoCommand[];
 };

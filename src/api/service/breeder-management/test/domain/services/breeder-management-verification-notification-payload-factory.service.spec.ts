@@ -12,7 +12,6 @@ describe('BreederManagementVerificationNotificationPayloadFactoryService', () =>
     it('breeder name이 없으면 이름 미설정 사용', () => {
         const payload = service.create({
             breeder: { _id: 'b-1', emailAddress: 'b@e.com' } as any,
-            level: 'new',
             isResubmission: false,
             submittedAt: new Date(),
             finalDocuments: [{ type: 'idCard', fileName: 'verification/id.pdf', uploadedAt: new Date() } as any],
@@ -26,7 +25,6 @@ describe('BreederManagementVerificationNotificationPayloadFactoryService', () =>
     it('originalFileName: draft > document > fileName 마지막 세그먼트 순서', () => {
         const payload = service.create({
             breeder: { _id: 'b-1', name: '브리더', emailAddress: 'b@e.com' } as any,
-            level: 'elite',
             isResubmission: true,
             submittedAt: new Date(),
             finalDocuments: [{ type: 'idCard', fileName: 'verification/abc.pdf', uploadedAt: new Date() } as any],
@@ -39,7 +37,6 @@ describe('BreederManagementVerificationNotificationPayloadFactoryService', () =>
     it('draft 매칭이 없고 document.originalFileName도 없으면 마지막 세그먼트', () => {
         const payload = service.create({
             breeder: { _id: 'b-1', name: '브리더', emailAddress: 'b@e.com' } as any,
-            level: 'new',
             isResubmission: false,
             submittedAt: new Date(),
             finalDocuments: [

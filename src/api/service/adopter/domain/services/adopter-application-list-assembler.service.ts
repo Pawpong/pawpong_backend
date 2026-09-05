@@ -34,7 +34,6 @@ export class AdopterApplicationListAssemblerService {
             status: application.status,
             appliedAt: application.appliedAt.toISOString(),
             processedAt: application.processedAt?.toISOString(),
-            breederLevel: (breeder?.verification?.level || 'new') as 'elite' | 'new',
             profileImage: breeder?.profileImageFileName
                 ? adopterFileUrlPort.generateOneSafe(breeder.profileImageFileName, 60)
                 : null,

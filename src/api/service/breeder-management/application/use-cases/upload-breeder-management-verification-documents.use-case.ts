@@ -36,14 +36,13 @@ export class UploadBreederManagementVerificationDocumentsUseCase {
         userId: string,
         files: Express.Multer.File[],
         types: string[],
-        level: 'new' | 'elite',
     ): Promise<BreederManagementUploadDocumentsResult> {
         const breeder = await this.breederManagementProfilePort.findById(userId);
         if (!breeder) {
             throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
         }
 
-        this.breederManagementVerificationDocumentPolicyService.validateUploadRequest(files, types, level);
+        this.breederManagementVerificationDocumentPolicyService.validateUploadRequest(files, types);
 
         const uploadedDocuments: BreederManagementUploadedDocumentResult[] = [];
         const draftDocuments: BreederManagementVerificationDraftDocument[] = [];
@@ -78,7 +77,6 @@ export class UploadBreederManagementVerificationDocumentsUseCase {
 
         return {
             count: uploadedDocuments.length,
-            level,
             documents: uploadedDocuments,
         };
     }

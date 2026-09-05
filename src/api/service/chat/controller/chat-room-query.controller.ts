@@ -10,7 +10,6 @@ import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto
 import { GetMyRoomsUseCase } from '../application/use-cases/get-my-rooms.use-case';
 import { GetMessagesUseCase } from '../application/use-cases/get-messages.use-case';
 import { CHAT_RESPONSE_MESSAGES } from '../constants/chat-response-messages';
-import { SenderRole } from '../../../../schema/chat-message.schema';
 import { ApiGetMyRoomsEndpoint, ApiGetMessagesEndpoint } from '../swagger/index';
 
 @ApiTags('채팅')
@@ -26,8 +25,7 @@ export class ChatRoomQueryController {
     @Roles('adopter', 'breeder')
     @ApiGetMyRoomsEndpoint()
     async getMyRooms(@CurrentUser() user: { userId: string; role: string }): Promise<ApiResponseDto<unknown>> {
-        const role = user.role === 'adopter' ? SenderRole.ADOPTER : SenderRole.BREEDER;
-        const rooms = await this.getMyRoomsUseCase.execute(user.userId, role);
+        const rooms = await this.getMyRoomsUseCase.execute(user.userId);
         return ApiResponseDto.success(rooms, CHAT_RESPONSE_MESSAGES.roomsRetrieved);
     }
 

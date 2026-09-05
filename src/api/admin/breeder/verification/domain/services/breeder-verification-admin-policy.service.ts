@@ -52,38 +52,6 @@ export class BreederVerificationAdminPolicyService {
         return AdminAction.REVIEW_BREEDER;
     }
 
-    isLevelChangeApproval(
-        breeder: BreederVerificationAdminBreederSnapshot,
-        verificationStatus: VerificationStatus,
-    ): boolean {
-        return (
-            !!breeder.verification?.isLevelChangeRequested &&
-            !!breeder.verification?.levelChangeRequest &&
-            verificationStatus === VerificationStatus.APPROVED
-        );
-    }
-
-    isLevelChangeDecision(
-        breeder: BreederVerificationAdminBreederSnapshot,
-        verificationStatus: VerificationStatus,
-    ): boolean {
-        return (
-            !!breeder.verification?.isLevelChangeRequested &&
-            !!breeder.verification?.levelChangeRequest &&
-            (verificationStatus === VerificationStatus.APPROVED || verificationStatus === VerificationStatus.REJECTED)
-        );
-    }
-
-    shouldClearLevelChangeRequest(
-        breeder: BreederVerificationAdminBreederSnapshot,
-        verificationStatus: VerificationStatus,
-    ): boolean {
-        return (
-            !!breeder.verification?.isLevelChangeRequested &&
-            (verificationStatus === VerificationStatus.APPROVED || verificationStatus === VerificationStatus.REJECTED)
-        );
-    }
-
     getBreederDisplayName(breeder: BreederVerificationAdminBreederSnapshot): string {
         return breeder.nickname || breeder.name || '브리더';
     }

@@ -123,7 +123,6 @@ describe('브리더 관리 인증 문서 제출 유스케이스', () => {
         ];
 
         const result = await useCase.execute('breeder-id', {
-            level: 'new',
             documents: [
                 {
                     type: 'idCard',
@@ -167,7 +166,6 @@ describe('브리더 관리 인증 문서 제출 유스케이스', () => {
         ];
 
         const result = await useCase.execute('breeder-id', {
-            level: 'new',
             documents: [
                 {
                     type: 'idCard',

@@ -70,9 +70,6 @@ export class AuthSignupValidationService {
         if (!dto.plan) {
             throw new DomainValidationError('브리더 회원가입 시 플랜은 필수입니다.');
         }
-        if (!dto.level) {
-            throw new DomainValidationError('브리더 회원가입 시 레벨은 필수입니다.');
-        }
     }
 
     throwInvalidRole(): never {

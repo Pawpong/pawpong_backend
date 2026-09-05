@@ -4,6 +4,7 @@ import { PriceDisplayType } from '../../../../../common/enum/user.enum';
 import type { BreederFileUrlPort } from '../../application/ports/breeder-file-url.port';
 import type { BreederPublicBreederRecord } from '../../application/ports/breeder-public-reader.port';
 import type { BreederCardResult } from '../../application/types/breeder-result.type';
+import { formatLocationLabel } from '../../../../../common/data/districts.data';
 
 type BreederPriceRange = {
     min?: number;
@@ -24,11 +25,8 @@ export class BreederExploreCardMapperService {
         return {
             breederId: String(breeder._id),
             breederName: breeder.name,
-            breederLevel: breeder.verification?.level || 'new',
             petType: breeder.petType || 'dog',
-            location: breeder.profile?.location
-                ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
-                : '',
+            location: formatLocationLabel(breeder.profile?.location?.city, breeder.profile?.location?.district),
             mainBreed: breeder.breeds?.[0] || '',
             isAdoptionAvailable: availableBreederIdSet.has(String(breeder._id)),
             priceRange: {
@@ -54,11 +52,8 @@ export class BreederExploreCardMapperService {
         return {
             breederId: String(breeder._id),
             breederName: breeder.name,
-            breederLevel: breeder.verification?.level || 'new',
             petType: breeder.petType || 'dog',
-            location: breeder.profile?.location
-                ? `${breeder.profile.location.city} ${breeder.profile.location.district}`
-                : '',
+            location: formatLocationLabel(breeder.profile?.location?.city, breeder.profile?.location?.district),
             mainBreed: breeder.breeds?.[0] || '',
             isAdoptionAvailable: availableBreederIdSet.has(String(breeder._id)),
             priceRange: undefined,

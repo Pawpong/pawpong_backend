@@ -31,16 +31,8 @@ export class BreederManagementVerificationDocumentsController {
         @UploadedFiles() files: Express.Multer.File[],
         @Body() dto: UploadDocumentsRequestDto,
     ): Promise<ApiResponseDto<UploadDocumentsResponseDto>> {
-        const result = await this.uploadBreederManagementVerificationDocumentsUseCase.execute(
-            userId,
-            files,
-            dto.types,
-            dto.level,
-        );
+        const result = await this.uploadBreederManagementVerificationDocumentsUseCase.execute(userId, files, dto.types);
 
-        return ApiResponseDto.success(
-            result,
-            `${dto.level} 레벨 브리더 인증 서류 ${result.count}개가 업로드되었습니다.`,
-        );
+        return ApiResponseDto.success(result, `브리더 인증 서류 ${result.count}개가 업로드되었습니다.`);
     }
 }

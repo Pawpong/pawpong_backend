@@ -1,30 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
- * 브리더 레벨 옵션 DTO
- */
-export class BreederLevelOptionDto {
-    @ApiProperty({
-        description: '브리더 레벨 값',
-        example: 'elite',
-        enum: ['elite', 'new'],
-    })
-    value: string;
-
-    @ApiProperty({
-        description: '브리더 레벨 레이블',
-        example: '엘리트',
-    })
-    label: string;
-
-    @ApiProperty({
-        description: '브리더 레벨 설명',
-        example: '인증된 전문 브리더',
-    })
-    description: string;
-}
-
-/**
  * 정렬 옵션 DTO
  */
 export class SortOptionDto {
@@ -123,12 +99,6 @@ export class AdoptionStatusOptionDto {
  * 전체 필터 옵션 응답 DTO
  */
 export class AllFilterOptionsResponseDto {
-    @ApiProperty({
-        description: '브리더 레벨 옵션',
-        type: [BreederLevelOptionDto],
-    })
-    breederLevels: BreederLevelOptionDto[];
-
     @ApiProperty({
         description: '정렬 옵션',
         type: [SortOptionDto],

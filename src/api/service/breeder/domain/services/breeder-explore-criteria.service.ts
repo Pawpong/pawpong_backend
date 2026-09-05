@@ -22,7 +22,6 @@ export class BreederExploreCriteriaService {
             province,
             city,
             isAdoptionAvailable,
-            breederLevel,
             sortBy,
             page = 1,
             limit = 20,
@@ -67,10 +66,6 @@ export class BreederExploreCriteriaService {
             filter['profile.location.city'] = { $in: province };
         } else if (city && city.length > 0) {
             filter['profile.location.district'] = { $in: city };
-        }
-
-        if (breederLevel && breederLevel.length > 0) {
-            filter['verification.level'] = { $in: breederLevel };
         }
 
         let sortOrder: Record<string, 1 | -1>;

@@ -168,12 +168,16 @@ export const winstonConfig: WinstonModuleOptions = {
         new winston.transports.File({
             filename: 'logs/exceptions.log',
             format: fileFormat,
+            maxsize: 5242880,
+            maxFiles: 3,
         }),
     ],
     rejectionHandlers: [
         new winston.transports.File({
             filename: 'logs/rejections.log',
             format: fileFormat,
+            maxsize: 5242880,
+            maxFiles: 3,
         }),
     ],
 };

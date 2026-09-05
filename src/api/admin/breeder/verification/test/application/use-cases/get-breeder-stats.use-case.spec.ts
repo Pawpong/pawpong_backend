@@ -12,10 +12,9 @@ function makeReader(
         stats: any;
     }> = {},
 ): BreederVerificationAdminReaderPort {
-    const { admin = adminWithPermission, stats = { totalApproved: 100, eliteCount: 20 } } = overrides;
+    const { admin = adminWithPermission, stats = { totalApproved: 100 } } = overrides;
     return {
         findAdminById: jest.fn().mockResolvedValue(admin),
-        getLevelChangeRequests: jest.fn(),
         getPendingBreeders: jest.fn(),
         getBreeders: jest.fn(),
         findBreederById: jest.fn(),
@@ -34,8 +33,6 @@ describe('브리더 통계 조회 유스케이스', () => {
         const result = await useCase.execute('admin-1');
 
         expect(result.totalApproved).toBe(100);
-        expect(result.eliteCount).toBe(20);
-        expect(result.newCount).toBe(80);
     });
 
     it('브리더 관리 권한이 없으면 DomainAuthorizationError를 던진다', async () => {

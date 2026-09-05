@@ -1,5 +1,6 @@
 import { MongooseModule } from '@nestjs/mongoose';
 
+import { DatabaseModule } from '../../../common/database/database.module';
 import { StorageModule } from '../../../common/storage/storage.module';
 import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
@@ -48,7 +49,7 @@ const CONTEST_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Breeder.name, schema: BreederSchema },
 ]);
 
-export const CONTEST_MODULE_IMPORTS = [CONTEST_SCHEMA_IMPORTS, StorageModule];
+export const CONTEST_MODULE_IMPORTS = [CONTEST_SCHEMA_IMPORTS, DatabaseModule, StorageModule];
 
 export const CONTEST_MODULE_CONTROLLERS = [
     ContestCurrentController,

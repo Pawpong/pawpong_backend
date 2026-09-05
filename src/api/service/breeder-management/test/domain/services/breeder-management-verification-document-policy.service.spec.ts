@@ -18,140 +18,78 @@ describe('BreederManagementVerificationDocumentPolicyService', () => {
     const service = new BreederManagementVerificationDocumentPolicyService();
 
     describe('validateUploadRequest', () => {
-        it('files 빈 배열은 예외', () => {
-            expect(() => service.validateUploadRequest([], [], 'new')).toThrow(DomainValidationError);
+        it('빈 파일 목록과 파일·타입 수 불일치를 거절한다', () => {
+            expect(() => service.validateUploadRequest([], [])).toThrow(DomainValidationError);
+            expect(() => service.validateUploadRequest([makeFile('a.pdf')], [])).toThrow(DomainValidationError);
         });
-        it('files 수와 types 수 불일치는 예외', () => {
-            expect(() => service.validateUploadRequest([makeFile('a.pdf')], [], 'new')).toThrow(DomainValidationError);
+
+        it('지원하는 서류는 등급 구분 없이 업로드할 수 있다', () => {
+            expect(() =>
+                service.validateUploadRequest(
+                    [makeFile('id.pdf'), makeFile('contract.pdf'), makeFile('certificate.pdf')],
+                    ['idCard', 'adoptionContractSample', 'breederCertification'],
+                ),
+            ).not.toThrow();
         });
-        it('개수가 일치하면 통과', () => {
-            expect(() => service.validateUploadRequest([makeFile('a.pdf')], ['idCard'], 'new')).not.toThrow();
-        });
-        it('20MB를 초과하거나 허용되지 않은 형식이면 예외', () => {
+
+        it('20MB 초과 또는 허용되지 않은 형식을 거절한다', () => {
             expect(() =>
                 service.validateUploadRequest(
                     [makeFile('large.pdf', 'application/pdf', 20 * 1024 * 1024 + 1)],
                     ['idCard'],
-                    'new',
                 ),
             ).toThrow(/20MB/);
             expect(() =>
-                service.validateUploadRequest([makeFile('script.exe', 'application/octet-stream')], ['idCard'], 'new'),
+                service.validateUploadRequest([makeFile('script.exe', 'application/octet-stream')], ['idCard']),
             ).toThrow(/지원되지 않는 형식/);
         });
-        it('정규화 후 중복되는 서류 타입이면 예외', () => {
+
+        it('정규화 후 중복되는 서류 타입을 거절한다', () => {
             expect(() =>
-                service.validateUploadRequest([makeFile('a.pdf'), makeFile('b.pdf')], ['idCard', 'id_card'], 'new'),
+                service.validateUploadRequest([makeFile('a.pdf'), makeFile('b.pdf')], ['idCard', 'id_card']),
             ).toThrow(/중복된 서류 타입/);
-        });
-        it('New 등급에서 Elite 전용 서류를 업로드하면 예외', () => {
-            expect(() =>
-                service.validateUploadRequest([makeFile('contract.pdf')], ['adoptionContractSample'], 'new'),
-            ).toThrow(/new 등급에서 제출할 수 없는/);
         });
     });
 
-    describe('buildSubmissionPlan - new 레벨', () => {
-        it('필수 서류(idCard, businessLicense)가 있으면 통과', () => {
+    describe('buildSubmissionPlan', () => {
+        it('신분증과 동물생산업 등록증이 있으면 신규 심사를 구성한다', () => {
             const submittedDocuments = [
                 { type: 'idCard', fileName: 'verification/id.pdf', originalFileName: 'id.pdf' },
-                { type: 'businessLicense', fileName: 'verification/bl.pdf' },
+                { type: 'businessLicense', fileName: 'verification/license.pdf' },
             ];
+
             const plan = service.buildSubmissionPlan({
-                level: 'new',
                 submittedDocuments,
                 draftDocuments: toDrafts(submittedDocuments),
-                currentVerification: undefined,
             });
+
             expect(plan.isResubmission).toBe(false);
-            expect(plan.finalDocuments).toHaveLength(2);
+            expect(plan.finalDocuments.map((document) => document.type)).toEqual([
+                'id_card',
+                'animal_production_license',
+            ]);
         });
 
-        it('필수 서류 누락 시 예외', () => {
+        it('필수 서류가 누락되면 거절한다', () => {
             expect(() =>
                 service.buildSubmissionPlan({
-                    level: 'new',
                     submittedDocuments: [{ type: 'idCard', fileName: 'verification/id.pdf' }],
                     draftDocuments: [{ type: 'idCard', fileName: 'verification/id.pdf' }],
                 }),
-            ).toThrow(DomainValidationError);
+            ).toThrow(/필수 서류가 누락/);
         });
-    });
 
-    describe('buildSubmissionPlan - elite 레벨', () => {
-        it('브리더 인증 서류가 없으면 예외', () => {
+        it('계약서와 전문성 증빙은 선택 서류로 함께 보존한다', () => {
             const submittedDocuments = [
                 { type: 'idCard', fileName: 'verification/id.pdf' },
-                { type: 'businessLicense', fileName: 'verification/bl.pdf' },
-                { type: 'contractSample', fileName: 'verification/cs.pdf' },
+                { type: 'businessLicense', fileName: 'verification/license.pdf' },
+                { type: 'contractSample', fileName: 'verification/contract.pdf' },
+                { type: 'ticaCfaDocument', fileName: 'verification/certificate.pdf' },
             ];
-            expect(() =>
-                service.buildSubmissionPlan({
-                    level: 'elite',
-                    submittedDocuments,
-                    draftDocuments: toDrafts(submittedDocuments),
-                }),
-            ).toThrow('전문성을 증빙하는 서류');
-        });
 
-        it('breederDogCertificate가 있으면 통과', () => {
-            const submittedDocuments = [
-                { type: 'idCard', fileName: 'verification/id.pdf' },
-                { type: 'businessLicense', fileName: 'verification/bl.pdf' },
-                { type: 'contractSample', fileName: 'verification/cs.pdf' },
-                { type: 'breederDogCertificate', fileName: 'verification/cert.pdf' },
-            ];
             const plan = service.buildSubmissionPlan({
-                level: 'elite',
                 submittedDocuments,
                 draftDocuments: toDrafts(submittedDocuments),
-            });
-            expect(plan.finalDocuments).toHaveLength(4);
-        });
-    });
-
-    describe('isResubmission 판별', () => {
-        it('REJECTED 상태는 재제출로 간주', () => {
-            const submittedDocuments = [
-                { type: 'idCard', fileName: 'verification/id.pdf' },
-                { type: 'businessLicense', fileName: 'verification/bl.pdf' },
-            ];
-            const plan = service.buildSubmissionPlan({
-                level: 'new',
-                submittedDocuments,
-                draftDocuments: toDrafts(submittedDocuments),
-                currentVerification: { status: VerificationStatus.REJECTED },
-            });
-            expect(plan.isResubmission).toBe(true);
-        });
-    });
-
-    describe('회원가입 서류와 관리 서류 규격 통합', () => {
-        it('pending 상태의 snake_case 회원가입 서류를 Elite 신청에 재사용한다', () => {
-            const submittedDocuments = [
-                {
-                    type: 'adoptionContractSample',
-                    fileName: 'verification/breeder-id/contract.pdf',
-                },
-                {
-                    type: 'ticaCfaDocument',
-                    fileName: 'verification/breeder-id/tica.pdf',
-                },
-            ];
-            const plan = service.buildSubmissionPlan({
-                level: 'elite',
-                submittedDocuments,
-                draftDocuments: toDrafts(submittedDocuments),
-                currentVerification: {
-                    status: VerificationStatus.APPROVED,
-                    documents: [
-                        { type: 'id_card', fileName: 'documents/verification/temp/new/id.pdf' },
-                        {
-                            type: 'animal_production_license',
-                            fileName: 'breeder-documents/license.pdf',
-                        },
-                    ],
-                },
             });
 
             expect(plan.finalDocuments.map((document) => document.type)).toEqual([
@@ -162,41 +100,71 @@ describe('BreederManagementVerificationDocumentPolicyService', () => {
             ]);
         });
 
-        it('지원하지 않는 서류 타입은 저장 전에 거절한다', () => {
+        it('REJECTED 상태는 재제출로 판정한다', () => {
+            const submittedDocuments = [
+                { type: 'idCard', fileName: 'verification/id.pdf' },
+                { type: 'businessLicense', fileName: 'verification/license.pdf' },
+            ];
+
+            const plan = service.buildSubmissionPlan({
+                submittedDocuments,
+                draftDocuments: toDrafts(submittedDocuments),
+                currentVerification: { status: VerificationStatus.REJECTED },
+            });
+
+            expect(plan.isResubmission).toBe(true);
+        });
+
+        it('회원가입에서 저장한 레거시 경로와 snake_case 타입을 재사용한다', () => {
+            const plan = service.buildSubmissionPlan({
+                submittedDocuments: [],
+                draftDocuments: [],
+                currentVerification: {
+                    status: VerificationStatus.REJECTED,
+                    documents: [
+                        { type: 'id_card', fileName: 'documents/verification/temp/id.pdf' },
+                        { type: 'animal_production_license', fileName: 'breeder-documents/license.pdf' },
+                    ],
+                },
+            });
+
+            expect(plan.finalDocuments).toHaveLength(2);
+        });
+
+        it('지원하지 않는 서류 타입을 저장 전에 거절한다', () => {
             expect(() =>
                 service.buildSubmissionPlan({
-                    level: 'new',
                     submittedDocuments: [{ type: 'unknownDocument', fileName: 'verification/unknown.pdf' }],
                     draftDocuments: [],
                 }),
             ).toThrow('지원하지 않는 서류 타입');
         });
-    });
 
-    describe('업로드 소유권 검증', () => {
-        it('재제출 시 기존 문서를 유지', () => {
-            const existing = [
-                { type: 'idCard', fileName: 'verification/old-id.pdf', uploadedAt: new Date() },
-                { type: 'businessLicense', fileName: 'verification/bl.pdf', uploadedAt: new Date() },
-            ];
+        it('재제출 시 기존 서류를 유지하고 새 서류를 병합한다', () => {
             const plan = service.buildSubmissionPlan({
-                level: 'new',
                 submittedDocuments: [
                     { type: 'idCard', fileName: 'keep-existing' },
-                    { type: 'businessLicense', fileName: 'verification/bl-new.pdf' },
+                    { type: 'businessLicense', fileName: 'verification/license-new.pdf' },
                 ],
-                draftDocuments: [{ type: 'businessLicense', fileName: 'verification/bl-new.pdf' }],
-                currentVerification: { status: VerificationStatus.REJECTED, documents: existing },
+                draftDocuments: [{ type: 'businessLicense', fileName: 'verification/license-new.pdf' }],
+                currentVerification: {
+                    status: VerificationStatus.REJECTED,
+                    documents: [
+                        { type: 'idCard', fileName: 'verification/id-old.pdf', uploadedAt: new Date() },
+                        { type: 'businessLicense', fileName: 'verification/license-old.pdf', uploadedAt: new Date() },
+                    ],
+                },
             });
-            // idCard는 기존 유지, businessLicense는 신규
-            expect(plan.finalDocuments.map((d) => d.fileName)).toContain('verification/old-id.pdf');
-            expect(plan.finalDocuments.map((d) => d.fileName)).toContain('verification/bl-new.pdf');
+
+            expect(plan.finalDocuments.map((document) => document.fileName)).toEqual([
+                'verification/id-old.pdf',
+                'verification/license-new.pdf',
+            ]);
         });
 
-        it('현재 사용자의 업로드 초안에 없는 신규 경로는 거절', () => {
+        it('현재 사용자의 업로드 초안에 없는 신규 경로를 거절한다', () => {
             expect(() =>
                 service.buildSubmissionPlan({
-                    level: 'new',
                     submittedDocuments: [
                         { type: 'idCard', fileName: 'verification/forged-id.pdf' },
                         { type: 'businessLicense', fileName: 'verification/forged-license.pdf' },

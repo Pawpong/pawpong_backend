@@ -31,6 +31,7 @@ export class GetMessagesUseCase {
 
             const messages = await this.chatMessageManager.findMessagesByRoomId(query.roomId, limit, query.before);
             await this.chatMessageManager.markMessagesAsRead(query.roomId, userId);
+            await this.chatRoomManager.updateReadMarker(query.roomId, userId, messages.at(0)?.id);
 
             this.logger.logSuccess('getMessages', '채팅 메시지 조회 완료', {
                 roomId: query.roomId,

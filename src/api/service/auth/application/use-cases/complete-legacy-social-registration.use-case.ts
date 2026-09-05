@@ -27,7 +27,6 @@ type LegacySocialAdditionalInfo = {
     introduction?: string;
     district?: string;
     breeds?: string[];
-    level?: string;
     marketingAgreed?: boolean;
 };
 
@@ -113,7 +112,6 @@ export class CompleteLegacySocialRegistrationUseCase {
             verification: {
                 status: VerificationStatus.PENDING,
                 plan: additionalInfo.plan === 'pro' ? BreederPlan.PRO : BreederPlan.BASIC,
-                level: additionalInfo.level || 'new',
                 documents: [],
             },
             profile: {

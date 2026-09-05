@@ -4,7 +4,6 @@ export type AdopterReviewListRecord = {
     breederId: string | null;
     breederNickname: string | null;
     breederProfileImageFileName: string | null;
-    breederLevel: string | null;
     breedingPetType: string | null;
     content: string;
     reviewType: string;
@@ -17,7 +16,6 @@ export type AdopterReviewDetailRecord = {
     breederId: string | null;
     breederNickname: string | null;
     breederProfileImageFileName: string | null;
-    breederLevel: string | null;
     breedingPetType: string | null;
     content: string;
     reviewType: string;

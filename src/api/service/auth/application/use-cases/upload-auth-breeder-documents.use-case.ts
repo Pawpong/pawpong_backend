@@ -29,17 +29,13 @@ export class UploadAuthBreederDocumentsUseCase {
     async execute(
         files: Express.Multer.File[],
         types: string[],
-        level: 'new' | 'elite',
         tempId?: string,
     ): Promise<AuthBreederDocumentUploadResult> {
-        this.authBreederDocumentFilePolicyService.validate(files, types, level);
+        this.authBreederDocumentFilePolicyService.validate(files, types);
 
         const uploadedDocuments = await Promise.all(
             files.map(async (file, index) => {
-                const uploaded = await this.authUploadFileStorePort.upload(
-                    file,
-                    `documents/verification/temp/${level}`,
-                );
+                const uploaded = await this.authUploadFileStorePort.upload(file, 'documents/verification/temp');
                 return {
                     type: types[index],
                     url: uploaded.cdnUrl,

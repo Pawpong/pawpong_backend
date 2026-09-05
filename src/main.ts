@@ -18,6 +18,7 @@ import { NotifyCriticalErrorUseCase } from './common/discord/application/use-cas
 
 import { AppModule } from './app.module';
 import { buildKafkaBroadcastConsumerGroupId } from './common/kafka/kafka-consumer-group';
+import { KafkaStartupRetry } from './common/kafka/kafka-startup-retry';
 
 declare const module: any;
 
@@ -89,6 +90,7 @@ async function bootstrap(): Promise<void> {
 
             // 개발 환경 - 어드민 개발 프론트엔드
             'http://localhost:5173',
+            'http://localhost:5175',
 
             // Pawpong 배포 프론트엔드
             'https://dev.pawpong.kr',
@@ -232,6 +234,7 @@ async function bootstrap(): Promise<void> {
     const kafkaBroker = configService.get<string>('KAFKA_BROKER', '');
     const kafkaEnabled = configService.get<string>('KAFKA_ENABLED', 'false').toLowerCase() === 'true';
     const shouldConnectKafka = kafkaEnabled && kafkaBroker.length > 0;
+    let kafkaConsumerStartup: KafkaStartupRetry | undefined;
 
     if (shouldConnectKafka) {
         const kafkaConsumerGroupId = buildKafkaBroadcastConsumerGroupId(
@@ -260,6 +263,39 @@ async function bootstrap(): Promise<void> {
                 producer: {
                     createPartitioner: Partitioners.DefaultPartitioner,
                 },
+            },
+        });
+
+        const configuredRetryDelay = Number(configService.get<string>('KAFKA_RECONNECT_INTERVAL_MS', '10000'));
+        const retryDelayMs = Number.isFinite(configuredRetryDelay) ? Math.max(1000, configuredRetryDelay) : 10000;
+        let outageNotified = false;
+
+        kafkaConsumerStartup = new KafkaStartupRetry({
+            start: async () => {
+                await app.startAllMicroservices();
+            },
+            retryDelayMs,
+            onStarted: () => {
+                logger.log('[bootstrap] Kafka chat consumer started');
+                outageNotified = false;
+            },
+            onFailure: (error, delayMs) => {
+                logger.warn(`[bootstrap] Kafka consumer 시작 실패 - HTTP는 계속 제공하며 ${delayMs}ms 후 재시도합니다`);
+
+                if (outageNotified) return;
+                outageNotified = true;
+                void notifyCriticalErrorUseCase
+                    .execute({
+                        severity: 'critical',
+                        context: 'Bootstrap',
+                        message: `Kafka chat consumer 시작 실패 (브로커: ${kafkaBroker}): ${error instanceof Error ? error.message : String(error)}`,
+                        stack: error instanceof Error ? error.stack : undefined,
+                    })
+                    .catch((notifyErr: unknown) => {
+                        logger.warn(
+                            `[bootstrap] Discord 긴급 알림 전송 실패: ${notifyErr instanceof Error ? notifyErr.message : String(notifyErr)}`,
+                        );
+                    });
             },
         });
     } else {
@@ -292,29 +328,8 @@ async function bootstrap(): Promise<void> {
 
     let isShuttingDown = false;
 
-    // Kafka Consumer 시작 (연결 설정이 있었을 때만)
-    if (shouldConnectKafka) {
-        try {
-            await app.startAllMicroservices();
-            logger.log('[bootstrap] Kafka chat consumer started');
-        } catch (error) {
-            logger.warn(
-                '[bootstrap] Kafka consumer failed to start - messages will be skipped until Kafka is available',
-            );
-            void notifyCriticalErrorUseCase
-                .execute({
-                    severity: 'critical',
-                    context: 'Bootstrap',
-                    message: `Kafka chat consumer 시작 실패 (브로커: ${kafkaBroker}): ${error instanceof Error ? error.message : String(error)}`,
-                    stack: error instanceof Error ? error.stack : undefined,
-                })
-                .catch((notifyErr: unknown) => {
-                    logger.warn(
-                        `[bootstrap] Discord 긴급 알림 전송 실패: ${notifyErr instanceof Error ? notifyErr.message : String(notifyErr)}`,
-                    );
-                });
-        }
-    }
+    // 최초 실패 시에도 HTTP 서버는 뜨며, 브로커가 준비되면 background에서 다시 합류한다.
+    await kafkaConsumerStartup?.start();
 
     // 서버 시작
     const server = await app.listen(port);
@@ -323,6 +338,7 @@ async function bootstrap(): Promise<void> {
     logger.log(`[bootstrap] Pawpong Backend Server running on: http://localhost:${port}`);
     logger.log(`[bootstrap] API Documentation available at: http://localhost:${port}/docs`);
     logger.log(`[bootstrap] Health check endpoint: http://localhost:${port}/api/health`);
+    logger.log(`[bootstrap] Readiness endpoint: http://localhost:${port}/api/health/ready`);
     logger.log(`[bootstrap] Static files served from: http://localhost:${port}/uploads/`);
     logger.log(`[bootstrap] Environment: ${process.env.NODE_ENV || 'development'}`);
 
@@ -336,6 +352,7 @@ async function bootstrap(): Promise<void> {
     process.on('SIGTERM', async () => {
         if (isShuttingDown) return;
         isShuttingDown = true;
+        kafkaConsumerStartup?.stop();
 
         logger.warn('[bootstrap] Received SIGTERM signal. Starting graceful shutdown...');
 
@@ -355,6 +372,7 @@ async function bootstrap(): Promise<void> {
     process.on('SIGINT', async () => {
         if (isShuttingDown) return;
         isShuttingDown = true;
+        kafkaConsumerStartup?.stop();
 
         logger.warn('[bootstrap] Received SIGINT signal. Starting graceful shutdown...');
 
@@ -374,7 +392,10 @@ async function bootstrap(): Promise<void> {
     if (module.hot) {
         logger.log('[bootstrap] Hot Module Replacement enabled');
         module.hot.accept();
-        module.hot.dispose(() => app.close());
+        module.hot.dispose(() => {
+            kafkaConsumerStartup?.stop();
+            return app.close();
+        });
     }
 
     // 개발 환경 추가 로그

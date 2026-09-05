@@ -50,11 +50,28 @@ jobs:
                   cache-to: type=gha,mode=max
 
             - name: Setup SSH for Production Server
+              # 백엔드와 동일 커밋의 Agent 이미지를 준비한다.
+              if: success()
               run: |
                   mkdir -p ~/.ssh
                   echo "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/prod_key
                   chmod 600 ~/.ssh/prod_key
                   ssh-keyscan -H "${{ secrets.PROD_SERVER_HOST }}" >> ~/.ssh/known_hosts || echo "SSH keyscan failed, will use StrictHostKeyChecking=no"
+
+            - name: Build and push AI Agent image
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: ai-agent/Dockerfile
+                  push: true
+                  tags: ${{ env.GAR_LOCATION }}/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}/pawpong-ai-agent:${{ github.sha }}
+
+            - name: Configure AI Agent credential
+              env:
+                  OPENAI_API_KEY: ${{ secrets.PAWPONG_OPENAI_API_KEY }}
+              run: |
+                  test -n "$OPENAI_API_KEY"
+                  printf '%s' "$OPENAI_API_KEY" | ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no colding@${{ secrets.PROD_SERVER_HOST }} "python3 -c 'import sys,pathlib,os; p=pathlib.Path(\"/home/colding/pawpong_backend/.env.production\"); key=sys.stdin.read().strip(); assert key and \"\\n\" not in key; lines=[line for line in p.read_text().splitlines() if not line.startswith(\"OPENAI_API_KEY=\")]; p.write_text(\"\\n\".join(lines)+\"\\nOPENAI_API_KEY=\"+key+\"\\n\"); os.chmod(p,0o600)'"
 
             - name: Deploy to Production Server
               env:
@@ -64,6 +81,9 @@ jobs:
                   COMMIT_SHA: ${{ github.sha }}
               run: |
                   echo "🚀 Starting deployment to production server..."
+                  # Keep potentially large Docker pull logs out of the process environment.
+                  # Print the log even when SSH/deployment fails.
+                  trap 'cat deploy.log' EXIT
                   ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no colding@${{ secrets.PROD_SERVER_HOST }} << ENDSSH > deploy.log 2>&1
                   set -e
 
@@ -74,7 +94,8 @@ jobs:
                   cd /home/colding/pawpong_backend || { echo "❌ Directory not found"; exit 1; }
 
                   echo "📥 Pulling latest code..."
-                  git pull origin main
+                  git pull --ff-only origin main
+                  test "\$(git rev-parse HEAD)" = "${COMMIT_SHA}"
 
                   echo "🐳 Pulling Docker image from Artifact Registry..."
                   IMAGE_TAG="${GAR_LOCATION}/${GCP_PROJECT_ID}/${SERVICE_NAME}/pawpong-backend:${COMMIT_SHA}"
@@ -82,15 +103,15 @@ jobs:
                   docker tag "\$IMAGE_TAG" pawpong-backend:latest
                   docker tag "\$IMAGE_TAG" pawpong-backend:${COMMIT_SHA}
 
+                  AGENT_IMAGE="${GAR_LOCATION}/${GCP_PROJECT_ID}/${SERVICE_NAME}/pawpong-ai-agent:${COMMIT_SHA}"
+                  docker pull "\$AGENT_IMAGE"
+                  docker tag "\$AGENT_IMAGE" pawpong-ai-agent:latest
+
                   echo "Running Blue-Green deployment..."
                   bash deploy.sh ${COMMIT_SHA}
 
                   echo "✅ Deployment completed successfully!"
                   ENDSSH
-                  cat deploy.log
-                  echo "DEPLOY_LOG<<EOF" >> $GITHUB_ENV
-                  cat deploy.log >> $GITHUB_ENV
-                  echo "EOF" >> $GITHUB_ENV
 
             - name: Send Discord Notification (Success)
               if: success()
@@ -100,8 +121,8 @@ jobs:
                   COMMIT_SHA=$(git rev-parse --short HEAD)
 
                   # 배포 로그에서 활성 컨테이너 추출
-                  ACTIVE_CONTAINER=$(echo "$DEPLOY_LOG" | grep -oP 'Active Container: \K(blue|green)' || echo "unknown")
-                  ACTIVE_PORT=$(echo "$DEPLOY_LOG" | grep -oP 'Active Container: (?:blue|green) \(port \K[0-9]+' || echo "unknown")
+                  ACTIVE_CONTAINER=$(grep -oP 'Active Container: \K(blue|green)' deploy.log | tail -n 1 || echo "unknown")
+                  ACTIVE_PORT=$(grep -oP 'Active Container: (?:blue|green) \(port \K[0-9]+' deploy.log | tail -n 1 || echo "unknown")
 
                   # JSON 특수문자 이스케이프
                   COMMIT_MSG_ESCAPED=$(echo "$COMMIT_MSG" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/\\t/g')
@@ -134,8 +155,8 @@ jobs:
                   COMMIT_SHA=$(git rev-parse --short HEAD)
 
                   # 배포 로그에서 실패한 컨테이너 추출
-                  FAILED_CONTAINER=$(echo "$DEPLOY_LOG" | grep -oP '(blue|green) deployment failed' | grep -oP '(blue|green)' || echo "unknown")
-                  ROLLBACK_CONTAINER=$(echo "$DEPLOY_LOG" | grep -oP 'Rolling back to \K(blue|green)' || echo "unknown")
+                  FAILED_CONTAINER=$(grep -oP '(blue|green) deployment failed' deploy.log | grep -oP '(blue|green)' | tail -n 1 || echo "unknown")
+                  ROLLBACK_CONTAINER=$(grep -oP 'Rolling back to \K(blue|green)' deploy.log | tail -n 1 || echo "unknown")
 
                   # 실패한 컨테이너 정보
                   if [ "$FAILED_CONTAINER" != "unknown" ]; then

@@ -70,25 +70,25 @@ describe('브리더 인증 문서 업로드 유스케이스', () => {
             { originalname: '등록증.jpg', size: 2048, mimetype: 'image/jpeg' } as Express.Multer.File,
         ];
 
-        const result = await useCase.execute(files, ['idCard', 'animalProductionLicense'], 'new', 'temp-docs');
+        const result = await useCase.execute(files, ['idCard', 'animalProductionLicense'], 'temp-docs');
 
         expect(result.count).toBe(2);
         expect(result.response.uploadedDocuments).toHaveLength(2);
         expect(result.response.uploadedDocuments[0]).toMatchObject({
             type: 'idCard',
-            url: 'https://cdn.test/documents/verification/temp/new/신분증.jpg',
-            filename: 'documents/verification/temp/new/신분증.jpg',
+            url: 'https://cdn.test/documents/verification/temp/신분증.jpg',
+            filename: 'documents/verification/temp/신분증.jpg',
             originalFileName: '신분증.jpg',
             size: 1024,
         });
         expect(tempUploadPort.get('temp-docs')?.documents).toEqual([
             {
-                fileName: 'documents/verification/temp/new/신분증.jpg',
+                fileName: 'documents/verification/temp/신분증.jpg',
                 originalFileName: '신분증.jpg',
                 type: 'idCard',
             },
             {
-                fileName: 'documents/verification/temp/new/등록증.jpg',
+                fileName: 'documents/verification/temp/등록증.jpg',
                 originalFileName: '등록증.jpg',
                 type: 'animalProductionLicense',
             },
@@ -100,7 +100,6 @@ describe('브리더 인증 문서 업로드 유스케이스', () => {
             useCase.execute(
                 [{ originalname: '신분증.jpg', size: 1024, mimetype: 'image/jpeg' } as Express.Multer.File],
                 ['idCard', 'animalProductionLicense'],
-                'new',
             ),
         ).rejects.toThrow('파일 개수(1)와 서류 타입 개수(2)가 일치하지 않습니다.');
     });

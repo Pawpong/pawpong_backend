@@ -13,10 +13,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# 환경 변수 로드
-if [ -f .env.production ]; then
-    export $(cat .env.production | grep -v '^#' | xargs)
-fi
+# 환경 변수는 Docker Compose의 env_file로 전달한다. 셸에서 비밀값을 재해석하지 않는다.
 
 # Discord 알림 함수 (비활성화)
 send_discord_notification() {
@@ -67,8 +64,29 @@ fi
 
 echo -e "${BLUE}Deploying to ${NEW_CONTAINER} container...${NC}"
 
+# 기존 Kafka는 재생성하지 않는다. 동일 커밋의 Agent가 먼저 준비되어야 한다.
+docker compose --profile kafka up -d --no-deps --no-build ai-agent
+AGENT_READY=false
+for i in {1..30}; do
+    if docker compose --profile kafka exec -T ai-agent python -c 'import grpc; from app import ai_agent_pb2 as p, ai_agent_pb2_grpc as g; r=g.AiAgentServiceStub(grpc.insecure_channel("localhost:50051")).HealthCheck(p.HealthCheckRequest(),timeout=3); assert r.openai_configured and r.kafka_connected' >/dev/null 2>&1; then
+        AGENT_READY=true
+        break
+    fi
+    sleep 2
+done
+if [ "$AGENT_READY" != true ]; then
+    echo 'AI Agent readiness failed; keeping the existing backend active.'
+    exit 1
+fi
+
 # 새 컨테이너 배포
-docker compose up -d --no-deps --build ${NEW_CONTAINER}
+if [ "${RUN_CHAT_PARTICIPANT_MIGRATION:-false}" = "true" ]; then
+    docker compose run --rm --no-deps -T ${NEW_CONTAINER} node dist/scripts/migrate-chat-participants.js --dry-run
+    docker compose run --rm --no-deps -T ${NEW_CONTAINER} node dist/scripts/migrate-chat-participants.js
+else
+    echo "Skipping data migration (explicit RUN_CHAT_PARTICIPANT_MIGRATION=true required)."
+fi
+docker compose up -d --no-deps --no-build ${NEW_CONTAINER}
 
 echo -e "${YELLOW}Waiting for ${NEW_CONTAINER} to start (40 seconds)...${NC}"
 sleep 40
@@ -78,7 +96,7 @@ echo -e "${BLUE}Health checking ${NEW_CONTAINER} deployment...${NC}"
 HEALTHY=false
 
 for i in {1..30}; do
-    if curl -sf http://localhost:${NEW_PORT}/api/health > /dev/null 2>&1; then
+    if curl --max-time 5 -sf http://localhost:${NEW_PORT}/api/health/ready > /dev/null 2>&1; then
         echo -e "${GREEN}${NEW_CONTAINER} deployment healthy!${NC}"
         HEALTHY=true
         break
@@ -94,9 +112,19 @@ if [ "$HEALTHY" = true ]; then
     if [ -f /etc/nginx/sites-available/pawpong ]; then
         echo -e "${BLUE}Updating Nginx configuration...${NC}"
         # Nginx에서 upstream 포트를 새 포트로 변경
-        sudo sed -i "s/localhost:[0-9]\{4\}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
-        sudo nginx -t && sudo systemctl reload nginx
+        cp /etc/nginx/sites-available/pawpong "/home/colding/pawpong_backend/.nginx-before-${IMAGE_TAG}"
+        sudo sed -i "/upstream pawpong_backend {/,/}/ s/localhost:${CURRENT_PORT}/localhost:${NEW_PORT}/" /etc/nginx/sites-available/pawpong
+        if ! sudo nginx -t || ! sudo systemctl reload nginx; then
+            sudo sed -i "/upstream pawpong_backend {/,/}/ s/localhost:${NEW_PORT}/localhost:${CURRENT_PORT}/" /etc/nginx/sites-available/pawpong
+            sudo nginx -t && sudo systemctl reload nginx
+            docker compose stop "${NEW_CONTAINER}"
+            exit 1
+        fi
         echo -e "${GREEN}Nginx reloaded with new upstream${NC}"
+    else
+        echo 'Missing Nginx configuration; refusing to stop the active backend.'
+        docker compose stop "${NEW_CONTAINER}"
+        exit 1
     fi
 
     sleep 5
@@ -109,19 +137,8 @@ if [ "$HEALTHY" = true ]; then
     echo -e "${GREEN}Active Container: ${NEW_CONTAINER} (port ${NEW_PORT})${NC}"
     echo -e "${GREEN}========================================${NC}"
 
-    # Docker 정리: 최근 10개 이미지만 유지, 나머지 삭제
-    echo -e "${BLUE}Cleaning up old Docker images (keeping latest 10)...${NC}"
-    IMAGES_TO_DELETE=$(docker images pawpong-backend --format "{{.ID}} {{.CreatedAt}}" | sort -k2 -r | tail -n +11 | awk '{print $1}')
-    if [ -n "$IMAGES_TO_DELETE" ]; then
-        echo "$IMAGES_TO_DELETE" | xargs docker rmi -f 2>/dev/null || true
-        echo -e "${GREEN}Old images cleaned up${NC}"
-    else
-        echo -e "${YELLOW}No old images to clean up${NC}"
-    fi
-    # 미사용 이미지 및 빌드 캐시 정리
-    docker image prune -f 2>/dev/null || true
-    docker builder prune -f --keep-storage=2GB 2>/dev/null || true
-    echo -e "${GREEN}Docker cleanup completed${NC}"
+    # 직전 컨테이너와 이미지는 검증 후 롤백할 수 있도록 보관한다.
+    echo -e "${GREEN}Previous container and image retained for rollback${NC}"
 
     # 성공 알림
     send_discord_notification "배포 성공\nTag: \`$IMAGE_TAG\`\nActive: \`${NEW_CONTAINER}\` (port ${NEW_PORT})" 3066993
@@ -159,4 +176,3 @@ if grep -qE '^KAFKA_ENABLED=true' .env.production 2>/dev/null; then
 else
     echo -e "${BLUE}KAFKA_ENABLED != true — Kafka/AI Agent 기동을 건너뜁니다${NC}"
 fi
-

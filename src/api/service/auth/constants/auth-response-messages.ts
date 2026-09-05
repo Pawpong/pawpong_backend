@@ -21,9 +21,9 @@ export const AUTH_RESPONSE_MESSAGE_EXAMPLES = {
     profileImageUploadedAndSaved: '프로필 이미지가 업로드되고 저장되었습니다.',
     profileImageUploadedAndTempStored:
         '프로필 이미지가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.',
-    breederDocumentsUploaded: 'new 레벨 브리더 인증 서류 2개가 업로드되었습니다.',
+    breederDocumentsUploaded: '브리더 인증 서류 2개가 업로드되었습니다.',
     breederDocumentsUploadedAndTempStored:
-        'new 레벨 브리더 인증 서류 2개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.',
+        '브리더 인증 서류 2개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.',
 } as const;
 
 export function buildAuthLogoutResult(loggedOutAt: string) {
@@ -81,10 +81,10 @@ export function buildAuthPhoneVerificationCompletedResult() {
     } as const;
 }
 
-export function buildAuthBreederDocumentsUploadMessage(level: string, count: number, tempId?: string): string {
+export function buildAuthBreederDocumentsUploadMessage(count: number, tempId?: string): string {
     if (tempId) {
-        return `${level} 레벨 브리더 인증 서류 ${count}개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.`;
+        return `브리더 인증 서류 ${count}개가 업로드되고 임시 저장되었습니다. 회원가입 시 자동으로 적용됩니다.`;
     }
 
-    return `${level} 레벨 브리더 인증 서류 ${count}개가 업로드되었습니다.`;
+    return `브리더 인증 서류 ${count}개가 업로드되었습니다.`;
 }

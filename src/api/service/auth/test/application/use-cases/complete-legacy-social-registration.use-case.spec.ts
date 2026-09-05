@@ -123,7 +123,6 @@ describe('레거시 소셜 가입 완료 유스케이스', () => {
                 petType: 'dog',
                 breeds: ['포메라니안'],
                 plan: 'pro',
-                level: 'elite',
             },
         );
 
@@ -137,7 +136,6 @@ describe('레거시 소셜 가입 완료 유스케이스', () => {
                 }),
                 verification: expect.objectContaining({
                     plan: 'pro',
-                    level: 'elite',
                 }),
             }),
         );
