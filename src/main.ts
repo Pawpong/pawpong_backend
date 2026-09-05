@@ -90,6 +90,7 @@ async function bootstrap(): Promise<void> {
 
             // 개발 환경 - 어드민 개발 프론트엔드
             'http://localhost:5173',
+            'http://localhost:5175',
 
             // Pawpong 배포 프론트엔드
             'https://dev.pawpong.kr',
