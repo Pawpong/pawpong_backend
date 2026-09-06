@@ -4,7 +4,10 @@ import { FilterQuery, Model, Types } from 'mongoose';
 
 import { AdoptionApplication, AdoptionApplicationDocument } from '../../../../schema/adoption-application.schema';
 import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
-import type { AdopterApplicationCreateCommand } from '../application/ports/adopter-application-command.port';
+import type {
+    AdopterApplicationCreateCommand,
+    AdopterApplicationUpdateCommand,
+} from '../application/ports/adopter-application-command.port';
 import type { AdopterObjectIdLike } from '../types/adopter-application.type';
 
 @Injectable()
@@ -60,6 +63,10 @@ export class AdopterApplicationRepository {
             _id: applicationId,
             adopterId,
         });
+    }
+
+    updateContent(applicationId: string, command: AdopterApplicationUpdateCommand) {
+        return this.adoptionApplicationModel.findByIdAndUpdate(applicationId, command, { new: true });
     }
 
     private buildQuery(adopterId: string, breederIds?: string[]): FilterQuery<AdoptionApplicationDocument> {

@@ -120,7 +120,10 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
 
             const breederDisplayName = breeder.name || breeder.nickname || '브리더';
             // 프론트 실제 라우트는 /activity/applications/{id} — 예전에 /applications/{id}로 나가 404났었다.
-            const targetPath = `/activity/applications/${command.applicationId}`;
+            // view=sent — 수신자(adopterId)는 이 신청을 "보낸" 쪽이다(브리더가 신청자여도 마찬가지).
+            // 프론트가 role만으로 보낸/받은 상세를 구분하므로 명시하지 않으면 브리더 수신자가
+            // 자기가 받은 신청 화면으로 잘못 연결된다.
+            const targetPath = `/activity/applications/${command.applicationId}?view=sent`;
 
             await this.notificationDispatchPort.createNotification(
                 command.adopterId,

@@ -21,4 +21,15 @@ export class AdopterApplicationCreateResultMapperService {
             message: '입양 상담 신청이 성공적으로 접수되었습니다. 브리더의 응답을 기다려주세요.',
         };
     }
+
+    toUpdateResult(
+        updatedApplication: AdopterApplicationCreatedRecord,
+        breederName: string,
+        petName?: string,
+    ): AdopterApplicationCreateResult {
+        return {
+            ...this.toResult(updatedApplication, breederName, petName),
+            message: '입양 신청서가 성공적으로 수정되었습니다.',
+        };
+    }
 }

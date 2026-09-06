@@ -32,6 +32,14 @@ export type AdopterApplicationCreatedRecord = {
     appliedAt: Date;
 };
 
+export type AdopterApplicationUpdateCommand = {
+    adopterName: string;
+    adopterEmail: string;
+    adopterPhone: string;
+    standardResponses: AdopterApplicationStandardResponsesRecord;
+    customResponses: AdopterApplicationCustomResponseRecord[];
+};
+
 export const ADOPTER_APPLICATION_COMMAND_PORT = Symbol('ADOPTER_APPLICATION_COMMAND_PORT');
 
 export interface AdopterApplicationCommandPort {
@@ -40,4 +48,9 @@ export interface AdopterApplicationCommandPort {
         breederId: string,
     ): Promise<AdopterApplicationCreatedRecord | null>;
     create(command: AdopterApplicationCreateCommand): Promise<AdopterApplicationCreatedRecord>;
+    findByIdAndAdopter(applicationId: string, adopterId: string): Promise<AdopterApplicationCreatedRecord | null>;
+    updateContent(
+        applicationId: string,
+        command: AdopterApplicationUpdateCommand,
+    ): Promise<AdopterApplicationCreatedRecord>;
 }
