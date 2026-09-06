@@ -32,9 +32,10 @@ export class AdopterProfileController {
     @ApiUpdateAdopterProfileEndpoint()
     async updateProfile(
         @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
         @Body() updateData: AdopterProfileUpdateRequestDto,
     ): Promise<ApiResponseDto<AdopterProfileUpdateResponseDto>> {
-        const result = await this.updateAdopterProfileUseCase.execute(userId, updateData);
+        const result = await this.updateAdopterProfileUseCase.execute(userId, updateData, role);
         return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.profileUpdated);
     }
 }

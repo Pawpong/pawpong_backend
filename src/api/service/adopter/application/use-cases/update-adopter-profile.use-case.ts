@@ -32,11 +32,14 @@ export class UpdateAdopterProfileUseCase {
                 livingSpaceDescription?: string;
             };
         },
+        userRole?: string,
     ): Promise<AdopterProfileUpdateResult> {
         const mappedUpdateData = this.adopterProfileUpdateMapperService.toRecord(updateData);
-        const adopter = await this.adopterProfilePort.updateProfile(userId, mappedUpdateData);
+        // 조회(GetAdopterProfileUseCase)와 마찬가지로 브리더도 이 경로를 탄다.
+        // role 을 넘기지 않으면 브리더 id 를 adopters 에서 갱신하려다 404 로 떨어진다.
+        const profile = await this.adopterProfilePort.updateProfile(userId, mappedUpdateData, userRole);
 
-        if (!adopter) {
+        if (!profile) {
             throw new DomainNotFoundError('입양자 정보를 찾을 수 없습니다.');
         }
 
