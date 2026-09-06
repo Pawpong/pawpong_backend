@@ -4,19 +4,19 @@ import { AuthSocialLoginPolicyService } from '../../../domain/services/auth-soci
 describe('AuthSocialLoginPolicyService', () => {
     const policy = new AuthSocialLoginPolicyService();
 
-    it('active는 통과', () => {
-        expect(() => policy.assertLoginAllowed('active')).not.toThrow();
+    it('active는 로그인 허용', () => {
+        expect(policy.resolveLoginDecision('active')).toBe('allow');
     });
 
-    it('deleted는 예외', () => {
-        expect(() => policy.assertLoginAllowed('deleted')).toThrow(DomainAuthenticationError);
+    it('deleted는 복구 확인 단계로 보낸다', () => {
+        expect(policy.resolveLoginDecision('deleted')).toBe('reactivation_required');
     });
 
     it('suspended는 예외', () => {
-        expect(() => policy.assertLoginAllowed('suspended')).toThrow(DomainAuthenticationError);
+        expect(() => policy.resolveLoginDecision('suspended')).toThrow(DomainAuthenticationError);
     });
 
-    it('undefined는 통과', () => {
-        expect(() => policy.assertLoginAllowed(undefined)).not.toThrow();
+    it('undefined는 로그인 허용', () => {
+        expect(policy.resolveLoginDecision(undefined)).toBe('allow');
     });
 });
