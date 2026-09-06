@@ -325,10 +325,10 @@ export const BreederManagementSwaggerDocs = {
 - verification_difficult: 브리더 심사나 검증 절차가 어려웠어요
 - policy_mismatch: 수익 구조나 서비스 정책이 잘 맞지 않아요
 - uncomfortable_ui: 사용하기 불편했어요 (UI/기능 등)
-- other: 다른 이유로 탈퇴하고 싶어요 (otherReason 필수)
+- other: 다른 이유로 탈퇴하고 싶어요 (otherReason 선택)
 
 **주의사항:**
-- 탈퇴 후에는 계정 복구 불가능
+- 탈퇴 후 동일 소셜 계정으로 재로그인하면 복구 안내를 받을 수 있음
 - 진행 중인 입양 신청이 있는 경우 먼저 처리 필요`,
         responseType: BreederAccountDeleteResponseDto,
         successDescription: '브리더 계정 탈퇴 성공',

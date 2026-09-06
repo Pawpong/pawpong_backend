@@ -23,10 +23,6 @@ export class DeleteAdopterAccountUseCase {
             throw new DomainValidationError('이미 탈퇴한 계정입니다.');
         }
 
-        if (deleteData.reason === 'other' && !deleteData.otherReason) {
-            throw new DomainValidationError('기타 사유를 입력해주세요.');
-        }
-
         const deletedAt = new Date();
         const command = {
             userId,

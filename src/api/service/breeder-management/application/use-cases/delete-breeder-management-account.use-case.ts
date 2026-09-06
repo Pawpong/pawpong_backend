@@ -28,10 +28,6 @@ export class DeleteBreederManagementAccountUseCase {
             throw new DomainValidationError('이미 탈퇴된 계정입니다.');
         }
 
-        if (deleteData?.reason === 'other' && !deleteData?.otherReason) {
-            throw new DomainValidationError('기타 사유를 입력해주세요.');
-        }
-
         const pendingApplications = await this.breederManagementAccountCommandPort.countPendingApplications(userId);
         if (pendingApplications > 0) {
             this.logger.logWarning('deleteBreederAccount', `진행 중인 입양 신청 ${pendingApplications}건 존재`, {
