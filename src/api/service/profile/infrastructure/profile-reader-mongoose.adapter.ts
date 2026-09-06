@@ -100,7 +100,7 @@ export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
         return { items, totalItems };
     }
 
-    async isFavoritedBy(adopterId: string, breederId: string): Promise<boolean> {
-        return this.repository.isFavoritedBy(adopterId, breederId);
+    async isFavoritedBy(userId: string, breederId: string, userRole?: string): Promise<boolean> {
+        return this.repository.isFavoritedBy(userId, breederId, userRole);
     }
 }
