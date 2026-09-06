@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { NotificationType, RecipientType } from '../../../../../common/enum/user.enum';
+import { NOTIFICATION_TARGET_URL } from '../../../../service/notification/constants/notification-target-url';
 import { MailTemplateService } from '../../../../../common/mail/mail-template.service';
 import {
     NOTIFICATION_DISPATCH_PORT,
@@ -25,6 +26,7 @@ export class BreederVerificationAdminNotifierAdapter implements BreederVerificat
             .type(NotificationType.BREEDER_APPROVED)
             .title('🎉 포퐁 브리더 입점이 승인되었습니다!')
             .content('지금 프로필을 세팅하고 아이들 정보를 등록해보세요.')
+            .targetUrl(NOTIFICATION_TARGET_URL.myHome())
             .related('/profile', 'page');
 
         if (recipient.emailAddress) {

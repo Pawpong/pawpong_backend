@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
 
@@ -119,6 +119,50 @@ export class AdoptionApplicationRepository {
      */
     async updateStatus(id: string, status: ApplicationStatus): Promise<AdoptionApplicationDocument | null> {
         return this.adoptionApplicationModel.findByIdAndUpdate(id, { status }, { new: true }).exec();
+    }
+
+    /**
+     * 입양 확정 시각 기록
+     * status 전이(updateStatus)와 같은 시각을 받아 approvedAt 에 기록한다.
+     * @param id AdoptionApplication ID
+     * @param approvedAt 확정 시각
+     */
+    async recordApprovedAt(id: string, approvedAt: Date): Promise<void> {
+        await this.adoptionApplicationModel.updateOne({ _id: id }, { $set: { approvedAt } }).exec();
+    }
+
+    /**
+     * 같은 펫의 다른 처리 중 신청 일괄 거절
+     * 한 펫은 한 명에게만 가므로, 확정 시 나머지 대기 신청을 종결시켜 유령 신청을 남기지 않는다.
+     * @param petId 반려동물 ID
+     * @param approvedApplicationId 확정된 신청 ID (거절 대상에서 제외)
+     * @returns 거절 처리된 신청 수
+     */
+    async rejectOtherOpenApplicationsForPet(petId: string, approvedApplicationId: string): Promise<number> {
+        const result = await this.adoptionApplicationModel.updateMany(
+            {
+                petId,
+                _id: { $ne: approvedApplicationId },
+                status: { $in: [ApplicationStatus.CONSULTATION_PENDING, ApplicationStatus.CONSULTATION_COMPLETED] },
+            },
+            { $set: { status: ApplicationStatus.ADOPTION_REJECTED } },
+        );
+        return result.modifiedCount;
+    }
+
+    /**
+     * 해당 펫에 상담완료(consultation_completed) 신청이 남아 있는지 여부.
+     * 펫 예약 상태를 신청서에서 다시 계산할 때 쓰는 유일한 판단 근거다 —
+     * 상담완료가 한 건이라도 있으면 예약중, 하나도 없으면 분양중으로 되돌린다.
+     * @param petId 반려동물 ID
+     * @returns 상담완료 신청 존재 여부
+     */
+    async existsConsultationCompletedForPet(petId: string): Promise<boolean> {
+        if (!Types.ObjectId.isValid(petId)) return false;
+        const found = await this.adoptionApplicationModel
+            .exists({ petId: new Types.ObjectId(petId), status: ApplicationStatus.CONSULTATION_COMPLETED })
+            .exec();
+        return Boolean(found);
     }
 
     /**

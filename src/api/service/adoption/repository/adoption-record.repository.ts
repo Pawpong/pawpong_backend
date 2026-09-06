@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
+import { REAPPLICATION_BLOCKING_STATUSES, type ReapplicationBlockingStatus } from '../../../../common/enum/user.enum';
 import { AdoptionApplication } from '../../../../schema/adoption-application.schema';
 import type { AvailablePetDocument } from '../../../../schema/available-pet.schema';
 
@@ -16,6 +17,30 @@ export class AdoptionRecordRepository {
         @InjectModel(AdoptionApplication.name)
         private readonly applicationModel: Model<AdoptionApplication>,
     ) {}
+
+    /**
+     * 입양자가 해당 펫에 낸 신청 중 재신청을 막는 것 하나를 조회한다.
+     * 상태 목록은 REAPPLICATION_BLOCKING_STATUSES 로, v2 신청 생성의 재신청 차단과 같은 기준을 쓴다.
+     * 여러 건이면 가장 최근 신청(appliedAt desc)을 반환한다.
+     */
+    async findBlockingApplicationForPet(
+        adopterId: string,
+        petId: string,
+    ): Promise<{ _id: Types.ObjectId; status: ReapplicationBlockingStatus } | null> {
+        if (!Types.ObjectId.isValid(adopterId) || !Types.ObjectId.isValid(petId)) {
+            return null;
+        }
+        return this.applicationModel
+            .findOne({
+                adopterId: new Types.ObjectId(adopterId),
+                petId: new Types.ObjectId(petId),
+                status: { $in: [...REAPPLICATION_BLOCKING_STATUSES] },
+            })
+            .select({ _id: 1, status: 1 })
+            .sort({ appliedAt: -1 })
+            .lean<{ _id: Types.ObjectId; status: ReapplicationBlockingStatus }>()
+            .exec();
+    }
 
     /**
      * 입양 승인된(adoption_approved) 신청 목록을 펫과 join 해서 카드 데이터를 모아 반환.

@@ -20,6 +20,7 @@ describe('AdopterApplicationNotifierAdapter - 상담 신청 알림톡 발송', (
         type: jest.Mock;
         title: jest.Mock;
         content: jest.Mock;
+        targetUrl: jest.Mock;
         related: jest.Mock;
         withEmail: jest.Mock;
         withPush: jest.Mock;
@@ -34,6 +35,7 @@ describe('AdopterApplicationNotifierAdapter - 상담 신청 알림톡 발송', (
             type: jest.fn().mockReturnThis(),
             title: jest.fn().mockReturnThis(),
             content: jest.fn().mockReturnThis(),
+            targetUrl: jest.fn().mockReturnThis(),
             related: jest.fn().mockReturnThis(),
             withEmail: jest.fn().mockReturnThis(),
             withPush: jest.fn().mockReturnThis(),
@@ -64,20 +66,20 @@ describe('AdopterApplicationNotifierAdapter - 상담 신청 알림톡 발송', (
     });
 
     it('브리더 전화번호가 있으면 상담 신청 알림톡을 해당 번호로 발송한다', async () => {
-        await adapter.notifyBreederOfNewApplication(target({ phoneNumber: '01012345678' }) as any);
+        await adapter.notifyBreederOfNewApplication(target({ phoneNumber: '01012345678' }) as any, 'app-1');
 
         expect(alimtalkService.sendConsultationRequest).toHaveBeenCalledTimes(1);
         expect(alimtalkService.sendConsultationRequest).toHaveBeenCalledWith('01012345678');
     });
 
     it('브리더 전화번호가 없으면 알림톡을 발송하지 않는다', async () => {
-        await adapter.notifyBreederOfNewApplication(target({ phoneNumber: undefined }) as any);
+        await adapter.notifyBreederOfNewApplication(target({ phoneNumber: undefined }) as any, 'app-1');
 
         expect(alimtalkService.sendConsultationRequest).not.toHaveBeenCalled();
     });
 
     it('인앱 알림(notificationDispatchPort)은 항상 발송된다', async () => {
-        await adapter.notifyBreederOfNewApplication(target({ phoneNumber: '01012345678' }) as any);
+        await adapter.notifyBreederOfNewApplication(target({ phoneNumber: '01012345678' }) as any, 'app-1');
 
         expect(notificationDispatchPort.to).toHaveBeenCalledTimes(1);
         expect(builder.send).toHaveBeenCalledTimes(1);
@@ -87,7 +89,7 @@ describe('AdopterApplicationNotifierAdapter - 상담 신청 알림톡 발송', (
         alimtalkService.sendConsultationRequest.mockRejectedValue(new Error('CoolSMS 장애'));
 
         await expect(
-            adapter.notifyBreederOfNewApplication(target({ phoneNumber: '01012345678' }) as any),
+            adapter.notifyBreederOfNewApplication(target({ phoneNumber: '01012345678' }) as any, 'app-1'),
         ).resolves.toBeUndefined();
     });
 });

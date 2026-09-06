@@ -1,3 +1,4 @@
+import type { ReapplicationBlockingStatus } from '../../../../../common/enum/user.enum';
 import type { AdoptionPetStatus, AdoptionPetType } from '../ports/adoption-pet-reader.port';
 import type { PageResult } from '../../../../../common/types/page-result.type';
 
@@ -65,4 +66,11 @@ export type AdoptionPetDetailResult = AdoptionPetItemResult & {
         locationText?: string;
         bpm: number;
     };
+    /**
+     * 로그인한 입양자가 이 펫에 이미 낸 신청 id. 재신청을 막는 신청이 있을 때만 채워진다.
+     * 프론트는 이 값이 있으면 '입양 신청하기' 대신 '내 신청서 보기'를 보여준다.
+     */
+    myApplicationId?: string;
+    /** 위 신청의 상태. 거절된 신청은 재신청을 막지 않으므로 여기 오지 않는다. */
+    myApplicationStatus?: ReapplicationBlockingStatus;
 };

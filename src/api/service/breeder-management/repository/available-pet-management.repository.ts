@@ -138,6 +138,42 @@ export class AvailablePetManagementRepository {
     }
 
     /**
+     * 분양중(available) 인 펫만 예약중(reserved)으로 전이한다.
+     * 조건을 필터에 함께 넣어 원자적으로 처리한다 — 이미 분양완료된 펫을 예약중으로 되돌리면 안 되고,
+     * 상담완료 처리가 동시에 두 건 들어와도 한 번만 전이되어야 하기 때문이다.
+     * @param id AvailablePet ID
+     * @param reservedAt 예약 시각
+     * @returns 실제로 전이됐으면 true (이미 예약중이거나 분양완료면 false)
+     */
+    async reserveIfAvailable(id: string, reservedAt: Date): Promise<boolean> {
+        if (!Types.ObjectId.isValid(id)) return false;
+        const result = await this.availablePetModel
+            .updateOne(
+                { _id: new Types.ObjectId(id), status: PetStatus.AVAILABLE },
+                { $set: { status: PetStatus.RESERVED, reservedAt } },
+            )
+            .exec();
+        return result.modifiedCount > 0;
+    }
+
+    /**
+     * 예약중(reserved) 인 펫만 분양중(available)으로 되돌리고 예약 시각을 지운다.
+     * 분양완료(adopted)는 필터에서 걸러지므로 확정된 펫이 다시 노출될 일은 없다.
+     * @param id AvailablePet ID
+     * @returns 실제로 되돌렸으면 true
+     */
+    async releaseIfReserved(id: string): Promise<boolean> {
+        if (!Types.ObjectId.isValid(id)) return false;
+        const result = await this.availablePetModel
+            .updateOne(
+                { _id: new Types.ObjectId(id), status: PetStatus.RESERVED },
+                { $set: { status: PetStatus.AVAILABLE }, $unset: { reservedAt: '' } },
+            )
+            .exec();
+        return result.modifiedCount > 0;
+    }
+
+    /**
      * AvailablePet 삭제
      * @param id AvailablePet ID
      * @returns 삭제된 AvailablePet 또는 null

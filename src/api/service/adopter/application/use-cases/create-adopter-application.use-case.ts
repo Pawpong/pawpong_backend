@@ -94,7 +94,8 @@ export class CreateAdopterApplicationUseCase {
             appliedAt: new Date(),
         });
 
-        await this.adopterApplicationNotifierPort.notifyBreederOfNewApplication(breeder);
+        const applicationId = savedApplication._id.toString();
+        await this.adopterApplicationNotifierPort.notifyBreederOfNewApplication(breeder, applicationId);
 
         const breederDisplayName = breeder.name || breeder.nickname || '브리더';
         await this.adopterApplicationNotifierPort.notifyApplicantApplicationConfirmed({
@@ -103,6 +104,7 @@ export class CreateAdopterApplicationUseCase {
             applicantName: contact.name,
             applicantEmail: contact.email,
             breederName: breederDisplayName,
+            applicationId,
         });
 
         return this.adopterApplicationCreateResultMapperService.toResult(
