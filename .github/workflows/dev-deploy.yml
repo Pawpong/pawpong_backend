@@ -130,6 +130,14 @@ jobs:
                     fi
                   EOF
 
+            - name: Configure dedicated development error routing
+              env:
+                  DEV_SERVER_HOST: ${{ secrets.DEV_SERVER_HOST }}
+                  DEV_SERVER_PORT: ${{ secrets.DEV_SERVER_PORT }}
+                  DEV_SERVER_USER: ${{ secrets.DEV_SERVER_USER }}
+                  DISCORD_DEV_ERROR_WEBHOOK_URL: ${{ secrets.DISCORD_DEV_ERROR_WEBHOOK_URL }}
+              run: python3 ops/observability/configure-dev-alerts.py
+
             - name: Remote health check (external HTTPS)
               run: |
                   for i in $(seq 1 12); do
@@ -149,6 +157,13 @@ jobs:
               env:
                   APP_ENV: development
                   DEPLOY_SERVICE: backend
+                  GH_TOKEN: ${{ github.token }}
+                  DEPLOY_REPOSITORY: ${{ github.repository }}
+                  DEPLOY_BRANCH: ${{ github.ref_name }}
+                  DEPLOY_ACTOR: ${{ github.triggering_actor }}
+                  DEPLOY_METHOD: SSH + PM2
+                  DEPLOY_TARGET: 개발 서버 · Mac Mini
+                  DEPLOY_URL: https://dev-api.pawpong.kr
                   DEPLOY_COMMIT: ${{ github.sha }}
                   DEPLOY_STATUS: ${{ job.status }}
                   DEPLOY_HEALTH: ${{ job.status == 'success' && 'passed deployment readiness checks' || 'not verified; inspect workflow log' }}
