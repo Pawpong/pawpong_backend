@@ -87,3 +87,9 @@ docker-compose.infra.yml
 # gRPC 생성 스텁 (빌드 시점 생성)
 ai-agent/app/ai_agent_pb2*.py
 ai-agent/app/ai_agent_pb2*.pyi
+
+# ── 서버 접속정보 등 로컬 전용 비밀 파일 (절대 커밋 금지) ──
+.claude/servers.local.md
+.claude/*.local.*
+servers.local.md
+*.local.md

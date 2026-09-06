@@ -54,6 +54,9 @@ export class AuthSocialLoginSuccessRedirectFactoryService {
                 value: input.tokens.accessToken,
                 options: {
                     ...input.cookieOptions,
+                    // 웹은 accessToken을 읽어 로그인 상태 및 Authorization 헤더를 구성한다.
+                    // 개발 BFF와 동일한 계약이며 refreshToken은 HttpOnly를 유지한다.
+                    httpOnly: false,
                     maxAge: 24 * 60 * 60 * 1000,
                 },
             },

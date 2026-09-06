@@ -3,6 +3,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
 import { AdoptionApplication, AdoptionApplicationSchema } from '../../../schema/adoption-application.schema';
 import { AvailablePet, AvailablePetSchema } from '../../../schema/available-pet.schema';
+import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 
 import { AdoptionApplicationCreateController } from './controller/adoption-application-create.controller';
 import { ADOPTION_APPLICATION_CONTEXT_PORT } from './application/ports/adoption-application-context.port';
@@ -18,6 +19,7 @@ const ADOPTION_APPLICATION_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
     { name: AvailablePet.name, schema: AvailablePetSchema },
     { name: Adopter.name, schema: AdopterSchema },
+    { name: Breeder.name, schema: BreederSchema },
 ]);
 
 export const ADOPTION_APPLICATION_MODULE_IMPORTS = [ADOPTION_APPLICATION_SCHEMA_IMPORTS];

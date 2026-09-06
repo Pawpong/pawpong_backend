@@ -19,6 +19,7 @@ import { NotifyCriticalErrorUseCase } from './common/discord/application/use-cas
 import { AppModule } from './app.module';
 import { buildKafkaBroadcastConsumerGroupId } from './common/kafka/kafka-consumer-group';
 import { KafkaStartupRetry } from './common/kafka/kafka-startup-retry';
+import { KafkaConsumerStatus } from './common/kafka/kafka-consumer-status';
 
 declare const module: any;
 
@@ -90,6 +91,7 @@ async function bootstrap(): Promise<void> {
 
             // 개발 환경 - 어드민 개발 프론트엔드
             'http://localhost:5173',
+            'http://localhost:5175',
 
             // Pawpong 배포 프론트엔드
             'https://dev.pawpong.kr',
@@ -233,6 +235,8 @@ async function bootstrap(): Promise<void> {
     const kafkaBroker = configService.get<string>('KAFKA_BROKER', '');
     const kafkaEnabled = configService.get<string>('KAFKA_ENABLED', 'false').toLowerCase() === 'true';
     const shouldConnectKafka = kafkaEnabled && kafkaBroker.length > 0;
+    // consumer 준비 여부는 ChatGateway 가 broadcast 폴백 여부를 판단할 때도 필요하므로 전역 상태로 공유한다.
+    const kafkaConsumerStatus = app.get(KafkaConsumerStatus);
     let kafkaConsumerStartup: KafkaStartupRetry | undefined;
 
     if (shouldConnectKafka) {
@@ -276,6 +280,7 @@ async function bootstrap(): Promise<void> {
             retryDelayMs,
             onStarted: () => {
                 logger.log('[bootstrap] Kafka chat consumer started');
+                kafkaConsumerStatus.markReady();
                 outageNotified = false;
             },
             onFailure: (error, delayMs) => {
@@ -352,6 +357,7 @@ async function bootstrap(): Promise<void> {
         if (isShuttingDown) return;
         isShuttingDown = true;
         kafkaConsumerStartup?.stop();
+        kafkaConsumerStatus.markNotReady();
 
         logger.warn('[bootstrap] Received SIGTERM signal. Starting graceful shutdown...');
 
@@ -372,6 +378,7 @@ async function bootstrap(): Promise<void> {
         if (isShuttingDown) return;
         isShuttingDown = true;
         kafkaConsumerStartup?.stop();
+        kafkaConsumerStatus.markNotReady();
 
         logger.warn('[bootstrap] Received SIGINT signal. Starting graceful shutdown...');
 
@@ -393,6 +400,7 @@ async function bootstrap(): Promise<void> {
         module.hot.accept();
         module.hot.dispose(() => {
             kafkaConsumerStartup?.stop();
+            kafkaConsumerStatus.markNotReady();
             return app.close();
         });
     }
