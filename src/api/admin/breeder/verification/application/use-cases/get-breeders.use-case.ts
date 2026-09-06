@@ -26,6 +26,7 @@ export class GetBreedersUseCase {
         const pageNumber = filter.pageNumber ?? 1;
         const itemsPerPage = filter.itemsPerPage ?? 10;
         const result = await this.breederVerificationAdminReader.getBreeders({
+            accountType: filter.accountType,
             verificationStatus: filter.verificationStatus,
             cityName: filter.cityName,
             searchKeyword: filter.searchKeyword,

@@ -27,8 +27,38 @@ describe('브리더 인증 수정 유스케이스', () => {
     );
 
     beforeEach(() => {
-        jest.clearAllMocks();
+        jest.resetAllMocks();
+        writer.updateBreederVerification.mockResolvedValue(true);
     });
+
+    it('경합으로 상태 변경에 실패하면 기록과 알림을 보내지 않는다', async () => {
+        reader.findAdminById.mockResolvedValue({ permissions: { canManageBreeders: true } });
+        reader.findBreederById.mockResolvedValue({ verification: { status: 'reviewing' } });
+        writer.updateBreederVerification.mockResolvedValue(false);
+        await expect(
+            useCase.execute('admin-1', 'breeder-1', {
+                verificationStatus: VerificationStatus.APPROVED,
+            }),
+        ).rejects.toMatchObject({ statusCode: 409 });
+        expect(writer.appendAdminActivityLog).not.toHaveBeenCalled();
+        expect(notifier.sendApproval).not.toHaveBeenCalled();
+        expect(notifier.sendRejection).not.toHaveBeenCalled();
+    });
+
+    it.each(['approved', 'rejected', undefined])(
+        '완료되었거나 알 수 없는 상태 %s는 변경하지 않는다',
+        async (status) => {
+            reader.findAdminById.mockResolvedValue({ permissions: { canManageBreeders: true } });
+            reader.findBreederById.mockResolvedValue({ verification: { status } });
+            await expect(
+                useCase.execute('admin-1', 'breeder-1', {
+                    verificationStatus: VerificationStatus.APPROVED,
+                }),
+            ).rejects.toMatchObject({ statusCode: 409 });
+            expect(writer.updateBreederVerification).not.toHaveBeenCalled();
+            expect(notifier.sendApproval).not.toHaveBeenCalled();
+        },
+    );
 
     it('인증 승인 상태와 승인 알림을 함께 처리한다', async () => {
         reader.findAdminById.mockResolvedValue({

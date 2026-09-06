@@ -34,7 +34,7 @@ export class BreederVerificationAdminRepository {
         criteria: BreederVerificationAdminSearchCriteria,
     ): Promise<{ items: BreederAdminBreederDocumentRecord[]; total: number }> {
         const { verificationStatus, cityName, searchKeyword, pageNumber, itemsPerPage } = criteria;
-        const query: FilterQuery<BreederDocument> = {};
+        const query: FilterQuery<BreederDocument> = this.accountFilter(criteria.accountType);
 
         if (verificationStatus) {
             query['verification.status'] = verificationStatus;
@@ -60,7 +60,7 @@ export class BreederVerificationAdminRepository {
         criteria: BreederVerificationAdminSearchCriteria,
     ): Promise<{ items: BreederAdminBreederDocumentRecord[]; total: number }> {
         const { verificationStatus, cityName, searchKeyword, pageNumber, itemsPerPage } = criteria;
-        const query: FilterQuery<BreederDocument> = {};
+        const query: FilterQuery<BreederDocument> = this.accountFilter(criteria.accountType);
 
         if (verificationStatus) {
             query['verification.status'] = verificationStatus;
@@ -109,7 +109,7 @@ export class BreederVerificationAdminRepository {
     async updateBreederVerification(
         breederId: string,
         command: BreederVerificationAdminUpdateVerificationCommand,
-    ): Promise<void> {
+    ): Promise<boolean> {
         const $set: Record<string, unknown> = {
             'verification.status': command.verificationStatus,
             'verification.reviewedAt': command.reviewedAt,
@@ -129,7 +129,12 @@ export class BreederVerificationAdminRepository {
         if (Object.keys($unset).length > 0) {
             update.$unset = $unset;
         }
-        await this.breederModel.updateOne({ _id: breederId }, update);
+        // 조회 이후 다른 관리자가 심사를 끝냈다면 변경과 후속 발송을 차단한다.
+        const result = await this.breederModel.updateOne(
+            { _id: breederId, 'verification.status': command.expectedStatus },
+            update,
+        );
+        return result.modifiedCount === 1;
     }
 
     async appendAdminActivityLog(adminId: string, logEntry: BreederVerificationAdminActivityLogEntry): Promise<void> {
@@ -138,6 +143,15 @@ export class BreederVerificationAdminRepository {
                 activityLogs: logEntry,
             },
         });
+    }
+
+    /** 기존 데이터의 필드 미지정은 일반 계정으로 취급한다. */
+    private accountFilter(
+        accountType: BreederVerificationAdminSearchCriteria['accountType'],
+    ): FilterQuery<BreederDocument> {
+        if (accountType === 'test') return { isTestAccount: true };
+        if (accountType === 'normal') return { isTestAccount: { $ne: true } };
+        return {};
     }
 
     private async search(
