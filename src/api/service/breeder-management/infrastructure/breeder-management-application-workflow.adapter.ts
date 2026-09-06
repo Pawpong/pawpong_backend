@@ -1,20 +1,27 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 
-import { ApplicationStatus } from '../../../../common/enum/user.enum';
+import { ApplicationStatus, PetStatus } from '../../../../common/enum/user.enum';
 import { NotificationType } from '../../../../common/enum/user.enum';
 import { CustomLoggerService } from '../../../../common/logger/custom-logger.service';
 import { MailService } from '../../../../common/mail/mail.service';
+import { SenderRole } from '../../../../schema/chat-message.schema';
+import {
+    CREATE_OR_GET_ROOM_USE_CASE,
+    type CreateOrGetRoomUseCasePort,
+} from '../../chat/application/ports/chat-interaction.port';
 import {
     NOTIFICATION_DISPATCH_PORT,
     type NotificationDispatchPort,
 } from '../../notification/application/ports/notification-dispatch.port';
 import type {
+    BreederManagementApplicationChatRoomCommand,
     BreederManagementApplicationRecord,
     BreederManagementApplicationStatusNotificationCommand,
     BreederManagementApplicationWorkflowPort,
 } from '../application/ports/breeder-management-application-workflow.port';
 import { AdoptionApplicationRepository } from '../repository/adoption-application.repository';
+import { AvailablePetManagementRepository } from '../repository/available-pet-management.repository';
 import { BreederManagementAdopterRepository } from '../repository/breeder-management-adopter.repository';
 import { BreederRepository } from '../repository/breeder.repository';
 
@@ -67,6 +74,9 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
         private readonly breederManagementAdopterRepository: BreederManagementAdopterRepository,
+        private readonly availablePetManagementRepository: AvailablePetManagementRepository,
+        @Inject(CREATE_OR_GET_ROOM_USE_CASE)
+        private readonly createOrGetRoomUseCase: CreateOrGetRoomUseCasePort,
     ) {}
 
     findApplicationByIdAndBreeder(
@@ -85,6 +95,56 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
 
     async incrementCompletedAdoptions(breederId: string): Promise<void> {
         await this.breederRepository.incrementCompletedAdoptions(breederId);
+    }
+
+    async recordApplicationApproval(applicationId: string, approvedAt: Date): Promise<void> {
+        await this.adoptionApplicationRepository.recordApprovedAt(applicationId, approvedAt);
+    }
+
+    async markPetAsAdopted(petId: string, adoptedAt: Date): Promise<void> {
+        await this.availablePetManagementRepository.update(petId, { status: PetStatus.ADOPTED, adoptedAt });
+    }
+
+    /**
+     * 펫 예약 상태를 신청서 기준으로 다시 계산한다.
+     * 상담완료 신청이 남아 있으면 예약중, 하나도 없으면 분양중으로 되돌린다.
+     * 두 전이 모두 조건부 update 라 분양완료(adopted)된 펫은 어느 쪽에도 걸리지 않는다.
+     */
+    async syncPetReservationFromApplications(petId: string): Promise<'reserved' | 'available' | 'unchanged'> {
+        const hasOpenConsultation = await this.adoptionApplicationRepository.existsConsultationCompletedForPet(petId);
+
+        if (hasOpenConsultation) {
+            const reserved = await this.availablePetManagementRepository.reserveIfAvailable(petId, new Date());
+            return reserved ? 'reserved' : 'unchanged';
+        }
+
+        const released = await this.availablePetManagementRepository.releaseIfReserved(petId);
+        return released ? 'available' : 'unchanged';
+    }
+
+    async rejectOtherOpenApplicationsForPet(petId: string, approvedApplicationId: string): Promise<number> {
+        return this.adoptionApplicationRepository.rejectOtherOpenApplicationsForPet(petId, approvedApplicationId);
+    }
+
+    /**
+     * 확정 시 입양자-브리더 채팅방 보장.
+     * chat 도메인의 create-or-get 유스케이스를 포트로 재사용하므로 이미 방이 있으면 재활용되고
+     * applicationId 만 덧붙는다(멱등). 프론트가 '채팅하기'에서 같은 경로를 다시 호출해도 동일한 방이 나온다.
+     * 방 생성 실패는 로깅만 하고 삼킨다 — 입양 확정 자체를 되돌리면 안 된다.
+     */
+    async ensureChatRoomForApplication(command: BreederManagementApplicationChatRoomCommand): Promise<void> {
+        try {
+            const room = await this.createOrGetRoomUseCase.execute(command.breederId, SenderRole.BREEDER, {
+                counterpartUserId: command.adopterId,
+                applicationId: command.applicationId,
+            });
+            this.logger.logSuccess('updateApplicationStatus', '입양 확정 채팅방 보장 완료', {
+                applicationId: command.applicationId,
+                roomId: room.id,
+            });
+        } catch (error) {
+            this.logger.logError('updateApplicationStatus', '입양 확정 채팅방 생성 실패', error);
+        }
     }
 
     async notifyApplicationStatusChanged(

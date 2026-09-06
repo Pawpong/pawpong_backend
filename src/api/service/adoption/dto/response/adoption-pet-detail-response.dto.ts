@@ -1,5 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 
+import {
+    REAPPLICATION_BLOCKING_STATUSES,
+    type ReapplicationBlockingStatus,
+} from '../../../../../common/enum/user.enum';
 import { AdoptionPetResponseDto } from './adoption-pet-response.dto';
 
 export class AdoptionPetVaccinationRecordDto {
@@ -121,4 +125,21 @@ export class AdoptionPetDetailResponseDto extends AdoptionPetResponseDto {
 
     @ApiProperty({ description: '브리더 요약', type: AdoptionPetBreederBlockDto })
     breeder: AdoptionPetBreederBlockDto;
+
+    @ApiProperty({
+        description:
+            '로그인한 입양자가 이 펫에 이미 낸 신청 ID. 재신청을 막는 신청이 있을 때만 내려간다. ' +
+            '값이 있으면 신청 버튼 대신 내 신청서 보기로 보낸다.',
+        required: false,
+        example: '507f1f77bcf86cd799439011',
+    })
+    myApplicationId?: string;
+
+    @ApiProperty({
+        description: '위 신청의 상태. 거절(adoption_rejected)은 재신청을 막지 않으므로 내려가지 않는다.',
+        required: false,
+        enum: REAPPLICATION_BLOCKING_STATUSES,
+        example: 'consultation_pending',
+    })
+    myApplicationStatus?: ReapplicationBlockingStatus;
 }

@@ -6,6 +6,7 @@ import type {
 } from '../../application/types/adopter-result.type';
 import type { AdopterProfileRecord } from '../../application/ports/adopter-profile.port';
 import type { AdopterApplicationEmbeddedRecord } from '../../types/adopter-application.type';
+import type { AdopterBreederRecord } from '../../types/adopter-breeder.type';
 import type { AdopterFavoriteRecord, AdopterWrittenReviewEmbeddedRecord } from '../../types/adopter-profile.type';
 
 @Injectable()
@@ -21,13 +22,7 @@ export class AdopterProfileResultMapperService {
             authProvider: adopter.socialAuthInfo?.authProvider || 'local',
             marketingAgreed: adopter.marketingAgreed ?? false,
             counselDefaultProfile: this.toCounselDefaultProfile(adopter.counselDefaultProfile),
-            favoriteBreederList: (adopter.favoriteBreederList || []).map((fav: AdopterFavoriteRecord) => ({
-                breederId: fav.favoriteBreederId,
-                breederName: fav.breederName,
-                addedAt: fav.addedAt,
-                breederProfileImageUrl: fav.breederProfileImageUrl,
-                breederLocation: fav.breederLocation,
-            })),
+            favoriteBreederList: this.toFavoriteResults(adopter.favoriteBreederList),
             adoptionApplicationList: (adopter.adoptionApplicationList || []).map(
                 (app: AdopterApplicationEmbeddedRecord) => ({
                     applicationId: app.applicationId,
@@ -47,6 +42,50 @@ export class AdopterProfileResultMapperService {
             createdAt: adopter.createdAt,
             updatedAt: adopter.updatedAt,
         };
+    }
+
+    /**
+     * 브리더가 입양 신청 화면에 들어올 때 쓰는 매핑.
+     *
+     * 응답 계약(AdopterProfileResult)은 그대로 두고, 브리더에게 없는 입양자 고유 값만 빈 기본값으로 채운다.
+     * counselDefaultProfile 은 null 이다 — 브리더는 가입 시 상담 조사 양식을 받지 않으므로
+     * 프론트의 "조사 건너뜀" 분기를 그대로 타야 한다. undefined 로 두면 그 분기가 터진다.
+     *
+     * Breeder 는 User 를 상속하므로 이메일·닉네임·계정상태·소셜 정보는 브리더 문서에도 있다.
+     * 다만 브리더의 표시 이름은 name(업체명)이라 nickname 이 비면 그걸 쓴다.
+     */
+    toResultFromBreeder(breeder: AdopterBreederRecord): AdopterProfileResult {
+        const fallbackTimestamp = breeder.createdAt ?? breeder.updatedAt;
+
+        return {
+            adopterId: breeder._id.toString(),
+            emailAddress: breeder.emailAddress || '',
+            nickname: breeder.nickname || breeder.name || '',
+            phoneNumber: breeder.phoneNumber || '',
+            profileImageFileName: breeder.profileImageFileName ?? undefined,
+            accountStatus: breeder.accountStatus || 'active',
+            authProvider: breeder.socialAuthInfo?.authProvider || 'local',
+            marketingAgreed: breeder.marketingAgreed ?? false,
+            counselDefaultProfile: null,
+            favoriteBreederList: this.toFavoriteResults(breeder.favoriteBreederList),
+            // 입양자 전용 이력 — 브리더 문서에는 없으므로 빈 배열로 계약을 지킨다.
+            adoptionApplicationList: [],
+            writtenReviewList: [],
+            createdAt: breeder.createdAt ?? fallbackTimestamp ?? new Date(),
+            updatedAt: breeder.updatedAt ?? fallbackTimestamp ?? new Date(),
+        };
+    }
+
+    private toFavoriteResults(
+        favorites: AdopterFavoriteRecord[] | undefined,
+    ): AdopterProfileResult['favoriteBreederList'] {
+        return (favorites || []).map((fav: AdopterFavoriteRecord) => ({
+            breederId: fav.favoriteBreederId,
+            breederName: fav.breederName,
+            addedAt: fav.addedAt,
+            breederProfileImageUrl: fav.breederProfileImageUrl,
+            breederLocation: fav.breederLocation,
+        }));
     }
 
     /**

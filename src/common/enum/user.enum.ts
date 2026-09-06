@@ -35,6 +35,21 @@ export enum ApplicationStatus {
     ADOPTION_REJECTED = 'adoption_rejected',
 }
 
+/**
+ * 같은 입양자가 같은 펫에 다시 신청하는 것을 막는 신청 상태 목록.
+ * 거절(adoption_rejected)만 종결로 보고 재신청을 허용한다.
+ *
+ * **재신청 차단(existsOpenApplicationForPet)과 상세 응답의 내 신청 상태(myApplicationStatus)가
+ * 반드시 이 하나의 목록을 함께 봐야 한다.** 한쪽만 바꾸면 "버튼은 활성인데 제출하면 409" 상태로 되돌아간다.
+ */
+export const REAPPLICATION_BLOCKING_STATUSES = [
+    ApplicationStatus.CONSULTATION_PENDING,
+    ApplicationStatus.CONSULTATION_COMPLETED,
+    ApplicationStatus.ADOPTION_APPROVED,
+] as const;
+
+export type ReapplicationBlockingStatus = (typeof REAPPLICATION_BLOCKING_STATUSES)[number];
+
 export enum ReviewType {
     CONSULTATION = 'consultation',
     ADOPTION = 'adoption',

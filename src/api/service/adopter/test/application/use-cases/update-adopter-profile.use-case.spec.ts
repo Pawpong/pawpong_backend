@@ -33,6 +33,7 @@ describe('입양자 프로필 수정 유스케이스', () => {
                 phoneNumber: '010-1234-5678',
                 profileImageFileName: 'profile.jpg',
             }),
+            undefined,
         );
     });
 
@@ -56,5 +57,18 @@ describe('입양자 프로필 수정 유스케이스', () => {
         await useCase.execute('adopter-1', { phone: '010-0000-0000' });
 
         expect(eventEmitter.emit).not.toHaveBeenCalled();
+    });
+
+    it('브리더 role 을 저장소까지 전달한다 (누락하면 adopters 에서 갱신하다 404)', async () => {
+        const updateProfile = jest.fn().mockResolvedValue({ _id: { toString: () => 'breeder-1' } });
+        const useCase = new UpdateAdopterProfileUseCase(
+            { updateProfile } as any,
+            new AdopterProfileUpdateMapperService(),
+            { emit: jest.fn() } as any,
+        );
+
+        await useCase.execute('breeder-1', { name: '켄넬' }, 'breeder');
+
+        expect(updateProfile).toHaveBeenCalledWith('breeder-1', expect.anything(), 'breeder');
     });
 });
