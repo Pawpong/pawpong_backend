@@ -10,6 +10,7 @@ import { AdopterReviewsModule } from '../reviews/adopter-reviews.module';
 import { AdopterApplicationCommandController } from '../controller/adopter-application-command.controller';
 import { AdopterApplicationQueryController } from '../controller/adopter-application-query.controller';
 import { CreateAdopterApplicationUseCase } from '../application/use-cases/create-adopter-application.use-case';
+import { UpdateAdopterApplicationUseCase } from '../application/use-cases/update-adopter-application.use-case';
 import { GetAdopterApplicationsUseCase } from '../application/use-cases/get-adopter-applications.use-case';
 import { GetAdopterApplicationDetailUseCase } from '../application/use-cases/get-adopter-application-detail.use-case';
 import { AdopterApplicationCreateResultMapperService } from '../domain/services/adopter-application-create-result-mapper.service';
@@ -49,6 +50,7 @@ export const ADOPTER_APPLICATIONS_MODULE_CONTROLLERS = [
 
 export const ADOPTER_APPLICATIONS_MODULE_PROVIDERS = [
     CreateAdopterApplicationUseCase,
+    UpdateAdopterApplicationUseCase,
     GetAdopterApplicationsUseCase,
     GetAdopterApplicationDetailUseCase,
     AdopterApplicationCreateResultMapperService,
