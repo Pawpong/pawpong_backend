@@ -15,6 +15,14 @@ export type AdopterBreederRecord = {
     accountStatus?: string;
     profileImageFileName?: string | null;
     favoriteBreederList?: AdopterFavoriteRecord[];
+    // Breeder 는 User 를 상속하고 스키마가 timestamps: true 라 아래 값들이 실제 문서에 존재한다.
+    // 신청자 프로필 응답을 브리더로도 채우기 위해 필요한 만큼만 선언한다.
+    socialAuthInfo?: {
+        authProvider?: string;
+    };
+    marketingAgreed?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
     petType?: string;
     breeds?: string[];
     stats?: {

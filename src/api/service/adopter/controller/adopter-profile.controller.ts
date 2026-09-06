@@ -20,8 +20,11 @@ export class AdopterProfileController {
 
     @Get('profile')
     @ApiGetAdopterProfileEndpoint()
-    async getProfile(@CurrentUser('userId') userId: string): Promise<ApiResponseDto<AdopterProfileResponseDto>> {
-        const result = await this.getAdopterProfileUseCase.execute(userId);
+    async getProfile(
+        @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
+    ): Promise<ApiResponseDto<AdopterProfileResponseDto>> {
+        const result = await this.getAdopterProfileUseCase.execute(userId, role);
         return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.profileRetrieved);
     }
 
