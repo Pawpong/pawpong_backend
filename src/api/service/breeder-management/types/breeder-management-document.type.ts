@@ -153,6 +153,8 @@ export type BreederManagementParentPetPersistencePayload = {
 
 export type BreederManagementAvailablePetPersistencePayload = {
     breederId: BreederManagementObjectIdLike;
+    /** 글쓴 브리더 계정에서 파생한 축종. 탐색 페이지 축종 탭 필터의 근거다. */
+    petType?: 'dog' | 'cat' | 'reptile';
     name: string;
     breed: string;
     gender: string;

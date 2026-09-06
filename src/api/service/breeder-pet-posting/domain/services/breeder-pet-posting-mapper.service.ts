@@ -1,23 +1,29 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 
+import type { BreederPetPostingProfileSnapshot } from '../../application/ports/breeder-pet-posting-profile.port';
 import type {
     BreederPetPostingCreateCommand,
     BreederPetPostingCreatePersistData,
     BreederPetPostingGeneticTestRecordPersistData,
     BreederPetPostingParentSnapshotPersistData,
     BreederPetPostingVaccinationRecordPersistData,
+    PostingPetType,
 } from '../../application/types/breeder-pet-posting-command.type';
 
 /**
  * v2 분양글 작성 — application command -> persistence data 매퍼.
  *
  * 날짜 문자열을 Date 로 변환하고, status 별로 records 또는 incompleteReason 만 보존한다.
+ * petType 은 클라이언트 입력이 아니라 글쓴 브리더 계정에서 파생한다.
  */
 @Injectable()
 export class BreederPetPostingMapperService {
-    toPersistData(breederId: string, command: BreederPetPostingCreateCommand): BreederPetPostingCreatePersistData {
+    toPersistData(
+        breeder: BreederPetPostingProfileSnapshot,
+        command: BreederPetPostingCreateCommand,
+    ): BreederPetPostingCreatePersistData {
         return {
-            breederId,
+            breederId: breeder.breederId,
             name: command.name,
             breed: command.breed,
             gender: command.gender,
@@ -26,7 +32,7 @@ export class BreederPetPostingMapperService {
             description: command.description,
             photos: command.photos,
             representativePhotoIndex: command.representativePhotoIndex ?? 0,
-            petType: command.petType,
+            petType: this.requirePetType(breeder),
             status: 'available',
             isActive: true,
 
@@ -49,6 +55,17 @@ export class BreederPetPostingMapperService {
             parentPetSnapshots: this.toParentSnapshots(command.parentPetSnapshots ?? []),
             breedingEnvironment: this.toBreedingEnvironment(command.breedingEnvironment),
         };
+    }
+
+    /**
+     * 탐색 페이지 축종 탭이 petType 으로 필터링하므로, 축종을 확정할 수 없는 분양글은 만들지 않는다.
+     * breeders.petType 은 required 라 정상 계정이면 항상 채워져 있다.
+     */
+    private requirePetType(breeder: BreederPetPostingProfileSnapshot): PostingPetType {
+        if (!breeder.petType) {
+            throw new BadRequestException('브리더 계정의 축종 정보가 없어 분양글을 등록할 수 없습니다.');
+        }
+        return breeder.petType;
     }
 
     private toVaccinationRecords(
