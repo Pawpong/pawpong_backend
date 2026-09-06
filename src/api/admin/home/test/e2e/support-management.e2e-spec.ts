@@ -71,8 +71,13 @@ describe('고객지원 관리자 계약과 원자적 이력', () => {
         return id;
     };
     it('미인증·일반 사용자 접근을 차단한다', async () => {
-        await request(app.getHttpServer() as Server).get('/home-admin/support').expect(401);
-        await request(app.getHttpServer() as Server).get('/home-admin/support').set('x-test-role', 'adopter').expect(403);
+        await request(app.getHttpServer() as Server)
+            .get('/home-admin/support')
+            .expect(401);
+        await request(app.getHttpServer() as Server)
+            .get('/home-admin/support')
+            .set('x-test-role', 'adopter')
+            .expect(403);
     });
     it('환경을 분리하고 접수번호 검색을 지원한다', async () => {
         const id = await seed();
