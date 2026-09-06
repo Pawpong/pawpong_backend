@@ -22,6 +22,18 @@ export type AuthSocialLoginSuccessFlowResult = {
     cookieOptions: AuthSocialCookieOptions;
 };
 
+export type AuthSocialReactivationFlowResult = {
+    kind: 'reactivation';
+    frontendUrl: string;
+    originUrl?: string;
+    reactivationToken: string;
+    expiresIn: number;
+    role: AuthSocialCallbackRole;
+    email: string;
+    name: string;
+    deletedAt?: string;
+};
+
 export type AuthSocialErrorFlowResult = {
     kind: 'error';
     frontendUrl: string;
@@ -31,4 +43,5 @@ export type AuthSocialErrorFlowResult = {
 export type AuthSocialCallbackFlowResult =
     | AuthSocialSignupFlowResult
     | AuthSocialLoginSuccessFlowResult
+    | AuthSocialReactivationFlowResult
     | AuthSocialErrorFlowResult;

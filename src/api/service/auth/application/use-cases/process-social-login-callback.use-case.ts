@@ -40,6 +40,22 @@ export class ProcessSocialLoginCallbackUseCase {
                 };
             }
 
+            if (result.needsReactivation && result.reactivation) {
+                const reactivation = result.reactivation;
+
+                return {
+                    kind: 'reactivation',
+                    frontendUrl,
+                    originUrl: userProfile.originUrl,
+                    reactivationToken: reactivation.reactivationToken,
+                    expiresIn: reactivation.expiresIn,
+                    role: reactivation.role,
+                    email: reactivation.email,
+                    name: reactivation.name,
+                    deletedAt: reactivation.deletedAt?.toISOString(),
+                };
+            }
+
             const user = result.user!;
             const tokens = await this.authSocialCallbackPort.generateSocialLoginTokens(user);
             const { isProduction, cookieOptions } = this.authSocialCallbackPort.resolveCookieOptions();

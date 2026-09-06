@@ -36,6 +36,7 @@ export class UpdateAdopterApplicationUseCase {
         userId: string,
         applicationId: string,
         dto: AdopterApplicationUpdateInput,
+        userRole?: string,
     ): Promise<AdopterApplicationCreateResult> {
         const application = await this.adopterApplicationCommandPort.findByIdAndAdopter(applicationId, userId);
         if (!application) {
@@ -54,7 +55,7 @@ export class UpdateAdopterApplicationUseCase {
             throw new DomainNotFoundError('해당 브리더를 찾을 수 없습니다.');
         }
 
-        const contact = await this.resolveApplicantContact(userId, dto);
+        const contact = await this.resolveApplicantContact(userId, dto, userRole);
 
         const standardResponses = this.adopterApplicationStandardAnswerBuilderService.build({
             ...dto,
@@ -81,16 +82,21 @@ export class UpdateAdopterApplicationUseCase {
     private async resolveApplicantContact(
         userId: string,
         dto: AdopterApplicationUpdateInput,
+        userRole?: string,
     ): Promise<{ name: string; email: string; phone: string }> {
-        const adopter = await this.adopterProfilePort.findById(userId);
-        if (!adopter) {
-            throw new DomainNotFoundError('입양자 정보를 찾을 수 없습니다.');
+        // 브리더 계정도 신청을 수정할 수 있어, role을 넘겨야 브리더 컬렉션에서도 조회한다.
+        const applicant = userRole
+            ? await this.adopterProfilePort.findById(userId, userRole)
+            : await this.adopterProfilePort.findById(userId);
+        if (!applicant) {
+            throw new DomainNotFoundError('회원 정보를 찾을 수 없습니다.');
         }
 
+        const profileName = 'name' in applicant ? applicant.name : undefined;
         return {
-            name: dto.name || adopter.nickname || '',
-            email: dto.email || adopter.emailAddress || '',
-            phone: dto.phone || adopter.phoneNumber || '',
+            name: dto.name || profileName || applicant.nickname || '',
+            email: dto.email || applicant.emailAddress || '',
+            phone: dto.phone || applicant.phoneNumber || '',
         };
     }
 }

@@ -26,6 +26,7 @@ import {
 import { AuthSocialCallbackResultFactoryService } from '../presentation/services/auth-social-callback-result-factory.service';
 import { AuthSocialErrorRedirectFactoryService } from '../presentation/services/auth-social-error-redirect-factory.service';
 import { AuthSocialLoginSuccessRedirectFactoryService } from '../presentation/services/auth-social-login-success-redirect-factory.service';
+import { AuthSocialReactivationRedirectFactoryService } from '../presentation/services/auth-social-reactivation-redirect-factory.service';
 import { AuthSocialSignupRedirectFactoryService } from '../presentation/services/auth-social-signup-redirect-factory.service';
 import { AuthRedirectResponseInterceptor } from '../presentation/interceptors/auth-redirect-response.interceptor';
 import { AuthSocialCallbackResponseInterceptor } from '../presentation/interceptors/auth-social-callback-response.interceptor';
@@ -62,6 +63,7 @@ const AUTH_SOCIAL_LOGIN_PRESENTATION_PROVIDERS = [
     AuthSocialErrorRedirectFactoryService,
     AuthSocialLoginSuccessRedirectFactoryService,
     AuthSocialSignupRedirectFactoryService,
+    AuthSocialReactivationRedirectFactoryService,
     AuthRedirectResponseInterceptor,
     AuthSocialCallbackResponseInterceptor,
 ];

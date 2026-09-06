@@ -51,6 +51,7 @@
         "seed:terms:dev": "node --env-file=.env -r ts-node/register src/scripts/seed-development-terms.ts",
         "migrate:chat-participants": "node --env-file=.env -r ts-node/register src/scripts/migrate-chat-participants.ts",
         "migrate:available-pet-type": "node --env-file=.env -r ts-node/register src/scripts/migrate-available-pet-type.ts",
+        "token:reactivation": "node --env-file=.env -r ts-node/register src/scripts/issue-reactivation-token.ts",
         "sync:faqs:dev": "node --env-file=.env -r ts-node/register src/scripts/sync-development-faqs.ts",
         "create:admin": "ts-node scripts/create-admin.ts",
         "prepare": "husky || true"
