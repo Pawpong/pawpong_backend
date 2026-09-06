@@ -1,3 +1,8 @@
+import { SupportEventRecord, SupportEventSchema } from '../../../schema/support-event.schema';
+import { SUPPORT_MANAGEMENT_PORT } from './application/ports/support-management.port';
+import { SupportManagementRepository } from './repository/support-management.repository';
+import { ManageSupportUseCase } from './application/use-cases/manage-support.use-case';
+import { HomeAdminSupportController } from './controller/home-admin-support.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { Banner, BannerSchema } from '../../../schema/banner.schema';
@@ -26,6 +31,7 @@ import { BannerRepository } from '../../service/home/repository/banner.repositor
 import { FaqRepository } from '../../service/home/repository/faq.repository';
 
 const HOME_ADMIN_SCHEMA_IMPORTS = MongooseModule.forFeature([
+    { name: SupportEventRecord.name, schema: SupportEventSchema },
     { name: Banner.name, schema: BannerSchema },
     { name: Faq.name, schema: FaqSchema },
 ]);
@@ -33,6 +39,7 @@ const HOME_ADMIN_SCHEMA_IMPORTS = MongooseModule.forFeature([
 export const HOME_ADMIN_MODULE_IMPORTS = [HOME_ADMIN_SCHEMA_IMPORTS, StorageModule];
 
 export const HOME_ADMIN_MODULE_CONTROLLERS = [
+    HomeAdminSupportController,
     HomeAdminBannersQueryController,
     HomeAdminBannersCommandController,
     HomeAdminFaqsQueryController,
@@ -71,6 +78,9 @@ const HOME_ADMIN_PORT_BINDINGS = [
 ];
 
 export const HOME_ADMIN_MODULE_PROVIDERS = [
+    ManageSupportUseCase,
+    SupportManagementRepository,
+    { provide: SUPPORT_MANAGEMENT_PORT, useExisting: SupportManagementRepository },
     ...HOME_ADMIN_USE_CASE_PROVIDERS,
     ...HOME_ADMIN_DOMAIN_PROVIDERS,
     ...HOME_ADMIN_INFRASTRUCTURE_PROVIDERS,

@@ -4,11 +4,23 @@ import { AnswerSupportInquiryUseCase } from '../application/use-cases/answer-sup
 import { HomePublicController } from '../decorator/home-controller.decorator';
 import { SupportRateLimitGuard } from '../decorator/support-rate-limit.guard';
 import { SupportInquiryRequestDto } from '../dto/request/support-inquiry-request.dto';
-import { ApiSupportInquiryEndpoint } from '../swagger/support';
+import { ApiSupportInquiryEndpoint, ApiSupportFeedbackEndpoint } from '../swagger/support';
+import { SubmitSupportFeedbackUseCase } from '../application/use-cases/submit-support-feedback.use-case';
 
 @HomePublicController()
 export class HomeSupportController {
-    constructor(private readonly answer: AnswerSupportInquiryUseCase) {}
+    constructor(
+        private readonly answer: AnswerSupportInquiryUseCase,
+        private readonly feedback: SubmitSupportFeedbackUseCase,
+    ) {}
+
+    @Post('support/feedback')
+    @HttpCode(200)
+    @UseGuards(SupportRateLimitGuard)
+    @ApiSupportFeedbackEndpoint()
+    async submitFeedback(@Body() body: SupportInquiryRequestDto) {
+        return ApiResponseDto.success(await this.feedback.execute(body.question, body.userType), '피드백 접수 완료');
+    }
 
     @Post('support/inquiry')
     @HttpCode(200)

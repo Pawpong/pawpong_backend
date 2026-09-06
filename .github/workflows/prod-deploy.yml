@@ -12,6 +12,10 @@ env:
     INSTANCE_NAME: ${{ secrets.INSTANCE_NAME }}
     GCP_SA_EMAIL: ${{ secrets.GCP_SA_EMAIL }}
 
+concurrency:
+    group: pawpong-production-deployment
+    cancel-in-progress: false
+
 jobs:
     build-and-deploy:
         name: Build and Deploy to GCP (Main)
@@ -113,77 +117,15 @@ jobs:
                   echo "✅ Deployment completed successfully!"
                   ENDSSH
 
-            - name: Send Discord Notification (Success)
-              if: success()
-              run: |
-                  COMMIT_MSG=$(git log -1 --pretty=%s | head -c 100)
-                  COMMIT_AUTHOR=$(git log -1 --pretty=%an)
-                  COMMIT_SHA=$(git rev-parse --short HEAD)
-
-                  # 배포 로그에서 활성 컨테이너 추출
-                  ACTIVE_CONTAINER=$(grep -oP 'Active Container: \K(blue|green)' deploy.log | tail -n 1 || echo "unknown")
-                  ACTIVE_PORT=$(grep -oP 'Active Container: (?:blue|green) \(port \K[0-9]+' deploy.log | tail -n 1 || echo "unknown")
-
-                  # JSON 특수문자 이스케이프
-                  COMMIT_MSG_ESCAPED=$(echo "$COMMIT_MSG" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/\\t/g')
-
-                  curl -H "Content-Type: application/json" \
-                       -X POST \
-                       -d "{
-                         \"embeds\": [{
-                           \"title\": \"프로덕션 배포 성공\",
-                           \"description\": \"Main 브랜치가 프로덕션 서버에 성공적으로 배포되었습니다.\",
-                           \"color\": 3066993,
-                           \"fields\": [
-                             {\"name\": \"서버\", \"value\": \"${{ secrets.PROD_SERVER_HOST }}\", \"inline\": true},
-                             {\"name\": \"배포 방식\", \"value\": \"Docker Blue-Green\", \"inline\": true},
-                             {\"name\": \"활성 컨테이너\", \"value\": \"${ACTIVE_CONTAINER} (포트 ${ACTIVE_PORT})\", \"inline\": true},
-                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
-                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
-                             {\"name\": \"커밋 메시지\", \"value\": \"${COMMIT_MSG_ESCAPED}\", \"inline\": false}
-                           ],
-                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                         }]
-                       }" \
-                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
-
-            - name: Send Discord Notification (Failure)
-              if: failure()
-              run: |
-                  COMMIT_MSG=$(git log -1 --pretty=%s | head -c 100)
-                  COMMIT_AUTHOR=$(git log -1 --pretty=%an)
-                  COMMIT_SHA=$(git rev-parse --short HEAD)
-
-                  # 배포 로그에서 실패한 컨테이너 추출
-                  FAILED_CONTAINER=$(grep -oP '(blue|green) deployment failed' deploy.log | grep -oP '(blue|green)' | tail -n 1 || echo "unknown")
-                  ROLLBACK_CONTAINER=$(grep -oP 'Rolling back to \K(blue|green)' deploy.log | tail -n 1 || echo "unknown")
-
-                  # 실패한 컨테이너 정보
-                  if [ "$FAILED_CONTAINER" != "unknown" ]; then
-                    FAIL_INFO="실패한 컨테이너: ${FAILED_CONTAINER}, 롤백 완료: ${ROLLBACK_CONTAINER}"
-                  else
-                    FAIL_INFO="배포 과정에서 오류 발생"
-                  fi
-
-                  # JSON 특수문자 이스케이프
-                  COMMIT_MSG_ESCAPED=$(echo "$COMMIT_MSG" | sed 's/\\/\\\\/g; s/"/\\"/g; s/\t/\\t/g')
-
-                  curl -H "Content-Type: application/json" \
-                       -X POST \
-                       -d "{
-                         \"embeds\": [{
-                           \"title\": \"프로덕션 배포 실패\",
-                           \"description\": \"Main 브랜치 배포 중 오류가 발생했습니다. ${FAIL_INFO}\",
-                           \"color\": 15158332,
-                           \"fields\": [
-                             {\"name\": \"서버\", \"value\": \"${{ secrets.PROD_SERVER_HOST }}\", \"inline\": true},
-                             {\"name\": \"배포 방식\", \"value\": \"Docker Blue-Green\", \"inline\": true},
-                             {\"name\": \"커밋 SHA\", \"value\": \"$COMMIT_SHA\", \"inline\": true},
-                             {\"name\": \"커밋 작성자\", \"value\": \"$COMMIT_AUTHOR\", \"inline\": true},
-                             {\"name\": \"커밋 메시지\", \"value\": \"${COMMIT_MSG_ESCAPED}\", \"inline\": false},
-                             {\"name\": \"로그 확인\", \"value\": \"[GitHub Actions 로그 보기](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
-                           ],
-                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                         }]
-                       }" \
-                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+            - name: Send standardized deployment result
+              if: always()
+              env:
+                  APP_ENV: production
+                  DEPLOY_SERVICE: backend + ai-agent
+                  DEPLOY_COMMIT: ${{ github.sha }}
+                  DEPLOY_STATUS: ${{ job.status }}
+                  DEPLOY_HEALTH: ${{ job.status == 'success' && 'passed deployment readiness checks' || 'not verified; inspect workflow log' }}
+                  DEPLOY_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                  DISCORD_DEPLOY_WEBHOOK_URL: ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+                  DISCORD_DEV_DEPLOY_WEBHOOK_URL: ${{ secrets.DISCORD_DEV_DEPLOY_WEBHOOK_URL }}
+              run: python3 ops/observability/notify.py

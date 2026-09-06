@@ -34,8 +34,8 @@ jobs:
               id: check_history
               run: |
                   echo "Checking deployment history..."
-                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no root@${{ secrets.PROD_SERVER_HOST }} << 'ENDSSH'
-                  cd /root/pawpong_backend
+                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no colding@${{ secrets.PROD_SERVER_HOST }} << 'ENDSSH'
+                  cd /home/colding/pawpong_backend
                   if [ -f .deploy_history ]; then
                       echo "=== Available versions ==="
                       cat -n .deploy_history
@@ -50,8 +50,8 @@ jobs:
                   VERSION: ${{ github.event.inputs.version }}
               run: |
                   echo "Starting rollback to version $VERSION..."
-                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no root@${{ secrets.PROD_SERVER_HOST }} << ENDSSH > rollback.log 2>&1
-                  cd /root/pawpong_backend
+                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no colding@${{ secrets.PROD_SERVER_HOST }} << ENDSSH > rollback.log 2>&1
+                  cd /home/colding/pawpong_backend
                   bash rollback.sh ${VERSION}
                   ENDSSH
                   cat rollback.log
@@ -59,48 +59,18 @@ jobs:
                   cat rollback.log >> $GITHUB_ENV
                   echo "EOF" >> $GITHUB_ENV
 
-            - name: Send Discord Notification (Success)
-              if: success()
-              run: |
-                  ROLLBACK_VERSION=$(echo "$ROLLBACK_LOG" | grep -oP 'Rolled back to: \K.*' || echo "unknown")
-                  ACTIVE_CONTAINER=$(echo "$ROLLBACK_LOG" | grep -oP 'Active Container: \K(blue|green)' || echo "unknown")
-                  ACTIVE_PORT=$(echo "$ROLLBACK_LOG" | grep -oP 'Active Container: (?:blue|green) \(port \K[0-9]+' || echo "unknown")
-
-                  curl -H "Content-Type: application/json" \
-                       -X POST \
-                       -d "{
-                         \"embeds\": [{
-                           \"title\": \"롤백 성공\",
-                           \"description\": \"프로덕션 서버가 이전 버전으로 롤백되었습니다.\",
-                           \"color\": 16776960,
-                           \"fields\": [
-                             {\"name\": \"롤백 버전\", \"value\": \"${ROLLBACK_VERSION}\", \"inline\": true},
-                             {\"name\": \"활성 컨테이너\", \"value\": \"${ACTIVE_CONTAINER} (포트 ${ACTIVE_PORT})\", \"inline\": true},
-                             {\"name\": \"실행자\", \"value\": \"${{ github.actor }}\", \"inline\": true}
-                           ],
-                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                         }]
-                       }" \
-                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
-
-            - name: Send Discord Notification (Failure)
-              if: failure()
-              run: |
-                  curl -H "Content-Type: application/json" \
-                       -X POST \
-                       -d "{
-                         \"embeds\": [{
-                           \"title\": \"롤백 실패\",
-                           \"description\": \"롤백 중 오류가 발생했습니다.\",
-                           \"color\": 15158332,
-                           \"fields\": [
-                             {\"name\": \"실행자\", \"value\": \"${{ github.actor }}\", \"inline\": true},
-                             {\"name\": \"로그 확인\", \"value\": \"[GitHub Actions 로그](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
-                           ],
-                           \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                         }]
-                       }" \
-                       ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+            - name: Send standardized deployment result
+              if: always()
+              env:
+                  APP_ENV: production
+                  DEPLOY_SERVICE: backend rollback
+                  DEPLOY_COMMIT: ${{ github.sha }}
+                  DEPLOY_STATUS: ${{ job.status }}
+                  DEPLOY_HEALTH: ${{ job.status == 'success' && 'passed deployment readiness checks' || 'not verified; inspect workflow log' }}
+                  DEPLOY_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                  DISCORD_DEPLOY_WEBHOOK_URL: ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+                  DISCORD_DEV_DEPLOY_WEBHOOK_URL: ${{ secrets.DISCORD_DEV_DEPLOY_WEBHOOK_URL }}
+              run: python3 ops/observability/notify.py
 
     cancelled:
         name: Rollback Cancelled

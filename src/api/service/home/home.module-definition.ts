@@ -1,6 +1,7 @@
 import { MongooseModule } from '@nestjs/mongoose';
 import { SUPPORT_GRPC_IMPORT, SUPPORT_PROVIDERS } from './support.module-definition';
 import { HomeSupportController } from './controller/home-support.controller';
+import { SupportEventRecord, SupportEventSchema } from '../../../schema/support-event.schema';
 
 import { AvailablePet, AvailablePetSchema } from '../../../schema/available-pet.schema';
 import { Banner, BannerSchema } from '../../../schema/banner.schema';
@@ -26,6 +27,7 @@ import { BannerRepository } from './repository/banner.repository';
 import { FaqRepository } from './repository/faq.repository';
 
 const HOME_SCHEMA_IMPORTS = MongooseModule.forFeature([
+    { name: SupportEventRecord.name, schema: SupportEventSchema },
     { name: Banner.name, schema: BannerSchema },
     { name: Faq.name, schema: FaqSchema },
     { name: Breeder.name, schema: BreederSchema },

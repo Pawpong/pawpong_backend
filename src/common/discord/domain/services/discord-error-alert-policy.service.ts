@@ -40,7 +40,10 @@ export class DiscordErrorAlertPolicyService {
             request.context,
             request.statusCode ?? 'no-status',
             request.method ?? 'no-method',
-            request.path ?? 'no-path',
+            (request.path ?? 'no-path')
+                .split('?')[0]
+                .replace(/\b[0-9a-f]{24}\b/gi, ':id')
+                .replace(/\b[0-9a-f]{8}-(?:[0-9a-f]{4}-){3}[0-9a-f]{12}\b/gi, ':id'),
             normalizedMessage,
         ].join('|');
     }

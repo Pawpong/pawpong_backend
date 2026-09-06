@@ -18,10 +18,12 @@ export class DiscordErrorAlertAdapter implements DiscordErrorAlertPort {
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
     ) {
+        const environment =
+            this.configService.get<string>('APP_ENV') || this.configService.get<string>('NODE_ENV') || 'development';
         this.errorWebhookUrl =
-            this.configService.get<string>('DISCORD_ERROR_WEBHOOK_URL') ||
-            this.configService.get<string>('DISCORD_WEBHOOK_URL') ||
-            '';
+            this.configService.get<string>(
+                environment === 'production' ? 'DISCORD_ERROR_WEBHOOK_URL' : 'DISCORD_DEV_ERROR_WEBHOOK_URL',
+            ) || '';
 
         if (!this.errorWebhookUrl) {
             this.logger.logWarning('DiscordErrorAlertAdapter', '디스코드 에러 웹훅 URL이 설정되지 않았습니다.');
@@ -37,27 +39,32 @@ export class DiscordErrorAlertAdapter implements DiscordErrorAlertPort {
                 'sendCriticalErrorAlert',
                 '디스코드 에러 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
             );
-            return;
+            throw new Error('discord_error_webhook_not_configured');
         }
 
         const timestamp = request.timestamp ?? new Date();
         const title = request.severity === 'critical' ? '🚨 Critical 서버 에러' : '⚠️ 서버 에러';
         const fields = this.buildFields(request);
 
-        await axios.post(this.errorWebhookUrl, {
-            embeds: [
-                {
-                    title,
-                    color: request.severity === 'critical' ? 0xf44336 : 0xff9800,
-                    description: this.truncate(request.message, 3500),
-                    fields,
-                    timestamp: timestamp.toISOString(),
-                    footer: {
-                        text: 'Pawpong Backend - Error Monitor',
+        await axios.post(
+            this.errorWebhookUrl,
+            {
+                allowed_mentions: { parse: [] },
+                embeds: [
+                    {
+                        title: `[${this.configService.get('APP_ENV') || this.configService.get('NODE_ENV') || 'development'}] ${title}`,
+                        color: request.severity === 'critical' ? 0xf44336 : 0xff9800,
+                        description: this.truncate(request.message, 3500),
+                        fields,
+                        timestamp: timestamp.toISOString(),
+                        footer: {
+                            text: 'Pawpong Backend - Error Monitor',
+                        },
                     },
-                },
-            ],
-        });
+                ],
+            },
+            { timeout: 8000, maxRedirects: 0 },
+        );
 
         this.logger.logSuccess('sendCriticalErrorAlert', 'Discord critical 에러 알림 전송 완료', {
             context: request.context,
@@ -81,13 +88,11 @@ export class DiscordErrorAlertAdapter implements DiscordErrorAlertPort {
         if (request.method || request.path) {
             fields.push({
                 name: 'Request',
-                value: this.truncate(`${request.method ?? '-'} ${request.path ?? '-'}`, 1024),
+                value: this.truncate(`${request.method ?? '-'} ${(request.path ?? '-').split('?')[0]}`, 1024),
                 inline: false,
             });
         }
-        if (request.userId) {
-            fields.push({ name: 'User ID', value: request.userId, inline: true });
-        }
+
         if (request.metadata && Object.keys(request.metadata).length > 0) {
             fields.push({
                 name: 'Metadata',
@@ -110,6 +115,10 @@ export class DiscordErrorAlertAdapter implements DiscordErrorAlertPort {
      * Discord embed 길이 제한에 맞춰 문자열을 자릅니다.
      */
     private truncate(value: string, maxLength: number): string {
+        value = value
+            .replace(/https?:\/\/[^\s]+/g, '[URL]')
+            .replace(/[\w.+-]+@[\w.-]+\.[a-z]{2,}/gi, '[email]')
+            .replace(/(?:bearer\s+|sk-)[a-z0-9_.-]+/gi, '[secret]');
         if (value.length <= maxLength) {
             return value;
         }
