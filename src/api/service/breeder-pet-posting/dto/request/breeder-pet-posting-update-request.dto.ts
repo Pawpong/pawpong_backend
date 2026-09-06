@@ -60,7 +60,12 @@ export class UpdateBreederPetPostingRequestDto {
     @MaxLength(500)
     description?: string;
 
-    @ApiPropertyOptional({ description: '동물 종류', enum: ['dog', 'cat', 'reptile'] })
+    @ApiPropertyOptional({
+        description:
+            '[deprecated] 동물 종류. 브리더 계정 축종에 종속되어 글 단위로 변경할 수 없으며 요청 값은 무시된다.',
+        enum: ['dog', 'cat', 'reptile'],
+        deprecated: true,
+    })
     @IsOptional()
     @IsEnum(['dog', 'cat', 'reptile'])
     petType?: 'dog' | 'cat' | 'reptile';

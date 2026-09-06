@@ -47,7 +47,7 @@ export interface BreederPetPostingCreateCommand {
     description: string;
     photos: string[];
     representativePhotoIndex?: number;
-    petType?: PostingPetType;
+    // petType 은 클라이언트 입력을 받지 않는다 — 글쓴 브리더의 breeders.petType 에서 파생한다.
 
     vaccinationStatus: VaccinationStatus;
     vaccinationRecords?: BreederPetPostingVaccinationRecordCommand[];
@@ -94,7 +94,8 @@ export interface BreederPetPostingCreatePersistData {
     description: string;
     photos: string[];
     representativePhotoIndex: number;
-    petType?: PostingPetType;
+    /** 글쓴 브리더의 축종에서 파생한 값. 탐색 페이지 축종 탭 필터의 근거라 반드시 채운다. */
+    petType: PostingPetType;
     status: 'available';
     isActive: true;
 
@@ -123,7 +124,7 @@ export interface BreederPetPostingCreateResult {
  * v2 분양글 부분 수정 command.
  *
  * 본 슬라이스는 단순 / 안전 필드만 지원한다:
- * - 기본 정보 (name, breed, gender, birthDate, price, description, petType)
+ * - 기본 정보 (name, breed, gender, birthDate, price, description)
  * - 분양 상태 전환 (status: available / reserved / adopted)
  * - 사진 (photos / representativePhotoIndex)
  *
@@ -137,7 +138,7 @@ export interface BreederPetPostingUpdateCommand {
     birthDate?: string;
     price?: number;
     description?: string;
-    petType?: PostingPetType;
+    // petType 은 브리더 계정 축종에 종속되므로 수정 대상이 아니다 (use-case 가 브리더 값으로 재확정한다).
     status?: 'available' | 'reserved' | 'adopted';
     photos?: string[];
     representativePhotoIndex?: number;

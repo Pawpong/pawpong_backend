@@ -173,6 +173,23 @@ describe('분양글 (브리더) E2E 테스트', () => {
                 .expect(400);
         });
 
+        it('등록된 분양글의 petType 은 요청 본문이 아니라 브리더 계정 축종으로 저장된다', async () => {
+            // 탐색 페이지 고양이/강아지 탭이 available_pets.petType 으로 필터링한다.
+            // getBreederToken 이 만든 계정은 dog 브리더이므로, 본문의 reptile 은 무시되어야 한다.
+            const res = await request(app.getHttpServer())
+                .post('/api/v2/breeder-pet-posting')
+                .set('Authorization', `Bearer ${breederToken}`)
+                .send({ ...validPostingBody(), petType: 'reptile' })
+                .expect(200);
+
+            const conn = app.get<Connection>(getConnectionToken());
+            const saved = await conn
+                .collection('available_pets')
+                .findOne({ _id: new ObjectId(res.body.data.petId as string) });
+
+            expect(saved?.petType).toBe('dog');
+        });
+
         it('DELETE /drafts/:draftId → 200, 같은 ID 재삭제 → 400', async () => {
             const saved = await request(app.getHttpServer())
                 .post('/api/v2/breeder-pet-posting/drafts')

@@ -24,6 +24,7 @@ const MIN_PHOTOS = 1;
  *   → 다른 브리더 소유 정보 누설 방지를 위해 403 대신 400 으로 통일
  *
  * 입력 필드 화이트리스트는 BreederPetPostingUpdateCommand 가 정의한다.
+ * petType 은 화이트리스트에서 제외한다 — 브리더 1명 = 1축종이라 글 단위로 바꿀 수 없다.
  */
 @Injectable()
 export class UpdateBreederPetPostingUseCase {
@@ -41,6 +42,13 @@ export class UpdateBreederPetPostingUseCase {
         }
 
         const persistData = this.toPersistData(command);
+
+        // 축종은 브리더 계정에 종속된다. 실제로 바꿀 필드가 있을 때 브리더 값으로 함께 재확정해,
+        // petType 이 비어 있던 과거 분양글이 수정 시점에 스스로 복구되게 한다.
+        // (빈 patch 는 기존처럼 소유 여부 확인만 하도록 그대로 둔다)
+        if (Object.keys(persistData).length > 0 && breeder.petType) {
+            persistData.petType = breeder.petType;
+        }
 
         const { changed } = await this.writerPort.updateByOwner(petId, breeder.breederId, persistData);
         if (!changed) {
@@ -78,7 +86,6 @@ export class UpdateBreederPetPostingUseCase {
         if (command.birthDate !== undefined) persist.birthDate = new Date(command.birthDate);
         if (command.price !== undefined) persist.price = command.price;
         if (command.description !== undefined) persist.description = command.description;
-        if (command.petType !== undefined) persist.petType = command.petType;
         if (command.status !== undefined) persist.status = command.status;
         if (command.photos !== undefined) persist.photos = command.photos;
         if (command.representativePhotoIndex !== undefined) {

@@ -26,6 +26,7 @@ import type {
  * 1. 브리더 존재 확인 (StrictRolesGuard 로 role 은 이미 검증됨)
  * 2. 도메인 검증 (사진 개수/대표 인덱스, 접종/검사 상태와 records 상호 배타, 부모 정보 중복)
  * 3. command -> persist data 매핑 후 writer port 로 저장
+ *    (petType 은 클라이언트 입력이 아니라 조회한 브리더 계정의 축종에서 파생한다)
  */
 @Injectable()
 export class CreateBreederPetPostingUseCase {
@@ -48,7 +49,7 @@ export class CreateBreederPetPostingUseCase {
 
         this.validator.validate(command);
 
-        const persistData = this.mapper.toPersistData(breeder.breederId, command);
+        const persistData = this.mapper.toPersistData(breeder, command);
         const result = await this.writerPort.create(persistData);
 
         // 임시저장에서 이어서 등록한 경우 draft 를 정리한다.

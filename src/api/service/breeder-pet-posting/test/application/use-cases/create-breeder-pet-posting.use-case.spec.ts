@@ -35,7 +35,7 @@ describe('CreateBreederPetPostingUseCase', () => {
 
     beforeEach(() => {
         jest.clearAllMocks();
-        profilePort.findById.mockResolvedValue({ breederId: 'breeder-1' });
+        profilePort.findById.mockResolvedValue({ breederId: 'breeder-1', petType: 'reptile' });
         writerPort.create.mockResolvedValue({ petId: 'pet-1' });
         draftPort.deleteByOwner.mockResolvedValue({ deleted: true });
     });
@@ -51,13 +51,14 @@ describe('CreateBreederPetPostingUseCase', () => {
         expect(writerPort.create).not.toHaveBeenCalled();
     });
 
-    it('정상 흐름 — breederId 가 profilePort 결과에서 채워진다', async () => {
+    it('정상 흐름 — breederId/petType 이 profilePort 결과에서 채워진다', async () => {
         const result = await useCase.execute('user-1', validCommand());
 
         expect(profilePort.findById).toHaveBeenCalledWith('user-1');
         expect(writerPort.create).toHaveBeenCalledTimes(1);
         const persistData = writerPort.create.mock.calls[0][0];
         expect(persistData.breederId).toBe('breeder-1');
+        expect(persistData.petType).toBe('reptile');
         expect(persistData.status).toBe('available');
         expect(persistData.vaccinationRecords).toHaveLength(1);
         expect(result).toEqual({ petId: 'pet-1' });
@@ -87,6 +88,22 @@ describe('CreateBreederPetPostingUseCase', () => {
         await useCase.execute('user-1', validCommand());
 
         expect(draftPort.deleteByOwner).not.toHaveBeenCalled();
+    });
+
+    it('petType 은 요청 본문이 아니라 브리더 계정 축종에서 채워진다', async () => {
+        // 탐색 페이지 고양이/강아지 탭이 이 필드로 필터링하므로 등록 시점에 반드시 채워져야 한다
+        profilePort.findById.mockResolvedValueOnce({ breederId: 'breeder-1', petType: 'cat' });
+
+        await useCase.execute('user-1', { ...validCommand(), petType: 'dog' } as BreederPetPostingCreateCommand);
+
+        expect(writerPort.create.mock.calls[0][0].petType).toBe('cat');
+    });
+
+    it('브리더 계정에 축종이 없으면 등록을 거부한다', async () => {
+        profilePort.findById.mockResolvedValueOnce({ breederId: 'breeder-1' });
+
+        await expect(useCase.execute('user-1', validCommand())).rejects.toThrow(BadRequestException);
+        expect(writerPort.create).not.toHaveBeenCalled();
     });
 
     it('draft 삭제가 실패해도 등록 응답은 성공한다 (best effort)', async () => {
