@@ -27,7 +27,8 @@ export interface ProfileReaderPort {
     ): Promise<FavoriteBreedersPageResult>;
 
     /**
-     * 입양자가 특정 브리더를 즐겨찾기했는지 여부 (브리더 공개 프로필 응답의 isFavorited 채움).
+     * 현재 사용자가 특정 브리더를 즐겨찾기했는지 여부 (브리더 공개 프로필 응답의 isFavorited 채움).
+     * userRole 은 조회할 도큐먼트를 가른다 — 입양자는 Adopter, 브리더는 Breeder.
      */
-    isFavoritedBy(adopterId: string, breederId: string): Promise<boolean>;
+    isFavoritedBy(userId: string, breederId: string, userRole?: string): Promise<boolean>;
 }

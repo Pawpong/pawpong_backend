@@ -6,6 +6,9 @@ import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
 import { AvailablePet, AvailablePetDocument } from '../../../../schema/available-pet.schema';
 import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
 
+type FavoriteBreederEntry = { favoriteBreederId: string };
+type FavoriteBreederListProjection = { favoriteBreederList?: FavoriteBreederEntry[] };
+
 /**
  * v2 profile — Mongoose 직접 접근을 캡슐화.
  * adapter 는 본 repository 만 통해 데이터에 접근한다.
@@ -77,15 +80,33 @@ export class ProfileRepository {
         return result;
     }
 
-    async isFavoritedBy(adopterId: string, breederId: string): Promise<boolean> {
-        if (!Types.ObjectId.isValid(adopterId)) return false;
+    async isFavoritedBy(userId: string, breederId: string, userRole?: string): Promise<boolean> {
+        if (!Types.ObjectId.isValid(userId)) return false;
+        const favoriteBreederList = await this.readFavoriteBreederList(userId, userRole);
+        return favoriteBreederList.some((entry) => entry.favoriteBreederId === breederId);
+    }
+
+    /**
+     * 즐겨찾기 목록은 역할별로 다른 도큐먼트에 임베드된다.
+     * 입양자는 Adopter.favoriteBreederList, 브리더는 Breeder.favoriteBreederList 를 읽는다
+     * (AdopterProfileAdapter 의 쓰기 경로 분기와 같은 규칙이라 읽기/쓰기가 같은 곳을 본다).
+     */
+    private async readFavoriteBreederList(userId: string, userRole?: string): Promise<FavoriteBreederEntry[]> {
+        if (userRole === 'breeder') {
+            const breeder = await this.breederModel
+                .findById(userId)
+                .select({ favoriteBreederList: 1 })
+                .lean<FavoriteBreederListProjection>()
+                .exec();
+            return breeder?.favoriteBreederList ?? [];
+        }
+
         const adopter = await this.adopterModel
-            .findById(adopterId)
+            .findById(userId)
             .select({ favoriteBreederList: 1 })
-            .lean<{ favoriteBreederList?: Array<{ favoriteBreederId: string }> }>()
+            .lean<FavoriteBreederListProjection>()
             .exec();
-        if (!adopter?.favoriteBreederList) return false;
-        return adopter.favoriteBreederList.some((entry) => entry.favoriteBreederId === breederId);
+        return adopter?.favoriteBreederList ?? [];
     }
 
     /**

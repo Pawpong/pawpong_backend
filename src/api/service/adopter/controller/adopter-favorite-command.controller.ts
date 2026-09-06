@@ -11,6 +11,14 @@ import { FavoriteRemoveResponseDto } from '../dto/response/favorite-remove-respo
 import { ADOPTER_RESPONSE_MESSAGES } from '../constants/adopter-response-messages';
 import { ApiAddAdopterFavoriteEndpoint, ApiRemoveAdopterFavoriteEndpoint } from '../swagger/index';
 
+/**
+ * 브리더 즐겨찾기 추가/제거.
+ *
+ * RolesGuard 의 breeder → adopter fallback 때문에 브리더도 이 컨트롤러를 호출한다.
+ * 저장소가 역할에 따라 Adopter.favoriteBreederList / Breeder.favoriteBreederList 로 갈리므로
+ * 현재 사용자의 role 을 반드시 유스케이스까지 전달해야 한다.
+ * (누락하면 브리더 id 를 adopters 컬렉션에서 찾다가 "입양자 정보를 찾을 수 없습니다." 로 실패한다)
+ */
 @AdopterProtectedController()
 export class AdopterFavoriteCommandController {
     constructor(
@@ -23,9 +31,10 @@ export class AdopterFavoriteCommandController {
     @ApiAddAdopterFavoriteEndpoint()
     async addFavorite(
         @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
         @Body() addFavoriteDto: FavoriteAddRequestDto,
     ): Promise<ApiResponseDto<FavoriteAddResponseDto>> {
-        const result = await this.addFavoriteBreederUseCase.execute(userId, addFavoriteDto);
+        const result = await this.addFavoriteBreederUseCase.execute(userId, addFavoriteDto, role);
         return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.favoriteAdded);
     }
 
@@ -33,9 +42,10 @@ export class AdopterFavoriteCommandController {
     @ApiRemoveAdopterFavoriteEndpoint()
     async removeFavorite(
         @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
         @Param('breederId') breederId: string,
     ): Promise<ApiResponseDto<FavoriteRemoveResponseDto>> {
-        const result = await this.removeFavoriteBreederUseCase.execute(userId, breederId);
+        const result = await this.removeFavoriteBreederUseCase.execute(userId, breederId, role);
         return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.favoriteRemoved);
     }
 }

@@ -144,50 +144,15 @@ jobs:
                   echo "❌ 외부 헬스체크 실패"
                   exit 1
 
-            - name: Discord Notification (Success)
-              if: success()
-              run: |
-                  COMMIT_MSG=$(git log -1 --pretty=%B | head -1)
-                  COMMIT_AUTHOR=$(git log -1 --pretty=%an)
-                  COMMIT_SHA=$(git rev-parse --short HEAD)
-
-                  curl -H "Content-Type: application/json" -X POST \
-                    -d "{
-                      \"embeds\": [{
-                        \"title\": \"✅ Dev 서버 배포 성공\",
-                        \"description\": \"Dev 브랜치가 Mac Mini(ubuntu-pawpong)에 배포되었습니다.\",
-                        \"color\": 5763719,
-                        \"fields\": [
-                          {\"name\": \"URL\", \"value\": \"https://dev-api.pawpong.kr\", \"inline\": true},
-                          {\"name\": \"서버\", \"value\": \"Mac Mini (colding)\", \"inline\": true},
-                          {\"name\": \"커밋\", \"value\": \"\`$COMMIT_SHA\` by $COMMIT_AUTHOR\", \"inline\": false},
-                          {\"name\": \"메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false}
-                        ],
-                        \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                      }]
-                    }" \
-                    ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
-
-            - name: Discord Notification (Failure)
-              if: failure()
-              run: |
-                  COMMIT_MSG=$(git log -1 --pretty=%B | head -1)
-                  COMMIT_AUTHOR=$(git log -1 --pretty=%an)
-                  COMMIT_SHA=$(git rev-parse --short HEAD)
-
-                  curl -H "Content-Type: application/json" -X POST \
-                    -d "{
-                      \"embeds\": [{
-                        \"title\": \"❌ Dev 서버 배포 실패\",
-                        \"description\": \"Dev 브랜치 배포 중 오류 발생.\",
-                        \"color\": 15158332,
-                        \"fields\": [
-                          {\"name\": \"서버\", \"value\": \"Mac Mini (colding)\", \"inline\": true},
-                          {\"name\": \"커밋\", \"value\": \"\`$COMMIT_SHA\` by $COMMIT_AUTHOR\", \"inline\": false},
-                          {\"name\": \"메시지\", \"value\": \"$COMMIT_MSG\", \"inline\": false},
-                          {\"name\": \"Actions 로그\", \"value\": \"[보기](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})\", \"inline\": false}
-                        ],
-                        \"timestamp\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
-                      }]
-                    }" \
-                    ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+            - name: Send standardized deployment result
+              if: always()
+              env:
+                  APP_ENV: development
+                  DEPLOY_SERVICE: backend
+                  DEPLOY_COMMIT: ${{ github.sha }}
+                  DEPLOY_STATUS: ${{ job.status }}
+                  DEPLOY_HEALTH: ${{ job.status == 'success' && 'passed deployment readiness checks' || 'not verified; inspect workflow log' }}
+                  DEPLOY_RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                  DISCORD_DEPLOY_WEBHOOK_URL: ${{ secrets.DISCORD_DEPLOY_WEBHOOK_URL }}
+                  DISCORD_DEV_DEPLOY_WEBHOOK_URL: ${{ secrets.DISCORD_DEV_DEPLOY_WEBHOOK_URL }}
+              run: python3 ops/observability/notify.py

@@ -1,3 +1,4 @@
+/* eslint @typescript-eslint/unbound-method: "off" -- Jest mock 호출 이력 matcher에 메서드 참조를 전달함. */
 import { NotifyCriticalErrorUseCase } from '../../../application/use-cases/notify-critical-error.use-case';
 import { DiscordErrorAlertPolicyService } from '../../../domain/services/discord-error-alert-policy.service';
 import { DiscordErrorAlertPort } from '../../../application/ports/discord-error-alert.port';
@@ -104,5 +105,28 @@ describe('NotifyCriticalErrorUseCase', () => {
         expect(first).toEqual({ sent: true });
         expect(second).toEqual({ sent: false, reason: 'cooldown' });
         expect(errorAlertPort.sendCriticalErrorAlert).toHaveBeenCalledTimes(1);
+    });
+    it('추가 요청 없이도 억제된 오류를 건수로 요약한다', async () => {
+        const r = { severity: 'critical' as const, context: 'API', message: 'failed', statusCode: 500 };
+        await useCase.execute(r, new Date('2026-04-16T00:00:00Z'));
+        await useCase.execute(r, new Date('2026-04-16T00:01:00Z'));
+        await useCase.execute(r, new Date('2026-04-16T00:02:00Z'));
+        await useCase.flush(new Date('2026-04-16T00:06:00Z'));
+        expect(errorAlertPort.sendCriticalErrorAlert).toHaveBeenCalledTimes(2);
+        expect(errorAlertPort.sendCriticalErrorAlert.mock.calls[1][0].metadata).toMatchObject({
+            occurrences: 2,
+            totalOccurrences: 3,
+            summary: true,
+        });
+    });
+    it('개발 환경은 운영 env가 함께 있어도 필터링한다', async () => {
+        process.env.APP_ENV = 'development';
+        try {
+            expect((await useCase.execute({ severity: 'critical', context: 'API', message: 'failed' })).reason).toBe(
+                'filtered',
+            );
+        } finally {
+            delete process.env.APP_ENV;
+        }
     });
 });

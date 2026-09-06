@@ -7,6 +7,8 @@ import { GetFaqsUseCase } from '../../application/use-cases/get-faqs.use-case';
 import { SUPPORT_AGENT_PORT } from '../../application/ports/support-agent.port';
 import { SupportRateLimitGuard } from '../../decorator/support-rate-limit.guard';
 import type { SupportInquiryResponseDto } from '../../dto/response/support-inquiry-response.dto';
+import { SUPPORT_LOG_PORT } from '../../application/ports/support-log.port';
+import { SubmitSupportFeedbackUseCase } from '../../application/use-cases/submit-support-feedback.use-case';
 
 const dataOf = (response: { body: unknown }): SupportInquiryResponseDto =>
     (response.body as { data: SupportInquiryResponseDto }).data;
@@ -15,7 +17,9 @@ describe('AI 문의 HTTP 계약', () => {
     let app: INestApplication;
     const selectFaqs = jest.fn();
     const execute = jest.fn();
+    const record = jest.fn();
     beforeEach(async () => {
+        record.mockReset().mockResolvedValue(undefined);
         selectFaqs.mockReset().mockResolvedValue(['faq-1']);
         execute
             .mockReset()
@@ -25,6 +29,8 @@ describe('AI 문의 HTTP 계약', () => {
             providers: [
                 AnswerSupportInquiryUseCase,
                 SupportRateLimitGuard,
+                SubmitSupportFeedbackUseCase,
+                { provide: SUPPORT_LOG_PORT, useValue: { record } },
                 { provide: GetFaqsUseCase, useValue: { execute } },
                 { provide: SUPPORT_AGENT_PORT, useValue: { selectFaqs } },
             ],
@@ -61,10 +67,13 @@ describe('AI 문의 HTTP 계약', () => {
         selectFaqs.mockResolvedValue([]);
         const result = await send().expect(200);
         expect(dataOf(result)).toEqual({ sources: [], needsHumanSupport: true });
+        expect(record).toHaveBeenCalledWith(expect.objectContaining({ kind: 'ai_no_match', userType: 'adopter' }));
+        expect(JSON.stringify(record.mock.calls)).not.toContain('어떻게 입양해요');
     });
     it('Agent 장애는 정상 답변으로 위장하지 않는다', async () => {
         selectFaqs.mockRejectedValue(new ServiceUnavailableException());
         await send().expect(503);
+        expect(record).toHaveBeenCalledWith(expect.objectContaining({ kind: 'ai_error' }));
     });
     it('동일 출처 중복 제거', async () => {
         selectFaqs.mockResolvedValue(['faq-1', 'faq-1']);
@@ -75,5 +84,48 @@ describe('AI 문의 HTTP 계약', () => {
         for (let i = 0; i < 5; i++) await send().expect(200);
         await send().expect(429);
         expect(selectFaqs).toHaveBeenCalledTimes(5);
+    });
+
+    it('AI 관측 저장 장애가 FAQ 응답을 막지 않는다', async () => {
+        selectFaqs.mockResolvedValue([]);
+        record.mockRejectedValue(new Error('database unavailable'));
+        await send().expect(200);
+    });
+
+    it('피드백을 저장한 뒤 접수번호를 반환하고 AI 호출은 하지 않는다', async () => {
+        const response = await request(app.getHttpServer())
+            .post('/v2/home/support/feedback')
+            .send({ question: '  오류 제보  ', userType: 'breeder' })
+            .expect(200);
+        const receiptId = (response.body as { data: { receiptId: string } }).data.receiptId;
+        expect(receiptId).toMatch(/^[a-f0-9-]{36}$/);
+        expect(record).toHaveBeenCalledWith({
+            eventId: receiptId,
+            kind: 'feedback',
+            message: '오류 제보',
+            userType: 'breeder',
+        });
+        expect(selectFaqs).not.toHaveBeenCalled();
+    });
+
+    it('피드백 저장 실패를 접수 성공으로 표시하지 않는다', async () => {
+        record.mockRejectedValue(new Error('database unavailable'));
+        await request(app.getHttpServer())
+            .post('/v2/home/support/feedback')
+            .send({ question: '오류 제보', userType: 'adopter' })
+            .expect(503);
+    });
+
+    it('피드백도 검증과 요청 제한을 적용한다', async () => {
+        await request(app.getHttpServer())
+            .post('/v2/home/support/feedback')
+            .send({ question: '', userType: 'admin' })
+            .expect(400);
+        expect(record).not.toHaveBeenCalled();
+        for (let i = 0; i < 4; i++) await send().expect(200);
+        await request(app.getHttpServer())
+            .post('/v2/home/support/feedback')
+            .send({ question: '제보', userType: 'adopter' })
+            .expect(429);
     });
 });

@@ -179,7 +179,12 @@ export class CreateBreederPetPostingRequestDto {
     @Max(9)
     representativePhotoIndex?: number;
 
-    @ApiPropertyOptional({ description: '동물 종류 (강아지/고양이/도마뱀)', enum: ['dog', 'cat', 'reptile'] })
+    @ApiPropertyOptional({
+        description:
+            '[deprecated] 동물 종류. 서버가 글쓴 브리더 계정의 축종으로 채우므로 요청 값은 무시된다. (브리더 1명 = 1축종)',
+        enum: ['dog', 'cat', 'reptile'],
+        deprecated: true,
+    })
     @IsOptional()
     @IsEnum(['dog', 'cat', 'reptile'])
     petType?: 'dog' | 'cat' | 'reptile';

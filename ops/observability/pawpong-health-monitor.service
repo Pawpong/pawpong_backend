@@ -1,0 +1,10 @@
+[Unit]
+Description=Pawpong health and recovery alerts
+After=docker.service network-online.target
+[Service]
+Type=oneshot
+User=colding
+WorkingDirectory=/home/colding/pawpong_backend
+ExecStart=/usr/bin/python3 /home/colding/pawpong_backend/ops/observability/health-monitor.py
+TimeoutStartSec=90
+UMask=0077

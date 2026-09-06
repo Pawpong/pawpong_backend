@@ -1,0 +1,10 @@
+[Unit]
+Description=Pawpong Sentry free plan Discord relay
+After=network-online.target
+[Service]
+Type=oneshot
+User=colding
+WorkingDirectory=/home/colding/pawpong_backend
+ExecStart=/usr/bin/python3 /home/colding/pawpong_backend/ops/observability/sentry-monitor.py
+TimeoutStartSec=240
+UMask=0077

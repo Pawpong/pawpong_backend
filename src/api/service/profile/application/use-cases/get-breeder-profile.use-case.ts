@@ -7,8 +7,9 @@ import type { BreederPublicProfileResult } from '../types/profile-result.type';
 
 /**
  * GET /v2/profile/breeders/:breederId — 브리더 공개 프로필 (브리더홈).
- * isFavorited 는 로그인한 입양자에게만, isFollowing 은 로그인 사용자 누구에게나 채워준다.
- * (비로그인/본인 호출은 false)
+ * isFavorited 는 로그인한 입양자·브리더 모두에게 채워준다 — 브리더도 다른 브리더를 즐겨찾기할 수 있고
+ * (POST /v2/adopter/favorite), 저장 위치만 Breeder.favoriteBreederList 로 갈릴 뿐이다.
+ * isFollowing 은 로그인 사용자 누구에게나 채워준다. (비로그인/본인 호출은 false)
  */
 @Injectable()
 export class GetBreederProfileUseCase {
@@ -25,8 +26,8 @@ export class GetBreederProfileUseCase {
         if (!breeder) throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
 
         const [isFavorited, isFollowing] = await Promise.all([
-            viewerUserId && viewerRole === 'adopter'
-                ? this.reader.isFavoritedBy(viewerUserId, breederId)
+            viewerUserId && (viewerRole === 'adopter' || viewerRole === 'breeder')
+                ? this.reader.isFavoritedBy(viewerUserId, breederId, viewerRole)
                 : Promise.resolve(false),
             viewerUserId && viewerUserId !== breederId
                 ? this.follow.isFollowing(viewerUserId, breederId)

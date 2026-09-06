@@ -1,3 +1,4 @@
+/* eslint @typescript-eslint/unbound-method: "off" -- Jest mock 호출 이력 matcher에 메서드 참조를 전달함. */
 import axios from 'axios';
 import { ConfigService } from '@nestjs/config';
 
@@ -16,6 +17,7 @@ describe('DiscordErrorAlertAdapter', () => {
         mockedAxios.post.mockResolvedValue({ data: {} });
         configService = {
             get: jest.fn((key: string) => {
+                if (key === 'NODE_ENV') return 'production';
                 if (key === 'DISCORD_ERROR_WEBHOOK_URL') return 'https://discord.test/error-webhook';
                 return undefined;
             }),
@@ -51,13 +53,14 @@ describe('DiscordErrorAlertAdapter', () => {
             expect.objectContaining({
                 embeds: [
                     expect.objectContaining({
-                        title: '🚨 Critical 서버 에러',
+                        title: '[production] 🚨 Critical 서버 에러',
                         color: 0xf44336,
                         description: 'DB connection failed',
                         timestamp: '2026-04-16T00:00:00.000Z',
                     }),
                 ],
             }),
+            { timeout: 8000, maxRedirects: 0 },
         );
         expect(logger.logSuccess).toHaveBeenCalled();
     });
@@ -69,11 +72,13 @@ describe('DiscordErrorAlertAdapter', () => {
             logger as unknown as CustomLoggerService,
         );
 
-        await adapter.sendCriticalErrorAlert({
-            severity: 'critical',
-            context: 'AllExceptionsFilter',
-            message: 'DB connection failed',
-        });
+        await expect(
+            adapter.sendCriticalErrorAlert({
+                severity: 'critical',
+                context: 'AllExceptionsFilter',
+                message: 'DB connection failed',
+            }),
+        ).rejects.toThrow('discord_error_webhook_not_configured');
 
         expect(mockedAxios.post).not.toHaveBeenCalled();
         expect(logger.logWarning).toHaveBeenCalledWith(

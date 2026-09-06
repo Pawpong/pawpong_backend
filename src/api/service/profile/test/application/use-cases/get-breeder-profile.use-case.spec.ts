@@ -56,8 +56,20 @@ describe('GetBreederProfileUseCase', () => {
         expect(follow.isFollowing).not.toHaveBeenCalled();
     });
 
-    it('로그인 브리더가 보면 isFavorited=false (입양자만 즐겨찾기 가능)', async () => {
+    it('로그인 브리더도 isFavorited 를 채운다 — 조회는 브리더 도큐먼트 기준', async () => {
+        // 브리더도 다른 브리더를 즐겨찾기할 수 있고 저장 위치만 Breeder.favoriteBreederList 로 갈린다.
+        // role 을 넘기지 않으면 adopters 컬렉션을 보게 되어 항상 false 가 된다.
+        reader.isFavoritedBy.mockResolvedValueOnce(true);
+
         const result = await useCase.execute('b-1', 'viewer-1', 'breeder');
+
+        expect(reader.isFavoritedBy).toHaveBeenCalledWith('viewer-1', 'b-1', 'breeder');
+        expect(result.isFavorited).toBe(true);
+    });
+
+    it('지원하지 않는 role 은 즐겨찾기 조회를 하지 않는다', async () => {
+        const result = await useCase.execute('b-1', 'admin-1', 'admin');
+
         expect(result.isFavorited).toBe(false);
         expect(reader.isFavoritedBy).not.toHaveBeenCalled();
     });
@@ -78,7 +90,7 @@ describe('GetBreederProfileUseCase', () => {
     it('로그인 입양자라면 isFavoritedBy 결과를 isFavorited 에 채운다', async () => {
         reader.isFavoritedBy.mockResolvedValueOnce(true);
         const result = await useCase.execute('b-1', 'adopter-1', 'adopter');
-        expect(reader.isFavoritedBy).toHaveBeenCalledWith('adopter-1', 'b-1');
+        expect(reader.isFavoritedBy).toHaveBeenCalledWith('adopter-1', 'b-1', 'adopter');
         expect(result.isFavorited).toBe(true);
     });
 });

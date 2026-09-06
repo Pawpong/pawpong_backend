@@ -1,3 +1,4 @@
+/* eslint @typescript-eslint/unbound-method: "off" -- Jest mock 호출 이력 matcher에 메서드 참조를 전달함. */
 import { CallHandler, ExecutionContext } from '@nestjs/common';
 import { of } from 'rxjs';
 
@@ -5,13 +6,13 @@ import { LoggingInterceptor } from '../logging.interceptor';
 import { CustomLoggerService } from '../../logger/custom-logger.service';
 
 describe('LoggingInterceptor', () => {
-    it('고객지원 문의 원문은 로그에 남기지 않는다', () => {
+    it.each(['inquiry', 'feedback'])('고객지원 %s 원문은 로그에 남기지 않는다', (route) => {
         const log = jest.fn();
         const interceptor = new LoggingInterceptor({ log } as unknown as CustomLoggerService);
         interceptor.intercept(
             createContext({
                 method: 'POST',
-                url: '/api/v2/home/support/inquiry?source=faq',
+                url: '/api/v2/home/support/' + route + '?source=faq',
                 ip: '127.0.0.1',
                 headers: {},
                 cookies: {},
@@ -51,7 +52,7 @@ describe('LoggingInterceptor', () => {
             next,
         );
 
-        const output = (logger.log as jest.Mock).mock.calls.map(([message]) => message).join('\n');
+        const output = (logger.log as jest.Mock).mock.calls.map(([message]: [unknown]) => String(message)).join('\n');
         expect(output).toContain('Token: [REDACTED]');
         expect(output).not.toContain(accessToken);
         expect(next.handle).toHaveBeenCalledTimes(1);

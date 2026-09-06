@@ -11,6 +11,13 @@ import { CustomLoggerService } from '../logger/custom-logger.service';
  */
 @Injectable()
 export class DiscordWebhookService {
+    /** 운영 사용자 알림이 개발 환경에서 발송되지 않도록 차단한다. */
+    private productionWebhook(key: string): string {
+        const environment =
+            this.configService.get<string>('APP_ENV') || this.configService.get<string>('NODE_ENV') || 'development';
+        return environment === 'production' ? this.configService.get<string>(key) || '' : '';
+    }
+
     private readonly signWebhookUrl: string;
     private readonly documentWebhookUrl: string;
     private readonly suppressExternalWarnings: boolean;
@@ -19,8 +26,8 @@ export class DiscordWebhookService {
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
     ) {
-        this.signWebhookUrl = this.configService.get<string>('DISCORD_SIGN_WEBHOOK_URL') || '';
-        this.documentWebhookUrl = this.configService.get<string>('DISCORD_DOCUMENT_WEBHOOK_URL') || '';
+        this.signWebhookUrl = this.productionWebhook('DISCORD_SIGN_WEBHOOK_URL');
+        this.documentWebhookUrl = this.productionWebhook('DISCORD_DOCUMENT_WEBHOOK_URL');
         this.suppressExternalWarnings =
             this.configService.get<string>('PAWPONG_SUPPRESS_EXTERNAL_WARNINGS') === 'true' ||
             process.env.PAWPONG_SUPPRESS_EXTERNAL_WARNINGS === 'true';
@@ -402,7 +409,7 @@ export class DiscordWebhookService {
         reasonDetail?: string;
         deletedAt: Date;
     }): Promise<void> {
-        const withdrawalWebhookUrl = this.configService.get<string>('DISCORD_WITHDRAWAL_WEBHOOK_URL') || '';
+        const withdrawalWebhookUrl = this.productionWebhook('DISCORD_WITHDRAWAL_WEBHOOK_URL');
 
         if (!withdrawalWebhookUrl) {
             this.logger.logWarning(
