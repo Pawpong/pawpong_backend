@@ -6,10 +6,10 @@
 #   - Blue/Green (평시 하나만 활성):   1.5GB
 #   - Redis:                          512MB
 #   - Grafana 256 + Loki 256 + Promtail 128: 640MB
-#   - Kafka 프로필: Zookeeper 256 + Kafka 512 + AI Agent 768: 1.5GB
+#   - Kafka 프로필: Zookeeper 256 + Kafka 1024 + AI Agent 768: 2GB
 #   ------------------------------------------------------------
-#   평시 합계: ~5.2GB
-#   Blue-Green 스왑 순간 +1.5GB = ~6.7GB — 8GB 안이지만 여유가 크지 않다.
+#   평시 합계: ~5.7GB
+#   Blue-Green 스왑 순간 +1.5GB = ~7.2GB — 8GB 안이지만 여유가 크지 않다.
 #   그래서 kafka-ui(256MB)는 운영 기본 프로필에서 뺐다(profile: kafka-ui).
 #
 # 사용법:
@@ -32,7 +32,7 @@ services:
         build: .
         container_name: pawpong_blue
         ports:
-            - '8080:8080'
+            - '127.0.0.1:8080:8080'
         env_file:
             - .env.production
         environment:
@@ -76,7 +76,7 @@ services:
         build: .
         container_name: pawpong_green
         ports:
-            - '8081:8080'
+            - '127.0.0.1:8081:8080'
         env_file:
             - .env.production
         environment:
@@ -273,7 +273,7 @@ services:
         depends_on:
             - zookeeper
         ports:
-            - '9092:9092'
+            - '127.0.0.1:9092:9092'
         environment:
             KAFKA_BROKER_ID: 1
             KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
@@ -286,7 +286,7 @@ services:
             KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
             KAFKA_LOG_RETENTION_HOURS: 168
             KAFKA_LOG_RETENTION_BYTES: 1073741824
-            KAFKA_HEAP_OPTS: '-Xmx384m -Xms384m'  # 힙 메모리 제한
+            KAFKA_HEAP_OPTS: '-Xmx384m -Xms256m'  # 네이티브 메모리와 헬스체크 JVM 여유 확보
         volumes:
             - kafka_data:/var/lib/kafka/data
         restart: unless-stopped
@@ -295,11 +295,11 @@ services:
         deploy:
             resources:
                 limits:
-                    memory: 512M
+                    memory: 1024M
                 reservations:
                     memory: 256M
         healthcheck:
-            test: [ 'CMD-SHELL', 'kafka-broker-api-versions --bootstrap-server localhost:9092 || exit 1' ]
+            test: [ 'CMD-SHELL', 'KAFKA_HEAP_OPTS="-Xms16m -Xmx64m" kafka-broker-api-versions --bootstrap-server localhost:9092 >/dev/null || exit 1' ]
             interval: 30s
             timeout: 10s
             retries: 5

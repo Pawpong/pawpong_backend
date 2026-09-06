@@ -64,7 +64,21 @@ fi
 
 echo -e "${BLUE}Deploying to ${NEW_CONTAINER} container...${NC}"
 
-# 기존 Kafka는 재생성하지 않는다. 동일 커밋의 Agent가 먼저 준비되어야 한다.
+# 설정이 바뀐 경우에만 Kafka를 재생성한다. 데이터 볼륨은 유지하며 준비 후 앱을 교체한다.
+docker compose --profile kafka up -d --no-deps zookeeper kafka
+KAFKA_READY=false
+for i in {1..60}; do
+    if [ "$(docker inspect --format '{{.State.Health.Status}}' kafka)" = healthy ]; then
+        KAFKA_READY=true
+        break
+    fi
+    sleep 2
+done
+if [ "$KAFKA_READY" != true ]; then
+    echo 'Kafka readiness failed; keeping the existing backend active.'
+    exit 1
+fi
+# 동일 커밋의 Agent가 먼저 준비되어야 한다.
 docker compose --profile kafka up -d --no-deps --no-build ai-agent
 AGENT_READY=false
 for i in {1..30}; do
