@@ -45,6 +45,14 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; bo
         title: '{breederName}님과의 상담이 완료되었어요!',
         body: '어떠셨는지 후기를 남겨주세요.',
     },
+    [NotificationType.ADOPTION_APPROVED]: {
+        title: '{breederName}님과의 입양이 확정됐어요!',
+        body: '축하드려요! 반려 생활 후기도 꼭 남겨주세요.',
+    },
+    [NotificationType.ADOPTION_REJECTED]: {
+        title: '입양 신청 결과를 안내드려요',
+        body: '{breederName}님과의 신청이 이번엔 아쉽게 연결되지 못했어요.',
+    },
     [NotificationType.DOCUMENT_REMINDER]: {
         title: '📄 브리더 입점 절차가 아직 완료되지 않았어요!',
         body: '필요한 서류들을 제출하시면 입양자에게 프로필이 공개됩니다.',

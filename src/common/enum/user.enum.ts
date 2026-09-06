@@ -149,6 +149,8 @@ export enum NotificationType {
     NEW_CONSULT_REQUEST = 'new_consult_request', // 새로운 상담 신청 (브리더가 받음)
     CONSULT_REQUEST_CONFIRMED = 'consult_request_confirmed', // 상담 신청 확인 (신청자가 받음)
     CONSULT_COMPLETED = 'consult_completed', // 상담 완료
+    ADOPTION_APPROVED = 'adoption_approved', // 입양 확정 (신청자가 받음)
+    ADOPTION_REJECTED = 'adoption_rejected', // 입양 신청 거절 (신청자가 받음)
 
     // 리마인드 관련
     DOCUMENT_REMINDER = 'document_reminder', // 서류 미제출 리마인드 (입점 심사 독촉)

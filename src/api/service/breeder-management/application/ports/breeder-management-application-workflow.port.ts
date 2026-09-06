@@ -18,10 +18,11 @@ export interface BreederManagementApplicationRecord {
     breederNotes?: string;
 }
 
-export interface BreederManagementConsultationCompletedNotificationCommand {
+export interface BreederManagementApplicationStatusNotificationCommand {
     breederId: string;
     adopterId: string;
     applicationId: string;
+    status: ApplicationStatus;
 }
 
 export interface BreederManagementApplicationChatRoomCommand {
@@ -37,7 +38,7 @@ export interface BreederManagementApplicationWorkflowPort {
     ): Promise<BreederManagementApplicationRecord | null>;
     updateStatus(applicationId: string, status: ApplicationStatus): Promise<void>;
     incrementCompletedAdoptions(breederId: string): Promise<void>;
-    notifyConsultationCompleted(command: BreederManagementConsultationCompletedNotificationCommand): Promise<void>;
+    notifyApplicationStatusChanged(command: BreederManagementApplicationStatusNotificationCommand): Promise<void>;
 
     /**
      * 입양 확정 시각을 신청서에 기록한다. (adoption_approved 전이와 같은 시각을 쓴다)

@@ -17,13 +17,51 @@ import {
 import type {
     BreederManagementApplicationChatRoomCommand,
     BreederManagementApplicationRecord,
+    BreederManagementApplicationStatusNotificationCommand,
     BreederManagementApplicationWorkflowPort,
-    BreederManagementConsultationCompletedNotificationCommand,
 } from '../application/ports/breeder-management-application-workflow.port';
 import { AdoptionApplicationRepository } from '../repository/adoption-application.repository';
 import { AvailablePetManagementRepository } from '../repository/available-pet-management.repository';
 import { BreederManagementAdopterRepository } from '../repository/breeder-management-adopter.repository';
 import { BreederRepository } from '../repository/breeder.repository';
+
+// 신청 상태별 알림 문구 — 상담완료/입양확정/거절 셋 다 입양자에게 알림을 보낸다.
+// (거절은 대상 status가 없으니 여기 없는 상태면 알림을 보내지 않는다)
+const STATUS_NOTIFICATION_CONTENT: Partial<
+    Record<
+        ApplicationStatus,
+        {
+            notificationType: NotificationType;
+            emailSubject: (breederName: string) => string;
+            emailHeading: string;
+            emailBody: (breederName: string) => string;
+            ctaLabel: string;
+        }
+    >
+> = {
+    [ApplicationStatus.CONSULTATION_COMPLETED]: {
+        notificationType: NotificationType.CONSULT_COMPLETED,
+        emailSubject: (breederName) => `${breederName}님과의 상담이 완료되었어요!`,
+        emailHeading: '🐾 상담이 완료되었습니다!',
+        emailBody: (breederName) => `${breederName}님과의 상담이 완료되었어요. 어떠셨는지 후기를 남겨주세요!`,
+        ctaLabel: '후기 작성하기',
+    },
+    [ApplicationStatus.ADOPTION_APPROVED]: {
+        notificationType: NotificationType.ADOPTION_APPROVED,
+        emailSubject: (breederName) => `${breederName}님과의 입양이 확정됐어요!`,
+        emailHeading: '🎉 입양이 확정됐습니다!',
+        emailBody: (breederName) =>
+            `${breederName}님과의 입양이 확정됐어요. 축하드려요! 반려 생활 후기도 꼭 남겨주세요.`,
+        ctaLabel: '후기 작성하기',
+    },
+    [ApplicationStatus.ADOPTION_REJECTED]: {
+        notificationType: NotificationType.ADOPTION_REJECTED,
+        emailSubject: () => '입양 신청 결과를 안내드려요',
+        emailHeading: '신청 결과를 안내드려요',
+        emailBody: (breederName) => `${breederName}님과의 신청이 이번엔 아쉽게 연결되지 못했어요.`,
+        ctaLabel: '신청 확인하기',
+    },
+};
 
 @Injectable()
 export class BreederManagementApplicationWorkflowAdapter implements BreederManagementApplicationWorkflowPort {
@@ -92,9 +130,12 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
         }
     }
 
-    async notifyConsultationCompleted(
-        command: BreederManagementConsultationCompletedNotificationCommand,
+    async notifyApplicationStatusChanged(
+        command: BreederManagementApplicationStatusNotificationCommand,
     ): Promise<void> {
+        const content = STATUS_NOTIFICATION_CONTENT[command.status];
+        if (!content) return;
+
         try {
             const breeder = await this.breederRepository.findById(command.breederId);
             const adopter = await this.breederManagementAdopterRepository.findById(command.adopterId);
@@ -121,38 +162,40 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
             this.logger.log(`[updateApplicationStatus] 알림 발송 대상 입양자 ID: ${command.adopterId}`);
 
             const breederDisplayName = breeder.name || breeder.nickname || '브리더';
+            // 프론트 실제 라우트는 /activity/applications/{id} — 예전에 /applications/{id}로 나가 404났었다.
+            const targetPath = `/activity/applications/${command.applicationId}`;
 
             await this.notificationDispatchPort.createNotification(
                 command.adopterId,
                 'adopter',
-                NotificationType.CONSULT_COMPLETED,
+                content.notificationType,
                 {
                     breederId: command.breederId,
                     breederName: breederDisplayName,
                     applicationId: command.applicationId,
                 },
-                `/applications/${command.applicationId}`,
+                targetPath,
             );
 
-            this.logger.logSuccess('updateApplicationStatus', '상담 완료 인앱 알림 발송 완료', {
+            this.logger.logSuccess('updateApplicationStatus', '신청 상태 변경 인앱 알림 발송 완료', {
                 adopterId: command.adopterId,
                 breederName: breederDisplayName,
+                status: command.status,
             });
 
             const appUrl = this.configService.get('APP_URL', 'https://pawpong.com');
             this.mailService
                 .sendMail({
                     to: adopter.emailAddress,
-                    subject: `${breederDisplayName}님과의 상담이 완료되었어요!`,
+                    subject: content.emailSubject(breederDisplayName),
                     html: `
                                 <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-                                    <h2 style="color: #4F3B2E;">🐾 상담이 완료되었습니다!</h2>
-                                    <p>${breederDisplayName}님과의 상담이 완료되었어요.</p>
-                                    <p>어떠셨는지 후기를 남겨주세요!</p>
+                                    <h2 style="color: #4F3B2E;">${content.emailHeading}</h2>
+                                    <p>${content.emailBody(breederDisplayName)}</p>
                                     <div style="margin: 30px 0;">
-                                        <a href="${appUrl}/applications/${command.applicationId}"
+                                        <a href="${appUrl}${targetPath}"
                                            style="background-color: #4F3B2E; color: white; padding: 12px 30px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                                            후기 작성하기
+                                            ${content.ctaLabel}
                                         </a>
                                     </div>
                                     <p style="color: #666; font-size: 12px;">
@@ -162,18 +205,18 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
                             `,
                 })
                 .then(() => {
-                    this.logger.logSuccess('updateApplicationStatus', '상담 완료 이메일 발송 완료', {
+                    this.logger.logSuccess('updateApplicationStatus', '신청 상태 변경 이메일 발송 완료', {
                         adopterEmail: adopter.emailAddress,
                         breederName: breeder.name,
                     });
                 })
                 .catch((emailError) => {
-                    this.logger.logWarning('updateApplicationStatus', '상담 완료 이메일 발송 실패', {
+                    this.logger.logWarning('updateApplicationStatus', '신청 상태 변경 이메일 발송 실패', {
                         error: emailError,
                     });
                 });
         } catch (error) {
-            this.logger.logError('updateApplicationStatus', '상담 완료 알림 발송 실패', error);
+            this.logger.logError('updateApplicationStatus', '신청 상태 변경 알림 발송 실패', error);
         }
     }
 }

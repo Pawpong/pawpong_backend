@@ -43,16 +43,15 @@ export class UpdateBreederManagementApplicationStatusUseCase {
             await this.finalizeAdoption(userId, applicationId, application);
         }
 
-        this.logger.log(
-            `[updateApplicationStatus] 상담 완료 체크: ${updateData.status} === ${ApplicationStatus.CONSULTATION_COMPLETED} ? ${updateData.status === ApplicationStatus.CONSULTATION_COMPLETED}`,
-        );
-
-        if (updateData.status === ApplicationStatus.CONSULTATION_COMPLETED) {
-            this.logger.log('[updateApplicationStatus] 상담 완료 알림 발송 시작');
-            await this.breederManagementApplicationWorkflowPort.notifyConsultationCompleted({
+        // 대기 상태로 되돌아가는 경우는 없으니, 나머지 세 상태는 전부 입양자에게 알린다
+        // (상담완료/입양확정/거절 — 해당 상태에 알림 문구가 없으면 어댑터가 조용히 건너뛴다)
+        if (updateData.status !== ApplicationStatus.CONSULTATION_PENDING) {
+            this.logger.log(`[updateApplicationStatus] 상태 변경 알림 발송 시작: ${updateData.status}`);
+            await this.breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged({
                 breederId: userId,
                 adopterId: application.adopterId.toString(),
                 applicationId,
+                status: updateData.status,
             });
         }
 
