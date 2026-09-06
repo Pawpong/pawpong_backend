@@ -18,6 +18,13 @@ export type AdopterWrittenReviewEmbeddedRecord = {
 
 export type AdopterProfileUpdateRecord = {
     nickname?: string;
+    /**
+     * 상담 사전 정보는 점 표기로 부분 갱신한다.
+     * 객체를 통째로 $set 하면 함께 저장된 counselPrivacyAgreedAt(가입 시 동의 시각)이 지워진다.
+     */
+    'counselDefaultProfile.selfIntroduction'?: string;
+    'counselDefaultProfile.dailyAbsenceHours'?: string;
+    'counselDefaultProfile.livingSpaceDescription'?: string;
     phoneNumber?: string;
     profileImageFileName?: string;
     marketingConsent?: boolean;

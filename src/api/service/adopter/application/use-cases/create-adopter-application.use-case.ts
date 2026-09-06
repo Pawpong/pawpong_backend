@@ -71,7 +71,10 @@ export class CreateAdopterApplicationUseCase {
             throw new DomainConflictError('해당 브리더에게 이미 대기 중인 상담 신청이 있습니다.');
         }
 
-        const standardResponses = this.adopterApplicationStandardAnswerBuilderService.build(dto);
+        // 브리더가 신청자인 경우 상담 사전 정보가 없다 (입양자 스키마 전용 필드)
+        const counselDefaultProfile =
+            'counselDefaultProfile' in applicant ? applicant.counselDefaultProfile : undefined;
+        const standardResponses = this.adopterApplicationStandardAnswerBuilderService.build(dto, counselDefaultProfile);
         const customResponses = this.adopterApplicationCustomAnswerBuilderService.build(
             dto,
             breeder.applicationForm || [],
