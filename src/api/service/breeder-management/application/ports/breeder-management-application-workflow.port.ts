@@ -18,10 +18,11 @@ export interface BreederManagementApplicationRecord {
     breederNotes?: string;
 }
 
-export interface BreederManagementConsultationCompletedNotificationCommand {
+export interface BreederManagementApplicationStatusNotificationCommand {
     breederId: string;
     adopterId: string;
     applicationId: string;
+    status: ApplicationStatus;
 }
 
 export interface BreederManagementApplicationWorkflowPort {
@@ -31,5 +32,5 @@ export interface BreederManagementApplicationWorkflowPort {
     ): Promise<BreederManagementApplicationRecord | null>;
     updateStatus(applicationId: string, status: ApplicationStatus): Promise<void>;
     incrementCompletedAdoptions(breederId: string): Promise<void>;
-    notifyConsultationCompleted(command: BreederManagementConsultationCompletedNotificationCommand): Promise<void>;
+    notifyApplicationStatusChanged(command: BreederManagementApplicationStatusNotificationCommand): Promise<void>;
 }

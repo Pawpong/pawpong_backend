@@ -7,9 +7,12 @@ import { ProfileBannerResponseDto } from '../../../admin/breeder-management/dto/
 import { AUTH_RESPONSE_MESSAGE_EXAMPLES } from '../constants/auth-response-messages';
 import {
     AUTH_PHONE_SEND_FAILURE_RESPONSE,
+    AUTH_REACTIVATION_NOT_FOUND_RESPONSE,
+    AUTH_REACTIVATION_UNAUTHORIZED_RESPONSE,
     AUTH_REFRESH_UNAUTHORIZED_RESPONSE,
 } from '../constants/auth-swagger.constants';
 import { RefreshTokenRequestDto } from '../dto/request/refresh-token-request.dto';
+import { ReactivateAccountRequestDto } from '../dto/request/reactivate-account-request.dto';
 import { CheckNicknameRequestDto } from '../dto/request/check-nickname-request.dto';
 import { CheckEmailRequestDto } from '../dto/request/check-email-request.dto';
 import { CheckBreederNameRequestDto } from '../dto/request/check-breeder-name-request.dto';
@@ -19,6 +22,7 @@ import { SocialCompleteRequestDto } from '../dto/request/social-complete-request
 import { RegisterAdopterFullRequestDto } from '../dto/request/register-adopter-full-request.dto';
 import { RegisterBreederRequestDto } from '../dto/request/register-breeder-request.dto';
 import { TokenResponseDto } from '../dto/response/token-response.dto';
+import { ReactivateAccountResponseDto } from '../dto/response/reactivate-account-response.dto';
 import { LogoutResponseDto } from '../dto/response/logout-response.dto';
 import { PhoneVerificationResponseDto } from '../dto/response/phone-verification-response.dto';
 import { RegisterAdopterResponseDto } from '../dto/response/register-adopter-response.dto';
@@ -103,6 +107,33 @@ export function ApiRefreshAuthEndpoint() {
             errorResponses: [AUTH_REFRESH_UNAUTHORIZED_RESPONSE],
         }),
         ApiBody({ type: RefreshTokenRequestDto }),
+    );
+}
+
+export function ApiReactivateAccountEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '탈퇴 계정 복구',
+            description: `
+                탈퇴한 계정을 사용자의 동의를 받아 복구하고 곧바로 로그인 토큰을 발급합니다.
+
+                ## 주요 기능
+                - 탈퇴 계정으로 소셜 로그인하면 콜백이 \`/login?type=deleted_account&reactivationToken=...\` 으로 리다이렉트합니다.
+                - 프론트엔드에서 복구 여부를 확인받은 뒤 그 토큰으로 이 API를 호출합니다.
+                - accountStatus를 active로 되돌리고 deletedAt/deleteReason을 제거합니다.
+                - 계정 ID가 유지되므로 기존 채팅방·입양신청·후기 등 연관 데이터가 그대로 복구됩니다.
+
+                ## 참고
+                - 복구 토큰은 소셜 콜백에서만 발급되며 유효시간은 10분입니다.
+                - 정지(suspended) 계정은 이 API로 복구할 수 없습니다.
+            `,
+            responseType: ReactivateAccountResponseDto,
+            isPublic: true,
+            successDescription: '계정 복구 성공',
+            successMessageExample: AUTH_RESPONSE_MESSAGE_EXAMPLES.accountReactivated,
+            errorResponses: [AUTH_REACTIVATION_UNAUTHORIZED_RESPONSE, AUTH_REACTIVATION_NOT_FOUND_RESPONSE],
+        }),
+        ApiBody({ type: ReactivateAccountRequestDto }),
     );
 }
 

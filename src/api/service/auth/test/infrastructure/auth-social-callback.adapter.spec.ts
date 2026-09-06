@@ -36,6 +36,7 @@ describe('AuthSocialCallbackAdapter', () => {
         const authTokenPort = {
             generateTokens: jest.fn(),
             hashRefreshToken: jest.fn(),
+            generateReactivationToken: jest.fn().mockReturnValue({ token: 'reactivation-token', expiresIn: 600 }),
         };
 
         const adapter = new AuthSocialCallbackAdapter(
@@ -106,19 +107,50 @@ describe('AuthSocialCallbackAdapter', () => {
         });
     });
 
-    it('탈퇴한 adopter는 DomainAuthenticationError를 던진다', async () => {
-        const { adapter, authAdopterRepository } = createAdapter();
+    it('탈퇴한 adopter는 로그인 대신 복구 확인 정보를 반환한다', async () => {
+        const { adapter, authAdopterRepository, authTokenPort } = createAdapter();
+        const deletedAt = new Date('2026-01-15T10:00:00.000Z');
         authAdopterRepository.findBySocialAuth.mockResolvedValue({
             _id: { toString: () => 'adopter-id' },
             emailAddress: 'deleted@test.com',
             nickname: '탈퇴유저',
             accountStatus: 'deleted',
+            deletedAt,
             profileImageFileName: null,
         });
 
-        await expect(adapter.handleSocialLogin(profile)).rejects.toThrow(
-            new DomainAuthenticationError('탈퇴한 계정으로는 로그인할 수 없습니다.'),
-        );
+        await expect(adapter.handleSocialLogin(profile)).resolves.toEqual({
+            needsAdditionalInfo: false,
+            needsReactivation: true,
+            reactivation: {
+                reactivationToken: 'reactivation-token',
+                expiresIn: 600,
+                role: 'adopter',
+                email: 'deleted@test.com',
+                name: '탈퇴유저',
+                deletedAt,
+            },
+        });
+        expect(authTokenPort.generateReactivationToken).toHaveBeenCalledWith('adopter-id', 'adopter');
+    });
+
+    it('탈퇴한 breeder도 복구 확인 정보를 반환한다', async () => {
+        const { adapter, authAdopterRepository, authBreederRepository, authTokenPort } = createAdapter();
+        authAdopterRepository.findBySocialAuth.mockResolvedValue(null);
+        authAdopterRepository.findByEmail.mockResolvedValue(null);
+        authBreederRepository.findBySocialAuth.mockResolvedValue({
+            _id: { toString: () => 'breeder-id' },
+            emailAddress: 'deleted-breeder@test.com',
+            name: '탈퇴 브리더',
+            accountStatus: 'deleted',
+            profileImageFileName: null,
+        });
+
+        await expect(adapter.handleSocialLogin(profile)).resolves.toMatchObject({
+            needsReactivation: true,
+            reactivation: { role: 'breeder', name: '탈퇴 브리더' },
+        });
+        expect(authTokenPort.generateReactivationToken).toHaveBeenCalledWith('breeder-id', 'breeder');
     });
 
     it('정지된 breeder는 DomainAuthenticationError를 던진다', async () => {

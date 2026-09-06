@@ -23,6 +23,7 @@ export class AdopterApplicationQueryController {
     @ApiGetAdopterApplicationsEndpoint()
     async getMyApplications(
         @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
         @Query() query: AdopterApplicationsQueryRequestDto,
     ): Promise<ApiResponseDto<ApplicationListResponseDto>> {
         const result = await this.getAdopterApplicationsUseCase.execute(
@@ -30,6 +31,7 @@ export class AdopterApplicationQueryController {
             query.page,
             query.limit,
             query.animalType,
+            role,
         );
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result),
@@ -41,9 +43,10 @@ export class AdopterApplicationQueryController {
     @ApiGetAdopterApplicationDetailEndpoint()
     async getApplicationDetail(
         @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
         @Param('id') applicationId: string,
     ): Promise<ApiResponseDto<ApplicationDetailResponseDto>> {
-        const result = await this.getAdopterApplicationDetailUseCase.execute(userId, applicationId);
+        const result = await this.getAdopterApplicationDetailUseCase.execute(userId, applicationId, role);
         return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.applicationDetailRetrieved);
     }
 }

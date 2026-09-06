@@ -22,7 +22,16 @@ export class UpdateAdopterProfileUseCase {
 
     async execute(
         userId: string,
-        updateData: { name?: string; phone?: string; profileImage?: string },
+        updateData: {
+            name?: string;
+            phone?: string;
+            profileImage?: string;
+            counselDefaultProfile?: {
+                selfIntroduction?: string;
+                dailyAbsenceHours?: string;
+                livingSpaceDescription?: string;
+            };
+        },
     ): Promise<AdopterProfileUpdateResult> {
         const mappedUpdateData = this.adopterProfileUpdateMapperService.toRecord(updateData);
         const adopter = await this.adopterProfilePort.updateProfile(userId, mappedUpdateData);

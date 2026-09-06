@@ -26,10 +26,13 @@ export class GetAdopterApplicationDetailUseCase {
         private readonly adopterApplicationDetailAssemblerService: AdopterApplicationDetailAssemblerService,
     ) {}
 
-    async execute(userId: string, applicationId: string): Promise<AdopterApplicationDetailResult> {
-        const adopter = await this.adopterProfilePort.findById(userId);
-        if (!adopter) {
-            throw new DomainNotFoundError('입양자 정보를 찾을 수 없습니다.');
+    async execute(userId: string, applicationId: string, userRole?: string): Promise<AdopterApplicationDetailResult> {
+        // 브리더 계정도 신청을 보낼 수 있어, role을 넘겨야 브리더 컬렉션에서도 조회한다.
+        const applicant = userRole
+            ? await this.adopterProfilePort.findById(userId, userRole)
+            : await this.adopterProfilePort.findById(userId);
+        if (!applicant) {
+            throw new DomainNotFoundError('회원 정보를 찾을 수 없습니다.');
         }
 
         const application = await this.adopterApplicationReaderPort.findByIdForAdopter(userId, applicationId);

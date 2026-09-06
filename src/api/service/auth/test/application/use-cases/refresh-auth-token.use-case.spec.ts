@@ -31,6 +31,8 @@ describe('인증 토큰 재발급 유스케이스', () => {
                 type: 'refresh',
             }),
             hashRefreshToken: jest.fn().mockResolvedValue('new-hashed-token'),
+            generateReactivationToken: jest.fn(),
+            verifyReactivationToken: jest.fn(),
             compareRefreshToken: jest.fn().mockResolvedValue(true),
         };
 
@@ -66,6 +68,8 @@ describe('인증 토큰 재발급 유스케이스', () => {
                 type: 'refresh',
             }),
             hashRefreshToken: jest.fn(),
+            generateReactivationToken: jest.fn(),
+            verifyReactivationToken: jest.fn(),
             compareRefreshToken: jest.fn(),
         };
 

@@ -63,7 +63,7 @@ describe('입양자 상담 신청 상세 조회 유스케이스', () => {
         adopterProfilePort.findById.mockResolvedValue(null);
 
         await expect(useCase.execute('user-1', 'app-1')).rejects.toThrow(DomainNotFoundError);
-        await expect(useCase.execute('user-1', 'app-1')).rejects.toThrow('입양자 정보를 찾을 수 없습니다.');
+        await expect(useCase.execute('user-1', 'app-1')).rejects.toThrow('회원 정보를 찾을 수 없습니다.');
     });
 
     it('해당 신청이 없거나 권한이 없으면 DomainNotFoundError를 던진다', async () => {

@@ -8,7 +8,7 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         findApplicationByIdAndBreeder: jest.fn(),
         updateStatus: jest.fn(),
         incrementCompletedAdoptions: jest.fn(),
-        notifyConsultationCompleted: jest.fn(),
+        notifyApplicationStatusChanged: jest.fn(),
     };
     const mockLogger = {
         logStart: jest.fn(),
@@ -37,7 +37,7 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
     it('상담 완료 상태로 변경하면 알림을 발송한다', async () => {
         breederManagementApplicationWorkflowPort.findApplicationByIdAndBreeder.mockResolvedValue(mockApplication);
         breederManagementApplicationWorkflowPort.updateStatus.mockResolvedValue(undefined);
-        breederManagementApplicationWorkflowPort.notifyConsultationCompleted.mockResolvedValue(undefined);
+        breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged.mockResolvedValue(undefined);
 
         const result = await useCase.execute('breeder-1', 'app-1', {
             applicationId: 'app-1',
@@ -45,18 +45,20 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         });
 
         expect(result.message).toBeDefined();
-        expect(breederManagementApplicationWorkflowPort.notifyConsultationCompleted).toHaveBeenCalledWith({
+        expect(breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged).toHaveBeenCalledWith({
             breederId: 'breeder-1',
             adopterId: 'adopter-1',
             applicationId: 'app-1',
+            status: ApplicationStatus.CONSULTATION_COMPLETED,
         });
         expect(breederManagementApplicationWorkflowPort.incrementCompletedAdoptions).not.toHaveBeenCalled();
     });
 
-    it('입양 승인 상태로 변경하면 완료 입양 수를 증가시킨다', async () => {
+    it('입양 승인 상태로 변경하면 완료 입양 수를 증가시키고 알림을 발송한다', async () => {
         breederManagementApplicationWorkflowPort.findApplicationByIdAndBreeder.mockResolvedValue(mockApplication);
         breederManagementApplicationWorkflowPort.updateStatus.mockResolvedValue(undefined);
         breederManagementApplicationWorkflowPort.incrementCompletedAdoptions.mockResolvedValue(undefined);
+        breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged.mockResolvedValue(undefined);
 
         await useCase.execute('breeder-1', 'app-1', {
             applicationId: 'app-1',
@@ -64,12 +66,18 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         });
 
         expect(breederManagementApplicationWorkflowPort.incrementCompletedAdoptions).toHaveBeenCalledWith('breeder-1');
-        expect(breederManagementApplicationWorkflowPort.notifyConsultationCompleted).not.toHaveBeenCalled();
+        expect(breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged).toHaveBeenCalledWith({
+            breederId: 'breeder-1',
+            adopterId: 'adopter-1',
+            applicationId: 'app-1',
+            status: ApplicationStatus.ADOPTION_APPROVED,
+        });
     });
 
-    it('일반 상태 변경은 알림과 카운트 증가 없이 처리된다', async () => {
+    it('거절 상태로 변경하면 카운트 증가 없이 알림만 발송한다', async () => {
         breederManagementApplicationWorkflowPort.findApplicationByIdAndBreeder.mockResolvedValue(mockApplication);
         breederManagementApplicationWorkflowPort.updateStatus.mockResolvedValue(undefined);
+        breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged.mockResolvedValue(undefined);
 
         await useCase.execute('breeder-1', 'app-1', {
             applicationId: 'app-1',
@@ -77,7 +85,25 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         });
 
         expect(breederManagementApplicationWorkflowPort.incrementCompletedAdoptions).not.toHaveBeenCalled();
-        expect(breederManagementApplicationWorkflowPort.notifyConsultationCompleted).not.toHaveBeenCalled();
+        expect(breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged).toHaveBeenCalledWith({
+            breederId: 'breeder-1',
+            adopterId: 'adopter-1',
+            applicationId: 'app-1',
+            status: ApplicationStatus.ADOPTION_REJECTED,
+        });
+    });
+
+    it('상담 대기 상태로 변경하면 알림을 발송하지 않는다', async () => {
+        breederManagementApplicationWorkflowPort.findApplicationByIdAndBreeder.mockResolvedValue(mockApplication);
+        breederManagementApplicationWorkflowPort.updateStatus.mockResolvedValue(undefined);
+
+        await useCase.execute('breeder-1', 'app-1', {
+            applicationId: 'app-1',
+            status: ApplicationStatus.CONSULTATION_PENDING,
+        });
+
+        expect(breederManagementApplicationWorkflowPort.incrementCompletedAdoptions).not.toHaveBeenCalled();
+        expect(breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged).not.toHaveBeenCalled();
     });
 
     it('신청을 찾을 수 없으면 DomainNotFoundError를 던진다', async () => {

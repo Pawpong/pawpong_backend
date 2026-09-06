@@ -77,7 +77,7 @@ describe('입양자 후기 작성 유스케이스', () => {
         ).rejects.toThrow(DomainNotFoundError);
         await expect(
             useCase.execute('user-1', { applicationId: 'app-1', reviewType: 'consultation', content: '후기' }),
-        ).rejects.toThrow('입양자 정보를 찾을 수 없습니다.');
+        ).rejects.toThrow('회원 정보를 찾을 수 없습니다.');
     });
 
     it('신청 정보가 없으면 DomainNotFoundError를 던진다', async () => {
