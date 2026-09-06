@@ -39,11 +39,17 @@ export class AdopterApplicationCommandController {
     @ApiUpdateAdopterApplicationEndpoint()
     async updateApplication(
         @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
         @Param('applicationId', new MongoObjectIdPipe('입양 신청', '올바르지 않은 입양 신청 ID 형식입니다.'))
         applicationId: string,
         @Body() updateApplicationDto: ApplicationUpdateRequestDto,
     ): Promise<ApiResponseDto<ApplicationUpdateResponseDto>> {
-        const result = await this.updateAdopterApplicationUseCase.execute(userId, applicationId, updateApplicationDto);
+        const result = await this.updateAdopterApplicationUseCase.execute(
+            userId,
+            applicationId,
+            updateApplicationDto,
+            role,
+        );
         return ApiResponseDto.success(result, ADOPTER_RESPONSE_MESSAGES.applicationUpdated);
     }
 }
