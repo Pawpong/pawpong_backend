@@ -10,6 +10,10 @@ import { Document, Types } from 'mongoose';
     timestamps: true, // createdAt, updatedAt 자동 생성
 })
 export class AppVersion extends Document {
+    /** 앱 바이너리에 포함된 아이콘만 관리자 추천으로 지정한다. */
+    @Prop({ type: String, enum: ['default', 'pixel'] })
+    appIconKey?: 'default' | 'pixel';
+
     /**
      * 앱 버전 고유 ID (MongoDB 자동 생성)
      */

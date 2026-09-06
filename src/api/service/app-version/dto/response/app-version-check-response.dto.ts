@@ -5,6 +5,10 @@ import { ApiProperty } from '@nestjs/swagger';
  * 앱 시작 시 강제/권장 업데이트 여부를 전달
  */
 export class AppVersionCheckResponseDto {
+    /** 미설정 응답은 이전 앱과 동일하게 유지한다. */
+    @ApiProperty({ description: '추천 앱 아이콘', enum: ['default', 'pixel'], required: false })
+    appIconKey?: 'default' | 'pixel';
+
     /**
      * 강제 업데이트 필요 여부
      * true면 앱 사용 불가 + 스토어 강제 이동
