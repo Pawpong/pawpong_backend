@@ -3,6 +3,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 
 import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
+import { AdoptionApplication, AdoptionApplicationSchema } from '../../../schema/adoption-application.schema';
+import { CHAT_APPLICATION_READER } from './application/ports/chat-application-reader.port';
+import { ChatApplicationRepository } from './repository/chat-application.repository';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 import { ChatMessage, ChatMessageSchema } from '../../../schema/chat-message.schema';
 import { ChatRoom, ChatRoomSchema } from '../../../schema/chat-room.schema';
@@ -46,6 +49,7 @@ import { ChatRoomCommandController } from './controller/chat-room-command.contro
 import { ChatRoomQueryController } from './controller/chat-room-query.controller';
 
 const CHAT_SCHEMA_IMPORTS = MongooseModule.forFeature([
+    { name: AdoptionApplication.name, schema: AdoptionApplicationSchema },
     { name: ChatRoom.name, schema: ChatRoomSchema },
     { name: ChatMessage.name, schema: ChatMessageSchema },
     { name: ChatUserBlock.name, schema: ChatUserBlockSchema },
@@ -85,6 +89,7 @@ const CHAT_DOMAIN_PROVIDERS = [
 ];
 
 const CHAT_INFRASTRUCTURE_PROVIDERS = [
+    ChatApplicationRepository,
     ChatRepository,
     ChatMongooseManagerAdapter,
     KafkaChatMessageBrokerAdapter,
@@ -94,6 +99,7 @@ const CHAT_INFRASTRUCTURE_PROVIDERS = [
 ];
 
 const CHAT_PORT_BINDINGS = [
+    { provide: CHAT_APPLICATION_READER, useExisting: ChatApplicationRepository },
     { provide: CHAT_ROOM_MANAGER, useExisting: ChatMongooseManagerAdapter },
     { provide: CHAT_MESSAGE_MANAGER, useExisting: ChatMongooseManagerAdapter },
     { provide: CHAT_MESSAGE_BROKER, useExisting: KafkaChatMessageBrokerAdapter },

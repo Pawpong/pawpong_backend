@@ -84,11 +84,38 @@ describe('Chat API E2E - participant 기반 1:1 DM', () => {
         });
 
         it('여러 입양 신청은 같은 방의 applicationIds에 누적한다', async () => {
-            const first = await createRoom(adopter2.token, breeder2.breederId, 'application-1');
-            const second = await createRoom(adopter2.token, breeder2.breederId, 'application-2');
+            const ids = [new Types.ObjectId(), new Types.ObjectId()];
+            await connection.collection('adoption_applications').insertMany(
+                ids.map((_id) => ({
+                    _id,
+                    adopterId: new Types.ObjectId(adopter2.adopterId),
+                    breederId: new Types.ObjectId(breeder2.breederId),
+                })),
+            );
+            const first = await createRoom(adopter2.token, breeder2.breederId, ids[0].toString());
+            const second = await createRoom(adopter2.token, breeder2.breederId, ids[1].toString());
 
             expect(second.body.data.roomId).toBe(first.body.data.roomId);
-            expect(second.body.data.applicationIds).toEqual(expect.arrayContaining(['application-1', 'application-2']));
+            expect(second.body.data.applicationIds).toEqual(expect.arrayContaining(ids.map(String)));
+        });
+
+        it('다른 신청인의 신청서를 연결하면 403이며 기존 방의 신청 목록은 바뀌지 않는다', async () => {
+            const applicationId = new Types.ObjectId();
+            await connection.collection('adoption_applications').insertOne({
+                _id: applicationId,
+                adopterId: new Types.ObjectId(adopter2.adopterId),
+                breederId: new Types.ObjectId(breeder1.breederId),
+            });
+            const room = await createRoom(adopter1.token, breeder1.breederId);
+            await request(app.getHttpServer())
+                .post('/api/v2/chat/rooms')
+                .set('Authorization', `Bearer ${adopter1.token}`)
+                .send({ counterpartUserId: breeder1.breederId, applicationId: String(applicationId) })
+                .expect(403);
+            const stored = await connection
+                .collection('chat_rooms')
+                .findOne({ _id: new Types.ObjectId(room.body.data.roomId) });
+            expect(stored?.applicationIds ?? []).not.toContain(String(applicationId));
         });
 
         it('자기 자신 또는 상대 ID 누락 요청은 400이다', async () => {
