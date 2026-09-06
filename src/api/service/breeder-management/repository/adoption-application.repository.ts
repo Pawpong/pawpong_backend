@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 
 import { ApplicationStatus } from '../../../../common/enum/user.enum';
 
@@ -148,6 +148,21 @@ export class AdoptionApplicationRepository {
             { $set: { status: ApplicationStatus.ADOPTION_REJECTED } },
         );
         return result.modifiedCount;
+    }
+
+    /**
+     * 해당 펫에 상담완료(consultation_completed) 신청이 남아 있는지 여부.
+     * 펫 예약 상태를 신청서에서 다시 계산할 때 쓰는 유일한 판단 근거다 —
+     * 상담완료가 한 건이라도 있으면 예약중, 하나도 없으면 분양중으로 되돌린다.
+     * @param petId 반려동물 ID
+     * @returns 상담완료 신청 존재 여부
+     */
+    async existsConsultationCompletedForPet(petId: string): Promise<boolean> {
+        if (!Types.ObjectId.isValid(petId)) return false;
+        const found = await this.adoptionApplicationModel
+            .exists({ petId: new Types.ObjectId(petId), status: ApplicationStatus.CONSULTATION_COMPLETED })
+            .exec();
+        return Boolean(found);
     }
 
     /**

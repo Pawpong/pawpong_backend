@@ -41,6 +41,8 @@ export class UpdateBreederManagementApplicationStatusUseCase {
 
         if (updateData.status === ApplicationStatus.ADOPTION_APPROVED) {
             await this.finalizeAdoption(userId, applicationId, application);
+        } else {
+            await this.syncPetReservation(application);
         }
 
         // 대기 상태로 되돌아가는 경우는 없으니, 나머지 세 상태는 전부 입양자에게 알린다
@@ -56,6 +58,31 @@ export class UpdateBreederManagementApplicationStatusUseCase {
         }
 
         return this.breederManagementApplicationStatusResultMapperService.toApplicationStatusUpdatedResult();
+    }
+
+    /**
+     * 확정 외 전이(상담완료·거절) 후 펫의 예약 상태를 신청서 기준으로 다시 맞춘다.
+     *
+     * 상담완료는 브리더가 "이 사람으로 진행한다"고 정한 확정 직전 단계이므로, 그 시점에 펫을
+     * 예약중으로 바꿔 다른 사람의 신규 신청을 막는다(findApplicablePet 이 status='available' 만 받는다).
+     * 반대로 그 신청이 거절되면 다시 분양중으로 풀어야 한다 — 걸기만 하고 푸는 길이 없으면
+     * 펫이 영영 잠긴다. 한 펫에 상담완료가 여러 건 있을 수 있어 "거절했으니 무조건 해제" 는
+     * 틀리므로, 전이를 지시하지 않고 어댑터가 신청서에서 매번 다시 계산하게 한다.
+     *
+     * 펫이 연결되지 않은 신청(v1 은 petId 없이 신청 가능)은 건너뛴다.
+     * 예약 동기화 실패가 상태 전이 자체를 되돌리면 안 되므로 예외는 로깅만 하고 삼킨다.
+     */
+    private async syncPetReservation(application: { petId?: { toString(): string } | null }): Promise<void> {
+        const petId = application.petId?.toString();
+        if (!petId) return;
+
+        try {
+            const synced =
+                await this.breederManagementApplicationWorkflowPort.syncPetReservationFromApplications(petId);
+            this.logger.log(`[updateApplicationStatus] 펫 예약 상태 동기화: ${synced} (petId: ${petId})`);
+        } catch (error) {
+            this.logger.logError('updateApplicationStatus', '펫 예약 상태 동기화 실패', error);
+        }
     }
 
     /**

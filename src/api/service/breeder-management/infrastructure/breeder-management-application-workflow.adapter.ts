@@ -105,6 +105,23 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
         await this.availablePetManagementRepository.update(petId, { status: PetStatus.ADOPTED, adoptedAt });
     }
 
+    /**
+     * 펫 예약 상태를 신청서 기준으로 다시 계산한다.
+     * 상담완료 신청이 남아 있으면 예약중, 하나도 없으면 분양중으로 되돌린다.
+     * 두 전이 모두 조건부 update 라 분양완료(adopted)된 펫은 어느 쪽에도 걸리지 않는다.
+     */
+    async syncPetReservationFromApplications(petId: string): Promise<'reserved' | 'available' | 'unchanged'> {
+        const hasOpenConsultation = await this.adoptionApplicationRepository.existsConsultationCompletedForPet(petId);
+
+        if (hasOpenConsultation) {
+            const reserved = await this.availablePetManagementRepository.reserveIfAvailable(petId, new Date());
+            return reserved ? 'reserved' : 'unchanged';
+        }
+
+        const released = await this.availablePetManagementRepository.releaseIfReserved(petId);
+        return released ? 'available' : 'unchanged';
+    }
+
     async rejectOtherOpenApplicationsForPet(petId: string, approvedApplicationId: string): Promise<number> {
         return this.adoptionApplicationRepository.rejectOtherOpenApplicationsForPet(petId, approvedApplicationId);
     }
