@@ -3,6 +3,7 @@ import { ClientsModule, Transport } from '@nestjs/microservices';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Partitioners } from 'kafkajs';
 import { KafkaService } from './kafka.service';
+import { KafkaConsumerStatus } from './kafka-consumer-status';
 
 /**
  * Kafka 모듈
@@ -46,7 +47,7 @@ import { KafkaService } from './kafka.service';
             },
         ]),
     ],
-    providers: [KafkaService],
-    exports: [KafkaService, ClientsModule],
+    providers: [KafkaService, KafkaConsumerStatus],
+    exports: [KafkaService, KafkaConsumerStatus, ClientsModule],
 })
 export class KafkaModule {}

@@ -19,6 +19,7 @@ import { NotifyCriticalErrorUseCase } from './common/discord/application/use-cas
 import { AppModule } from './app.module';
 import { buildKafkaBroadcastConsumerGroupId } from './common/kafka/kafka-consumer-group';
 import { KafkaStartupRetry } from './common/kafka/kafka-startup-retry';
+import { KafkaConsumerStatus } from './common/kafka/kafka-consumer-status';
 
 declare const module: any;
 
@@ -234,6 +235,8 @@ async function bootstrap(): Promise<void> {
     const kafkaBroker = configService.get<string>('KAFKA_BROKER', '');
     const kafkaEnabled = configService.get<string>('KAFKA_ENABLED', 'false').toLowerCase() === 'true';
     const shouldConnectKafka = kafkaEnabled && kafkaBroker.length > 0;
+    // consumer 준비 여부는 ChatGateway 가 broadcast 폴백 여부를 판단할 때도 필요하므로 전역 상태로 공유한다.
+    const kafkaConsumerStatus = app.get(KafkaConsumerStatus);
     let kafkaConsumerStartup: KafkaStartupRetry | undefined;
 
     if (shouldConnectKafka) {
@@ -277,6 +280,7 @@ async function bootstrap(): Promise<void> {
             retryDelayMs,
             onStarted: () => {
                 logger.log('[bootstrap] Kafka chat consumer started');
+                kafkaConsumerStatus.markReady();
                 outageNotified = false;
             },
             onFailure: (error, delayMs) => {
@@ -353,6 +357,7 @@ async function bootstrap(): Promise<void> {
         if (isShuttingDown) return;
         isShuttingDown = true;
         kafkaConsumerStartup?.stop();
+        kafkaConsumerStatus.markNotReady();
 
         logger.warn('[bootstrap] Received SIGTERM signal. Starting graceful shutdown...');
 
@@ -373,6 +378,7 @@ async function bootstrap(): Promise<void> {
         if (isShuttingDown) return;
         isShuttingDown = true;
         kafkaConsumerStartup?.stop();
+        kafkaConsumerStatus.markNotReady();
 
         logger.warn('[bootstrap] Received SIGINT signal. Starting graceful shutdown...');
 
@@ -394,6 +400,7 @@ async function bootstrap(): Promise<void> {
         module.hot.accept();
         module.hot.dispose(() => {
             kafkaConsumerStartup?.stop();
+            kafkaConsumerStatus.markNotReady();
             return app.close();
         });
     }
