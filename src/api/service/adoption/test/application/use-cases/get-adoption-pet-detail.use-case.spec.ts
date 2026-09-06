@@ -57,7 +57,7 @@ describe('분양 상세 — 내 신청 상태 노출', () => {
             status: ApplicationStatus.CONSULTATION_PENDING,
         });
 
-        const result = await useCase.execute({ petId: 'pet-1', adopterId: 'adopter-1', viewerRole: 'adopter' });
+        const result = await useCase.execute({ petId: 'pet-1', viewerUserId: 'adopter-1' });
 
         expect(recordReader.findMyBlockingApplicationForPet).toHaveBeenCalledWith('adopter-1', 'pet-1');
         expect(result.myApplicationId).toBe('app-1');
@@ -65,7 +65,7 @@ describe('분양 상세 — 내 신청 상태 노출', () => {
     });
 
     it('신청이 없으면 두 필드 모두 undefined', async () => {
-        const result = await useCase.execute({ petId: 'pet-1', adopterId: 'adopter-1', viewerRole: 'adopter' });
+        const result = await useCase.execute({ petId: 'pet-1', viewerUserId: 'adopter-1' });
 
         expect(result.myApplicationId).toBeUndefined();
         expect(result.myApplicationStatus).toBeUndefined();
@@ -78,11 +78,28 @@ describe('분양 상세 — 내 신청 상태 노출', () => {
         expect(result.myApplicationId).toBeUndefined();
     });
 
-    it('브리더는 신청 주체가 아니므로 조회하지 않는다', async () => {
-        const result = await useCase.execute({ petId: 'pet-1', adopterId: 'breeder-1', viewerRole: 'breeder' });
+    it('브리더도 신청 주체이므로 역할로 막지 않는다', async () => {
+        // 브리더는 v1 경로(POST /v2/adopter/application)로 다른 브리더의 펫에 신청할 수 있고,
+        // 그 신청도 같은 재신청 차단(409)에 걸린다. 역할로 막으면 버튼이 계속 활성으로 남는다.
+        recordReader.findMyBlockingApplicationForPet.mockResolvedValue({
+            applicationId: 'app-9',
+            status: ApplicationStatus.CONSULTATION_PENDING,
+        });
 
-        expect(recordReader.findMyBlockingApplicationForPet).not.toHaveBeenCalled();
+        const result = await useCase.execute({ petId: 'pet-1', viewerUserId: 'breeder-1' });
+
+        expect(recordReader.findMyBlockingApplicationForPet).toHaveBeenCalledWith('breeder-1', 'pet-1');
+        expect(result.myApplicationId).toBe('app-9');
+        expect(result.myApplicationStatus).toBe(ApplicationStatus.CONSULTATION_PENDING);
+    });
+
+    it('자기 분양글을 보는 브리더는 자기 펫에 낸 신청이 없어 자연히 undefined 다', async () => {
+        recordReader.findMyBlockingApplicationForPet.mockResolvedValue(null);
+
+        const result = await useCase.execute({ petId: 'pet-1', viewerUserId: 'breeder-1' });
+
         expect(result.myApplicationId).toBeUndefined();
+        expect(result.myApplicationStatus).toBeUndefined();
     });
 
     it('내 신청 조회가 즐겨찾기 조회를 막지 않는다 (같은 병렬 구간)', async () => {
@@ -92,7 +109,7 @@ describe('분양 상세 — 내 신청 상태 노출', () => {
             status: ApplicationStatus.ADOPTION_APPROVED,
         });
 
-        const result = await useCase.execute({ petId: 'pet-1', adopterId: 'adopter-1', viewerRole: 'adopter' });
+        const result = await useCase.execute({ petId: 'pet-1', viewerUserId: 'adopter-1' });
 
         expect(result.isFavorited).toBe(true);
         expect(result.myApplicationId).toBe('app-1');

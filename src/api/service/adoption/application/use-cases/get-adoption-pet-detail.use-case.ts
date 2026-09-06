@@ -36,9 +36,11 @@ export class GetAdoptionPetDetailUseCase {
 
     async execute(input: {
         petId: string;
-        adopterId?: string;
-        /** 신청 주체는 입양자뿐이다. 브리더/비로그인은 내 신청 상태를 조회하지 않는다. */
-        viewerRole?: string;
+        /**
+         * 로그인 사용자 id. 입양자·브리더 모두 올 수 있다 — 브리더도 다른 브리더의 펫에 입양 신청을 한다.
+         * (즐겨찾기·내 신청 상태 모두 역할과 무관하게 이 id 로 조회한다)
+         */
+        viewerUserId?: string;
     }): Promise<AdoptionPetDetailResult> {
         const detail = await this.petReader.readByIdDetailed(input.petId);
         if (!detail) {
@@ -58,8 +60,9 @@ export class GetAdoptionPetDetailUseCase {
                   : [];
 
         // 이미 신청한 펫이면 프론트가 '입양 신청하기' 대신 '내 신청서 보기'를 보여줘야 한다.
-        // 신청 주체는 입양자뿐이라 브리더/비로그인은 조회하지 않는다.
-        const shouldReadMyApplication = Boolean(input.adopterId) && input.viewerRole === 'adopter';
+        // 역할로 막지 않는다 — 브리더도 다른 브리더의 펫에 입양 신청을 하므로 같은 재신청 차단에 걸린다.
+        // 자기 분양글을 보는 브리더는 애초에 자기 펫에 낸 신청이 없어 자연히 null 이 된다.
+        const viewerUserId = input.viewerUserId;
 
         const [photoUrls, parents, environmentPhotoUrls, breederSummary, favoritedSet, myApplication] =
             await Promise.all([
@@ -67,11 +70,11 @@ export class GetAdoptionPetDetailUseCase {
                 this.resolveParentPhotos(detail.parentPetSnapshots),
                 Promise.all(environmentFileNames.map((fileName) => this.assetUrlPort.generateSignedUrl(fileName))),
                 this.breederSummaryPort.readSummary(detail.breederId),
-                input.adopterId
-                    ? this.favoriteReader.findFavoritedPetIds(input.adopterId, [detail.id])
+                viewerUserId
+                    ? this.favoriteReader.findFavoritedPetIds(viewerUserId, [detail.id])
                     : Promise.resolve(new Set<string>()),
-                shouldReadMyApplication
-                    ? this.recordReader.findMyBlockingApplicationForPet(input.adopterId!, detail.id)
+                viewerUserId
+                    ? this.recordReader.findMyBlockingApplicationForPet(viewerUserId, detail.id)
                     : Promise.resolve(null),
             ]);
 

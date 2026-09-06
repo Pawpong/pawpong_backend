@@ -11,7 +11,7 @@ import { ApiGetAdoptionDetailEndpoint } from '../swagger/index';
 
 /**
  * 입양 동물 상세 (Figma 39:1240) — 공개, 로그인 시 isFavorited 채움.
- * 로그인 사용자가 입양자면 이 펫에 이미 낸 신청(myApplicationId/myApplicationStatus)도 함께 내려준다.
+ * 로그인 사용자가 이 펫에 이미 낸 신청(myApplicationId/myApplicationStatus)도 함께 내려준다 (역할 무관).
  * GET 요청 시 viewCount 가 원자적으로 +1 증가한다.
  */
 @AdoptionOptionalAuthController()
@@ -23,13 +23,8 @@ export class AdoptionDetailController {
     async getDetail(
         @Param('petId', new MongoObjectIdPipe('동물')) petId: string,
         @CurrentUser('userId') userId?: string,
-        @CurrentUser('role') userRole?: string,
     ): Promise<ApiResponseDto<AdoptionPetDetailResponseDto>> {
-        const result = await this.getAdoptionPetDetailUseCase.execute({
-            petId,
-            adopterId: userId,
-            viewerRole: userRole,
-        });
+        const result = await this.getAdoptionPetDetailUseCase.execute({ petId, viewerUserId: userId });
         return ApiResponseDto.success(result, ADOPTION_RESPONSE_MESSAGE_EXAMPLES.detailRetrieved);
     }
 }
