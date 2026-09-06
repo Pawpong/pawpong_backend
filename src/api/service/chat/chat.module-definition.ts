@@ -4,7 +4,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
 import { AdoptionApplication, AdoptionApplicationSchema } from '../../../schema/adoption-application.schema';
-import { CHAT_APPLICATION_READER } from './application/ports/chat-application-reader.port';
+import {
+    CHAT_APPLICATION_READER,
+    CHAT_APPLICATION_LIST_READER,
+} from './application/ports/chat-application-reader.port';
+import { GetChatApplicationsUseCase } from './application/use-cases/get-chat-applications.use-case';
 import { ChatApplicationRepository } from './repository/chat-application.repository';
 import { Breeder, BreederSchema } from '../../../schema/breeder.schema';
 import { ChatMessage, ChatMessageSchema } from '../../../schema/chat-message.schema';
@@ -72,6 +76,7 @@ export const CHAT_MODULE_CONTROLLERS = [ChatRoomCommandController, ChatRoomQuery
 const CHAT_PRESENTATION_PROVIDERS = [ChatGateway];
 
 const CHAT_APPLICATION_PROVIDERS = [
+    GetChatApplicationsUseCase,
     CreateOrGetRoomUseCase,
     GetMyRoomsUseCase,
     SendMessageUseCase,
@@ -99,6 +104,7 @@ const CHAT_INFRASTRUCTURE_PROVIDERS = [
 ];
 
 const CHAT_PORT_BINDINGS = [
+    { provide: CHAT_APPLICATION_LIST_READER, useExisting: ChatApplicationRepository },
     { provide: CHAT_APPLICATION_READER, useExisting: ChatApplicationRepository },
     { provide: CHAT_ROOM_MANAGER, useExisting: ChatMongooseManagerAdapter },
     { provide: CHAT_MESSAGE_MANAGER, useExisting: ChatMongooseManagerAdapter },

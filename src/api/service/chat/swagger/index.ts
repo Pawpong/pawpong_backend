@@ -4,6 +4,15 @@ import { ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { CHAT_RESPONSE_MESSAGES } from '../constants/chat-response-messages';
 import { ChatRoomResponseDto } from '../dto/response/chat-room-response.dto';
 import { ChatMessageResponseDto } from '../dto/response/chat-message-response.dto';
+import { ChatApplicationResponseDto } from '../dto/response/chat-application-response.dto';
+
+export function ApiGetChatApplicationsEndpoint() {
+    return ApiEndpoint({
+        summary: '채팅에 연결된 신청서 조회',
+        description: '채팅 참여자이면서 신청 당사자인 경우만 조회. 내부 메모와 연락처 제외.',
+        responseType: [ChatApplicationResponseDto],
+    });
+}
 
 export function ApiCreateOrGetRoomEndpoint() {
     return applyDecorators(

@@ -97,6 +97,23 @@ describe('Chat API E2E - participant 기반 1:1 DM', () => {
 
             expect(second.body.data.roomId).toBe(first.body.data.roomId);
             expect(second.body.data.applicationIds).toEqual(expect.arrayContaining(ids.map(String)));
+            const endpoint = `/api/v2/chat/rooms/${first.body.data.roomId}/applications`;
+            const sent = await request(app.getHttpServer())
+                .get(endpoint)
+                .set('Authorization', `Bearer ${adopter2.token}`)
+                .expect(200);
+            expect(sent.body.data).toHaveLength(2);
+            expect(sent.body.data.every((item) => item.direction === 'sent')).toBe(true);
+            const received = await request(app.getHttpServer())
+                .get(endpoint)
+                .set('Authorization', `Bearer ${breeder2.token}`)
+                .expect(200);
+            expect(received.body.data.every((item) => item.direction === 'received')).toBe(true);
+            await request(app.getHttpServer())
+                .get(endpoint)
+                .set('Authorization', `Bearer ${adopter1.token}`)
+                .expect(403);
+            await request(app.getHttpServer()).get(endpoint).expect(401);
         });
 
         it('다른 신청인의 신청서를 연결하면 403이며 기존 방의 신청 목록은 바뀌지 않는다', async () => {
