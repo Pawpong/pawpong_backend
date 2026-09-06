@@ -64,6 +64,13 @@ jobs:
               env:
                   APP_ENV: production
                   DEPLOY_SERVICE: backend rollback
+                  GH_TOKEN: ${{ github.token }}
+                  DEPLOY_REPOSITORY: ${{ github.repository }}
+                  DEPLOY_BRANCH: ${{ github.ref_name }}
+                  DEPLOY_ACTOR: ${{ github.triggering_actor }}
+                  DEPLOY_METHOD: Docker Blue-Green 롤백
+                  DEPLOY_TARGET: 운영 서버 · api.pawpong.kr
+                  DEPLOY_URL: https://api.pawpong.kr
                   DEPLOY_COMMIT: ${{ github.sha }}
                   DEPLOY_STATUS: ${{ job.status }}
                   DEPLOY_HEALTH: ${{ job.status == 'success' && 'passed deployment readiness checks' || 'not verified; inspect workflow log' }}
