@@ -8,6 +8,7 @@ import {
     type AuthSocialCallbackTokens,
     type AuthSocialCookieOptions,
 } from '../../application/ports/auth-social-callback.port';
+import { buildAuthCookieOptions } from '../../constants/auth-cookie.constants';
 import { AuthSocialRedirectPathService } from '../../domain/services/auth-social-redirect-path.service';
 
 type LoginSuccessInput = {
@@ -48,34 +49,23 @@ export class AuthSocialLoginSuccessRedirectFactoryService {
             };
         }
 
+        // 쿠키별 httpOnly/maxAge 는 AUTH_COOKIE_POLICIES 한 곳에서 온다.
+        // 로그아웃의 만료 옵션도 같은 정의를 보므로 속성이 어긋날 수 없다.
         const cookies = [
             {
                 name: 'accessToken',
                 value: input.tokens.accessToken,
-                options: {
-                    ...input.cookieOptions,
-                    // 웹은 accessToken을 읽어 로그인 상태 및 Authorization 헤더를 구성한다.
-                    // 개발 BFF와 동일한 계약이며 refreshToken은 HttpOnly를 유지한다.
-                    httpOnly: false,
-                    maxAge: 24 * 60 * 60 * 1000,
-                },
+                options: buildAuthCookieOptions('accessToken', input.cookieOptions),
             },
             {
                 name: 'refreshToken',
                 value: input.tokens.refreshToken,
-                options: {
-                    ...input.cookieOptions,
-                    maxAge: 7 * 24 * 60 * 60 * 1000,
-                },
+                options: buildAuthCookieOptions('refreshToken', input.cookieOptions),
             },
             {
                 name: 'userRole',
                 value: input.role,
-                options: {
-                    ...input.cookieOptions,
-                    httpOnly: false,
-                    maxAge: 24 * 60 * 60 * 1000,
-                },
+                options: buildAuthCookieOptions('userRole', input.cookieOptions),
             },
         ];
 
