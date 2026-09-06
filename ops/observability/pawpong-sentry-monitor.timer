@@ -1,0 +1,8 @@
+[Unit]
+Description=Poll Pawpong Sentry issues every five minutes
+[Timer]
+OnBootSec=180
+OnUnitActiveSec=300
+Persistent=true
+[Install]
+WantedBy=timers.target

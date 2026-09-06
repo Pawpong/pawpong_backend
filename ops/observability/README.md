@@ -41,3 +41,13 @@
 - 지원 HTTP·관리자 권한·revision 충돌·outbox 임대·환경 필터 통합 테스트 사용함.
 - `python3 ops/observability/test_monitor.py`: 장애/복구 전이와 배포 payload 검증함.
 - 실제 연결 테스트는 `[운영 연결 검증]` 표시와 합성 문구를 사용하며, 서비스 중단을 만들어 테스트하지 않음.
+
+## Sentry 무료 플랜 중계
+
+- 새 조직 `pawpong-mq`의 `pawpong-web-production`과 `pawpong-web-development`를 사용함. 각 프로젝트 DSN을 별도 설정함.
+- 현재 플랜 UI에서 Discord 직접 연동을 제공하지 않아 공개 API의 `event:read` 전용 토큰으로 중계함. 유료 플랜 또는 쓰기 권한이 필요하지 않음.
+- `sentry-monitor.py`가 5분마다 환경·프로젝트 필터로 조회하고 새 오류·누적 건수 증가·상태 변경만 전달함. 오류 원문·사용자 정보는 Discord로 복사하지 않음.
+- 토큰과 웹훅은 `/home/colding/.config/pawpong/sentry-monitor.env`(600)에 보관함. 키는 `SENTRY_READ_TOKEN`, `SENTRY_ORG`, `SENTRY_PRODUCTION_PROJECT`, `SENTRY_DEVELOPMENT_PROJECT`, `DISCORD_SENTRY_PRODUCTION_WEBHOOK_URL`, `DISCORD_SENTRY_DEVELOPMENT_WEBHOOK_URL`임.
+- `pawpong-sentry-monitor.service`와 `.timer`도 systemd에 설치함. API/웹훅 장애는 실패 종료하고 다음 주기에 재시도함. 상태 파일은 기존 모니터와 별도로 저장함.
+- 성능 추적·리플레이·로그 수집을 꺼서 오류 이벤트만 사용함. 실제 오류가 무료 한도보다 많으면 수집 누락 가능하며 무료 사용량 자체를 무제한으로 보장하지 않음.
+- 공식 API: https://docs.sentry.io/api/events/list-an-organizations-issues/
