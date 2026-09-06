@@ -1,5 +1,6 @@
 import { MailModule } from '../../../../common/mail/mail.module';
 
+import { ChatModule } from '../../chat/chat.module';
 import { NotificationModule } from '../../notification/notification.module';
 import { BreederManagementSharedModule } from '../shared/breeder-management-shared.module';
 import { BreederManagementProfileModule } from '../profile/breeder-management-profile.module';
@@ -26,12 +27,14 @@ import { BREEDER_MANAGEMENT_APPLICATION_WORKFLOW_PORT } from '../application/por
 
 // 브리더 관리 > 입양 신청 슬라이스
 // 신청 워크플로우(상태 변경)는 메일·알림 발송을 동반하므로 MailModule/NotificationModule 이 필요하다.
+// 입양 확정은 채팅방까지 열어야 해서 ChatModule 이 export 하는 CREATE_OR_GET_ROOM_USE_CASE 를 포트로 주입받는다.
 // 목록 조회(LIST_READER_PORT)·설정(SETTINGS_PORT)은 shared, 소유권 검증(PROFILE_PORT)은 profile 슬라이스에서 주입.
 export const BREEDER_MANAGEMENT_APPLICATIONS_MODULE_IMPORTS = [
     BreederManagementSharedModule,
     BreederManagementProfileModule,
     MailModule,
     NotificationModule,
+    ChatModule,
 ];
 
 export const BREEDER_MANAGEMENT_APPLICATIONS_MODULE_CONTROLLERS = [

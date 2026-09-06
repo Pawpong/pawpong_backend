@@ -17,13 +17,23 @@ export class AdoptionPetRepository {
         @InjectModel(Breeder.name) private readonly breederModel: Model<Breeder>,
     ) {}
 
-    private async buildBaseFilter(input: {
-        petType?: AdoptionPetType;
-        breederId?: string;
-        excludePetId?: string;
-        status?: AdoptionPetStatus;
-        keyword?: string;
-    }): Promise<FilterQuery<AvailablePet>> {
+    /**
+     * 목록·상세 공용 기본 필터.
+     *
+     * options.includeAdopted 는 단건 조회 경로(상세·조회수 갱신) 전용 탈출구다.
+     * 목록/개수는 호출자가 status 를 명시하지 않으면 분양완료(adopted)를 제외하지만,
+     * 상세는 분양완료 펫도 계속 열려야 한다 (공유 링크로 들어와도 404 대신 '분양완료' 로 보여야 함).
+     */
+    private async buildBaseFilter(
+        input: {
+            petType?: AdoptionPetType;
+            breederId?: string;
+            excludePetId?: string;
+            status?: AdoptionPetStatus;
+            keyword?: string;
+        },
+        options: { includeAdopted?: boolean } = {},
+    ): Promise<FilterQuery<AvailablePet>> {
         if (input.breederId && !Types.ObjectId.isValid(input.breederId)) {
             return { isActive: true, breederId: { $in: [] } };
         }
@@ -43,6 +53,9 @@ export class AdoptionPetRepository {
         }
         if (input.status) {
             filter.status = input.status;
+        } else if (!options.includeAdopted) {
+            // 분양완료는 목록에서 내려간다. status=adopted 를 명시적으로 요청하면 위 분기로 그대로 조회된다.
+            filter.status = { $ne: 'adopted' };
         }
         if (input.keyword && input.keyword.trim()) {
             // 정규식 특수문자 이스케이프 처리 (ReDoS 방지)
@@ -85,12 +98,15 @@ export class AdoptionPetRepository {
 
     /**
      * isActive=false 항목은 조회 결과에서 제외한다 (입양 상세 진입 차단).
+     * 분양완료(adopted)는 제외하지 않는다 — 상세는 계속 열리고 '분양완료' 상태로 보여야 한다.
      */
     async findActiveById(petId: string): Promise<AvailablePet | null> {
         if (!Types.ObjectId.isValid(petId)) {
             return Promise.resolve(null);
         }
-        return this.model.findOne({ ...(await this.buildBaseFilter({})), _id: new Types.ObjectId(petId) }).exec();
+        return this.model
+            .findOne({ ...(await this.buildBaseFilter({}, { includeAdopted: true })), _id: new Types.ObjectId(petId) })
+            .exec();
     }
 
     async incrementFavoriteCount(petId: string, delta: number): Promise<void> {
@@ -110,7 +126,7 @@ export class AdoptionPetRepository {
         }
         const updated = await this.model
             .findOneAndUpdate(
-                { ...(await this.buildBaseFilter({})), _id: new Types.ObjectId(petId) },
+                { ...(await this.buildBaseFilter({}, { includeAdopted: true })), _id: new Types.ObjectId(petId) },
                 { $inc: { viewCount: 1 } },
                 { new: true, projection: { viewCount: 1 } },
             )

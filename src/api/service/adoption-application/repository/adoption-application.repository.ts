@@ -83,7 +83,10 @@ export class AdoptionApplicationRepository implements OnModuleInit {
     }
 
     /**
-     * 동일 adopter × pet 의 처리 중 신청(consultation_pending/consultation_completed) 존재 여부.
+     * 동일 adopter × pet 의 재신청 차단 대상 신청 존재 여부.
+     * 처리 중(consultation_pending/consultation_completed) 뿐 아니라 확정(adoption_approved)도 포함한다.
+     * 확정된 신청이 있으면 같은 입양자가 같은 펫에 다시 신청할 수 없다.
+     * 거절(adoption_rejected)만 종결로 보고 재신청을 허용한다.
      * 카운터/문서 페치 없이 가벼운 exists 사용.
      */
     async existsOpenApplicationForPet(adopterId: string, petId: string): Promise<boolean> {
@@ -91,7 +94,7 @@ export class AdoptionApplicationRepository implements OnModuleInit {
         const found = await this.applicationModel.exists({
             adopterId: new Types.ObjectId(adopterId),
             petId: new Types.ObjectId(petId),
-            status: { $in: ['consultation_pending', 'consultation_completed'] },
+            status: { $in: ['consultation_pending', 'consultation_completed', 'adoption_approved'] },
         });
         return Boolean(found);
     }

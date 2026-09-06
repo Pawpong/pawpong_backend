@@ -40,7 +40,7 @@ export class UpdateBreederManagementApplicationStatusUseCase {
         await this.breederManagementApplicationWorkflowPort.updateStatus(applicationId, updateData.status);
 
         if (updateData.status === ApplicationStatus.ADOPTION_APPROVED) {
-            await this.breederManagementApplicationWorkflowPort.incrementCompletedAdoptions(userId);
+            await this.finalizeAdoption(userId, applicationId, application);
         }
 
         this.logger.log(
@@ -57,5 +57,43 @@ export class UpdateBreederManagementApplicationStatusUseCase {
         }
 
         return this.breederManagementApplicationStatusResultMapperService.toApplicationStatusUpdatedResult();
+    }
+
+    /**
+     * 입양 확정 후속 처리.
+     * 신청서 상태 전이(updateStatus)만으로는 아무 일도 일어나지 않으므로, 확정 시점에
+     * 승인 시각 기록 → 펫 분양완료 전이 → 같은 펫의 다른 대기 신청 일괄 거절 → 브리더 실적 증가 →
+     * 채팅방 보장까지 한 번에 마무리한다.
+     *
+     * 펫이 연결되지 않은 신청(v1 은 petId 없이 신청 가능)은 펫 관련 단계를 건너뛴다.
+     * 채팅방 보장은 실패해도 확정을 되돌리지 않는다(포트 구현체가 예외를 삼킨다).
+     */
+    private async finalizeAdoption(
+        breederId: string,
+        applicationId: string,
+        application: { adopterId: { toString(): string }; petId?: { toString(): string } | null },
+    ): Promise<void> {
+        const approvedAt = new Date();
+        await this.breederManagementApplicationWorkflowPort.recordApplicationApproval(applicationId, approvedAt);
+
+        const petId = application.petId?.toString();
+        if (petId) {
+            await this.breederManagementApplicationWorkflowPort.markPetAsAdopted(petId, approvedAt);
+            const rejectedCount = await this.breederManagementApplicationWorkflowPort.rejectOtherOpenApplicationsForPet(
+                petId,
+                applicationId,
+            );
+            this.logger.log(
+                `[updateApplicationStatus] 펫 분양완료 전이 및 다른 대기 신청 ${rejectedCount}건 자동 거절 (petId: ${petId})`,
+            );
+        }
+
+        await this.breederManagementApplicationWorkflowPort.incrementCompletedAdoptions(breederId);
+
+        await this.breederManagementApplicationWorkflowPort.ensureChatRoomForApplication({
+            breederId,
+            adopterId: application.adopterId.toString(),
+            applicationId,
+        });
     }
 }

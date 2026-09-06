@@ -122,6 +122,35 @@ export class AdoptionApplicationRepository {
     }
 
     /**
+     * 입양 확정 시각 기록
+     * status 전이(updateStatus)와 같은 시각을 받아 approvedAt 에 기록한다.
+     * @param id AdoptionApplication ID
+     * @param approvedAt 확정 시각
+     */
+    async recordApprovedAt(id: string, approvedAt: Date): Promise<void> {
+        await this.adoptionApplicationModel.updateOne({ _id: id }, { $set: { approvedAt } }).exec();
+    }
+
+    /**
+     * 같은 펫의 다른 처리 중 신청 일괄 거절
+     * 한 펫은 한 명에게만 가므로, 확정 시 나머지 대기 신청을 종결시켜 유령 신청을 남기지 않는다.
+     * @param petId 반려동물 ID
+     * @param approvedApplicationId 확정된 신청 ID (거절 대상에서 제외)
+     * @returns 거절 처리된 신청 수
+     */
+    async rejectOtherOpenApplicationsForPet(petId: string, approvedApplicationId: string): Promise<number> {
+        const result = await this.adoptionApplicationModel.updateMany(
+            {
+                petId,
+                _id: { $ne: approvedApplicationId },
+                status: { $in: [ApplicationStatus.CONSULTATION_PENDING, ApplicationStatus.CONSULTATION_COMPLETED] },
+            },
+            { $set: { status: ApplicationStatus.ADOPTION_REJECTED } },
+        );
+        return result.modifiedCount;
+    }
+
+    /**
      * 입양 신청 생성
      * @param data 생성할 데이터
      * @returns 생성된 AdoptionApplication
