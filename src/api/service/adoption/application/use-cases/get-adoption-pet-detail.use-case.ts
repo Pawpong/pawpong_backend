@@ -13,6 +13,7 @@ import {
 } from '../ports/adoption-breeder-summary.port';
 import { ADOPTION_PET_READER_PORT, type AdoptionPetReaderPort } from '../ports/adoption-pet-reader.port';
 import { ADOPTION_PET_WRITER_PORT, type AdoptionPetWriterPort } from '../ports/adoption-pet-writer.port';
+import { ADOPTION_RECORD_READER_PORT, type AdoptionRecordReaderPort } from '../ports/adoption-record-reader.port';
 import type { AdoptionPetDetailResult } from '../types/adoption-result.type';
 
 @Injectable()
@@ -28,10 +29,17 @@ export class GetAdoptionPetDetailUseCase {
         private readonly assetUrlPort: AdoptionAssetUrlPort,
         @Inject(ADOPTION_BREEDER_SUMMARY_PORT)
         private readonly breederSummaryPort: AdoptionBreederSummaryPort,
+        @Inject(ADOPTION_RECORD_READER_PORT)
+        private readonly recordReader: AdoptionRecordReaderPort,
         private readonly mapper: AdoptionPetMapperService,
     ) {}
 
-    async execute(input: { petId: string; adopterId?: string }): Promise<AdoptionPetDetailResult> {
+    async execute(input: {
+        petId: string;
+        adopterId?: string;
+        /** 신청 주체는 입양자뿐이다. 브리더/비로그인은 내 신청 상태를 조회하지 않는다. */
+        viewerRole?: string;
+    }): Promise<AdoptionPetDetailResult> {
         const detail = await this.petReader.readByIdDetailed(input.petId);
         if (!detail) {
             throw new BadRequestException('해당 동물을 찾을 수 없습니다.');
@@ -49,15 +57,23 @@ export class GetAdoptionPetDetailUseCase {
                   ? [detail.breedingEnvironment.photoFileName]
                   : [];
 
-        const [photoUrls, parents, environmentPhotoUrls, breederSummary, favoritedSet] = await Promise.all([
-            Promise.all(detail.photos.map((fileName) => this.assetUrlPort.generateSignedUrl(fileName))),
-            this.resolveParentPhotos(detail.parentPetSnapshots),
-            Promise.all(environmentFileNames.map((fileName) => this.assetUrlPort.generateSignedUrl(fileName))),
-            this.breederSummaryPort.readSummary(detail.breederId),
-            input.adopterId
-                ? this.favoriteReader.findFavoritedPetIds(input.adopterId, [detail.id])
-                : Promise.resolve(new Set<string>()),
-        ]);
+        // 이미 신청한 펫이면 프론트가 '입양 신청하기' 대신 '내 신청서 보기'를 보여줘야 한다.
+        // 신청 주체는 입양자뿐이라 브리더/비로그인은 조회하지 않는다.
+        const shouldReadMyApplication = Boolean(input.adopterId) && input.viewerRole === 'adopter';
+
+        const [photoUrls, parents, environmentPhotoUrls, breederSummary, favoritedSet, myApplication] =
+            await Promise.all([
+                Promise.all(detail.photos.map((fileName) => this.assetUrlPort.generateSignedUrl(fileName))),
+                this.resolveParentPhotos(detail.parentPetSnapshots),
+                Promise.all(environmentFileNames.map((fileName) => this.assetUrlPort.generateSignedUrl(fileName))),
+                this.breederSummaryPort.readSummary(detail.breederId),
+                input.adopterId
+                    ? this.favoriteReader.findFavoritedPetIds(input.adopterId, [detail.id])
+                    : Promise.resolve(new Set<string>()),
+                shouldReadMyApplication
+                    ? this.recordReader.findMyBlockingApplicationForPet(input.adopterId!, detail.id)
+                    : Promise.resolve(null),
+            ]);
 
         const isFavorited = favoritedSet.has(detail.id);
         const baseCard = this.mapper.toItem({ ...detail, viewCount: effectiveViewCount }, photoUrls, isFavorited);
@@ -92,6 +108,8 @@ export class GetAdoptionPetDetailUseCase {
                   }
                 : undefined,
             breeder: breederBlock,
+            myApplicationId: myApplication?.applicationId,
+            myApplicationStatus: myApplication?.status,
         };
     }
 
