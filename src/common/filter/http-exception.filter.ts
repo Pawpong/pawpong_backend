@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { ApiResponseDto } from '../dto/response/api-response.dto';
 import { NotifyCriticalErrorUseCase } from '../discord/application/use-cases/notify-critical-error.use-case';
 import { DomainError } from '../error/domain.error';
+import { logHttpFailure } from './http-error-log';
 
 /**
  * HTTP 예외 필터
@@ -41,7 +42,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
         }
 
         // 에러 로깅
-        this.logger.error(`[${request.method}] ${request.url} - ${status} - ${errorMessage}`);
+        logHttpFailure(this.logger, request, status, status >= 500 ? exception.stack : undefined);
         this.notifyCriticalError(exception, request, status, errorMessage);
 
         // ApiResponseDto 형식으로 응답
@@ -103,7 +104,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const message = this.resolveMessage(exception);
 
         // 에러 로깅
-        this.logger.error(`[${request.method}] ${request.url} - ${status} - ${message}`, exception.stack);
+        logHttpFailure(this.logger, request, status, status >= 500 ? exception?.stack : undefined);
         this.notifyCriticalError(exception, request, status, message);
 
         // ApiResponseDto 형식으로 응답

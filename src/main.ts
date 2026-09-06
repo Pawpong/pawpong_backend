@@ -11,7 +11,7 @@ import path from 'path';
 
 import { HttpExceptionFilter, AllExceptionsFilter } from './common/filter/http-exception.filter';
 import { HttpStatusInterceptor } from './common/interceptor/http-status.interceptor';
-import { LoggingInterceptor } from './common/interceptor/logging.interceptor';
+import { httpRequestLogging } from './common/logger/http-request-logging';
 
 import { CustomLoggerService } from './common/logger/custom-logger.service';
 import { NotifyCriticalErrorUseCase } from './common/discord/application/use-cases/notify-critical-error.use-case';
@@ -43,6 +43,7 @@ async function bootstrap(): Promise<void> {
 
     // 쿠키 파서 미들웨어 적용
     app.use(cookieParser());
+    app.use(httpRequestLogging(app.get(CustomLoggerService)));
 
     // HTTP 연결 최적화 설정
     expressApp.set('trust proxy', true);
@@ -76,8 +77,6 @@ async function bootstrap(): Promise<void> {
     app.useGlobalInterceptors(new HttpStatusInterceptor());
 
     // 로깅 인터셉터 적용 (Winston 로거 사용)
-    const customLogger = app.get(CustomLoggerService);
-    app.useGlobalInterceptors(new LoggingInterceptor(customLogger));
 
     // CORS 설정
     app.enableCors({

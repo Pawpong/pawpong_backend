@@ -116,6 +116,9 @@ export class LogCategorizerService {
         const groupMap = new Map<string, { entries: LokiLogEntry[]; category: IssueCategory }>();
 
         for (const entry of entries) {
+            // Historical 4xx records were logged as errors; do not present them as server outages.
+            const status = this.httpStatus(entry);
+            if (status !== undefined && status < 500 && status !== 429) continue;
             const category = this.classifyCategory(entry);
             const groupKey = this.buildGroupKey(entry, category);
 
@@ -162,6 +165,7 @@ export class LogCategorizerService {
      * - 그 외 → application
      */
     private classifyCategory(entry: LokiLogEntry): IssueCategory {
+        if (this.httpStatus(entry) !== undefined) return 'api_error';
         if (entry.context === 'ServerKafka') {
             return 'infrastructure';
         }
@@ -176,6 +180,18 @@ export class LogCategorizerService {
         }
 
         return 'application';
+    }
+
+    private httpStatus(entry: LokiLogEntry): number | undefined {
+        if (!['HttpExceptionFilter', 'AllExceptionsFilter'].includes(entry.context)) return undefined;
+        try {
+            const data = JSON.parse(entry.message);
+            if (data.event === 'http_failure' && Number.isInteger(data.statusCode)) return data.statusCode;
+        } catch {
+            /* Legacy human-readable logs. */
+        }
+        const match = entry.message.match(/ - (\d{3}) - /);
+        return match ? Number(match[1]) : undefined;
     }
 
     /**

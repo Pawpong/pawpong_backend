@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios from 'axios';
 
@@ -48,7 +48,7 @@ export class LokiQueryAdapter implements ILokiQueryPort {
     /**
      * error/warn 레벨 로그를 조회합니다.
      *
-     * Loki에 접근할 수 없는 경우 빈 배열을 반환하여 상위 레이어가 graceful하게 처리할 수 있도록 합니다.
+     * 조회 실패를 정상(빈 로그)과 구분하여 503으로 전달합니다.
      */
     async queryErrorsAndWarnings(options: LokiQueryOptions): Promise<LokiLogEntry[]> {
         const query = `{app="pawpong-backend", level=~"error|warn"}`;
@@ -69,11 +69,13 @@ export class LokiQueryAdapter implements ILokiQueryPort {
         } catch (error) {
             this.logger.logError(
                 'queryErrorsAndWarnings',
-                'Loki 쿼리 실패 — 빈 결과 반환',
+                'Loki 쿼리 실패 — 상태 확인 불가',
                 error,
                 LokiQueryAdapter.name,
             );
-            return [];
+            throw new ServiceUnavailableException(
+                '운영 로그 저장소에 연결할 수 없습니다. 현재 상태를 확인할 수 없습니다.',
+            );
         }
     }
 
