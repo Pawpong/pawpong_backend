@@ -18,10 +18,23 @@ export type AuthSocialAuthenticatedUser = {
     profileImage?: string;
 };
 
+/** 탈퇴 계정이 다시 소셜 로그인했을 때 프론트에 넘길 복구 확인 정보 */
+export type AuthSocialReactivationCandidate = {
+    reactivationToken: string;
+    expiresIn: number;
+    role: AuthSocialCallbackRole;
+    email: string;
+    name: string;
+    deletedAt?: Date;
+};
+
 export type AuthSocialCallbackLoginResult = {
     needsAdditionalInfo: boolean;
     tempUserId?: string;
     user?: AuthSocialAuthenticatedUser;
+    /** true 면 로그인 대신 복구 동의 단계로 보내야 한다. */
+    needsReactivation?: boolean;
+    reactivation?: AuthSocialReactivationCandidate;
 };
 
 export type AuthSocialCallbackTokens = {
