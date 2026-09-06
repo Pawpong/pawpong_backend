@@ -40,4 +40,55 @@ describe('AdopterApplicationStandardAnswerBuilderService', () => {
         expect(result.preferredPetDescription).toBeUndefined();
         expect(result.desiredAdoptionTiming).toBeUndefined();
     });
+
+    // 가입 때 사전 정보를 작성한 사용자에게는 신청 화면이 같은 문항을 다시 묻지 않아
+    // 해당 필드가 비어서 들어온다 — 저장 값이 사라지지 않도록 프로필로 채운다.
+    const counselDefaultProfile = {
+        selfIntroduction: '프로필 자기소개',
+        dailyAbsenceHours: '프로필 6시간',
+        livingSpaceDescription: '프로필 24평',
+    };
+
+    const baseDto = {
+        privacyConsent: true,
+        familyMembers: 'f',
+        allFamilyConsent: true,
+        canProvideBasicCare: true,
+        canAffordMedicalExpenses: true,
+    };
+
+    it('요청 값이 비면 상담 사전 정보로 채운다', () => {
+        const result = service.build(
+            { ...baseDto, selfIntroduction: '', timeAwayFromHome: '', livingSpaceDescription: undefined } as any,
+            counselDefaultProfile,
+        );
+
+        expect(result.selfIntroduction).toBe('프로필 자기소개');
+        expect(result.timeAwayFromHome).toBe('프로필 6시간');
+        expect(result.livingSpaceDescription).toBe('프로필 24평');
+    });
+
+    it('요청 값이 있으면 상담 사전 정보보다 요청 값을 우선한다', () => {
+        const result = service.build(
+            {
+                ...baseDto,
+                selfIntroduction: '요청 자기소개',
+                timeAwayFromHome: '요청 2시간',
+                livingSpaceDescription: '요청 원룸',
+            } as any,
+            counselDefaultProfile,
+        );
+
+        expect(result.selfIntroduction).toBe('요청 자기소개');
+        expect(result.timeAwayFromHome).toBe('요청 2시간');
+        expect(result.livingSpaceDescription).toBe('요청 원룸');
+    });
+
+    it('둘 다 없으면 빈 문자열이다', () => {
+        const result = service.build({ ...baseDto, selfIntroduction: '' } as any);
+
+        expect(result.selfIntroduction).toBe('');
+        expect(result.timeAwayFromHome).toBe('');
+        expect(result.livingSpaceDescription).toBe('');
+    });
 });
