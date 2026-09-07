@@ -1,4 +1,8 @@
 import { MongooseModule } from '@nestjs/mongoose';
+import { PlatformAdminBackupController } from './controller/platform-admin-backup.controller';
+import { ManageProductionBackupUseCase } from './application/use-cases/manage-production-backup.use-case';
+import { PRODUCTION_BACKUP } from './application/ports/production-backup.port';
+import { ProductionBackupQueueAdapter } from './infrastructure/production-backup-queue.adapter';
 
 import { Adopter, AdopterSchema } from '../../../schema/adopter.schema';
 import { AdoptionApplication, AdoptionApplicationSchema } from '../../../schema/adoption-application.schema';
@@ -32,6 +36,7 @@ const PLATFORM_ADMIN_SCHEMA_IMPORTS = MongooseModule.forFeature([
 export const PLATFORM_ADMIN_MODULE_IMPORTS = [PLATFORM_ADMIN_SCHEMA_IMPORTS];
 
 export const PLATFORM_ADMIN_MODULE_CONTROLLERS = [
+    PlatformAdminBackupController,
     PlatformAdminStatsController,
     PlatformAdminMvpStatsController,
     PlatformAdminSystemHealthController,
@@ -63,6 +68,9 @@ const PLATFORM_ADMIN_PORT_BINDINGS = [
 ];
 
 export const PLATFORM_ADMIN_MODULE_PROVIDERS = [
+    ManageProductionBackupUseCase,
+    ProductionBackupQueueAdapter,
+    { provide: PRODUCTION_BACKUP, useExisting: ProductionBackupQueueAdapter },
     ...PLATFORM_ADMIN_USE_CASE_PROVIDERS,
     ...PLATFORM_ADMIN_DOMAIN_PROVIDERS,
     ...PLATFORM_ADMIN_INFRASTRUCTURE_PROVIDERS,

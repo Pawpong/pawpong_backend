@@ -8,6 +8,15 @@ import { VerificationStatus } from '../../../../../../common/enum/user.enum';
  * 브리더 검색 요청 DTO
  */
 export class BreederSearchRequestDto {
+    @ApiProperty({
+        description: '계정 구분. normal은 테스트 표시가 없는 기존 계정도 포함',
+        enum: ['all', 'normal', 'test'],
+        required: false,
+    })
+    @IsOptional()
+    @IsEnum(['all', 'normal', 'test'])
+    accountType?: 'all' | 'normal' | 'test';
+
     /**
      * 인증 상태 필터
      * @example "pending"

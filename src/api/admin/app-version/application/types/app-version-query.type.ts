@@ -5,6 +5,8 @@ export type AppVersionAdminListQuery = {
 };
 
 export type AppVersionAdminItemResult = {
+    /** 앱에 내장된 추천 아이콘. 미설정이면 기존 사용자 선택을 유지한다. */
+    appIconKey?: 'default' | 'pixel';
     appVersionId: string;
     platform: 'ios' | 'android';
     latestVersion: string;

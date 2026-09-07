@@ -6,6 +6,12 @@ import { IsString, IsBoolean, IsOptional, IsIn } from 'class-validator';
  * 모든 필드는 선택사항 (수정할 필드만 전달)
  */
 export class AppVersionUpdateRequestDto {
+    /** 내장 아이콘 추천값. 실제 변경은 앱에서 사용자가 선택한다. */
+    @ApiProperty({ description: '추천 앱 아이콘 (사용자 선택 후 적용)', enum: ['default', 'pixel'], required: false })
+    @IsOptional()
+    @IsIn(['default', 'pixel'])
+    appIconKey?: 'default' | 'pixel';
+
     /**
      * 최신 버전
      */

@@ -70,12 +70,18 @@ jobs:
                   push: true
                   tags: ${{ env.GAR_LOCATION }}/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}/pawpong-ai-agent:${{ github.sha }}
 
-            - name: Configure AI Agent credential
-              env:
-                  OPENAI_API_KEY: ${{ secrets.PAWPONG_OPENAI_API_KEY }}
+            - name: Build and push production backup worker
+              uses: docker/build-push-action@v5
+              with:
+                  context: .
+                  file: Dockerfile.backup
+                  push: true
+                  tags: ${{ env.GAR_LOCATION }}/${{ env.GCP_PROJECT_ID }}/${{ env.SERVICE_NAME }}/pawpong-backup:${{ github.sha }}
+
+            - name: Verify Control-managed environment (read only)
               run: |
-                  test -n "$OPENAI_API_KEY"
-                  printf '%s' "$OPENAI_API_KEY" | ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no colding@${{ secrets.PROD_SERVER_HOST }} "python3 -c 'import sys,pathlib,os; p=pathlib.Path(\"/home/colding/pawpong_backend/.env.production\"); key=sys.stdin.read().strip(); assert key and \"\\n\" not in key; lines=[line for line in p.read_text().splitlines() if not line.startswith(\"OPENAI_API_KEY=\")]; p.write_text(\"\\n\".join(lines)+\"\\nOPENAI_API_KEY=\"+key+\"\\n\"); os.chmod(p,0o600)'"
+                  # 운영 값은 Control만 수정한다. CI는 파일 존재 여부만 확인하고 덮어쓰지 않는다.
+                  ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=yes colding@${{ secrets.PROD_SERVER_HOST }} 'test -s /home/colding/pawpong_backend/.env.production'
 
             - name: Deploy to Production Server
               env:
@@ -110,6 +116,10 @@ jobs:
                   AGENT_IMAGE="${GAR_LOCATION}/${GCP_PROJECT_ID}/${SERVICE_NAME}/pawpong-ai-agent:${COMMIT_SHA}"
                   docker pull "\$AGENT_IMAGE"
                   docker tag "\$AGENT_IMAGE" pawpong-ai-agent:latest
+
+                  BACKUP_IMAGE="${GAR_LOCATION}/${GCP_PROJECT_ID}/${SERVICE_NAME}/pawpong-backup:${COMMIT_SHA}"
+                  docker pull "\$BACKUP_IMAGE"
+                  docker tag "\$BACKUP_IMAGE" pawpong-backup:latest
 
                   echo "Running Blue-Green deployment..."
                   bash deploy.sh ${COMMIT_SHA}

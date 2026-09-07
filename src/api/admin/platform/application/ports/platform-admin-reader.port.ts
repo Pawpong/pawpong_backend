@@ -4,6 +4,7 @@ export interface PlatformAdminAdminSnapshot {
     id: string;
     permissions?: {
         canViewStatistics?: boolean;
+        canManageAdmins?: boolean;
     };
 }
 

@@ -1,7 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
 import { AdminAction, VerificationStatus } from '../../../../../../common/enum/user.enum';
-import { DomainAuthorizationError, DomainValidationError } from '../../../../../../common/error/domain.error';
+import {
+    DomainAuthorizationError,
+    DomainConflictError,
+    DomainValidationError,
+} from '../../../../../../common/error/domain.error';
 import {
     BreederVerificationAdminAdminSnapshot,
     BreederVerificationAdminBreederSnapshot,
@@ -9,6 +13,22 @@ import {
 
 @Injectable()
 export class BreederVerificationAdminPolicyService {
+    /** 완료된 심사를 덮어쓰거나 동일 상태 알림을 재발송하지 않는다. */
+    assertVerificationTransition(current: string | undefined, next: VerificationStatus): string {
+        const allowed =
+            current === VerificationStatus.PENDING
+                ? [VerificationStatus.REVIEWING, VerificationStatus.APPROVED, VerificationStatus.REJECTED]
+                : current === VerificationStatus.REVIEWING
+                  ? [VerificationStatus.APPROVED, VerificationStatus.REJECTED]
+                  : [];
+        if (!current || !allowed.includes(next)) {
+            throw new DomainConflictError(
+                '이미 처리되었거나 변경할 수 없는 심사 상태입니다. 새로고침 후 확인해주세요.',
+            );
+        }
+        return current;
+    }
+
     assertCanManageBreeders(
         admin: BreederVerificationAdminAdminSnapshot | null,
         message: string,

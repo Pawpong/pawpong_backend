@@ -76,8 +76,8 @@ export class BreederVerificationAdminMongooseRepositoryAdapter
     async updateBreederVerification(
         breederId: string,
         command: BreederVerificationAdminUpdateVerificationCommand,
-    ): Promise<void> {
-        await this.breederVerificationAdminRepository.updateBreederVerification(breederId, command);
+    ): Promise<boolean> {
+        return this.breederVerificationAdminRepository.updateBreederVerification(breederId, command);
     }
 
     async appendAdminActivityLog(adminId: string, logEntry: BreederVerificationAdminActivityLogEntry): Promise<void> {

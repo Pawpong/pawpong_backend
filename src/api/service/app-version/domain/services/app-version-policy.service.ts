@@ -38,6 +38,7 @@ export class AppVersionPolicyService {
               : '';
 
         return {
+            ...(versionInfo.appIconKey ? { appIconKey: versionInfo.appIconKey } : {}),
             needsForceUpdate,
             needsRecommendUpdate,
             latestVersion: versionInfo.latestVersion,

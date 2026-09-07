@@ -7,6 +7,7 @@ import type { AppVersionAdminItemResult } from '../../application/types/app-vers
 export class AppVersionAdminItemMapperService {
     toResult(appVersion: AppVersionAdminSnapshot): AppVersionAdminItemResult {
         return {
+            ...(appVersion.appIconKey ? { appIconKey: appVersion.appIconKey } : {}),
             appVersionId: appVersion.appVersionId,
             platform: appVersion.platform,
             latestVersion: appVersion.latestVersion,
