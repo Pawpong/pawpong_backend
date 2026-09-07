@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model, Types } from 'mongoose';
+import { FilterQuery, Model, Types, UpdateQuery } from 'mongoose';
 
 import { AvailablePet, AvailablePetDocument } from '../../../../schema/available-pet.schema';
 import type {
@@ -84,6 +84,9 @@ export class BreederPetPostingRepository {
     /**
      * 본인 분양글만 갱신. petId+breederId+isActive=true 매칭 필터로 단일 updateOne.
      * 매칭이 0건이면 changed=false (다른 브리더 소유 / 비활성 / 미존재 모두 동일하게 처리).
+     *
+     * patch 값 규약: undefined 는 미변경, null 은 명시적 제거($unset), 나머지는 $set.
+     * null 을 그대로 $set 하면 "접종 완료인데 미완료 사유가 null 로 남은" 모순 문서가 되므로 구분한다.
      */
     async updateByOwner(
         petId: string,
@@ -95,13 +98,27 @@ export class BreederPetPostingRepository {
         }
 
         const $set: Record<string, unknown> = {};
+        const $unset: Record<string, ''> = {};
         for (const [key, value] of Object.entries(patch)) {
-            if (value !== undefined) {
-                $set[key] = value;
+            if (value === undefined) {
+                continue;
             }
+            if (value === null) {
+                $unset[key] = '';
+                continue;
+            }
+            $set[key] = value;
         }
 
-        if (Object.keys($set).length === 0) {
+        const update: UpdateQuery<AvailablePetDocument> = {};
+        if (Object.keys($set).length > 0) {
+            update.$set = $set;
+        }
+        if (Object.keys($unset).length > 0) {
+            update.$unset = $unset;
+        }
+
+        if (Object.keys(update).length === 0) {
             // 빈 patch 는 본인 글 존재 여부만 확인 — idempotent
             const exists = await this.availablePetModel.exists({
                 _id: new Types.ObjectId(petId),
@@ -118,7 +135,7 @@ export class BreederPetPostingRepository {
                     breederId: new Types.ObjectId(breederId),
                     isActive: true,
                 },
-                { $set },
+                update,
             )
             .exec();
 

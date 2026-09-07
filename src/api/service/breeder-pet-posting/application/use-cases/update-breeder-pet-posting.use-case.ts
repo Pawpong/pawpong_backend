@@ -1,5 +1,7 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 
+import { BreederPetPostingMapperService } from '../../domain/services/breeder-pet-posting-mapper.service';
+import { BreederPetPostingValidatorService } from '../../domain/services/breeder-pet-posting-validator.service';
 import {
     BREEDER_PET_POSTING_PROFILE_PORT,
     type BreederPetPostingProfilePort,
@@ -8,13 +10,7 @@ import {
     BREEDER_PET_POSTING_WRITER_PORT,
     type BreederPetPostingWriterPort,
 } from '../ports/breeder-pet-posting-writer.port';
-import type {
-    BreederPetPostingUpdateCommand,
-    BreederPetPostingUpdatePersistData,
-} from '../types/breeder-pet-posting-command.type';
-
-const MAX_PHOTOS = 10;
-const MIN_PHOTOS = 1;
+import type { BreederPetPostingUpdateCommand } from '../types/breeder-pet-posting-command.type';
 
 /**
  * v2 분양글 부분 수정 use-case (브리더 본인 전용).
@@ -25,6 +21,9 @@ const MIN_PHOTOS = 1;
  *
  * 입력 필드 화이트리스트는 BreederPetPostingUpdateCommand 가 정의한다.
  * petType 은 화이트리스트에서 제외한다 — 브리더 1명 = 1축종이라 글 단위로 바꿀 수 없다.
+ *
+ * cross-field 검증과 command -> persist 변환은 작성 경로와 같은 도메인 서비스를 쓴다
+ * (validator.validateUpdate / mapper.toUpdatePersistData) — 규칙이 두 벌로 갈라지지 않게 한다.
  */
 @Injectable()
 export class UpdateBreederPetPostingUseCase {
@@ -33,6 +32,8 @@ export class UpdateBreederPetPostingUseCase {
         private readonly profilePort: BreederPetPostingProfilePort,
         @Inject(BREEDER_PET_POSTING_WRITER_PORT)
         private readonly writerPort: BreederPetPostingWriterPort,
+        private readonly validator: BreederPetPostingValidatorService,
+        private readonly mapper: BreederPetPostingMapperService,
     ) {}
 
     async execute(userId: string, petId: string, command: BreederPetPostingUpdateCommand): Promise<{ petId: string }> {
@@ -41,7 +42,13 @@ export class UpdateBreederPetPostingUseCase {
             throw new BadRequestException('브리더 정보를 찾을 수 없습니다.');
         }
 
-        const persistData = this.toPersistData(command);
+        // class-validator 의 @IsOptional 은 null 도 통과시킨다. null 을 "미제공"으로 정규화해두지 않으면
+        // 검증/매핑이 null 을 배열·객체로 다루다 500 이 난다 (예: parentPetSnapshots: null).
+        // 값 삭제는 null 이 아니라 빈 배열 / 빈 객체로 표현한다 — DTO 설명과 같은 계약이다.
+        const patch = this.withoutNulls(command);
+
+        this.validator.validateUpdate(patch);
+        const persistData = this.mapper.toUpdatePersistData(patch);
 
         // 축종은 브리더 계정에 종속된다. 실제로 바꿀 필드가 있을 때 브리더 값으로 함께 재확정해,
         // petType 이 비어 있던 과거 분양글이 수정 시점에 스스로 복구되게 한다.
@@ -58,39 +65,9 @@ export class UpdateBreederPetPostingUseCase {
         return { petId };
     }
 
-    private toPersistData(command: BreederPetPostingUpdateCommand): BreederPetPostingUpdatePersistData {
-        // photos 가 제공된 경우만 길이 + 대표 인덱스 검증 (cross-field).
-        // 미제공이면 기존 photos 그대로 — DB 상태와 정합성은 그대로 유지된다.
-        if (command.photos !== undefined) {
-            if (command.photos.length < MIN_PHOTOS) {
-                throw new BadRequestException('이미지를 최소 1장 이상 업로드해주세요.');
-            }
-            if (command.photos.length > MAX_PHOTOS) {
-                throw new BadRequestException(`이미지는 최대 ${MAX_PHOTOS}장까지 업로드할 수 있습니다.`);
-            }
-            const index = command.representativePhotoIndex ?? 0;
-            if (index < 0 || index >= command.photos.length) {
-                throw new BadRequestException('대표 사진 인덱스가 업로드된 이미지 범위를 벗어났습니다.');
-            }
-        } else if (command.representativePhotoIndex !== undefined) {
-            // photos 없이 대표 인덱스만 변경 — 클라이언트가 기존 photos 길이를 신뢰. 음수만 차단.
-            if (command.representativePhotoIndex < 0) {
-                throw new BadRequestException('대표 사진 인덱스가 유효하지 않습니다.');
-            }
-        }
-
-        const persist: BreederPetPostingUpdatePersistData = {};
-        if (command.name !== undefined) persist.name = command.name;
-        if (command.breed !== undefined) persist.breed = command.breed;
-        if (command.gender !== undefined) persist.gender = command.gender;
-        if (command.birthDate !== undefined) persist.birthDate = new Date(command.birthDate);
-        if (command.price !== undefined) persist.price = command.price;
-        if (command.description !== undefined) persist.description = command.description;
-        if (command.status !== undefined) persist.status = command.status;
-        if (command.photos !== undefined) persist.photos = command.photos;
-        if (command.representativePhotoIndex !== undefined) {
-            persist.representativePhotoIndex = command.representativePhotoIndex;
-        }
-        return persist;
+    private withoutNulls(command: BreederPetPostingUpdateCommand): BreederPetPostingUpdateCommand {
+        return Object.fromEntries(
+            Object.entries(command).filter(([, value]) => value !== null),
+        ) as BreederPetPostingUpdateCommand;
     }
 }

@@ -109,20 +109,30 @@ export function ApiUpdateBreederPetPostingEndpoint() {
         ApiEndpoint({
             summary: '분양글 부분 수정 (v2, 작성자 본인)',
             description: `
-                v2 분양글의 단순/안전 필드를 부분 수정합니다.
+                v2 분양글을 부분 수정합니다. **보낸 필드만** 바뀌고, 보내지 않은 필드는 기존 값이 유지됩니다.
 
                 ## 지원 필드 (화이트리스트)
-                - name, breed, gender, birthDate, price, description, petType
+                - name, breed, gender, birthDate, price, description
                 - status (분양 상태 전환: available / reserved / adopted)
                 - photos / representativePhotoIndex (photos 제공 시 1~10 + 대표 인덱스 범위 검증)
-
-                ## 제외된 필드
-                - vaccinationStatus/Records/IncompleteReason
-                - geneticTestStatus/Records/IncompleteReason
+                - vaccinationStatus / vaccinationRecords / vaccinationIncompleteReason
+                - geneticTestStatus / geneticTestRecords / geneticTestIncompleteReason
                 - parentPetSnapshots
                 - breedingEnvironment
 
-                위 필드들은 cross-field 정합성이 복잡하여 별도 PR 에서 다룹니다. 본 endpoint 에 보내면 무시됩니다.
+                petType 은 브리더 계정 축종에 종속되어 요청 값이 무시됩니다 (서버가 계정 축종으로 재확정).
+
+                ## 배열/객체는 전체 교체
+                photos, parentPetSnapshots, breedingEnvironment 는 부분 병합이 아니라 통째로 대체됩니다.
+                - parentPetSnapshots: [] → 부모 정보 전체 삭제
+                - breedingEnvironment: 설명도 사진도 없는 객체 → 사육 환경 삭제
+                - breedingEnvironment 는 photoFileNames(최대 5장)가 정식이며 photoFileName(단일)은 deprecated — 둘 다 오면 배열이 우선합니다.
+
+                ## 건강 정보는 그룹 단위로만 수정 가능
+                status 와 records/사유가 서로를 구속하므로, 그룹 내 아무 필드나 보내면 status 도 함께 보내야 합니다.
+                (없이 보내면 400: "접종 정보를 수정하려면 접종 상태를 함께 보내주세요.")
+                - completed → records 1개 이상 필수, 미완료 사유 동봉 불가. 기존에 저장돼 있던 미완료 사유는 삭제됩니다.
+                - incomplete → 사유 필수, records 동봉 불가. 기존 기록은 비워집니다.
 
                 ## 권한
                 - JWT 인증 + StrictRolesGuard('breeder')

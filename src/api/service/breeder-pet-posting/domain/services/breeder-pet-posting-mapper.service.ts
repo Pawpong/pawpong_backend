@@ -6,15 +6,20 @@ import type {
     BreederPetPostingCreatePersistData,
     BreederPetPostingGeneticTestRecordPersistData,
     BreederPetPostingParentSnapshotPersistData,
+    BreederPetPostingUpdateCommand,
+    BreederPetPostingUpdatePersistData,
     BreederPetPostingVaccinationRecordPersistData,
     PostingPetType,
 } from '../../application/types/breeder-pet-posting-command.type';
 
 /**
- * v2 분양글 작성 — application command -> persistence data 매퍼.
+ * v2 분양글 작성/수정 — application command -> persistence data 매퍼.
  *
  * 날짜 문자열을 Date 로 변환하고, status 별로 records 또는 incompleteReason 만 보존한다.
  * petType 은 클라이언트 입력이 아니라 글쓴 브리더 계정에서 파생한다.
+ *
+ * 작성과 수정은 같은 변환 규칙(날짜 캐스팅, 사육 환경 정규화)을 공유하고,
+ * "제공된 필드만 담는지" 여부만 다르다.
  */
 @Injectable()
 export class BreederPetPostingMapperService {
@@ -55,6 +60,64 @@ export class BreederPetPostingMapperService {
             parentPetSnapshots: this.toParentSnapshots(command.parentPetSnapshots ?? []),
             breedingEnvironment: this.toBreedingEnvironment(command.breedingEnvironment),
         };
+    }
+
+    /**
+     * 부분 수정 — 제공된(undefined 아닌) 필드만 담는다. 미제공 필드는 기존 DB 값이 유지된다.
+     *
+     * 건강 정보는 그룹 단위로 온다(validator 가 status 동반을 강제).
+     * status 를 뒤집으면 반대편 값이 모순이 되므로 여기서 함께 정리한다 —
+     * completed 면 미완료 사유를 제거(null)하고, incomplete 면 기록을 비운다.
+     * 작성 시 mapper 가 status 에 맞지 않는 값을 애초에 저장하지 않는 것과 같은 규칙이다.
+     */
+    toUpdatePersistData(command: BreederPetPostingUpdateCommand): BreederPetPostingUpdatePersistData {
+        const persist: BreederPetPostingUpdatePersistData = {};
+
+        if (command.name !== undefined) persist.name = command.name;
+        if (command.breed !== undefined) persist.breed = command.breed;
+        if (command.gender !== undefined) persist.gender = command.gender;
+        if (command.birthDate !== undefined) persist.birthDate = this.toDate(command.birthDate, '태어난 날짜');
+        if (command.price !== undefined) persist.price = command.price;
+        if (command.description !== undefined) persist.description = command.description;
+        if (command.status !== undefined) persist.status = command.status;
+        if (command.photos !== undefined) persist.photos = command.photos;
+        if (command.representativePhotoIndex !== undefined) {
+            persist.representativePhotoIndex = command.representativePhotoIndex;
+        }
+
+        if (command.vaccinationStatus !== undefined) {
+            persist.vaccinationStatus = command.vaccinationStatus;
+            if (command.vaccinationStatus === 'completed') {
+                persist.vaccinationRecords = this.toVaccinationRecords(command.vaccinationRecords ?? []);
+                persist.vaccinationIncompleteReason = null;
+            } else {
+                persist.vaccinationRecords = [];
+                persist.vaccinationIncompleteReason = command.vaccinationIncompleteReason?.trim() ?? null;
+            }
+        }
+
+        if (command.geneticTestStatus !== undefined) {
+            persist.geneticTestStatus = command.geneticTestStatus;
+            if (command.geneticTestStatus === 'completed') {
+                persist.geneticTestRecords = this.toGeneticTestRecords(command.geneticTestRecords ?? []);
+                persist.geneticTestIncompleteReason = null;
+            } else {
+                persist.geneticTestRecords = [];
+                persist.geneticTestIncompleteReason = command.geneticTestIncompleteReason?.trim() ?? null;
+            }
+        }
+
+        // 배열/객체는 전체 교체 — 빈 배열이면 부모 정보를 모두 지운다는 뜻이다
+        if (command.parentPetSnapshots !== undefined) {
+            persist.parentPetSnapshots = this.toParentSnapshots(command.parentPetSnapshots);
+        }
+
+        // 설명도 사진도 없는 객체가 오면 작성 때와 같이 "환경 없음"으로 정규화되고, 수정에서는 제거를 뜻한다
+        if (command.breedingEnvironment !== undefined) {
+            persist.breedingEnvironment = this.toBreedingEnvironment(command.breedingEnvironment) ?? null;
+        }
+
+        return persist;
     }
 
     /**

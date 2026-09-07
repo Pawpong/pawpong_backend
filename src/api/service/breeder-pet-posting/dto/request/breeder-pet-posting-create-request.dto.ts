@@ -17,7 +17,11 @@ import {
     ValidateNested,
 } from 'class-validator';
 
-class VaccinationRecordRequestDto {
+/*
+ * 아래 중첩 DTO 들은 부분 수정 요청(UpdateBreederPetPostingRequestDto)에서도 그대로 재사용한다.
+ * 작성/수정이 같은 중첩 검증 규칙을 쓰도록 클래스를 한 곳에만 둔다.
+ */
+export class VaccinationRecordRequestDto {
     @ApiProperty({ description: '접종명', example: '종합백신' })
     @IsString()
     @IsNotEmpty()
@@ -34,7 +38,7 @@ class VaccinationRecordRequestDto {
     round: number;
 }
 
-class GeneticTestRecordRequestDto {
+export class GeneticTestRecordRequestDto {
     @ApiProperty({ description: '검사 검진일 (YYYY-MM-DD)', example: '2025-02-15' })
     @IsDateString()
     date: string;
@@ -55,7 +59,7 @@ class GeneticTestRecordRequestDto {
     result: string;
 }
 
-class ParentPetSnapshotRequestDto {
+export class ParentPetSnapshotRequestDto {
     @ApiProperty({ description: '부모 관계', enum: ['mother', 'father'], example: 'mother' })
     @IsEnum(['mother', 'father'])
     relation: 'mother' | 'father';
@@ -81,7 +85,7 @@ class ParentPetSnapshotRequestDto {
     photoFileName?: string;
 }
 
-class BreedingEnvironmentRequestDto {
+export class BreedingEnvironmentRequestDto {
     @ApiPropertyOptional({ description: '사육 환경 설명 (최대 1000자)', example: '온습도 일정한 전용 사육장' })
     @IsOptional()
     @IsString()
