@@ -63,6 +63,25 @@ export class BreederPetPostingRepository {
     }
 
     /**
+     * 본인 분양글 단건 조회 (수정 화면 복원용).
+     * petId+breederId+isActive=true 로 소유자 검증까지 한 번에 처리 — 매칭이 없으면 null.
+     */
+    async findByOwner(petId: string, breederId: string): Promise<AvailablePetDocument | null> {
+        if (!Types.ObjectId.isValid(petId) || !Types.ObjectId.isValid(breederId)) {
+            return null;
+        }
+
+        return this.availablePetModel
+            .findOne({
+                _id: new Types.ObjectId(petId),
+                breederId: new Types.ObjectId(breederId),
+                isActive: true,
+            })
+            .lean<AvailablePetDocument>()
+            .exec();
+    }
+
+    /**
      * 본인 분양글만 갱신. petId+breederId+isActive=true 매칭 필터로 단일 updateOne.
      * 매칭이 0건이면 changed=false (다른 브리더 소유 / 비활성 / 미존재 모두 동일하게 처리).
      */

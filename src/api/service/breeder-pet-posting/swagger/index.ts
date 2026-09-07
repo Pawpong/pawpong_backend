@@ -12,6 +12,7 @@ import {
     DeleteBreederPetPostingDraftResponseDto,
     SaveBreederPetPostingDraftResponseDto,
 } from '../dto/response/breeder-pet-posting-draft-response.dto';
+import { BreederPetPostingEditDetailResponseDto } from '../dto/response/breeder-pet-posting-edit-response.dto';
 import { CreateBreederPetPostingResponseDto } from '../dto/response/breeder-pet-posting-response.dto';
 
 const BREEDER_NOT_FOUND_RESPONSE = {
@@ -63,6 +64,43 @@ export function ApiCreateBreederPetPostingEndpoint() {
             successMessageExample: BREEDER_PET_POSTING_RESPONSE_MESSAGES.created,
             errorResponses: [VALIDATION_ERROR_RESPONSE, BREEDER_NOT_FOUND_RESPONSE],
         }),
+    );
+}
+
+export function ApiGetBreederPetPostingForEditEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '분양글 수정용 단건 조회 (v2, 작성자 본인)',
+            description: `
+                수정 화면의 폼을 기존 값으로 채우기 위한 조회 API 입니다.
+
+                ## 공개 상세(GET /v2/adoption/:petId) 와의 차이
+                - 공개 상세는 표시용이라 사진 **URL** 만 내려주고 파일키가 없습니다.
+                - PATCH 는 photos 를 **파일키 배열**로 받기 때문에, 수정 화면은 파일키가 필요합니다.
+                - 그래서 임시저장 조회와 같은 계약을 씁니다 —
+                  form 에는 파일키를 그대로 두고, 미리보기용 signed URL 을 같은 순서로 나란히 내려줍니다.
+
+                ## form
+                - 분양글 작성 요청(CreateBreederPetPostingRequestDto)과 동일 shape 입니다.
+                - 표시용 가공을 하지 않습니다: price 는 숫자, birthDate 는 YYYY-MM-DD, relation 은 mother/father 원본값.
+                - 값을 그대로 폼에 부었다가 PATCH 로 되돌려 보낼 수 있습니다.
+
+                ## photoUrls
+                - pet: form.photos 와 같은 순서
+                - parents: form.parentPetSnapshots 와 같은 순서 (사진 없는 행은 null)
+                - breedingEnvironment: 사육 환경 첫 장 (없으면 null)
+                - breedingEnvironmentPhotos: 사육 환경 사진 전체 (form.breedingEnvironment.photoFileNames 와 같은 순서)
+
+                ## 권한
+                - JWT 인증 + StrictRolesGuard('breeder')
+                - 본인 글이 아니거나 이미 비활성/미존재면 400 ("해당 분양글을 찾을 수 없습니다.") — update/delete 와 동일하게, 다른 브리더 소유 정보 누설 방지를 위해 403/404 대신 400 으로 통일
+            `,
+            responseType: BreederPetPostingEditDetailResponseDto,
+            successDescription: '분양글 수정용 조회 성공',
+            successMessageExample: BREEDER_PET_POSTING_RESPONSE_MESSAGES.retrievedForEdit,
+            errorResponses: [BREEDER_NOT_FOUND_RESPONSE, POSTING_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'petId', description: '분양글(펫) ID', example: '507f1f77bcf86cd799439011' }),
     );
 }
 

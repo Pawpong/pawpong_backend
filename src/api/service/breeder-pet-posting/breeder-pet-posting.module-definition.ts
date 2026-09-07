@@ -16,6 +16,7 @@ import { CreateBreederPetPostingUseCase } from './application/use-cases/create-b
 import { DeleteBreederPetPostingDraftUseCase } from './application/use-cases/delete-breeder-pet-posting-draft.use-case';
 import { DeleteBreederPetPostingUseCase } from './application/use-cases/delete-breeder-pet-posting.use-case';
 import { GetBreederPetPostingDraftUseCase } from './application/use-cases/get-breeder-pet-posting-draft.use-case';
+import { GetBreederPetPostingForEditUseCase } from './application/use-cases/get-breeder-pet-posting-for-edit.use-case';
 import { ListMyBreederPetPostingDraftsUseCase } from './application/use-cases/list-my-breeder-pet-posting-drafts.use-case';
 import { ListMyBreederPetPostingsUseCase } from './application/use-cases/list-my-breeder-pet-postings.use-case';
 import { SaveBreederPetPostingDraftUseCase } from './application/use-cases/save-breeder-pet-posting-draft.use-case';
@@ -27,6 +28,7 @@ import { BreederPetPostingUpdateController } from './controller/breeder-pet-post
 import { BreederPetPostingCardMapperService } from './domain/services/breeder-pet-posting-card-mapper.service';
 import { BreederPetPostingDraftCardMapperService } from './domain/services/breeder-pet-posting-draft-card-mapper.service';
 import { BreederPetPostingDraftPhotoUrlService } from './domain/services/breeder-pet-posting-draft-photo-url.service';
+import { BreederPetPostingEditFormMapperService } from './domain/services/breeder-pet-posting-edit-form-mapper.service';
 import { BreederPetPostingMapperService } from './domain/services/breeder-pet-posting-mapper.service';
 import { BreederPetPostingValidatorService } from './domain/services/breeder-pet-posting-validator.service';
 import { BreederPetPostingAssetUrlStorageAdapter } from './infrastructure/breeder-pet-posting-asset-url-storage.adapter';
@@ -49,7 +51,8 @@ export const BREEDER_PET_POSTING_MODULE_IMPORTS = [BREEDER_PET_POSTING_SCHEMA_IM
 
 export const BREEDER_PET_POSTING_MODULE_CONTROLLERS = [
     BreederPetPostingCreateController,
-    // Draft 컨트롤러를 Update(:petId 패턴)보다 먼저 등록해 'drafts' 리터럴 경로가 우선 매칭되게 한다
+    // Draft/List 컨트롤러를 Update(:petId 패턴)보다 먼저 등록해 'drafts'/'me' 리터럴 경로가 우선 매칭되게 한다.
+    // Update 컨트롤러가 GET :petId 도 갖게 되어(수정 화면 조회) 순서가 어긋나면 GET drafts, GET me 가 잡아먹힌다.
     BreederPetPostingDraftController,
     BreederPetPostingListController,
     BreederPetPostingUpdateController,
@@ -58,6 +61,7 @@ export const BREEDER_PET_POSTING_MODULE_CONTROLLERS = [
 const BREEDER_PET_POSTING_USE_CASE_PROVIDERS = [
     CreateBreederPetPostingUseCase,
     ListMyBreederPetPostingsUseCase,
+    GetBreederPetPostingForEditUseCase,
     UpdateBreederPetPostingUseCase,
     DeleteBreederPetPostingUseCase,
     SaveBreederPetPostingDraftUseCase,
@@ -72,6 +76,7 @@ const BREEDER_PET_POSTING_DOMAIN_PROVIDERS = [
     BreederPetPostingCardMapperService,
     BreederPetPostingDraftCardMapperService,
     BreederPetPostingDraftPhotoUrlService,
+    BreederPetPostingEditFormMapperService,
 ];
 
 const BREEDER_PET_POSTING_INFRASTRUCTURE_PROVIDERS = [
