@@ -52,6 +52,7 @@
         "seed:banners": "ts-node src/scripts/seed-all.ts --only-banners",
         "seed:faqs": "ts-node src/scripts/seed-all.ts --only-faqs",
         "seed:terms:dev": "node --env-file=.env -r ts-node/register src/scripts/seed-development-terms.ts",
+        "seed:terms:published": "node --env-file=.env -r ts-node/register src/scripts/seed-published-terms.ts",
         "migrate:chat-participants": "node --env-file=.env -r ts-node/register src/scripts/migrate-chat-participants.ts",
         "migrate:available-pet-type": "node --env-file=.env -r ts-node/register src/scripts/migrate-available-pet-type.ts",
         "migrate:notification-target-url": "node --env-file=.env -r ts-node/register src/scripts/migrate-notification-community-target-url.ts",

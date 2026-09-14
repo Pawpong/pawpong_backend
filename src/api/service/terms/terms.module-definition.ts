@@ -3,6 +3,16 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { LoggerModule } from '../../../common/logger/logger.module';
 import { Terms, TermsSchema } from '../../../schema/terms.schema';
 
+import { TermsAdminCommandController } from '../../admin/terms/controller/terms-admin-command.controller';
+import { TermsAdminQueryController } from '../../admin/terms/controller/terms-admin-query.controller';
+import { TERMS_WRITER_PORT } from '../../admin/terms/application/ports/terms-writer.port';
+import { ActivateTermsUseCase } from '../../admin/terms/application/use-cases/activate-terms.use-case';
+import { CreateTermsUseCase } from '../../admin/terms/application/use-cases/create-terms.use-case';
+import { DeleteTermsUseCase } from '../../admin/terms/application/use-cases/delete-terms.use-case';
+import { GetTermsDetailAdminUseCase } from '../../admin/terms/application/use-cases/get-terms-detail-admin.use-case';
+import { GetTermsListAdminUseCase } from '../../admin/terms/application/use-cases/get-terms-list-admin.use-case';
+import { UpdateTermsUseCase } from '../../admin/terms/application/use-cases/update-terms.use-case';
+import { TermsMongooseWriterAdapter } from '../../admin/terms/infrastructure/terms-mongoose-writer.adapter';
 import { TERMS_READER_PORT } from './application/ports/terms-reader.port';
 import { GetActiveTermByCodeUseCase } from './application/use-cases/get-active-term-by-code.use-case';
 import { GetActiveTermsListUseCase } from './application/use-cases/get-active-terms-list.use-case';
@@ -16,18 +26,36 @@ const TERMS_SCHEMA_IMPORTS = MongooseModule.forFeature([{ name: Terms.name, sche
 
 export const TERMS_MODULE_IMPORTS = [TERMS_SCHEMA_IMPORTS, LoggerModule];
 
-export const TERMS_MODULE_CONTROLLERS = [TermsListController, TermsDetailController];
+export const TERMS_MODULE_CONTROLLERS = [
+    TermsListController,
+    TermsDetailController,
+    TermsAdminQueryController,
+    TermsAdminCommandController,
+];
 
-const TERMS_USE_CASE_PROVIDERS = [GetActiveTermsListUseCase, GetActiveTermByCodeUseCase];
+const TERMS_USE_CASE_PROVIDERS = [
+    GetActiveTermsListUseCase,
+    GetActiveTermByCodeUseCase,
+    GetTermsListAdminUseCase,
+    GetTermsDetailAdminUseCase,
+    CreateTermsUseCase,
+    UpdateTermsUseCase,
+    ActivateTermsUseCase,
+    DeleteTermsUseCase,
+];
 
 const TERMS_DOMAIN_PROVIDERS = [TermsItemMapperService];
 
-const TERMS_INFRASTRUCTURE_PROVIDERS = [TermsRepository, TermsMongooseReaderAdapter];
+const TERMS_INFRASTRUCTURE_PROVIDERS = [TermsRepository, TermsMongooseReaderAdapter, TermsMongooseWriterAdapter];
 
 const TERMS_PORT_BINDINGS = [
     {
         provide: TERMS_READER_PORT,
         useExisting: TermsMongooseReaderAdapter,
+    },
+    {
+        provide: TERMS_WRITER_PORT,
+        useExisting: TermsMongooseWriterAdapter,
     },
 ];
 

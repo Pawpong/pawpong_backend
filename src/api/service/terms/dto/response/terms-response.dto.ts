@@ -44,6 +44,12 @@ export class TermsResponseDto {
     isRequired: boolean;
 
     @ApiProperty({
+        description: '활성 여부 (코드별로 1개 버전만 활성 상태)',
+        example: true,
+    })
+    isActive: boolean;
+
+    @ApiProperty({
         description: '활성화 시점',
         example: '2025-01-15T00:00:00.000Z',
         required: false,
