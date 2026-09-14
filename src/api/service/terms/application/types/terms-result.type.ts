@@ -7,6 +7,7 @@ export type TermsItemResult = {
     title: string;
     body: string;
     isRequired: boolean;
+    isActive: boolean;
     activatedAt?: string;
     createdAt: string;
     updatedAt: string;
