@@ -25,6 +25,11 @@ export class TermsRepository {
         return this.termsModel.findById(termsId).exec();
     }
 
+    /** code+version 은 유니크 인덱스라 생성 전 중복 확인에 쓴다 */
+    findByCodeAndVersion(code: TermsCode, version: string): Promise<Terms | null> {
+        return this.termsModel.findOne({ code, version }).exec();
+    }
+
     async create(createData: TermsCreateCommand): Promise<Terms> {
         const terms = new this.termsModel({
             code: createData.code,

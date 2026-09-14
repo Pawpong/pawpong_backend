@@ -4,6 +4,8 @@ import { ApiBody, ApiParam } from '@nestjs/swagger';
 import { ApiController, ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { TERMS_RESPONSE_MESSAGE_EXAMPLES } from '../../../service/terms/constants/terms-response-messages';
 import {
+    TERMS_ADMIN_ACTIVE_DELETE_CONFLICT_RESPONSE,
+    TERMS_ADMIN_DUPLICATE_VERSION_RESPONSE,
     TERMS_ADMIN_FORBIDDEN_RESPONSE,
     TERMS_ADMIN_NOT_FOUND_RESPONSE,
 } from '../../../service/terms/constants/terms-swagger.constants';
@@ -32,7 +34,7 @@ export function ApiCreateTermsAdminEndpoint() {
             responseType: TermsResponseDto,
             successDescription: '약관 생성 성공',
             successMessageExample: TERMS_RESPONSE_MESSAGE_EXAMPLES.termsCreated,
-            errorResponses: [TERMS_ADMIN_FORBIDDEN_RESPONSE],
+            errorResponses: [TERMS_ADMIN_FORBIDDEN_RESPONSE, TERMS_ADMIN_DUPLICATE_VERSION_RESPONSE],
         }),
         ApiBody({ type: TermsCreateRequestDto }),
     );
@@ -69,7 +71,11 @@ export function ApiGetTermsDetailAdminEndpoint() {
             responseType: TermsResponseDto,
             successDescription: '약관 조회 성공',
             successMessageExample: TERMS_RESPONSE_MESSAGE_EXAMPLES.termsDetailRetrieved,
-            errorResponses: [TERMS_ADMIN_FORBIDDEN_RESPONSE, TERMS_ADMIN_NOT_FOUND_RESPONSE],
+            errorResponses: [
+                TERMS_ADMIN_FORBIDDEN_RESPONSE,
+                TERMS_ADMIN_NOT_FOUND_RESPONSE,
+                TERMS_ADMIN_ACTIVE_DELETE_CONFLICT_RESPONSE,
+            ],
         }),
         ApiParam({
             name: 'termsId',
@@ -143,6 +149,8 @@ export function ApiDeleteTermsAdminEndpoint() {
 
                 ## 주의사항
                 - 삭제된 약관은 복구할 수 없습니다.
+                - **활성 상태인 약관은 삭제할 수 없습니다.** 활성 약관이 사라지면 해당 코드의 동의를
+                  받을 수 없어 입양자 회원가입이 막힙니다. 다른 버전을 먼저 활성화한 뒤 삭제하세요.
 
                 ## 권한
                 - 관리자(admin) 권한이 필요합니다.

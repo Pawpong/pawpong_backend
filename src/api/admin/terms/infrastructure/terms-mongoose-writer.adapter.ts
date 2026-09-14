@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 
-import { Terms } from '../../../../schema/terms.schema';
+import { Terms, TermsCode } from '../../../../schema/terms.schema';
 import { TermsSnapshot } from '../../../service/terms/application/ports/terms-reader.port';
 import { TermsRepository } from '../../../service/terms/repository/terms.repository';
 import { TermsWriterPort } from '../application/ports/terms-writer.port';
@@ -17,6 +17,11 @@ export class TermsMongooseWriterAdapter implements TermsWriterPort {
 
     async findById(termsId: string): Promise<TermsSnapshot | null> {
         const terms = await this.termsRepository.findById(termsId);
+        return terms ? this.toSnapshot(terms) : null;
+    }
+
+    async findByCodeAndVersion(code: TermsCode, version: string): Promise<TermsSnapshot | null> {
+        const terms = await this.termsRepository.findByCodeAndVersion(code, version);
         return terms ? this.toSnapshot(terms) : null;
     }
 

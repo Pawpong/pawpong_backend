@@ -1,6 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
-import { DomainValidationError } from '../../../../../common/error/domain.error';
+import { DomainConflictError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { TermsItemMapperService } from '../../../../service/terms/domain/services/terms-item-mapper.service';
 import { TERMS_WRITER_PORT, type TermsWriterPort } from '../ports/terms-writer.port';
@@ -24,6 +24,15 @@ export class CreateTermsUseCase {
         }
 
         try {
+            // code+version 은 유니크 인덱스라, 사전 확인 없이 저장하면 드라이버의 E11000 이 그대로 500 으로 샌다.
+            const duplicated = await this.termsWriter.findByCodeAndVersion(createData.code, createData.version);
+
+            if (duplicated) {
+                throw new DomainConflictError(
+                    `이미 존재하는 약관 버전입니다: ${createData.code} ${createData.version}`,
+                );
+            }
+
             const terms = await this.termsWriter.create(createData);
 
             this.logger.logSuccess('createTerms', '약관 생성 완료', { termsId: terms.id });
