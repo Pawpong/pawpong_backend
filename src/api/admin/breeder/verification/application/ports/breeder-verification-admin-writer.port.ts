@@ -1,6 +1,7 @@
 import { AdminAction, AdminTargetType } from '../../../../../../common/enum/user.enum';
 
 export interface BreederVerificationAdminUpdateVerificationCommand {
+    expectedStatus: string;
     verificationStatus: string;
     reviewedAt: Date;
     rejectionReason?: string;
@@ -22,6 +23,6 @@ export interface BreederVerificationAdminWriterPort {
     updateBreederVerification(
         breederId: string,
         command: BreederVerificationAdminUpdateVerificationCommand,
-    ): Promise<void>;
+    ): Promise<boolean>;
     appendAdminActivityLog(adminId: string, logEntry: BreederVerificationAdminActivityLogEntry): Promise<void>;
 }

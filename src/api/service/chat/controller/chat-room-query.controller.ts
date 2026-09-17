@@ -9,6 +9,8 @@ import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto
 
 import { GetMyRoomsUseCase } from '../application/use-cases/get-my-rooms.use-case';
 import { GetMessagesUseCase } from '../application/use-cases/get-messages.use-case';
+import { GetChatApplicationsUseCase } from '../application/use-cases/get-chat-applications.use-case';
+import { ApiGetChatApplicationsEndpoint } from '../swagger/index';
 import { CHAT_RESPONSE_MESSAGES } from '../constants/chat-response-messages';
 import { ApiGetMyRoomsEndpoint, ApiGetMessagesEndpoint } from '../swagger/index';
 
@@ -19,7 +21,18 @@ export class ChatRoomQueryController {
     constructor(
         private readonly getMyRoomsUseCase: GetMyRoomsUseCase,
         private readonly getMessagesUseCase: GetMessagesUseCase,
+        private readonly getChatApplicationsUseCase: GetChatApplicationsUseCase,
     ) {}
+
+    @Get('rooms/:roomId/applications')
+    @Roles('adopter', 'breeder')
+    @ApiGetChatApplicationsEndpoint()
+    async getApplications(@CurrentUser('userId') userId: string, @Param('roomId') roomId: string) {
+        return ApiResponseDto.success(
+            await this.getChatApplicationsUseCase.execute(userId, roomId),
+            '연결된 신청서 조회 완료',
+        );
+    }
 
     @Get('rooms')
     @Roles('adopter', 'breeder')

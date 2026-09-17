@@ -28,6 +28,21 @@ describe('JwtStrategy', () => {
         expect(userStatusPort.findAccountStatus).toHaveBeenCalledWith('adopter-id', 'adopter');
     });
 
+    it('토큰의 사용자 계정이 없으면 인증 실패로 처리한다', async () => {
+        const userStatusPort: jest.Mocked<JwtUserStatusPort> = {
+            findAccountStatus: jest.fn().mockResolvedValue(undefined),
+        };
+        const strategy = createStrategy(userStatusPort);
+
+        await expect(
+            strategy.validate({
+                sub: 'missing-id',
+                email: 'missing@test.com',
+                role: 'breeder',
+            }),
+        ).rejects.toThrow(new DomainAuthenticationError('인증된 사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.'));
+    });
+
     it('정상 breeder는 인증 사용자 정보를 반환한다', async () => {
         const userStatusPort: jest.Mocked<JwtUserStatusPort> = {
             findAccountStatus: jest.fn().mockResolvedValue('active'),

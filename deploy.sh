@@ -174,6 +174,12 @@ else
 fi
 
 # Grafana/Loki/Promtail 확인
+# 백업은 Control에서 명시적으로 활성화한 경우에만 실행한다. 키를 source/eval하지 않는다.
+# 배포 스왑 이후에 시작하므로 백업 메모리 512MB가 스왑 피크에 추가되지 않게 한다.
+if grep -qE '^PROD_BACKUP_ENABLED=true' .env.production 2>/dev/null; then
+    docker compose --env-file .env.production -f docker-compose.yml -f docker-compose.backup.yml --profile backup up -d --no-deps backup
+fi
+
 echo -e "${BLUE}Ensuring monitoring stack is running...${NC}"
 docker compose up -d grafana loki promtail
 

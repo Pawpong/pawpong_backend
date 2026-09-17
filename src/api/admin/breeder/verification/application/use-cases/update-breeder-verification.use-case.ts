@@ -10,6 +10,7 @@ import type { BreederVerificationAdminNotifierPort } from '../ports/breeder-veri
 import { BreederVerificationAdminActivityLogFactoryService } from '../../domain/services/breeder-verification-admin-activity-log-factory.service';
 import { BreederVerificationAdminPolicyService } from '../../domain/services/breeder-verification-admin-policy.service';
 import type { BreederVerificationUpdateCommand } from '../types/breeder-verification-admin-command.type';
+import { DomainConflictError } from '../../../../../../common/error/domain.error';
 
 @Injectable()
 export class UpdateBreederVerificationUseCase {
@@ -40,8 +41,13 @@ export class UpdateBreederVerificationUseCase {
             ),
         );
 
+        const expectedStatus = this.breederVerificationAdminPolicyService.assertVerificationTransition(
+            breeder.verification?.status,
+            verificationData.verificationStatus,
+        );
         const reviewedAt = new Date();
-        await this.breederVerificationAdminWriter.updateBreederVerification(breederId, {
+        const updated = await this.breederVerificationAdminWriter.updateBreederVerification(breederId, {
+            expectedStatus,
             verificationStatus: verificationData.verificationStatus,
             reviewedAt,
             ...(verificationData.rejectionReason !== undefined
@@ -50,6 +56,10 @@ export class UpdateBreederVerificationUseCase {
                   }
                 : {}),
         });
+
+        if (!updated) {
+            throw new DomainConflictError('다른 요청에서 심사가 변경되었습니다. 새로고침 후 확인해주세요.');
+        }
 
         await this.breederVerificationAdminWriter.appendAdminActivityLog(
             adminId,

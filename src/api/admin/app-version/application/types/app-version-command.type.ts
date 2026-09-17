@@ -1,4 +1,5 @@
 export type AppVersionCreateCommand = {
+    appIconKey?: 'default' | 'pixel';
     platform: 'ios' | 'android';
     latestVersion: string;
     minRequiredVersion: string;
@@ -10,6 +11,7 @@ export type AppVersionCreateCommand = {
 };
 
 export type AppVersionUpdateCommand = {
+    appIconKey?: 'default' | 'pixel';
     latestVersion?: string;
     minRequiredVersion?: string;
     forceUpdateMessage?: string;

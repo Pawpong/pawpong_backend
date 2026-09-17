@@ -15,6 +15,7 @@ export class AppVersionMongooseReaderAdapter implements AppVersionReaderPort {
         }
 
         return {
+            ...(versionInfo.appIconKey ? { appIconKey: versionInfo.appIconKey } : {}),
             latestVersion: versionInfo.latestVersion,
             minRequiredVersion: versionInfo.minRequiredVersion,
             forceUpdateMessage: versionInfo.forceUpdateMessage,

@@ -6,7 +6,8 @@ import { CHAT_PARTICIPANT_READER, type ChatParticipantReaderPort } from '../port
 import { ChatPolicyService } from '../../domain/services/chat-policy.service';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { SenderRole } from '../../../../../schema/chat-message.schema';
-import { DomainValidationError } from '../../../../../common/error/domain.error';
+import { DomainAuthorizationError, DomainValidationError } from '../../../../../common/error/domain.error';
+import { CHAT_APPLICATION_READER, type ChatApplicationReaderPort } from '../ports/chat-application-reader.port';
 import type { CreateRoomCommand } from '../types/chat-command.type';
 import { CHAT_USER_BLOCK_MANAGER, type ChatUserBlockManagerPort } from '../ports/chat-user-block-manager.port';
 
@@ -23,6 +24,8 @@ export class CreateOrGetRoomUseCase {
         private readonly blockManager: ChatUserBlockManagerPort,
         private readonly chatPolicyService: ChatPolicyService,
         private readonly logger: CustomLoggerService,
+        @Inject(CHAT_APPLICATION_READER)
+        private readonly applicationReader: ChatApplicationReaderPort,
     ) {}
 
     async execute(userId: string, role: SenderRole, command: CreateRoomCommand): Promise<ChatRoomSnapshot> {
@@ -46,6 +49,12 @@ export class CreateOrGetRoomUseCase {
             this.chatPolicyService.requireNotBlocked(isBlocked);
 
             const participantIds = [userId, counterpartUserId];
+            if (
+                command.applicationId &&
+                !(await this.applicationReader.belongsToParticipants(command.applicationId, participantIds))
+            ) {
+                throw new DomainAuthorizationError('이 대화에 연결할 수 없는 신청서입니다.');
+            }
             const existing = await this.chatRoomManager.findRoomByParticipants(participantIds);
             if (existing) {
                 const room = await this.chatRoomManager.activateRoom(existing.id, command.applicationId);
