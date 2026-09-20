@@ -28,10 +28,7 @@ export class AuthSocialCallbackResultFactoryService {
                 return this.authSocialLoginSuccessRedirectFactoryService.create({
                     frontendUrl: result.frontendUrl,
                     originUrl: result.originUrl,
-                    role: result.role,
                     tokens: result.tokens,
-                    isProduction: result.isProduction,
-                    cookieOptions: result.cookieOptions,
                 });
             case 'reactivation':
                 return this.authSocialReactivationRedirectFactoryService.create({

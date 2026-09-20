@@ -50,7 +50,6 @@ describe('인증 소셜 콜백 결과 팩토리', () => {
             kind: 'login_success',
             frontendUrl: 'https://pawpong.kr',
             originUrl: 'https://pawpong.kr|/feed',
-            role: 'adopter',
             tokens: {
                 accessToken: 'token',
                 refreshToken: 'refresh-token',
@@ -61,13 +60,6 @@ describe('인증 소셜 콜백 결과 팩토리', () => {
                     email: 'user@test.com',
                     name: '유저',
                 },
-            },
-            isProduction: false,
-            cookieOptions: {
-                httpOnly: true,
-                secure: false,
-                sameSite: 'lax',
-                path: '/',
             },
         });
 

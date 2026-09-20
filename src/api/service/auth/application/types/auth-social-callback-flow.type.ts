@@ -2,7 +2,6 @@ import type {
     AuthSocialCallbackProfile,
     AuthSocialCallbackRole,
     AuthSocialCallbackTokens,
-    AuthSocialCookieOptions,
 } from '../ports/auth-social-callback.port';
 
 export type AuthSocialSignupFlowResult = {
@@ -16,10 +15,7 @@ export type AuthSocialLoginSuccessFlowResult = {
     kind: 'login_success';
     frontendUrl: string;
     originUrl?: string;
-    role: AuthSocialCallbackRole;
     tokens: AuthSocialCallbackTokens;
-    isProduction: boolean;
-    cookieOptions: AuthSocialCookieOptions;
 };
 
 export type AuthSocialReactivationFlowResult = {
