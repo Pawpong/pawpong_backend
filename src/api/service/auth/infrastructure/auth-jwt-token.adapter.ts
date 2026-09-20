@@ -48,13 +48,31 @@ export class AuthJwtTokenAdapter implements AuthTokenPort {
         return {
             accessToken,
             refreshToken,
-            accessTokenExpiresIn: 3600,
-            refreshTokenExpiresIn: 604800,
+            accessTokenExpiresIn: this.resolveTokenExpiresInSeconds(accessToken, 24 * 60 * 60),
+            refreshTokenExpiresIn: this.resolveTokenExpiresInSeconds(refreshToken, 7 * 24 * 60 * 60),
         };
     }
 
     verifyRefreshToken(refreshToken: string): AuthRefreshTokenPayload {
-        return this.jwtService.verify(refreshToken);
+        const payload = this.jwtService.verify<AuthRefreshTokenPayload>(refreshToken);
+        if (payload.type !== 'refresh') {
+            throw new JsonWebTokenError('invalid refresh token type');
+        }
+        return payload;
+    }
+
+    private resolveTokenExpiresInSeconds(token: string, fallbackSeconds: number): number {
+        const decoded = this.jwtService.decode(token);
+        if (
+            typeof decoded === 'object' &&
+            decoded !== null &&
+            typeof decoded.exp === 'number' &&
+            typeof decoded.iat === 'number' &&
+            decoded.exp > decoded.iat
+        ) {
+            return decoded.exp - decoded.iat;
+        }
+        return fallbackSeconds;
     }
 
     generateReactivationToken(userId: string, role: AuthSessionRole): AuthReactivationToken {

@@ -52,6 +52,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             accountStatus = await this.userStatusPort.findAccountStatus(payload.sub, payload.role);
         }
 
+        if ((payload.role === 'adopter' || payload.role === 'breeder') && !accountStatus) {
+            this.logger.warn(`존재하지 않는 계정 토큰 접근 시도: ${payload.sub}, role: ${payload.role}`);
+            throw new DomainAuthenticationError('인증된 사용자 정보를 찾을 수 없습니다. 다시 로그인해주세요.');
+        }
+
         // 탈퇴된 계정인 경우 인증 실패
         if (accountStatus === 'deleted') {
             this.logger.warn(`탈퇴된 계정 접근 시도: ${payload.sub}`);

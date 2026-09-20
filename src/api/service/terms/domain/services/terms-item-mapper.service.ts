@@ -13,6 +13,7 @@ export class TermsItemMapperService {
             title: terms.title,
             body: terms.body,
             isRequired: terms.isRequired,
+            isActive: terms.isActive,
             activatedAt: terms.activatedAt ? terms.activatedAt.toISOString() : undefined,
             createdAt: terms.createdAt.toISOString(),
             updatedAt: terms.updatedAt.toISOString(),
