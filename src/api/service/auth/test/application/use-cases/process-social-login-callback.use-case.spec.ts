@@ -120,16 +120,15 @@ describe('소셜 로그인 콜백 처리 유스케이스', () => {
             kind: 'login_success',
             frontendUrl: 'http://localhost:3000',
             originUrl: 'http://localhost:3000|/mypage',
-            role: 'adopter',
-            isProduction: true,
         });
         if (result.kind === 'login_success') {
             expect(result.tokens.accessToken).toBe('access-token');
-            expect(result.cookieOptions.sameSite).toBe('none');
+            // 쿠키는 프론트 BFF 소유 — 흐름 결과에 쿠키 옵션이 실리지 않는다
+            expect(result).not.toHaveProperty('cookieOptions');
         }
     });
 
-    it('프로덕션 브리더 로그인은 쿠키 옵션이 포함된 흐름 결과를 반환한다', async () => {
+    it('프로덕션 브리더 로그인도 쿠키 없이 토큰만 담은 흐름 결과를 반환한다', async () => {
         port.profileResult = {
             needsAdditionalInfo: false,
             user: {
@@ -157,12 +156,10 @@ describe('소셜 로그인 콜백 처리 유스케이스', () => {
             kind: 'login_success',
             frontendUrl: 'https://pawpong.kr',
             originUrl: 'https://pawpong.kr|/dashboard',
-            role: 'breeder',
-            isProduction: true,
         });
         if (result.kind === 'login_success') {
             expect(result.tokens.refreshToken).toBe('refresh-token');
-            expect(result.cookieOptions.domain).toBe('.pawpong.kr');
+            expect(result).not.toHaveProperty('cookieOptions');
         }
     });
 
