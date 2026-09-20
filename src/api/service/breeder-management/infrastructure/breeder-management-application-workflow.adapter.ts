@@ -19,6 +19,7 @@ import type {
     BreederManagementApplicationRecord,
     BreederManagementApplicationStatusNotificationCommand,
     BreederManagementApplicationWorkflowPort,
+    BreederManagementRejectedApplication,
 } from '../application/ports/breeder-management-application-workflow.port';
 import { AdoptionApplicationRepository } from '../repository/adoption-application.repository';
 import { AvailablePetManagementRepository } from '../repository/available-pet-management.repository';
@@ -122,7 +123,10 @@ export class BreederManagementApplicationWorkflowAdapter implements BreederManag
         return released ? 'available' : 'unchanged';
     }
 
-    async rejectOtherOpenApplicationsForPet(petId: string, approvedApplicationId: string): Promise<number> {
+    async rejectOtherOpenApplicationsForPet(
+        petId: string,
+        approvedApplicationId: string,
+    ): Promise<BreederManagementRejectedApplication[]> {
         return this.adoptionApplicationRepository.rejectOtherOpenApplicationsForPet(petId, approvedApplicationId);
     }
 

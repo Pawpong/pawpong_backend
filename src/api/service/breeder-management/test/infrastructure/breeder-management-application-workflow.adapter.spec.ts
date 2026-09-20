@@ -5,7 +5,9 @@ describe('입양 확정 워크플로 어댑터 — 펫 전이·일괄 거절·�
     function setup() {
         const adoptionApplicationRepository: any = {
             recordApprovedAt: jest.fn().mockResolvedValue(undefined),
-            rejectOtherOpenApplicationsForPet: jest.fn().mockResolvedValue(2),
+            rejectOtherOpenApplicationsForPet: jest
+                .fn()
+                .mockResolvedValue([{ applicationId: 'app-2', adopterId: 'adopter-2' }]),
         };
         const availablePetManagementRepository: any = { update: jest.fn().mockResolvedValue({}) };
         const createOrGetRoomUseCase: any = { execute: jest.fn().mockResolvedValue({ id: 'room-1' }) };
@@ -50,10 +52,13 @@ describe('입양 확정 워크플로 어댑터 — 펫 전이·일괄 거절·�
         });
     });
 
-    it('다른 대기 신청 일괄 거절은 리포지토리에 위임하고 건수를 반환한다', async () => {
+    it('다른 대기 신청 일괄 거절은 리포지토리에 위임하고 거절된 신청 목록을 그대로 돌려준다', async () => {
         const { adapter, adoptionApplicationRepository } = setup();
 
-        await expect(adapter.rejectOtherOpenApplicationsForPet('pet-1', 'app-1')).resolves.toBe(2);
+        // 건수가 아니라 목록이어야 한다 — 호출자가 이 사람들에게 거절 알림을 보내야 하기 때문이다.
+        await expect(adapter.rejectOtherOpenApplicationsForPet('pet-1', 'app-1')).resolves.toEqual([
+            { applicationId: 'app-2', adopterId: 'adopter-2' },
+        ]);
         expect(adoptionApplicationRepository.rejectOtherOpenApplicationsForPet).toHaveBeenCalledWith('pet-1', 'app-1');
     });
 
