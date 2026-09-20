@@ -1,4 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import {
+    OPS_PENDING_KIND,
+    OPS_PENDING_RESOLVED_EVENT,
+    type OpsPendingResolvedEvent,
+} from '../../../../../common/events/ops-pending.event';
 
 import { ApplicationStatus } from '../../../../../common/enum/user.enum';
 import { DomainConflictError, DomainNotFoundError } from '../../../../../common/error/domain.error';
@@ -53,6 +60,7 @@ export class UpdateBreederManagementApplicationStatusUseCase {
         private readonly breederManagementApplicationWorkflowPort: BreederManagementApplicationWorkflowPort,
         private readonly breederManagementApplicationStatusResultMapperService: BreederManagementApplicationStatusResultMapperService,
         private readonly logger: CustomLoggerService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async execute(userId: string, applicationId: string, updateData: BreederManagementApplicationStatusUpdateCommand) {
@@ -105,6 +113,14 @@ export class UpdateBreederManagementApplicationStatusUseCase {
                 status: updateData.status,
             });
         }
+
+        // 브리더가 응답했으면 운영 대기도 끝난다. 상담 대기로 되돌아가는 전이는 없다.
+        const opsResolved: OpsPendingResolvedEvent = {
+            kind: OPS_PENDING_KIND.ADOPTION_APPLICATION,
+            referenceId: applicationId,
+            resolution: STATUS_LABEL[updateData.status] ?? updateData.status,
+        };
+        await this.eventEmitter.emitAsync(OPS_PENDING_RESOLVED_EVENT, opsResolved);
 
         return this.breederManagementApplicationStatusResultMapperService.toApplicationStatusUpdatedResult();
     }

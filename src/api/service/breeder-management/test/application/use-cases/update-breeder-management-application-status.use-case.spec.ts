@@ -26,6 +26,7 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         breederManagementApplicationWorkflowPort as any,
         new BreederManagementApplicationStatusResultMapperService(),
         mockLogger as any,
+        { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
     );
 
     const mockApplication = {
