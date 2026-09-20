@@ -1,4 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import {
+    OPS_PENDING_CREATED_EVENT,
+    OPS_PENDING_KIND,
+    type OpsPendingCreatedEvent,
+} from '../../../../../common/events/ops-pending.event';
 
 import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
@@ -20,6 +27,7 @@ export class CreateAdopterReportUseCase {
         @Inject(ADOPTER_REPORT_COMMAND_PORT)
         private readonly adopterReportCommandPort: AdopterReportCommandPort,
         private readonly adopterReportPayloadBuilderService: AdopterReportPayloadBuilderService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async execute(userId: string, dto: AdopterReportCreateCommand) {
@@ -35,6 +43,19 @@ export class CreateAdopterReportUseCase {
 
         const { reportId, report } = this.adopterReportPayloadBuilderService.build(userId, reporterName, dto);
         await this.adopterReportCommandPort.addReport(dto.breederId, report);
+
+        // 신고는 관리자가 처리해야 끝난다. 신고 본문은 방에 남기지 않고 어드민에서 확인하게 한다.
+        const opsEvent: OpsPendingCreatedEvent = {
+            kind: OPS_PENDING_KIND.BREEDER_REPORT,
+            referenceId: reportId,
+            summary: '브리더 신고가 접수되었습니다. 어드민에서 내용을 확인해주세요.',
+            details: [
+                { name: '신고 ID', value: reportId },
+                { name: '브리더 ID', value: dto.breederId },
+                { name: '신고 사유', value: dto.reason },
+            ],
+        };
+        await this.eventEmitter.emitAsync(OPS_PENDING_CREATED_EVENT, opsEvent);
 
         return {
             reportId,

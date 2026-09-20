@@ -64,7 +64,7 @@ describe('입양자 프로필 수정 유스케이스', () => {
         const useCase = new UpdateAdopterProfileUseCase(
             { updateProfile } as any,
             new AdopterProfileUpdateMapperService(),
-            { emit: jest.fn() } as any,
+            { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
         );
 
         await useCase.execute('breeder-1', { name: '켄넬' }, 'breeder');

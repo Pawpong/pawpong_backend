@@ -1,4 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import {
+    OPS_PENDING_CREATED_EVENT,
+    OPS_PENDING_KIND,
+    type OpsPendingCreatedEvent,
+} from '../../../../../common/events/ops-pending.event';
 
 import { DomainNotFoundError } from '../../../../../common/error/domain.error';
 import { ADOPTER_PROFILE_PORT } from '../ports/adopter-profile.port';
@@ -19,6 +26,7 @@ export class ReportAdopterReviewUseCase {
         private readonly adopterBreederReaderPort: AdopterBreederReaderPort,
         @Inject(ADOPTER_REVIEW_COMMAND_PORT)
         private readonly adopterReviewCommandPort: AdopterReviewCommandPort,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async execute(userId: string, dto: AdopterReviewReportCommand): Promise<AdopterReviewReportResult> {
@@ -41,6 +49,18 @@ export class ReportAdopterReviewUseCase {
             dto.description || '',
             new Date(),
         );
+
+        // 후기 신고는 숨김/삭제 판단이 필요해 관리자 처리 대기로 올린다.
+        const opsEvent: OpsPendingCreatedEvent = {
+            kind: OPS_PENDING_KIND.REVIEW_REPORT,
+            referenceId: dto.reviewId,
+            summary: '후기 신고가 접수되었습니다. 어드민에서 내용을 확인해주세요.',
+            details: [
+                { name: '후기 ID', value: dto.reviewId },
+                { name: '신고 사유', value: dto.reason },
+            ],
+        };
+        await this.eventEmitter.emitAsync(OPS_PENDING_CREATED_EVENT, opsEvent);
 
         return {
             message: ADOPTER_RESPONSE_PAYLOAD_MESSAGES.reviewReported,
