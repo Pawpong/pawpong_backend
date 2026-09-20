@@ -24,6 +24,7 @@ describe('CreateAdoptionApplicationV2UseCase', () => {
         writerPort as any,
         new AdoptionApplicationValidatorService(),
         new AdoptionApplicationPersistMapperService(),
+        { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
     );
 
     beforeEach(() => {
