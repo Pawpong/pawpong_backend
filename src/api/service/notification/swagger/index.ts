@@ -140,6 +140,27 @@ export function ApiRegisterPushDeviceTokenEndpoint() {
     );
 }
 
+export function ApiRegisterAnonymousDeviceEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '기기 푸시 토큰 등록 (비로그인)',
+            description: `
+                로그인 여부와 관계없이 앱 실행 직후 호출합니다. 기기를 먼저 등록해두면
+                아직 계정이 없는 사용자도 공지·안내 푸시를 받을 수 있습니다.
+
+                ## 주요 기능
+                - 처음 등록된 기기에는 설치 안내 푸시를 1회 발송합니다.
+                - 나중에 로그인하면 POST /v2/notification/push-token 이 같은 토큰을 계정에 바인딩합니다.
+                - 재호출은 마지막 접속 시각만 갱신합니다(멱등).
+            `,
+            nullableData: true,
+            successDescription: '기기 등록 성공',
+            successMessageExample: NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.pushDeviceRegistered,
+        }),
+        ApiBody({ type: RegisterPushDeviceTokenRequestDto }),
+    );
+}
+
 export function ApiUnregisterPushDeviceTokenEndpoint() {
     return applyDecorators(
         ApiEndpoint({
