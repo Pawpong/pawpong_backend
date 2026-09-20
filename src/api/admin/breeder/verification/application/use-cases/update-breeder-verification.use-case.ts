@@ -1,4 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import {
+    OPS_PENDING_KIND,
+    OPS_PENDING_RESOLVED_EVENT,
+    type OpsPendingResolvedEvent,
+} from '../../../../../../common/events/ops-pending.event';
 
 import { AdminTargetType, VerificationStatus } from '../../../../../../common/enum/user.enum';
 import { BREEDER_VERIFICATION_ADMIN_READER_PORT } from '../ports/breeder-verification-admin-reader.port';
@@ -23,6 +30,7 @@ export class UpdateBreederVerificationUseCase {
         private readonly breederVerificationAdminNotifier: BreederVerificationAdminNotifierPort,
         private readonly breederVerificationAdminPolicyService: BreederVerificationAdminPolicyService,
         private readonly breederVerificationAdminActivityLogFactoryService: BreederVerificationAdminActivityLogFactoryService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async execute(
@@ -83,6 +91,14 @@ export class UpdateBreederVerificationUseCase {
         } else if (verificationData.verificationStatus === VerificationStatus.REJECTED) {
             await this.breederVerificationAdminNotifier.sendRejection(recipient, verificationData.rejectionReason);
         }
+
+        // 처리된 건은 리마인드를 멈춘다. 처리했는데 독촉이 계속 오면 알림을 무시하게 된다.
+        const opsResolved: OpsPendingResolvedEvent = {
+            kind: OPS_PENDING_KIND.BREEDER_VERIFICATION,
+            referenceId: breederId,
+            resolution: verificationData.verificationStatus,
+        };
+        await this.eventEmitter.emitAsync(OPS_PENDING_RESOLVED_EVENT, opsResolved);
 
         return {
             message: `Breeder verification ${verificationData.verificationStatus}`,
