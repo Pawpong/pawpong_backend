@@ -9,6 +9,7 @@ describe('상담 배너 수정 유스케이스', () => {
         generateOne: jest.fn().mockReturnValue('https://signed.example.com/counsel-banners/banner-1.png'),
         generateOneSafe: jest.fn(),
         generateMany: jest.fn(),
+        toFileKey: jest.fn((value: string) => value),
     };
 
     it('상담 배너가 있으면 수정된 응답을 반환한다', async () => {

@@ -27,6 +27,7 @@ describe('프로필 배너 생성 유스케이스', () => {
             generateOne: jest.fn().mockReturnValue('https://signed.example.com/profile-banners/banner-1.png'),
             generateOneSafe: jest.fn(),
             generateMany: jest.fn(),
+            toFileKey: jest.fn((value: string) => value),
         };
         const useCase = new CreateProfileBannerUseCase(
             bannerWriter,

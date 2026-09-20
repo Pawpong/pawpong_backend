@@ -6,6 +6,10 @@ import {
     USER_PROFILE_UPDATED_EVENT,
     type UserProfileUpdatedEvent,
 } from '../../../../../common/events/user-profile-updated.event';
+import {
+    BREEDER_MANAGEMENT_FILE_URL_PORT,
+    type BreederManagementFileUrlPort,
+} from '../ports/breeder-management-file-url.port';
 import { BREEDER_MANAGEMENT_PROFILE_PORT } from '../ports/breeder-management-profile.port';
 import type { BreederManagementProfilePort } from '../ports/breeder-management-profile.port';
 import { BreederManagementProfileCommandResultMapperService } from '../../domain/services/breeder-management-profile-command-result-mapper.service';
@@ -17,6 +21,8 @@ export class UpdateBreederManagementProfileUseCase {
     constructor(
         @Inject(BREEDER_MANAGEMENT_PROFILE_PORT)
         private readonly breederManagementProfilePort: BreederManagementProfilePort,
+        @Inject(BREEDER_MANAGEMENT_FILE_URL_PORT)
+        private readonly fileUrlPort: BreederManagementFileUrlPort,
         private readonly breederManagementProfileUpdateMapperService: BreederManagementProfileUpdateMapperService,
         private readonly breederManagementProfileCommandResultMapperService: BreederManagementProfileCommandResultMapperService,
         private readonly eventEmitter: EventEmitter2,
@@ -28,7 +34,21 @@ export class UpdateBreederManagementProfileUseCase {
             throw new DomainNotFoundError('브리더 정보를 찾을 수 없습니다.');
         }
 
-        const mappedUpdateData = this.breederManagementProfileUpdateMapperService.toUpdateData(breeder, updateData);
+        // 대표 사진은 조회 시 CDN URL 로 나가므로, 화면이 기존 사진을 그대로 돌려보내면 URL 이 들어온다.
+        // 저장은 항상 파일키 기준이어야 버킷/도메인이 바뀌어도 이미지가 살아남는다.
+        const normalizedUpdateData = updateData.profilePhotos
+            ? {
+                  ...updateData,
+                  profilePhotos: updateData.profilePhotos
+                      .map((photo) => this.fileUrlPort.toFileKey(photo))
+                      .filter((photo) => photo.length > 0),
+              }
+            : updateData;
+
+        const mappedUpdateData = this.breederManagementProfileUpdateMapperService.toUpdateData(
+            breeder,
+            normalizedUpdateData,
+        );
         await this.breederManagementProfilePort.updateProfile(userId, mappedUpdateData);
 
         // 닉네임/프로필 이미지는 커뮤니티 등에 snapshot 으로 복제돼 있어, 변경 시 동기화 이벤트를 발행한다.
