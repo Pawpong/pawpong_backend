@@ -128,6 +128,9 @@ importers:
       ioredis:
         specifier: ^5.9.1
         version: 5.10.1
+      jose:
+        specifier: ^4.15.9
+        version: 4.15.9
       json5:
         specifier: ^2.2.3
         version: 2.2.3
