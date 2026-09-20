@@ -123,13 +123,17 @@ export interface BreederPetPostingCreateResult {
 /**
  * v2 분양글 부분 수정 command.
  *
- * 본 슬라이스는 단순 / 안전 필드만 지원한다:
+ * 지원 범위:
  * - 기본 정보 (name, breed, gender, birthDate, price, description)
  * - 분양 상태 전환 (status: available / reserved / adopted)
  * - 사진 (photos / representativePhotoIndex)
+ * - 건강 정보 (vaccination / geneticTest), 부모 정보, 사육 환경
  *
- * 복잡 필드(vaccination/geneticTest/parents/breedingEnvironment) 는 cross-field validation
- * 부담이 커서 별도 PR 로 분리한다. 본 PR 의 update 는 위 화이트리스트 외의 필드를 받지 않는다.
+ * 미제공(undefined) 필드는 기존 DB 값을 그대로 유지한다.
+ * 배열/객체 필드는 부분 병합이 아니라 전체 교체다.
+ *
+ * 건강 정보는 status 와 records/사유가 서로를 구속하므로 그룹 단위로만 수정할 수 있다.
+ * (그룹 내 아무 필드나 오면 status 도 함께 와야 한다 — validator 가 강제)
  */
 export interface BreederPetPostingUpdateCommand {
     name?: string;
@@ -142,10 +146,28 @@ export interface BreederPetPostingUpdateCommand {
     status?: 'available' | 'reserved' | 'adopted';
     photos?: string[];
     representativePhotoIndex?: number;
+
+    vaccinationStatus?: VaccinationStatus;
+    vaccinationRecords?: BreederPetPostingVaccinationRecordCommand[];
+    vaccinationIncompleteReason?: string;
+
+    geneticTestStatus?: GeneticTestStatus;
+    geneticTestRecords?: BreederPetPostingGeneticTestRecordCommand[];
+    geneticTestIncompleteReason?: string;
+
+    parentPetSnapshots?: BreederPetPostingParentSnapshotCommand[];
+    breedingEnvironment?: BreederPetPostingBreedingEnvironmentCommand;
 }
 
 /**
- * persist 단계 — Date 캐스팅 등 적용 후 Mongoose $set 에 그대로 전달 가능한 모양.
+ * persist 단계 — Date 캐스팅 등 적용 후 Mongoose 갱신 연산에 그대로 전달 가능한 모양.
+ *
+ * 값 규약 (repository.updateByOwner 가 해석한다):
+ * - undefined : 손대지 않음 (기존 DB 값 유지)
+ * - null      : 명시적 제거($unset). status 전환으로 모순이 된 값을 지울 때 쓴다.
+ *               예) 접종 상태를 completed 로 바꾸면 남아 있던 미완료 사유를 지워야 한다.
+ *               ($set: null 로 두면 필드가 null 인 채로 남아 조회 응답에 새어나간다)
+ * - 그 외      : $set
  */
 export interface BreederPetPostingUpdatePersistData {
     name?: string;
@@ -158,6 +180,17 @@ export interface BreederPetPostingUpdatePersistData {
     status?: 'available' | 'reserved' | 'adopted';
     photos?: string[];
     representativePhotoIndex?: number;
+
+    vaccinationStatus?: VaccinationStatus;
+    vaccinationRecords?: BreederPetPostingVaccinationRecordPersistData[];
+    vaccinationIncompleteReason?: string | null;
+
+    geneticTestStatus?: GeneticTestStatus;
+    geneticTestRecords?: BreederPetPostingGeneticTestRecordPersistData[];
+    geneticTestIncompleteReason?: string | null;
+
+    parentPetSnapshots?: BreederPetPostingParentSnapshotPersistData[];
+    breedingEnvironment?: BreederPetPostingCreatePersistData['breedingEnvironment'] | null;
 }
 
 export interface BreederPetPostingDeleteResult {
