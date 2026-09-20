@@ -1,4 +1,4 @@
-import { DomainNotFoundError } from '../../../../../../common/error/domain.error';
+import { DomainConflictError, DomainNotFoundError } from '../../../../../../common/error/domain.error';
 import { ApplicationStatus } from '../../../../../../common/enum/user.enum';
 import { UpdateBreederManagementApplicationStatusUseCase } from '../../../application/use-cases/update-breeder-management-application-status.use-case';
 import { BreederManagementApplicationStatusResultMapperService } from '../../../domain/services/breeder-management-application-status-result-mapper.service';
@@ -26,6 +26,7 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         breederManagementApplicationWorkflowPort as any,
         new BreederManagementApplicationStatusResultMapperService(),
         mockLogger as any,
+        { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
     );
 
     const mockApplication = {
@@ -47,7 +48,7 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged.mockResolvedValue(undefined);
         breederManagementApplicationWorkflowPort.recordApplicationApproval.mockResolvedValue(undefined);
         breederManagementApplicationWorkflowPort.markPetAsAdopted.mockResolvedValue(undefined);
-        breederManagementApplicationWorkflowPort.rejectOtherOpenApplicationsForPet.mockResolvedValue(0);
+        breederManagementApplicationWorkflowPort.rejectOtherOpenApplicationsForPet.mockResolvedValue([]);
         breederManagementApplicationWorkflowPort.ensureChatRoomForApplication.mockResolvedValue(undefined);
     });
 
@@ -150,7 +151,9 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
     });
 
     it('입양 확정 시 같은 펫의 다른 대기 신청을 일괄 거절한다 (확정 본인 신청은 제외)', async () => {
-        breederManagementApplicationWorkflowPort.rejectOtherOpenApplicationsForPet.mockResolvedValue(2);
+        breederManagementApplicationWorkflowPort.rejectOtherOpenApplicationsForPet.mockResolvedValue([
+            { applicationId: 'app-2', adopterId: 'adopter-2' },
+        ]);
 
         await approve();
 
@@ -158,6 +161,49 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
             'pet-1',
             'app-1',
         );
+    });
+
+    it('자동 거절된 신청자에게도 진행 종료 알림을 보낸다 (조용히 닫히면 안 된다)', async () => {
+        breederManagementApplicationWorkflowPort.rejectOtherOpenApplicationsForPet.mockResolvedValue([
+            { applicationId: 'app-2', adopterId: 'adopter-2' },
+            { applicationId: 'app-3', adopterId: 'adopter-3' },
+        ]);
+
+        await approve();
+
+        expect(breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged).toHaveBeenCalledWith({
+            breederId: 'breeder-1',
+            adopterId: 'adopter-2',
+            applicationId: 'app-2',
+            status: ApplicationStatus.ADOPTION_REJECTED,
+        });
+        expect(breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged).toHaveBeenCalledWith({
+            breederId: 'breeder-1',
+            adopterId: 'adopter-3',
+            applicationId: 'app-3',
+            status: ApplicationStatus.ADOPTION_REJECTED,
+        });
+        // 확정 본인 알림 1건 + 자동 거절 2건
+        expect(breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged).toHaveBeenCalledTimes(3);
+    });
+
+    it('자동 거절 대상이 없으면 추가 알림을 보내지 않는다', async () => {
+        await approve();
+
+        expect(breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged).toHaveBeenCalledTimes(1);
+    });
+
+    it('알림 발송이 실패해도 입양 확정을 되돌리지 않는다 (확정은 이미 끝난 뒤다)', async () => {
+        breederManagementApplicationWorkflowPort.rejectOtherOpenApplicationsForPet.mockResolvedValue([
+            { applicationId: 'app-2', adopterId: 'adopter-2' },
+        ]);
+        breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged.mockRejectedValue(
+            new Error('mail server down'),
+        );
+
+        await expect(approve()).resolves.toBeDefined();
+        expect(breederManagementApplicationWorkflowPort.markPetAsAdopted).toHaveBeenCalled();
+        expect(mockLogger.logError).toHaveBeenCalled();
     });
 
     it('입양 확정 시 입양자-브리더 채팅방을 보장한다', async () => {
@@ -194,6 +240,65 @@ describe('브리더 입양 신청 상태 변경 유스케이스', () => {
         expect(breederManagementApplicationWorkflowPort.rejectOtherOpenApplicationsForPet).not.toHaveBeenCalled();
         expect(breederManagementApplicationWorkflowPort.recordApplicationApproval).not.toHaveBeenCalled();
         expect(breederManagementApplicationWorkflowPort.ensureChatRoomForApplication).not.toHaveBeenCalled();
+    });
+
+    describe('상태 전이 가드', () => {
+        const withStatus = (status: ApplicationStatus) => {
+            breederManagementApplicationWorkflowPort.findApplicationByIdAndBreeder.mockResolvedValue({
+                ...mockApplicationWithPet,
+                status,
+            });
+        };
+
+        const run = (status: ApplicationStatus) =>
+            useCase.execute('breeder-1', 'app-1', { applicationId: 'app-1', status });
+
+        // 낡은 화면에서 온 재확정이 여기서 걸린다 — 막지 않으면 한 펫에 확정 신청이 두 건 생기고
+        // 브리더 실적(completedAdoptions)도 두 번 오른다.
+        it.each([
+            [ApplicationStatus.ADOPTION_REJECTED, ApplicationStatus.ADOPTION_APPROVED],
+            [ApplicationStatus.ADOPTION_APPROVED, ApplicationStatus.ADOPTION_REJECTED],
+            [ApplicationStatus.ADOPTION_APPROVED, ApplicationStatus.CONSULTATION_COMPLETED],
+            [ApplicationStatus.ADOPTION_REJECTED, ApplicationStatus.CONSULTATION_COMPLETED],
+            [ApplicationStatus.CONSULTATION_COMPLETED, ApplicationStatus.CONSULTATION_PENDING],
+        ])('%s → %s 는 409 로 막고 아무것도 바꾸지 않는다', async (current, next) => {
+            withStatus(current);
+
+            await expect(run(next)).rejects.toThrow(DomainConflictError);
+
+            expect(breederManagementApplicationWorkflowPort.updateStatus).not.toHaveBeenCalled();
+            expect(breederManagementApplicationWorkflowPort.incrementCompletedAdoptions).not.toHaveBeenCalled();
+            expect(breederManagementApplicationWorkflowPort.markPetAsAdopted).not.toHaveBeenCalled();
+            expect(breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged).not.toHaveBeenCalled();
+        });
+
+        it.each([
+            [ApplicationStatus.CONSULTATION_PENDING, ApplicationStatus.CONSULTATION_COMPLETED],
+            [ApplicationStatus.CONSULTATION_PENDING, ApplicationStatus.ADOPTION_REJECTED],
+            [ApplicationStatus.CONSULTATION_COMPLETED, ApplicationStatus.ADOPTION_APPROVED],
+            [ApplicationStatus.CONSULTATION_COMPLETED, ApplicationStatus.ADOPTION_REJECTED],
+        ])('%s → %s 는 그대로 통과한다', async (current, next) => {
+            withStatus(current);
+
+            await expect(run(next)).resolves.toBeDefined();
+            expect(breederManagementApplicationWorkflowPort.updateStatus).toHaveBeenCalledWith('app-1', next);
+        });
+
+        // 버튼 두 번 누름·재시도. 실패로 보이면 안 되지만, 알림·실적이 두 번 나가도 안 된다.
+        it.each([
+            ApplicationStatus.CONSULTATION_PENDING,
+            ApplicationStatus.CONSULTATION_COMPLETED,
+            ApplicationStatus.ADOPTION_APPROVED,
+            ApplicationStatus.ADOPTION_REJECTED,
+        ])('같은 상태(%s)로의 재요청은 성공하되 아무 부수효과도 내지 않는다', async (status) => {
+            withStatus(status);
+
+            await expect(run(status)).resolves.toBeDefined();
+
+            expect(breederManagementApplicationWorkflowPort.updateStatus).not.toHaveBeenCalled();
+            expect(breederManagementApplicationWorkflowPort.incrementCompletedAdoptions).not.toHaveBeenCalled();
+            expect(breederManagementApplicationWorkflowPort.notifyApplicationStatusChanged).not.toHaveBeenCalled();
+        });
     });
 
     it('신청을 찾을 수 없으면 DomainNotFoundError를 던진다', async () => {

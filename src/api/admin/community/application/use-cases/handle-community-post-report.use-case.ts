@@ -1,4 +1,11 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import {
+    OPS_PENDING_KIND,
+    OPS_PENDING_RESOLVED_EVENT,
+    type OpsPendingResolvedEvent,
+} from '../../../../../common/events/ops-pending.event';
 
 import {
     COMMUNITY_REPORT_ADMIN_READER_PORT,
@@ -24,6 +31,7 @@ export class HandleCommunityPostReportUseCase {
         private readonly reportAdminReader: CommunityReportAdminReaderPort,
         @Inject(COMMUNITY_REPORT_ADMIN_WRITER_PORT)
         private readonly reportAdminWriter: CommunityReportAdminWriterPort,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async execute(reportId: string, adminId: string, action: ReportAction): Promise<HandleReportResult> {
@@ -42,6 +50,14 @@ export class HandleCommunityPostReportUseCase {
             resolvedByAdminId: adminId,
             resolvedAt,
         });
+
+        // 처리된 건은 리마인드를 멈춘다. 처리했는데 독촉이 계속 오면 알림을 무시하게 된다.
+        const opsResolved: OpsPendingResolvedEvent = {
+            kind: OPS_PENDING_KIND.COMMUNITY_REPORT,
+            referenceId: report.postId,
+            resolution: action,
+        };
+        await this.eventEmitter.emitAsync(OPS_PENDING_RESOLVED_EVENT, opsResolved);
 
         return { reportId, postId: report.postId, action };
     }

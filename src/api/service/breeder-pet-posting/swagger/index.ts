@@ -12,6 +12,7 @@ import {
     DeleteBreederPetPostingDraftResponseDto,
     SaveBreederPetPostingDraftResponseDto,
 } from '../dto/response/breeder-pet-posting-draft-response.dto';
+import { BreederPetPostingEditDetailResponseDto } from '../dto/response/breeder-pet-posting-edit-response.dto';
 import { CreateBreederPetPostingResponseDto } from '../dto/response/breeder-pet-posting-response.dto';
 
 const BREEDER_NOT_FOUND_RESPONSE = {
@@ -66,25 +67,72 @@ export function ApiCreateBreederPetPostingEndpoint() {
     );
 }
 
+export function ApiGetBreederPetPostingForEditEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '분양글 수정용 단건 조회 (v2, 작성자 본인)',
+            description: `
+                수정 화면의 폼을 기존 값으로 채우기 위한 조회 API 입니다.
+
+                ## 공개 상세(GET /v2/adoption/:petId) 와의 차이
+                - 공개 상세는 표시용이라 사진 **URL** 만 내려주고 파일키가 없습니다.
+                - PATCH 는 photos 를 **파일키 배열**로 받기 때문에, 수정 화면은 파일키가 필요합니다.
+                - 그래서 임시저장 조회와 같은 계약을 씁니다 —
+                  form 에는 파일키를 그대로 두고, 미리보기용 signed URL 을 같은 순서로 나란히 내려줍니다.
+
+                ## form
+                - 분양글 작성 요청(CreateBreederPetPostingRequestDto)과 동일 shape 입니다.
+                - 표시용 가공을 하지 않습니다: price 는 숫자, birthDate 는 YYYY-MM-DD, relation 은 mother/father 원본값.
+                - 값을 그대로 폼에 부었다가 PATCH 로 되돌려 보낼 수 있습니다.
+
+                ## photoUrls
+                - pet: form.photos 와 같은 순서
+                - parents: form.parentPetSnapshots 와 같은 순서 (사진 없는 행은 null)
+                - breedingEnvironment: 사육 환경 첫 장 (없으면 null)
+                - breedingEnvironmentPhotos: 사육 환경 사진 전체 (form.breedingEnvironment.photoFileNames 와 같은 순서)
+
+                ## 권한
+                - JWT 인증 + StrictRolesGuard('breeder')
+                - 본인 글이 아니거나 이미 비활성/미존재면 400 ("해당 분양글을 찾을 수 없습니다.") — update/delete 와 동일하게, 다른 브리더 소유 정보 누설 방지를 위해 403/404 대신 400 으로 통일
+            `,
+            responseType: BreederPetPostingEditDetailResponseDto,
+            successDescription: '분양글 수정용 조회 성공',
+            successMessageExample: BREEDER_PET_POSTING_RESPONSE_MESSAGES.retrievedForEdit,
+            errorResponses: [BREEDER_NOT_FOUND_RESPONSE, POSTING_NOT_FOUND_RESPONSE],
+        }),
+        ApiParam({ name: 'petId', description: '분양글(펫) ID', example: '507f1f77bcf86cd799439011' }),
+    );
+}
+
 export function ApiUpdateBreederPetPostingEndpoint() {
     return applyDecorators(
         ApiEndpoint({
             summary: '분양글 부분 수정 (v2, 작성자 본인)',
             description: `
-                v2 분양글의 단순/안전 필드를 부분 수정합니다.
+                v2 분양글을 부분 수정합니다. **보낸 필드만** 바뀌고, 보내지 않은 필드는 기존 값이 유지됩니다.
 
                 ## 지원 필드 (화이트리스트)
-                - name, breed, gender, birthDate, price, description, petType
+                - name, breed, gender, birthDate, price, description
                 - status (분양 상태 전환: available / reserved / adopted)
                 - photos / representativePhotoIndex (photos 제공 시 1~10 + 대표 인덱스 범위 검증)
-
-                ## 제외된 필드
-                - vaccinationStatus/Records/IncompleteReason
-                - geneticTestStatus/Records/IncompleteReason
+                - vaccinationStatus / vaccinationRecords / vaccinationIncompleteReason
+                - geneticTestStatus / geneticTestRecords / geneticTestIncompleteReason
                 - parentPetSnapshots
                 - breedingEnvironment
 
-                위 필드들은 cross-field 정합성이 복잡하여 별도 PR 에서 다룹니다. 본 endpoint 에 보내면 무시됩니다.
+                petType 은 브리더 계정 축종에 종속되어 요청 값이 무시됩니다 (서버가 계정 축종으로 재확정).
+
+                ## 배열/객체는 전체 교체
+                photos, parentPetSnapshots, breedingEnvironment 는 부분 병합이 아니라 통째로 대체됩니다.
+                - parentPetSnapshots: [] → 부모 정보 전체 삭제
+                - breedingEnvironment: 설명도 사진도 없는 객체 → 사육 환경 삭제
+                - breedingEnvironment 는 photoFileNames(최대 5장)가 정식이며 photoFileName(단일)은 deprecated — 둘 다 오면 배열이 우선합니다.
+
+                ## 건강 정보는 그룹 단위로만 수정 가능
+                status 와 records/사유가 서로를 구속하므로, 그룹 내 아무 필드나 보내면 status 도 함께 보내야 합니다.
+                (없이 보내면 400: "접종 정보를 수정하려면 접종 상태를 함께 보내주세요.")
+                - completed → records 1개 이상 필수, 미완료 사유 동봉 불가. 기존에 저장돼 있던 미완료 사유는 삭제됩니다.
+                - incomplete → 사유 필수, records 동봉 불가. 기존 기록은 비워집니다.
 
                 ## 권한
                 - JWT 인증 + StrictRolesGuard('breeder')

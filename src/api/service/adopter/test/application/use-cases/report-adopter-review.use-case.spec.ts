@@ -14,6 +14,7 @@ describe('후기 신고 유스케이스', () => {
         adopterProfilePort as any,
         adopterBreederReaderPort as any,
         adopterReviewCommandPort as any,
+        { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
     );
 
     beforeEach(() => {

@@ -49,6 +49,7 @@ export class ProfileMapperService {
             plan: snapshot.plan,
             businessLocation: snapshot.businessLocation,
             longDescription: snapshot.longDescription,
+            representativePhotos: this.assetUrl.toPhotoUrls(snapshot.representativePhotoFileNames),
         };
     }
 
@@ -81,6 +82,7 @@ export class ProfileMapperService {
             followingCount: snapshot.followingCount,
             plan: snapshot.plan,
             businessLocation: snapshot.businessLocation,
+            representativePhotos: this.assetUrl.toPhotoUrls(snapshot.representativePhotoFileNames),
             isFavorited,
             isFollowing,
         };

@@ -21,6 +21,7 @@ describe('브리더 신고 처리 유스케이스', () => {
         new BreederReportAdminPolicyService(),
         new BreederReportAdminActivityLogFactoryService(),
         new BreederReportAdminActionResultMapperService(),
+        { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
     );
 
     beforeEach(() => {

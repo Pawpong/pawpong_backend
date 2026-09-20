@@ -3,7 +3,7 @@ import { BadRequestException } from '@nestjs/common';
 import { GetBreederProfileUseCase } from '../../../application/use-cases/get-breeder-profile.use-case';
 import { ProfileMapperService } from '../../../domain/services/profile-mapper.service';
 
-const assetUrl = { toProfileImageUrl: () => undefined };
+const assetUrl = { toProfileImageUrl: () => undefined, toPhotoUrls: () => [] };
 
 const breederSnapshot = {
     breederId: 'b-1',

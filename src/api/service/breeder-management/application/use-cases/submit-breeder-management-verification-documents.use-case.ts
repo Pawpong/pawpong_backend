@@ -1,4 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import {
+    OPS_PENDING_CREATED_EVENT,
+    OPS_PENDING_KIND,
+    type OpsPendingCreatedEvent,
+} from '../../../../../common/events/ops-pending.event';
 
 import { VerificationStatus } from '../../../../../common/enum/user.enum';
 import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
@@ -37,6 +44,7 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
         private readonly breederManagementVerificationCommandResultMapperService: BreederManagementVerificationCommandResultMapperService,
         private readonly breederManagementVerificationDocumentPolicyService: BreederManagementVerificationDocumentPolicyService,
         private readonly breederManagementVerificationNotificationPayloadFactoryService: BreederManagementVerificationNotificationPayloadFactoryService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async execute(
@@ -78,6 +86,21 @@ export class SubmitBreederManagementVerificationDocumentsUseCase {
         );
 
         await this.breederManagementVerificationDraftStorePort.delete(userId);
+
+        // 심사가 밀리면 브리더가 이탈한다. 승인/거절 전까지 운영 대기로 올려 리마인드를 받는다.
+        const opsEvent: OpsPendingCreatedEvent = {
+            kind: OPS_PENDING_KIND.BREEDER_VERIFICATION,
+            referenceId: userId,
+            summary: submissionPlan.isResubmission
+                ? '브리더가 인증 서류를 재제출했습니다. 심사가 필요합니다.'
+                : '브리더가 인증 서류를 제출했습니다. 심사가 필요합니다.',
+            details: [
+                { name: '브리더 ID', value: userId },
+                { name: '서류 수', value: String(submissionPlan.finalDocuments.length) },
+                { name: '재제출 여부', value: submissionPlan.isResubmission ? '재제출' : '최초 제출' },
+            ],
+        };
+        await this.eventEmitter.emitAsync(OPS_PENDING_CREATED_EVENT, opsEvent);
 
         return this.breederManagementVerificationCommandResultMapperService.toVerificationDocumentsSubmittedResult();
     }

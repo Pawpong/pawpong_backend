@@ -1,4 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import {
+    OPS_PENDING_KIND,
+    OPS_PENDING_RESOLVED_EVENT,
+    type OpsPendingResolvedEvent,
+} from '../../../../../../common/events/ops-pending.event';
 
 import { BREEDER_REPORT_ADMIN_READER_PORT } from '../ports/breeder-report-admin-reader.port';
 import { BREEDER_REPORT_ADMIN_WRITER_PORT } from '../ports/breeder-report-admin-writer.port';
@@ -20,6 +27,7 @@ export class HandleBreederReportUseCase {
         private readonly breederReportAdminPolicyService: BreederReportAdminPolicyService,
         private readonly breederReportAdminActivityLogFactoryService: BreederReportAdminActivityLogFactoryService,
         private readonly breederReportAdminActionResultMapperService: BreederReportAdminActionResultMapperService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async execute(
@@ -62,6 +70,14 @@ export class HandleBreederReportUseCase {
                 ),
             ),
         );
+
+        // 처리된 건은 리마인드를 멈춘다. 처리했는데 독촉이 계속 오면 알림을 무시하게 된다.
+        const opsResolved: OpsPendingResolvedEvent = {
+            kind: OPS_PENDING_KIND.BREEDER_REPORT,
+            referenceId: reportId,
+            resolution: actionData.action,
+        };
+        await this.eventEmitter.emitAsync(OPS_PENDING_RESOLVED_EVENT, opsResolved);
 
         return this.breederReportAdminActionResultMapperService.toResult(
             reportId,

@@ -12,6 +12,8 @@ describe('소셜 로그인 리다이렉트 URL 생성 유스케이스', () => {
         process.env.NAVER_CALLBACK_URL = 'https://api.example.com/auth/naver/callback';
         process.env.KAKAO_CLIENT_ID = 'kakao-client-id';
         process.env.KAKAO_CALLBACK_URL = 'https://api.example.com/auth/kakao/callback';
+        process.env.APPLE_CLIENT_ID = 'kr.pawpong.web';
+        process.env.APPLE_CALLBACK_URL = 'https://api.example.com/auth/apple/callback';
     });
 
     it('google 프로바이더에 대한 리다이렉트 URL을 반환한다', () => {
@@ -30,6 +32,20 @@ describe('소셜 로그인 리다이렉트 URL 생성 유스케이스', () => {
         const url = useCase.execute('kakao');
         expect(url).toContain('kauth.kakao.com');
         expect(url).toContain('kakao-client-id');
+    });
+
+    it('apple 프로바이더에 대한 리다이렉트 URL을 반환한다', () => {
+        const url = useCase.execute('apple');
+        expect(url).toContain('appleid.apple.com/auth/authorize');
+        expect(url).toContain('kr.pawpong.web');
+    });
+
+    it('apple은 name/email scope 요청에 필요한 form_post 응답 모드를 지정한다', () => {
+        // scope에 name/email이 있으면 Apple이 form_post를 강제한다. 빠지면 인증 자체가 거부된다.
+        const params = new URL(useCase.execute('apple')).searchParams;
+        expect(params.get('response_mode')).toBe('form_post');
+        expect(params.get('scope')).toBe('name email');
+        expect(params.get('response_type')).toBe('code id_token');
     });
 
     it('returnUrl이 있으면 state에 인코딩하여 포함한다', () => {

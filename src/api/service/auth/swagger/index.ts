@@ -218,6 +218,14 @@ export function ApiKakaoCallbackEndpoint() {
     return ApiSocialLoginCallbackEndpoint('카카오');
 }
 
+export function ApiAppleLoginEndpoint() {
+    return ApiSocialLoginEntryEndpoint('애플');
+}
+
+export function ApiAppleCallbackEndpoint() {
+    return ApiSocialLoginCallbackEndpoint('애플');
+}
+
 export function ApiCompleteSocialRegistrationEndpoint() {
     return applyDecorators(
         ApiEndpoint({

@@ -1,4 +1,11 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import {
+    OPS_PENDING_KIND,
+    OPS_PENDING_RESOLVED_EVENT,
+    type OpsPendingResolvedEvent,
+} from '../../../../../common/events/ops-pending.event';
 
 import { AdminAction, AdminTargetType } from '../../../../../common/enum/user.enum';
 import { AdopterAdminActivityLogFactoryService } from '../../domain/services/adopter-admin-activity-log-factory.service';
@@ -20,6 +27,7 @@ export class DeleteAdopterAdminReviewUseCase {
         private readonly adopterAdminPolicyService: AdopterAdminPolicyService,
         private readonly adopterAdminActivityLogFactoryService: AdopterAdminActivityLogFactoryService,
         private readonly adopterAdminReviewDeleteResultMapperService: AdopterAdminReviewDeleteResultMapperService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async execute(adminId: string, breederId: string, reviewId: string): Promise<AdopterAdminReviewDeleteResult> {
@@ -38,6 +46,14 @@ export class DeleteAdopterAdminReviewUseCase {
         );
 
         await this.adopterAdminWriter.appendAdminActivity(adminId, activityLog);
+
+        // 처리된 건은 리마인드를 멈춘다. 처리했는데 독촉이 계속 오면 알림을 무시하게 된다.
+        const opsResolved: OpsPendingResolvedEvent = {
+            kind: OPS_PENDING_KIND.REVIEW_REPORT,
+            referenceId: reviewId,
+            resolution: '후기 숨김',
+        };
+        await this.eventEmitter.emitAsync(OPS_PENDING_RESOLVED_EVENT, opsResolved);
 
         return this.adopterAdminReviewDeleteResultMapperService.toDeleteReviewResult(
             reviewId,

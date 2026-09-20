@@ -6,6 +6,7 @@ function makeFileUrlPort(signedUrl = 'https://signed.example.com/x.png'): Breede
         generateOne: jest.fn().mockReturnValue(signedUrl),
         generateOneSafe: jest.fn(),
         generateMany: jest.fn(),
+        toFileKey: jest.fn((value: string) => value),
     };
 }
 

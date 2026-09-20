@@ -13,8 +13,17 @@ describe('브리더 프로필 수정 유스케이스', () => {
 
     const eventEmitter = { emit: jest.fn() };
 
+    // CDN URL 로 되돌아온 대표 사진을 파일키로 되돌리는 최소 구현
+    const fileUrlPort = {
+        generateOne: jest.fn(),
+        generateOneSafe: jest.fn(),
+        generateMany: jest.fn(),
+        toFileKey: jest.fn((value: string) => value.replace('https://cdn.example.com/bucket/', '')),
+    };
+
     const useCase = new UpdateBreederManagementProfileUseCase(
         breederManagementProfilePort as any,
+        fileUrlPort as any,
         new BreederManagementProfileUpdateMapperService(),
         new BreederManagementProfileCommandResultMapperService(),
         eventEmitter as any,
@@ -74,6 +83,22 @@ describe('브리더 프로필 수정 유스케이스', () => {
             nickname: undefined,
             profileImageFileName: 'profiles/new.png',
         });
+    });
+
+    it('대표 사진이 CDN URL 로 들어와도 파일키로 저장한다', async () => {
+        breederManagementProfilePort.findByIdWithAllData.mockResolvedValue(mockBreeder);
+        breederManagementProfilePort.updateProfile.mockResolvedValue(undefined);
+
+        await useCase.execute('breeder-1', {
+            profilePhotos: ['https://cdn.example.com/bucket/representative/a.jpg', 'representative/b.jpg'],
+        } as any);
+
+        expect(breederManagementProfilePort.updateProfile).toHaveBeenCalledWith(
+            'breeder-1',
+            expect.objectContaining({
+                'profile.representativePhotos': ['representative/a.jpg', 'representative/b.jpg'],
+            }),
+        );
     });
 
     it('프로필 이미지 제거(빈 문자열) 시에도 동기화 이벤트를 발행한다', async () => {

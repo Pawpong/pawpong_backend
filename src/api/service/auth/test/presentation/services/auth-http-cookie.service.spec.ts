@@ -1,5 +1,5 @@
+import { AUTH_COOKIE_NAMES, AUTH_COOKIE_POLICIES } from '../../../constants/auth-cookie.constants';
 import { AuthHttpCookieService } from '../../../presentation/services/auth-http-cookie.service';
-import { AuthSocialLoginSuccessRedirectFactoryService } from '../../../presentation/services/auth-social-login-success-redirect-factory.service';
 
 describe('로그아웃 쿠키 만료 — 로그인 시 속성과 일치해야 한다', () => {
     const cookieOptions = {
@@ -58,26 +58,16 @@ describe('로그아웃 쿠키 만료 — 로그인 시 속성과 일치해야 �
         }
     });
 
-    it('로그인 시 굽는 httpOnly 와 로그아웃 시 만료 httpOnly 가 쿠키별로 정확히 일치한다', () => {
+    it('로그아웃 만료 httpOnly 가 쿠키별 정책과 정확히 일치한다', () => {
         const { service, response } = setup();
-        const factory = new AuthSocialLoginSuccessRedirectFactoryService(
-            { resolve: () => '/' } as any,
-            { log: jest.fn() } as any,
-        );
 
-        const baked = factory.create({
-            frontendUrl: 'https://pawpong.kr',
-            role: 'adopter',
-            isProduction: true,
-            tokens: { accessToken: 'a', refreshToken: 'r' } as any,
-            cookieOptions,
-        }).cookies!;
         service.clearAuthCookies(response);
 
-        // 이 대조가 깨지면 로그아웃이 쿠키를 지우지 못하고 속성만 덮어쓴다.
-        for (const cookie of baked) {
-            expect(clearedOptions(response, cookie.name).httpOnly).toBe(cookie.options.httpOnly);
+        // 만료 응답의 httpOnly 가 원래 값과 다르면 브라우저에 속성만 뒤바뀐 쿠키가 남아
+        // 로그아웃이 되지 않는다. 프론트 BFF 도 같은 정책으로 굽는다.
+        for (const name of AUTH_COOKIE_NAMES) {
+            expect(clearedOptions(response, name).httpOnly).toBe(AUTH_COOKIE_POLICIES[name].httpOnly);
         }
-        expect(baked.map((cookie) => cookie.name)).toEqual(['accessToken', 'refreshToken', 'userRole']);
+        expect(AUTH_COOKIE_NAMES).toEqual(['accessToken', 'refreshToken', 'userRole']);
     });
 });

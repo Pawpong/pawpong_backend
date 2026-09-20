@@ -105,6 +105,7 @@ describe('브리더 관리 인증 문서 제출 유스케이스', () => {
             new BreederManagementVerificationCommandResultMapperService(),
             new BreederManagementVerificationDocumentPolicyService(),
             new BreederManagementVerificationNotificationPayloadFactoryService(),
+            { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
         );
     });
 

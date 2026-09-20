@@ -1,6 +1,9 @@
 import { ProfileMapperService } from '../../../domain/services/profile-mapper.service';
 
-const assetUrl = { toProfileImageUrl: (n?: string | null) => (n ? `signed/${n}` : undefined) };
+const assetUrl = {
+    toProfileImageUrl: (n?: string | null) => (n ? `signed/${n}` : undefined),
+    toPhotoUrls: (names?: string[] | null) => (names ?? []).filter(Boolean).map((n) => `signed/${n}`),
+};
 
 describe('ProfileMapperService', () => {
     const mapper = new ProfileMapperService(assetUrl);
@@ -33,12 +36,15 @@ describe('ProfileMapperService', () => {
                 followingCount: 0,
                 plan: 'pro',
                 businessLocation: { city: '경남', district: '창원시' },
+                representativePhotoFileNames: ['p1.jpg', 'p2.jpg'],
             },
             true,
             false,
         );
         expect(dto.isFavorited).toBe(true);
         expect(dto.isFollowing).toBe(false);
+        // 대표 사진은 파일명이 아니라 노출 URL 로 변환돼 나간다
+        expect(dto.representativePhotos).toEqual(['signed/p1.jpg', 'signed/p2.jpg']);
         expect(dto).not.toHaveProperty('level');
     });
 

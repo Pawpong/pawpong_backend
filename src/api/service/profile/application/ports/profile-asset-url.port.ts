@@ -6,4 +6,10 @@ export interface ProfileAssetUrlPort {
      * 비어있으면 undefined 반환.
      */
     toProfileImageUrl(fileName?: string | null): string | undefined;
+
+    /**
+     * 대표 사진 파일명 목록을 외부 노출 URL 목록으로 변환한다.
+     * 비어있는 파일명은 제외하므로 결과 길이가 입력보다 짧을 수 있다.
+     */
+    toPhotoUrls(fileNames?: string[] | null): string[];
 }

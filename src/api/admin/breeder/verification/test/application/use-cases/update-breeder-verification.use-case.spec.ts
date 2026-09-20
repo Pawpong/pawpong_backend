@@ -24,6 +24,7 @@ describe('브리더 인증 수정 유스케이스', () => {
         notifier as any,
         new BreederVerificationAdminPolicyService(),
         new BreederVerificationAdminActivityLogFactoryService(),
+        { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
     );
 
     beforeEach(() => {

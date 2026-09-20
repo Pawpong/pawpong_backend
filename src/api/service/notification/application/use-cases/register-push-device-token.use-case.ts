@@ -2,6 +2,10 @@ import { BadRequestException, HttpException, Inject, Injectable } from '@nestjs/
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import {
+    NOTIFICATION_DEVICE_REGISTRY_PORT,
+    type NotificationDeviceRegistryPort,
+} from '../ports/notification-device-registry.port';
+import {
     NOTIFICATION_PUSH_TOKEN_STORE_PORT,
     type NotificationPushTokenStorePort,
     type RegisterPushDeviceTokenCommand,
@@ -10,12 +14,17 @@ import {
 /**
  * 디바이스 푸시 토큰을 사용자 계정에 등록합니다.
  * 같은 토큰이 이미 있으면 registeredAt만 갱신합니다.
+ *
+ * 앱은 로그인 전에 이미 POST /device-token 으로 기기를 등록해둔다.
+ * 여기서는 그 기기를 로그인한 계정에 바인딩하는 일까지 함께 처리한다.
  */
 @Injectable()
 export class RegisterPushDeviceTokenUseCase {
     constructor(
         @Inject(NOTIFICATION_PUSH_TOKEN_STORE_PORT)
         private readonly pushTokenStore: NotificationPushTokenStorePort,
+        @Inject(NOTIFICATION_DEVICE_REGISTRY_PORT)
+        private readonly deviceRegistry: NotificationDeviceRegistryPort,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -35,6 +44,7 @@ export class RegisterPushDeviceTokenUseCase {
 
         try {
             await this.pushTokenStore.register(command);
+            await this.bindDeviceToUser(command);
             this.logger.logSuccess('registerPushToken', '디바이스 푸시 토큰 등록 완료', {
                 userId: command.userId,
             });
@@ -44,6 +54,18 @@ export class RegisterPushDeviceTokenUseCase {
             }
             this.logger.logError('registerPushToken', '디바이스 푸시 토큰 등록 실패', error);
             throw new BadRequestException('디바이스 토큰 등록에 실패했습니다.');
+        }
+    }
+
+    /**
+     * 기기 레지스트리 바인딩은 보조 기록이다.
+     * 실패해도 계정 토큰 등록(실제 푸시 수신 경로)은 이미 끝났으므로 요청을 깨뜨리지 않는다.
+     */
+    private async bindDeviceToUser(command: RegisterPushDeviceTokenCommand): Promise<void> {
+        try {
+            await this.deviceRegistry.bindToUser(command.token, command.userId, command.userRole);
+        } catch (error) {
+            this.logger.logError('registerPushToken', '기기-계정 바인딩 실패', error);
         }
     }
 }

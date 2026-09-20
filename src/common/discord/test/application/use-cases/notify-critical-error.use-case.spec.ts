@@ -17,6 +17,7 @@ describe('NotifyCriticalErrorUseCase', () => {
         process.env.NODE_ENV = 'production';
 
         errorAlertPort = {
+            isAlertEnabled: jest.fn().mockReturnValue(true),
             sendCriticalErrorAlert: jest.fn().mockResolvedValue(undefined),
         };
         logger = {
@@ -119,6 +120,21 @@ describe('NotifyCriticalErrorUseCase', () => {
             summary: true,
         });
     });
+    it('알림 대상 환경이 아니면(로컬) 실패가 아니라 filtered 로 처리한다', async () => {
+        // 개발자 PC 로그가 실패 알림으로 남으면 실제 전송 장애를 가린다
+        errorAlertPort.isAlertEnabled.mockReturnValue(false);
+
+        const result = await useCase.execute({
+            severity: 'critical',
+            context: 'Bootstrap',
+            message: 'Kafka chat consumer 시작 실패',
+        });
+
+        expect(result).toEqual({ sent: false, reason: 'filtered' });
+        expect(errorAlertPort.sendCriticalErrorAlert).not.toHaveBeenCalled();
+        expect(logger.logError).not.toHaveBeenCalled();
+    });
+
     it('개발 환경은 운영 env가 함께 있어도 필터링한다', async () => {
         process.env.APP_ENV = 'development';
         try {

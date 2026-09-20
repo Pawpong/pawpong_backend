@@ -18,4 +18,8 @@ export class BreederManagementFileUrlAdapter implements BreederManagementFileUrl
     generateMany(fileNames: string[], expirationMinutes: number = 60): string[] {
         return this.storageService.generateSignedUrls(fileNames, expirationMinutes);
     }
+
+    toFileKey(value: string): string {
+        return this.storageService.toFileKey(value);
+    }
 }

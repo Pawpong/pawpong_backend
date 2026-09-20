@@ -25,6 +25,12 @@ export interface BreederManagementApplicationStatusNotificationCommand {
     status: ApplicationStatus;
 }
 
+/** 확정 후속으로 자동 거절된 신청 — 알림 발송 대상 */
+export interface BreederManagementRejectedApplication {
+    applicationId: string;
+    adopterId: string;
+}
+
 export interface BreederManagementApplicationChatRoomCommand {
     breederId: string;
     adopterId: string;
@@ -52,9 +58,15 @@ export interface BreederManagementApplicationWorkflowPort {
 
     /**
      * 같은 펫의 다른 처리 중(consultation_pending/consultation_completed) 신청을 일괄 거절한다.
-     * 확정된 본인 신청은 제외하며, 거절 처리된 건수를 반환한다.
+     * 확정된 본인 신청은 제외한다.
+     *
+     * 건수가 아니라 거절된 신청 목록을 돌려준다 — 이 사람들에게도 "진행 종료" 알림이 나가야 하는데,
+     * 건수만으로는 누구에게 보낼지 알 수 없어 예전엔 조용히 상태만 바뀌었다.
      */
-    rejectOtherOpenApplicationsForPet(petId: string, approvedApplicationId: string): Promise<number>;
+    rejectOtherOpenApplicationsForPet(
+        petId: string,
+        approvedApplicationId: string,
+    ): Promise<BreederManagementRejectedApplication[]>;
 
     /**
      * 펫의 예약 상태를 신청서에서 다시 계산해 맞춘다.
