@@ -25,6 +25,12 @@ export interface DiscordErrorAlertRequest {
  * 외부 시스템(Discord Webhook) 의존성을 애플리케이션 계층 밖으로 분리합니다.
  */
 export interface DiscordErrorAlertPort {
+    /**
+     * 이 환경이 알림 대상인지 알려준다.
+     * 로컬처럼 보낼 방이 없는 환경을 전송 실패로 기록하지 않기 위해 호출 전에 확인한다.
+     */
+    isAlertEnabled(): boolean;
+
     sendCriticalErrorAlert(request: DiscordErrorAlertRequest): Promise<void>;
 }
 
