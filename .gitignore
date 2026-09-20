@@ -59,6 +59,11 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 CLAUDE.md
+# AGENTS.md 는 CLAUDE.md 와 같은 로컬 전용 메모리다 (접속 정보·URI 포함)
+AGENTS.md
+# 로컬 에이전트 설정 — .claude/ 의 자동 생성 미러와 머신별 MCP 경로
+.agents/
+.codex/
 swagger.json
 
 # MCP server config (local dev tool, machine-specific)
