@@ -8,6 +8,7 @@ import { ProfileMapperService } from '../../../domain/services/profile-mapper.se
 
 const assetUrl: ProfileAssetUrlPort = {
     toProfileImageUrl: (name?: string | null) => (name ? `https://signed/${name}` : undefined),
+    toPhotoUrls: (names?: string[] | null) => (names ?? []).map((name) => `https://signed/${name}`),
 };
 
 const adopterSnapshot = {

@@ -53,4 +53,11 @@ export class MyProfileResponseDto {
 
     @ApiPropertyOptional({ description: '(브리더) 긴 소개글 (최대 1500자)' })
     longDescription?: string;
+
+    @ApiPropertyOptional({
+        description: '(브리더) 대표 사진 URL (최대 3장). 등록 전이면 빈 배열',
+        type: [String],
+        example: ['https://cdn.../breeders/photo-1.jpg'],
+    })
+    representativePhotos?: string[];
 }
