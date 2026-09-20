@@ -33,6 +33,7 @@ describe('입양자 관리자 후기 삭제 유스케이스', () => {
             new AdopterAdminPolicyService(),
             new AdopterAdminActivityLogFactoryService(),
             new AdopterAdminReviewDeleteResultMapperService(),
+            { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
         );
 
         await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).resolves.toMatchObject({
@@ -66,6 +67,7 @@ describe('입양자 관리자 후기 삭제 유스케이스', () => {
             new AdopterAdminPolicyService(),
             new AdopterAdminActivityLogFactoryService(),
             new AdopterAdminReviewDeleteResultMapperService(),
+            { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
         );
 
         await expect(useCase.execute('admin-1', 'breeder-1', 'review-1')).rejects.toBeInstanceOf(DomainValidationError);
