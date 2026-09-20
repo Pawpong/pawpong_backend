@@ -4,7 +4,6 @@ import type { Response } from 'express';
 import {
     AUTH_SOCIAL_CALLBACK_PORT,
     type AuthSocialCallbackPort,
-    type AuthSocialCookieDefinition,
 } from '../../application/ports/auth-social-callback.port';
 import { AUTH_COOKIE_NAMES, buildExpiredAuthCookieOptions } from '../../constants/auth-cookie.constants';
 
@@ -24,16 +23,6 @@ export class AuthHttpCookieService {
 
         AUTH_COOKIE_NAMES.forEach((name) => {
             response.cookie(name, '', buildExpiredAuthCookieOptions(name, cookieOptions));
-        });
-    }
-
-    applyCookies(response: Response, cookies?: AuthSocialCookieDefinition[]): void {
-        if (!cookies) {
-            return;
-        }
-
-        cookies.forEach((cookie) => {
-            response.cookie(cookie.name, cookie.value, cookie.options);
         });
     }
 }

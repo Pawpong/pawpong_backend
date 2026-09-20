@@ -58,18 +58,8 @@ export type AuthSocialCookieOptions = {
     path: string;
 };
 
-export type AuthSocialCookieDefinition = {
-    name: string;
-    value: string;
-    options: AuthSocialCookieOptions & {
-        maxAge: number;
-        httpOnly?: boolean;
-    };
-};
-
 export type AuthSocialCallbackResult = {
     redirectUrl: string;
-    cookies?: AuthSocialCookieDefinition[];
 };
 
 export const AUTH_SOCIAL_CALLBACK_PORT = Symbol('AUTH_SOCIAL_CALLBACK_PORT');

@@ -4,7 +4,6 @@ import { of, lastValueFrom } from 'rxjs';
 
 import type { AuthSocialCallbackFlowResult } from '../../../application/types/auth-social-callback-flow.type';
 import { AuthSocialCallbackResponseInterceptor } from '../../../presentation/interceptors/auth-social-callback-response.interceptor';
-import { AuthHttpCookieService } from '../../../presentation/services/auth-http-cookie.service';
 import { AuthSocialCallbackResultFactoryService } from '../../../presentation/services/auth-social-callback-result-factory.service';
 
 describe('인증 소셜 콜백 응답 인터셉터', () => {
@@ -15,35 +14,17 @@ describe('인증 소셜 콜백 응답 인터셉터', () => {
             }),
         }) as unknown as ExecutionContext;
 
-    it('콜백 결과를 쿠키와 리다이렉트 응답으로 변환한다', async () => {
+    it('콜백 결과를 리다이렉트 응답으로 변환한다', async () => {
         const response = {
             redirect: jest.fn(),
+            cookie: jest.fn(),
         } as unknown as Response;
-        const authHttpCookieService = {
-            applyCookies: jest.fn(),
-        } as unknown as AuthHttpCookieService;
         const authSocialCallbackResultFactoryService = {
             create: jest.fn().mockReturnValue({
-                redirectUrl: 'https://pawpong.kr/login/success',
-                cookies: [
-                    {
-                        name: 'accessToken',
-                        value: 'token',
-                        options: {
-                            httpOnly: true,
-                            secure: false,
-                            sameSite: 'lax',
-                            path: '/',
-                            maxAge: 60_000,
-                        },
-                    },
-                ],
+                redirectUrl: 'https://pawpong.kr/login/success?accessToken=token',
             }),
         } as unknown as AuthSocialCallbackResultFactoryService;
-        const interceptor = new AuthSocialCallbackResponseInterceptor(
-            authHttpCookieService,
-            authSocialCallbackResultFactoryService,
-        );
+        const interceptor = new AuthSocialCallbackResponseInterceptor(authSocialCallbackResultFactoryService);
         const result: AuthSocialCallbackFlowResult = {
             kind: 'error',
             frontendUrl: 'https://pawpong.kr',
@@ -56,19 +37,8 @@ describe('인증 소셜 콜백 응답 인터셉터', () => {
         await lastValueFrom(interceptor.intercept(createExecutionContext(response), next));
 
         expect(authSocialCallbackResultFactoryService.create).toHaveBeenCalledWith(result);
-        expect(authHttpCookieService.applyCookies).toHaveBeenCalledWith(response, [
-            {
-                name: 'accessToken',
-                value: 'token',
-                options: {
-                    httpOnly: true,
-                    secure: false,
-                    sameSite: 'lax',
-                    path: '/',
-                    maxAge: 60_000,
-                },
-            },
-        ]);
-        expect(response.redirect).toHaveBeenCalledWith('https://pawpong.kr/login/success');
+        expect(response.redirect).toHaveBeenCalledWith('https://pawpong.kr/login/success?accessToken=token');
+        // 소셜 콜백은 더 이상 쿠키를 굽지 않는다 (쿠키 소유권은 프론트 BFF)
+        expect(response.cookie).not.toHaveBeenCalled();
     });
 });

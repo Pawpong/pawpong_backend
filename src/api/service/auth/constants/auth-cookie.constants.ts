@@ -24,15 +24,6 @@ export type AuthCookieName = keyof typeof AUTH_COOKIE_POLICIES;
 /** 응답에 나가는 순서 — 굽기·만료가 같은 순서를 쓴다. */
 export const AUTH_COOKIE_NAMES = Object.keys(AUTH_COOKIE_POLICIES) as AuthCookieName[];
 
-/** 로그인 시 쿠키 옵션 (공통 옵션 + 쿠키별 httpOnly/maxAge). */
-export const buildAuthCookieOptions = (
-    name: AuthCookieName,
-    baseOptions: AuthSocialCookieOptions,
-): AuthSocialCookieOptions & { maxAge: number } => ({
-    ...baseOptions,
-    ...AUTH_COOKIE_POLICIES[name],
-});
-
 /**
  * 로그아웃 시 만료 옵션. httpOnly 는 로그인 때와 같은 값을 쓰고 maxAge 만 0 으로 둔다.
  * 여기서 httpOnly 를 공통 옵션에 맡기면(과거 동작) accessToken 이 httpOnly 로 덮여 삭제가 무력해진다.
