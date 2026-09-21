@@ -26,10 +26,27 @@ const authorReader = {
     readAuthorSnapshot: jest.fn(),
 };
 
+const notificationDispatch = {
+    to: jest.fn().mockReturnValue({
+        type: jest.fn().mockReturnThis(),
+        title: jest.fn().mockReturnThis(),
+        content: jest.fn().mockReturnThis(),
+        metadata: jest.fn().mockReturnThis(),
+        targetUrl: jest.fn().mockReturnThis(),
+        send: jest.fn().mockResolvedValue({}),
+    }),
+    createNotification: jest.fn(),
+};
+
 beforeEach(() => jest.clearAllMocks());
 
 describe('CreateCommunityPostCommentUseCase', () => {
-    const useCase = new CreateCommunityPostCommentUseCase(reader as any, authorReader as any, commentWriter as any);
+    const useCase = new CreateCommunityPostCommentUseCase(
+        reader as any,
+        authorReader as any,
+        commentWriter as any,
+        notificationDispatch as any,
+    );
 
     it('존재하지 않는 게시글 → BadRequestException', async () => {
         reader.existsActivePost.mockResolvedValueOnce(false);
