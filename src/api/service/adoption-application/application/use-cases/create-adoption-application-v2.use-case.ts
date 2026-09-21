@@ -1,4 +1,11 @@
 import { BadRequestException, ConflictException, Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+
+import {
+    OPS_PENDING_CREATED_EVENT,
+    OPS_PENDING_KIND,
+    type OpsPendingCreatedEvent,
+} from '../../../../../common/events/ops-pending.event';
 
 import { AdoptionApplicationPersistMapperService } from '../../domain/services/adoption-application-persist-mapper.service';
 import { AdoptionApplicationValidatorService } from '../../domain/services/adoption-application-validator.service';
@@ -33,6 +40,7 @@ export class CreateAdoptionApplicationV2UseCase {
         private readonly writerPort: AdoptionApplicationWriterPort,
         private readonly validator: AdoptionApplicationValidatorService,
         private readonly mapper: AdoptionApplicationPersistMapperService,
+        private readonly eventEmitter: EventEmitter2,
     ) {}
 
     async execute(command: CreateAdoptionApplicationV2Command): Promise<CreateAdoptionApplicationV2Result> {
@@ -50,6 +58,20 @@ export class CreateAdoptionApplicationV2UseCase {
 
         const persistData = this.mapper.toPersistData(command, context);
         const { applicationId } = await this.writerPort.create(persistData);
+
+        // 상담 신청은 브리더가 응답해야 끝난다. 운영에서 방치 건을 볼 수 있도록 대기 알림을 발행한다.
+        const opsEvent: OpsPendingCreatedEvent = {
+            kind: OPS_PENDING_KIND.ADOPTION_APPLICATION,
+            referenceId: applicationId,
+            summary: '입양자가 상담을 신청했습니다. 브리더 응답 전까지 대기 상태입니다.',
+            details: [
+                { name: '신청 ID', value: applicationId },
+                { name: '브리더 ID', value: context.breederId },
+                { name: '분양글 ID', value: command.petId },
+            ],
+        };
+        await this.eventEmitter.emitAsync(OPS_PENDING_CREATED_EVENT, opsEvent);
+
         return { applicationId, status: 'consultation_pending' };
     }
 }

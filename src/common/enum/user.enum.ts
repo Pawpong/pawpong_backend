@@ -35,6 +35,21 @@ export enum ApplicationStatus {
     ADOPTION_REJECTED = 'adoption_rejected',
 }
 
+/**
+ * 같은 입양자가 같은 펫에 다시 신청하는 것을 막는 신청 상태 목록.
+ * 거절(adoption_rejected)만 종결로 보고 재신청을 허용한다.
+ *
+ * **재신청 차단(existsOpenApplicationForPet)과 상세 응답의 내 신청 상태(myApplicationStatus)가
+ * 반드시 이 하나의 목록을 함께 봐야 한다.** 한쪽만 바꾸면 "버튼은 활성인데 제출하면 409" 상태로 되돌아간다.
+ */
+export const REAPPLICATION_BLOCKING_STATUSES = [
+    ApplicationStatus.CONSULTATION_PENDING,
+    ApplicationStatus.CONSULTATION_COMPLETED,
+    ApplicationStatus.ADOPTION_APPROVED,
+] as const;
+
+export type ReapplicationBlockingStatus = (typeof REAPPLICATION_BLOCKING_STATUSES)[number];
+
 export enum ReviewType {
     CONSULTATION = 'consultation',
     ADOPTION = 'adoption',
@@ -149,6 +164,8 @@ export enum NotificationType {
     NEW_CONSULT_REQUEST = 'new_consult_request', // 새로운 상담 신청 (브리더가 받음)
     CONSULT_REQUEST_CONFIRMED = 'consult_request_confirmed', // 상담 신청 확인 (신청자가 받음)
     CONSULT_COMPLETED = 'consult_completed', // 상담 완료
+    ADOPTION_APPROVED = 'adoption_approved', // 입양 확정 (신청자가 받음)
+    ADOPTION_REJECTED = 'adoption_rejected', // 입양 신청 거절 (신청자가 받음)
 
     // 리마인드 관련
     DOCUMENT_REMINDER = 'document_reminder', // 서류 미제출 리마인드 (입점 심사 독촉)
@@ -165,6 +182,8 @@ export enum NotificationType {
 
     // 커뮤니티
     COMMUNITY_POST_LIKED = 'community_post_liked', // 커뮤니티 게시글 좋아요
+    COMMUNITY_POST_COMMENTED = 'community_post_commented', // 커뮤니티 게시글 댓글
+    COMMUNITY_COMMENT_REPLIED = 'community_comment_replied', // 커뮤니티 댓글에 달린 대댓글
 }
 
 export enum RecipientType {

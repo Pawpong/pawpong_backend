@@ -34,6 +34,7 @@ export class CommunityCommentMongooseAdapter implements CommunityCommentWriterPo
             commentId: String(doc._id),
             postId: String(doc.postId),
             authorId: String(doc.authorId),
+            authorModel: doc.authorModel,
             isActive: doc.isActive,
         };
     }

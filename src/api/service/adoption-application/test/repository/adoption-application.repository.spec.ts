@@ -2,6 +2,41 @@ import { ConflictException } from '@nestjs/common';
 
 import { AdoptionApplicationRepository } from '../../repository/adoption-application.repository';
 
+describe('AdoptionApplicationRepository — 재신청 차단 상태 범위', () => {
+    const adopterId = '507f1f77bcf86cd799439022';
+    const petId = '507f1f77bcf86cd799439033';
+
+    function buildRepository(exists: jest.Mock) {
+        return new AdoptionApplicationRepository({ exists } as any, {} as any, {} as any, {} as any);
+    }
+
+    it('확정(adoption_approved)된 신청이 있으면 같은 입양자의 재신청을 막는다', async () => {
+        const exists = jest.fn().mockResolvedValue({ _id: 'app-1' });
+        const repo = buildRepository(exists);
+
+        await expect(repo.existsOpenApplicationForPet(adopterId, petId)).resolves.toBe(true);
+        expect(exists.mock.calls[0][0].status.$in).toContain('adoption_approved');
+    });
+
+    it('거절(adoption_rejected)은 종결로 보고 재신청을 허용한다', async () => {
+        const exists = jest.fn().mockResolvedValue(null);
+        const repo = buildRepository(exists);
+
+        await repo.existsOpenApplicationForPet(adopterId, petId);
+        expect(exists.mock.calls[0][0].status.$in).not.toContain('adoption_rejected');
+    });
+
+    it('처리 중 상태 두 개도 계속 차단 대상이다', async () => {
+        const exists = jest.fn().mockResolvedValue(null);
+        const repo = buildRepository(exists);
+
+        await repo.existsOpenApplicationForPet(adopterId, petId);
+        expect(exists.mock.calls[0][0].status.$in).toEqual(
+            expect.arrayContaining(['consultation_pending', 'consultation_completed']),
+        );
+    });
+});
+
 describe('AdoptionApplicationRepository — stale index 방어층', () => {
     function buildRepository(applicationModel: any) {
         return new AdoptionApplicationRepository(applicationModel as any, {} as any, {} as any, {} as any);

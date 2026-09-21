@@ -50,6 +50,7 @@ export interface BreederVerificationAdminBreederSnapshot {
 }
 
 export interface BreederVerificationAdminSearchCriteria {
+    accountType?: 'all' | 'normal' | 'test';
     verificationStatus?: string;
     cityName?: string;
     searchKeyword?: string;

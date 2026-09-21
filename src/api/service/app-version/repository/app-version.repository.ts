@@ -48,6 +48,7 @@ export class AppVersionRepository {
         }
         if (updateData.iosStoreUrl !== undefined) appVersion.iosStoreUrl = updateData.iosStoreUrl;
         if (updateData.androidStoreUrl !== undefined) appVersion.androidStoreUrl = updateData.androidStoreUrl;
+        if (updateData.appIconKey !== undefined) appVersion.appIconKey = updateData.appIconKey;
         if (updateData.isActive !== undefined) appVersion.isActive = updateData.isActive;
 
         return appVersion.save();

@@ -1,14 +1,20 @@
 import { BadRequestException, Body, Delete, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
+import { Public } from '../../../../common/decorator/public.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
+import { RegisterAnonymousDeviceUseCase } from '../application/use-cases/register-anonymous-device.use-case';
 import { RegisterPushDeviceTokenUseCase } from '../application/use-cases/register-push-device-token.use-case';
 import { UnregisterPushDeviceTokenUseCase } from '../application/use-cases/unregister-push-device-token.use-case';
 import { NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES } from '../constants/notification-response-messages';
 import { NotificationProtectedController } from '../decorator/notification-controller.decorator';
 import { RegisterPushDeviceTokenRequestDto } from '../dto/request/register-push-device-token-request.dto';
 import { UnregisterPushDeviceTokenRequestDto } from '../dto/request/unregister-push-device-token-request.dto';
-import { ApiRegisterPushDeviceTokenEndpoint, ApiUnregisterPushDeviceTokenEndpoint } from '../swagger/index';
+import {
+    ApiRegisterAnonymousDeviceEndpoint,
+    ApiRegisterPushDeviceTokenEndpoint,
+    ApiUnregisterPushDeviceTokenEndpoint,
+} from '../swagger/index';
 
 /**
  * 디바이스 푸시 토큰 등록/해제 컨트롤러
@@ -17,9 +23,27 @@ import { ApiRegisterPushDeviceTokenEndpoint, ApiUnregisterPushDeviceTokenEndpoin
 @NotificationProtectedController()
 export class NotificationPushTokenController {
     constructor(
+        private readonly registerAnonymousDeviceUseCase: RegisterAnonymousDeviceUseCase,
         private readonly registerPushDeviceTokenUseCase: RegisterPushDeviceTokenUseCase,
         private readonly unregisterPushDeviceTokenUseCase: UnregisterPushDeviceTokenUseCase,
     ) {}
+
+    /**
+     * 로그인 전에도 호출 가능한 기기 등록.
+     * 계정 없이는 푸시를 아예 받을 수 없던 문제를 없앤다 — 앱 심사자도 여기에 해당한다.
+     */
+    @Public()
+    @Post('device-token')
+    @HttpCode(HttpStatus.OK)
+    @ApiRegisterAnonymousDeviceEndpoint()
+    async registerDevice(@Body() body: RegisterPushDeviceTokenRequestDto): Promise<ApiResponseDto<null>> {
+        await this.registerAnonymousDeviceUseCase.execute({
+            token: body.token,
+            platform: body.platform,
+            appVersion: body.appVersion,
+        });
+        return ApiResponseDto.success(null, NOTIFICATION_RESPONSE_MESSAGE_EXAMPLES.pushDeviceRegistered);
+    }
 
     @Post('push-token')
     @HttpCode(HttpStatus.OK)

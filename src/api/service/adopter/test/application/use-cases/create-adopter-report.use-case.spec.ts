@@ -13,6 +13,7 @@ describe('브리더 신고 유스케이스', () => {
         adopterBreederReaderPort as any,
         adopterReportCommandPort as any,
         new AdopterReportPayloadBuilderService(),
+        { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
     );
 
     beforeEach(() => {

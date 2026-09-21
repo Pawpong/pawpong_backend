@@ -30,6 +30,7 @@ function makeFileUrlPort(): BreederManagementFileUrlPort {
         generateOne: jest.fn().mockReturnValue('https://cdn.example.com/banner.png'),
         generateOneSafe: jest.fn(),
         generateMany: jest.fn(),
+        toFileKey: jest.fn((value: string) => value),
     };
 }
 

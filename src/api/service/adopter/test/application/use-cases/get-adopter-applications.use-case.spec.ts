@@ -69,7 +69,7 @@ describe('입양자 상담 신청 목록 조회 유스케이스', () => {
         adopterProfilePort.findById.mockResolvedValue(null);
 
         await expect(useCase.execute('user-1', 1, 10)).rejects.toThrow(DomainNotFoundError);
-        await expect(useCase.execute('user-1', 1, 10)).rejects.toThrow('입양자 정보를 찾을 수 없습니다.');
+        await expect(useCase.execute('user-1', 1, 10)).rejects.toThrow('회원 정보를 찾을 수 없습니다.');
     });
 
     it('animalType 필터를 적용하면 breederIds로 필터링한다', async () => {

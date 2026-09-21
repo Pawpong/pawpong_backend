@@ -49,15 +49,19 @@ describe('입양자 계정 탈퇴 유스케이스', () => {
         );
     });
 
-    it("reason이 'other'이고 otherReason이 없으면 DomainValidationError를 던진다", async () => {
+    it("reason이 'other'이고 otherReason이 없어도 정상 처리한다", async () => {
         adopterAccountCommandPort.findAdopterById.mockResolvedValue({
             accountStatus: 'active',
         });
+        adopterAccountCommandPort.softDeleteAdopter.mockResolvedValue(undefined);
+        adopterAccountCommandPort.notifyAdopterWithdrawal.mockResolvedValue(undefined);
 
-        await expect(useCase.execute('user-1', { reason: 'other', otherReason: undefined })).rejects.toThrow(
-            DomainValidationError,
+        const result = await useCase.execute('user-1', { reason: 'other' });
+
+        expect(result.adopterId).toBe('user-1');
+        expect(adopterAccountCommandPort.softDeleteAdopter).toHaveBeenCalledWith(
+            expect.objectContaining({ reason: 'other', otherReason: undefined }),
         );
-        await expect(useCase.execute('user-1', { reason: 'other' })).rejects.toThrow('기타 사유를 입력해주세요.');
     });
 
     it("reason이 'other'이고 otherReason이 있으면 정상 처리한다", async () => {

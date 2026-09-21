@@ -1,6 +1,7 @@
 import { BadRequestException, Inject, Injectable, Logger } from '@nestjs/common';
 
 import { NotificationType, RecipientType } from '../../../../../common/enum/user.enum';
+import { NOTIFICATION_TARGET_URL } from '../../../notification/constants/notification-target-url';
 import { NOTIFICATION_DISPATCH_PORT } from '../../../notification/application/ports/notification-dispatch.port';
 import type { NotificationDispatchPort } from '../../../notification/application/ports/notification-dispatch.port';
 import { COMMUNITY_AUTHOR_READER_PORT, type CommunityAuthorReaderPort } from '../ports/community-author-reader.port';
@@ -63,7 +64,7 @@ export class LikeCommunityPostUseCase {
             .title('좋아요를 받았어요!')
             .content(`${likerNickname}님이 내 게시글을 좋아합니다.`)
             .metadata({ likerNickname, postId })
-            .targetUrl(`/community/posts/${postId}`)
+            .targetUrl(NOTIFICATION_TARGET_URL.communityPost(postId))
             .send();
     }
 }

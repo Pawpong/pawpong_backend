@@ -30,7 +30,7 @@ export class AccountDeleteRequestDto {
     reason: AdopterWithdrawReason;
 
     /**
-     * 기타 사유 (reason이 'other'일 때 필수)
+     * 기타 사유 (reason이 'other'일 때 선택 입력)
      * @example "다른 플랫폼에서 입양을 완료했습니다"
      */
     @ApiProperty({

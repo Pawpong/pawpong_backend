@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import type {
     AdopterApplicationCreateCommand,
     AdopterApplicationCreatedRecord,
+    AdopterApplicationUpdateCommand,
 } from '../application/ports/adopter-application-command.port';
 import type { AdopterApplicationCommandPort } from '../application/ports/adopter-application-command.port';
 import { AdopterApplicationRepository } from '../repository/adopter-application.repository';
@@ -22,5 +23,25 @@ export class AdopterApplicationCommandAdapter implements AdopterApplicationComma
 
     async create(command: AdopterApplicationCreateCommand): Promise<AdopterApplicationCreatedRecord> {
         return (await this.adopterApplicationRepository.create(command)) as AdopterApplicationCreatedRecord;
+    }
+
+    async findByIdAndAdopter(
+        applicationId: string,
+        adopterId: string,
+    ): Promise<AdopterApplicationCreatedRecord | null> {
+        return (await this.adopterApplicationRepository.findByIdForAdopter(
+            adopterId,
+            applicationId,
+        )) as AdopterApplicationCreatedRecord | null;
+    }
+
+    async updateContent(
+        applicationId: string,
+        command: AdopterApplicationUpdateCommand,
+    ): Promise<AdopterApplicationCreatedRecord> {
+        return (await this.adopterApplicationRepository.updateContent(
+            applicationId,
+            command,
+        )) as AdopterApplicationCreatedRecord;
     }
 }

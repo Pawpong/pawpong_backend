@@ -40,18 +40,30 @@ export class ProcessSocialLoginCallbackUseCase {
                 };
             }
 
+            if (result.needsReactivation && result.reactivation) {
+                const reactivation = result.reactivation;
+
+                return {
+                    kind: 'reactivation',
+                    frontendUrl,
+                    originUrl: userProfile.originUrl,
+                    reactivationToken: reactivation.reactivationToken,
+                    expiresIn: reactivation.expiresIn,
+                    role: reactivation.role,
+                    email: reactivation.email,
+                    name: reactivation.name,
+                    deletedAt: reactivation.deletedAt?.toISOString(),
+                };
+            }
+
             const user = result.user!;
             const tokens = await this.authSocialCallbackPort.generateSocialLoginTokens(user);
-            const { isProduction, cookieOptions } = this.authSocialCallbackPort.resolveCookieOptions();
 
             return {
                 kind: 'login_success',
                 frontendUrl,
                 originUrl: userProfile.originUrl,
-                role: user.role,
                 tokens,
-                isProduction,
-                cookieOptions,
             };
         } catch (error) {
             const errorMessage = getErrorMessage(error, '로그인 처리 중 오류가 발생했습니다.');

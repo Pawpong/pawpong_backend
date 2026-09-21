@@ -339,6 +339,14 @@ export class StorageService {
         return `${this.cdnBaseUrl}/${this.normalizeObjectKey(fileName)}`;
     }
 
+    /**
+     * 외부로 나갔던 CDN URL 또는 파일명을 저장용 파일키로 되돌린다.
+     * 화면에서 받은 URL 을 그대로 다시 저장하면 버킷 교체 시 깨지므로 저장 전에 거친다.
+     */
+    toFileKey(value: string): string {
+        return this.normalizeObjectKey(value);
+    }
+
     private stripBucketPrefix(filePath: string): string {
         const bucketNames = new Set([this.bucketName, ...StorageService.LEGACY_BUCKET_NAMES].filter(Boolean));
 

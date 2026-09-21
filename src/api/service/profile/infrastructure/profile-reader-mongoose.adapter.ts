@@ -50,6 +50,7 @@ export class ProfileReaderMongooseAdapter implements ProfileReaderPort {
             followerCount: breeder.stats?.followerCount ?? 0,
             followingCount: breeder.stats?.followingCount ?? 0,
             plan: (breeder.verification?.plan as 'basic' | 'pro') ?? 'basic',
+            representativePhotoFileNames: breeder.profile?.representativePhotos ?? [],
             businessLocation: {
                 city: breeder.profile?.location?.city ?? '',
                 district: breeder.profile?.location?.district ?? '',

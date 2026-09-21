@@ -13,21 +13,38 @@ import type { DiscordErrorAlertPort, DiscordErrorAlertRequest } from '../applica
 @Injectable()
 export class DiscordErrorAlertAdapter implements DiscordErrorAlertPort {
     private readonly errorWebhookUrl: string;
+    private readonly environment: string;
+
+    /**
+     * 환경별 에러 웹훅 키.
+     * 배포된 환경만 값을 가진다. 개발자 PC(local)는 대상이 아니라서 어느 방으로도 보내지 않는다.
+     */
+    private static readonly ERROR_WEBHOOK_KEY_BY_ENVIRONMENT: Record<string, string> = {
+        production: 'DISCORD_ERROR_WEBHOOK_URL',
+        development: 'DISCORD_DEV_ERROR_WEBHOOK_URL',
+    };
 
     constructor(
         private readonly configService: ConfigService,
         private readonly logger: CustomLoggerService,
     ) {
-        const environment =
+        this.environment =
             this.configService.get<string>('APP_ENV') || this.configService.get<string>('NODE_ENV') || 'development';
-        this.errorWebhookUrl =
-            this.configService.get<string>(
-                environment === 'production' ? 'DISCORD_ERROR_WEBHOOK_URL' : 'DISCORD_DEV_ERROR_WEBHOOK_URL',
-            ) || '';
+        const webhookKey = DiscordErrorAlertAdapter.ERROR_WEBHOOK_KEY_BY_ENVIRONMENT[this.environment];
+        this.errorWebhookUrl = webhookKey ? this.configService.get<string>(webhookKey) || '' : '';
 
-        if (!this.errorWebhookUrl) {
+        // 로컬(APP_ENV=local)은 알림 대상이 아니므로 경고 없이 조용히 끈다.
+        // 개발 서버 오류 방에 개발자 PC 로그가 섞이면 실제 dev 장애를 못 알아본다.
+        if (!this.errorWebhookUrl && webhookKey) {
             this.logger.logWarning('DiscordErrorAlertAdapter', '디스코드 에러 웹훅 URL이 설정되지 않았습니다.');
         }
+    }
+
+    /**
+     * 알림을 보낼 방이 정해진 환경인지 반환합니다.
+     */
+    isAlertEnabled(): boolean {
+        return this.errorWebhookUrl.length > 0;
     }
 
     /**
@@ -35,10 +52,13 @@ export class DiscordErrorAlertAdapter implements DiscordErrorAlertPort {
      */
     async sendCriticalErrorAlert(request: DiscordErrorAlertRequest): Promise<void> {
         if (!this.errorWebhookUrl) {
-            this.logger.logWarning(
-                'sendCriticalErrorAlert',
-                '디스코드 에러 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
-            );
+            // 알림 대상이 아닌 환경(local 등)은 설정 누락이 아니므로 경고도 남기지 않는다.
+            if (DiscordErrorAlertAdapter.ERROR_WEBHOOK_KEY_BY_ENVIRONMENT[this.environment]) {
+                this.logger.logWarning(
+                    'sendCriticalErrorAlert',
+                    '디스코드 에러 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
+                );
+            }
             throw new Error('discord_error_webhook_not_configured');
         }
 
@@ -52,7 +72,7 @@ export class DiscordErrorAlertAdapter implements DiscordErrorAlertPort {
                 allowed_mentions: { parse: [] },
                 embeds: [
                     {
-                        title: `[${this.configService.get('APP_ENV') || this.configService.get('NODE_ENV') || 'development'}] ${title}`,
+                        title: `[${this.environment}] ${title}`,
                         color: request.severity === 'critical' ? 0xf44336 : 0xff9800,
                         description: this.truncate(request.message, 3500),
                         fields,

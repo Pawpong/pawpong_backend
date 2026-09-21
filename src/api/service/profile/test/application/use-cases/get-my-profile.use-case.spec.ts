@@ -3,7 +3,10 @@ import { BadRequestException } from '@nestjs/common';
 import { GetMyProfileUseCase } from '../../../application/use-cases/get-my-profile.use-case';
 import { ProfileMapperService } from '../../../domain/services/profile-mapper.service';
 
-const assetUrl = { toProfileImageUrl: (n?: string | null) => (n ? `https://signed/${n}` : undefined) };
+const assetUrl = {
+    toProfileImageUrl: (n?: string | null) => (n ? `https://signed/${n}` : undefined),
+    toPhotoUrls: (names?: string[] | null) => (names ?? []).map((n) => `https://signed/${n}`),
+};
 
 describe('GetMyProfileUseCase', () => {
     const reader = {

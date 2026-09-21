@@ -10,6 +10,7 @@ import type {
     AdoptionRecordReaderPort,
     ListMyAdoptedQuery,
     ListMyAdoptedResult,
+    MyPetApplicationSnapshot,
 } from '../application/ports/adoption-record-reader.port';
 import { AdoptionRecordRepository } from '../repository/adoption-record.repository';
 
@@ -37,6 +38,12 @@ export class AdoptionRecordMongooseReaderAdapter implements AdoptionRecordReader
             })),
             totalItems,
         };
+    }
+
+    async findMyBlockingApplicationForPet(adopterId: string, petId: string): Promise<MyPetApplicationSnapshot | null> {
+        const application = await this.repository.findBlockingApplicationForPet(adopterId, petId);
+        if (!application) return null;
+        return { applicationId: String(application._id), status: application.status };
     }
 
     private toPetSnapshot(pet: AvailablePetDocument, chatCount: number): AdoptionPetSnapshot {

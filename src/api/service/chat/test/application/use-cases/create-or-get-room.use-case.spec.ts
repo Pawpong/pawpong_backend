@@ -69,6 +69,47 @@ const logger = { logStart: jest.fn(), logSuccess: jest.fn(), logError: jest.fn()
 describe('CreateOrGetRoomUseCase', () => {
     const policy = new ChatPolicyService();
 
+    it.each([null, createdRoom])('타인의 신청서는 신규/기존 방에 연결하지 않는다', async (existing) => {
+        const manager = makeRoomManager(existing);
+        const broker = makeBroker();
+        const reader = { belongsToParticipants: jest.fn().mockResolvedValue(false) };
+        const useCase = new CreateOrGetRoomUseCase(
+            manager,
+            broker,
+            makeParticipantReader(),
+            makeBlockManager(),
+            policy,
+            logger,
+            reader,
+        );
+        await expect(
+            useCase.execute('adopter-1', SenderRole.ADOPTER, {
+                counterpartUserId: 'breeder-1',
+                applicationId: 'foreign-application',
+            }),
+        ).rejects.toBeInstanceOf(DomainAuthorizationError);
+        expect(reader.belongsToParticipants).toHaveBeenCalledWith('foreign-application', ['adopter-1', 'breeder-1']);
+        expect(manager.findRoomByParticipants).not.toHaveBeenCalled();
+        expect(manager.createRoom).not.toHaveBeenCalled();
+        expect(manager.activateRoom).not.toHaveBeenCalled();
+        expect(broker.publishRoomCreated).not.toHaveBeenCalled();
+    });
+
+    it('일반 DM에는 신청서 조회가 필요 없다', async () => {
+        const reader = { belongsToParticipants: jest.fn() };
+        const useCase = new CreateOrGetRoomUseCase(
+            makeRoomManager(),
+            makeBroker(),
+            makeParticipantReader(),
+            makeBlockManager(),
+            policy,
+            logger,
+            reader,
+        );
+        await useCase.execute('breeder-1', SenderRole.BREEDER, { counterpartUserId: 'breeder-2' });
+        expect(reader.belongsToParticipants).not.toHaveBeenCalled();
+    });
+
     it('기존 방은 새로 만들지 않고 같은 ID를 활성화하며 applicationId를 추가한다', async () => {
         const manager = makeRoomManager(createdRoom);
         const broker = makeBroker();
@@ -79,6 +120,7 @@ describe('CreateOrGetRoomUseCase', () => {
             makeBlockManager(),
             policy,
             logger,
+            { belongsToParticipants: jest.fn().mockResolvedValue(true) },
         );
         const result = await useCase.execute('adopter-1', SenderRole.ADOPTER, {
             counterpartUserId: 'breeder-1',
@@ -100,6 +142,7 @@ describe('CreateOrGetRoomUseCase', () => {
             makeBlockManager(),
             policy,
             logger,
+            { belongsToParticipants: jest.fn().mockResolvedValue(true) },
         );
         await useCase.execute('breeder-1', SenderRole.BREEDER, { counterpartUserId: 'adopter-1' });
         expect(manager.createRoom).toHaveBeenCalledWith(
@@ -123,6 +166,7 @@ describe('CreateOrGetRoomUseCase', () => {
             makeBlockManager(),
             policy,
             logger,
+            { belongsToParticipants: jest.fn().mockResolvedValue(true) },
         );
         await useCase.execute('adopter-1', SenderRole.ADOPTER, { breederId: 'breeder-1' });
         expect(manager.findRoomByParticipants).toHaveBeenCalledWith(['adopter-1', 'breeder-1']);
@@ -136,6 +180,7 @@ describe('CreateOrGetRoomUseCase', () => {
             makeBlockManager(),
             policy,
             logger,
+            { belongsToParticipants: jest.fn().mockResolvedValue(true) },
         );
         await expect(
             useCase.execute('adopter-1', SenderRole.ADOPTER, { counterpartUserId: 'adopter-1' }),
@@ -150,6 +195,7 @@ describe('CreateOrGetRoomUseCase', () => {
             makeBlockManager(),
             policy,
             logger,
+            { belongsToParticipants: jest.fn().mockResolvedValue(true) },
         );
         await expect(
             useCase.execute('adopter-1', SenderRole.ADOPTER, { counterpartUserId: 'breeder-1' }),
@@ -165,6 +211,7 @@ describe('CreateOrGetRoomUseCase', () => {
             makeBlockManager(true),
             policy,
             logger,
+            { belongsToParticipants: jest.fn().mockResolvedValue(true) },
         );
         await expect(
             useCase.execute('adopter-1', SenderRole.ADOPTER, { counterpartUserId: 'breeder-1' }),

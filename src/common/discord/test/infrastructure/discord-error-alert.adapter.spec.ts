@@ -86,4 +86,59 @@ describe('DiscordErrorAlertAdapter', () => {
             '디스코드 에러 웹훅이 설정되지 않아 알림을 보낼 수 없습니다.',
         );
     });
+
+    it('로컬 환경(APP_ENV=local)은 개발 서버 웹훅으로 보내지 않는다', async () => {
+        // 개발자 PC 오류가 개발 서버 오류 방에 섞이면 실제 dev 장애를 가린다.
+        configService.get.mockImplementation((key: string) => {
+            if (key === 'APP_ENV') return 'local';
+            if (key === 'NODE_ENV') return 'development';
+            if (key === 'DISCORD_DEV_ERROR_WEBHOOK_URL') return 'https://discord.test/dev-error-webhook';
+            if (key === 'DISCORD_ERROR_WEBHOOK_URL') return 'https://discord.test/error-webhook';
+            return undefined;
+        });
+
+        const adapter = new DiscordErrorAlertAdapter(
+            configService as unknown as ConfigService,
+            logger as unknown as CustomLoggerService,
+        );
+
+        await expect(
+            adapter.sendCriticalErrorAlert({
+                severity: 'critical',
+                context: 'Bootstrap',
+                message: 'Kafka chat consumer 시작 실패',
+            }),
+        ).rejects.toThrow('discord_error_webhook_not_configured');
+
+        expect(mockedAxios.post).not.toHaveBeenCalled();
+        // 알림 대상 환경이 아니므로 설정 누락 경고도 남기지 않는다
+        expect(logger.logWarning).not.toHaveBeenCalled();
+    });
+
+    it('개발 서버(APP_ENV=development)는 개발 오류 웹훅으로 보낸다', async () => {
+        configService.get.mockImplementation((key: string) => {
+            if (key === 'APP_ENV') return 'development';
+            if (key === 'DISCORD_DEV_ERROR_WEBHOOK_URL') return 'https://discord.test/dev-error-webhook';
+            return undefined;
+        });
+
+        const adapter = new DiscordErrorAlertAdapter(
+            configService as unknown as ConfigService,
+            logger as unknown as CustomLoggerService,
+        );
+
+        await adapter.sendCriticalErrorAlert({
+            severity: 'critical',
+            context: 'Bootstrap',
+            message: 'Kafka chat consumer 시작 실패',
+        });
+
+        expect(mockedAxios.post).toHaveBeenCalledWith(
+            'https://discord.test/dev-error-webhook',
+            expect.objectContaining({
+                embeds: [expect.objectContaining({ title: '[development] 🚨 Critical 서버 에러' })],
+            }),
+            { timeout: 8000, maxRedirects: 0 },
+        );
+    });
 });

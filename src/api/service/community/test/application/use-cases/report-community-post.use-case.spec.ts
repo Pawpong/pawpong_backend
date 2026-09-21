@@ -21,7 +21,12 @@ const reportPort = {
 beforeEach(() => jest.clearAllMocks());
 
 describe('ReportCommunityPostUseCase', () => {
-    const useCase = new ReportCommunityPostUseCase(reader as any, authorReader as any, reportPort as any);
+    const useCase = new ReportCommunityPostUseCase(
+        reader as any,
+        authorReader as any,
+        reportPort as any,
+        { emit: jest.fn(), emitAsync: jest.fn().mockResolvedValue([]) } as any,
+    );
 
     it('존재하지 않는 게시글 → BadRequestException, report 미호출', async () => {
         reader.existsActivePost.mockResolvedValueOnce(false);

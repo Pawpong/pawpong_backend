@@ -2,6 +2,7 @@ import { ConflictException, Injectable, Logger, OnModuleInit } from '@nestjs/com
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 
+import { REAPPLICATION_BLOCKING_STATUSES } from '../../../../common/enum/user.enum';
 import { getErrorMessage, hasErrorCode } from '../../../../common/utils/error.util';
 import { AdoptionApplication, AdoptionApplicationDocument } from '../../../../schema/adoption-application.schema';
 import { Adopter } from '../../../../schema/adopter.schema';
@@ -83,7 +84,9 @@ export class AdoptionApplicationRepository implements OnModuleInit {
     }
 
     /**
-     * 동일 adopter × pet 의 처리 중 신청(consultation_pending/consultation_completed) 존재 여부.
+     * 동일 adopter × pet 의 재신청 차단 대상 신청 존재 여부.
+     * 대상 상태는 REAPPLICATION_BLOCKING_STATUSES 하나로 관리한다 — 분양 상세의 myApplicationStatus 도
+     * 같은 상수를 보므로, 여기만 바꾸면 "버튼은 활성인데 제출하면 409" 로 되돌아간다.
      * 카운터/문서 페치 없이 가벼운 exists 사용.
      */
     async existsOpenApplicationForPet(adopterId: string, petId: string): Promise<boolean> {
@@ -91,7 +94,7 @@ export class AdoptionApplicationRepository implements OnModuleInit {
         const found = await this.applicationModel.exists({
             adopterId: new Types.ObjectId(adopterId),
             petId: new Types.ObjectId(petId),
-            status: { $in: ['consultation_pending', 'consultation_completed'] },
+            status: { $in: [...REAPPLICATION_BLOCKING_STATUSES] },
         });
         return Boolean(found);
     }

@@ -4,6 +4,7 @@ import { RecipientType } from '../../../../common/enum/user.enum';
 import { MailTemplateService } from '../../../../common/mail/mail-template.service';
 import { AlimtalkService } from '../../../../common/alimtalk/alimtalk.service';
 import { NotificationType } from '../../../../common/enum/user.enum';
+import { NOTIFICATION_TARGET_URL } from '../../notification/constants/notification-target-url';
 import {
     NOTIFICATION_DISPATCH_PORT,
     type NotificationDispatchPort,
@@ -25,7 +26,10 @@ export class AdopterApplicationNotifierAdapter implements AdopterApplicationNoti
         private readonly notificationDispatchPort: NotificationDispatchPort,
     ) {}
 
-    async notifyBreederOfNewApplication(target: AdopterApplicationBreederNotificationTarget): Promise<void> {
+    async notifyBreederOfNewApplication(
+        target: AdopterApplicationBreederNotificationTarget,
+        applicationId: string,
+    ): Promise<void> {
         const breederId = target._id.toString();
         const breederDisplayName = target.name || target.nickname || '브리더';
         const emailContent = target.emailAddress
@@ -37,6 +41,7 @@ export class AdopterApplicationNotifierAdapter implements AdopterApplicationNoti
             .type(NotificationType.NEW_CONSULT_REQUEST)
             .title('💬 새로운 입양 상담 신청이 도착했어요!')
             .content('지금 확인해보세요.')
+            .targetUrl(NOTIFICATION_TARGET_URL.applicationDetail(applicationId))
             .related('/application', 'page');
 
         if (emailContent && target.emailAddress) {
@@ -78,6 +83,7 @@ export class AdopterApplicationNotifierAdapter implements AdopterApplicationNoti
             .title('✅ 상담 신청이 접수되었습니다!')
             .content(`${target.breederName}님이 확인 후 연락드릴 예정입니다.`)
             .metadata({ breederName: target.breederName })
+            .targetUrl(NOTIFICATION_TARGET_URL.applicationDetail(target.applicationId))
             .related(target.applicantId, 'applications');
 
         if (emailContent && target.applicantEmail) {

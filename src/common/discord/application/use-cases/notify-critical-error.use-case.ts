@@ -38,6 +38,8 @@ export class NotifyCriticalErrorUseCase implements OnModuleInit, OnModuleDestroy
     /** 환경별 채널 정책을 적용한 뒤 같은 오류의 동시 전송도 한 번으로 제한한다. */
     async execute(request: DiscordErrorAlertRequest, now = new Date()): Promise<NotifyCriticalErrorResult> {
         const environment = process.env.APP_ENV || process.env.NODE_ENV || 'development';
+        // 로컬처럼 보낼 방이 없는 환경은 전송을 시도하지 않는다. 시도하면 실패 로그가 남아 실제 장애와 섞인다.
+        if (!this.errorAlertPort.isAlertEnabled()) return { sent: false, reason: 'filtered' };
         if (environment !== 'production' && !process.env.DISCORD_DEV_ERROR_WEBHOOK_URL)
             return { sent: false, reason: 'filtered' };
         if (!this.policyService.shouldNotify(request)) return { sent: false, reason: 'filtered' };

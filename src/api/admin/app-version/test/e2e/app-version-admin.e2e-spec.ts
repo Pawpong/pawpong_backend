@@ -29,6 +29,53 @@ describe('앱 버전 관리자 종단간 테스트', () => {
         await app.close();
     });
 
+    it('관리자 아이콘 추천을 저장·수정하고 공개 버전 응답까지 전달한다', async () => {
+        expect(adminToken).not.toBe('');
+        const payload = {
+            platform: 'android',
+            latestVersion: '1.0.0',
+            minRequiredVersion: '1.0.0',
+            forceUpdateMessage: '업데이트',
+            recommendUpdateMessage: '업데이트',
+            iosStoreUrl: 'https://apps.apple.com/app/pawpong/id123456789',
+            androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
+            isActive: true,
+            appIconKey: 'pixel',
+        };
+        const created = await request(app.getHttpServer())
+            .post('/api/app-version-admin')
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send(payload)
+            .expect(200);
+        expect(created.body.data.appIconKey).toBe('pixel');
+        const id = created.body.data.appVersionId;
+        const current = await request(app.getHttpServer())
+            .get('/api/v2/app-version/check')
+            .query({ platform: 'android', currentVersion: '1.0.0' })
+            .expect(200);
+        expect(current.body.data.appIconKey).toBe('pixel');
+        await request(app.getHttpServer())
+            .patch(`/api/app-version-admin/${id}`)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ appIconKey: 'https://example.com/icon.png' })
+            .expect(400);
+        const reset = await request(app.getHttpServer())
+            .patch(`/api/app-version-admin/${id}`)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ appIconKey: 'default' })
+            .expect(200);
+        expect(reset.body.data.appIconKey).toBe('default');
+        const checked = await request(app.getHttpServer())
+            .get('/api/v2/app-version/check')
+            .query({ platform: 'android', currentVersion: '1.0.0' })
+            .expect(200);
+        expect(checked.body.data.appIconKey).toBe('default');
+        await request(app.getHttpServer())
+            .delete(`/api/app-version-admin/${id}`)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .expect(200);
+    });
+
     describe('POST /api/app-version-admin', () => {
         it('iOS 앱 버전 생성 성공', async () => {
             if (!adminToken) {

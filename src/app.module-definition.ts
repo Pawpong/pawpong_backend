@@ -7,6 +7,7 @@ import { AlimtalkAdminModule } from './common/alimtalk/admin/alimtalk-admin.modu
 import { AlimtalkModule } from './common/alimtalk/alimtalk.module';
 import { DatabaseModule } from './common/database/database.module';
 import { DiscordWebhookModule } from './common/discord/discord-webhook.module';
+import { OpsAlertModule } from './common/ops-alert/ops-alert.module';
 import { KafkaModule } from './common/kafka/kafka.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { RedisModule } from './common/redis/redis.module';
@@ -54,6 +55,7 @@ const APP_FOUNDATION_MODULES = [
     EventEmitterModule.forRoot(),
     LoggerModule,
     DiscordWebhookModule,
+    OpsAlertModule,
     RedisModule,
     KafkaModule,
     DatabaseModule,

@@ -7,6 +7,7 @@ import { ADOPTER_RESPONSE_MESSAGES } from '../constants/adopter-response-message
 import { ADOPTER_FORBIDDEN_RESPONSE } from '../constants/adopter-swagger.constants';
 import { AccountDeleteRequestDto } from '../dto/request/account-delete-request.dto';
 import { ApplicationCreateRequestDto } from '../dto/request/application-create-request.dto';
+import { ApplicationUpdateRequestDto } from '../dto/request/application-update-request.dto';
 import { FavoriteAddRequestDto } from '../dto/request/favorite-add-request.dto';
 import { AdopterProfileUpdateRequestDto } from '../dto/request/profile-update-request.dto';
 import { ReportCreateRequestDto } from '../dto/request/report-create-request.dto';
@@ -16,6 +17,7 @@ import { AccountDeleteResponseDto } from '../dto/response/account-delete-respons
 import { AdopterProfileResponseDto } from '../dto/response/adopter-profile-response.dto';
 import { AdopterProfileUpdateResponseDto } from '../dto/response/profile-update-response.dto';
 import { ApplicationCreateResponseDto } from '../dto/response/application-create-response.dto';
+import { ApplicationUpdateResponseDto } from '../dto/response/application-update-response.dto';
 import { ApplicationDetailResponseDto } from '../dto/response/application-detail-response.dto';
 import { ApplicationListItemResponseDto } from '../dto/response/application-list-item-response.dto';
 import { ApplicationListResponseDto } from '../dto/response/application-list-response.dto';
@@ -52,6 +54,30 @@ export function ApiCreateAdopterApplicationEndpoint() {
             successMessageExample: ADOPTER_RESPONSE_MESSAGES.applicationCreated,
         }),
         ApiBody({ type: ApplicationCreateRequestDto }),
+    );
+}
+
+export function ApiUpdateAdopterApplicationEndpoint() {
+    return applyDecorators(
+        ApiEndpoint({
+            summary: '입양 신청서 전체 수정',
+            description: `내가 제출한 입양 신청서 내용을 다시 작성합니다.
+
+**비즈니스 규칙:**
+- 본인이 제출한 신청만 수정할 수 있습니다.
+- 상담 대기(consultation_pending) 상태일 때만 수정할 수 있습니다 — 브리더가 상담을 시작한 뒤에는 수정할 수 없습니다.
+- breederId/petId는 수정 범위가 아닙니다 (다른 브리더·개체로 옮기려면 새로 신청해야 합니다).`,
+            responseType: ApplicationUpdateResponseDto,
+            errorResponses: [ADOPTER_FORBIDDEN_RESPONSE],
+            successDescription: '입양 신청서 수정 성공',
+            successMessageExample: ADOPTER_RESPONSE_MESSAGES.applicationUpdated,
+        }),
+        ApiParam({
+            name: 'applicationId',
+            description: '수정할 입양 신청 ID',
+            example: '507f1f77bcf86cd799439011',
+        }),
+        ApiBody({ type: ApplicationUpdateRequestDto }),
     );
 }
 

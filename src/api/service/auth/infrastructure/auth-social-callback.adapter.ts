@@ -11,7 +11,9 @@ import {
     type AuthSocialAuthenticatedUser,
     type AuthSocialCallbackLoginResult,
     type AuthSocialCallbackProfile,
+    type AuthSocialCallbackRole,
 } from '../application/ports/auth-social-callback.port';
+import type { AuthRegistrationRecord } from '../types/auth-record.type';
 import { AuthSocialLoginPolicyService } from '../domain/services/auth-social-login-policy.service';
 
 @Injectable()
@@ -105,7 +107,13 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
         }
 
         if (adopter) {
-            this.authSocialLoginPolicyService.assertLoginAllowed(adopter.accountStatus);
+            if (
+                this.authSocialLoginPolicyService.resolveLoginDecision(adopter.accountStatus) ===
+                'reactivation_required'
+            ) {
+                this.logger.log(`[handleSocialLogin] 탈퇴 Adopter 복구 확인 필요: ${adopter.emailAddress}`);
+                return this.buildReactivationResult(adopter, 'adopter', adopter.nickname || adopter.emailAddress);
+            }
 
             this.logger.log(`[handleSocialLogin] 기존 Adopter 로그인 성공: ${adopter.emailAddress}`);
             return {
@@ -126,7 +134,17 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
         );
 
         if (breeder) {
-            this.authSocialLoginPolicyService.assertLoginAllowed(breeder.accountStatus);
+            if (
+                this.authSocialLoginPolicyService.resolveLoginDecision(breeder.accountStatus) ===
+                'reactivation_required'
+            ) {
+                this.logger.log(`[handleSocialLogin] 탈퇴 Breeder 복구 확인 필요: ${breeder.emailAddress}`);
+                return this.buildReactivationResult(
+                    breeder,
+                    'breeder',
+                    breeder.name || breeder.nickname || breeder.emailAddress,
+                );
+            }
 
             this.logger.log(`[handleSocialLogin] 기존 Breeder 로그인 성공: ${breeder.emailAddress}`);
             return {
@@ -149,6 +167,32 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
         return {
             needsAdditionalInfo: true,
             tempUserId,
+        };
+    }
+
+    /**
+     * 탈퇴 계정은 바로 로그인시키지 않고, 복구 동의 API를 호출할 수 있는 단기 토큰만 발급한다.
+     * 이 토큰이 있어야 복구가 가능하므로 소셜 인증을 통과한 본인만 복구할 수 있다.
+     */
+    private buildReactivationResult(
+        account: AuthRegistrationRecord,
+        role: AuthSocialCallbackRole,
+        name: string,
+    ): AuthSocialCallbackLoginResult {
+        const userId = account._id.toString();
+        const { token, expiresIn } = this.authTokenPort.generateReactivationToken(userId, role);
+
+        return {
+            needsAdditionalInfo: false,
+            needsReactivation: true,
+            reactivation: {
+                reactivationToken: token,
+                expiresIn,
+                role,
+                email: account.emailAddress,
+                name,
+                deletedAt: account.deletedAt,
+            },
         };
     }
 

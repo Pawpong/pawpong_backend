@@ -25,9 +25,10 @@ export class AdopterReviewCommandController {
     @ApiCreateAdopterReviewEndpoint()
     async createReview(
         @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
         @Body() createReviewDto: ReviewCreateRequestDto,
     ): Promise<ApiResponseDto<ReviewCreateResponseDto>> {
-        const result = await this.createAdopterReviewUseCase.execute(userId, createReviewDto);
+        const result = await this.createAdopterReviewUseCase.execute(userId, createReviewDto, role);
         return ApiResponseDto.success(
             result as ReviewCreateResponseDto & AdopterReviewCreateResult,
             ADOPTER_RESPONSE_MESSAGES.reviewCreated,

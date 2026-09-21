@@ -26,10 +26,28 @@ const authorReader = {
     readAuthorSnapshot: jest.fn(),
 };
 
+const notificationDispatch = {
+    to: jest.fn().mockReturnValue({
+        type: jest.fn().mockReturnThis(),
+        title: jest.fn().mockReturnThis(),
+        content: jest.fn().mockReturnThis(),
+        metadata: jest.fn().mockReturnThis(),
+        targetUrl: jest.fn().mockReturnThis(),
+        send: jest.fn().mockResolvedValue({}),
+    }),
+    createNotification: jest.fn(),
+};
+
 beforeEach(() => jest.clearAllMocks());
 
 describe('CreateCommunityPostCommentUseCase', () => {
-    const useCase = new CreateCommunityPostCommentUseCase(reader as any, authorReader as any, commentWriter as any);
+    const useCase = new CreateCommunityPostCommentUseCase(
+        reader as any,
+        authorReader as any,
+        commentReader as any,
+        commentWriter as any,
+        notificationDispatch as any,
+    );
 
     it('존재하지 않는 게시글 → BadRequestException', async () => {
         reader.existsActivePost.mockResolvedValueOnce(false);
@@ -75,6 +93,53 @@ describe('CreateCommunityPostCommentUseCase', () => {
         expect(commentWriter.createComment).toHaveBeenCalledWith(
             expect.objectContaining({ parentCommentId: 'c-parent' }),
         );
+    });
+
+    it('답글 — 원댓글 작성자가 게시글 작성자와 다르면 둘 다 알림', async () => {
+        reader.existsActivePost.mockResolvedValueOnce(true);
+        reader.readPostById.mockResolvedValueOnce({ authorId: 'post-author', authorModel: 'Breeder' });
+        authorReader.readAuthorSnapshot.mockResolvedValueOnce({
+            authorId: 'u-1',
+            authorModel: 'Adopter',
+            authorNickname: '답글단이',
+        });
+        commentReader.readCommentById.mockResolvedValueOnce({
+            commentId: 'c-parent',
+            authorId: 'parent-author',
+            authorModel: 'Adopter',
+            isActive: true,
+        });
+        commentWriter.createComment.mockResolvedValueOnce({ commentId: 'c-2' });
+
+        await useCase.execute('p-1', 'u-1', 'adopter', { body: '답글', parentCommentId: 'c-parent' });
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(notificationDispatch.to).toHaveBeenCalledWith('post-author', expect.anything());
+        expect(notificationDispatch.to).toHaveBeenCalledWith('parent-author', expect.anything());
+        expect(notificationDispatch.to).toHaveBeenCalledTimes(2);
+    });
+
+    it('답글 — 원댓글 작성자 = 게시글 작성자면 알림 한 번만 (중복 방지)', async () => {
+        reader.existsActivePost.mockResolvedValueOnce(true);
+        reader.readPostById.mockResolvedValueOnce({ authorId: 'post-author', authorModel: 'Breeder' });
+        authorReader.readAuthorSnapshot.mockResolvedValueOnce({
+            authorId: 'u-1',
+            authorModel: 'Adopter',
+            authorNickname: '답글단이',
+        });
+        commentReader.readCommentById.mockResolvedValueOnce({
+            commentId: 'c-parent',
+            authorId: 'post-author',
+            authorModel: 'Breeder',
+            isActive: true,
+        });
+        commentWriter.createComment.mockResolvedValueOnce({ commentId: 'c-3' });
+
+        await useCase.execute('p-1', 'u-1', 'adopter', { body: '답글', parentCommentId: 'c-parent' });
+        await new Promise((resolve) => setImmediate(resolve));
+
+        expect(notificationDispatch.to).toHaveBeenCalledTimes(1);
+        expect(notificationDispatch.to).toHaveBeenCalledWith('post-author', expect.anything());
     });
 
     it('빈 body → BadRequestException', async () => {

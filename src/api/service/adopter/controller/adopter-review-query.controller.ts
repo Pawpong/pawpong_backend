@@ -23,9 +23,10 @@ export class AdopterReviewQueryController {
     @ApiGetAdopterReviewsEndpoint()
     async getMyReviews(
         @CurrentUser('userId') userId: string,
+        @CurrentUser('role') role: string,
         @Query() query: AdopterPaginationQueryRequestDto,
     ): Promise<ApiResponseDto<PaginationResponseDto<AdopterMyReviewItemDto>>> {
-        const result = await this.getAdopterReviewsUseCase.execute(userId, query.page, query.limit);
+        const result = await this.getAdopterReviewsUseCase.execute(userId, query.page, query.limit, role);
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result),
             ADOPTER_RESPONSE_MESSAGES.reviewListRetrieved,

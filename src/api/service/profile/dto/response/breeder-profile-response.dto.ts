@@ -46,6 +46,13 @@ export class BreederPublicProfileResponseDto {
     businessLocation: BreederBusinessLocationDto;
 
     @ApiProperty({
+        description: '대표 사진 URL (최대 3장). 등록 전이면 빈 배열',
+        type: [String],
+        example: ['https://cdn.../breeders/photo-1.jpg'],
+    })
+    representativePhotos: string[];
+
+    @ApiProperty({
         description: '현재 로그인 입양자가 이 브리더를 즐겨찾기 했는지 (비로그인/브리더 호출 시 false)',
         example: true,
     })

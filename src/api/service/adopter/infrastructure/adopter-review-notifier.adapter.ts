@@ -1,6 +1,7 @@
 import { Inject, Injectable } from '@nestjs/common';
 
 import { NotificationType, RecipientType } from '../../../../common/enum/user.enum';
+import { NOTIFICATION_TARGET_URL } from '../../notification/constants/notification-target-url';
 import { MailTemplateService } from '../../../../common/mail/mail-template.service';
 import {
     NOTIFICATION_DISPATCH_PORT,
@@ -31,6 +32,7 @@ export class AdopterReviewNotifierAdapter implements AdopterReviewNotifierPort {
             .type(NotificationType.NEW_REVIEW_REGISTERED)
             .title('⭐ 새로운 후기가 등록되었어요!')
             .content('브리더 프로필에서 후기를 확인해보세요.')
+            .targetUrl(NOTIFICATION_TARGET_URL.receivedReviews())
             .related(`/explore/breeder/${breederId}#reviews`, 'profile')
             .metadata({ breederId });
 

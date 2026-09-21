@@ -66,12 +66,17 @@ describe('브리더 계정 탈퇴 유스케이스', () => {
         expect(breederManagementAccountCommandPort.softDeleteBreeder).not.toHaveBeenCalled();
     });
 
-    it('기타 사유를 선택했지만 otherReason이 없으면 DomainValidationError를 던진다', async () => {
+    it('기타 사유를 선택하고 otherReason이 없어도 정상 처리된다', async () => {
         breederManagementAccountCommandPort.findBreederById.mockResolvedValue(mockBreeder);
+        breederManagementAccountCommandPort.countPendingApplications.mockResolvedValue(0);
+        breederManagementAccountCommandPort.softDeleteBreeder.mockResolvedValue(undefined);
+        breederManagementAccountCommandPort.deactivateAllAvailablePetsByBreeder.mockResolvedValue(0);
 
-        await expect(useCase.execute('breeder-1', { reason: 'other' })).rejects.toThrow(DomainValidationError);
-        await expect(useCase.execute('breeder-1', { reason: 'other' })).rejects.toThrow('기타 사유를 입력해주세요.');
-        expect(breederManagementAccountCommandPort.softDeleteBreeder).not.toHaveBeenCalled();
+        await useCase.execute('breeder-1', { reason: 'other' });
+
+        expect(breederManagementAccountCommandPort.softDeleteBreeder).toHaveBeenCalledWith(
+            expect.objectContaining({ reason: 'other', otherReason: undefined }),
+        );
     });
 
     it('기타 사유와 내용이 모두 있으면 정상 처리된다', async () => {

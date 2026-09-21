@@ -6,6 +6,7 @@ import { NaverStrategy } from '../../../../common/strategy/naver.strategy';
 
 import { AuthSharedModule } from '../shared/auth-shared.module';
 import { AuthSignupModule } from '../signup/auth-signup.module';
+import { AuthAppleLoginController } from '../controller/auth-apple-login.controller';
 import { AuthGoogleLoginController } from '../controller/auth-google-login.controller';
 import { AuthKakaoLoginController } from '../controller/auth-kakao-login.controller';
 import { AuthNaverLoginController } from '../controller/auth-naver-login.controller';
@@ -16,6 +17,7 @@ import { ProcessSocialLoginCallbackUseCase } from '../application/use-cases/proc
 import { CheckSocialUserUseCase } from '../application/use-cases/check-social-user.use-case';
 import { CompleteSocialRegistrationUseCase } from '../application/use-cases/complete-social-registration.use-case';
 import { CompleteLegacySocialRegistrationUseCase } from '../application/use-cases/complete-legacy-social-registration.use-case';
+import { AuthAppleIdTokenService } from '../domain/services/auth-apple-id-token.service';
 import { AuthSocialRedirectPathService } from '../domain/services/auth-social-redirect-path.service';
 import { AuthSocialRegistrationResultMapperService } from '../domain/services/auth-social-registration-result-mapper.service';
 import { AuthSocialUserCheckResultMapperService } from '../domain/services/auth-social-user-check-result-mapper.service';
@@ -26,6 +28,7 @@ import {
 import { AuthSocialCallbackResultFactoryService } from '../presentation/services/auth-social-callback-result-factory.service';
 import { AuthSocialErrorRedirectFactoryService } from '../presentation/services/auth-social-error-redirect-factory.service';
 import { AuthSocialLoginSuccessRedirectFactoryService } from '../presentation/services/auth-social-login-success-redirect-factory.service';
+import { AuthSocialReactivationRedirectFactoryService } from '../presentation/services/auth-social-reactivation-redirect-factory.service';
 import { AuthSocialSignupRedirectFactoryService } from '../presentation/services/auth-social-signup-redirect-factory.service';
 import { AuthRedirectResponseInterceptor } from '../presentation/interceptors/auth-redirect-response.interceptor';
 import { AuthSocialCallbackResponseInterceptor } from '../presentation/interceptors/auth-social-callback-response.interceptor';
@@ -35,6 +38,7 @@ import { AuthSocialCallbackResponseInterceptor } from '../presentation/intercept
 export const AUTH_SOCIAL_LOGIN_MODULE_IMPORTS = [AuthSharedModule, AuthSignupModule, ConfigModule];
 
 export const AUTH_SOCIAL_LOGIN_MODULE_CONTROLLERS = [
+    AuthAppleLoginController,
     AuthGoogleLoginController,
     AuthKakaoLoginController,
     AuthNaverLoginController,
@@ -51,6 +55,8 @@ const AUTH_SOCIAL_LOGIN_USE_CASE_PROVIDERS = [
 ];
 
 const AUTH_SOCIAL_LOGIN_DOMAIN_PROVIDERS = [
+    // Apple 은 passport 전략 대신 id_token 을 직접 검증한다 (콜백이 POST form_post 라서).
+    AuthAppleIdTokenService,
     AuthSocialRedirectPathService,
     AuthSocialRegistrationResultMapperService,
     AuthSocialUserCheckResultMapperService,
@@ -62,6 +68,7 @@ const AUTH_SOCIAL_LOGIN_PRESENTATION_PROVIDERS = [
     AuthSocialErrorRedirectFactoryService,
     AuthSocialLoginSuccessRedirectFactoryService,
     AuthSocialSignupRedirectFactoryService,
+    AuthSocialReactivationRedirectFactoryService,
     AuthRedirectResponseInterceptor,
     AuthSocialCallbackResponseInterceptor,
 ];

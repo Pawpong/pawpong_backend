@@ -32,6 +32,7 @@ export class AppVersionMongooseWriterAdapter implements AppVersionWriterPort {
 
     private toSnapshot(version: AppVersion): AppVersionAdminSnapshot {
         return {
+            ...(version.appIconKey ? { appIconKey: version.appIconKey } : {}),
             appVersionId: version._id.toString(),
             platform: version.platform,
             latestVersion: version.latestVersion,

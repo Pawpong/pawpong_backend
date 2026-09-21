@@ -30,7 +30,7 @@ export class BreederAccountDeleteRequestDto {
     reason: BreederWithdrawReason;
 
     /**
-     * 기타 사유 (reason이 'other'일 때 필수)
+     * 기타 사유 (reason이 'other'일 때 선택 입력)
      * @example "다른 플랫폼으로 이전했습니다"
      */
     @ApiProperty({

@@ -7,6 +7,7 @@ import type { AvailablePetDocument } from '../../../../schema/available-pet.sche
 import { ChatRoom, ChatRoomDocument, ChatRoomStatus } from '../../../../schema/chat-room.schema';
 import type {
     BreederPetPostingCardSnapshot,
+    BreederPetPostingEditSnapshot,
     BreederPetPostingReaderPort,
     ListMyPostingsQuery,
     ListMyPostingsResult,
@@ -34,6 +35,44 @@ export class BreederPetPostingReaderMongooseAdapter implements BreederPetPosting
         return {
             snapshots: docs.map((doc) => this.toSnapshot(doc, chatCountMap.get(doc._id.toString()) ?? 0)),
             totalItems,
+        };
+    }
+
+    async findEditSnapshotByOwner(petId: string, breederId: string): Promise<BreederPetPostingEditSnapshot | null> {
+        const doc = await this.repository.findByOwner(petId, breederId);
+        return doc ? this.toEditSnapshot(doc) : null;
+    }
+
+    /**
+     * 수정 화면 복원용 매핑 — 표시용 가공 없이 저장값을 그대로 옮긴다.
+     * v2 이전에 작성된 글은 건강/부모/사육환경 필드가 아예 없으므로 배열은 빈 배열로 보정한다.
+     */
+    private toEditSnapshot(doc: AvailablePetDocument): BreederPetPostingEditSnapshot {
+        return {
+            petId: String(doc._id),
+            name: doc.name,
+            breed: doc.breed,
+            petType: doc.petType,
+            gender: doc.gender as 'male' | 'female',
+            birthDate: doc.birthDate,
+            price: doc.price,
+            description: doc.description ?? '',
+            photos: doc.photos ?? [],
+            representativePhotoIndex: doc.representativePhotoIndex ?? 0,
+            status: doc.status as 'available' | 'reserved' | 'adopted',
+
+            vaccinationStatus: doc.vaccinationStatus,
+            vaccinationRecords: doc.vaccinationRecords ?? [],
+            vaccinationIncompleteReason: doc.vaccinationIncompleteReason,
+
+            geneticTestStatus: doc.geneticTestStatus,
+            geneticTestRecords: doc.geneticTestRecords ?? [],
+            geneticTestIncompleteReason: doc.geneticTestIncompleteReason,
+
+            parentPetSnapshots: doc.parentPetSnapshots ?? [],
+            breedingEnvironment: doc.breedingEnvironment,
+
+            updatedAt: doc.updatedAt,
         };
     }
 

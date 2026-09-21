@@ -2,6 +2,7 @@ export const ADOPTER_RESPONSE_MESSAGES = {
     profileRetrieved: '입양자 프로필이 조회되었습니다.',
     profileUpdated: '프로필이 성공적으로 수정되었습니다.',
     applicationCreated: '입양 신청이 성공적으로 제출되었습니다.',
+    applicationUpdated: '입양 신청서가 성공적으로 수정되었습니다.',
     applicationListRetrieved: '입양 신청 목록이 조회되었습니다.',
     applicationDetailRetrieved: '입양 신청 상세 정보가 조회되었습니다.',
     reviewCreated: '후기가 성공적으로 작성되었습니다.',

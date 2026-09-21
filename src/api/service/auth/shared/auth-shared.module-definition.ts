@@ -17,11 +17,13 @@ import { AuthJwtTokenAdapter } from '../infrastructure/auth-jwt-token.adapter';
 import { AuthRegistrationAdapter } from '../infrastructure/auth-registration.adapter';
 import { AuthTempUploadStore } from '../infrastructure/auth-temp-upload.store';
 import { AuthSocialCallbackAdapter } from '../infrastructure/auth-social-callback.adapter';
+import { AuthAccountReactivationAdapter } from '../infrastructure/auth-account-reactivation.adapter';
 import { AuthSocialLoginPolicyService } from '../domain/services/auth-social-login-policy.service';
 import { AUTH_TOKEN_PORT } from '../application/ports/auth-token.port';
 import { AUTH_REGISTRATION_PORT } from '../application/ports/auth-registration.port';
 import { AUTH_TEMP_UPLOAD_PORT } from '../application/ports/auth-temp-upload.port';
 import { AUTH_SOCIAL_CALLBACK_PORT } from '../application/ports/auth-social-callback.port';
+import { AUTH_ACCOUNT_REACTIVATION_PORT } from '../application/ports/auth-account-reactivation.port';
 import { AuthSignupValidationService } from '../domain/services/auth-signup-validation.service';
 import { AuthPhoneNumberNormalizerService } from '../domain/services/auth-phone-number-normalizer.service';
 import { AuthStoredFileNameService } from '../domain/services/auth-stored-file-name.service';
@@ -72,6 +74,7 @@ const AUTH_SHARED_INFRASTRUCTURE_PROVIDERS = [
     AuthRegistrationAdapter,
     AuthTempUploadStore,
     AuthSocialCallbackAdapter,
+    AuthAccountReactivationAdapter,
     JwtUserStatusMongooseAdapter,
 ];
 
@@ -92,6 +95,11 @@ const AUTH_SHARED_PORT_BINDINGS = [
         // 소셜 콜백 처리 + 인증 쿠키 옵션 결정 (AuthHttpCookieService 가 소비)
         provide: AUTH_SOCIAL_CALLBACK_PORT,
         useExisting: AuthSocialCallbackAdapter,
+    },
+    {
+        // 탈퇴 계정 복구 (소셜 콜백에서 발급한 복구 토큰으로만 접근)
+        provide: AUTH_ACCOUNT_REACTIVATION_PORT,
+        useExisting: AuthAccountReactivationAdapter,
     },
     {
         provide: JWT_USER_STATUS_PORT,
@@ -115,6 +123,7 @@ export const AUTH_SHARED_MODULE_EXPORTS = [
     AUTH_REGISTRATION_PORT,
     AUTH_TEMP_UPLOAD_PORT,
     AUTH_SOCIAL_CALLBACK_PORT,
+    AUTH_ACCOUNT_REACTIVATION_PORT,
     AuthHttpCookieService,
     // 슬라이스에서 JwtService / Passport 가드를 사용할 수 있도록 재노출
     JwtModule,

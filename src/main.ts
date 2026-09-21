@@ -20,6 +20,7 @@ import { AppModule } from './app.module';
 import { buildKafkaBroadcastConsumerGroupId } from './common/kafka/kafka-consumer-group';
 import { KafkaStartupRetry } from './common/kafka/kafka-startup-retry';
 import { KafkaConsumerStatus } from './common/kafka/kafka-consumer-status';
+import { swaggerAccess } from './common/security/swagger-access';
 
 declare const module: any;
 
@@ -214,9 +215,18 @@ async function bootstrap(): Promise<void> {
         operationIdFactory: (_controllerKey: string, methodKey: string) => methodKey,
     });
 
+    const docsConfig = app.get(ConfigService);
+    app.use(
+        swaggerAccess({
+            username: docsConfig.get<string>('SWAGGER_AUTH_USERNAME'),
+            password: docsConfig.get<string>('SWAGGER_AUTH_PASSWORD'),
+            production: docsConfig.get<string>('NODE_ENV') === 'production',
+            developmentPublic: docsConfig.get<string>('SWAGGER_DEVELOPMENT_PUBLIC') === 'true',
+        }),
+    );
     SwaggerModule.setup('docs', app, document, {
         swaggerOptions: {
-            persistAuthorization: true, // 인증 정보 유지
+            persistAuthorization: false, // 공유 PC의 브라우저에 API 토큰을 영구 보관하지 않는다.
             tryItOutEnabled: true, // API 테스트 기능 활성화
             filter: true, // API 검색 기능 활성화
             displayOperationId: true, // Operation ID 표시

@@ -2,15 +2,20 @@ import { MongooseModule } from '@nestjs/mongoose';
 
 import { Adopter, AdopterSchema } from '../../../../schema/adopter.schema';
 import { Breeder, BreederSchema } from '../../../../schema/breeder.schema';
+import { PushDevice, PushDeviceSchema } from '../../../../schema/push-device.schema';
 import { AdopterRepository } from '../../adopter/repository/adopter.repository';
 import { BreederRepository } from '../../breeder-management/repository/breeder.repository';
 
 import { NotificationPushTokenController } from '../controller/notification-push-token.controller';
+import { RegisterAnonymousDeviceUseCase } from '../application/use-cases/register-anonymous-device.use-case';
 import { RegisterPushDeviceTokenUseCase } from '../application/use-cases/register-push-device-token.use-case';
 import { UnregisterPushDeviceTokenUseCase } from '../application/use-cases/unregister-push-device-token.use-case';
 import { SendNotificationPushUseCase } from '../application/use-cases/send-notification-push.use-case';
 import { NotificationFirebasePushAdapter } from '../infrastructure/notification-firebase-push.adapter';
 import { NotificationPushTokenMongooseAdapter } from '../infrastructure/notification-push-token-mongoose.adapter';
+import { PushDeviceMongooseAdapter } from '../infrastructure/push-device-mongoose.adapter';
+import { PushDeviceRepository } from '../repository/push-device.repository';
+import { NOTIFICATION_DEVICE_REGISTRY_PORT } from '../application/ports/notification-device-registry.port';
 import { NOTIFICATION_PUSH_PORT } from '../application/ports/notification-push.port';
 import { NOTIFICATION_PUSH_TOKEN_STORE_PORT } from '../application/ports/notification-push-token-store.port';
 
@@ -22,6 +27,8 @@ import { NOTIFICATION_PUSH_TOKEN_STORE_PORT } from '../application/ports/notific
 const NOTIFICATION_PUSH_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: Adopter.name, schema: AdopterSchema },
     { name: Breeder.name, schema: BreederSchema },
+    // 계정에 묶이지 않은 기기 — 로그인 전에도 푸시를 받을 수 있게 하는 독립 컬렉션
+    { name: PushDevice.name, schema: PushDeviceSchema },
 ]);
 
 export const NOTIFICATION_PUSH_MODULE_IMPORTS = [NOTIFICATION_PUSH_SCHEMA_IMPORTS];
@@ -29,6 +36,7 @@ export const NOTIFICATION_PUSH_MODULE_IMPORTS = [NOTIFICATION_PUSH_SCHEMA_IMPORT
 export const NOTIFICATION_PUSH_MODULE_CONTROLLERS = [NotificationPushTokenController];
 
 export const NOTIFICATION_PUSH_MODULE_PROVIDERS = [
+    RegisterAnonymousDeviceUseCase,
     RegisterPushDeviceTokenUseCase,
     UnregisterPushDeviceTokenUseCase,
     SendNotificationPushUseCase,
@@ -36,6 +44,8 @@ export const NOTIFICATION_PUSH_MODULE_PROVIDERS = [
     BreederRepository,
     NotificationFirebasePushAdapter,
     NotificationPushTokenMongooseAdapter,
+    PushDeviceRepository,
+    PushDeviceMongooseAdapter,
     {
         provide: NOTIFICATION_PUSH_PORT,
         useExisting: NotificationFirebasePushAdapter,
@@ -43,6 +53,10 @@ export const NOTIFICATION_PUSH_MODULE_PROVIDERS = [
     {
         provide: NOTIFICATION_PUSH_TOKEN_STORE_PORT,
         useExisting: NotificationPushTokenMongooseAdapter,
+    },
+    {
+        provide: NOTIFICATION_DEVICE_REGISTRY_PORT,
+        useExisting: PushDeviceMongooseAdapter,
     },
 ];
 
@@ -52,4 +66,5 @@ export const NOTIFICATION_PUSH_MODULE_EXPORTS = [
     // 어드민 푸시 발송 모듈이 직접 소비
     NOTIFICATION_PUSH_PORT,
     NOTIFICATION_PUSH_TOKEN_STORE_PORT,
+    NOTIFICATION_DEVICE_REGISTRY_PORT,
 ];

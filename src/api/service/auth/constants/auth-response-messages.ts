@@ -4,6 +4,8 @@ export const AUTH_RESPONSE_MESSAGE_EXAMPLES = {
     socialRegistrationCompleted: '소셜 회원가입이 완료되었습니다.',
     logoutCompleted: '로그아웃되었습니다.',
     tokenRefreshed: '토큰이 재발급되었습니다.',
+    accountReactivationRequired: '탈퇴한 계정입니다. 복구 후 이용하시겠습니까?',
+    accountReactivated: '계정이 복구되었습니다.',
     emailAvailable: '사용 가능한 이메일입니다.',
     emailDuplicated: '이미 가입된 이메일입니다.',
     nicknameAvailable: '사용 가능한 닉네임입니다.',

@@ -32,6 +32,7 @@ export type AuthRegistrationRecord = {
     phoneNumber?: string;
     profileImageFileName?: string | null;
     accountStatus: string;
+    deletedAt?: Date;
     refreshToken?: string | null;
     socialAuthInfo?: AuthSocialAuthInfoRecord;
     createdAt?: Date;

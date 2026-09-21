@@ -45,13 +45,28 @@
 ### 4. 소셜 로그인 플로우
 
 ```
-1. GET /api/auth/{provider} (google/naver/kakao)
+1. GET /api/auth/{provider} (google/naver/kakao/apple)
 2. OAuth Provider 인증
 3. GET /api/auth/{provider}/callback
 4. 신규 사용자 → /signup (tempId 전달)
-   기존 사용자 → /login/success (토큰 전달)
+   기존 사용자 → /login/success (토큰을 URL 파라미터로 전달)
 5. POST /api/auth/social/complete (추가 정보 입력)
 ```
+
+**쿠키는 백엔드가 굽지 않습니다.** 모든 환경에서 토큰을 `/login/success?accessToken=...&refreshToken=...`
+형태로 넘기고, 쿠키 저장은 프론트 BFF(`/api/auth/set-cookie`) 한 곳이 담당합니다.
+
+- 과거에는 운영에서만 백엔드가 `Domain=.pawpong.kr` 쿠키를 굽고 `/login/success` 를 건너뛰었습니다.
+  그 결과 BFF 가 심는 host-only 쿠키와 같은 이름 쿠키가 두 벌이 되어, 갱신에 성공하고도 옛 토큰을 집어 401 이 반복됐습니다.
+- RN 웹뷰는 `/login/success` 에서만 accessToken 을 postMessage 로 받아 FCM 토큰을 등록합니다.
+  운영이 그 페이지를 건너뛰던 동안 운영 앱 사용자의 푸시 토큰 등록이 아예 일어나지 않았습니다.
+- 로그아웃의 쿠키 만료 경로는 남겨둡니다. 기존 사용자 브라우저에 이미 심긴 `.pawpong.kr` 쿠키를 지우려면 필요합니다.
+
+#### Apple 로그인
+
+Apple 은 서명된 `id_token` 자체가 신원 증명이라 다른 소셜과 처리가 다릅니다.
+`AuthAppleIdTokenService` 가 Apple JWKS 로 서명·발급자(`https://appleid.apple.com`)·수신자·만료를 모두 검증합니다.
+검증 없이 payload 만 디코딩하면 `sub` 를 위조해 남의 계정으로 로그인할 수 있습니다.
 
 ### 5. 브리더 인증 서류 업로드
 
@@ -181,9 +196,13 @@ NAVER_CLIENT_ID=
 NAVER_CLIENT_SECRET=
 KAKAO_CLIENT_ID=
 KAKAO_CLIENT_SECRET=
+# Apple 웹 로그인의 Services ID (id_token 의 audience 검증에 사용)
+APPLE_CLIENT_ID=
 
-# Frontend
+# Frontend — 소셜 콜백이 토큰을 붙여 돌려보낼 주소
 FRONTEND_URL=http://localhost:3000
+FRONTEND_URL_LOCAL=http://localhost:3000
+FRONTEND_URL_PROD=https://pawpong.kr
 ```
 
 ## 에러 처리
