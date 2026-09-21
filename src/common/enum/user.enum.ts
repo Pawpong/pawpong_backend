@@ -183,6 +183,7 @@ export enum NotificationType {
     // 커뮤니티
     COMMUNITY_POST_LIKED = 'community_post_liked', // 커뮤니티 게시글 좋아요
     COMMUNITY_POST_COMMENTED = 'community_post_commented', // 커뮤니티 게시글 댓글
+    COMMUNITY_COMMENT_REPLIED = 'community_comment_replied', // 커뮤니티 댓글에 달린 대댓글
 }
 
 export enum RecipientType {

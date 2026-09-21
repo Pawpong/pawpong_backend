@@ -1,9 +1,12 @@
+import type { CommunityAuthorModel } from '../types/community-post.type';
+
 export const COMMUNITY_COMMENT_READER_PORT = Symbol('COMMUNITY_COMMENT_READER_PORT');
 
 export interface CommunityCommentSnapshot {
     commentId: string;
     postId: string;
     authorId: string;
+    authorModel: CommunityAuthorModel;
     isActive: boolean;
 }
 

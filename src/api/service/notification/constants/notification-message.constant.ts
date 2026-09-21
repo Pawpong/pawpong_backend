@@ -84,4 +84,8 @@ export const NOTIFICATION_MESSAGES: Record<NotificationType, { title: string; bo
         title: '댓글이 달렸어요!',
         body: '{commenterNickname}님이 내 게시글에 댓글을 남겼어요.',
     },
+    [NotificationType.COMMUNITY_COMMENT_REPLIED]: {
+        title: '답글이 달렸어요!',
+        body: '{replierNickname}님이 내 댓글에 답글을 남겼어요.',
+    },
 };
