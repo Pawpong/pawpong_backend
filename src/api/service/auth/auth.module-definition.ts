@@ -6,6 +6,7 @@ import { AuthPhoneModule } from './phone/auth-phone.module';
 import { AuthUploadModule } from './upload/auth-upload.module';
 import { AuthBannerModule } from './banner/auth-banner.module';
 import { AuthAdminModule } from '../../admin/auth/auth-admin.module';
+import { AuthReviewModule } from './review/auth-review.module';
 
 // 인증 바운디드 컨텍스트 — 기능 슬라이스 조립만 담당한다.
 // 각 슬라이스가 자기 DI(컨트롤러·유스케이스·도메인·어댑터·Port 바인딩)를 직접 소유하고,
@@ -20,6 +21,7 @@ export const AUTH_MODULE_IMPORTS = [
     AuthUploadModule,
     AuthBannerModule,
     AuthAdminModule,
+    AuthReviewModule,
 ];
 
 // JWT 인증 인프라(JwtStrategy/JwtModule/PassportModule)는 다른 도메인의 가드가 사용하므로 재노출
