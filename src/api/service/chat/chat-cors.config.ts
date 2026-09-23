@@ -28,7 +28,8 @@ export function buildChatCorsOrigins(env: NodeJS.ProcessEnv = process.env): (str
         .map((value) => value.trim().replace(/\/+$/, ''))
         .filter((value) => value.length > 0);
 
-    return [...new Set([...configured, ...STATIC_CHAT_ORIGINS]), VERCEL_PREVIEW_ORIGIN];
+    const emulatorOrigins = env.APP_ENV === 'local' ? ['http://10.0.2.2:3000'] : [];
+    return [...new Set([...configured, ...STATIC_CHAT_ORIGINS, ...emulatorOrigins]), VERCEL_PREVIEW_ORIGIN];
 }
 
 /**

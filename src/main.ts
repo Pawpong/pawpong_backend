@@ -85,6 +85,8 @@ async function bootstrap(): Promise<void> {
             // 개발 환경 - 서비스 개발 프론트엔드
             'http://localhost:3000',
             'http://localhost:3001',
+            // Android emulator -> local Mac; never add this origin to deployed environments.
+            ...(process.env.APP_ENV === 'local' ? ['http://10.0.2.2:3000'] : []),
 
             // 개발 환경 - 로컬 도메인 (프로덕션 쿠키 테스트용)
             'http://local.pawpong.kr:3000',
