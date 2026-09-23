@@ -63,6 +63,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             throw new DomainAuthenticationError('이미 탈퇴된 계정입니다.');
         }
 
+        // 관리자 정지는 이미 발급된 access token에도 즉시 적용한다.
+        if (accountStatus === 'suspended') {
+            throw new DomainAuthenticationError('정지된 계정입니다.');
+        }
+
         return {
             userId: payload.sub,
             email: payload.email,

@@ -1,3 +1,4 @@
+import { DomainAuthenticationError } from '../../../../common/error/domain.error';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -76,7 +77,15 @@ export class AuthBreederRepository {
      * Refresh 토큰 업데이트
      */
     async updateRefreshToken(id: string, refreshToken: string | null): Promise<void> {
-        await this.breederModel.findByIdAndUpdate(id, { refreshToken }).exec();
+        // 재발급 검증 뒤 계정이 정지된 경합에서도 refresh hash를 다시 저장하지 않는다.
+        const result = await this.breederModel
+            .updateOne(
+                { _id: id, ...(refreshToken ? { accountStatus: { $nin: ['suspended', 'deleted'] } } : {}) },
+                { $set: { refreshToken } },
+            )
+            .exec();
+        if (refreshToken && result.matchedCount === 0)
+            throw new DomainAuthenticationError('사용할 수 없는 계정입니다.');
     }
 
     /**

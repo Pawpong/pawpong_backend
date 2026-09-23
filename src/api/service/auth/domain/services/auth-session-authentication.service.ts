@@ -15,6 +15,10 @@ export class AuthSessionAuthenticationService {
         if (!user) {
             throw new DomainAuthenticationError('사용자를 찾을 수 없습니다.');
         }
+        // 기존 refresh hash가 남아 있는 계정도 사용 중단 상태에서는 재발급하지 않는다.
+        if (user.accountStatus === 'suspended' || user.accountStatus === 'deleted') {
+            throw new DomainAuthenticationError('사용할 수 없는 계정입니다. 다시 로그인해주세요.');
+        }
     }
 
     assertRefreshTokenHash(refreshTokenHash: string | null): asserts refreshTokenHash is string {

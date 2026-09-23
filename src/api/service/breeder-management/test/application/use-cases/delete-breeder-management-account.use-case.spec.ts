@@ -22,6 +22,7 @@ describe('브리더 계정 탈퇴 유스케이스', () => {
         breederManagementAccountCommandPort as any,
         new BreederManagementAccountCommandResultMapperService(),
         mockLogger as any,
+        { emitAsync: jest.fn() } as any,
     );
 
     const mockBreeder = {

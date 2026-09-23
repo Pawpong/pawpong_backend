@@ -1,4 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ACCOUNT_ACCESS_REVOKED } from '../../../../../common/account-access/account-access-revoked.event';
 
 import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { ADOPTER_ACCOUNT_COMMAND_PORT, type AdopterAccountCommandPort } from '../ports/adopter-account-command.port';
@@ -11,6 +13,7 @@ export class DeleteAdopterAccountUseCase {
     constructor(
         @Inject(ADOPTER_ACCOUNT_COMMAND_PORT)
         private readonly adopterAccountCommandPort: AdopterAccountCommandPort,
+        private readonly events: EventEmitter2,
     ) {}
 
     async execute(userId: string, deleteData: AdopterAccountDeleteCommand): Promise<AdopterAccountDeleteResult> {
@@ -32,6 +35,7 @@ export class DeleteAdopterAccountUseCase {
         };
 
         await this.adopterAccountCommandPort.softDeleteAdopter(command);
+        await this.events.emitAsync(ACCOUNT_ACCESS_REVOKED, { userId, role: 'adopter' });
         await this.adopterAccountCommandPort.notifyAdopterWithdrawal(command, adopter);
 
         return {

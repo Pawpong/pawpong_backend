@@ -24,6 +24,7 @@ describe('브리더 정지 유스케이스', () => {
         new BreederAdminPolicyService(),
         new BreederAdminActivityLogFactoryService(),
         new BreederAdminSuspensionResultMapperService(),
+        { emitAsync: jest.fn() } as any,
     );
 
     beforeEach(() => {

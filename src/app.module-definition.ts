@@ -1,5 +1,6 @@
 import { ConfigModule } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { AccountAccessModule } from './common/account-access/account-access.module';
 import { WinstonModule } from 'nest-winston';
 
 import { winstonConfig } from './common/config/winston.config';
@@ -55,6 +56,7 @@ const APP_FOUNDATION_MODULES = [
     }),
     WinstonModule.forRoot(winstonConfig),
     EventEmitterModule.forRoot(),
+    AccountAccessModule,
     LoggerModule,
     DiscordWebhookModule,
     OpsAlertModule,

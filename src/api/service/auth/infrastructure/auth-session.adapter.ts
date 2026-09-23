@@ -22,6 +22,7 @@ export class AuthSessionAdapter implements AuthSessionPort {
                 id: String(adopter._id),
                 email: adopter.emailAddress,
                 role,
+                accountStatus: adopter.accountStatus,
                 refreshTokenHash: adopter.refreshToken ?? null,
             };
         }
@@ -35,6 +36,7 @@ export class AuthSessionAdapter implements AuthSessionPort {
             id: String(breeder._id),
             email: breeder.emailAddress,
             role,
+            accountStatus: breeder.accountStatus,
             refreshTokenHash: breeder.refreshToken ?? null,
         };
     }

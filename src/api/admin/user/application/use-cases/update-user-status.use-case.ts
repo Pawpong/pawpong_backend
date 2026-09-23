@@ -1,4 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ACCOUNT_ACCESS_REVOKED } from '../../../../../common/account-access/account-access-revoked.event';
 
 import { UserStatus } from '../../../../../common/enum/user.enum';
 import {
@@ -20,6 +22,7 @@ export class UpdateUserStatusUseCase {
         private readonly userAdminWriter: UserAdminWriterPort,
         private readonly userAdminCommandPolicyService: UserAdminCommandPolicyService,
         private readonly userAdminActivityLogFactoryService: UserAdminActivityLogFactoryService,
+        private readonly events: EventEmitter2,
     ) {}
 
     async execute(
@@ -48,6 +51,10 @@ export class UpdateUserStatusUseCase {
                   }
                 : {}),
         });
+
+        if (userData.accountStatus === UserStatus.DELETED || userData.accountStatus === UserStatus.SUSPENDED) {
+            await this.events.emitAsync(ACCOUNT_ACCESS_REVOKED, { userId, role });
+        }
 
         await this.userAdminWriter.appendAdminActivityLog(
             adminId,

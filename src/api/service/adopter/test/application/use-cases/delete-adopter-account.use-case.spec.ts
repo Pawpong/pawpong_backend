@@ -9,7 +9,7 @@ describe('입양자 계정 탈퇴 유스케이스', () => {
         notifyAdopterWithdrawal: jest.fn(),
     };
 
-    const useCase = new DeleteAdopterAccountUseCase(adopterAccountCommandPort as any);
+    const useCase = new DeleteAdopterAccountUseCase(adopterAccountCommandPort as any, { emitAsync: jest.fn() } as any);
 
     beforeEach(() => {
         jest.clearAllMocks();

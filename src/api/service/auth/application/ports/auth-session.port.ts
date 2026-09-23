@@ -4,6 +4,7 @@ export type AuthSessionUser = {
     readonly id: string;
     readonly email: string;
     readonly role: AuthSessionRole;
+    readonly accountStatus: string;
     readonly refreshTokenHash: string | null;
 };
 

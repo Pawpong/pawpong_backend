@@ -11,6 +11,13 @@ describe('JwtStrategy', () => {
         return new JwtStrategy(configService as never, userStatusPort);
     };
 
+    it.each(['adopter', 'breeder'] as const)('정지한 %s의 기존 access token을 거절한다', async (role) => {
+        const strategy = createStrategy({ findAccountStatus: jest.fn().mockResolvedValue('suspended') });
+        await expect(strategy.validate({ sub: 'user-id', email: 'user@example.test', role })).rejects.toThrow(
+            DomainAuthenticationError,
+        );
+    });
+
     it('탈퇴한 adopter는 DomainAuthenticationError를 던진다', async () => {
         const userStatusPort: jest.Mocked<JwtUserStatusPort> = {
             findAccountStatus: jest.fn().mockResolvedValue('deleted'),

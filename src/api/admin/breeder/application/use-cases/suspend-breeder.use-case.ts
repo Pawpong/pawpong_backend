@@ -1,4 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ACCOUNT_ACCESS_REVOKED } from '../../../../../common/account-access/account-access-revoked.event';
 
 import { AdminAction, AdminTargetType } from '../../../../../common/enum/user.enum';
 import { BREEDER_ADMIN_READER_PORT } from '../ports/breeder-admin-reader.port';
@@ -25,6 +27,7 @@ export class SuspendBreederUseCase {
         private readonly breederAdminPolicyService: BreederAdminPolicyService,
         private readonly breederAdminActivityLogFactoryService: BreederAdminActivityLogFactoryService,
         private readonly breederAdminSuspensionResultMapperService: BreederAdminSuspensionResultMapperService,
+        private readonly events: EventEmitter2,
     ) {}
 
     async execute(
@@ -47,6 +50,8 @@ export class SuspendBreederUseCase {
             suspensionReason: suspendData.reason,
             suspendedAt,
         });
+
+        await this.events.emitAsync(ACCOUNT_ACCESS_REVOKED, { userId: breederId, role: 'breeder' });
 
         await this.breederAdminWriter.appendAdminActivityLog(
             adminId,

@@ -49,6 +49,7 @@ describe('사용자 상태 수정 유스케이스', () => {
             writer,
             new UserAdminCommandPolicyService(),
             new UserAdminActivityLogFactoryService(),
+            { emitAsync: jest.fn() } as any,
         );
 
         await expect(
@@ -107,6 +108,7 @@ describe('사용자 상태 수정 유스케이스', () => {
             },
             new UserAdminCommandPolicyService(),
             new UserAdminActivityLogFactoryService(),
+            { emitAsync: jest.fn() } as any,
         );
 
         await expect(

@@ -317,6 +317,12 @@ export class UserAdminRepository {
             }
         }
 
+        // 관리자 상태 전환과 기존 세션·푸시 폐기는 원자적으로 처리한다.
+        if (patch.accountStatus === 'suspended' || patch.accountStatus === 'deleted') {
+            $unset.refreshToken = '';
+            $set.pushDeviceTokens = [];
+        }
+
         const update: Record<string, Record<string, unknown>> = {};
         if (Object.keys($set).length > 0) {
             update.$set = $set;

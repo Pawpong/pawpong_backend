@@ -1,3 +1,4 @@
+import { DomainAuthenticationError } from '../../../../common/error/domain.error';
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, FilterQuery, Model } from 'mongoose';
@@ -118,6 +119,10 @@ export class BreederRepository {
                 {
                     $set: {
                         ...updateData,
+                        // 이벤트 처리 전 프로세스가 끝나도 예전 세션은 복구되지 않는다.
+                        ...(['suspended', 'deleted'].includes(String(updateData.accountStatus))
+                            ? { refreshToken: null, pushDeviceTokens: [] }
+                            : {}),
                         updatedAt: new Date(),
                     },
                 },
@@ -397,9 +402,9 @@ export class BreederRepository {
         session?: ClientSession,
     ): Promise<void> {
         // 한 원자적 업데이트에서 같은 토큰을 교체해 동시 재등록으로 배열이 중복되지 않게 한다.
-        await this.breederModel
+        const result = await this.breederModel
             .updateOne(
-                { _id: breederId },
+                { _id: breederId, accountStatus: { $nin: ['suspended', 'deleted'] } },
                 [
                     {
                         $set: {
@@ -421,6 +426,7 @@ export class BreederRepository {
                 { session },
             )
             .exec();
+        if (result.matchedCount === 0) throw new DomainAuthenticationError('사용할 수 없는 계정입니다.');
     }
 
     /**
@@ -458,7 +464,7 @@ export class BreederRepository {
      */
     async findPushDeviceTokens(breederId: string): Promise<string[]> {
         const doc = await this.breederModel
-            .findById(breederId)
+            .findOne({ _id: breederId, accountStatus: { $nin: ['suspended', 'deleted'] } })
             .select('pushDeviceTokens')
             .lean<{ pushDeviceTokens?: Array<{ token?: string }> }>()
             .exec();

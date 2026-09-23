@@ -6,6 +6,31 @@ import { type AuthTokenPort } from '../../../application/ports/auth-token.port';
 import { AuthSessionAuthenticationService } from '../../../domain/services/auth-session-authentication.service';
 
 describe('인증 토큰 재발급 유스케이스', () => {
+    it.each(['suspended', 'deleted'])(
+        '%s 계정은 유효한 refresh hash가 남아 있어도 재발급하지 않는다',
+        async (accountStatus) => {
+            const session = {
+                findById: jest
+                    .fn()
+                    .mockResolvedValue({ id: 'user-1', role: 'adopter', accountStatus, refreshTokenHash: 'old-hash' }),
+                updateRefreshToken: jest.fn(),
+            };
+            const token = {
+                verifyRefreshToken: jest.fn().mockReturnValue({ sub: 'user-1', role: 'adopter' }),
+                generateTokens: jest.fn(),
+                compareRefreshToken: jest.fn(),
+            };
+            const useCase = new RefreshAuthTokenUseCase(
+                session,
+                token as never,
+                new AuthSessionAuthenticationService(),
+            );
+            await expect(useCase.execute('old-refresh')).rejects.toBeInstanceOf(DomainAuthenticationError);
+            expect(token.generateTokens).not.toHaveBeenCalled();
+            expect(token.compareRefreshToken).not.toHaveBeenCalled();
+            expect(session.updateRefreshToken).not.toHaveBeenCalled();
+        },
+    );
     it('리프레시 토큰 문자열로 새 토큰을 발급한다', async () => {
         const authSessionPort: AuthSessionPort = {
             findById: jest.fn().mockResolvedValue({

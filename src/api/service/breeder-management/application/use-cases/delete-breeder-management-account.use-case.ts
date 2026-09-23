@@ -1,4 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { ACCOUNT_ACCESS_REVOKED } from '../../../../../common/account-access/account-access-revoked.event';
 
 import { DomainNotFoundError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
@@ -13,6 +15,7 @@ export class DeleteBreederManagementAccountUseCase {
         private readonly breederManagementAccountCommandPort: BreederManagementAccountCommandPort,
         private readonly breederManagementAccountCommandResultMapperService: BreederManagementAccountCommandResultMapperService,
         private readonly logger: CustomLoggerService,
+        private readonly events: EventEmitter2,
     ) {}
 
     async execute(userId: string, deleteData?: { reason?: string; otherReason?: string }) {
@@ -45,6 +48,7 @@ export class DeleteBreederManagementAccountUseCase {
         };
 
         await this.breederManagementAccountCommandPort.softDeleteBreeder(command);
+        await this.events.emitAsync(ACCOUNT_ACCESS_REVOKED, { userId, role: 'breeder' });
 
         const deactivatedPetsCount =
             await this.breederManagementAccountCommandPort.deactivateAllAvailablePetsByBreeder(userId);

@@ -1,3 +1,4 @@
+import { DomainAuthenticationError } from '../../../../common/error/domain.error';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { ClientSession, FilterQuery, Model } from 'mongoose';
@@ -117,7 +118,19 @@ export class AdopterRepository {
         try {
             // updatedAt 은 schema timestamps 로 자동 갱신되므로 수동 필드를 주입하지 않는다.
             return await this.adopterModel
-                .findByIdAndUpdate(adopterId, { $set: { ...updateData } }, { new: true, runValidators: true })
+                .findByIdAndUpdate(
+                    adopterId,
+                    {
+                        $set: {
+                            ...updateData,
+                            // 상태 전환과 토큰 폐기를 같은 문서 쓰기에 묶는다.
+                            ...(['suspended', 'deleted'].includes(String(updateData.accountStatus))
+                                ? { refreshToken: null, pushDeviceTokens: [] }
+                                : {}),
+                        },
+                    },
+                    { new: true, runValidators: true },
+                )
                 .select('-password_hash')
                 .exec();
         } catch (error) {
@@ -310,9 +323,9 @@ export class AdopterRepository {
         session?: ClientSession,
     ): Promise<void> {
         // 한 원자적 업데이트에서 같은 토큰을 교체해 동시 재등록으로 배열이 중복되지 않게 한다.
-        await this.adopterModel
+        const result = await this.adopterModel
             .updateOne(
-                { _id: adopterId },
+                { _id: adopterId, accountStatus: { $nin: ['suspended', 'deleted'] } },
                 [
                     {
                         $set: {
@@ -334,6 +347,7 @@ export class AdopterRepository {
                 { session },
             )
             .exec();
+        if (result.matchedCount === 0) throw new DomainAuthenticationError('사용할 수 없는 계정입니다.');
     }
 
     /**
@@ -371,7 +385,7 @@ export class AdopterRepository {
      */
     async findPushDeviceTokens(adopterId: string): Promise<string[]> {
         const doc = await this.adopterModel
-            .findById(adopterId)
+            .findOne({ _id: adopterId, accountStatus: { $nin: ['suspended', 'deleted'] } })
             .select('pushDeviceTokens')
             .lean<{ pushDeviceTokens?: Array<{ token?: string }> }>()
             .exec();
