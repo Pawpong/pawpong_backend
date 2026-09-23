@@ -5,6 +5,12 @@ import { AppVersionWriterPort } from '../../../application/ports/app-version-wri
 
 function makeWriter(deleted = true): AppVersionWriterPort {
     return {
+        findById: jest.fn().mockResolvedValue({
+            latestVersion: '2.0.0',
+            minRequiredVersion: '1.0.0',
+            iosStoreUrl: 'https://apps.apple.com/app',
+            androidStoreUrl: 'https://play.google.com/store/apps',
+        }),
         create: jest.fn(),
         update: jest.fn(),
         delete: jest.fn().mockResolvedValue(deleted),

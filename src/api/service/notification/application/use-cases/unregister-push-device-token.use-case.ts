@@ -40,7 +40,7 @@ export class UnregisterPushDeviceTokenUseCase {
         try {
             await this.pushTokenStore.unregister(command);
             // 기기 레코드는 남기고 계정 바인딩만 푼다 — 로그아웃해도 공지 푸시는 계속 받는다.
-            await this.unbindDevice(command.token);
+            await this.unbindDevice(command);
             this.logger.logSuccess('unregisterPushToken', '디바이스 푸시 토큰 해제 완료', {
                 userId: command.userId,
             });
@@ -53,9 +53,9 @@ export class UnregisterPushDeviceTokenUseCase {
         }
     }
 
-    private async unbindDevice(token: string): Promise<void> {
+    private async unbindDevice(command: UnregisterPushDeviceTokenCommand): Promise<void> {
         try {
-            await this.deviceRegistry.unbind(token);
+            await this.deviceRegistry.unbind(command.token, command.userId, command.userRole);
         } catch (error) {
             this.logger.logError('unregisterPushToken', '기기 바인딩 해제 실패', error);
         }

@@ -15,6 +15,14 @@ import {
     type AdminPushRecipientReaderPort,
 } from '../ports/admin-push-recipient-reader.port';
 import type { AdminPushDispatchResult, SendAdminPushCommand } from '../types/admin-push.type';
+import {
+    NOTIFICATION_PUSH_TOKEN_STORE_PORT,
+    type NotificationPushTokenStorePort,
+} from '../../../../service/notification/application/ports/notification-push-token-store.port';
+import {
+    NOTIFICATION_DEVICE_REGISTRY_PORT,
+    type NotificationDeviceRegistryPort,
+} from '../../../../service/notification/application/ports/notification-device-registry.port';
 
 const FCM_MULTICAST_CHUNK = 500; // FCM sendEachForMulticast 한도
 
@@ -40,10 +48,13 @@ export class SendAdminPushUseCase {
         @Inject(NOTIFICATION_PUSH_PORT)
         private readonly notificationPush: NotificationPushPort,
         private readonly validator: AdminPushTargetValidatorService,
+        @Inject(NOTIFICATION_PUSH_TOKEN_STORE_PORT) private readonly tokenStore: NotificationPushTokenStorePort,
+        @Inject(NOTIFICATION_DEVICE_REGISTRY_PORT) private readonly deviceRegistry: NotificationDeviceRegistryPort,
     ) {}
 
     async execute(command: SendAdminPushCommand): Promise<AdminPushDispatchResult> {
         this.validator.validate(command.target);
+        this.validator.validateTargetUrl(command.targetUrl);
 
         const title = command.title.trim();
         const body = command.body.trim();
@@ -76,7 +87,7 @@ export class SendAdminPushUseCase {
         }
 
         // 2) 토큰 평탄화 + FCM 500개 chunk 발송
-        const allTokens = recipients.flatMap((r) => r.tokens);
+        const allTokens = [...new Set(recipients.flatMap((r) => r.tokens))];
         let pushSuccess = 0;
         let pushFailed = 0;
         let invalidTokens = 0;
@@ -92,6 +103,19 @@ export class SendAdminPushUseCase {
                 if (r.success) pushSuccess += 1;
                 else pushFailed += 1;
                 if (r.invalidToken) invalidTokens += 1;
+            }
+            const invalid = results.filter((result) => result.invalidToken).map((result) => result.token);
+            if (invalid.length > 0) {
+                await this.deviceRegistry.removeTokens(invalid);
+                await Promise.all(
+                    recipients.map((recipient) =>
+                        this.tokenStore.purgeInvalidTokens(
+                            recipient.userId,
+                            recipient.userRole,
+                            invalid.filter((token) => recipient.tokens.includes(token)),
+                        ),
+                    ),
+                );
             }
         }
 

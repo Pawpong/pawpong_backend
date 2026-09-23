@@ -21,6 +21,12 @@ const updated: AppVersionAdminSnapshot = {
 
 function makeWriter(result: AppVersionAdminSnapshot | null = updated): AppVersionWriterPort {
     return {
+        findById: jest.fn().mockResolvedValue({
+            latestVersion: '2.0.0',
+            minRequiredVersion: '1.0.0',
+            iosStoreUrl: 'https://apps.apple.com/app',
+            androidStoreUrl: 'https://play.google.com/store/apps',
+        }),
         create: jest.fn(),
         update: jest.fn().mockResolvedValue(result),
         delete: jest.fn(),

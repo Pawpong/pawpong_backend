@@ -187,6 +187,7 @@ async function bootstrap(): Promise<void> {
         .addTag('지역')
         .addTag('인기 검색어')
         .addTag('앱 버전')
+        .addTag('공유 링크')
         .addTag('시스템')
         // ── 관리자 API (Admin) ─────────────────────────────────────────
         .addTag('인증 관리 (Admin)')
@@ -209,6 +210,7 @@ async function bootstrap(): Promise<void> {
         .addTag('품종 관리 (Admin)')
         .addTag('지역 관리 (Admin)')
         .addTag('앱 버전 관리 (Admin)')
+        .addTag('공유 링크 관리 (Admin)')
         .addTag('입양 신청 질문 (Admin)')
         .addTag('업로드 관리 (Admin)')
         .build();

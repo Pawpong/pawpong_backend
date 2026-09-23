@@ -2,7 +2,6 @@ import { BadRequestException } from '@nestjs/common';
 
 import { CustomLoggerService } from '../../../../../../common/logger/custom-logger.service';
 import { RegisterPushDeviceTokenUseCase } from '../../../application/use-cases/register-push-device-token.use-case';
-import type { NotificationDeviceRegistryPort } from '../../../application/ports/notification-device-registry.port';
 import type {
     NotificationPushTokenStorePort,
     RegisterPushDeviceTokenCommand,
@@ -16,7 +15,6 @@ describe('디바이스 푸시 토큰 등록 유스케이스', () => {
     } as unknown as CustomLoggerService;
 
     let pushTokenStore: jest.Mocked<NotificationPushTokenStorePort>;
-    let deviceRegistry: jest.Mocked<NotificationDeviceRegistryPort>;
     let useCase: RegisterPushDeviceTokenUseCase;
 
     const baseCommand: RegisterPushDeviceTokenCommand = {
@@ -35,14 +33,7 @@ describe('디바이스 푸시 토큰 등록 유스케이스', () => {
             purgeInvalidTokens: jest.fn().mockResolvedValue(undefined),
             findTokensByUser: jest.fn().mockResolvedValue({ userId: 'user-1', userRole: 'adopter', tokens: [] }),
         };
-        deviceRegistry = {
-            registerDevice: jest.fn().mockResolvedValue({ isNewDevice: false }),
-            bindToUser: jest.fn().mockResolvedValue(undefined),
-            unbind: jest.fn().mockResolvedValue(undefined),
-            markWelcomeSent: jest.fn().mockResolvedValue(undefined),
-            removeTokens: jest.fn().mockResolvedValue(undefined),
-        };
-        useCase = new RegisterPushDeviceTokenUseCase(pushTokenStore, deviceRegistry, logger);
+        useCase = new RegisterPushDeviceTokenUseCase(pushTokenStore, logger);
     });
 
     it('포트 register 를 커맨드 그대로 호출한다', async () => {

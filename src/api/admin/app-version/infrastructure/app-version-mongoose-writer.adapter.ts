@@ -13,6 +13,12 @@ import { AppVersionRepository } from '../../../service/app-version/repository/ap
 export class AppVersionMongooseWriterAdapter implements AppVersionWriterPort {
     constructor(private readonly appVersionRepository: AppVersionRepository) {}
 
+    /** 부분 수정의 교차 검증에 필요한 기존 설정을 반환한다. */
+    async findById(appVersionId: string): Promise<AppVersionAdminSnapshot | null> {
+        const version = await this.appVersionRepository.findById(appVersionId);
+        return version ? this.toSnapshot(version) : null;
+    }
+
     async create(createData: AppVersionCreateCommand): Promise<AppVersionAdminSnapshot> {
         const appVersion = await this.appVersionRepository.create(createData);
         return this.toSnapshot(appVersion);

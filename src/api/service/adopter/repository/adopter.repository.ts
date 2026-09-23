@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { FilterQuery, Model } from 'mongoose';
+import { ClientSession, FilterQuery, Model } from 'mongoose';
 
 import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
 import { DomainConflictError } from '../../../../common/error/domain.error';
@@ -307,21 +307,31 @@ export class AdopterRepository {
         token: string,
         platform?: 'ios' | 'android',
         appVersion?: string,
+        session?: ClientSession,
     ): Promise<void> {
-        await this.adopterModel.updateOne({ _id: adopterId }, { $pull: { pushDeviceTokens: { token } } }).exec();
+        // 한 원자적 업데이트에서 같은 토큰을 교체해 동시 재등록으로 배열이 중복되지 않게 한다.
         await this.adopterModel
             .updateOne(
                 { _id: adopterId },
-                {
-                    $push: {
-                        pushDeviceTokens: {
-                            token,
-                            platform,
-                            registeredAt: new Date(),
-                            appVersion,
+                [
+                    {
+                        $set: {
+                            pushDeviceTokens: {
+                                $concatArrays: [
+                                    {
+                                        $filter: {
+                                            input: { $ifNull: ['$pushDeviceTokens', []] },
+                                            as: 'entry',
+                                            cond: { $ne: ['$$entry.token', { $literal: token }] },
+                                        },
+                                    },
+                                    { $literal: [{ token, platform, registeredAt: new Date(), appVersion }] },
+                                ],
+                            },
                         },
                     },
-                },
+                ],
+                { session },
             )
             .exec();
     }
@@ -346,10 +356,11 @@ export class AdopterRepository {
      *
      * @param token 제거할 FCM 디바이스 토큰
      */
-    async removePushDeviceTokenFromAllUsers(token: string): Promise<void> {
+    async removePushDeviceTokenFromAllUsers(token: string, session?: ClientSession): Promise<void> {
         if (!token) return;
         await this.adopterModel
             .updateMany({ 'pushDeviceTokens.token': token }, { $pull: { pushDeviceTokens: { token } } })
+            .session(session ?? null)
             .exec();
     }
 

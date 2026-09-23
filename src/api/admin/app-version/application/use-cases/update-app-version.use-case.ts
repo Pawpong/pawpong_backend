@@ -38,17 +38,24 @@ export class UpdateAppVersionUseCase {
                 '최소 요구 버전',
             );
         }
-        // 둘 다 같은 요청에 있으면 브릭 방지 체크. 단일 필드 업데이트의 cross-field 검증은
-        // 어드민 UI 폼이 1차로 막고, 서버는 동일 페이로드 내 일관성만 책임진다.
-        if (updateData.latestVersion !== undefined && updateData.minRequiredVersion !== undefined) {
-            this.appVersionAdminCommandPolicyService.ensureMinRequiredNotAboveLatest(
-                updateData.minRequiredVersion,
-                updateData.latestVersion,
-            );
-        }
-
         try {
-            const updated = await this.appVersionWriter.update(appVersionId, updateData);
+            const current = await this.appVersionWriter.findById(appVersionId);
+            if (!current) throw new DomainNotFoundError('앱 버전 정보를 찾을 수 없습니다.');
+            // 한 필드만 PATCH하더라도 저장된 값과 합친 정책을 검증한다.
+            this.appVersionAdminCommandPolicyService.ensureMinRequiredNotAboveLatest(
+                updateData.minRequiredVersion ?? current.minRequiredVersion,
+                updateData.latestVersion ?? current.latestVersion,
+            );
+            this.appVersionAdminCommandPolicyService.ensureStoreUrls(
+                updateData.iosStoreUrl ?? current.iosStoreUrl,
+                updateData.androidStoreUrl ?? current.androidStoreUrl,
+            );
+            // 검증한 두 버전은 함께 원자적으로 저장해 동시 PATCH에서도 역전되지 않게 한다.
+            const updated = await this.appVersionWriter.update(appVersionId, {
+                ...updateData,
+                latestVersion: updateData.latestVersion ?? current.latestVersion,
+                minRequiredVersion: updateData.minRequiredVersion ?? current.minRequiredVersion,
+            });
 
             if (!updated) {
                 throw new DomainNotFoundError('앱 버전 정보를 찾을 수 없습니다.');

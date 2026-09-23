@@ -23,7 +23,7 @@ import type {
  * 무효 토큰 판정:
  * - 'messaging/registration-token-not-registered'
  * - 'messaging/invalid-registration-token'
- * - 'messaging/invalid-argument' (형식 오류)
+ * 일반 invalid-argument는 메시지 오류일 수 있으므로 토큰 삭제 근거로 사용하지 않는다.
  */
 @Injectable()
 export class NotificationFirebasePushAdapter implements NotificationPushPort, OnModuleInit {
@@ -77,9 +77,9 @@ export class NotificationFirebasePushAdapter implements NotificationPushPort, On
                 },
                 apns: {
                     headers: {
-                        // iOS 개발 빌드(debug)는 sandbox APNs, 배포 빌드는 production APNs 사용
-                        'apns-environment':
-                            this.configService.get('NODE_ENV') === 'production' ? 'production' : 'sandbox',
+                        // APNs 환경은 앱 토큰이 결정한다. 서버 NODE_ENV로 덮어쓰지 않는다.
+                        'apns-push-type': 'alert',
+                        'apns-priority': '10',
                     },
                     payload: {
                         aps: {
@@ -98,8 +98,7 @@ export class NotificationFirebasePushAdapter implements NotificationPushPort, On
                 const errorCode = result.error?.code ?? 'unknown';
                 const invalidToken =
                     errorCode === 'messaging/registration-token-not-registered' ||
-                    errorCode === 'messaging/invalid-registration-token' ||
-                    errorCode === 'messaging/invalid-argument';
+                    errorCode === 'messaging/invalid-registration-token';
 
                 return {
                     token,

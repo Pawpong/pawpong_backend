@@ -22,8 +22,8 @@ export class PushDeviceMongooseAdapter implements NotificationDeviceRegistryPort
         await this.pushDeviceRepository.bindToUser(token, userId, userRole);
     }
 
-    async unbind(token: string): Promise<void> {
-        await this.pushDeviceRepository.unbind(token);
+    async unbind(token: string, userId: string, userRole: string): Promise<void> {
+        await this.pushDeviceRepository.unbind(token, userId, userRole);
     }
 
     async markWelcomeSent(token: string): Promise<void> {

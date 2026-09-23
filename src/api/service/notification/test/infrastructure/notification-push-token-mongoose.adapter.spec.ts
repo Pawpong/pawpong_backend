@@ -10,6 +10,9 @@ describe('푸시 토큰 스토어 어댑터 - 기기 핸드오프', () => {
     let breederRepository: jest.Mocked<
         Pick<BreederRepository, 'upsertPushDeviceToken' | 'removePushDeviceTokenFromAllUsers'>
     >;
+    const session = {} as any;
+    const connection = { transaction: jest.fn(async (callback) => callback(session)) };
+    const deviceRepository = { bindToUser: jest.fn().mockResolvedValue(undefined) };
     let adapter: NotificationPushTokenMongooseAdapter;
 
     const command: RegisterPushDeviceTokenCommand = {
@@ -32,14 +35,16 @@ describe('푸시 토큰 스토어 어댑터 - 기기 핸드오프', () => {
         adapter = new NotificationPushTokenMongooseAdapter(
             adopterRepository as unknown as AdopterRepository,
             breederRepository as unknown as BreederRepository,
+            connection as any,
+            deviceRepository as any,
         );
     });
 
     it('등록 시 adopter/breeder 전체에서 동일 토큰을 먼저 제거한다', async () => {
         await adapter.register(command);
 
-        expect(adopterRepository.removePushDeviceTokenFromAllUsers).toHaveBeenCalledWith(command.token);
-        expect(breederRepository.removePushDeviceTokenFromAllUsers).toHaveBeenCalledWith(command.token);
+        expect(adopterRepository.removePushDeviceTokenFromAllUsers).toHaveBeenCalledWith(command.token, session);
+        expect(breederRepository.removePushDeviceTokenFromAllUsers).toHaveBeenCalledWith(command.token, session);
     });
 
     it('전역 제거 후 현재 유저(adopter)에 토큰을 upsert 한다', async () => {
@@ -50,6 +55,7 @@ describe('푸시 토큰 스토어 어댑터 - 기기 핸드오프', () => {
             command.token,
             command.platform,
             command.appVersion,
+            session,
         );
         expect(breederRepository.upsertPushDeviceToken).not.toHaveBeenCalled();
     });
@@ -57,13 +63,14 @@ describe('푸시 토큰 스토어 어댑터 - 기기 핸드오프', () => {
     it('breeder 역할이면 breeder 에 upsert 한다 (전역 제거는 동일)', async () => {
         await adapter.register({ ...command, userRole: 'breeder', userId: 'breeder-1' });
 
-        expect(adopterRepository.removePushDeviceTokenFromAllUsers).toHaveBeenCalledWith(command.token);
-        expect(breederRepository.removePushDeviceTokenFromAllUsers).toHaveBeenCalledWith(command.token);
+        expect(adopterRepository.removePushDeviceTokenFromAllUsers).toHaveBeenCalledWith(command.token, session);
+        expect(breederRepository.removePushDeviceTokenFromAllUsers).toHaveBeenCalledWith(command.token, session);
         expect(breederRepository.upsertPushDeviceToken).toHaveBeenCalledWith(
             'breeder-1',
             command.token,
             command.platform,
             command.appVersion,
+            session,
         );
         expect(adopterRepository.upsertPushDeviceToken).not.toHaveBeenCalled();
     });

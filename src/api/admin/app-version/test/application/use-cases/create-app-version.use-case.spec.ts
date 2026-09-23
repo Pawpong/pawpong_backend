@@ -21,6 +21,7 @@ const created: AppVersionAdminSnapshot = {
 
 function makeWriter(snapshot: AppVersionAdminSnapshot = created): AppVersionWriterPort {
     return {
+        findById: jest.fn(),
         create: jest.fn().mockResolvedValue(snapshot),
         update: jest.fn(),
         delete: jest.fn(),

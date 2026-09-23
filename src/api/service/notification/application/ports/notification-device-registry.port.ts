@@ -31,7 +31,7 @@ export interface NotificationDeviceRegistryPort {
     bindToUser(token: string, userId: string, userRole: string): Promise<void>;
 
     /** 로그아웃 시 바인딩 해제 (기기 레코드는 유지) */
-    unbind(token: string): Promise<void>;
+    unbind(token: string, userId: string, userRole: string): Promise<void>;
 
     /** 설치 안내 푸시 발송 완료 표시 */
     markWelcomeSent(token: string): Promise<void>;

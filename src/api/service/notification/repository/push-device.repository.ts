@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { ClientSession, Model } from 'mongoose';
 
 import { PushDevice } from '../../../../schema/push-device.schema';
 
@@ -41,22 +41,23 @@ export class PushDeviceRepository {
      * 기기를 계정에 바인딩한다.
      * 같은 토큰이 다른 계정에 묶여 있었다면 덮어쓴다 — 디바이스 1대는 마지막 로그인 계정 1명에게 속한다.
      */
-    async bindToUser(token: string, userId: string, userRole: string): Promise<void> {
+    async bindToUser(token: string, userId: string, userRole: string, session?: ClientSession): Promise<void> {
         await this.pushDeviceModel.updateOne(
             { token },
             {
                 $set: { userId, userRole, lastSeenAt: new Date() },
                 $setOnInsert: { token, welcomeSent: false },
             },
-            { upsert: true },
+            { upsert: true, session },
         );
     }
 
     /**
      * 로그아웃 시 바인딩만 해제한다. 기기 레코드는 남겨 재로그인 시 다시 묶을 수 있게 한다.
      */
-    async unbind(token: string): Promise<void> {
-        await this.pushDeviceModel.updateOne({ token }, { $set: { userId: null, userRole: null } });
+    async unbind(token: string, userId: string, userRole: string): Promise<void> {
+        // 계정 전환 후 늦게 도착한 이전 계정의 로그아웃은 새 소유자를 해제하지 않는다.
+        await this.pushDeviceModel.updateOne({ token, userId, userRole }, { $set: { userId: null, userRole: null } });
     }
 
     /**

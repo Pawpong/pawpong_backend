@@ -18,6 +18,7 @@ import { AdopterModule } from './api/service/adopter/adopter.module';
 import { AnnouncementModule } from './api/service/announcement/announcement.module';
 import { AppVersionModule } from './api/service/app-version/app-version.module';
 import { AppSplashModule } from './api/service/app-splash/app-splash.module';
+import { DeepLinkModule } from './api/service/deep-link/deep-link.module';
 import { AuthModule } from './api/service/auth/auth.module';
 import { BreedModule } from './api/service/breed/breed.module';
 import { BreederAdminModule } from './api/admin/breeder/breeder-admin.module';
@@ -93,6 +94,7 @@ const APP_API_MODULES = [
     AdoptionApplicationModule,
     AppVersionModule,
     AppSplashModule,
+    DeepLinkModule,
     InquiryModule,
     FeedModule,
     ChatModule,

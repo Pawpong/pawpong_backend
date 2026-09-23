@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { DomainValidationError } from '../../../../../common/error/domain.error';
+import { isAppStoreUrl } from '../../../../service/app-version/domain/services/app-version-store-url.policy';
 
 /**
  * 앱 버전 어드민 명령 정책.
@@ -33,8 +34,20 @@ export class AppVersionAdminCommandPolicyService {
      * 빈 문자열/undefined 는 호출 측에서 거른다.
      */
     ensureSemverFormat(version: string, fieldName: string): void {
-        if (!AppVersionAdminCommandPolicyService.SEMVER_PATTERN.test(version)) {
+        if (
+            typeof version !== 'string' ||
+            !AppVersionAdminCommandPolicyService.SEMVER_PATTERN.test(version) ||
+            version.length > 40 ||
+            version.split('.').some((part) => !Number.isSafeInteger(Number(part)))
+        ) {
             throw new DomainValidationError(`${fieldName} 형식이 올바르지 않습니다. 예: 1.2.0 (숫자.숫자.숫자)`);
+        }
+    }
+
+    /** 앱을 외부 피싱 페이지나 스크립트로 보내는 스토어 설정을 차단한다. */
+    ensureStoreUrls(iosStoreUrl: string, androidStoreUrl: string): void {
+        if (!isAppStoreUrl(iosStoreUrl, 'ios') || !isAppStoreUrl(androidStoreUrl, 'android')) {
+            throw new DomainValidationError('스토어 URL은 Apple App Store 또는 Google Play의 HTTPS 주소여야 합니다.');
         }
     }
 

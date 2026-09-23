@@ -42,7 +42,10 @@ function applyTestingEnvironment(): void {
  * - 글로벌 프리픽스: /api
  * - 글로벌 파이프: ValidationPipe (transform, whitelist 활성화)
  */
-export async function createTestingApp(overrides: ProviderOverride[] = []): Promise<INestApplication> {
+export async function createTestingApp(
+    overrides: ProviderOverride[] = [],
+    options: { port?: number; host?: string; corsOrigins?: string[] } = {},
+): Promise<INestApplication> {
     if (mongod) {
         await mongod.stop();
         mongod = undefined as any;
@@ -69,6 +72,7 @@ export async function createTestingApp(overrides: ProviderOverride[] = []): Prom
     const moduleFixture = await builder.compile();
 
     const app = moduleFixture.createNestApplication();
+    if (options.corsOrigins) app.enableCors({ origin: options.corsOrigins, credentials: true });
 
     // 글로벌 프리픽스 설정 (/api)
     app.setGlobalPrefix('api');
@@ -91,7 +95,7 @@ export async function createTestingApp(overrides: ProviderOverride[] = []): Prom
     await app.init();
     // 요청마다 Supertest가 서버를 열고 닫지 않도록 앱 수명 동안 포트를 유지한다.
     // Node의 keep-alive 연결이 닫힌 임시 서버를 재사용하는 불안정성을 방지한다.
-    await app.listen(0, '127.0.0.1');
+    await app.listen(options.port ?? 0, options.host ?? '127.0.0.1');
 
     const originalClose = app.close.bind(app);
     let closed = false;

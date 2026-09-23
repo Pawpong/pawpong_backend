@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString, Matches, MaxLength } from 'class-validator';
 
 /**
  * 디바이스 푸시 토큰 해제 요청 DTO
@@ -12,5 +12,7 @@ export class UnregisterPushDeviceTokenRequestDto {
     })
     @IsString()
     @IsNotEmpty()
+    @MaxLength(4096)
+    @Matches(/^\S+$/)
     token: string;
 }

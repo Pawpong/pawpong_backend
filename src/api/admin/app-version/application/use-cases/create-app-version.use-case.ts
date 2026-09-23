@@ -26,6 +26,7 @@ export class CreateAppVersionUseCase {
             createData.minRequiredVersion,
             createData.latestVersion,
         );
+        this.appVersionAdminCommandPolicyService.ensureStoreUrls(createData.iosStoreUrl, createData.androidStoreUrl);
 
         try {
             const appVersion = await this.appVersionWriter.create(createData);

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsBoolean, IsOptional, IsIn } from 'class-validator';
+import { IsString, IsBoolean, ValidateIf, IsIn } from 'class-validator';
 
 /**
  * 앱 버전 수정 요청 DTO
@@ -8,7 +8,7 @@ import { IsString, IsBoolean, IsOptional, IsIn } from 'class-validator';
 export class AppVersionUpdateRequestDto {
     /** 내장 아이콘 추천값. 실제 변경은 앱에서 사용자가 선택한다. */
     @ApiProperty({ description: '추천 앱 아이콘 (사용자 선택 후 적용)', enum: ['default', 'pixel'], required: false })
-    @IsOptional()
+    @ValidateIf((_object, value) => value !== undefined)
     @IsIn(['default', 'pixel'])
     appIconKey?: 'default' | 'pixel';
 
@@ -17,7 +17,7 @@ export class AppVersionUpdateRequestDto {
      */
     @ApiProperty({ description: '최신 버전 (예: "1.3.0")', example: '1.3.0', required: false })
     @IsString()
-    @IsOptional()
+    @ValidateIf((_object, value) => value !== undefined)
     latestVersion?: string;
 
     /**
@@ -25,7 +25,7 @@ export class AppVersionUpdateRequestDto {
      */
     @ApiProperty({ description: '최소 요구 버전 (예: "1.1.0")', example: '1.1.0', required: false })
     @IsString()
-    @IsOptional()
+    @ValidateIf((_object, value) => value !== undefined)
     minRequiredVersion?: string;
 
     /**
@@ -33,7 +33,7 @@ export class AppVersionUpdateRequestDto {
      */
     @ApiProperty({ description: '강제 업데이트 메시지', required: false })
     @IsString()
-    @IsOptional()
+    @ValidateIf((_object, value) => value !== undefined)
     forceUpdateMessage?: string;
 
     /**
@@ -41,7 +41,7 @@ export class AppVersionUpdateRequestDto {
      */
     @ApiProperty({ description: '권장 업데이트 메시지', required: false })
     @IsString()
-    @IsOptional()
+    @ValidateIf((_object, value) => value !== undefined)
     recommendUpdateMessage?: string;
 
     /**
@@ -49,7 +49,7 @@ export class AppVersionUpdateRequestDto {
      */
     @ApiProperty({ description: 'iOS App Store URL', required: false })
     @IsString()
-    @IsOptional()
+    @ValidateIf((_object, value) => value !== undefined)
     iosStoreUrl?: string;
 
     /**
@@ -57,7 +57,7 @@ export class AppVersionUpdateRequestDto {
      */
     @ApiProperty({ description: 'Google Play Store URL', required: false })
     @IsString()
-    @IsOptional()
+    @ValidateIf((_object, value) => value !== undefined)
     androidStoreUrl?: string;
 
     /**
@@ -65,6 +65,6 @@ export class AppVersionUpdateRequestDto {
      */
     @ApiProperty({ description: '활성화 여부', required: false })
     @IsBoolean()
-    @IsOptional()
+    @ValidateIf((_object, value) => value !== undefined)
     isActive?: boolean;
 }

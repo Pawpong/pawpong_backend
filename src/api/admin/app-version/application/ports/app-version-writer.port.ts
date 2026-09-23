@@ -4,6 +4,7 @@ import { type AppVersionCreateCommand, type AppVersionUpdateCommand } from '../t
 export const APP_VERSION_WRITER_PORT = Symbol('APP_VERSION_WRITER_PORT');
 
 export interface AppVersionWriterPort {
+    findById(appVersionId: string): Promise<AppVersionAdminSnapshot | null>;
     create(createData: AppVersionCreateCommand): Promise<AppVersionAdminSnapshot>;
     update(appVersionId: string, updateData: AppVersionUpdateCommand): Promise<AppVersionAdminSnapshot | null>;
     delete(appVersionId: string): Promise<boolean>;

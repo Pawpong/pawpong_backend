@@ -1,6 +1,15 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsEnum, IsNotEmpty, IsOptional, IsString, MaxLength, ValidateNested } from 'class-validator';
+import {
+    IsDefined,
+    IsObject,
+    IsEnum,
+    IsNotEmpty,
+    IsOptional,
+    IsString,
+    MaxLength,
+    ValidateNested,
+} from 'class-validator';
 
 class AdminPushTargetDto {
     @ApiProperty({
@@ -27,6 +36,8 @@ class AdminPushTargetDto {
 
 export class SendAdminPushRequestDto {
     @ApiProperty({ description: '발송 대상', type: AdminPushTargetDto })
+    @IsDefined()
+    @IsObject()
     @ValidateNested()
     @Type(() => AdminPushTargetDto)
     target: AdminPushTargetDto;

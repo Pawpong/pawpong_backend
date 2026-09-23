@@ -15,6 +15,7 @@ describe('앱 버전 생성 유스케이스', () => {
 
     it('유효한 명령이면 앱 버전을 생성한다', async () => {
         const appVersionWriter: AppVersionWriterPort = {
+            findById: jest.fn(),
             create: jest.fn().mockResolvedValue({
                 appVersionId: 'version-1',
                 platform: 'ios',
@@ -59,6 +60,12 @@ describe('앱 버전 생성 유스케이스', () => {
     it('관리자 정보가 없으면 예외를 던진다', async () => {
         const useCase = new CreateAppVersionUseCase(
             {
+                findById: jest.fn().mockResolvedValue({
+                    latestVersion: '2.0.0',
+                    minRequiredVersion: '1.0.0',
+                    iosStoreUrl: 'https://apps.apple.com/app',
+                    androidStoreUrl: 'https://play.google.com/store/apps',
+                }),
                 create: jest.fn(),
                 update: jest.fn(),
                 delete: jest.fn(),

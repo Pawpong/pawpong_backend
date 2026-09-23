@@ -2,10 +2,6 @@ import { BadRequestException, HttpException, Inject, Injectable } from '@nestjs/
 
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import {
-    NOTIFICATION_DEVICE_REGISTRY_PORT,
-    type NotificationDeviceRegistryPort,
-} from '../ports/notification-device-registry.port';
-import {
     NOTIFICATION_PUSH_TOKEN_STORE_PORT,
     type NotificationPushTokenStorePort,
     type RegisterPushDeviceTokenCommand,
@@ -23,8 +19,6 @@ export class RegisterPushDeviceTokenUseCase {
     constructor(
         @Inject(NOTIFICATION_PUSH_TOKEN_STORE_PORT)
         private readonly pushTokenStore: NotificationPushTokenStorePort,
-        @Inject(NOTIFICATION_DEVICE_REGISTRY_PORT)
-        private readonly deviceRegistry: NotificationDeviceRegistryPort,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -44,7 +38,6 @@ export class RegisterPushDeviceTokenUseCase {
 
         try {
             await this.pushTokenStore.register(command);
-            await this.bindDeviceToUser(command);
             this.logger.logSuccess('registerPushToken', '디바이스 푸시 토큰 등록 완료', {
                 userId: command.userId,
             });
@@ -54,18 +47,6 @@ export class RegisterPushDeviceTokenUseCase {
             }
             this.logger.logError('registerPushToken', '디바이스 푸시 토큰 등록 실패', error);
             throw new BadRequestException('디바이스 토큰 등록에 실패했습니다.');
-        }
-    }
-
-    /**
-     * 기기 레지스트리 바인딩은 보조 기록이다.
-     * 실패해도 계정 토큰 등록(실제 푸시 수신 경로)은 이미 끝났으므로 요청을 깨뜨리지 않는다.
-     */
-    private async bindDeviceToUser(command: RegisterPushDeviceTokenCommand): Promise<void> {
-        try {
-            await this.deviceRegistry.bindToUser(command.token, command.userId, command.userRole);
-        } catch (error) {
-            this.logger.logError('registerPushToken', '기기-계정 바인딩 실패', error);
         }
     }
 }

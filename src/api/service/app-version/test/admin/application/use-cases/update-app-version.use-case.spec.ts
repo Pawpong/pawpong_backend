@@ -15,6 +15,12 @@ describe('앱 버전 수정 유스케이스', () => {
 
     it('앱 버전이 있으면 수정된 응답을 반환한다', async () => {
         const appVersionWriter: AppVersionWriterPort = {
+            findById: jest.fn().mockResolvedValue({
+                latestVersion: '2.0.0',
+                minRequiredVersion: '1.0.0',
+                iosStoreUrl: 'https://apps.apple.com/app',
+                androidStoreUrl: 'https://play.google.com/store/apps',
+            }),
             create: jest.fn(),
             update: jest.fn().mockResolvedValue({
                 appVersionId: 'version-1',
@@ -51,6 +57,12 @@ describe('앱 버전 수정 유스케이스', () => {
     it('앱 버전이 없으면 예외을 던진다', async () => {
         const useCase = new UpdateAppVersionUseCase(
             {
+                findById: jest.fn().mockResolvedValue({
+                    latestVersion: '2.0.0',
+                    minRequiredVersion: '1.0.0',
+                    iosStoreUrl: 'https://apps.apple.com/app',
+                    androidStoreUrl: 'https://play.google.com/store/apps',
+                }),
                 create: jest.fn(),
                 update: jest.fn().mockResolvedValue(null),
                 delete: jest.fn(),
@@ -66,6 +78,12 @@ describe('앱 버전 수정 유스케이스', () => {
     it('관리자 정보가 없으면 예외을 던진다', async () => {
         const useCase = new UpdateAppVersionUseCase(
             {
+                findById: jest.fn().mockResolvedValue({
+                    latestVersion: '2.0.0',
+                    minRequiredVersion: '1.0.0',
+                    iosStoreUrl: 'https://apps.apple.com/app',
+                    androidStoreUrl: 'https://play.google.com/store/apps',
+                }),
                 create: jest.fn(),
                 update: jest.fn(),
                 delete: jest.fn(),

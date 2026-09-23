@@ -12,6 +12,11 @@ import {
 export class AppVersionRepository {
     constructor(@InjectModel(AppVersion.name) private readonly appVersionModel: Model<AppVersion>) {}
 
+    /** 부분 수정 전에 저장된 버전 정책을 조회한다. */
+    findById(appVersionId: string): Promise<AppVersion | null> {
+        return this.appVersionModel.findById(appVersionId).exec();
+    }
+
     findLatestActiveByPlatform(platform: 'ios' | 'android'): Promise<AppVersion | null> {
         return this.appVersionModel.findOne({ platform, isActive: true }).sort({ createdAt: -1 }).exec();
     }
@@ -34,24 +39,11 @@ export class AppVersionRepository {
     }
 
     async update(appVersionId: string, updateData: AppVersionUpdateCommand): Promise<AppVersion | null> {
-        const appVersion = await this.appVersionModel.findById(appVersionId).exec();
-
-        if (!appVersion) {
-            return null;
-        }
-
-        if (updateData.latestVersion !== undefined) appVersion.latestVersion = updateData.latestVersion;
-        if (updateData.minRequiredVersion !== undefined) appVersion.minRequiredVersion = updateData.minRequiredVersion;
-        if (updateData.forceUpdateMessage !== undefined) appVersion.forceUpdateMessage = updateData.forceUpdateMessage;
-        if (updateData.recommendUpdateMessage !== undefined) {
-            appVersion.recommendUpdateMessage = updateData.recommendUpdateMessage;
-        }
-        if (updateData.iosStoreUrl !== undefined) appVersion.iosStoreUrl = updateData.iosStoreUrl;
-        if (updateData.androidStoreUrl !== undefined) appVersion.androidStoreUrl = updateData.androidStoreUrl;
-        if (updateData.appIconKey !== undefined) appVersion.appIconKey = updateData.appIconKey;
-        if (updateData.isActive !== undefined) appVersion.isActive = updateData.isActive;
-
-        return appVersion.save();
+        // 유스케이스에서 병합·검증한 버전 쌍을 한 번에 저장한다.
+        const values = Object.fromEntries(Object.entries(updateData).filter(([, value]) => value !== undefined));
+        return this.appVersionModel
+            .findByIdAndUpdate(appVersionId, { $set: values }, { new: true, runValidators: true })
+            .exec();
     }
 
     async deleteById(appVersionId: string): Promise<boolean> {

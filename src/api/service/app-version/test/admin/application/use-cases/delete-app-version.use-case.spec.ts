@@ -14,6 +14,12 @@ describe('앱 버전 삭제 유스케이스', () => {
     it('삭제 대상이 있으면 정상 종료한다', async () => {
         const useCase = new DeleteAppVersionUseCase(
             {
+                findById: jest.fn().mockResolvedValue({
+                    latestVersion: '2.0.0',
+                    minRequiredVersion: '1.0.0',
+                    iosStoreUrl: 'https://apps.apple.com/app',
+                    androidStoreUrl: 'https://play.google.com/store/apps',
+                }),
                 create: jest.fn(),
                 update: jest.fn(),
                 delete: jest.fn().mockResolvedValue(true),
@@ -27,6 +33,12 @@ describe('앱 버전 삭제 유스케이스', () => {
 
     it('대상이 없으면 도메인 not found 예외를 던진다', async () => {
         const appVersionWriter: AppVersionWriterPort = {
+            findById: jest.fn().mockResolvedValue({
+                latestVersion: '2.0.0',
+                minRequiredVersion: '1.0.0',
+                iosStoreUrl: 'https://apps.apple.com/app',
+                androidStoreUrl: 'https://play.google.com/store/apps',
+            }),
             create: jest.fn(),
             update: jest.fn(),
             delete: jest.fn().mockResolvedValue(false),
@@ -43,6 +55,12 @@ describe('앱 버전 삭제 유스케이스', () => {
     it('관리자 정보가 없으면 도메인 validation 예외를 던진다', async () => {
         const useCase = new DeleteAppVersionUseCase(
             {
+                findById: jest.fn().mockResolvedValue({
+                    latestVersion: '2.0.0',
+                    minRequiredVersion: '1.0.0',
+                    iosStoreUrl: 'https://apps.apple.com/app',
+                    androidStoreUrl: 'https://play.google.com/store/apps',
+                }),
                 create: jest.fn(),
                 update: jest.fn(),
                 delete: jest.fn(),

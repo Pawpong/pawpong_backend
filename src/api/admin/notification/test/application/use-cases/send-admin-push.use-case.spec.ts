@@ -8,12 +8,16 @@ describe('SendAdminPushUseCase', () => {
     const recipientReader = { readRecipients: jest.fn() };
     const notificationCommand = { create: jest.fn(), createMany: jest.fn() };
     const notificationPush = { sendToTokens: jest.fn() };
+    const tokenStore = { purgeInvalidTokens: jest.fn() };
+    const deviceRegistry = { removeTokens: jest.fn() };
 
     const useCase = new SendAdminPushUseCase(
         recipientReader as any,
         notificationCommand as any,
         notificationPush as any,
         new AdminPushTargetValidatorService(),
+        tokenStore as any,
+        deviceRegistry as any,
     );
 
     beforeEach(() => {
