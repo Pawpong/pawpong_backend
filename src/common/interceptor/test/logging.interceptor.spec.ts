@@ -6,6 +6,26 @@ import { LoggingInterceptor } from '../logging.interceptor';
 import { CustomLoggerService } from '../../logger/custom-logger.service';
 
 describe('LoggingInterceptor', () => {
+    it.each([
+        {
+            method: 'POST',
+            url: '/api/v2/auth/native/exchange?debug=secret-query',
+            body: { code: 'secret-code', state: 'secret-state', codeVerifier: 'secret-verifier' },
+        },
+        {
+            method: 'POST',
+            url: '/api/v2/auth/native/google/start',
+            body: { codeChallenge: 'secret-challenge', frontendOrigin: 'https://pawpong.kr' },
+        },
+        { method: 'GET', url: '/api/auth/google/callback?code=secret-code&state=secret-state', body: {} },
+    ])('네이티브 OAuth 비밀값을 로그에 남기지 않는다: $url', ({ method, url, body }) => {
+        const log = jest.fn();
+        const interceptor = new LoggingInterceptor({ log } as unknown as CustomLoggerService);
+        interceptor.intercept(createContext({ method, url, body, ip: '127.0.0.1', headers: {} }), {
+            handle: () => of(null),
+        });
+        expect(JSON.stringify(log.mock.calls)).not.toContain('secret-');
+    });
     it.each(['inquiry', 'feedback'])('고객지원 %s 원문은 로그에 남기지 않는다', (route) => {
         const log = jest.fn();
         const interceptor = new LoggingInterceptor({ log } as unknown as CustomLoggerService);

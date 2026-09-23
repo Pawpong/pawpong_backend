@@ -21,12 +21,16 @@ export class LoggingInterceptor implements NestInterceptor {
         const request = ctx.getRequest<Request>();
 
         const { method, url, ip, headers } = request;
+        const path = url.split('?')[0];
+        const isNativeAuth = /\/v2\/auth\/native\//.test(path);
+        const isGoogleCallback = /\/auth\/google\/callback\/?$/.test(path);
         const cookies = request.cookies as Record<string, unknown> | undefined;
         const body: unknown = request.body;
 
         // 요청 헤더 로깅
         this.logger.log(``, 'HTTP');
-        this.logger.log(`▶ ${method} ${url}`, 'HTTP');
+        // 인증 코드/state가 붙은 callback URL과 네이티브 교환 요청은 재현 가능한 비밀값이다.
+        this.logger.log(`▶ ${method} ${isNativeAuth || isGoogleCallback ? path : url}`, 'HTTP');
         this.logger.log(`  ├─ IP: ${ip}`, 'HTTP');
 
         // Bearer 토큰은 존재 여부만 남긴다. JWT 원문은 로그 수집기와 터미널 기록에
@@ -52,7 +56,8 @@ export class LoggingInterceptor implements NestInterceptor {
             // 자유 입력 문의에는 개인정보가 포함될 수 있으므로 원문을 저장하지 않는다.
             if (
                 /\/v2\/home\/support\/(inquiry|feedback)\/?$/.test(url.split('?')[0]) ||
-                /\/home-admin\/support\//.test(url)
+                /\/home-admin\/support\//.test(url) ||
+                isNativeAuth
             ) {
                 for (const key of Object.keys(safeBody)) safeBody[key] = '[REDACTED]';
             }
