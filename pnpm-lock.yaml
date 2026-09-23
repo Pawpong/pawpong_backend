@@ -170,6 +170,9 @@ importers:
       passport-naver:
         specifier: ^1.0.6
         version: 1.0.6
+      proxy-addr:
+        specifier: 2.0.7
+        version: 2.0.7
       reflect-metadata:
         specifier: ^0.2.2
         version: 0.2.2
@@ -237,6 +240,9 @@ importers:
       '@types/passport-jwt':
         specifier: ^4.0.1
         version: 4.0.1
+      '@types/proxy-addr':
+        specifier: 2.0.3
+        version: 2.0.3
       '@types/sharp':
         specifier: ^0.32.0
         version: 0.32.0
@@ -1762,6 +1768,9 @@ packages:
 
   '@types/passport@1.0.17':
     resolution: {integrity: sha512-aciLyx+wDwT2t2/kJGJR2AEeBz0nJU4WuRX04Wu9Dqc5lSUtwu0WERPHYsLhF9PtseiAMPBGNUOtFjxZ56prsg==}
+
+  '@types/proxy-addr@2.0.3':
+    resolution: {integrity: sha512-TgAHHO4tNG3HgLTUhB+hM4iwW6JUNeQHCLnF1DjaDA9c69PN+IasoFu2MYDhubFc+ZIw5c5t9DMtjvrD6R3Egg==}
 
   '@types/qs@6.15.1':
     resolution: {integrity: sha512-GZHUBZR9hckSUhrxmp1nG6NwdpM9fCunJwyThLW1X3AyHgd9IlHb6VANpQQqDr2o/qQp6McZ3y/IA2rVzKzSbw==}
@@ -6700,6 +6709,10 @@ snapshots:
   '@types/passport@1.0.17':
     dependencies:
       '@types/express': 5.0.6
+
+  '@types/proxy-addr@2.0.3':
+    dependencies:
+      '@types/node': 22.19.19
 
   '@types/qs@6.15.1': {}
 

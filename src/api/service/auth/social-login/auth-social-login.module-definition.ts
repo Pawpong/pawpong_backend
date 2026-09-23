@@ -32,12 +32,23 @@ import { AuthSocialReactivationRedirectFactoryService } from '../presentation/se
 import { AuthSocialSignupRedirectFactoryService } from '../presentation/services/auth-social-signup-redirect-factory.service';
 import { AuthRedirectResponseInterceptor } from '../presentation/interceptors/auth-redirect-response.interceptor';
 import { AuthSocialCallbackResponseInterceptor } from '../presentation/interceptors/auth-social-callback-response.interceptor';
+import { AuthNativeLoginController } from '../controller/auth-native-login.controller';
+import { StartNativeGoogleLoginUseCase } from '../application/use-cases/start-native-google-login.use-case';
+import { CompleteNativeGoogleLoginUseCase } from '../application/use-cases/complete-native-google-login.use-case';
+import { ExchangeNativeLoginUseCase } from '../application/use-cases/exchange-native-login.use-case';
+import { AuthNativeLoginPolicyService } from '../domain/services/auth-native-login-policy.service';
+import { AUTH_NATIVE_SESSION_PORT } from '../application/ports/auth-native-session.port';
+import { AuthNativeSessionAdapter } from '../infrastructure/auth-native-session.adapter';
+import { AuthGoogleCallbackGuard } from '../presentation/guards/auth-google-callback.guard';
+import { AuthGoogleCallbackResponseInterceptor } from '../presentation/interceptors/auth-google-callback-response.interceptor';
+import { AuthNativeStartLimitGuard } from '../presentation/guards/auth-native-start-limit.guard';
 
 // 인증 > 소셜 로그인 슬라이스 (구글/카카오/네이버 OAuth)
 // 신규 소셜 유저의 가입 완료는 signup 슬라이스의 가입 유스케이스(Port 토큰)를 사용한다.
 export const AUTH_SOCIAL_LOGIN_MODULE_IMPORTS = [AuthSharedModule, AuthSignupModule, ConfigModule];
 
 export const AUTH_SOCIAL_LOGIN_MODULE_CONTROLLERS = [
+    AuthNativeLoginController,
     AuthAppleLoginController,
     AuthGoogleLoginController,
     AuthKakaoLoginController,
@@ -74,6 +85,15 @@ const AUTH_SOCIAL_LOGIN_PRESENTATION_PROVIDERS = [
 ];
 
 export const AUTH_SOCIAL_LOGIN_MODULE_PROVIDERS = [
+    StartNativeGoogleLoginUseCase,
+    CompleteNativeGoogleLoginUseCase,
+    ExchangeNativeLoginUseCase,
+    AuthNativeLoginPolicyService,
+    AuthNativeSessionAdapter,
+    { provide: AUTH_NATIVE_SESSION_PORT, useExisting: AuthNativeSessionAdapter },
+    AuthGoogleCallbackGuard,
+    AuthNativeStartLimitGuard,
+    AuthGoogleCallbackResponseInterceptor,
     ...AUTH_SOCIAL_LOGIN_USE_CASE_PROVIDERS,
     ...AUTH_SOCIAL_LOGIN_DOMAIN_PROVIDERS,
     ...AUTH_SOCIAL_LOGIN_PRESENTATION_PROVIDERS,
