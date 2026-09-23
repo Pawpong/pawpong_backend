@@ -35,7 +35,7 @@ export type FeedVideoDocumentRecord = {
 export type FeedCommentDocumentRecord = {
     _id: FeedObjectIdLike;
     videoId: FeedObjectIdLike;
-    userId: FeedObjectIdLike | FeedUploaderDocumentRecord;
+    userId: FeedObjectIdLike | FeedUploaderDocumentRecord | null;
     content: string;
     parentId?: FeedObjectIdLike;
     likeCount?: number;

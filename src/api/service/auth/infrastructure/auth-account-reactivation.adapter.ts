@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { DomainAuthenticationError } from '../../../../common/error/domain.error';
 
 import { UserStatus } from '../../../../common/enum/user.enum';
 import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
@@ -37,6 +38,7 @@ export class AuthAccountReactivationAdapter implements AuthAccountReactivationPo
                 name: adopter.nickname || adopter.emailAddress,
                 role: 'adopter',
                 accountStatus: adopter.accountStatus,
+                permanentDeletionRequestedAt: adopter.permanentDeletionRequestedAt,
                 profileImage: adopter.profileImageFileName ?? undefined,
             };
         }
@@ -50,6 +52,7 @@ export class AuthAccountReactivationAdapter implements AuthAccountReactivationPo
             name: breeder.name || breeder.nickname || breeder.emailAddress,
             role: 'breeder',
             accountStatus: breeder.accountStatus,
+            permanentDeletionRequestedAt: breeder.permanentDeletionRequestedAt,
             profileImage: breeder.profileImageFileName ?? undefined,
         };
     }
@@ -61,11 +64,15 @@ export class AuthAccountReactivationAdapter implements AuthAccountReactivationPo
             $unset: WITHDRAWAL_FIELDS,
         };
 
-        if (role === 'adopter') {
-            await this.adopterModel.findByIdAndUpdate(userId, update).exec();
-            return;
-        }
-
-        await this.breederModel.findByIdAndUpdate(userId, update).exec();
+        const filter = {
+            _id: userId,
+            accountStatus: UserStatus.DELETED,
+            permanentDeletionRequestedAt: { $exists: false },
+        };
+        const result =
+            role === 'adopter'
+                ? await this.adopterModel.updateOne(filter, update).exec()
+                : await this.breederModel.updateOne(filter, update).exec();
+        if (result.matchedCount !== 1) throw new DomainAuthenticationError('복구할 수 없는 계정입니다.');
     }
 }

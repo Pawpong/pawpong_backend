@@ -16,7 +16,9 @@ export class AuthSocialLoginPolicyService {
      * 탈퇴 계정은 차단하지 않고 복구 확인 단계로 보낸다.
      * 정지 계정은 사용자가 스스로 해제할 수 없으므로 그대로 차단한다.
      */
-    resolveLoginDecision(accountStatus?: string): AuthSocialLoginDecision {
+    resolveLoginDecision(accountStatus?: string, permanentDeletionRequestedAt?: Date): AuthSocialLoginDecision {
+        if (permanentDeletionRequestedAt)
+            throw new DomainAuthenticationError('영구 삭제가 접수된 계정은 복구할 수 없습니다.');
         if (accountStatus === UserStatus.SUSPENDED) {
             throw new DomainAuthenticationError('정지된 계정입니다. 자세한 내용은 이메일을 확인해주세요.');
         }

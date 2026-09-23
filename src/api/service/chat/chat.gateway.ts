@@ -12,6 +12,7 @@ import {
 import { Namespace, Socket, type DefaultEventsMap } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { OnEvent } from '@nestjs/event-emitter';
 
 import { SendMessageUseCase } from './application/use-cases/send-message.use-case';
 import { GetMessagesUseCase } from './application/use-cases/get-messages.use-case';
@@ -29,6 +30,7 @@ import { ChatPolicyService } from './domain/services/chat-policy.service';
 import { UserStatus } from '../../../common/enum/user.enum';
 import { KafkaConsumerStatus } from '../../../common/kafka/kafka-consumer-status';
 import { buildChatCorsOrigin } from './chat-cors.config';
+import { AccountWriteFenceService } from '../../../common/account-write-fence/account-write-fence.service';
 
 /** 인증 미들웨어가 socket.data 에 심어두는 사용자 식별 정보 */
 export interface ChatSocketUser {
@@ -76,6 +78,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
     @WebSocketServer()
     server: ChatNamespace;
 
+    @OnEvent('account.permanent-deletion.requested')
+    disconnectDeletedAccount(event: { accountId: string; role: string }) {
+        for (const socket of this.server?.sockets.values() ?? []) {
+            if (socket.data.user?.userId === event.accountId && String(socket.data.user.role) === event.role)
+                socket.disconnect(true);
+        }
+    }
+
     /** 이미 전파한 messageId → 전파 시각. Kafka consumer 지연 폴백과 consumer 재합류가 겹쳐도 중복 emit 하지 않는다. */
     private readonly broadcastedMessageIds = new Map<string, number>();
 
@@ -95,6 +105,7 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         private readonly configService: ConfigService,
         private readonly kafkaConsumerStatus: KafkaConsumerStatus,
         private readonly logger: CustomLoggerService,
+        private readonly writeFence: AccountWriteFenceService,
     ) {}
 
     /**
@@ -179,6 +190,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const user = this.requireUser(client);
 
         try {
+            // 다른 인스턴스에 남아 있던 소켓도 입장 시 현재 계정 상태를 다시 확인한다.
+            this.chatPolicyService.requireActive(
+                this.chatPolicyService.requireProfile(
+                    await this.participantReader.findParticipant(user.userId, user.role),
+                ),
+            );
             const room = this.chatPolicyService.requireRoom(await this.chatRoomManager.findRoomById(payload.roomId));
             this.chatPolicyService.requireParticipant(room, user.userId);
             await client.join(payload.roomId);
@@ -212,19 +229,24 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const user = this.requireUser(client);
 
         try {
-            const result = await this.sendMessageUseCase.execute(user.userId, user.role, {
-                roomId: dto.roomId,
-                content: dto.content,
-                messageType: dto.messageType,
-            });
+            await this.writeFence.runWithLease(
+                { accountId: user.userId, role: user.role, operation: 'websocket:send_message' },
+                async () => {
+                    const result = await this.sendMessageUseCase.execute(user.userId, user.role, {
+                        roomId: dto.roomId,
+                        content: dto.content,
+                        messageType: dto.messageType,
+                    });
 
-            // 로컬 개발이나 Kafka 장애 중에도 단일 인스턴스 채팅은 끊기지 않게 한다.
-            // 발행에 성공했더라도 consumer 가 아직 합류하지 않았으면 아무도 소비하지 않으므로
-            // (부팅 직후 재시도 구간) consumer 준비 상태까지 함께 보고 폴백한다.
-            // consumer 합류 후 같은 메시지가 다시 오면 broadcastNewMessage 의 중복 제거가 막아준다.
-            if (!result.brokerPublished || !this.kafkaConsumerStatus.isReady()) {
-                this.broadcastNewMessage(this.chatMessageMapperService.toBroadcastPayload(result));
-            }
+                    // 로컬 개발이나 Kafka 장애 중에도 단일 인스턴스 채팅은 끊기지 않게 한다.
+                    // 발행에 성공했더라도 consumer 가 아직 합류하지 않았으면 아무도 소비하지 않으므로
+                    // (부팅 직후 재시도 구간) consumer 준비 상태까지 함께 보고 폴백한다.
+                    // consumer 합류 후 같은 메시지가 다시 오면 broadcastNewMessage 의 중복 제거가 막아준다.
+                    if (!result.brokerPublished || !this.kafkaConsumerStatus.isReady()) {
+                        this.broadcastNewMessage(this.chatMessageMapperService.toBroadcastPayload(result));
+                    }
+                },
+            );
         } catch (error) {
             client.emit('error', { message: error.message });
         }
@@ -290,11 +312,16 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         const user = this.requireUser(client);
 
         try {
-            await this.getMessagesUseCase.execute(user.userId, { roomId: payload.roomId });
-            this.server.to(payload.roomId).emit('messages_read', {
-                roomId: payload.roomId,
-                readBy: user.userId,
-            });
+            await this.writeFence.runWithLease(
+                { accountId: user.userId, role: user.role, operation: 'websocket:read_messages' },
+                async () => {
+                    await this.getMessagesUseCase.execute(user.userId, { roomId: payload.roomId });
+                    this.server.to(payload.roomId).emit('messages_read', {
+                        roomId: payload.roomId,
+                        readBy: user.userId,
+                    });
+                },
+            );
         } catch (error) {
             client.emit('error', { message: error.message });
         }

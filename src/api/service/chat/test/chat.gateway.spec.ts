@@ -1,6 +1,7 @@
 import { WsException } from '@nestjs/websockets';
 
 import { ChatGateway } from '../chat.gateway';
+import { AccountWriteFenceService } from '../../../../common/account-write-fence/account-write-fence.service';
 import { ChatPolicyService } from '../domain/services/chat-policy.service';
 import { ChatRoomStatus } from '../../../../schema/chat-room.schema';
 import { MessageType, SenderRole } from '../../../../schema/chat-message.schema';
@@ -42,7 +43,7 @@ function makeClient() {
         join: jest.fn().mockResolvedValue(undefined),
         leave: jest.fn(),
         emit: jest.fn(),
-    } as any;
+    } as unknown as jest.Mocked<Parameters<ChatGateway['handleSendMessage']>[0]>;
 }
 
 function makeGateway(
@@ -53,6 +54,7 @@ function makeGateway(
         brokerPublished?: boolean;
         consumerReady?: boolean;
         findParticipant?: jest.Mock;
+        runWithLease?: jest.Mock;
     } = {},
 ) {
     const {
@@ -65,7 +67,7 @@ function makeGateway(
 
     const roomManager = {
         findRoomById: jest.fn().mockResolvedValue(roomResult),
-    } as any;
+    };
     const sendMessageUseCase = {
         execute: jest.fn().mockResolvedValue({ ...message, brokerPublished }),
     };
@@ -82,10 +84,13 @@ function makeGateway(
     const kafkaConsumerStatus = new KafkaConsumerStatus();
     if (consumerReady) kafkaConsumerStatus.markReady();
 
+    const writeFence = {
+        runWithLease: options.runWithLease ?? jest.fn((_actor: unknown, run: () => Promise<unknown>) => run()),
+    };
     const gateway = new ChatGateway(
         sendMessageUseCase as any,
         { execute: jest.fn() } as any,
-        roomManager,
+        roomManager as unknown as ConstructorParameters<typeof ChatGateway>[2],
         { findParticipant } as any,
         new ChatPolicyService(),
         mapper as any,
@@ -93,13 +98,24 @@ function makeGateway(
         { get: jest.fn().mockReturnValue('secret') } as any,
         kafkaConsumerStatus,
         { logSuccess: jest.fn() } as any,
+        writeFence as unknown as AccountWriteFenceService,
     );
 
     const emit = jest.fn();
     const to = jest.fn().mockReturnValue({ emit });
     gateway.server = { to } as any;
 
-    return { gateway, roomManager, sendMessageUseCase, mapper, findParticipant, kafkaConsumerStatus, to, emit };
+    return {
+        gateway,
+        roomManager,
+        sendMessageUseCase,
+        mapper,
+        findParticipant,
+        kafkaConsumerStatus,
+        writeFence,
+        to,
+        emit,
+    };
 }
 
 /**
@@ -125,6 +141,92 @@ async function simulateConnect(gateway: ChatGateway, client: any): Promise<Error
 }
 
 describe('ChatGateway', () => {
+    it('rejects a send before the message use case when deletion has locked the account', async () => {
+        const { gateway, sendMessageUseCase, writeFence } = makeGateway({
+            runWithLease: jest.fn().mockRejectedValue(new Error('account write blocked')),
+        });
+        const client = makeClient();
+        await simulateConnect(gateway, client);
+        await gateway.handleSendMessage(client, {
+            roomId: 'room-1',
+            content: 'no write',
+            messageType: MessageType.TEXT,
+        });
+        expect(writeFence.runWithLease).toHaveBeenCalledWith(
+            { accountId: 'user-1', role: SenderRole.ADOPTER, operation: 'websocket:send_message' },
+            expect.any(Function),
+        );
+        expect(sendMessageUseCase.execute).not.toHaveBeenCalled();
+        expect(client.emit).toHaveBeenCalledWith('error', { message: 'account write blocked' });
+    });
+
+    it('does not finish the websocket lease until message persistence and broadcast have finished', async () => {
+        let finish!: (value: unknown) => void;
+        const released = jest.fn();
+        const runWithLease = jest.fn(async (_actor: unknown, run: () => Promise<unknown>) => {
+            try {
+                return await run();
+            } finally {
+                released();
+            }
+        });
+        const { gateway, sendMessageUseCase, emit } = makeGateway({ runWithLease, brokerPublished: false });
+        sendMessageUseCase.execute.mockImplementationOnce(
+            () =>
+                new Promise((resolve) => {
+                    finish = resolve;
+                }),
+        );
+        const client = makeClient();
+        await simulateConnect(gateway, client);
+        const pending = gateway.handleSendMessage(client, {
+            roomId: 'room-1',
+            content: 'persist',
+            messageType: MessageType.TEXT,
+        });
+        expect(released).not.toHaveBeenCalled();
+        finish({ ...message, brokerPublished: false });
+        await pending;
+        expect(emit).toHaveBeenCalledWith('new_message', expect.any(Object));
+        expect(released).toHaveBeenCalledTimes(1);
+        expect(emit.mock.invocationCallOrder[0]).toBeLessThan(released.mock.invocationCallOrder[0]);
+    });
+
+    it('also fences websocket read-state mutations after account deletion', async () => {
+        const { gateway, writeFence, emit } = makeGateway({
+            runWithLease: jest.fn().mockRejectedValue(new Error('account write blocked')),
+        });
+        const client = makeClient();
+        await simulateConnect(gateway, client);
+        await gateway.handleReadMessages(client, { roomId: 'room-1' });
+        expect(writeFence.runWithLease).toHaveBeenCalledWith(
+            { accountId: 'user-1', role: SenderRole.ADOPTER, operation: 'websocket:read_messages' },
+            expect.any(Function),
+        );
+        expect(emit).not.toHaveBeenCalled();
+    });
+
+    it.each([UserStatus.DELETED, UserStatus.SUSPENDED, null])(
+        'rechecks an existing socket before joining when the account becomes %s',
+        async (status) => {
+            const { gateway, findParticipant, roomManager } = makeGateway();
+            const client = makeClient();
+            await simulateConnect(gateway, client);
+            findParticipant.mockResolvedValueOnce(
+                status === null
+                    ? null
+                    : {
+                          userId: 'user-1',
+                          role: SenderRole.ADOPTER,
+                          accountStatus: status,
+                      },
+            );
+            await expect(gateway.handleJoinRoom(client, { roomId: 'room-1' })).rejects.toBeInstanceOf(WsException);
+            expect(roomManager.findRoomById).not.toHaveBeenCalled();
+            expect(client.join).not.toHaveBeenCalled();
+        },
+    );
+
     it('connect 직후 즉시 join_room 해도 성공한다', async () => {
         // 연결 성립 전에 인증이 끝나야 하므로, 참여자 조회가 느려도 join_room 이 거절되면 안 된다.
         const findParticipant = jest
@@ -195,7 +297,9 @@ describe('ChatGateway', () => {
     it('토큰이 없으면 연결 자체를 거절한다', async () => {
         const { gateway } = makeGateway();
         const client = makeClient();
-        client.handshake = { auth: {}, query: {}, headers: {} };
+        client.handshake.auth = {};
+        client.handshake.query = {};
+        client.handshake.headers = {};
 
         const rejection = await simulateConnect(gateway, client);
 

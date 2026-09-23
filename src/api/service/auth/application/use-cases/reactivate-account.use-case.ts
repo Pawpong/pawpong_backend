@@ -34,7 +34,10 @@ export class ReactivateAccountUseCase {
 
         const account = await this.authAccountReactivationPort.findById(payload.sub, payload.role);
         this.authAccountReactivationPolicyService.assertAccount(account);
-        this.authAccountReactivationPolicyService.assertReactivatable(account.accountStatus);
+        this.authAccountReactivationPolicyService.assertReactivatable(
+            account.accountStatus,
+            account.permanentDeletionRequestedAt,
+        );
 
         await this.authAccountReactivationPort.reactivate(account.userId, account.role);
 

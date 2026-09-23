@@ -35,7 +35,7 @@ export class LikeCommunityPostUseCase {
         const { alreadyLiked } = await this.likePort.like(postId, userId, userModel);
 
         if (!alreadyLiked) {
-            this.sendLikeNotification(postId, userId, userModel).catch((err: Error) => {
+            await this.sendLikeNotification(postId, userId, userModel).catch((err: Error) => {
                 this.logger.error(`[execute] 좋아요 알림 발송 실패: ${err.message}`, { postId, userId });
             });
         }

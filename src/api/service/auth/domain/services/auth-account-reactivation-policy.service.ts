@@ -20,7 +20,9 @@ export class AuthAccountReactivationPolicyService {
      * 복구 대상이 실제로 탈퇴 상태인지 확인한다.
      * 정지 계정은 사용자가 스스로 풀 수 없고, 활성 계정은 복구할 것이 없다.
      */
-    assertReactivatable(accountStatus: string): void {
+    assertReactivatable(accountStatus: string, permanentDeletionRequestedAt?: Date): void {
+        if (permanentDeletionRequestedAt)
+            throw new DomainAuthenticationError('영구 삭제가 접수된 계정은 복구할 수 없습니다.');
         if (accountStatus === SUSPENDED_STATUS) {
             throw new DomainAuthenticationError('정지된 계정입니다. 자세한 내용은 이메일을 확인해주세요.');
         }
