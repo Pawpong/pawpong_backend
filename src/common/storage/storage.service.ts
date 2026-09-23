@@ -478,11 +478,13 @@ export class StorageService {
     /**
      * 버킷 내 파일 목록 조회 (Admin용)
      */
-    async listObjects(prefix?: string, maxKeys: number = 1000) {
+    async listObjects(prefix?: string, maxKeys: number = 1000, continuationToken?: string) {
         if (this.isTestMode) {
-            const keys = [...this.inMemoryObjects.entries()]
-                .filter(([fileName]) => !prefix || fileName.startsWith(prefix))
-                .slice(0, maxKeys);
+            const matching = [...this.inMemoryObjects.entries()].filter(
+                ([fileName]) => !prefix || fileName.startsWith(prefix),
+            );
+            const offset = Number(continuationToken ?? 0);
+            const keys = matching.slice(offset, offset + maxKeys);
 
             return {
                 Contents: keys.map(([fileName, object]) => ({
@@ -491,7 +493,8 @@ export class StorageService {
                     LastModified: object.lastModified,
                     ETag: `"${fileName}"`,
                 })),
-                IsTruncated: this.inMemoryObjects.size > maxKeys,
+                IsTruncated: matching.length > offset + maxKeys,
+                NextContinuationToken: matching.length > offset + maxKeys ? String(offset + maxKeys) : undefined,
                 KeyCount: keys.length,
                 $metadata: {},
             };
@@ -501,6 +504,7 @@ export class StorageService {
             Bucket: this.bucketName,
             Prefix: prefix || '',
             MaxKeys: maxKeys,
+            ContinuationToken: continuationToken,
         });
 
         return await this.s3.send(command);

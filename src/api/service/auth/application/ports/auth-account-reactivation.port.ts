@@ -7,6 +7,7 @@ export type AuthReactivationAccount = {
     readonly role: AuthSessionRole;
     readonly accountStatus: string;
     readonly profileImage?: string;
+    readonly permanentDeletionRequestedAt?: Date;
 };
 
 export const AUTH_ACCOUNT_REACTIVATION_PORT = Symbol('AUTH_ACCOUNT_REACTIVATION_PORT');

@@ -85,7 +85,7 @@ export class FeedCommentMongooseManagerAdapter implements FeedCommentManagerPort
         return {
             id: comment._id.toString(),
             videoId: comment.videoId.toString(),
-            userId: populatedAuthor ? populatedAuthor._id.toString() : comment.userId.toString(),
+            userId: populatedAuthor ? populatedAuthor._id.toString() : (comment.userId?.toString() ?? ''),
             content: comment.content,
             parentId: comment.parentId ? comment.parentId.toString() : undefined,
             likeCount: comment.likeCount || 0,

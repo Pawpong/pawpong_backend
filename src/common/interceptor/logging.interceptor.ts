@@ -24,13 +24,18 @@ export class LoggingInterceptor implements NestInterceptor {
         const path = url.split('?')[0];
         const isNativeAuth = /\/v2\/auth\/native\//.test(path);
         const isGoogleCallback = /\/auth\/google\/callback\/?$/.test(path);
+        const isReviewLogin = /\/auth\/review-login\/?$/.test(path);
+        const isAppleCallback = /\/auth\/apple(?:\/callback|\/native)?\/?$/.test(path);
         const cookies = request.cookies as Record<string, unknown> | undefined;
         const body: unknown = request.body;
 
         // 요청 헤더 로깅
         this.logger.log(``, 'HTTP');
         // 인증 코드/state가 붙은 callback URL과 네이티브 교환 요청은 재현 가능한 비밀값이다.
-        this.logger.log(`▶ ${method} ${isNativeAuth || isGoogleCallback ? path : url}`, 'HTTP');
+        this.logger.log(
+            `▶ ${method} ${isNativeAuth || isGoogleCallback || isReviewLogin || isAppleCallback ? path : url}`,
+            'HTTP',
+        );
         this.logger.log(`  ├─ IP: ${ip}`, 'HTTP');
 
         // Bearer 토큰은 존재 여부만 남긴다. JWT 원문은 로그 수집기와 터미널 기록에
@@ -57,11 +62,16 @@ export class LoggingInterceptor implements NestInterceptor {
             if (
                 /\/v2\/home\/support\/(inquiry|feedback)\/?$/.test(url.split('?')[0]) ||
                 /\/home-admin\/support\//.test(url) ||
-                isNativeAuth
+                isNativeAuth ||
+                isReviewLogin ||
+                isAppleCallback
             ) {
                 for (const key of Object.keys(safeBody)) safeBody[key] = '[REDACTED]';
             }
             if (safeBody.password) safeBody.password = '***';
+            for (const key of ['code', 'id_token', 'refresh_token', 'receiptToken']) {
+                if (key in safeBody) safeBody[key] = '[REDACTED]';
+            }
             if (typeof safeBody.refreshToken === 'string')
                 safeBody.refreshToken = safeBody.refreshToken.substring(0, 12) + '...';
             // FCM 푸시 디바이스 토큰은 영구 재사용되므로 앞자리만 남기고 마스킹

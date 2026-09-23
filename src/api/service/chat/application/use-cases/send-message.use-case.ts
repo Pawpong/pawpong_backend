@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { AccountWriteFenceService } from '../../../../../common/account-write-fence/account-write-fence.service';
 
 import { CHAT_ROOM_MANAGER, type ChatRoomManagerPort } from '../ports/chat-room-manager.port';
 import {
@@ -32,6 +33,7 @@ export class SendMessageUseCase {
         private readonly chatPolicyService: ChatPolicyService,
         private readonly chatMessageMapperService: ChatMessageMapperService,
         private readonly logger: CustomLoggerService,
+        private readonly writeFence: AccountWriteFenceService,
     ) {}
 
     async execute(
@@ -61,22 +63,28 @@ export class SendMessageUseCase {
             this.chatPolicyService.requireNotBlocked(isBlocked);
             const messageType = command.messageType ?? MessageType.TEXT;
 
-            const message = await this.chatMessageManager.createMessage({
-                roomId: command.roomId,
-                senderId,
-                senderRole,
-                receiverId: receiver.userId,
-                content: command.content,
-                messageType,
-            });
+            // 수신자 삭제도 다른 사용자의 진행 중 전송을 기다리도록 양쪽 계정에 lease를 둔다.
+            return await this.writeFence.runWithLease(
+                { accountId: receiver.userId, role: receiver.role, operation: 'chat:receive_message' },
+                async () => {
+                    const message = await this.chatMessageManager.createMessage({
+                        roomId: command.roomId,
+                        senderId,
+                        senderRole,
+                        receiverId: receiver.userId,
+                        content: command.content,
+                        messageType,
+                    });
 
-            await this.chatRoomManager.updateRoomLastMessage(command.roomId, command.content);
-            const brokerPublished = await this.chatMessageBroker.publishMessage(
-                this.chatMessageMapperService.toBroadcastPayload(message),
+                    await this.chatRoomManager.updateRoomLastMessage(command.roomId, command.content);
+                    const brokerPublished = await this.chatMessageBroker.publishMessage(
+                        this.chatMessageMapperService.toBroadcastPayload(message),
+                    );
+
+                    this.logger.logSuccess('sendMessage', '채팅 메시지 전송 완료', { messageId: message.id });
+                    return { ...message, brokerPublished };
+                },
             );
-
-            this.logger.logSuccess('sendMessage', '채팅 메시지 전송 완료', { messageId: message.id });
-            return { ...message, brokerPublished };
         } catch (error) {
             this.logger.logError('sendMessage', '채팅 메시지 전송', error);
             throw error;

@@ -1,3 +1,5 @@
+import { AccountWriteFenceService } from '../../../../../../common/account-write-fence/account-write-fence.service';
+import { UnauthorizedException } from '@nestjs/common';
 import { SendMessageUseCase } from '../../../application/use-cases/send-message.use-case';
 import { ChatPolicyService } from '../../../domain/services/chat-policy.service';
 import { ChatMessageMapperService } from '../../../domain/services/chat-message-mapper.service';
@@ -86,12 +88,14 @@ function makeBroker(): {
 
 function makeParticipantReader(statusById: Record<string, UserStatus> = {}): ChatParticipantReaderPort {
     return {
-        findParticipant: jest.fn(async (userId: string, role?: SenderRole) => ({
-            userId,
-            role: role!,
-            nickname: userId,
-            accountStatus: statusById[userId] ?? UserStatus.ACTIVE,
-        })),
+        findParticipant: jest.fn((userId: string, role?: SenderRole) =>
+            Promise.resolve({
+                userId,
+                role: role!,
+                nickname: userId,
+                accountStatus: statusById[userId] ?? UserStatus.ACTIVE,
+            }),
+        ),
     };
 }
 
@@ -121,6 +125,7 @@ describe('SendMessageUseCase', () => {
         participantReader: ChatParticipantReaderPort = makeParticipantReader(),
         broker: ChatMessageBrokerPort = makeBroker().broker,
         blockManager: ChatUserBlockManagerPort = makeBlockManager(),
+        writeFence = { runWithLease: jest.fn((_actor: unknown, run: () => Promise<unknown>) => run()) },
     ) {
         return new SendMessageUseCase(
             roomManager,
@@ -131,8 +136,58 @@ describe('SendMessageUseCase', () => {
             policy,
             mapper,
             makeLogger(),
+            writeFence as unknown as AccountWriteFenceService,
         );
     }
+
+    it('rechecks the recipient through a lease before persistence even if the earlier profile was active', async () => {
+        const { manager, createMessage } = makeMessageManager();
+        const fence = { runWithLease: jest.fn().mockRejectedValue(new UnauthorizedException()) };
+        await expect(
+            makeUseCase(
+                makeRoomManager(),
+                manager,
+                makeParticipantReader(),
+                makeBroker().broker,
+                makeBlockManager(),
+                fence,
+            ).execute('adopter-1', SenderRole.ADOPTER, { roomId: 'room-1', content: 'late send' }),
+        ).rejects.toBeInstanceOf(UnauthorizedException);
+        expect(fence.runWithLease).toHaveBeenCalledWith(
+            { accountId: 'breeder-1', role: SenderRole.BREEDER, operation: 'chat:receive_message' },
+            expect.any(Function),
+        );
+        expect(createMessage).not.toHaveBeenCalled();
+    });
+
+    it('keeps the recipient lease through persistence and broker publication', async () => {
+        const events: string[] = [];
+        const { manager } = makeMessageManager();
+        const { broker, publishMessage } = makeBroker();
+        publishMessage.mockImplementation(() => {
+            events.push('publish');
+            return Promise.resolve(true);
+        });
+        const fence = {
+            runWithLease: jest.fn(async (_actor: unknown, run: () => Promise<unknown>) => {
+                events.push('acquire');
+                try {
+                    return await run();
+                } finally {
+                    events.push('release');
+                }
+            }),
+        };
+        await makeUseCase(
+            makeRoomManager(),
+            manager,
+            makeParticipantReader(),
+            broker,
+            makeBlockManager(),
+            fence,
+        ).execute('adopter-1', SenderRole.ADOPTER, { roomId: 'room-1', content: 'send' });
+        expect(events).toEqual(['acquire', 'publish', 'release']);
+    });
 
     it('상대 ID를 participantIds에서 계산해 메시지를 저장하고 발행한다', async () => {
         const { manager: messageManager, createMessage } = makeMessageManager();
