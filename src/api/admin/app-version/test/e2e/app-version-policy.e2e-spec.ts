@@ -17,7 +17,7 @@ describe('관리자 앱 버전 정책 E2E', () => {
         minRequiredVersion: '2.2.0',
         forceUpdateMessage: '필수 업데이트',
         recommendUpdateMessage: '선택 업데이트',
-        iosStoreUrl: 'https://apps.apple.com/app/pawpong/id123456789',
+        iosStoreUrl: 'https://apps.apple.com/app/pawpong/id6814126823',
         androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
     };
     const auth = () => ({ Authorization: `Bearer ${adminToken}` });
@@ -102,13 +102,22 @@ describe('관리자 앱 버전 정책 E2E', () => {
             { iosStoreUrl: 'javascript:alert(1)' },
             { androidStoreUrl: 'https://evil.example' },
             { iosStoreUrl: 'https://apps.apple.com.evil.example/app' },
+            { iosStoreUrl: 'https://apps.apple.com/app/id123456789' },
+            { iosStoreUrl: 'https://apps.apple.com/' },
+            { androidStoreUrl: 'https://play.google.com/store/apps/details?id=com.other.app' },
+            { androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app&id=com.other.app' },
         ])
             await update(body).expect(400);
     });
 
     it('기존 DB의 빈 주소나 외부 URL로 사용자를 강제 업데이트에 가두지 않는다', async () => {
         const db = app.get<Connection>(getConnectionToken());
-        for (const androidStoreUrl of ['', 'javascript:alert(1)', 'https://evil.example']) {
+        for (const androidStoreUrl of [
+            '',
+            'javascript:alert(1)',
+            'https://evil.example',
+            'https://play.google.com/store/apps/details?id=com.other.app',
+        ]) {
             await db
                 .collection('app_versions')
                 .updateOne({ _id: new Types.ObjectId(id) }, { $set: { androidStoreUrl } });
@@ -122,6 +131,30 @@ describe('관리자 앱 버전 정책 E2E', () => {
         await db
             .collection('app_versions')
             .updateOne({ _id: new Types.ObjectId(id) }, { $set: { androidStoreUrl: payload.androidStoreUrl } });
+    });
+
+    it('DTO를 거치는 긴급 OFF는 불량 저장 정책을 그대로 두고 비활성화하며 재활성은 검증한다', async () => {
+        const db = app.get<Connection>(getConnectionToken());
+        await db.collection('app_versions').updateOne(
+            { _id: new Types.ObjectId(id) },
+            {
+                $set: { androidStoreUrl: 'https://play.google.com/', minRequiredVersion: '99.0.0' },
+            },
+        );
+        const disabled = await update({ isActive: false }).expect(200);
+        expect((disabled.body as { data: unknown }).data).toMatchObject({
+            isActive: false,
+            minRequiredVersion: '99.0.0',
+            androidStoreUrl: 'https://play.google.com/',
+        });
+        const checked = await check('0.0.0').expect(200);
+        expect((checked.body as { data: { needsForceUpdate: boolean } }).data.needsForceUpdate).toBe(false);
+        await update({ isActive: true }).expect(400);
+        await update({
+            isActive: true,
+            androidStoreUrl: payload.androidStoreUrl,
+            minRequiredVersion: payload.minRequiredVersion,
+        }).expect(200);
     });
 
     it('정상 부분 수정·비활성화·삭제가 공개 정책에 반영된다', async () => {

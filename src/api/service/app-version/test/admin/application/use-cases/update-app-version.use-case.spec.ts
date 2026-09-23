@@ -18,8 +18,8 @@ describe('앱 버전 수정 유스케이스', () => {
             findById: jest.fn().mockResolvedValue({
                 latestVersion: '2.0.0',
                 minRequiredVersion: '1.0.0',
-                iosStoreUrl: 'https://apps.apple.com/app',
-                androidStoreUrl: 'https://play.google.com/store/apps',
+                iosStoreUrl: 'https://apps.apple.com/app/id6814126823',
+                androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
             }),
             create: jest.fn(),
             update: jest.fn().mockResolvedValue({
@@ -60,8 +60,8 @@ describe('앱 버전 수정 유스케이스', () => {
                 findById: jest.fn().mockResolvedValue({
                     latestVersion: '2.0.0',
                     minRequiredVersion: '1.0.0',
-                    iosStoreUrl: 'https://apps.apple.com/app',
-                    androidStoreUrl: 'https://play.google.com/store/apps',
+                    iosStoreUrl: 'https://apps.apple.com/app/id6814126823',
+                    androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
                 }),
                 create: jest.fn(),
                 update: jest.fn().mockResolvedValue(null),
@@ -81,8 +81,8 @@ describe('앱 버전 수정 유스케이스', () => {
                 findById: jest.fn().mockResolvedValue({
                     latestVersion: '2.0.0',
                     minRequiredVersion: '1.0.0',
-                    iosStoreUrl: 'https://apps.apple.com/app',
-                    androidStoreUrl: 'https://play.google.com/store/apps',
+                    iosStoreUrl: 'https://apps.apple.com/app/id6814126823',
+                    androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
                 }),
                 create: jest.fn(),
                 update: jest.fn(),

@@ -36,7 +36,7 @@ describe('앱 버전 확인 유스케이스', () => {
                 minRequiredVersion: '1.2.0',
                 forceUpdateMessage: '강제 업데이트',
                 recommendUpdateMessage: '권장 업데이트',
-                iosStoreUrl: 'https://apps.apple.com/app/pawpong/id1',
+                iosStoreUrl: 'https://apps.apple.com/app/pawpong/id6814126823',
                 androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
             }),
         };
@@ -47,7 +47,7 @@ describe('앱 버전 확인 유스케이스', () => {
             needsRecommendUpdate: false,
             latestVersion: '1.3.0',
             message: '강제 업데이트',
-            storeUrl: 'https://apps.apple.com/app/pawpong/id1',
+            storeUrl: 'https://apps.apple.com/app/pawpong/id6814126823',
         });
     });
 

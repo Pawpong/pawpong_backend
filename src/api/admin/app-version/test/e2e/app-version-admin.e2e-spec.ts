@@ -37,7 +37,7 @@ describe('앱 버전 관리자 종단간 테스트', () => {
             minRequiredVersion: '1.0.0',
             forceUpdateMessage: '업데이트',
             recommendUpdateMessage: '업데이트',
-            iosStoreUrl: 'https://apps.apple.com/app/pawpong/id123456789',
+            iosStoreUrl: 'https://apps.apple.com/app/pawpong/id6814126823',
             androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
             isActive: true,
             appIconKey: 'pixel',

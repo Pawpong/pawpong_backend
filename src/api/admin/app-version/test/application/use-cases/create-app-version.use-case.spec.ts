@@ -12,8 +12,8 @@ const created: AppVersionAdminSnapshot = {
     minRequiredVersion: '0.9.0',
     forceUpdateMessage: '업데이트 필요',
     recommendUpdateMessage: '업데이트 권장',
-    iosStoreUrl: 'https://apps.apple.com/app',
-    androidStoreUrl: 'https://play.google.com/store/apps',
+    iosStoreUrl: 'https://apps.apple.com/app/id6814126823',
+    androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
     isActive: true,
     createdAt: new Date('2026-01-01T00:00:00.000Z'),
     updatedAt: new Date('2026-01-01T00:00:00.000Z'),
@@ -52,8 +52,8 @@ describe('앱 버전 생성 유스케이스', () => {
             minRequiredVersion: '0.9.0',
             forceUpdateMessage: '업데이트 필요',
             recommendUpdateMessage: '업데이트 권장',
-            iosStoreUrl: 'https://apps.apple.com/app',
-            androidStoreUrl: 'https://play.google.com/store/apps',
+            iosStoreUrl: 'https://apps.apple.com/app/id6814126823',
+            androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
             isActive: true,
         });
 

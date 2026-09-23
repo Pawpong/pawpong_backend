@@ -24,7 +24,7 @@ describe('AppVersionPolicyService', () => {
             latestVersion: '2.0.0',
             forceUpdateMessage: '강제 업데이트',
             recommendUpdateMessage: '권장 업데이트',
-            iosStoreUrl: 'https://apps.apple.com/app/pawpong/id123456789',
+            iosStoreUrl: 'https://apps.apple.com/app/pawpong/id6814126823',
             androidStoreUrl: 'https://play.google.com/store/apps/details?id=kr.pawpong.app',
         };
 
@@ -39,7 +39,7 @@ describe('AppVersionPolicyService', () => {
             const result = policy.buildCheckResponse('ios', '0.9.0', versionInfo as any);
             expect(result.needsForceUpdate).toBe(true);
             expect(result.message).toBe('강제 업데이트');
-            expect(result.storeUrl).toBe('https://apps.apple.com/app/pawpong/id123456789');
+            expect(result.storeUrl).toBe('https://apps.apple.com/app/pawpong/id6814126823');
         });
 
         it('현재 버전이 latestVersion보다 낮지만 minRequired 이상이면 권장 업데이트', () => {

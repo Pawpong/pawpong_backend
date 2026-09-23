@@ -28,6 +28,16 @@ export class UpdateAppVersionUseCase {
         this.appVersionAdminCommandPolicyService.ensureAppVersionId(appVersionId);
         this.appVersionAdminCommandPolicyService.ensureAdminId(adminId);
 
+        // 잘못 저장된 정책도 즉시 내릴 수 있어야 한다. 긴급 중단은 다른 필드를 덮어쓰지 않는다.
+        if (
+            updateData.isActive === false &&
+            Object.entries(updateData).every(([key, value]) => key === 'isActive' || value === undefined)
+        ) {
+            const disabled = await this.appVersionWriter.update(appVersionId, { isActive: false });
+            if (!disabled) throw new DomainNotFoundError('앱 버전 정보를 찾을 수 없습니다.');
+            return this.appVersionAdminItemMapperService.toResult(disabled);
+        }
+
         // 부분 업데이트라도 들어온 필드는 형식 검증.
         if (updateData.latestVersion !== undefined) {
             this.appVersionAdminCommandPolicyService.ensureSemverFormat(updateData.latestVersion, '최신 버전');
