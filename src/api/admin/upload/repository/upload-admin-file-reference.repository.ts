@@ -12,6 +12,7 @@ import { ParentPet, ParentPetDocument } from '../../../../schema/parent-pet.sche
 import { AiImageFilter, AiImageFilterDocument } from '../../../../schema/ai-image-filter.schema';
 import { AiImageJob, AiImageJobDocument } from '../../../../schema/ai-image-job.schema';
 import { ContestEntry, ContestEntryDocument } from '../../../../schema/contest-entry.schema';
+import { AppSplash, AppSplashDocument } from '../../../../schema/app-splash.schema';
 import type {
     UploadAdminReferencedAdopterDocumentRecord,
     UploadAdminReferencedAvailablePetDocumentRecord,
@@ -34,7 +35,18 @@ export class UploadAdminFileReferenceRepository {
         @InjectModel(AiImageFilter.name) private readonly aiImageFilterModel: Model<AiImageFilterDocument>,
         @InjectModel(AiImageJob.name) private readonly aiImageJobModel: Model<AiImageJobDocument>,
         @InjectModel(ContestEntry.name) private readonly contestEntryModel: Model<ContestEntryDocument>,
+        @InjectModel(AppSplash.name) private readonly appSplashModel: Model<AppSplashDocument>,
     ) {}
+
+    /** 비활성 설정도 재사용할 수 있으므로 스플래시 이미지는 참조 중으로 보존한다. */
+    countAppSplashImages(fileKey: string): Promise<number> {
+        return this.appSplashModel.countDocuments({ imageFileName: fileKey });
+    }
+
+    /** 파일 보관함의 고아 파일 정리에서 앱 시작 이미지를 보호한다. */
+    async readAppSplashImages(): Promise<string[]> {
+        return this.appSplashModel.distinct('imageFileName', { imageFileName: { $nin: ['', null] } }).exec();
+    }
 
     countBreederProfileImages(fileKey: string): Promise<number> {
         return this.breederModel.countDocuments({ profileImageFileName: fileKey });

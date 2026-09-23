@@ -11,6 +11,7 @@ import { CounselBanner, CounselBannerSchema } from '../../../schema/counsel-bann
 import { AiImageFilter, AiImageFilterSchema } from '../../../schema/ai-image-filter.schema';
 import { AiImageJob, AiImageJobSchema } from '../../../schema/ai-image-job.schema';
 import { ContestEntry, ContestEntrySchema } from '../../../schema/contest-entry.schema';
+import { AppSplash, AppSplashSchema } from '../../../schema/app-splash.schema';
 
 import { UploadAdminFilesListController } from './controller/upload-admin-files-list.controller';
 import { UploadAdminFolderFilesController } from './controller/upload-admin-folder-files.controller';
@@ -52,6 +53,7 @@ const UPLOAD_ADMIN_SCHEMA_IMPORTS = MongooseModule.forFeature([
     { name: AiImageFilter.name, schema: AiImageFilterSchema },
     { name: AiImageJob.name, schema: AiImageJobSchema },
     { name: ContestEntry.name, schema: ContestEntrySchema },
+    { name: AppSplash.name, schema: AppSplashSchema },
 ]);
 
 export const UPLOAD_ADMIN_MODULE_IMPORTS = [UPLOAD_ADMIN_SCHEMA_IMPORTS, StorageModule];

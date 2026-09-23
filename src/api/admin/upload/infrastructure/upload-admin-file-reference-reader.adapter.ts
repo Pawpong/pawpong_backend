@@ -14,6 +14,13 @@ export class UploadAdminFileReferenceReaderAdapter implements UploadAdminReferen
 
         await this.pushReferenceIfExists(
             references,
+            await this.uploadAdminFileReferenceRepository.countAppSplashImages(fileKey),
+            'app_splashes',
+            'imageFileName',
+        );
+
+        await this.pushReferenceIfExists(
+            references,
             await this.uploadAdminFileReferenceRepository.countBreederProfileImages(fileKey),
             'breeders',
             'profileImageFileName',
@@ -98,6 +105,7 @@ export class UploadAdminFileReferenceReaderAdapter implements UploadAdminReferen
         const referencedFiles = new Set<string>();
 
         const fileGroups = await Promise.all([
+            this.uploadAdminFileReferenceRepository.readAppSplashImages(),
             this.uploadAdminFileReferenceRepository.readBreederReferencedFiles(),
             this.uploadAdminFileReferenceRepository.readAvailablePetPhotoFiles(),
             this.uploadAdminFileReferenceRepository.readParentPetPhotoFiles(),
