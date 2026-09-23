@@ -58,15 +58,16 @@ export class ChatMongooseManagerAdapter implements ChatRoomManagerPort, ChatMess
     }
 
     async createMessage(data: {
+        clientMessageId?: string;
         roomId: string;
         senderId: string;
         senderRole: SenderRole;
         receiverId: string;
         content: string;
         messageType: MessageType;
-    }): Promise<ChatMessageSnapshot> {
-        const message = await this.chatRepository.createMessage(data);
-        return this.chatMessageMapperService.toSnapshot(message as any);
+    }): Promise<ChatMessageSnapshot & { isDuplicate?: boolean }> {
+        const { message, isDuplicate } = await this.chatRepository.createMessage(data);
+        return { ...this.chatMessageMapperService.toSnapshot(message as any), isDuplicate };
     }
 
     async findMessagesByRoomId(roomId: string, limit: number, before?: Date): Promise<ChatMessageSnapshot[]> {

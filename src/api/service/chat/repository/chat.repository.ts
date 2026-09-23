@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleInit } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -8,11 +8,16 @@ import { buildChatParticipantKey } from '../domain/chat-participant-key';
 import type { ChatRoomParticipantSnapshot } from '../application/ports/chat-room-manager.port';
 
 @Injectable()
-export class ChatRepository {
+export class ChatRepository implements OnModuleInit {
     constructor(
         @InjectModel(ChatRoom.name) private readonly chatRoomModel: Model<ChatRoomDocument>,
         @InjectModel(ChatMessage.name) private readonly chatMessageModel: Model<ChatMessageDocument>,
     ) {}
+
+    /** unique index 준비 전에 재전송 요청을 받지 않도록 앱 부팅을 기다린다. */
+    async onModuleInit(): Promise<void> {
+        await this.chatMessageModel.init();
+    }
 
     // ─── Room ────────────────────────────────────────────────────────────────
 
@@ -165,15 +170,30 @@ export class ChatRepository {
     // ─── Message ─────────────────────────────────────────────────────────────
 
     async createMessage(data: {
+        clientMessageId?: string;
         roomId: string;
         senderId: string;
         senderRole: string;
         receiverId: string;
         content: string;
         messageType: MessageType;
-    }): Promise<ChatMessageDocument> {
+    }): Promise<{ message: ChatMessageDocument; isDuplicate: boolean }> {
         const message = new this.chatMessageModel(data);
-        return message.save();
+        try {
+            return { message: await message.save(), isDuplicate: false };
+        } catch (error) {
+            // 사전 조회 대신 unique index로 동시 재시도도 하나의 메시지로 수렴시킨다.
+            if (!data.clientMessageId || (error as { code?: number })?.code !== 11000) throw error;
+            const existing = await this.chatMessageModel
+                .findOne({
+                    roomId: data.roomId,
+                    senderId: data.senderId,
+                    clientMessageId: data.clientMessageId,
+                })
+                .exec();
+            if (!existing) throw error;
+            return { message: existing, isDuplicate: true };
+        }
     }
 
     async findMessagesByRoomId(roomId: string, limit: number = 50, before?: Date): Promise<ChatMessageDocument[]> {

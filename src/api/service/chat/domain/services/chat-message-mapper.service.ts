@@ -5,6 +5,7 @@ import { MessageType, SenderRole } from '../../../../../schema/chat-message.sche
 
 type ChatMessageSource = {
     _id: { toString(): string };
+    clientMessageId?: string;
     roomId: string;
     senderId: string;
     senderRole: SenderRole;
@@ -21,6 +22,7 @@ export class ChatMessageMapperService {
     toSnapshot(message: ChatMessageSource): ChatMessageSnapshot {
         return {
             id: message._id.toString(),
+            ...(message.clientMessageId ? { clientMessageId: message.clientMessageId } : {}),
             roomId: message.roomId,
             senderId: message.senderId,
             senderRole: message.senderRole,
@@ -40,6 +42,7 @@ export class ChatMessageMapperService {
     toBroadcastPayload(message: ChatMessageSnapshot) {
         return {
             messageId: message.id,
+            ...(message.clientMessageId ? { clientMessageId: message.clientMessageId } : {}),
             roomId: message.roomId,
             senderId: message.senderId,
             senderRole: message.senderRole,

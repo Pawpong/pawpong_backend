@@ -8,6 +8,7 @@ export interface CreateRoomCommand {
 }
 
 export interface SendMessageCommand {
+    clientMessageId?: string;
     roomId: string;
     content: string;
     messageType?: MessageType;

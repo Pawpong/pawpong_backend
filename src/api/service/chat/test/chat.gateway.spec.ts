@@ -81,6 +81,7 @@ function makeGateway(
         });
     const kafkaConsumerStatus = new KafkaConsumerStatus();
     if (consumerReady) kafkaConsumerStatus.markReady();
+    const verify = jest.fn().mockReturnValue(payload);
 
     const gateway = new ChatGateway(
         sendMessageUseCase as any,
@@ -89,7 +90,7 @@ function makeGateway(
         { findParticipant } as any,
         new ChatPolicyService(),
         mapper as any,
-        { verify: jest.fn().mockReturnValue(payload) } as any,
+        { verify } as any,
         { get: jest.fn().mockReturnValue('secret') } as any,
         kafkaConsumerStatus,
         { logSuccess: jest.fn() } as any,
@@ -97,9 +98,9 @@ function makeGateway(
 
     const emit = jest.fn();
     const to = jest.fn().mockReturnValue({ emit });
-    gateway.server = { to } as any;
+    gateway.server = { to, sockets: new Map() } as any;
 
-    return { gateway, roomManager, sendMessageUseCase, mapper, findParticipant, kafkaConsumerStatus, to, emit };
+    return { gateway, roomManager, sendMessageUseCase, mapper, findParticipant, kafkaConsumerStatus, to, emit, verify };
 }
 
 /**
@@ -213,6 +214,26 @@ describe('ChatGateway', () => {
         expect(client.data.user).toBeUndefined();
     });
 
+    it('정지 계정도 Socket 연결 단계에서 거부한다', async () => {
+        const { gateway } = makeGateway({ accountStatus: UserStatus.SUSPENDED });
+        expect(await simulateConnect(gateway, makeClient())).toBeInstanceOf(Error);
+    });
+
+    it('연결 뒤 토큰이 만료되면 재인증 후 전송을 거부하고 연결을 닫는다', async () => {
+        const { gateway, sendMessageUseCase, verify } = makeGateway();
+        const client = makeClient() as Parameters<ChatGateway['handleSendMessage']>[0];
+        const disconnect = jest.spyOn(client, 'disconnect');
+        await simulateConnect(gateway, client);
+        verify.mockImplementation(() => {
+            throw new Error('jwt expired');
+        });
+        expect(await gateway.handleSendMessage(client, { roomId: 'room-1', content: '만료된 전송' })).toMatchObject({
+            success: false,
+        });
+        expect(disconnect).toHaveBeenCalledWith(true);
+        expect(sendMessageUseCase.execute).not.toHaveBeenCalled();
+    });
+
     it('Kafka 발행 실패 시 현재 인스턴스에 새 메시지를 직접 전파한다', async () => {
         const { gateway, mapper, to, emit } = makeGateway({ brokerPublished: false });
         const client = makeClient();
@@ -274,7 +295,7 @@ describe('ChatGateway', () => {
         });
 
         // consumer 가 합류한 뒤 같은 offset 을 다시 읽어 broadcast 를 시도하는 상황
-        gateway.broadcastNewMessage({ ...message, messageId: message.id });
+        await gateway.broadcastNewMessage({ ...message, messageId: message.id });
 
         expect(to).toHaveBeenCalledTimes(1);
         expect(emit).toHaveBeenCalledTimes(1);

@@ -2,6 +2,7 @@ import { MessageType, SenderRole } from '../../../../../schema/chat-message.sche
 
 export interface ChatMessageSnapshot {
     id: string;
+    clientMessageId?: string;
     roomId: string;
     senderId: string;
     senderRole: SenderRole;
@@ -17,13 +18,14 @@ export const CHAT_MESSAGE_MANAGER = Symbol('CHAT_MESSAGE_MANAGER');
 
 export interface ChatMessageManagerPort {
     createMessage(data: {
+        clientMessageId?: string;
         roomId: string;
         senderId: string;
         senderRole: SenderRole;
         receiverId: string;
         content: string;
         messageType: MessageType;
-    }): Promise<ChatMessageSnapshot>;
+    }): Promise<ChatMessageSnapshot & { isDuplicate?: boolean }>;
     findMessagesByRoomId(roomId: string, limit: number, before?: Date): Promise<ChatMessageSnapshot[]>;
     markMessagesAsRead(roomId: string, receiverId: string): Promise<void>;
     countUnreadMessages(roomId: string, receiverId: string): Promise<number>;

@@ -5,6 +5,9 @@ export class ChatMessageResponseDto {
     @ApiProperty()
     messageId: string;
 
+    @ApiProperty({ required: false, description: '클라이언트 재전송 식별자' })
+    clientMessageId?: string;
+
     @ApiProperty()
     roomId: string;
 

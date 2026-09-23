@@ -25,8 +25,8 @@ export class ChatKafkaConsumer {
     constructor(private readonly chatGateway: ChatGateway) {}
 
     @EventPattern(KafkaTopic.CHAT_MESSAGE)
-    handleChatMessage(@Payload() payload: any): void {
+    async handleChatMessage(@Payload() payload: any): Promise<void> {
         const message = typeof payload === 'string' ? JSON.parse(payload) : payload;
-        this.chatGateway.broadcastNewMessage(message);
+        await this.chatGateway.broadcastNewMessage(message);
     }
 }

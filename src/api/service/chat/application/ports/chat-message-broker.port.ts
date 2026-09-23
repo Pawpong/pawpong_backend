@@ -2,6 +2,7 @@ import { MessageType, SenderRole } from '../../../../../schema/chat-message.sche
 
 export interface ChatMessageBrokerPayload {
     messageId: string;
+    clientMessageId?: string;
     roomId: string;
     senderId: string;
     senderRole: SenderRole;

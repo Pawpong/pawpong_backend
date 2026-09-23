@@ -55,6 +55,7 @@ export class ChatRoomQueryController {
         const messages = await this.getMessagesUseCase.execute(user.userId, { roomId, limit, before: beforeDate });
         const items = messages.map((message) => ({
             messageId: message.id,
+            ...(message.clientMessageId ? { clientMessageId: message.clientMessageId } : {}),
             roomId: message.roomId,
             senderRole: message.senderRole,
             isMine: message.senderId === user.userId,

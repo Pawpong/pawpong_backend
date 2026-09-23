@@ -12,6 +12,11 @@ import {
 import { Namespace, Socket, type DefaultEventsMap } from 'socket.io';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
+import { OnEvent } from '@nestjs/event-emitter';
+import {
+    ACCOUNT_ACCESS_REVOKED,
+    type AccountAccessRevokedEvent,
+} from '../../../common/account-access/account-access-revoked.event';
 
 import { SendMessageUseCase } from './application/use-cases/send-message.use-case';
 import { GetMessagesUseCase } from './application/use-cases/get-messages.use-case';
@@ -141,7 +146,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
 
         const role = payload.role === 'adopter' ? SenderRole.ADOPTER : SenderRole.BREEDER;
         const participant = await this.participantReader.findParticipant(payload.sub, role);
-        if (!participant || participant.accountStatus === UserStatus.DELETED) {
+        if (
+            !participant ||
+            participant.accountStatus === UserStatus.DELETED ||
+            participant.accountStatus === UserStatus.SUSPENDED
+        ) {
             throw new Error('채팅을 사용할 수 없는 계정입니다.');
         }
 
@@ -162,12 +171,47 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         return client.data.user;
     }
 
-    private requireUser(client: ChatSocket): ChatSocketUser {
+    private async requireUser(client: ChatSocket): Promise<ChatSocketUser> {
         const user = this.readUser(client);
         if (!user) {
             throw new WsException('인증이 필요합니다.');
         }
+        // 연결 뒤 만료·정지·탈퇴된 세션은 다음 읽기/쓰기에서도 신뢰하지 않는다.
+        try {
+            await this.authenticate(client);
+        } catch {
+            delete client.data.user;
+            client.disconnect(true);
+            throw new WsException('인증이 만료되었거나 사용할 수 없는 계정입니다.');
+        }
         return user;
+    }
+
+    /** 같은 프로세스의 기존 연결을 즉시 닫고 방 구독도 함께 해제한다. */
+    @OnEvent(ACCOUNT_ACCESS_REVOKED)
+    revokeAccountConnections(event: AccountAccessRevokedEvent): void {
+        const role = event.role === 'adopter' ? SenderRole.ADOPTER : SenderRole.BREEDER;
+        for (const client of this.server?.sockets?.values() ?? []) {
+            if (client.data.user?.userId === event.userId && client.data.user.role === role) {
+                delete client.data.user;
+                client.disconnect(true);
+            }
+        }
+    }
+
+    /** 다른 서버에서 정지했거나 가만히 대기하던 만료 세션에도 새 메시지를 보내지 않는다. */
+    private async authenticateRoom(roomId: string): Promise<void> {
+        await Promise.all(
+            Array.from(this.server.sockets.values())
+                .filter((client) => client.rooms.has(roomId))
+                .map(async (client) => {
+                    try {
+                        await this.requireUser(client);
+                    } catch {
+                        client.disconnect(true);
+                    }
+                }),
+        );
     }
 
     /**
@@ -176,13 +220,14 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
      */
     @SubscribeMessage('join_room')
     async handleJoinRoom(@ConnectedSocket() client: ChatSocket, @MessageBody() payload: { roomId: string }) {
-        const user = this.requireUser(client);
+        const user = await this.requireUser(client);
 
         try {
             const room = this.chatPolicyService.requireRoom(await this.chatRoomManager.findRoomById(payload.roomId));
             this.chatPolicyService.requireParticipant(room, user.userId);
             await client.join(payload.roomId);
             this.logger.logSuccess('ChatGateway', `${user.userId} 채팅방 입장: ${payload.roomId}`);
+            return { success: true };
         } catch (error) {
             throw new WsException(error instanceof Error ? error.message : '채팅방 입장에 실패했습니다.');
         }
@@ -209,10 +254,10 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
      */
     @SubscribeMessage('send_message')
     async handleSendMessage(@ConnectedSocket() client: ChatSocket, @MessageBody() dto: SendMessageRequestDto) {
-        const user = this.requireUser(client);
-
         try {
+            const user = await this.requireUser(client);
             const result = await this.sendMessageUseCase.execute(user.userId, user.role, {
+                ...(dto.clientMessageId !== undefined ? { clientMessageId: dto.clientMessageId } : {}),
                 roomId: dto.roomId,
                 content: dto.content,
                 messageType: dto.messageType,
@@ -222,11 +267,18 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
             // 발행에 성공했더라도 consumer 가 아직 합류하지 않았으면 아무도 소비하지 않으므로
             // (부팅 직후 재시도 구간) consumer 준비 상태까지 함께 보고 폴백한다.
             // consumer 합류 후 같은 메시지가 다시 오면 broadcastNewMessage 의 중복 제거가 막아준다.
-            if (!result.brokerPublished || !this.kafkaConsumerStatus.isReady()) {
-                this.broadcastNewMessage(this.chatMessageMapperService.toBroadcastPayload(result));
+            if (!result.isDuplicate && (!result.brokerPublished || !this.kafkaConsumerStatus.isReady())) {
+                await this.broadcastNewMessage(this.chatMessageMapperService.toBroadcastPayload(result));
             }
+            return {
+                success: true,
+                messageId: result.id,
+                ...(result.clientMessageId ? { clientMessageId: result.clientMessageId } : {}),
+            };
         } catch (error) {
-            client.emit('error', { message: error.message });
+            const message = error instanceof Error ? error.message : '메시지 전송에 실패했습니다.';
+            client.emit('error', { message });
+            return { success: false, error: message };
         }
     }
 
@@ -237,8 +289,9 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
      * 같은 messageId 는 한 번만 내보낸다. Kafka consumer 미준비 구간에서 gateway 가 직접
      * 전파한 메시지를 consumer 가 뒤늦게 합류해 offset 부터 다시 읽어도 중복 수신이 없다.
      */
-    broadcastNewMessage(message: {
+    async broadcastNewMessage(message: {
         messageId: string;
+        clientMessageId?: string;
         roomId: string;
         senderId: string;
         senderRole: string;
@@ -247,11 +300,12 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
         messageType: string;
         isRead: boolean;
         createdAt: Date;
-    }): void {
+    }): Promise<void> {
         if (!this.markBroadcasted(message.messageId)) {
             return;
         }
 
+        await this.authenticateRoom(message.roomId);
         this.server.to(message.roomId).emit('new_message', message);
     }
 
@@ -287,10 +341,11 @@ export class ChatGateway implements OnGatewayInit, OnGatewayConnection, OnGatewa
      */
     @SubscribeMessage('read_messages')
     async handleReadMessages(@ConnectedSocket() client: ChatSocket, @MessageBody() payload: { roomId: string }) {
-        const user = this.requireUser(client);
+        const user = await this.requireUser(client);
 
         try {
             await this.getMessagesUseCase.execute(user.userId, { roomId: payload.roomId });
+            await this.authenticateRoom(payload.roomId);
             this.server.to(payload.roomId).emit('messages_read', {
                 roomId: payload.roomId,
                 readBy: user.userId,

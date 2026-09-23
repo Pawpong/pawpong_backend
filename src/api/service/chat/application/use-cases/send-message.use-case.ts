@@ -13,7 +13,7 @@ import { ChatMessageMapperService } from '../../domain/services/chat-message-map
 import { CustomLoggerService } from '../../../../../common/logger/custom-logger.service';
 import { SenderRole, MessageType } from '../../../../../schema/chat-message.schema';
 import type { SendMessageCommand } from '../types/chat-command.type';
-import { DomainAuthorizationError } from '../../../../../common/error/domain.error';
+import { DomainAuthorizationError, DomainValidationError } from '../../../../../common/error/domain.error';
 import { CHAT_USER_BLOCK_MANAGER, type ChatUserBlockManagerPort } from '../ports/chat-user-block-manager.port';
 
 @Injectable()
@@ -38,10 +38,17 @@ export class SendMessageUseCase {
         senderId: string,
         senderRole: SenderRole,
         command: SendMessageCommand,
-    ): Promise<ChatMessageSnapshot & { brokerPublished: boolean }> {
+    ): Promise<ChatMessageSnapshot & { brokerPublished: boolean; isDuplicate?: boolean }> {
         this.logger.logStart('sendMessage', '채팅 메시지 전송 시작', { roomId: command.roomId, senderId });
 
         try {
+            // WebSocket도 HTTP와 같은 식별자 제한을 적용한다.
+            if (
+                command.clientMessageId !== undefined &&
+                (typeof command.clientMessageId !== 'string' || !/^[A-Za-z0-9_-]{1,128}$/.test(command.clientMessageId))
+            ) {
+                throw new DomainValidationError('메시지 식별자가 올바르지 않습니다.');
+            }
             const room = this.chatPolicyService.requireRoom(await this.chatRoomManager.findRoomById(command.roomId));
             const sender = this.chatPolicyService.requireParticipant(room, senderId);
             const receiver = this.chatPolicyService.resolveReceiver(room, senderId);
@@ -62,6 +69,7 @@ export class SendMessageUseCase {
             const messageType = command.messageType ?? MessageType.TEXT;
 
             const message = await this.chatMessageManager.createMessage({
+                ...(command.clientMessageId ? { clientMessageId: command.clientMessageId } : {}),
                 roomId: command.roomId,
                 senderId,
                 senderRole,
@@ -69,6 +77,14 @@ export class SendMessageUseCase {
                 content: command.content,
                 messageType,
             });
+
+            if (message.isDuplicate) {
+                if (message.content !== command.content || message.messageType !== messageType) {
+                    throw new DomainValidationError('같은 메시지 식별자로 다른 내용을 전송할 수 없습니다.');
+                }
+                // 이미 저장된 재시도는 읽지 않음 수·방 정렬·브로드캐스트를 다시 변경하지 않는다.
+                return { ...message, brokerPublished: true };
+            }
 
             await this.chatRoomManager.updateRoomLastMessage(command.roomId, command.content);
             const brokerPublished = await this.chatMessageBroker.publishMessage(
