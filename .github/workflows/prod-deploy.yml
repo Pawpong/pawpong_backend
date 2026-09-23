@@ -29,6 +29,11 @@ jobs:
             - name: Checkout code
               uses: actions/checkout@v4
 
+            - name: Test deployment disk preflight
+              run: |
+                  bash -n scripts/check-deploy-disk.sh
+                  python3 -m unittest discover -s scripts/tests -p 'test_check_deploy_disk.py' -v
+
             - name: Authenticate to Google Cloud
               id: auth
               uses: google-github-actions/auth@v2
@@ -89,7 +94,14 @@ jobs:
                   GCP_PROJECT_ID: ${{ env.GCP_PROJECT_ID }}
                   SERVICE_NAME: ${{ env.SERVICE_NAME }}
                   COMMIT_SHA: ${{ github.sha }}
+                  DEPLOY_MIN_FREE_GIB: ${{ vars.PROD_DEPLOY_MIN_FREE_GIB || '8' }}
+                  DEPLOY_MIN_FREE_PERCENT: ${{ vars.PROD_DEPLOY_MIN_FREE_PERCENT || '10' }}
+                  DEPLOY_MIN_FREE_INODE_PERCENT: ${{ vars.PROD_DEPLOY_MIN_FREE_INODE_PERCENT || '10' }}
               run: |
+                  # SSH heredoc에 전달할 설정은 숫자로 제한한다. 범위는 서버 검사에서 다시 검증한다.
+                  for threshold in "$DEPLOY_MIN_FREE_GIB" "$DEPLOY_MIN_FREE_PERCENT" "$DEPLOY_MIN_FREE_INODE_PERCENT"; do
+                      [[ "$threshold" =~ ^[1-9][0-9]{0,6}$ ]] || { echo 'Invalid deployment disk threshold'; exit 1; }
+                  done
                   echo "🚀 Starting deployment to production server..."
                   # Keep potentially large Docker pull logs out of the process environment.
                   # Print the log even when SSH/deployment fails.
@@ -106,6 +118,11 @@ jobs:
                   echo "📥 Pulling latest code..."
                   git pull --ff-only origin main
                   test "\$(git rev-parse HEAD)" = "${COMMIT_SHA}"
+
+                  DEPLOY_MIN_FREE_GIB=${DEPLOY_MIN_FREE_GIB} \
+                  DEPLOY_MIN_FREE_PERCENT=${DEPLOY_MIN_FREE_PERCENT} \
+                  DEPLOY_MIN_FREE_INODE_PERCENT=${DEPLOY_MIN_FREE_INODE_PERCENT} \
+                  bash scripts/check-deploy-disk.sh
 
                   echo "🐳 Pulling Docker image from Artifact Registry..."
                   IMAGE_TAG="${GAR_LOCATION}/${GCP_PROJECT_ID}/${SERVICE_NAME}/pawpong-backend:${COMMIT_SHA}"
