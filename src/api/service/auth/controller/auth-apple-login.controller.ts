@@ -17,6 +17,7 @@ import {
 } from '../application/tokens/auth-social-flow.token';
 import { AuthSocialOAuthController } from '../decorator/auth-public-controller.decorator';
 import { AuthAppleIdTokenService } from '../domain/services/auth-apple-id-token.service';
+import { AppleCredentialService } from '../apple-credentials/application/apple-credential.service';
 import { AuthRedirectResponseInterceptor } from '../presentation/interceptors/auth-redirect-response.interceptor';
 import { AuthSocialCallbackResponseInterceptor } from '../presentation/interceptors/auth-social-callback-response.interceptor';
 import { ApiAppleCallbackEndpoint, ApiAppleLoginEndpoint } from '../swagger/index';
@@ -40,6 +41,7 @@ export class AuthAppleLoginController {
         @Inject(PROCESS_SOCIAL_LOGIN_CALLBACK_FLOW)
         private readonly processSocialLoginCallbackUseCase: ProcessSocialLoginCallbackFlowPort,
         private readonly appleIdTokenService: AuthAppleIdTokenService,
+        private readonly appleCredentials: AppleCredentialService,
         private readonly logger: CustomLoggerService,
     ) {}
 
@@ -61,7 +63,7 @@ export class AuthAppleLoginController {
     async appleCallback(@Body() body: AppleCallbackBody) {
         // 사용자가 Apple 인증 화면에서 취소하면 error 만 담겨 돌아온다.
         if (body.error) {
-            this.logger.log(`[appleLogin] Apple 인증 취소 또는 실패: ${body.error}`);
+            this.logger.log('[appleLogin] Apple 인증 취소 또는 실패');
         }
 
         const claims = await this.appleIdTokenService.verify(body.id_token || '');
@@ -78,7 +80,11 @@ export class AuthAppleLoginController {
             originUrl,
         };
 
-        return this.processSocialLoginCallbackUseCase.execute(profile, originUrl, originUrl);
+        // 영구 삭제 등으로 로그인 자체가 거절된 계정의 새 외부 토큰은 저장하지 않는다.
+        const result = await this.processSocialLoginCallbackUseCase.execute(profile, originUrl, originUrl);
+        if (result.kind === 'error') return result;
+        await this.appleCredentials.capture(body.code, claims.sub);
+        return result;
     }
 
     /** 최초 인증에만 오는 `user` JSON. 깨져 있어도 로그인 자체를 막지 않는다. */
