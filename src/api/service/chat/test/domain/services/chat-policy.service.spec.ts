@@ -18,6 +18,7 @@ const baseRoom = {
     participantKey: 'a-1:b-1',
     participantStates: [{ userId: 'a-1' }, { userId: 'b-1' }],
     applicationIds: [],
+    petIds: [],
     status: ChatRoomStatus.ACTIVE,
     createdAt: new Date(),
 };

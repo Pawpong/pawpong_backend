@@ -27,6 +27,12 @@ export class ChatRoomResponseDto {
     @ApiProperty({ required: false })
     applicationId?: string;
 
+    @ApiProperty({ type: [String], description: '이 방에 연결된 분양 개체 ID 목록' })
+    petIds: string[];
+
+    @ApiProperty({ required: false, description: '가장 최근에 연결된 분양 개체 ID' })
+    petId?: string;
+
     @ApiProperty({ enum: ChatRoomStatus })
     status: ChatRoomStatus;
 

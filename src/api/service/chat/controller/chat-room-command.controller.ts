@@ -47,6 +47,7 @@ export class ChatRoomCommandController {
             counterpartUserId: dto.counterpartUserId,
             breederId: dto.breederId,
             applicationId: dto.applicationId,
+            petId: dto.petId,
         });
         const result = await this.chatRoomResponseAssembler.toResult(room, user.userId);
         return ApiResponseDto.success(result, CHAT_RESPONSE_MESSAGES.roomReady);

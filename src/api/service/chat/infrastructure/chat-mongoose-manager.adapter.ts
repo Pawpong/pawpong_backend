@@ -34,13 +34,17 @@ export class ChatMongooseManagerAdapter implements ChatRoomManagerPort, ChatMess
         return this.chatRoomMapperService.toSnapshots(rooms as any);
     }
 
-    async createRoom(participants: ChatRoomParticipantSnapshot[], applicationId?: string): Promise<ChatRoomSnapshot> {
-        const room = await this.chatRepository.createRoom(participants, applicationId);
+    async createRoom(
+        participants: ChatRoomParticipantSnapshot[],
+        applicationId?: string,
+        petId?: string,
+    ): Promise<ChatRoomSnapshot> {
+        const room = await this.chatRepository.createRoom(participants, applicationId, petId);
         return this.chatRoomMapperService.toSnapshot(room as any);
     }
 
-    async activateRoom(roomId: string, applicationId?: string): Promise<ChatRoomSnapshot> {
-        const room = await this.chatRepository.activateRoom(roomId, applicationId);
+    async activateRoom(roomId: string, applicationId?: string, petId?: string): Promise<ChatRoomSnapshot> {
+        const room = await this.chatRepository.activateRoom(roomId, applicationId, petId);
         if (!room) throw new Error('채팅방 활성화에 실패했습니다.');
         return this.chatRoomMapperService.toSnapshot(room as any);
     }

@@ -127,7 +127,7 @@ describe('CreateOrGetRoomUseCase', () => {
             applicationId: 'app-2',
         });
         expect(result.id).toBe('room-1');
-        expect(manager.activateRoom).toHaveBeenCalledWith('room-1', 'app-2');
+        expect(manager.activateRoom).toHaveBeenCalledWith('room-1', 'app-2', undefined);
         expect(manager.createRoom).not.toHaveBeenCalled();
         expect(broker.publishRoomCreated).not.toHaveBeenCalled();
     });
@@ -151,10 +151,52 @@ describe('CreateOrGetRoomUseCase', () => {
                 { userId: 'adopter-1', role: SenderRole.ADOPTER },
             ],
             undefined,
+            undefined,
         );
         expect(broker.publishRoomCreated).toHaveBeenCalledWith(
             expect.objectContaining({ roomId: 'room-1', participantIds: createdRoom.participantIds }),
         );
+    });
+
+    it('petId를 넘기면 신규 방 생성과 기존 방 재활성화 양쪽에 그대로 전달된다', async () => {
+        const createManager = makeRoomManager();
+        const createUseCase = new CreateOrGetRoomUseCase(
+            createManager,
+            makeBroker(),
+            makeParticipantReader(),
+            makeBlockManager(),
+            policy,
+            logger,
+            { belongsToParticipants: jest.fn().mockResolvedValue(true) },
+        );
+        await createUseCase.execute('adopter-1', SenderRole.ADOPTER, {
+            counterpartUserId: 'breeder-1',
+            petId: 'pet-1',
+        });
+        expect(createManager.createRoom).toHaveBeenCalledWith(
+            [
+                { userId: 'adopter-1', role: SenderRole.ADOPTER },
+                { userId: 'breeder-1', role: SenderRole.BREEDER },
+            ],
+            undefined,
+            'pet-1',
+        );
+
+        const activateManager = makeRoomManager(createdRoom);
+        const activateUseCase = new CreateOrGetRoomUseCase(
+            activateManager,
+            makeBroker(),
+            makeParticipantReader(),
+            makeBlockManager(),
+            policy,
+            logger,
+            { belongsToParticipants: jest.fn().mockResolvedValue(true) },
+        );
+        await activateUseCase.execute('adopter-1', SenderRole.ADOPTER, {
+            counterpartUserId: 'breeder-1',
+            petId: 'pet-2',
+        });
+        expect(activateManager.activateRoom).toHaveBeenCalledWith('room-1', undefined, 'pet-2');
     });
 
     it('기존 breederId 요청도 호환한다', async () => {
