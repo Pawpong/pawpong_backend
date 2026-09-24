@@ -20,4 +20,9 @@ export class CreateRoomRequestDto {
     @IsOptional()
     @IsString()
     applicationId?: string;
+
+    @ApiProperty({ description: '문의하는 분양 개체 ID (선택, 신청서 없이 바로 문의할 때)', required: false })
+    @IsOptional()
+    @IsString()
+    petId?: string;
 }

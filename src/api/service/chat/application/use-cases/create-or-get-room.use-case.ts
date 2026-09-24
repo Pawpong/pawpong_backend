@@ -57,7 +57,7 @@ export class CreateOrGetRoomUseCase {
             }
             const existing = await this.chatRoomManager.findRoomByParticipants(participantIds);
             if (existing) {
-                const room = await this.chatRoomManager.activateRoom(existing.id, command.applicationId);
+                const room = await this.chatRoomManager.activateRoom(existing.id, command.applicationId, command.petId);
                 this.logger.logSuccess('createOrGetRoom', '기존 채팅방 재활성화', { roomId: room.id });
                 return room;
             }
@@ -70,6 +70,7 @@ export class CreateOrGetRoomUseCase {
                         { userId: counterpartUserId, role: validCounterpart.role },
                     ],
                     command.applicationId,
+                    command.petId,
                 );
             } catch (error) {
                 if (!this.isDuplicateKeyError(error)) throw error;
@@ -77,6 +78,7 @@ export class CreateOrGetRoomUseCase {
                 room = await this.chatRoomManager.activateRoom(
                     this.chatPolicyService.requireRoom(concurrentlyCreated).id,
                     command.applicationId,
+                    command.petId,
                 );
                 return room;
             }

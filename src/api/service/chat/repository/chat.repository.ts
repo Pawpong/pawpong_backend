@@ -69,7 +69,11 @@ export class ChatRepository implements OnModuleInit {
             .exec() as unknown as Promise<ChatRoomDocument[]>;
     }
 
-    async createRoom(participants: ChatRoomParticipantSnapshot[], applicationId?: string): Promise<ChatRoomDocument> {
+    async createRoom(
+        participants: ChatRoomParticipantSnapshot[],
+        applicationId?: string,
+        petId?: string,
+    ): Promise<ChatRoomDocument> {
         const participantIds = participants.map(({ userId }) => userId);
         const legacyAdopter = participants.find(({ role }) => role === SenderRole.ADOPTER);
         const legacyBreeder = participants.find(({ role }) => role === SenderRole.BREEDER);
@@ -81,6 +85,7 @@ export class ChatRepository implements OnModuleInit {
             participantStates: participantIds.map((userId) => ({ userId })),
             applicationIds: applicationId ? [applicationId] : [],
             applicationId,
+            petIds: petId ? [petId] : [],
             // 구버전 compound unique index가 아직 남은 롤아웃 구간에서도
             // same-role DM들이 null/null로 충돌하지 않도록 두 ID를 채운다.
             adopterId: hasLegacyAdopterBreederPair ? legacyAdopter!.userId : participantIds[0],
@@ -90,14 +95,19 @@ export class ChatRepository implements OnModuleInit {
         return room.save();
     }
 
-    async activateRoom(roomId: string, applicationId?: string): Promise<ChatRoomDocument | null> {
+    async activateRoom(roomId: string, applicationId?: string, petId?: string): Promise<ChatRoomDocument | null> {
         const update: Record<string, unknown> = {
             $set: { status: ChatRoomStatus.ACTIVE },
         };
+        const addToSet: Record<string, unknown> = {};
         if (applicationId) {
-            update.$addToSet = { applicationIds: applicationId };
+            addToSet.applicationIds = applicationId;
             (update.$set as Record<string, unknown>).applicationId = applicationId;
         }
+        if (petId) {
+            addToSet.petIds = petId;
+        }
+        if (Object.keys(addToSet).length > 0) update.$addToSet = addToSet;
 
         await this.chatRoomModel.updateOne({ _id: roomId }, update);
         // legacy 문서는 배열이 없을 수 있다. 배열이 있는 방에만 $[]를 적용한다.

@@ -30,6 +30,8 @@ export class ChatRoomResponseAssemblerService {
             roomId: room.id,
             applicationIds: room.applicationIds,
             applicationId: room.applicationId,
+            petIds: room.petIds,
+            petId: room.petId,
             status: room.status,
             counterpart: counterpartProfile
                 ? {

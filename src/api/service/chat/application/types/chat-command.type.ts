@@ -5,6 +5,7 @@ export interface CreateRoomCommand {
     /** @deprecated counterpartUserId로 전환한다. */
     breederId?: string;
     applicationId?: string;
+    petId?: string;
 }
 
 export interface SendMessageCommand {

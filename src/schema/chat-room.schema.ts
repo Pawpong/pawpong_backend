@@ -74,6 +74,9 @@ export class ChatRoom {
     @Prop({ type: [String], default: undefined })
     applicationIds?: string[];
 
+    @Prop({ type: [String], default: undefined })
+    petIds?: string[];
+
     @Prop({ type: [ChatRoomParticipantStateSchema], default: undefined })
     participantStates?: ChatRoomParticipantState[];
 

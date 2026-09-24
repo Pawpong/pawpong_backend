@@ -24,6 +24,7 @@ const room: ChatRoomSnapshot = {
     participantKey: 'adopter-1:breeder-1',
     participantStates: [{ userId: 'adopter-1' }, { userId: 'breeder-1' }],
     applicationIds: [],
+    petIds: [],
     status: ChatRoomStatus.ACTIVE,
     createdAt: new Date(),
 };

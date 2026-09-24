@@ -16,6 +16,7 @@ type ChatRoomSource = {
     participantKey?: string;
     participantStates?: ChatRoomParticipantStateSnapshot[];
     applicationIds?: string[];
+    petIds?: string[];
     adopterId?: string;
     breederId?: string;
     applicationId?: string;
@@ -35,6 +36,7 @@ export class ChatRoomMapperService {
         const applicationIds = [
             ...new Set([...(room.applicationIds ?? []), room.applicationId].filter(Boolean)),
         ] as string[];
+        const petIds = [...new Set(room.petIds ?? [])];
 
         return {
             id: room._id.toString(),
@@ -42,10 +44,12 @@ export class ChatRoomMapperService {
             participants,
             participantKey: room.participantKey ?? buildChatParticipantKey(participantIds),
             applicationIds,
+            petIds,
             participantStates: this.resolveParticipantStates(room, participants),
             adopterId: room.adopterId,
             breederId: room.breederId,
             applicationId: room.applicationId ?? applicationIds.at(-1),
+            petId: petIds.at(-1),
             status: room.status,
             lastMessage: room.lastMessage,
             lastMessageAt: room.lastMessageAt,

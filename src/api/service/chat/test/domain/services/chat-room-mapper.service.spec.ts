@@ -10,6 +10,7 @@ describe('ChatRoomMapperService', () => {
             adopterId: 'a-1',
             breederId: 'b-1',
             applicationId: 'app-1',
+            petIds: ['pet-1', 'pet-2'],
             status: ChatRoomStatus.ACTIVE,
             lastMessage: '안녕',
             lastMessageAt: new Date('2026-01-01'),
@@ -17,6 +18,20 @@ describe('ChatRoomMapperService', () => {
         });
         expect(result.id).toBe('room-1');
         expect(result.applicationId).toBe('app-1');
+        expect(result.petIds).toEqual(['pet-1', 'pet-2']);
+        expect(result.petId).toBe('pet-2');
+    });
+
+    it('petIds가 없으면 빈 배열과 petId undefined를 돌려준다', () => {
+        const result = service.toSnapshot({
+            _id: { toString: () => 'room-2' },
+            adopterId: 'a-1',
+            breederId: 'b-1',
+            status: ChatRoomStatus.ACTIVE,
+            createdAt: new Date('2025-12-01'),
+        });
+        expect(result.petIds).toEqual([]);
+        expect(result.petId).toBeUndefined();
     });
 
     it('toSnapshots: 여러 개 매핑', () => {
