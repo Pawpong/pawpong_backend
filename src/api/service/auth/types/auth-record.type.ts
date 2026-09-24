@@ -33,6 +33,7 @@ export type AuthRegistrationRecord = {
     profileImageFileName?: string | null;
     accountStatus: string;
     deletedAt?: Date;
+    permanentDeletionRequestedAt?: Date;
     refreshToken?: string | null;
     socialAuthInfo?: AuthSocialAuthInfoRecord;
     createdAt?: Date;

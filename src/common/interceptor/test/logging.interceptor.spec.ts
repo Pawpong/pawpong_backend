@@ -9,6 +9,35 @@ describe('LoggingInterceptor', () => {
     it.each([
         {
             method: 'POST',
+            url: '/api/auth/apple/callback?code=secret-query',
+            body: {
+                code: 'secret-code',
+                id_token: 'secret-id-token',
+                refresh_token: 'secret-refresh',
+                receiptToken: 'secret-receipt',
+            },
+        },
+        {
+            method: 'POST',
+            url: '/api/v2/auth/apple/receipt',
+            body: {
+                code: 'secret-code',
+                id_token: 'secret-id-token',
+                refresh_token: 'secret-refresh',
+                receiptToken: 'secret-receipt',
+            },
+        },
+        {
+            method: 'POST',
+            url: '/api/auth/review-login?password=secret-query',
+            body: {
+                emailAddress: 'secret-email@example.com',
+                password: 'secret-password',
+                nested: { password: 'secret-nested' },
+            },
+        },
+        {
+            method: 'POST',
             url: '/api/v2/auth/native/exchange?debug=secret-query',
             body: { code: 'secret-code', state: 'secret-state', codeVerifier: 'secret-verifier' },
         },

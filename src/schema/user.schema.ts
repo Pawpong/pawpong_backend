@@ -141,6 +141,10 @@ export class User {
     @Prop()
     deletedAt?: Date;
 
+    /** 영구 삭제 접수 표식. 복구 가능한 일반 탈퇴와 구분하며 재활성화를 금지한다. */
+    @Prop()
+    permanentDeletionRequestedAt?: Date;
+
     /**
      * 회원 탈퇴 사유 (accountStatus가 deleted일 때)
      * 입양자: already_adopted, no_suitable_pet, adoption_fee_burden, uncomfortable_ui, privacy_concern, other

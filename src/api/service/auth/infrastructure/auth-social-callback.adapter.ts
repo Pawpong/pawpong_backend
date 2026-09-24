@@ -108,8 +108,10 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
 
         if (adopter) {
             if (
-                this.authSocialLoginPolicyService.resolveLoginDecision(adopter.accountStatus) ===
-                'reactivation_required'
+                this.authSocialLoginPolicyService.resolveLoginDecision(
+                    adopter.accountStatus,
+                    adopter.permanentDeletionRequestedAt,
+                ) === 'reactivation_required'
             ) {
                 this.logger.log(`[handleSocialLogin] 탈퇴 Adopter 복구 확인 필요: ${adopter.emailAddress}`);
                 return this.buildReactivationResult(adopter, 'adopter', adopter.nickname || adopter.emailAddress);
@@ -135,8 +137,10 @@ export class AuthSocialCallbackAdapter implements AuthSocialCallbackPort {
 
         if (breeder) {
             if (
-                this.authSocialLoginPolicyService.resolveLoginDecision(breeder.accountStatus) ===
-                'reactivation_required'
+                this.authSocialLoginPolicyService.resolveLoginDecision(
+                    breeder.accountStatus,
+                    breeder.permanentDeletionRequestedAt,
+                ) === 'reactivation_required'
             ) {
                 this.logger.log(`[handleSocialLogin] 탈퇴 Breeder 복구 확인 필요: ${breeder.emailAddress}`);
                 return this.buildReactivationResult(

@@ -64,7 +64,7 @@ export class CreateCommunityPostCommentUseCase {
             parentCommentId: command.parentCommentId,
         });
 
-        this.dispatchCommentNotifications(postId, author, command.parentCommentId).catch((err: Error) => {
+        await this.dispatchCommentNotifications(postId, author, command.parentCommentId).catch((err: Error) => {
             this.logger.error(`[execute] 댓글 알림 발송 실패: ${err.message}`, { postId, userId });
         });
 

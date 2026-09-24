@@ -41,7 +41,7 @@ export class ChatRoomResponseAssemblerService {
                 : {
                       userId: counterpart.userId,
                       role: counterpart.role,
-                      nickname: '알 수 없음',
+                      nickname: '삭제된 사용자',
                   },
             lastMessage: room.lastMessage,
             lastMessageAt: room.lastMessageAt?.toISOString(),

@@ -1,4 +1,5 @@
 import { ConfigModule } from '@nestjs/config';
+import { AppleCredentialsModule } from '../apple-credentials/apple-credentials.module';
 
 import { GoogleStrategy } from '../../../../common/strategy/google.strategy';
 import { KakaoStrategy } from '../../../../common/strategy/kakao.strategy';
@@ -45,7 +46,12 @@ import { AuthNativeStartLimitGuard } from '../presentation/guards/auth-native-st
 
 // 인증 > 소셜 로그인 슬라이스 (구글/카카오/네이버 OAuth)
 // 신규 소셜 유저의 가입 완료는 signup 슬라이스의 가입 유스케이스(Port 토큰)를 사용한다.
-export const AUTH_SOCIAL_LOGIN_MODULE_IMPORTS = [AuthSharedModule, AuthSignupModule, ConfigModule];
+export const AUTH_SOCIAL_LOGIN_MODULE_IMPORTS = [
+    AuthSharedModule,
+    AuthSignupModule,
+    ConfigModule,
+    AppleCredentialsModule,
+];
 
 export const AUTH_SOCIAL_LOGIN_MODULE_CONTROLLERS = [
     AuthNativeLoginController,

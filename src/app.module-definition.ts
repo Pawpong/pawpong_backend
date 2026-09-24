@@ -12,6 +12,7 @@ import { OpsAlertModule } from './common/ops-alert/ops-alert.module';
 import { KafkaModule } from './common/kafka/kafka.module';
 import { LoggerModule } from './common/logger/logger.module';
 import { RedisModule } from './common/redis/redis.module';
+import { AccountWriteFenceModule } from './common/account-write-fence/account-write-fence.module';
 
 import { AdoptionApplicationModule } from './api/service/adoption-application/adoption-application.module';
 import { AdoptionModule } from './api/service/adoption/adoption.module';
@@ -21,6 +22,7 @@ import { AppVersionModule } from './api/service/app-version/app-version.module';
 import { AppSplashModule } from './api/service/app-splash/app-splash.module';
 import { DeepLinkModule } from './api/service/deep-link/deep-link.module';
 import { AuthModule } from './api/service/auth/auth.module';
+import { AccountDeletionModule } from './api/service/account-deletion/account-deletion.module';
 import { BreedModule } from './api/service/breed/breed.module';
 import { BreederAdminModule } from './api/admin/breeder/breeder-admin.module';
 import { BreederManagementModule } from './api/service/breeder-management/breeder-management.module';
@@ -63,12 +65,14 @@ const APP_FOUNDATION_MODULES = [
     RedisModule,
     KafkaModule,
     DatabaseModule,
+    AccountWriteFenceModule,
     AlimtalkModule,
     AlimtalkAdminModule,
 ];
 
 const APP_API_MODULES = [
     AuthModule,
+    AccountDeletionModule,
     HomeModule,
     HomeAdminModule,
     BreederModule,

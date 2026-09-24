@@ -5,7 +5,8 @@ import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import request from 'supertest';
 
-import { createTestingApp } from '../../testing/test-utils';
+import { createTestingApp, getAdopterToken, getAdminToken } from '../../testing/test-utils';
+import { ManageProductionBackupUseCase } from '../../../api/admin/platform/application/use-cases/manage-production-backup.use-case';
 
 /** 이 테스트가 읽는 OpenAPI 조각만 최소로 정의한다 (라이브러리 타입은 union 이 깊어 검증 의도를 흐린다) */
 interface OperationLike {
@@ -14,6 +15,20 @@ interface OperationLike {
 type PathsLike = Record<string, Record<string, OperationLike>>;
 
 const HTTP_METHODS = ['get', 'post', 'patch', 'put', 'delete'] as const;
+
+// 완료 전 접수만 반환하는 두 경로는 기존 202 계약을 유지하며 아래 HTTP 검사로 별도 증명한다.
+const ACCEPTED_ENDPOINTS = [
+    {
+        path: '/api/v2/account-deletion',
+        controller: 'src/api/service/account-deletion/controller/account-deletion.controller.ts',
+        postDecorator: '@Post()',
+    },
+    {
+        path: '/api/platform-admin/backups',
+        controller: 'src/api/admin/platform/controller/platform-admin-backup.controller.ts',
+        postDecorator: "@Post('backups')",
+    },
+] as const;
 
 /**
  * Swagger 성공 상태 코드가 "실제 HTTP 응답"과 일치하는지 검증한다.
@@ -25,9 +40,13 @@ const HTTP_METHODS = ['get', 'post', 'patch', 'put', 'delete'] as const;
 describe('Swagger 성공 상태 코드 ↔ 실응답 대조 (e2e)', () => {
     let app: INestApplication;
     let paths: PathsLike;
+    // 계약 검증에서 실제 운영 백업 프로세스를 시작하지 않는다.
+    const backupRequest = jest.fn().mockResolvedValue({ requestId: 'contract-backup', status: 'pending' });
 
     beforeAll(async () => {
-        app = await createTestingApp();
+        app = await createTestingApp([
+            { provide: ManageProductionBackupUseCase, useValue: { execute: backupRequest } },
+        ]);
         const document = SwaggerModule.createDocument(app, new DocumentBuilder().setTitle('t').setVersion('1').build());
         paths = document.paths as unknown as PathsLike;
     }, 30000);
@@ -42,16 +61,18 @@ describe('Swagger 성공 상태 코드 ↔ 실응답 대조 (e2e)', () => {
 
     /**
      * 실호출 대조는 인증이 걸린 엔드포인트(대부분의 POST)에 닿지 못한다.
-     * 그 구간은 "인터셉터가 201/204 를 200 으로 바꾸므로 그 외 2xx 는 발생 불가"라는
-     * 불변식으로 문서를 검사해 메운다. 아래 실호출 테스트와 역할이 다르다.
+     * 그 구간은 일반 성공의 200 계약과 명시적 비동기 접수의 202 계약으로 검사한다.
+     * 202는 인터셉터의 변환 대상이 아니며 허용한 경로도 아래에서 실호출로 대조한다.
      */
-    it('성공 응답을 200 이외의 2xx 로 문서화한 엔드포인트가 없다 (인증 구간 포함)', () => {
+    it('일반 성공은 200, 명시적 비동기 접수만 202로 문서화한다 (인증 구간 포함)', () => {
         const offenders: string[] = [];
 
         for (const [path, operations] of Object.entries(paths)) {
             for (const method of HTTP_METHODS) {
                 if (!operations[method]) continue;
-                const notOk = documentedSuccess(path, method).filter((code) => code !== '200');
+                const expected =
+                    method === 'post' && ACCEPTED_ENDPOINTS.some((endpoint) => endpoint.path === path) ? '202' : '200';
+                const notOk = documentedSuccess(path, method).filter((code) => code !== expected);
                 if (notOk.length > 0) {
                     offenders.push(`${method.toUpperCase()} ${path} → ${notOk.join(',')}`);
                 }
@@ -93,7 +114,7 @@ describe('Swagger 성공 상태 코드 ↔ 실응답 대조 (e2e)', () => {
      * 근접 검색(±N줄)은 앞뒤 다른 핸들러의 데코레이터를 오인할 수 있어,
      * @Post 가 속한 데코레이터 블록(직전 빈 줄/닫는 중괄호 ~ 메서드 시그니처)만 본다.
      */
-    it('모든 @Post 핸들러의 데코레이터 블록에 @HttpCode(HttpStatus.OK) 가 있다', () => {
+    it('모든 @Post 핸들러가 해당 경로의 성공 상태 코드를 명시한다', () => {
         const controllers: string[] = [];
         const walk = (dir: string): void => {
             for (const entry of readdirSync(dir)) {
@@ -129,9 +150,15 @@ describe('Swagger 성공 상태 코드 ↔ 실응답 대조 (e2e)', () => {
                 }
 
                 const block = lines.slice(start, end + 1).join('\n');
-                // 표기법(HttpStatus.OK / 200)이 아니라 값이 200 인지를 본다.
-                // @HttpCode(201)·@HttpCode(HttpStatus.CREATED) 등은 통과시키지 않는다.
-                if (!/@HttpCode\(\s*(?:HttpStatus\.OK|200)\s*\)/.test(block)) {
+                const relativeFile = file.replace(`${process.cwd()}/`, '');
+                const isAccepted = ACCEPTED_ENDPOINTS.some(
+                    (endpoint) => endpoint.controller === relativeFile && endpoint.postDecorator === line.trim(),
+                );
+                // 다른 경로의 202 또는 모든 경로의 201은 여전히 실패시킨다.
+                const expectedCode = isAccepted
+                    ? /@HttpCode\(\s*(?:HttpStatus\.ACCEPTED|202)\s*\)/
+                    : /@HttpCode\(\s*(?:HttpStatus\.OK|200)\s*\)/;
+                if (!expectedCode.test(block)) {
                     offenders.push(`${file.replace(`${process.cwd()}/`, '')}:${index + 1}`);
                 }
             });
@@ -139,6 +166,39 @@ describe('Swagger 성공 상태 코드 ↔ 실응답 대조 (e2e)', () => {
 
         expect(controllers.length).toBeGreaterThan(50);
         expect(offenders).toEqual([]);
+    });
+
+    it('영구 삭제 접수는 실제 HTTP와 Swagger가 모두 202이며 상태 조회는 200이다', async () => {
+        const adopter = await getAdopterToken(app);
+        expect(adopter?.token).toBeTruthy();
+        const path = '/api/v2/account-deletion';
+        const accepted = await request(app.getHttpServer())
+            .post(path)
+            .set('Authorization', `Bearer ${adopter!.token}`)
+            .send({ confirmation: 'DELETE_PERMANENTLY' })
+            .expect(202);
+        expect(documentedSuccess(path, 'post')).toEqual(['202']);
+        const { requestId, receiptToken } = accepted.body.data;
+        expect(accepted.body.data.status).toBe('pending');
+        const status = await request(app.getHttpServer())
+            .post(`${path}/status`)
+            .send({ requestId, receiptToken })
+            .expect(200);
+        expect(documentedSuccess(`${path}/status`, 'post')).toEqual(['200']);
+        expect(status.body.data).toMatchObject({ requestId, status: 'pending' });
+    });
+
+    it('관리자 백업은 외부 실행 없이도 실제 HTTP와 Swagger의 202 접수 계약을 유지한다', async () => {
+        const adminToken = await getAdminToken(app);
+        expect(adminToken).toBeTruthy();
+        const path = '/api/platform-admin/backups';
+        const accepted = await request(app.getHttpServer())
+            .post(path)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .expect(202);
+        expect(documentedSuccess(path, 'post')).toEqual(['202']);
+        expect(backupRequest).toHaveBeenCalledWith(expect.any(String), 'request');
+        expect(accepted.body.data.requestId).toBe('contract-backup');
     });
 
     it('공개 POST: 실제 응답이 201 이 아니라 문서대로 200 이다', async () => {

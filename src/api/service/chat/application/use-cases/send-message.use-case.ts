@@ -1,4 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
+import { AccountWriteFenceService } from '../../../../../common/account-write-fence/account-write-fence.service';
 
 import { CHAT_ROOM_MANAGER, type ChatRoomManagerPort } from '../ports/chat-room-manager.port';
 import {
@@ -32,6 +33,7 @@ export class SendMessageUseCase {
         private readonly chatPolicyService: ChatPolicyService,
         private readonly chatMessageMapperService: ChatMessageMapperService,
         private readonly logger: CustomLoggerService,
+        private readonly writeFence: AccountWriteFenceService,
     ) {}
 
     async execute(
@@ -68,31 +70,37 @@ export class SendMessageUseCase {
             this.chatPolicyService.requireNotBlocked(isBlocked);
             const messageType = command.messageType ?? MessageType.TEXT;
 
-            const message = await this.chatMessageManager.createMessage({
-                ...(command.clientMessageId ? { clientMessageId: command.clientMessageId } : {}),
-                roomId: command.roomId,
-                senderId,
-                senderRole,
-                receiverId: receiver.userId,
-                content: command.content,
-                messageType,
-            });
+            // 수신자 삭제도 다른 사용자의 진행 중 전송을 기다리도록 양쪽 계정에 lease를 둔다.
+            return await this.writeFence.runWithLease(
+                { accountId: receiver.userId, role: receiver.role, operation: 'chat:receive_message' },
+                async () => {
+                    const message = await this.chatMessageManager.createMessage({
+                        ...(command.clientMessageId ? { clientMessageId: command.clientMessageId } : {}),
+                        roomId: command.roomId,
+                        senderId,
+                        senderRole,
+                        receiverId: receiver.userId,
+                        content: command.content,
+                        messageType,
+                    });
 
-            if (message.isDuplicate) {
-                if (message.content !== command.content || message.messageType !== messageType) {
-                    throw new DomainValidationError('같은 메시지 식별자로 다른 내용을 전송할 수 없습니다.');
-                }
-                // 이미 저장된 재시도는 읽지 않음 수·방 정렬·브로드캐스트를 다시 변경하지 않는다.
-                return { ...message, brokerPublished: true };
-            }
+                    if (message.isDuplicate) {
+                        if (message.content !== command.content || message.messageType !== messageType) {
+                            throw new DomainValidationError('같은 메시지 식별자로 다른 내용을 전송할 수 없습니다.');
+                        }
+                        // 이미 저장된 재시도는 읽지 않음 수·방 정렬·브로드캐스트를 다시 변경하지 않는다.
+                        return { ...message, brokerPublished: true };
+                    }
 
-            await this.chatRoomManager.updateRoomLastMessage(command.roomId, command.content);
-            const brokerPublished = await this.chatMessageBroker.publishMessage(
-                this.chatMessageMapperService.toBroadcastPayload(message),
+                    await this.chatRoomManager.updateRoomLastMessage(command.roomId, command.content);
+                    const brokerPublished = await this.chatMessageBroker.publishMessage(
+                        this.chatMessageMapperService.toBroadcastPayload(message),
+                    );
+
+                    this.logger.logSuccess('sendMessage', '채팅 메시지 전송 완료', { messageId: message.id });
+                    return { ...message, brokerPublished };
+                },
             );
-
-            this.logger.logSuccess('sendMessage', '채팅 메시지 전송 완료', { messageId: message.id });
-            return { ...message, brokerPublished };
         } catch (error) {
             this.logger.logError('sendMessage', '채팅 메시지 전송', error);
             throw error;
