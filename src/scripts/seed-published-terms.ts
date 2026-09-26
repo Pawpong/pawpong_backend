@@ -6,6 +6,7 @@ import { PUBLISHED_TERMS } from '../common/data/published-terms.data';
 import { Terms, TermsSchema } from '../schema/terms.schema';
 
 const SEED_CONFIRMATION_VARIABLE = 'PAWPONG_ALLOW_TERMS_SEED';
+const CONTENT_RIGHTS_CONFIRMATION_VARIABLE = 'PAWPONG_ALLOW_CONTENT_RIGHTS_ROLLOUT';
 
 /**
  * 실제 서비스 약관을 MONGODB_URI 가 가리키는 DB에 발행한다.
@@ -17,6 +18,11 @@ const SEED_CONFIRMATION_VARIABLE = 'PAWPONG_ALLOW_TERMS_SEED';
 async function seedPublishedTerms(): Promise<void> {
     if (process.env[SEED_CONFIRMATION_VARIABLE] !== 'true') {
         throw new Error(`${SEED_CONFIRMATION_VARIABLE}=true 를 명시해야 약관 시더를 실행할 수 있습니다.`);
+    }
+    if (process.env[CONTENT_RIGHTS_CONFIRMATION_VARIABLE] !== 'true') {
+        throw new Error(
+            `${CONTENT_RIGHTS_CONFIRMATION_VARIABLE}=true 를 명시해야 새 게시물 이용 조항을 발행할 수 있습니다. 기존 게시물 재동의·노출 제한과 사전 공지를 먼저 준비하세요.`,
+        );
     }
 
     const mongodbUri = process.env.MONGODB_URI;
