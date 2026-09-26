@@ -14,6 +14,11 @@ export interface AiImageJobSnapshot {
     negativePromptSnapshot: string;
     modelSnapshot: string;
     outputSizeSnapshot: string;
+    referenceImageObjectKeysSnapshot: string[];
+    inputFidelitySnapshot: 'low' | 'high';
+    postProcessTypeSnapshot: 'none' | 'pixelate';
+    pixelSizeSnapshot: number;
+    paletteSizeSnapshot: number;
     attempt: number;
     errorCode: string | null;
     completedAt: Date | null;

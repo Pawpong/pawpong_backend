@@ -64,6 +64,8 @@ export class AiImagePreviewGrpcAdapter implements AiImagePreviewPort, OnModuleIn
                             pixelSize: command.pixelSize,
                             paletteSize: command.paletteSize,
                         },
+                        referenceImageObjectKeys: command.referenceImageObjectKeys,
+                        inputFidelity: command.inputFidelity,
                     }) as unknown as import('rxjs').Observable<GenerateFilterPreviewGrpcResponse>
                 ).pipe(timeout(AiImagePreviewGrpcAdapter.CALL_TIMEOUT_MS)),
             );

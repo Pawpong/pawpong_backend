@@ -35,6 +35,11 @@ export class AiImageFilterReaderAdapter implements AiImageFilterReaderPort {
             model: filter.model,
             outputSize: filter.outputSize ?? '1024x1024',
             referenceImageObjectKeys: filter.referenceImageObjectKeys ?? [],
+            // 설정 도입 전 필터는 예전 동작(도트 96/48)과 같게 읽는다
+            postProcessType: filter.postProcessType ?? 'pixelate',
+            pixelSize: filter.pixelSize ?? 96,
+            paletteSize: filter.paletteSize ?? 48,
+            inputFidelity: filter.inputFidelity ?? 'high',
             isActive: filter.isActive ?? true,
             sortOrder: filter.sortOrder ?? 0,
             createdAt: filter.createdAt,

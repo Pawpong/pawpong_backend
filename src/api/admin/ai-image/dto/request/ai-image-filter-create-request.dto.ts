@@ -1,5 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsBoolean, IsInt, IsNotEmpty, IsOptional, IsString, MaxLength, Min } from 'class-validator';
+import {
+    ArrayMaxSize,
+    IsArray,
+    IsBoolean,
+    IsIn,
+    IsInt,
+    IsNotEmpty,
+    IsOptional,
+    IsString,
+    Max,
+    MaxLength,
+    Min,
+} from 'class-validator';
 
 export class AiImageFilterCreateRequestDto {
     @ApiProperty({ description: '필터명 (사용자 노출)', example: '포근한 버섯 상점' })
@@ -41,11 +53,36 @@ export class AiImageFilterCreateRequestDto {
     @IsString()
     outputSize?: string;
 
-    @ApiPropertyOptional({ description: '스타일 레퍼런스 이미지 S3 파일키 목록', type: [String] })
+    @ApiPropertyOptional({ description: '스타일 레퍼런스 이미지 S3 파일키 목록 (최대 4장)', type: [String] })
     @IsOptional()
     @IsArray()
+    @ArrayMaxSize(4)
     @IsString({ each: true })
     referenceImageObjectKeys?: string[];
+
+    @ApiPropertyOptional({ description: '생성 후처리 (기본 pixelate — 포퐁 도트 콘셉트)', enum: ['none', 'pixelate'] })
+    @IsOptional()
+    @IsIn(['none', 'pixelate'])
+    postProcessType?: 'none' | 'pixelate';
+
+    @ApiPropertyOptional({ description: '도트 해상도(장축 픽셀 수)', example: 96, minimum: 16, maximum: 512 })
+    @IsOptional()
+    @IsInt()
+    @Min(16)
+    @Max(512)
+    pixelSize?: number;
+
+    @ApiPropertyOptional({ description: '팔레트 색 수', example: 48, minimum: 2, maximum: 256 })
+    @IsOptional()
+    @IsInt()
+    @Min(2)
+    @Max(256)
+    paletteSize?: number;
+
+    @ApiPropertyOptional({ description: '원본 보존 강도 (high: 얼굴·무늬 보존↑, 비용↑)', enum: ['low', 'high'] })
+    @IsOptional()
+    @IsIn(['low', 'high'])
+    inputFidelity?: 'low' | 'high';
 
     @ApiPropertyOptional({ description: '사용자 노출 여부', example: true })
     @IsOptional()

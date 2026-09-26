@@ -72,6 +72,24 @@ export class AiImageJob {
     @Prop({ default: '1024x1024' })
     outputSizeSnapshot: string;
 
+    /** 생성 시점 레퍼런스 파일키 스냅샷 */
+    @Prop({ type: [String], default: [] })
+    referenceImageObjectKeysSnapshot: string[];
+
+    /** 생성 시점 원본 보존 강도 스냅샷 */
+    @Prop({ type: String, default: 'low' })
+    inputFidelitySnapshot: 'low' | 'high';
+
+    /** 생성 시점 후처리 스냅샷 (설정 도입 전 작업은 도트 기본값) */
+    @Prop({ type: String, default: 'pixelate' })
+    postProcessTypeSnapshot: 'none' | 'pixelate';
+
+    @Prop({ default: 96 })
+    pixelSizeSnapshot: number;
+
+    @Prop({ default: 48 })
+    paletteSizeSnapshot: number;
+
     /** 시도 횟수 (관리자 재시도 시 증가) */
     @Prop({ default: 1 })
     attempt: number;

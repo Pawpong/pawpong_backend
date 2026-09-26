@@ -8,6 +8,10 @@ export interface AiImageFilterCreateCommand {
     model: string;
     outputSize?: string;
     referenceImageObjectKeys?: string[];
+    postProcessType?: 'none' | 'pixelate';
+    pixelSize?: number;
+    paletteSize?: number;
+    inputFidelity?: 'low' | 'high';
     isActive?: boolean;
     sortOrder?: number;
 }

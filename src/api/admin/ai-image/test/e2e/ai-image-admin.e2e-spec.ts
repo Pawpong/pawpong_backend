@@ -47,6 +47,11 @@ describe('AI 이미지 관리자 종단간 테스트', () => {
             expect(response.body.success).toBe(true);
             expect(response.body.data.name).toBe('포근한 버섯 상점');
             expect(response.body.data.isActive).toBe(true);
+            // 포퐁 도트 콘셉트 — 설정을 주지 않으면 도트 후처리·원본 보존 high 로 저장된다
+            expect(response.body.data.postProcessType).toBe('pixelate');
+            expect(response.body.data.pixelSize).toBe(96);
+            expect(response.body.data.paletteSize).toBe(48);
+            expect(response.body.data.inputFidelity).toBe('high');
             createdFilterId = response.body.data.filterId;
         });
 
@@ -70,6 +75,26 @@ describe('AI 이미지 관리자 종단간 테스트', () => {
 
             expect(response.body.data.prompt).toBe('수정된 프롬프트');
             expect(response.body.data.isActive).toBe(false);
+        });
+
+        it('필터 수정 — 도트 설정 변경', async () => {
+            const response = await request(app.getHttpServer())
+                .patch(`/api/ai-image-admin/filter/${createdFilterId}`)
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({ postProcessType: 'pixelate', pixelSize: 64, paletteSize: 16, inputFidelity: 'low' })
+                .expect(200);
+
+            expect(response.body.data.pixelSize).toBe(64);
+            expect(response.body.data.paletteSize).toBe(16);
+            expect(response.body.data.inputFidelity).toBe('low');
+        });
+
+        it('도트 해상도 범위를 벗어나면 400', async () => {
+            await request(app.getHttpServer())
+                .patch(`/api/ai-image-admin/filter/${createdFilterId}`)
+                .set('Authorization', `Bearer ${adminToken}`)
+                .send({ pixelSize: 4 })
+                .expect(400);
         });
 
         it('잘못된 필터 ID 형식으로 수정 시 400', async () => {

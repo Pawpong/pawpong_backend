@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsIn, IsInt, IsNotEmpty, IsOptional, IsString, Max, Min } from 'class-validator';
 import { Type } from 'class-transformer';
 
 /** 필터 저장 전에 프롬프트를 즉시 시험해보는 요청 */
@@ -49,4 +49,16 @@ export class AiImageFilterPreviewRequestDto {
     @Min(2)
     @Max(256)
     paletteSize?: number;
+
+    @ApiPropertyOptional({ description: '스타일 레퍼런스 파일키 (최대 4장)', type: [String] })
+    @IsOptional()
+    @IsArray()
+    @ArrayMaxSize(4)
+    @IsString({ each: true })
+    referenceImageObjectKeys?: string[];
+
+    @ApiPropertyOptional({ description: '원본 보존 강도', enum: ['low', 'high'], example: 'high' })
+    @IsOptional()
+    @IsIn(['low', 'high'])
+    inputFidelity?: 'low' | 'high';
 }

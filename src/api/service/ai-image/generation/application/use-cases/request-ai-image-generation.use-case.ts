@@ -74,6 +74,11 @@ export class RequestAiImageGenerationUseCase {
             negativePromptSnapshot: filter.negativePrompt,
             modelSnapshot: filter.model,
             outputSizeSnapshot: filter.outputSize,
+            referenceImageObjectKeysSnapshot: filter.referenceImageObjectKeys,
+            inputFidelitySnapshot: filter.inputFidelity,
+            postProcessTypeSnapshot: filter.postProcessType,
+            pixelSizeSnapshot: filter.pixelSize,
+            paletteSizeSnapshot: filter.paletteSize,
         });
 
         const outputObjectKey = this.objectKey.resolveResultKey(job.jobId);
@@ -89,6 +94,13 @@ export class RequestAiImageGenerationUseCase {
                 negativePrompt: job.negativePromptSnapshot,
                 model: job.modelSnapshot,
                 outputSize: job.outputSizeSnapshot,
+                referenceImageObjectKeys: job.referenceImageObjectKeysSnapshot,
+                inputFidelity: job.inputFidelitySnapshot,
+                postProcess: {
+                    type: job.postProcessTypeSnapshot,
+                    pixelSize: job.pixelSizeSnapshot,
+                    paletteSize: job.paletteSizeSnapshot,
+                },
                 requestedAt: new Date().toISOString(),
             });
         } catch (error) {

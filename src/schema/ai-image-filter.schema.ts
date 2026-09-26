@@ -49,6 +49,28 @@ export class AiImageFilter {
     @Prop({ type: [String], default: [] })
     referenceImageObjectKeys: string[];
 
+    /**
+     * 생성 후처리. 포퐁 콘셉트가 도트 그림이라 기본값은 pixelate 다.
+     * 모델이 만든 '도트 느낌' 이미지를 실제 픽셀 격자로 스냅시켜 결과물 톤을 통일한다.
+     */
+    @Prop({ type: String, enum: ['none', 'pixelate'], default: 'pixelate' })
+    postProcessType: 'none' | 'pixelate';
+
+    /** 도트 해상도 (축소 후 장축 픽셀 수, 낮을수록 굵은 도트) */
+    @Prop({ default: 96 })
+    pixelSize: number;
+
+    /** 도트 팔레트 색 수 (낮을수록 레트로) */
+    @Prop({ default: 48 })
+    paletteSize: number;
+
+    /**
+     * 원본 보존 강도. high 는 반려동물의 얼굴·털 무늬를 더 강하게 살린다(OpenAI 비용 증가).
+     * "우리 아이"가 알아볼 수 있어야 하는 콘테스트 특성상 기본값은 high 다.
+     */
+    @Prop({ type: String, enum: ['low', 'high'], default: 'high' })
+    inputFidelity: 'low' | 'high';
+
     /** 사용자 노출 여부 (false 면 목록에서 제외) */
     @Prop({ default: true, index: true })
     isActive: boolean;
