@@ -212,7 +212,7 @@ export class BreederProfile {
     };
 
     /**
-     * 브리더 대표 사진 URL 배열 (최대 3장 제한)
+     * 브리더 대표 사진 URL 배열 (최대 4장 제한)
      */
     @Prop({ type: [String], validate: [arrayLimit, '{PATH} exceeds the limit of 3'], default: [] })
     representativePhotos: string[];

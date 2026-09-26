@@ -32,8 +32,8 @@ export class BreederManagementProfileUpdateMapperService {
         }
 
         if (updateData.profilePhotos) {
-            if (updateData.profilePhotos.length > 3) {
-                throw new DomainValidationError('프로필 사진은 최대 3장까지만 업로드할 수 있습니다.');
+            if (updateData.profilePhotos.length > 4) {
+                throw new DomainValidationError('프로필 사진은 최대 4장까지만 업로드할 수 있습니다.');
             }
 
             profileUpdateData['profile.representativePhotos'] = updateData.profilePhotos;

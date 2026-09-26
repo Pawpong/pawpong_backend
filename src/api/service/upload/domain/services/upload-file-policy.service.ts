@@ -24,8 +24,8 @@ export class UploadFilePolicyService {
             throw new DomainValidationError('파일이 업로드되지 않았습니다.');
         }
 
-        if (files.length > 3) {
-            throw new DomainValidationError('대표 사진은 최대 3장까지 업로드 가능합니다.');
+        if (files.length > 4) {
+            throw new DomainValidationError('대표 사진은 최대 4장까지 업로드 가능합니다.');
         }
 
         files.forEach((file) => this.validateMediaFile(file));
