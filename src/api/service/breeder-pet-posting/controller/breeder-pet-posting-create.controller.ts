@@ -2,6 +2,7 @@ import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
+import { RequireContentRights } from '../../../../common/content-rights/require-content-rights.decorator';
 
 import { CreateBreederPetPostingUseCase } from '../application/use-cases/create-breeder-pet-posting.use-case';
 import { BREEDER_PET_POSTING_RESPONSE_MESSAGES } from '../constants/breeder-pet-posting-response-messages';
@@ -19,6 +20,7 @@ export class BreederPetPostingCreateController {
     constructor(private readonly createUseCase: CreateBreederPetPostingUseCase) {}
 
     @Post()
+    @RequireContentRights()
     @HttpCode(HttpStatus.OK)
     @ApiCreateBreederPetPostingEndpoint()
     async create(

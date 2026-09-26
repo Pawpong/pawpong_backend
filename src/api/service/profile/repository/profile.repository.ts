@@ -5,6 +5,7 @@ import { Model, Types } from 'mongoose';
 import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
 import { AvailablePet, AvailablePetDocument } from '../../../../schema/available-pet.schema';
 import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
+import { CONTENT_RIGHTS_VERSION, isIosAppRequest } from '../../../../common/content-rights/app-request-context';
 
 type FavoriteBreederEntry = { favoriteBreederId: string };
 type FavoriteBreederListProjection = { favoriteBreederList?: FavoriteBreederEntry[] };
@@ -38,7 +39,7 @@ export class ProfileRepository {
         const objectIds = adopterIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
         if (objectIds.length === 0) return [];
         return this.adopterModel
-            .find({ _id: { $in: objectIds } })
+            .find({ _id: { $in: objectIds }, ...(isIosAppRequest() ? { contentRightsConsentVersion: CONTENT_RIGHTS_VERSION } : {}) })
             .lean<AdopterDocument[]>()
             .exec();
     }
@@ -47,7 +48,7 @@ export class ProfileRepository {
         const objectIds = breederIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
         if (objectIds.length === 0) return [];
         return this.breederModel
-            .find({ _id: { $in: objectIds } })
+            .find({ _id: { $in: objectIds }, ...(isIosAppRequest() ? { contentRightsConsentVersion: CONTENT_RIGHTS_VERSION } : {}) })
             .lean<BreederDocument[]>()
             .exec();
     }

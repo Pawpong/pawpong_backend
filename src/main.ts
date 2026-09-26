@@ -12,6 +12,7 @@ import path from 'path';
 import { HttpExceptionFilter, AllExceptionsFilter } from './common/filter/http-exception.filter';
 import { HttpStatusInterceptor } from './common/interceptor/http-status.interceptor';
 import { httpRequestLogging } from './common/logger/http-request-logging';
+import { runWithAppRequest } from './common/content-rights/app-request-context';
 
 import { CustomLoggerService } from './common/logger/custom-logger.service';
 import { NotifyCriticalErrorUseCase } from './common/discord/application/use-cases/notify-critical-error.use-case';
@@ -44,6 +45,7 @@ async function bootstrap(): Promise<void> {
 
     // 쿠키 파서 미들웨어 적용
     app.use(cookieParser());
+    app.use((req, _res, next) => runWithAppRequest(req.headers['user-agent'], next));
     app.use(httpRequestLogging(app.get(CustomLoggerService)));
 
     // HTTP 연결 최적화 설정

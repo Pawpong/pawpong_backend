@@ -23,6 +23,7 @@ import { AppSplashModule } from './api/service/app-splash/app-splash.module';
 import { DeepLinkModule } from './api/service/deep-link/deep-link.module';
 import { AuthModule } from './api/service/auth/auth.module';
 import { AccountDeletionModule } from './api/service/account-deletion/account-deletion.module';
+import { ContentRightsModule } from './api/service/content-rights/content-rights.module';
 import { BreedModule } from './api/service/breed/breed.module';
 import { BreederAdminModule } from './api/admin/breeder/breeder-admin.module';
 import { BreederManagementModule } from './api/service/breeder-management/breeder-management.module';
@@ -73,6 +74,7 @@ const APP_FOUNDATION_MODULES = [
 const APP_API_MODULES = [
     AuthModule,
     AccountDeletionModule,
+    ContentRightsModule,
     HomeModule,
     HomeAdminModule,
     BreederModule,

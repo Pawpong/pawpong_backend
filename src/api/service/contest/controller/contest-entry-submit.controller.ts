@@ -2,6 +2,7 @@ import { BadRequestException, Body, HttpCode, HttpStatus, Post } from '@nestjs/c
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
+import { RequireContentRights } from '../../../../common/content-rights/require-content-rights.decorator';
 import { SubmitContestEntryUseCase } from '../application/use-cases/submit-contest-entry.use-case';
 import { ContestProtectedController } from '../decorator/contest-controller.decorator';
 import { SubmitContestEntryRequestDto } from '../dto/request/submit-contest-entry-request.dto';
@@ -16,6 +17,7 @@ export class ContestEntrySubmitController {
     constructor(private readonly submitContestEntryUseCase: SubmitContestEntryUseCase) {}
 
     @Post('entry')
+    @RequireContentRights()
     @HttpCode(HttpStatus.OK)
     @ApiSubmitContestEntryEndpoint()
     async submit(

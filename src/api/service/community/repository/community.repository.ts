@@ -9,6 +9,7 @@ import type {
     CommunityPostCreatePersistData,
     CommunityPostUpdateCommand,
 } from '../application/types/community-post-write.type';
+import { eligibleAppAuthorIds, isIosAppRequest } from '../../../../common/content-rights/app-request-context';
 
 /**
  * v2 커뮤니티 — Mongoose 직접 접근 캡슐화.
@@ -25,6 +26,9 @@ export class CommunityRepository {
 
     async listPosts(query: CommunityPostListQuery): Promise<{ docs: CommunityPostDocument[]; totalItems: number }> {
         const filter: FilterQuery<CommunityPost> = { isActive: true };
+        if (isIosAppRequest() && query.status !== 'draft') {
+            filter.$and = [{ authorId: { $in: await eligibleAppAuthorIds(this.postModel.db) } }];
+        }
         if (query.petType) filter.petType = query.petType;
         if (query.category && query.category.trim().length > 0) filter.category = query.category.trim();
         if (query.authorId && Types.ObjectId.isValid(query.authorId)) {
@@ -111,8 +115,11 @@ export class CommunityRepository {
 
     async findPostById(postId: string): Promise<CommunityPostDocument | null> {
         if (!Types.ObjectId.isValid(postId)) return null;
+        const appAuthorFilter = isIosAppRequest()
+            ? { authorId: { $in: await eligibleAppAuthorIds(this.postModel.db) } }
+            : {};
         return this.postModel
-            .findOne({ _id: new Types.ObjectId(postId), isActive: true })
+            .findOne({ _id: new Types.ObjectId(postId), isActive: true, ...appAuthorFilter })
             .lean<CommunityPostDocument>()
             .exec();
     }
@@ -120,9 +127,12 @@ export class CommunityRepository {
     async findPostsByIds(postIds: string[]): Promise<CommunityPostDocument[]> {
         const objectIds = postIds.filter((id) => Types.ObjectId.isValid(id)).map((id) => new Types.ObjectId(id));
         if (objectIds.length === 0) return [];
+        const appAuthorFilter = isIosAppRequest()
+            ? { authorId: { $in: await eligibleAppAuthorIds(this.postModel.db) } }
+            : {};
         // 저장 목록은 발행 글만 노출 (임시저장 방어). 레거시(status 미기재) 글은 발행으로 취급.
         return this.postModel
-            .find({ _id: { $in: objectIds }, isActive: true, status: { $ne: 'draft' } })
+            .find({ _id: { $in: objectIds }, isActive: true, status: { $ne: 'draft' }, ...appAuthorFilter })
             .lean<CommunityPostDocument[]>()
             .exec();
     }
@@ -133,7 +143,10 @@ export class CommunityRepository {
      */
     async existsActivePost(postId: string): Promise<boolean> {
         if (!Types.ObjectId.isValid(postId)) return false;
-        const found = await this.postModel.exists({ _id: new Types.ObjectId(postId), isActive: true });
+        const appAuthorFilter = isIosAppRequest()
+            ? { authorId: { $in: await eligibleAppAuthorIds(this.postModel.db) } }
+            : {};
+        const found = await this.postModel.exists({ _id: new Types.ObjectId(postId), isActive: true, ...appAuthorFilter });
         return Boolean(found);
     }
 
@@ -190,10 +203,16 @@ export class CommunityRepository {
         if (!Types.ObjectId.isValid(query.postId)) {
             return { docs: [], totalItems: 0 };
         }
+        if (isIosAppRequest() && !(await this.existsActivePost(query.postId))) {
+            return { docs: [], totalItems: 0 };
+        }
         const filter: FilterQuery<CommunityPostComment> = {
             postId: new Types.ObjectId(query.postId),
             isActive: true,
         };
+        if (isIosAppRequest()) {
+            filter.authorId = { $in: await eligibleAppAuthorIds(this.commentModel.db) };
+        }
 
         const [docs, totalItems] = await Promise.all([
             this.commentModel
@@ -222,11 +241,14 @@ export class CommunityRepository {
             return [];
         }
 
+        const appAuthorFilter = isIosAppRequest()
+            ? { authorId: { $in: await eligibleAppAuthorIds(this.commentModel.db) } }
+            : {};
         const rows = await this.commentModel
             .aggregate<{
                 latest: CommunityPostCommentDocument;
             }>([
-                { $match: { postId: { $in: objectIds }, isActive: true } },
+                { $match: { postId: { $in: objectIds }, isActive: true, ...appAuthorFilter } },
                 { $sort: { postId: 1, createdAt: -1 } },
                 { $group: { _id: '$postId', latest: { $first: '$$ROOT' } } },
             ])

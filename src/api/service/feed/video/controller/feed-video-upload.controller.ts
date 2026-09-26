@@ -1,4 +1,5 @@
 import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { RequireContentRights } from '../../../../../common/content-rights/require-content-rights.decorator';
 import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Body, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
 
@@ -21,6 +22,7 @@ export class FeedVideoUploadController {
     ) {}
 
     @Post('videos/upload-url')
+    @RequireContentRights()
     @HttpCode(HttpStatus.OK)
     @ApiGetFeedVideoUploadUrlEndpoint()
     async getUploadUrl(
@@ -41,6 +43,7 @@ export class FeedVideoUploadController {
     }
 
     @Post('videos/:videoId/upload-complete')
+    @RequireContentRights()
     @HttpCode(HttpStatus.OK)
     @ApiCompleteFeedVideoUploadEndpoint()
     async completeUpload(

@@ -5,6 +5,7 @@ import { Model } from 'mongoose';
 import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
 import type { FavoriteBreederRecord } from '../application/ports/adopter-profile.port';
 import type { AdopterBreederRecord } from '../types/adopter-breeder.type';
+import { CONTENT_RIGHTS_VERSION, isIosAppRequest } from '../../../../common/content-rights/app-request-context';
 
 @Injectable()
 export class AdopterBreederFavoriteRepository {
@@ -12,7 +13,7 @@ export class AdopterBreederFavoriteRepository {
 
     findById(breederId: string): Promise<AdopterBreederRecord | null> {
         return this.breederModel
-            .findById(breederId)
+            .findOne({ _id: breederId, ...(isIosAppRequest() ? { contentRightsConsentVersion: CONTENT_RIGHTS_VERSION } : {}) })
             .select('-password')
             .lean()
             .exec() as Promise<AdopterBreederRecord | null>;
@@ -24,7 +25,15 @@ export class AdopterBreederFavoriteRepository {
         limit: number,
     ): Promise<{ favorites: FavoriteBreederRecord[]; total: number }> {
         const breeder = await this.breederModel.findById(breederId).select('favoriteBreederList').lean().exec();
-        const allFavorites = breeder?.favoriteBreederList || [];
+        let allFavorites = breeder?.favoriteBreederList || [];
+        if (isIosAppRequest() && allFavorites.length > 0) {
+            const approvedIds = await this.breederModel.distinct('_id', {
+                _id: { $in: allFavorites.map((item) => item.favoriteBreederId) },
+                contentRightsConsentVersion: CONTENT_RIGHTS_VERSION,
+            });
+            const approved = new Set(approvedIds.map(String));
+            allFavorites = allFavorites.filter((item) => approved.has(item.favoriteBreederId));
+        }
         const startIndex = (page - 1) * limit;
 
         return {
