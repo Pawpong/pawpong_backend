@@ -1,5 +1,7 @@
 export const COMMUNITY_RESPONSE_MESSAGES = {
     listRetrieved: '커뮤니티 게시글 목록 조회 성공',
+    hallOfFameCurrentRetrieved: '이번 회차 명예의 전당 조회 성공',
+    hallOfFameHistoryRetrieved: '지난 회차 명예의 전당 조회 성공',
     detailRetrieved: '커뮤니티 게시글 조회 성공',
     commentsRetrieved: '커뮤니티 게시글 댓글 조회 성공',
     created: '게시글이 등록되었습니다.',
