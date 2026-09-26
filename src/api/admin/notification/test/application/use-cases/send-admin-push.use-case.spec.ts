@@ -27,8 +27,27 @@ describe('SendAdminPushUseCase', () => {
 
     const validCmd = () => ({
         target: { type: 'all_adopters' as const },
+        purpose: 'service' as const,
         title: '공지 제목',
         body: '공지 본문',
+    });
+
+    it('마케팅 알림은 동의한 수신자에게만 앱 알림과 푸시를 보낸다', async () => {
+        recipientReader.readRecipients.mockResolvedValueOnce([
+            { userId: 'a-1', userRole: 'adopter', tokens: ['t-1'], marketingAgreed: true },
+            { userId: 'a-2', userRole: 'adopter', tokens: ['t-2'], marketingAgreed: false },
+        ]);
+        notificationPush.sendToTokens.mockResolvedValueOnce([
+            { token: 't-1', success: true, invalidToken: false },
+        ]);
+
+        const result = await useCase.execute({ ...validCmd(), purpose: 'marketing' });
+
+        expect(notificationCommand.createMany).toHaveBeenCalledWith([
+            expect.objectContaining({ userId: 'a-1' }),
+        ]);
+        expect(notificationPush.sendToTokens).toHaveBeenCalledWith(['t-1'], expect.anything());
+        expect(result.recipients).toBe(1);
     });
 
     it('target 검증 실패 → BadRequest, downstream 호출 안 함', async () => {
