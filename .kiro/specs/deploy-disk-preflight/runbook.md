@@ -71,6 +71,17 @@ bash scripts/check-deploy-disk.sh
 
 확보할 수 있는 안전한 후보가 부족하면 보호 대상을 삭제하지 말고 디스크 확장 또는 별도의 보존 정책 결정을 진행한다. 공간 확보 후 서비스 health를 확인하고, 중단했던 배포를 재실행한다. 이 스크립트는 자동 정리·컨테이너 재시작·볼륨 삭제를 하지 않는다.
 
+## 운영 주간 자동 정리
+
+`main`의 `.github/workflows/prod-docker-cleanup.yml`은 매주 일요일 03:37 KST에 별도 작업으로 실행한다. 운영 배포와 같은 GitHub Actions concurrency group을 사용하므로 두 작업은 동시에 실행되지 않는다. `scripts/cleanup-prod-docker.py`는 기본값이 dry-run이며 CI에서만 `--execute`를 전달한다.
+
+- `.deploy_history`와 `.last_deploy`의 모든 태그, `latest`, 실행 중이거나 정지된 컨테이너의 이미지 ID를 보호한다. 이력이 없거나 현재 `pawpong-backend:latest`가 없으면 삭제 전에 실패한다.
+- 정확히 `pawpong-backend`, `pawpong-ai-agent`, `pawpong-backup`의 로컬 태그 또는 `asia-northeast3-docker.pkg.dev/pawpong/pawpong-docker/` 아래 같은 이름의 레지스트리 태그로만 구성된 이미지 ID 중 **14일 이상** 지난 후보만 명시적인 전체 태그로 삭제한다. 같은 ID에 다른 저장소 태그가 섞여 있으면 건너뛴다. 레지스트리 경로가 바뀌면 정리 코드도 함께 검토한다. 이는 30일 수동 기본 기준과 별도인, 이력·컨테이너를 자동 확인하는 운영 정책이다.
+- 14일 지난 dangling 이미지는 Docker 기본 `image prune`으로, 30일 지난 미사용 빌드 캐시는 `builder prune`으로 정리한다. `image prune -a`, 강제 삭제, 컨테이너·볼륨·네트워크 삭제는 하지 않는다.
+- Control 또는 수동 배포는 GitHub concurrency group에 포함되지 않는다. 해당 경로에서 동시에 배포 중이면 주간 정리와 시간을 분리해야 한다. 이미지 참조가 바뀌어 삭제 명령이 거부되면 강제하지 않고 작업을 실패시킨다.
+
+주간 정리는 배포 전 용량 검사를 대체하지 않는다. 이미 여유 공간이 부족한 배포는 `scripts/check-deploy-disk.sh`에서 그대로 중단된다. `rollback.sh`가 이력의 일부 `control-env-*` 항목에 대해 로컬 이미지를 찾지 못하는 기존 문제도 주간 정리로 해결되지 않는다.
+
 ## 이번 변경에서 수정하지 않은 배포 위험
 
 아래는 `main` 기준 `3f6d500d`에서 확인한 별도 개선 항목이다. 이 PR은 디스크 사전 검사와 수동 절차에 한정한다.
