@@ -57,6 +57,7 @@
         "migrate:available-pet-type": "node --env-file=.env -r ts-node/register src/scripts/migrate-available-pet-type.ts",
         "migrate:notification-target-url": "node --env-file=.env -r ts-node/register src/scripts/migrate-notification-community-target-url.ts",
         "token:reactivation": "node --env-file=.env -r ts-node/register src/scripts/issue-reactivation-token.ts",
+        "seed:ai-image-filter": "node --env-file=.env -r ts-node/register src/scripts/seed-default-ai-image-filter.ts",
         "sync:faqs:dev": "node --env-file=.env -r ts-node/register src/scripts/sync-development-faqs.ts",
         "create:admin": "ts-node scripts/create-admin.ts",
         "prepare": "husky || true"

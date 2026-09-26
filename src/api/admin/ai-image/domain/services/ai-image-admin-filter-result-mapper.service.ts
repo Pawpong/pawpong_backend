@@ -27,6 +27,12 @@ export class AiImageAdminFilterResultMapperService {
             model: snapshot.model,
             outputSize: snapshot.outputSize,
             referenceImageObjectKeys: snapshot.referenceImageObjectKeys,
+            // 어드민이 레퍼런스를 파일명이 아니라 그림으로 확인할 수 있게 URL 을 함께 준다
+            referenceImageUrls: snapshot.referenceImageObjectKeys.map((key) => this.assetUrl.toUrl(key) ?? ''),
+            postProcessType: snapshot.postProcessType,
+            pixelSize: snapshot.pixelSize,
+            paletteSize: snapshot.paletteSize,
+            inputFidelity: snapshot.inputFidelity,
             isActive: snapshot.isActive,
             sortOrder: snapshot.sortOrder,
             createdAt: snapshot.createdAt.toISOString(),

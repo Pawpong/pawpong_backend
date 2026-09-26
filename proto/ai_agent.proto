@@ -54,6 +54,10 @@ message GenerateFilterPreviewRequest {
     string model = 4;
     string output_size = 5;
     PostProcessOptions post_process = 6;
+    // 화풍 참고용 레퍼런스 S3 키 (원본 뒤에 붙여 모델에 함께 전달)
+    repeated string reference_image_object_keys = 7;
+    // low | high — high 는 원본 얼굴·무늬를 더 강하게 보존한다
+    string input_fidelity = 8;
 }
 
 message GenerateFilterPreviewResponse {

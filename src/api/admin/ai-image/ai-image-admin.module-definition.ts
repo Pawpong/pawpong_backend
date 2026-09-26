@@ -14,6 +14,7 @@ import { UpdateAiImageFilterUseCase } from './application/use-cases/update-ai-im
 import { DeleteAiImageFilterUseCase } from './application/use-cases/delete-ai-image-filter.use-case';
 import { GenerateAiImageFilterPreviewUseCase } from './application/use-cases/generate-ai-image-filter-preview.use-case';
 import { CreateAiImageAdminUploadUrlUseCase } from './application/use-cases/create-ai-image-admin-upload-url.use-case';
+import { UploadAiImageAdminAssetUseCase } from './application/use-cases/upload-ai-image-admin-asset.use-case';
 import { GetAiImageAgentHealthUseCase } from './application/use-cases/get-ai-image-agent-health.use-case';
 import { GetAiImageJobsUseCase } from './application/use-cases/get-ai-image-jobs.use-case';
 import { AiImageAdminFilterResultMapperService } from './domain/services/ai-image-admin-filter-result-mapper.service';
@@ -70,6 +71,7 @@ const AI_IMAGE_ADMIN_USE_CASE_PROVIDERS = [
     DeleteAiImageFilterUseCase,
     GenerateAiImageFilterPreviewUseCase,
     CreateAiImageAdminUploadUrlUseCase,
+    UploadAiImageAdminAssetUseCase,
     GetAiImageAgentHealthUseCase,
     GetAiImageJobsUseCase,
 ];

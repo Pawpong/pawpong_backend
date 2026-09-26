@@ -8,6 +8,7 @@ images.generate 는 맞지 않다.
 import base64
 import io
 import logging
+from typing import Sequence
 
 from openai import OpenAI
 
@@ -31,26 +32,52 @@ class OpenAiImageAdapter:
             timeout=settings.openai_timeout_seconds,
         )
 
-    def edit(self, image_bytes: bytes, prompt: str, negative_prompt: str, model: str, size: str) -> bytes:
-        """스타일 변환된 PNG 바이트를 돌려준다."""
+    def edit(
+        self,
+        image_bytes: bytes,
+        prompt: str,
+        negative_prompt: str,
+        model: str,
+        size: str,
+        reference_images: Sequence[bytes] = (),
+        input_fidelity: str = "low",
+    ) -> bytes:
+        """스타일 변환된 PNG 바이트를 돌려준다.
+
+        레퍼런스 이미지는 원본 뒤에 붙여 함께 보낸다. 첫 장이 변환 대상(반려동물 사진)이고
+        나머지는 화풍 참고용이라는 것을 프롬프트에 명시해야 모델이 레퍼런스 속 대상을 그리지 않는다.
+        input_fidelity=high 는 원본의 얼굴·털 무늬를 더 강하게 보존한다(비용↑). low 는 파라미터를
+        아예 보내지 않는다 — 기본값이면서 이 옵션을 모르는 모델에서도 안전하다.
+        """
         if not settings.openai_configured:
             raise OpenAiImageError("OPENAI_NOT_CONFIGURED", "OPENAI_API_KEY 미설정")
 
         # gpt-image-1 은 negative prompt 파라미터가 없어 프롬프트에 흡수시킨다
         full_prompt = prompt
+        if reference_images:
+            full_prompt = (
+                "The first image is the pet photo to transform. The remaining images are style references only: "
+                "match their art style, palette and mood, but keep the subject from the first image.\n\n"
+                f"{full_prompt}"
+            )
         if negative_prompt:
-            full_prompt = f"{prompt}\n\nAvoid: {negative_prompt}"
+            full_prompt = f"{full_prompt}\n\nAvoid: {negative_prompt}"
 
-        image_file = io.BytesIO(image_bytes)
-        image_file.name = "input.png"
+        images = [_named_file(image_bytes, "input.png")]
+        images += [_named_file(data, f"reference-{index}.png") for index, data in enumerate(reference_images, 1)]
+
+        options = {}
+        if input_fidelity == "high":
+            options["input_fidelity"] = "high"
 
         try:
             response = self._client.images.edit(
                 model=model or settings.openai_image_model,
-                image=image_file,
+                image=images if len(images) > 1 else images[0],
                 prompt=full_prompt,
                 size=size or "1024x1024",
                 n=1,
+                **options,
             )
         except Exception as error:  # noqa: BLE001 — SDK 예외 계층이 버전마다 달라 광범위 포착
             # API 키는 절대 로그에 남기지 않는다 (SDK 는 메시지에 키를 넣지 않음)
@@ -65,3 +92,10 @@ class OpenAiImageAdapter:
             raise OpenAiImageError("OPENAI_EMPTY_RESPONSE", "b64_json 누락")
 
         return base64.b64decode(encoded)
+
+
+def _named_file(data: bytes, name: str) -> io.BytesIO:
+    """SDK 가 multipart 파일명·MIME 을 확장자로 판단하므로 이름을 붙여 넘긴다."""
+    file = io.BytesIO(data)
+    file.name = name
+    return file

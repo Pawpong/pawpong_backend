@@ -8,6 +8,8 @@ export interface AiImagePreviewCommand {
     postProcessType: 'none' | 'pixelate';
     pixelSize: number;
     paletteSize: number;
+    referenceImageObjectKeys: string[];
+    inputFidelity: 'low' | 'high';
 }
 
 /** AI Agent 응답 */

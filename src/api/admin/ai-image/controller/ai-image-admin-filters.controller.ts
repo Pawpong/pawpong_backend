@@ -87,6 +87,8 @@ export class AiImageAdminFiltersController {
             postProcessType: body.postProcessType ?? 'pixelate',
             pixelSize: body.pixelSize ?? 96,
             paletteSize: body.paletteSize ?? 48,
+            referenceImageObjectKeys: body.referenceImageObjectKeys ?? [],
+            inputFidelity: body.inputFidelity ?? 'high',
         });
         return ApiResponseDto.success(result, AI_IMAGE_RESPONSE_MESSAGES.filterPreviewGenerated);
     }

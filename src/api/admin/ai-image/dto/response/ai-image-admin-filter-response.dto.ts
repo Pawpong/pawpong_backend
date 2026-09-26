@@ -32,6 +32,21 @@ export class AiImageAdminFilterResponseDto {
     @ApiProperty({ description: '레퍼런스 이미지 S3 파일키 목록', type: [String] })
     referenceImageObjectKeys: string[];
 
+    @ApiProperty({ description: '레퍼런스 이미지 URL 목록 (referenceImageObjectKeys 와 같은 순서)', type: [String] })
+    referenceImageUrls: string[];
+
+    @ApiProperty({ description: '생성 후처리', enum: ['none', 'pixelate'], example: 'pixelate' })
+    postProcessType: 'none' | 'pixelate';
+
+    @ApiProperty({ description: '도트 해상도(장축 픽셀 수)', example: 96 })
+    pixelSize: number;
+
+    @ApiProperty({ description: '팔레트 색 수', example: 48 })
+    paletteSize: number;
+
+    @ApiProperty({ description: '원본 보존 강도', enum: ['low', 'high'], example: 'high' })
+    inputFidelity: 'low' | 'high';
+
     @ApiProperty({ description: '사용자 노출 여부', example: true })
     isActive: boolean;
 

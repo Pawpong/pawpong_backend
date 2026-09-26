@@ -100,4 +100,40 @@ describe('AI 이미지 어드민 애셋 업로드 (e2e)', () => {
             .send({ purpose: 'thumbnail', contentType: 'image/png' })
             .expect(401);
     });
+
+    describe('서버 경유 업로드 (버킷 CORS 없이 브라우저에서 올리는 경로)', () => {
+        const png = Buffer.from(
+            'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+            'base64',
+        );
+
+        it('레퍼런스를 올리면 ai-image/reference 키와 URL 을 돌려준다', async () => {
+            const response = await request(app.getHttpServer())
+                .post('/api/ai-image-admin/asset')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .field('purpose', 'reference')
+                .attach('file', png, { filename: 'ref.png', contentType: 'image/png' })
+                .expect(200);
+
+            expect(response.body.data.objectKey).toMatch(/^ai-image\/reference\/[0-9a-f-]+\.png$/);
+            expect(response.body.data.imageUrl).toContain(response.body.data.objectKey);
+        });
+
+        it('파일 없이 요청하면 400', async () => {
+            await request(app.getHttpServer())
+                .post('/api/ai-image-admin/asset')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .field('purpose', 'reference')
+                .expect(400);
+        });
+
+        it('지원하지 않는 형식은 400', async () => {
+            await request(app.getHttpServer())
+                .post('/api/ai-image-admin/asset')
+                .set('Authorization', `Bearer ${adminToken}`)
+                .field('purpose', 'thumbnail')
+                .attach('file', Buffer.from('gif'), { filename: 'a.gif', contentType: 'image/gif' })
+                .expect(400);
+        });
+    });
 });

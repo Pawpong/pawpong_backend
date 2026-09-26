@@ -9,6 +9,11 @@ export interface AiImageJobCreateCommand {
     negativePromptSnapshot: string;
     modelSnapshot: string;
     outputSizeSnapshot: string;
+    referenceImageObjectKeysSnapshot: string[];
+    inputFidelitySnapshot: 'low' | 'high';
+    postProcessTypeSnapshot: 'none' | 'pixelate';
+    pixelSizeSnapshot: number;
+    paletteSizeSnapshot: number;
 }
 
 /** Kafka 요청 토픽 페이로드 (Python AI Agent 계약) */
@@ -23,6 +28,12 @@ export interface AiImageGenerationRequestedEvent {
     negativePrompt: string;
     model: string;
     outputSize: string;
+    /** 화풍 참고 이미지 파일키 — 원본과 함께 모델에 전달된다 */
+    referenceImageObjectKeys: string[];
+    /** low | high — high 는 원본 얼굴·무늬 보존을 강화한다 */
+    inputFidelity: 'low' | 'high';
+    /** 생성 후 도트 격자 스냅 설정 */
+    postProcess: { type: 'none' | 'pixelate'; pixelSize: number; paletteSize: number };
     requestedAt: string;
 }
 

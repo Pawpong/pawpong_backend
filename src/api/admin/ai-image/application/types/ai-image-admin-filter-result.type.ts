@@ -10,6 +10,11 @@ export interface AiImageAdminFilterResult {
     model: string;
     outputSize: string;
     referenceImageObjectKeys: string[];
+    referenceImageUrls: string[];
+    postProcessType: 'none' | 'pixelate';
+    pixelSize: number;
+    paletteSize: number;
+    inputFidelity: 'low' | 'high';
     isActive: boolean;
     sortOrder: number;
     createdAt: string;

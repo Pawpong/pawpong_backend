@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends build-essential
 # 런타임 의존성만 /install 로 격리한다
 RUN pip install --no-cache-dir --prefix=/install \
     aiokafka==0.12.0 boto3==1.35.99 grpcio==1.68.1 protobuf==5.29.2 \
-    langgraph==0.2.60 openai==1.59.7 pillow==11.1.0
+    langgraph==0.2.60 openai==1.109.1 pillow==11.1.0
 
 # 스텁 생성 도구는 빌더에만 설치 — 생성물을 리포에 커밋하지 않기 위해 빌드 시점에 만든다
 RUN pip install --no-cache-dir grpcio-tools==1.68.1

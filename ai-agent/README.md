@@ -26,6 +26,10 @@ NestJS ──gRPC GenerateFilterPreview──► AI Agent   (어드민 미리보
 normalize → generate → pixelate → upload
 ```
 
+- `normalize`: 원본 + 레퍼런스(최대 4장, 장축 1024) 다운로드·정규화. 레퍼런스는 못 읽으면 건너뛴다
+- `generate`: 원본을 첫 장, 레퍼런스를 뒤에 붙여 `images.edit`. `input_fidelity=high` 일 때만 파라미터를 보낸다
+- `pixelate`: 필터 `postProcess.type` 이 `pixelate` 일 때만 격자 스냅 (없으면 도트 기본값)
+
 각 단계가 실패하면 `error_code` 를 채우고 즉시 종료한다. 단계별 코드가 그대로
 `ai-image.result.v1` 의 `errorCode` 로 나가므로, 어디서 깨졌는지 결과만 보고 안다.
 

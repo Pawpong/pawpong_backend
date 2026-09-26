@@ -1,9 +1,10 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiParam } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiParam } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint } from '../../../../../common/decorator/swagger.decorator';
 import { AI_IMAGE_RESPONSE_MESSAGES } from '../../constants/ai-image-response-messages';
 import { AiImageUploadUrlResponseDto } from '../dto/response/ai-image-upload-url-response.dto';
+import { AiImageSourceUploadResponseDto } from '../dto/response/ai-image-source-upload-response.dto';
 import { AiImageGenerationResponseDto } from '../dto/response/ai-image-generation-response.dto';
 
 export function ApiAiImageProtectedController() {
@@ -31,6 +32,37 @@ export function ApiCreateAiImageUploadUrlEndpoint() {
                     errorExample: '지원하지 않는 이미지 형식입니다. (jpg, png, webp 만 가능)',
                 },
             ],
+        }),
+    );
+}
+
+export function ApiUploadAiImageSourceEndpoint() {
+    return applyDecorators(
+        ApiConsumes('multipart/form-data'),
+        ApiEndpoint({
+            summary: 'AI 원본 사진 업로드',
+            description: `
+                원본 사진을 서버 경유로 올리고 inputObjectKey 를 돌려줍니다.
+                웹·앱 웹뷰에서는 버킷 직업로드(presigned PUT)가 CORS 로 막히므로 이 API 를 씁니다.
+                지원 형식은 jpg/png/webp, 최대 10MB 입니다. HEIC 는 클라이언트에서 변환해야 합니다.
+            `,
+            responseType: AiImageSourceUploadResponseDto,
+            successDescription: '원본 업로드 성공',
+            successMessageExample: AI_IMAGE_RESPONSE_MESSAGES.sourceUploaded,
+            errorResponses: [
+                {
+                    status: 400,
+                    description: '파일 누락 또는 지원하지 않는 이미지 형식',
+                    errorExample: '지원하지 않는 이미지 형식입니다. (jpg, png, webp 만 가능)',
+                },
+            ],
+        }),
+        ApiBody({
+            schema: {
+                type: 'object',
+                required: ['file'],
+                properties: { file: { type: 'string', format: 'binary' } },
+            },
         }),
     );
 }
