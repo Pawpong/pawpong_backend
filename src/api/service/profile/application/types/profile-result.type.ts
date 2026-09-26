@@ -24,7 +24,7 @@ export interface MyProfileResult {
     plan?: 'basic' | 'pro';
     businessLocation?: BusinessLocationResult;
     longDescription?: string;
-    /** (브리더) 대표 사진 URL (최대 3장). 등록 전이면 빈 배열 */
+    /** (브리더) 대표 사진 URL (최대 4장). 등록 전이면 빈 배열 */
     representativePhotos?: string[];
 }
 
@@ -50,7 +50,7 @@ export interface BreederPublicProfileResult {
     followingCount: number;
     plan: 'basic' | 'pro';
     businessLocation: BusinessLocationResult;
-    /** 대표 사진 URL (최대 3장). 등록 전이면 빈 배열 */
+    /** 대표 사진 URL (최대 4장). 등록 전이면 빈 배열 */
     representativePhotos: string[];
     isFavorited: boolean;
     isFollowing: boolean;

@@ -33,7 +33,7 @@ export interface BreederProfileSnapshot {
     followingCount: number;
     plan: 'basic' | 'pro';
     businessLocation: ProfileBusinessLocation;
-    /** 브리더가 등록한 대표 사진 파일명 (최대 3장). URL 변환 전 원본 값이다 */
+    /** 브리더가 등록한 대표 사진 파일명 (최대 4장). URL 변환 전 원본 값이다 */
     representativePhotoFileNames: string[];
 }
 

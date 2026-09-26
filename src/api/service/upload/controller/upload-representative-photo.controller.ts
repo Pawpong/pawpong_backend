@@ -16,7 +16,7 @@ export class UploadRepresentativePhotoController {
     @Post('representative-photos')
     @HttpCode(HttpStatus.OK)
     @ApiUploadRepresentativePhotosEndpoint()
-    @UseInterceptors(FilesInterceptor('files', 3))
+    @UseInterceptors(FilesInterceptor('files', 4))
     async uploadRepresentativePhotos(
         @UploadedFiles() files: Express.Multer.File[],
         @CurrentUser('userId') userId: string,

@@ -21,19 +21,21 @@ describe('UploadFilePolicyService', () => {
     const policy = new UploadFilePolicyService();
 
     describe('ensureRepresentativePhotos', () => {
-        it('이미지 파일을 1~3장 업로드하면 통과한다', () => {
+        it('이미지 파일을 1~4장 업로드하면 통과한다', () => {
             expect(() => policy.ensureRepresentativePhotos([makeImage()])).not.toThrow();
-            expect(() => policy.ensureRepresentativePhotos([makeImage(), makeImage(), makeImage()])).not.toThrow();
+            expect(() =>
+                policy.ensureRepresentativePhotos([makeImage(), makeImage(), makeImage(), makeImage()]),
+            ).not.toThrow();
         });
 
         it('파일이 없으면 DomainValidationError를 던진다', () => {
             expect(() => policy.ensureRepresentativePhotos([])).toThrow(DomainValidationError);
         });
 
-        it('4장 이상이면 DomainValidationError를 던진다', () => {
+        it('5장 이상이면 DomainValidationError를 던진다', () => {
             expect(() =>
-                policy.ensureRepresentativePhotos([makeImage(), makeImage(), makeImage(), makeImage()]),
-            ).toThrow('최대 3장');
+                policy.ensureRepresentativePhotos([makeImage(), makeImage(), makeImage(), makeImage(), makeImage()]),
+            ).toThrow('최대 4장');
         });
 
         it('허용되지 않은 mimetype은 DomainValidationError를 던진다', () => {

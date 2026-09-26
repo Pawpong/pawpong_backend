@@ -106,7 +106,7 @@ export class BreederCardResponseDto {
     isFavorited: boolean;
 
     /**
-     * 대표 사진 URL 배열 (최대 3장)
+     * 대표 사진 URL 배열 (최대 4장)
      * @example ["https://example.com/photo1.jpg", "https://example.com/photo2.jpg"]
      */
     @ApiProperty({

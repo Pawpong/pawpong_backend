@@ -20,17 +20,17 @@ describe('BreederManagementProfileUpdateMapperService', () => {
         expect(result['profile.location']).toEqual({ city: '서울', district: '강남구', address: '역삼동' });
     });
 
-    it('profilePhotos가 3장 이하면 통과', () => {
+    it('profilePhotos가 4장 이하면 통과', () => {
         const result = service.toUpdateData(
             { profile: {} } as any,
-            { profilePhotos: ['a.jpg', 'b.jpg', 'c.jpg'] } as any,
+            { profilePhotos: ['a.jpg', 'b.jpg', 'c.jpg', 'd.jpg'] } as any,
         );
-        expect(result['profile.representativePhotos']).toHaveLength(3);
+        expect(result['profile.representativePhotos']).toHaveLength(4);
     });
 
-    it('profilePhotos가 4장 이상이면 DomainValidationError', () => {
+    it('profilePhotos가 5장 이상이면 DomainValidationError', () => {
         expect(() =>
-            service.toUpdateData({ profile: {} } as any, { profilePhotos: ['a', 'b', 'c', 'd'] } as any),
+            service.toUpdateData({ profile: {} } as any, { profilePhotos: ['a', 'b', 'c', 'd', 'e'] } as any),
         ).toThrow(DomainValidationError);
     });
 

@@ -46,7 +46,7 @@ export class BreederPublicProfileResponseDto {
     businessLocation: BreederBusinessLocationDto;
 
     @ApiProperty({
-        description: '대표 사진 URL (최대 3장). 등록 전이면 빈 배열',
+        description: '대표 사진 URL (최대 4장). 등록 전이면 빈 배열',
         type: [String],
         example: ['https://cdn.../breeders/photo-1.jpg'],
     })
