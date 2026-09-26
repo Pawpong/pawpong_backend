@@ -81,7 +81,7 @@
 }
 ```
 
-**대표 사진(`profilePhotos`)은 최대 3장이며 저장은 항상 파일키 기준입니다.**
+**대표 사진(`profilePhotos`)은 최대 4장이며 저장은 항상 파일키 기준입니다.**
 조회 응답에는 CDN URL 로 나가므로 화면이 기존 사진을 그대로 돌려보내면 URL 이 들어옵니다.
 유스케이스가 `BreederManagementFileUrlPort.toFileKey` 로 되돌린 뒤 저장하므로, 버킷이나 도메인이 바뀌어도 이미지가 살아남습니다.
 저장된 대표 사진은 `GET /api/v2/profile/me` 와 공개 브리더홈 응답의 `representativePhotos` 로 노출됩니다.

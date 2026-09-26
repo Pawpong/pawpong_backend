@@ -9,7 +9,7 @@
 ### 1. 브리더 대표 사진 업로드
 
 - 브리더 프로필 대표 사진 업로드 (`POST /api/upload/representative-photos`)
-- 최대 3장 제한, 각 파일 최대 5MB
+- 최대 4장 제한, 각 파일 최대 5MB
 - 로그인 필수 (브리더 권한)
 - 자동으로 DB에 저장 (`profile.representativePhotos` 배열)
 
@@ -56,7 +56,7 @@
 
 **검증:**
 
-- 파일 개수: 최대 3장
+- 파일 개수: 최대 4장
 - 파일 크기: 각 파일 최대 5MB
 - 파일 타입: jpg, jpeg, png, gif, webp만 허용
 
