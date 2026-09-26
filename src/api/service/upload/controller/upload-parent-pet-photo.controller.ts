@@ -2,6 +2,7 @@ import { Body, HttpCode, HttpStatus, Param, Post, UploadedFiles, UseInterceptors
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
+import { UPLOAD_MAX_FILE_COUNT, UPLOAD_MULTER_LIMITS } from '../constants/upload-file-limits.constants';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { MongoObjectIdPipe } from '../../../../common/pipe/mongo-object-id.pipe';
 import { UploadParentPetPhotosUseCase } from '../application/use-cases/upload-parent-pet-photos.use-case';
@@ -18,7 +19,7 @@ export class UploadParentPetPhotoController {
     @Post('parent-pet-photos/:petId')
     @HttpCode(HttpStatus.OK)
     @ApiUploadParentPetPhotosEndpoint()
-    @UseInterceptors(FilesInterceptor('files', 5))
+    @UseInterceptors(FilesInterceptor('files', UPLOAD_MAX_FILE_COUNT.petPhotos, { limits: UPLOAD_MULTER_LIMITS }))
     async uploadParentPetPhotos(
         @Param('petId', new MongoObjectIdPipe('개체', '올바르지 않은 개체 ID 형식입니다.')) petId: string,
         @UploadedFiles() files: Express.Multer.File[],

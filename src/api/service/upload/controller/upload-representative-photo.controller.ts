@@ -2,6 +2,7 @@ import { HttpCode, HttpStatus, Post, UploadedFiles, UseInterceptors } from '@nes
 import { FilesInterceptor } from '@nestjs/platform-express';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
+import { UPLOAD_MAX_FILE_COUNT, UPLOAD_MULTER_LIMITS } from '../constants/upload-file-limits.constants';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { UploadRepresentativePhotosUseCase } from '../application/use-cases/upload-representative-photos.use-case';
 import { UPLOAD_RESPONSE_MESSAGE_EXAMPLES } from '../constants/upload-response-messages';
@@ -16,7 +17,9 @@ export class UploadRepresentativePhotoController {
     @Post('representative-photos')
     @HttpCode(HttpStatus.OK)
     @ApiUploadRepresentativePhotosEndpoint()
-    @UseInterceptors(FilesInterceptor('files', 4))
+    @UseInterceptors(
+        FilesInterceptor('files', UPLOAD_MAX_FILE_COUNT.representativePhotos, { limits: UPLOAD_MULTER_LIMITS }),
+    )
     async uploadRepresentativePhotos(
         @UploadedFiles() files: Express.Multer.File[],
         @CurrentUser('userId') userId: string,

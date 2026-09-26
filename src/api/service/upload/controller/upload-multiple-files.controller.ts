@@ -1,6 +1,7 @@
 import { Body, HttpCode, HttpStatus, Post, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { FilesInterceptor } from '@nestjs/platform-express';
 
+import { UPLOAD_MAX_FILE_COUNT, UPLOAD_MULTER_LIMITS } from '../constants/upload-file-limits.constants';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { UploadMultipleFilesUseCase } from '../application/use-cases/upload-multiple-files.use-case';
 import { buildUploadMultipleFilesUploadedMessage } from '../constants/upload-response-messages';
@@ -16,7 +17,7 @@ export class UploadMultipleFilesController {
     @Post('multiple')
     @HttpCode(HttpStatus.OK)
     @ApiUploadMultipleFilesEndpoint()
-    @UseInterceptors(FilesInterceptor('files', 10))
+    @UseInterceptors(FilesInterceptor('files', UPLOAD_MAX_FILE_COUNT.multiple, { limits: UPLOAD_MULTER_LIMITS }))
     async uploadMultiple(
         @UploadedFiles() files: Express.Multer.File[],
         @Body() requestDto: UploadFolderRequestDto,
