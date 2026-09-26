@@ -10,7 +10,7 @@ AI 사진 콘테스트용 이미지 변환 도메인. 사용자가 반려동물 
 - 결과물은 기존 `POST /api/v2/contest/entry` 에 파일키로 그대로 넘긴다 (**contest 도메인 무수정**)
 
 위치: `src/api/service/ai-image/` + `src/api/admin/ai-image/`.
-상태: 백엔드·AI Agent 구현 완료(dev). 프론트 미구현.
+상태: 백엔드·AI Agent·어드민 구현 완료(dev). 사용자 화면은 콘테스트 참여 페이지의 "AI 도트 필터"로 연결(frontend_2.0).
 
 ### 인프라 제약이 설계를 결정했다
 
@@ -58,7 +58,8 @@ AI Agent 가 꺼져 있어도 동작해야 하고, 여기에만 의존시키면 
 | Method | Path | 용도 |
 |---|---|---|
 | GET | `/api/v2/ai-image/filters` | 활성 필터 목록 (공개) |
-| POST | `/api/v2/ai-image/upload-url` | 원본 업로드 presigned URL |
+| POST | `/api/v2/ai-image/upload-url` | 원본 업로드 presigned URL (네이티브·서버용) |
+| POST | `/api/v2/ai-image/source` | 원본 서버 경유 업로드 (웹·웹뷰용, multipart, 10MB) |
 | POST | `/api/v2/ai-image/generation` | 생성 요청 |
 | GET | `/api/v2/ai-image/generation/{jobId}` | 생성 상태 폴링 (본인 것만) |
 | GET | `/api/v2/ai-image/generations` | 내 생성 이력 |
@@ -68,6 +69,7 @@ AI Agent 가 꺼져 있어도 동작해야 하고, 여기에만 의존시키면 
 | PATCH | `/api/ai-image-admin/filter/{filterId}` | 필터 수정 |
 | DELETE | `/api/ai-image-admin/filter/{filterId}` | 필터 삭제 |
 | POST | `/api/ai-image-admin/upload-url` | 썸네일·레퍼런스·미리보기 원본 업로드 URL |
+| POST | `/api/ai-image-admin/asset` | 썸네일·레퍼런스·미리보기 원본 서버 경유 업로드 (multipart) |
 | GET | `/api/ai-image-admin/agent/health` | AI Agent 가동 상태 (gRPC 동기) |
 | GET | `/api/ai-image-admin/jobs` | 생성 작업 모니터링 (상태·사용자·필터 필터링) |
 
@@ -82,6 +84,14 @@ AI Agent 가 꺼져 있어도 동작해야 하고, 여기에만 의존시키면 
 `source`→`ai-image/source`) 고아 파일 정리 시 출처를 구분할 수 있게 한다.
 MIME 허용 규칙은 사용자 생성 경로와 같아야 하므로 `shared` 의 키 서비스 한 곳에서 관리한다.
 
+### 브라우저 업로드는 서버를 거친다
+
+버킷(iwinv)에 CORS 설정이 없어 브라우저·웹뷰의 presigned PUT 은 preflight 에서 403 으로 막힌다.
+그래서 화면에서 올리는 경로(`/v2/ai-image/source`, `/ai-image-admin/asset`)는 multipart 로 서버를 거친다.
+입력 상한이 10MB 라 2 vCPU 에 주는 부담은 기존 콘테스트 사진 업로드와 같은 수준이다.
+키 규칙·MIME 허용은 presign 경로와 같은 `AiImageObjectKeyService` 를 쓰므로 생성 요청의
+`ai-image/source/` 검증을 그대로 통과한다. presign 엔드포인트는 네이티브·서버 클라이언트용으로 남겨 둔다.
+
 헬스체크는 **연결 실패도 200 + `UNREACHABLE`** 로 내려간다. 미리보기와 정반대 계약인데,
 미리보기는 실패하면 재시도해야 할 일이지만 헬스체크는 죽었다는 사실 자체가 조회 결과이기 때문이다.
 타임아웃도 미리보기(120초)와 달리 5초로 짧게 끊는다.
@@ -90,12 +100,24 @@ MIME 허용 규칙은 사용자 생성 경로와 같아야 하므로 `shared` �
 
 `ai_image_filters` — 관리자가 소유하는 필터 정의
 : `name`, `description`, `thumbnailFileName`, `prompt`, `negativePrompt`, `model`,
-  `outputSize`, `referenceImageObjectKeys[]`, `isActive`, `sortOrder`
+  `outputSize`, `referenceImageObjectKeys[]`(최대 4장), `isActive`, `sortOrder`
+  \+ 스타일 `postProcessType`(`pixelate`|`none`, 기본 pixelate) · `pixelSize`(16~512, 기본 96) ·
+  `paletteSize`(2~256, 기본 48) · `inputFidelity`(`high`|`low`, 기본 high)
+
+포퐁 결과물 톤이 도트 그림이라 새 필터의 기본값은 도트다. 모델이 만든 '도트 느낌' 이미지를
+실제 픽셀 격자로 스냅시켜 필터가 달라도 결과 톤이 맞는다. `inputFidelity=high` 는 원본 얼굴·털 무늬를
+더 강하게 보존한다 — 콘테스트는 "우리 아이"를 알아볼 수 있어야 해서 기본값을 high 로 뒀다.
+설정 도입 전 필터·작업은 예전 동작(도트 96/48)과 같게 읽는다.
+
+기본 필터 "포퐁 도트 초상화"는 `pnpm seed:ai-image-filter` 로 등록한다. 이미 있으면 건드리지 않는다
+(어드민이 다듬은 프롬프트를 되돌리지 않기 위해).
 
 `ai_image_jobs` — 생성 작업
 : `userId`, `userRole`, `contestId`, `filterId`, `inputObjectKey`, `outputObjectKey`,
   `status`, `attempt`, `errorCode`, `completedAt`
-  \+ **스냅샷** `promptSnapshot` · `negativePromptSnapshot` · `modelSnapshot` · `outputSizeSnapshot`
+  \+ **스냅샷** `promptSnapshot` · `negativePromptSnapshot` · `modelSnapshot` · `outputSizeSnapshot` ·
+  `referenceImageObjectKeysSnapshot` · `inputFidelitySnapshot` · `postProcessTypeSnapshot` ·
+  `pixelSizeSnapshot` · `paletteSizeSnapshot`
 
 상태 전이: `PENDING → QUEUED → PROCESSING → SUCCEEDED | FAILED`
 
@@ -162,6 +184,9 @@ try/catch 로 감싸 로그만 남기고, 형식 오류·성공인데 결과키 
 
 **Python AI Agent** — `ai-agent/` (같은 리포). Kafka 컨슈머 + gRPC 서버 단일 프로세스.
 LangGraph 고정 파이프라인 `normalize → generate → pixelate → upload` (분기·자율판단 없음).
+레퍼런스는 원본 뒤에 붙여 `images.edit` 에 함께 보내고(한 장 못 읽으면 건너뜀), pixelate 는 필터 설정이
+`pixelate` 일 때만 적용한다. Kafka 요청에 `referenceImageObjectKeys`·`inputFidelity`·`postProcess` 가
+없으면(옛 메시지) 레퍼런스 없음·low·도트로 처리한다.
 운영 제한: `AI_CONCURRENCY=1`, 재시도 1회, 입력 장축 2048px·10MB 상한.
 자세한 내용은 [`ai-agent/README.md`](../../../ai-agent/README.md).
 
