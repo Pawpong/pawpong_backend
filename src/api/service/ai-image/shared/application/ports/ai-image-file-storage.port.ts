@@ -1,3 +1,5 @@
+import type { Readable } from 'stream';
+
 export const AI_IMAGE_FILE_STORAGE_PORT = Symbol('AI_IMAGE_FILE_STORAGE_PORT');
 
 export interface AiImageFileStoragePort {
@@ -10,4 +12,7 @@ export interface AiImageFileStoragePort {
      * 화면에서 올리는 경로는 이쪽을 쓴다. 입력은 10MB 상한이라 2 vCPU 에 부담이 작다.
      */
     upload(fileKey: string, body: Buffer, contentType: string): Promise<void>;
+
+    /** 저장된 이미지를 스트림으로 연다 (결과 이미지 전달용) */
+    openStream(fileKey: string): Promise<Readable>;
 }

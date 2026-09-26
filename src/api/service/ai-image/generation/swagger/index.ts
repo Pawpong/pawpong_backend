@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiBody, ApiConsumes, ApiParam } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiOkResponse, ApiOperation, ApiParam, ApiProduces } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint } from '../../../../../common/decorator/swagger.decorator';
 import { AI_IMAGE_RESPONSE_MESSAGES } from '../../constants/ai-image-response-messages';
@@ -127,5 +127,21 @@ export function ApiGetMyAiImageGenerationsEndpoint() {
             successDescription: 'AI 생성 이력 조회 성공',
             successMessageExample: AI_IMAGE_RESPONSE_MESSAGES.generationsRetrieved,
         }),
+    );
+}
+
+export function ApiGetAiImageGenerationImageEndpoint() {
+    return applyDecorators(
+        ApiOperation({
+            summary: 'AI 생성 결과 이미지 받기',
+            description: `
+                본인의 완성된(succeeded) 생성 결과를 PNG 바이트로 내려줍니다.
+                버킷에 CORS 가 없어 브라우저가 결과 URL 을 직접 읽을 수 없으므로,
+                커뮤니티 글쓰기처럼 결과를 일반 사진으로 다시 올려야 하는 화면에서 씁니다.
+            `,
+        }),
+        ApiParam({ name: 'jobId', description: '생성 작업 ID' }),
+        ApiProduces('image/png'),
+        ApiOkResponse({ description: 'PNG 이미지', schema: { type: 'string', format: 'binary' } }),
     );
 }

@@ -44,6 +44,18 @@ export class AiImageJobRepository {
             .exec();
     }
 
+    /** 콘테스트와 무관한 생성(커뮤니티 등) 중 since 이후 건수 — 일일 쿼터 산정용 (실패 건 제외) */
+    countWithoutContestSince(userId: string, since: Date): Promise<number> {
+        return this.jobModel
+            .countDocuments({
+                userId,
+                contestId: null,
+                createdAt: { $gte: since },
+                status: { $ne: AiImageJobStatus.FAILED },
+            })
+            .exec();
+    }
+
     /**
      * 진행 중 상태일 때만 전이. 이미 종결된 작업이면 null 을 반환한다.
      * 결과 메시지가 중복 도착해도 최초 1회만 반영되도록 하는 멱등성의 핵심.

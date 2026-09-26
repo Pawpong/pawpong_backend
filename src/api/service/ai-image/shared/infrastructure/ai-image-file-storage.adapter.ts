@@ -1,3 +1,4 @@
+import type { Readable } from 'stream';
 import { Injectable } from '@nestjs/common';
 
 import { StorageService } from '../../../../../common/storage/storage.service';
@@ -17,5 +18,9 @@ export class AiImageFileStorageAdapter implements AiImageFileStoragePort {
 
     upload(fileKey: string, body: Buffer, contentType: string): Promise<void> {
         return this.storageService.putObject(fileKey, body, contentType);
+    }
+
+    openStream(fileKey: string): Promise<Readable> {
+        return this.storageService.getFileStream(fileKey);
     }
 }
