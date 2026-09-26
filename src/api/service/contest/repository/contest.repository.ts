@@ -6,6 +6,7 @@ import { Contest, ContestDocument } from '../../../../schema/contest.schema';
 import { ContestEntry, ContestEntryDocument } from '../../../../schema/contest-entry.schema';
 import { ContestVote, ContestVoteDocument } from '../../../../schema/contest-vote.schema';
 import type { ContestVoteCancelWriteResult, ContestVoteWriteResult } from '../application/ports/contest-writer.port';
+import { eligibleAppAuthorIds, isIosAppRequest } from '../../../../common/content-rights/app-request-context';
 
 @Injectable()
 export class ContestRepository {
@@ -49,18 +50,18 @@ export class ContestRepository {
             .then(() => undefined);
     }
 
-    findTopEntries(contestId: string, limit: number): Promise<ContestEntryDocument[]> {
+    async findTopEntries(contestId: string, limit: number): Promise<ContestEntryDocument[]> {
         return this.entryModel
-            .find({ contestId: new Types.ObjectId(contestId), status: 'active' })
+            .find({ contestId: new Types.ObjectId(contestId), status: 'active', ...await this.appEntryFilter() })
             .sort({ voteCount: -1, createdAt: 1 })
             .limit(limit)
             .lean<ContestEntryDocument[]>()
             .exec();
     }
 
-    findEntries(contestId: string, skip: number, limit: number): Promise<ContestEntryDocument[]> {
+    async findEntries(contestId: string, skip: number, limit: number): Promise<ContestEntryDocument[]> {
         return this.entryModel
-            .find({ contestId: new Types.ObjectId(contestId), status: 'active' })
+            .find({ contestId: new Types.ObjectId(contestId), status: 'active', ...await this.appEntryFilter() })
             .sort({ voteCount: -1, createdAt: 1 })
             .skip(skip)
             .limit(limit)
@@ -68,20 +69,20 @@ export class ContestRepository {
             .exec();
     }
 
-    countEntries(contestId: string): Promise<number> {
-        return this.entryModel.countDocuments({ contestId: new Types.ObjectId(contestId), status: 'active' }).exec();
+    async countEntries(contestId: string): Promise<number> {
+        return this.entryModel.countDocuments({ contestId: new Types.ObjectId(contestId), status: 'active', ...await this.appEntryFilter() }).exec();
     }
 
-    findEntryByUserId(contestId: string, userId: string): Promise<ContestEntryDocument | null> {
+    async findEntryByUserId(contestId: string, userId: string): Promise<ContestEntryDocument | null> {
         return this.entryModel
-            .findOne({ contestId: new Types.ObjectId(contestId), userId })
+            .findOne({ contestId: new Types.ObjectId(contestId), userId, ...await this.appEntryFilter() })
             .lean<ContestEntryDocument>()
             .exec();
     }
 
-    findEntryById(entryId: string): Promise<ContestEntryDocument | null> {
+    async findEntryById(entryId: string): Promise<ContestEntryDocument | null> {
         if (!Types.ObjectId.isValid(entryId)) return Promise.resolve(null);
-        return this.entryModel.findById(entryId).lean<ContestEntryDocument>().exec();
+        return this.entryModel.findOne({ _id: new Types.ObjectId(entryId), ...await this.appEntryFilter() }).lean<ContestEntryDocument>().exec();
     }
 
     async createEntry(data: {
@@ -104,6 +105,7 @@ export class ContestRepository {
     }
 
     async findRandomEntry(contestId: string, excludeUserId: string): Promise<ContestEntryDocument | null> {
+        const appEntryFilter = await this.appEntryFilter();
         const results = await this.entryModel
             .aggregate<ContestEntryDocument>([
                 {
@@ -111,12 +113,18 @@ export class ContestRepository {
                         contestId: new Types.ObjectId(contestId),
                         userId: { $ne: excludeUserId },
                         status: 'active',
+                        ...appEntryFilter,
                     },
                 },
                 { $sample: { size: 1 } },
             ])
             .exec();
         return results[0] ?? null;
+    }
+
+    private async appEntryFilter(): Promise<{ userId?: { $in: string[] } }> {
+        if (!isIosAppRequest()) return {};
+        return { userId: { $in: (await eligibleAppAuthorIds(this.entryModel.db)).map(String) } };
     }
 
     findVote(contestId: string, voterId: string): Promise<ContestVoteDocument | null> {

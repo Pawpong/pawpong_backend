@@ -8,6 +8,7 @@ import { MongoMemoryReplSet } from 'mongodb-memory-server';
 import { AppModule } from '../../app.module';
 import { AllExceptionsFilter } from '../filter/http-exception.filter';
 import { HttpStatusInterceptor } from '../interceptor/http-status.interceptor';
+import { runWithAppRequest } from '../content-rights/app-request-context';
 
 /** 테스트용 인메모리 MongoDB 인스턴스 (단일 노드 ReplSet — 멀티 도큐먼트 트랜잭션 지원) */
 let mongod: MongoMemoryReplSet;
@@ -72,6 +73,7 @@ export async function createTestingApp(
     const moduleFixture = await builder.compile();
 
     const app = moduleFixture.createNestApplication();
+    app.use((req, _res, next) => runWithAppRequest(req.headers['user-agent'], next));
     if (options.corsOrigins) app.enableCors({ origin: options.corsOrigins, credentials: true });
 
     // 글로벌 프리픽스 설정 (/api)

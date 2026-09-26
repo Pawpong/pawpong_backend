@@ -4,6 +4,7 @@ import { CurrentUser } from '../../../../common/decorator/current-user.decorator
 import { Public } from '../../../../common/decorator/public.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
+import { RequireContentRights } from '../../../../common/content-rights/require-content-rights.decorator';
 import { CreateCommunityPostCommentUseCase } from '../application/use-cases/create-community-post-comment.use-case';
 import { DeleteCommunityPostCommentUseCase } from '../application/use-cases/delete-community-post-comment.use-case';
 import { GetCommunityPostCommentsUseCase } from '../application/use-cases/get-community-post-comments.use-case';
@@ -52,6 +53,7 @@ export class CommunityPostCommentController {
     }
 
     @Post('posts/:postId/comments')
+    @RequireContentRights()
     @HttpCode(HttpStatus.OK)
     @ApiCreateCommentEndpoint()
     async create(
@@ -68,6 +70,7 @@ export class CommunityPostCommentController {
     }
 
     @Patch('comments/:commentId')
+    @RequireContentRights()
     @ApiUpdateCommentEndpoint()
     async update(
         @Param('commentId') commentId: string,

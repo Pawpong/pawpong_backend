@@ -15,6 +15,7 @@ import type {
     InquiryDocumentRecord,
     InquirySortRecord,
 } from '../types/inquiry-document.type';
+import { eligibleAppAuthorIds, isIosAppRequest } from '../../../../common/content-rights/app-request-context';
 
 /**
  * 문의 데이터 접근 계층 Repository
@@ -55,13 +56,17 @@ export class InquiryRepository {
         limit: number,
     ): Promise<InquiryDocumentRecord[]> {
         try {
-            return await this.inquiryModel
-                .find(filter)
+            const appFilter = isIosAppRequest()
+                ? { $and: [{ authorId: { $in: await eligibleAppAuthorIds(this.inquiryModel.db) } }] }
+                : {};
+            const docs = await this.inquiryModel
+                .find({ ...filter, ...appFilter })
                 .sort(sortOption)
                 .skip(skip)
                 .limit(limit)
                 .lean<InquiryDocumentRecord[]>()
                 .exec();
+            return this.filterAppAnswers(docs);
         } catch (error) {
             throw new Error(`문의 목록 조회 실패: ${getErrorMessage(error)}`);
         }
@@ -101,10 +106,23 @@ export class InquiryRepository {
      */
     async findById(inquiryId: string): Promise<InquiryDocumentRecord | null> {
         try {
-            return await this.inquiryModel.findById(inquiryId).lean<InquiryDocumentRecord>().exec();
+            const doc = await this.inquiryModel.findById(inquiryId).lean<InquiryDocumentRecord>().exec();
+            if (!doc || !isIosAppRequest() || doc.type !== 'common') return doc;
+            const allowed = new Set((await eligibleAppAuthorIds(this.inquiryModel.db)).map(String));
+            if (!allowed.has(String(doc.authorId))) return null;
+            return (await this.filterAppAnswers([doc]))[0] ?? null;
         } catch (error) {
             throw new Error(`문의 조회 실패: ${getErrorMessage(error)}`);
         }
+    }
+
+    private async filterAppAnswers(docs: InquiryDocumentRecord[]): Promise<InquiryDocumentRecord[]> {
+        if (!isIosAppRequest() || docs.length === 0) return docs;
+        const allowed = new Set((await eligibleAppAuthorIds(this.inquiryModel.db)).map(String));
+        return docs.map((doc) => ({
+            ...doc,
+            answers: (doc.answers ?? []).filter((answer) => allowed.has(String(answer.breederId))),
+        }));
     }
 
     /**
