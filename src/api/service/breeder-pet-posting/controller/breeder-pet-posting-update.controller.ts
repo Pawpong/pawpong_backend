@@ -2,6 +2,7 @@ import { Body, Delete, Get, Param, Patch } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
+import { RequireContentRights } from '../../../../common/content-rights/require-content-rights.decorator';
 import { MongoObjectIdPipe } from '../../../../common/pipe/mongo-object-id.pipe';
 
 import { DeleteBreederPetPostingUseCase } from '../application/use-cases/delete-breeder-pet-posting.use-case';
@@ -46,6 +47,7 @@ export class BreederPetPostingUpdateController {
     }
 
     @Patch(':petId')
+    @RequireContentRights()
     @ApiUpdateBreederPetPostingEndpoint()
     async update(
         @CurrentUser('userId') userId: string,

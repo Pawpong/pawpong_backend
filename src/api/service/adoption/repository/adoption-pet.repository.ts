@@ -9,6 +9,7 @@ import type {
     AdoptionPetStatus,
     AdoptionPetType,
 } from '../application/ports/adoption-pet-reader.port';
+import { CONTENT_RIGHTS_VERSION, isIosAppRequest } from '../../../../common/content-rights/app-request-context';
 
 @Injectable()
 export class AdoptionPetRepository {
@@ -42,6 +43,7 @@ export class AdoptionPetRepository {
         const breederIds = await this.breederModel
             .distinct('_id', {
                 ...(input.breederId ? { _id: input.breederId } : {}),
+                ...(isIosAppRequest() ? { contentRightsConsentVersion: CONTENT_RIGHTS_VERSION } : {}),
             })
             .exec();
         const filter: FilterQuery<AvailablePet> = { isActive: true, breederId: { $in: breederIds } };

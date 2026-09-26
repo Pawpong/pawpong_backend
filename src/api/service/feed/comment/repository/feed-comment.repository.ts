@@ -5,6 +5,7 @@ import { Model, Types } from 'mongoose';
 import { Video, VideoDocument } from '../../../../../schema/video.schema';
 import { VideoComment } from '../../../../../schema/video-comment.schema';
 import type { FeedCommentDocumentRecord, FeedObjectIdLike } from '../../types/feed-document.type';
+import { eligibleAppAuthorIds, isIosAppRequest } from '../../../../../common/content-rights/app-request-context';
 
 @Injectable()
 export class FeedCommentRepository {
@@ -13,23 +14,26 @@ export class FeedCommentRepository {
         @InjectModel(VideoComment.name) private readonly videoCommentModel: Model<VideoComment>,
     ) {}
 
-    findVideoById(videoId: string) {
+    async findVideoById(videoId: string) {
         const objectId = this.toObjectId(videoId);
         if (!objectId) {
             return Promise.resolve(null);
         }
 
-        return this.videoModel.findById(objectId).lean().exec();
+        const authorFilter = isIosAppRequest()
+            ? { uploadedBy: { $in: await eligibleAppAuthorIds(this.videoModel.db) } }
+            : {};
+        return this.videoModel.findOne({ _id: objectId, ...authorFilter }).lean().exec();
     }
 
-    findCommentByIdWithAuthor(commentId: string): Promise<FeedCommentDocumentRecord | null> {
+    async findCommentByIdWithAuthor(commentId: string): Promise<FeedCommentDocumentRecord | null> {
         const objectId = this.toObjectId(commentId);
         if (!objectId) {
             return Promise.resolve(null);
         }
 
         return this.videoCommentModel
-            .findById(objectId)
+            .findOne({ _id: objectId, ...await this.appCommentFilter() })
             .populate('userId', 'name profileImageFileName businessName')
             .lean()
             .exec() as Promise<FeedCommentDocumentRecord | null>;
@@ -55,7 +59,7 @@ export class FeedCommentRepository {
         await this.videoModel.updateOne({ _id: videoId }, { $inc: { commentCount: delta } }).exec();
     }
 
-    findRootCommentsByVideo(videoId: string, skip: number, limit: number): Promise<FeedCommentDocumentRecord[]> {
+    async findRootCommentsByVideo(videoId: string, skip: number, limit: number): Promise<FeedCommentDocumentRecord[]> {
         const videoObjectId = this.toObjectId(videoId);
         if (!videoObjectId) {
             return Promise.resolve([] as FeedCommentDocumentRecord[]);
@@ -66,6 +70,7 @@ export class FeedCommentRepository {
                 videoId: videoObjectId,
                 parentId: { $exists: false },
                 isDeleted: false,
+                ...await this.appCommentFilter(),
             })
             .sort({ createdAt: -1 })
             .skip(skip)
@@ -75,7 +80,7 @@ export class FeedCommentRepository {
             .exec() as Promise<FeedCommentDocumentRecord[]>;
     }
 
-    countRootCommentsByVideo(videoId: string): Promise<number> {
+    async countRootCommentsByVideo(videoId: string): Promise<number> {
         const videoObjectId = this.toObjectId(videoId);
         if (!videoObjectId) {
             return Promise.resolve(0);
@@ -86,11 +91,12 @@ export class FeedCommentRepository {
                 videoId: videoObjectId,
                 parentId: { $exists: false },
                 isDeleted: false,
+                ...await this.appCommentFilter(),
             })
             .exec();
     }
 
-    aggregateReplyCounts(parentIds: string[]) {
+    async aggregateReplyCounts(parentIds: string[]) {
         const parentObjectIds = parentIds
             .map((parentId) => this.toObjectId(parentId))
             .filter((id): id is Types.ObjectId => !!id);
@@ -104,6 +110,7 @@ export class FeedCommentRepository {
                 $match: {
                     parentId: { $in: parentObjectIds },
                     isDeleted: false,
+                    ...await this.appCommentFilter(),
                 },
             },
             {
@@ -115,7 +122,7 @@ export class FeedCommentRepository {
         ]);
     }
 
-    findRepliesByParent(commentId: string, skip: number, limit: number): Promise<FeedCommentDocumentRecord[]> {
+    async findRepliesByParent(commentId: string, skip: number, limit: number): Promise<FeedCommentDocumentRecord[]> {
         const commentObjectId = this.toObjectId(commentId);
         if (!commentObjectId) {
             return Promise.resolve([] as FeedCommentDocumentRecord[]);
@@ -125,6 +132,7 @@ export class FeedCommentRepository {
             .find({
                 parentId: commentObjectId,
                 isDeleted: false,
+                ...await this.appCommentFilter(),
             })
             .sort({ createdAt: 1 })
             .skip(skip)
@@ -134,7 +142,7 @@ export class FeedCommentRepository {
             .exec() as Promise<FeedCommentDocumentRecord[]>;
     }
 
-    countRepliesByParent(commentId: string): Promise<number> {
+    async countRepliesByParent(commentId: string): Promise<number> {
         const commentObjectId = this.toObjectId(commentId);
         if (!commentObjectId) {
             return Promise.resolve(0);
@@ -144,6 +152,7 @@ export class FeedCommentRepository {
             .countDocuments({
                 parentId: commentObjectId,
                 isDeleted: false,
+                ...await this.appCommentFilter(),
             })
             .exec();
     }
@@ -176,5 +185,10 @@ export class FeedCommentRepository {
 
     private toObjectId(value: string): Types.ObjectId | null {
         return Types.ObjectId.isValid(value) ? new Types.ObjectId(value) : null;
+    }
+
+    private async appCommentFilter(): Promise<{ userId?: { $in: Types.ObjectId[] } }> {
+        if (!isIosAppRequest()) return {};
+        return { userId: { $in: await eligibleAppAuthorIds(this.videoCommentModel.db) } };
     }
 }

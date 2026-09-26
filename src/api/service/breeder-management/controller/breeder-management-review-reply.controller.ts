@@ -3,6 +3,7 @@ import { Body, Delete, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
 import { ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
+import { RequireContentRights } from '../../../../common/content-rights/require-content-rights.decorator';
 import { AddBreederManagementReviewReplyUseCase } from '../application/use-cases/add-breeder-management-review-reply.use-case';
 import { RemoveBreederManagementReviewReplyUseCase } from '../application/use-cases/remove-breeder-management-review-reply.use-case';
 import { UpdateBreederManagementReviewReplyUseCase } from '../application/use-cases/update-breeder-management-review-reply.use-case';
@@ -25,6 +26,7 @@ export class BreederManagementReviewReplyController {
     ) {}
 
     @Post('reviews/:reviewId/reply')
+    @RequireContentRights()
     @HttpCode(HttpStatus.OK)
     @ApiAddBreederManagementReviewReplyEndpoint()
     async addReviewReply(
@@ -37,6 +39,7 @@ export class BreederManagementReviewReplyController {
     }
 
     @Patch('reviews/:reviewId/reply')
+    @RequireContentRights()
     @ApiUpdateBreederManagementReviewReplyEndpoint()
     async updateReviewReply(
         @CurrentUser('userId') userId: string,

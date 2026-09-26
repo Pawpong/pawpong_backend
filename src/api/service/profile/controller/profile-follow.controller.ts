@@ -1,4 +1,6 @@
-import { Delete, Get, HttpCode, HttpStatus, Param, Post, Query } from '@nestjs/common';
+import { Delete, Get, HttpCode, HttpStatus, NotFoundException, Param, Post, Query } from '@nestjs/common';
+import { InjectConnection } from '@nestjs/mongoose';
+import { Connection } from 'mongoose';
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
@@ -20,6 +22,7 @@ import {
     ApiRemoveMyFollowerEndpoint,
     ApiUnfollowUserEndpoint,
 } from '../swagger/index';
+import { eligibleAppAuthorIds, isIosAppRequest } from '../../../../common/content-rights/app-request-context';
 
 /**
  * 팔로우/언팔로우 + 내 팔로워 삭제 — JWT 필수, 입양자/브리더 모두 사용 가능 (Figma 678:46565).
@@ -75,7 +78,16 @@ export class ProfileFollowListController {
     constructor(
         private readonly getUserFollowersUseCase: GetUserFollowersUseCase,
         private readonly getUserFollowingsUseCase: GetUserFollowingsUseCase,
+        @InjectConnection() private readonly connection: Connection,
     ) {}
+
+    private async requireVisibleProfile(userId: string): Promise<void> {
+        if (!isIosAppRequest()) return;
+        const allowed = await eligibleAppAuthorIds(this.connection);
+        if (!allowed.some((id) => String(id) === userId)) {
+            throw new NotFoundException('사용자 정보를 찾을 수 없습니다.');
+        }
+    }
 
     @Get('users/:userId/followers')
     @ApiGetUserFollowersEndpoint()
@@ -84,6 +96,7 @@ export class ProfileFollowListController {
         @Query() query: FollowListQueryDto,
         @CurrentUser('userId') viewerId?: string,
     ): Promise<ApiResponseDto<PaginationResponseDto<FollowUserCardResponseDto>>> {
+        await this.requireVisibleProfile(userId);
         const result = await this.getUserFollowersUseCase.execute(userId, query.page, query.pageSize, viewerId);
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result),
@@ -98,6 +111,7 @@ export class ProfileFollowListController {
         @Query() query: FollowListQueryDto,
         @CurrentUser('userId') viewerId?: string,
     ): Promise<ApiResponseDto<PaginationResponseDto<FollowUserCardResponseDto>>> {
+        await this.requireVisibleProfile(userId);
         const result = await this.getUserFollowingsUseCase.execute(userId, query.page, query.pageSize, viewerId);
         return ApiResponseDto.success(
             PaginationResponseDto.fromPageResult(result),

@@ -189,6 +189,16 @@ export class User {
     @Prop({ default: false })
     marketingAgreed: boolean;
 
+    /** 웹·앱 게시물 표시를 작성자가 명시적으로 허락한 별도 동의 버전. */
+    @Prop({ type: String })
+    contentRightsConsentVersion?: string;
+
+    @Prop({ type: Date })
+    contentRightsConsentedAt?: Date;
+
+    @Prop({ type: [{ version: String, consentedAt: Date }], default: [] })
+    contentRightsConsentHistory?: Array<{ version: string; consentedAt: Date }>;
+
     /**
      * 푸시 알림 디바이스 토큰 목록 (FCM)
      * 한 사용자가 여러 기기에서 앱을 쓸 수 있으므로 배열로 관리.
