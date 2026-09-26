@@ -6,7 +6,10 @@ AI 사진 콘테스트용 이미지 변환 도메인. 사용자가 반려동물 
 **AI 필터**(도트 스타일 등)로 변환해 콘테스트에 출품한다.
 
 - 관리자: 필터 CRUD + 저장 전 프롬프트 즉시 시험(미리보기)
-- 사용자: 활성 필터 목록 → 원본 업로드 URL 발급 → 생성 요청 → 상태 폴링
+- 사용자: 활성 필터 목록 → 원본 업로드 → 생성 요청 → 상태 폴링
+- 커뮤니티 글쓰기: 명예의 전당이 커뮤니티 좋아요 기반으로 바뀌어 AI 도트 변환도 글쓰기에 붙였다.
+  결과를 `generation/{jobId}/image` 로 받아 일반 커뮤니티 사진(`community/` 키)으로 다시 올린다 —
+  글 수정·명예의 전당 스냅샷 등 기존 사진 흐름을 커뮤니티 코드 수정 없이 그대로 탄다
 - 결과물은 기존 `POST /api/v2/contest/entry` 에 파일키로 그대로 넘긴다 (**contest 도메인 무수정**)
 
 위치: `src/api/service/ai-image/` + `src/api/admin/ai-image/`.
@@ -62,6 +65,7 @@ AI Agent 가 꺼져 있어도 동작해야 하고, 여기에만 의존시키면 
 | POST | `/api/v2/ai-image/source` | 원본 서버 경유 업로드 (웹·웹뷰용, multipart, 10MB) |
 | POST | `/api/v2/ai-image/generation` | 생성 요청 |
 | GET | `/api/v2/ai-image/generation/{jobId}` | 생성 상태 폴링 (본인 것만) |
+| GET | `/api/v2/ai-image/generation/{jobId}/image` | 내 완성 결과 PNG 바이트 (커뮤니티 글쓰기에서 일반 사진으로 재업로드) |
 | GET | `/api/v2/ai-image/generations` | 내 생성 이력 |
 | GET | `/api/ai-image-admin/filters` | 필터 전체 목록 |
 | POST | `/api/ai-image-admin/filter` | 필터 생성 |
@@ -150,7 +154,8 @@ try/catch 로 감싸 로그만 남기고, 형식 오류·성공인데 결과키 
 그 작업이 무엇으로 돌았는지 알 수 없기 때문이다(사용자 응답에는 여전히 넣지 않는다).
 
 ### Property 5: 쿼터는 실패 건을 세지 않는다
-사용자·콘테스트당 3회. 실패한 생성은 카운트에서 제외해 사용자가 손해보지 않게 한다.
+콘테스트 참여는 사용자·콘테스트당 3회, 콘테스트 없이 쓰는 경우(커뮤니티 글쓰기)는 사용자당 **하루 3회**(KST 자정 초기화).
+콘테스트 기준을 그대로 쓰면 contestId 가 없는 사용이 평생 3회로 묶여서 나눴다. 실패한 생성은 카운트에서 제외해 사용자가 손해보지 않게 한다.
 
 ## Error Handling
 

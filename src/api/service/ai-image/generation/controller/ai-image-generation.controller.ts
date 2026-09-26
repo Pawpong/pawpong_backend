@@ -1,4 +1,4 @@
-import { Body, Get, HttpCode, HttpStatus, Param, Post } from '@nestjs/common';
+import { Body, Get, Header, HttpCode, HttpStatus, Param, Post, StreamableFile } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
@@ -6,12 +6,14 @@ import { MongoObjectIdPipe } from '../../../../../common/pipe/mongo-object-id.pi
 import { AI_IMAGE_RESPONSE_MESSAGES } from '../../constants/ai-image-response-messages';
 import { RequestAiImageGenerationUseCase } from '../application/use-cases/request-ai-image-generation.use-case';
 import { GetAiImageGenerationUseCase } from '../application/use-cases/get-ai-image-generation.use-case';
+import { GetAiImageGenerationImageUseCase } from '../application/use-cases/get-ai-image-generation-image.use-case';
 import { GetMyAiImageGenerationsUseCase } from '../application/use-cases/get-my-ai-image-generations.use-case';
 import { AiImageGenerationController as AiImageGenerationControllerDecorator } from '../decorator/ai-image-generation-controller.decorator';
 import { AiImageGenerationRequestDto } from '../dto/request/ai-image-generation-request.dto';
 import type { AiImageGenerationResponseDto } from '../dto/response/ai-image-generation-response.dto';
 import {
     ApiGetAiImageGenerationEndpoint,
+    ApiGetAiImageGenerationImageEndpoint,
     ApiGetMyAiImageGenerationsEndpoint,
     ApiRequestAiImageGenerationEndpoint,
 } from '../swagger/index';
@@ -23,6 +25,7 @@ export class AiImageGenerationController {
         private readonly requestAiImageGenerationUseCase: RequestAiImageGenerationUseCase,
         private readonly getAiImageGenerationUseCase: GetAiImageGenerationUseCase,
         private readonly getMyAiImageGenerationsUseCase: GetMyAiImageGenerationsUseCase,
+        private readonly getAiImageGenerationImageUseCase: GetAiImageGenerationImageUseCase,
     ) {}
 
     @Post('generation')
@@ -73,5 +76,18 @@ export class AiImageGenerationController {
     ): Promise<ApiResponseDto<AiImageGenerationResponseDto>> {
         const result = await this.getAiImageGenerationUseCase.execute(jobId, userId);
         return ApiResponseDto.success(result, AI_IMAGE_RESPONSE_MESSAGES.generationRetrieved);
+    }
+
+    @Get('generation/:jobId/image')
+    @Header('Content-Type', 'image/png')
+    @Header('Cache-Control', 'private, max-age=3600')
+    @ApiGetAiImageGenerationImageEndpoint()
+    async getGenerationImage(
+        @Param('jobId', new MongoObjectIdPipe('AI 생성 요청', '올바르지 않은 AI 생성 요청 ID 형식입니다.'))
+        jobId: string,
+        @CurrentUser('userId') userId: string,
+    ): Promise<StreamableFile> {
+        const stream = await this.getAiImageGenerationImageUseCase.execute(jobId, userId);
+        return new StreamableFile(stream);
     }
 }

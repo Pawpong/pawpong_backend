@@ -6,6 +6,7 @@ import { CreateAiImageUploadUrlUseCase } from './application/use-cases/create-ai
 import { UploadAiImageSourceUseCase } from './application/use-cases/upload-ai-image-source.use-case';
 import { RequestAiImageGenerationUseCase } from './application/use-cases/request-ai-image-generation.use-case';
 import { GetAiImageGenerationUseCase } from './application/use-cases/get-ai-image-generation.use-case';
+import { GetAiImageGenerationImageUseCase } from './application/use-cases/get-ai-image-generation-image.use-case';
 import { GetMyAiImageGenerationsUseCase } from './application/use-cases/get-my-ai-image-generations.use-case';
 import { ApplyAiImageGenerationResultUseCase } from './application/use-cases/apply-ai-image-generation-result.use-case';
 import { AiImageQuotaService } from './domain/services/ai-image-quota.service';
@@ -32,6 +33,7 @@ const AI_IMAGE_GENERATION_USE_CASE_PROVIDERS = [
     UploadAiImageSourceUseCase,
     RequestAiImageGenerationUseCase,
     GetAiImageGenerationUseCase,
+    GetAiImageGenerationImageUseCase,
     GetMyAiImageGenerationsUseCase,
     ApplyAiImageGenerationResultUseCase,
 ];
