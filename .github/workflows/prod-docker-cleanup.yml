@@ -1,0 +1,41 @@
+name: Clean up old production Docker images
+
+on:
+    # Sunday 03:37 Asia/Seoul. Keep cleanup outside the normal deployment path.
+    schedule:
+        - cron: '37 18 * * 6'
+    workflow_dispatch:
+
+concurrency:
+    group: pawpong-production-deployment
+    cancel-in-progress: false
+
+permissions:
+    contents: read
+
+jobs:
+    cleanup:
+        if: github.ref == 'refs/heads/main'
+        runs-on: ubuntu-latest
+        timeout-minutes: 20
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Verify rollback-aware cleanup selection
+              run: python3 -m unittest discover -s scripts/tests -p 'test_cleanup_prod_docker.py' -v
+
+            - name: Configure production SSH
+              run: |
+                  install -d -m 700 ~/.ssh
+                  printf '%s\n' "${{ secrets.PROD_SSH_KEY }}" > ~/.ssh/prod_key
+                  chmod 600 ~/.ssh/prod_key
+                  ssh-keyscan -H '${{ secrets.PROD_SERVER_HOST }}' >> ~/.ssh/known_hosts
+
+            - name: Remove old unused images and build cache
+              run: |
+                  ssh -i ~/.ssh/prod_key -o BatchMode=yes -o StrictHostKeyChecking=yes \
+                    'colding@${{ secrets.PROD_SERVER_HOST }}' \
+                    'cd /home/colding/pawpong_backend && python3 - --execute' \
+                    < scripts/cleanup-prod-docker.py
