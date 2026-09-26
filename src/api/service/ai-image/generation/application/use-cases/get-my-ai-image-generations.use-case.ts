@@ -7,7 +7,8 @@ import {
 import { AiImageGenerationResultMapperService } from '../../domain/services/ai-image-generation-result-mapper.service';
 import type { AiImageGenerationResult } from '../types/ai-image-generation-result.type';
 
-const MY_GENERATIONS_LIMIT = 30;
+/** 보관함 한 화면 분량 — 하루 3회 제한이라 20일치 정도가 담긴다 */
+const MY_GENERATIONS_LIMIT = 60;
 
 /** GET v2/ai-image/generations — 내 생성 이력 (최신순) */
 @Injectable()

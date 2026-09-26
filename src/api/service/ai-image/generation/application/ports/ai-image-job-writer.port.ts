@@ -15,4 +15,7 @@ export interface AiImageJobWriterPort {
 
     /** 실패 종료. 진행 중 상태일 때만 전이된다 */
     markFailed(jobId: string, errorCode: string): Promise<AiImageJobSnapshot | null>;
+
+    /** 내 AI 사진 보관함에서 숨김 (본인 작업만). 대상이 없으면 false */
+    hideForUser(jobId: string, userId: string): Promise<boolean>;
 }

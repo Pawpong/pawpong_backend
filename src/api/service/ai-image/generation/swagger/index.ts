@@ -145,3 +145,17 @@ export function ApiGetAiImageGenerationImageEndpoint() {
         ApiOkResponse({ description: 'PNG 이미지', schema: { type: 'string', format: 'binary' } }),
     );
 }
+
+export function ApiHideAiImageGenerationEndpoint() {
+    return applyDecorators(
+        ApiOperation({
+            summary: '내 AI 사진 보관함에서 지우기',
+            description: `
+                보관함 목록에서 뺍니다. 기록은 남아 하루 생성 횟수에는 계속 포함됩니다.
+                이미 커뮤니티에 올린 사진은 별도 파일이라 영향이 없습니다.
+            `,
+        }),
+        ApiParam({ name: 'jobId', description: '생성 작업 ID' }),
+        ApiOkResponse({ description: '숨김 완료' }),
+    );
+}

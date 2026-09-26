@@ -155,4 +155,46 @@ describe('AI 이미지 — 커뮤니티 사용 (e2e)', () => {
                 .expect(400);
         });
     });
+
+    describe('보관함에서 지우기', () => {
+        let jobId: string;
+
+        beforeAll(async () => {
+            const inserted = await connection
+                .collection('ai_image_jobs')
+                .insertOne(buildJob(owner.adopterId, { outputObjectKey: 'ai-image/result/hide.png' }));
+            jobId = String(inserted.insertedId);
+        });
+
+        it('다른 사용자는 지울 수 없다', async () => {
+            await request(app.getHttpServer())
+                .delete(`/api/v2/ai-image/generation/${jobId}`)
+                .set('Authorization', `Bearer ${other.token}`)
+                .expect(400);
+        });
+
+        it('지우면 내 목록에서 빠지지만 하루 횟수에는 계속 들어간다', async () => {
+            await request(app.getHttpServer())
+                .delete(`/api/v2/ai-image/generation/${jobId}`)
+                .set('Authorization', `Bearer ${owner.token}`)
+                .expect(200);
+
+            const list = await request(app.getHttpServer())
+                .get('/api/v2/ai-image/generations')
+                .set('Authorization', `Bearer ${owner.token}`)
+                .expect(200);
+            expect(list.body.data.some((job: { jobId: string }) => job.jobId === jobId)).toBe(false);
+
+            // 오늘 이미 3건 + 지운 1건 — 지워도 제한은 풀리지 않는다
+            const response = await requestGeneration(owner.token).expect(400);
+            expect(response.body.error ?? response.body.message).toContain('하루 3회');
+        });
+
+        it('이미 지운 사진을 또 지우면 400', async () => {
+            await request(app.getHttpServer())
+                .delete(`/api/v2/ai-image/generation/${jobId}`)
+                .set('Authorization', `Bearer ${owner.token}`)
+                .expect(400);
+        });
+    });
 });

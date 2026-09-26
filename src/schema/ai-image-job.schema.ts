@@ -90,6 +90,13 @@ export class AiImageJob {
     @Prop({ default: 48 })
     paletteSizeSnapshot: number;
 
+    /**
+     * 사용자가 내 AI 사진 보관함에서 지운 시각. 목록에서만 빠지고 기록은 남는다 —
+     * 하루 생성 횟수는 지운 것도 세야 지웠다 다시 만드는 식으로 제한을 우회하지 못한다.
+     */
+    @Prop({ type: Date, default: null })
+    hiddenAt: Date | null;
+
     /** 시도 횟수 (관리자 재시도 시 증가) */
     @Prop({ default: 1 })
     attempt: number;

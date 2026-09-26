@@ -1,4 +1,4 @@
-import { Body, Get, Header, HttpCode, HttpStatus, Param, Post, StreamableFile } from '@nestjs/common';
+import { Body, Delete, Get, Header, HttpCode, HttpStatus, Param, Post, StreamableFile } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
@@ -7,6 +7,7 @@ import { AI_IMAGE_RESPONSE_MESSAGES } from '../../constants/ai-image-response-me
 import { RequestAiImageGenerationUseCase } from '../application/use-cases/request-ai-image-generation.use-case';
 import { GetAiImageGenerationUseCase } from '../application/use-cases/get-ai-image-generation.use-case';
 import { GetAiImageGenerationImageUseCase } from '../application/use-cases/get-ai-image-generation-image.use-case';
+import { HideAiImageGenerationUseCase } from '../application/use-cases/hide-ai-image-generation.use-case';
 import { GetMyAiImageGenerationsUseCase } from '../application/use-cases/get-my-ai-image-generations.use-case';
 import { AiImageGenerationController as AiImageGenerationControllerDecorator } from '../decorator/ai-image-generation-controller.decorator';
 import { AiImageGenerationRequestDto } from '../dto/request/ai-image-generation-request.dto';
@@ -14,6 +15,7 @@ import type { AiImageGenerationResponseDto } from '../dto/response/ai-image-gene
 import {
     ApiGetAiImageGenerationEndpoint,
     ApiGetAiImageGenerationImageEndpoint,
+    ApiHideAiImageGenerationEndpoint,
     ApiGetMyAiImageGenerationsEndpoint,
     ApiRequestAiImageGenerationEndpoint,
 } from '../swagger/index';
@@ -26,6 +28,7 @@ export class AiImageGenerationController {
         private readonly getAiImageGenerationUseCase: GetAiImageGenerationUseCase,
         private readonly getMyAiImageGenerationsUseCase: GetMyAiImageGenerationsUseCase,
         private readonly getAiImageGenerationImageUseCase: GetAiImageGenerationImageUseCase,
+        private readonly hideAiImageGenerationUseCase: HideAiImageGenerationUseCase,
     ) {}
 
     @Post('generation')
@@ -89,5 +92,16 @@ export class AiImageGenerationController {
     ): Promise<StreamableFile> {
         const stream = await this.getAiImageGenerationImageUseCase.execute(jobId, userId);
         return new StreamableFile(stream);
+    }
+
+    @Delete('generation/:jobId')
+    @ApiHideAiImageGenerationEndpoint()
+    async hideGeneration(
+        @Param('jobId', new MongoObjectIdPipe('AI 생성 요청', '올바르지 않은 AI 생성 요청 ID 형식입니다.'))
+        jobId: string,
+        @CurrentUser('userId') userId: string,
+    ): Promise<ApiResponseDto<{ jobId: string; hidden: boolean }>> {
+        const result = await this.hideAiImageGenerationUseCase.execute(jobId, userId);
+        return ApiResponseDto.success(result, AI_IMAGE_RESPONSE_MESSAGES.generationHidden);
     }
 }

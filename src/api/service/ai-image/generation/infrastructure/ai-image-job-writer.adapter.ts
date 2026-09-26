@@ -37,6 +37,10 @@ export class AiImageJobWriterAdapter implements AiImageJobWriterPort {
         return job ? toAiImageJobSnapshot(job) : null;
     }
 
+    hideForUser(jobId: string, userId: string): Promise<boolean> {
+        return this.repository.hideForUser(jobId, userId);
+    }
+
     async markFailed(jobId: string, errorCode: string): Promise<AiImageJobSnapshot | null> {
         const job = await this.repository.transitionIfInProgress(jobId, {
             status: AiImageJobStatus.FAILED,
