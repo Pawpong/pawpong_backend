@@ -10,4 +10,7 @@ export interface AiImageJobReaderPort {
 
     /** 쿼터 산정 — 사용자·콘테스트별 생성 횟수 (실패 건은 제외) */
     countByUserAndContest(userId: string, contestId: string | null): Promise<number>;
+
+    /** 쿼터 산정 — 콘테스트 없이(커뮤니티 등) since 이후 생성 횟수 (실패 건은 제외) */
+    countWithoutContestSince(userId: string, since: Date): Promise<number>;
 }

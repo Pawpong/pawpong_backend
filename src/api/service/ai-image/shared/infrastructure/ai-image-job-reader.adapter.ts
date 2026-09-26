@@ -23,4 +23,8 @@ export class AiImageJobReaderAdapter implements AiImageJobReaderPort {
     countByUserAndContest(userId: string, contestId: string | null): Promise<number> {
         return this.repository.countByUserAndContest(userId, contestId);
     }
+
+    countWithoutContestSince(userId: string, since: Date): Promise<number> {
+        return this.repository.countWithoutContestSince(userId, since);
+    }
 }

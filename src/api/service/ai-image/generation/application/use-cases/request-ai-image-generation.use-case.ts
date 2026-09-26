@@ -60,8 +60,12 @@ export class RequestAiImageGenerationUseCase {
         }
 
         const contestId = command.contestId ?? null;
-        const usedCount = await this.jobReader.countByUserAndContest(command.userId, contestId);
-        this.quota.ensureWithinQuota(usedCount);
+        if (contestId) {
+            this.quota.ensureWithinQuota(await this.jobReader.countByUserAndContest(command.userId, contestId));
+        } else {
+            const since = this.quota.startOfKstDay(new Date());
+            this.quota.ensureWithinDailyQuota(await this.jobReader.countWithoutContestSince(command.userId, since));
+        }
 
         // 생성 시점 필터 값을 스냅샷으로 복사 — 이후 관리자가 필터를 바꿔도 결과가 흔들리지 않는다
         const job = await this.jobWriter.createPending({
