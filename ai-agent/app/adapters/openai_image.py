@@ -55,9 +55,15 @@ class OpenAiImageAdapter:
         # gpt-image-1 은 negative prompt 파라미터가 없어 프롬프트에 흡수시킨다
         full_prompt = prompt
         if reference_images:
+            # 레퍼런스에 다른 동물이 있으면 모델이 귀·얼굴형을 섞어 그린다(말티즈가 코기 귀를 달고 나옴).
+            # 레퍼런스에서 가져올 것(화풍)과 가져오면 안 될 것(대상의 생김새)을 모두 못 박는다.
             full_prompt = (
-                "The first image is the pet photo to transform. The remaining images are style references only: "
-                "match their art style, palette and mood, but keep the subject from the first image.\n\n"
+                "Image 1 is the pet to draw. Images 2+ are STYLE REFERENCES ONLY.\n"
+                "From the references, copy only the art style: palette, outline weight, pixel/brush texture, "
+                "shading and background mood.\n"
+                "Do NOT copy anything about the animal in the references - not its species, breed, ear shape, "
+                "face shape, fur color, markings or pose. The subject's appearance must come only from image 1 "
+                "(same breed, ear shape, face, fur color and markings as the photo).\n\n"
                 f"{full_prompt}"
             )
         if negative_prompt:
