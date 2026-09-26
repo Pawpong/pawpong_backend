@@ -82,13 +82,17 @@ jobs:
                   # proto/ 는 반드시 함께 보낸다.
                   # nest-cli 에 assets 설정이 없어 .proto 가 dist 로 복사되지 않고,
                   # gRPC 클라이언트가 process.cwd()/proto 를 읽으므로 없으면 부팅이 실패한다.
+                  # ai-agent/ 는 .venv·생성 스텁을 서버에서 만들므로 지우지 않게 제외한다
                   if rsync -avz --delete -e "ssh ${SSH_OPTS}" dist/ "${SERVER}:${REMOTE_DIR}/dist/" \
                      && rsync -avz --delete -e "ssh ${SSH_OPTS}" proto/ "${SERVER}:${REMOTE_DIR}/proto/" \
+                     && rsync -avz --delete --exclude '.venv' --exclude '__pycache__' --exclude 'ai_agent_pb2*' \
+                        -e "ssh ${SSH_OPTS}" ai-agent/ "${SERVER}:${REMOTE_DIR}/ai-agent/" \
                      && rsync -avz -e "ssh ${SSH_OPTS}" package.json pnpm-lock.yaml .npmrc "${SERVER}:${REMOTE_DIR}/"; then
                     echo "✅ rsync 전송 성공"
                   else
                     echo "⚠️ rsync 실패 → tar+ssh fallback 시도"
-                    tar czf - dist proto package.json pnpm-lock.yaml .npmrc | \
+                    tar czf - --exclude 'ai-agent/.venv' --exclude '__pycache__' \
+                      dist proto ai-agent package.json pnpm-lock.yaml .npmrc | \
                       ssh ${SSH_OPTS% -p*} -p ${PORT} ${SERVER} \
                         "cd ${REMOTE_DIR} && rm -rf dist proto && tar xzf -"
                   fi
@@ -130,6 +134,15 @@ jobs:
                     fi
                   EOF
 
+            - name: Deploy AI Agent on Mac Mini (pm2)
+              # 콘테스트 AI 도트 필터(Kafka 생성)·어드민 미리보기(gRPC)·문의 안내가 이 프로세스를 쓴다.
+              # 백엔드와 같은 커밋의 proto 로 스텁을 만들어 계약이 어긋나지 않게 한다.
+              run: |
+                  SERVER="${{ secrets.DEV_SERVER_USER }}@${{ secrets.DEV_SERVER_HOST }}"
+                  PORT="${{ secrets.DEV_SERVER_PORT }}"
+                  ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no -p ${PORT} ${SERVER} \
+                    "bash /home/colding/pawpong_backend/ai-agent/scripts/deploy-dev.sh"
+
             - name: Configure dedicated development error routing
               env:
                   DEV_SERVER_HOST: ${{ secrets.DEV_SERVER_HOST }}
@@ -156,7 +169,7 @@ jobs:
               if: always()
               env:
                   APP_ENV: development
-                  DEPLOY_SERVICE: backend
+                  DEPLOY_SERVICE: backend + ai-agent
                   GH_TOKEN: ${{ github.token }}
                   DEPLOY_REPOSITORY: ${{ github.repository }}
                   DEPLOY_BRANCH: ${{ github.ref_name }}
