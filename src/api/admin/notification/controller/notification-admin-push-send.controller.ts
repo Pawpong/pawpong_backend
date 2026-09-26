@@ -31,6 +31,7 @@ export class NotificationAdminPushSendController {
                     : { type: body.target.type as 'all_adopters' | 'all_breeders' },
             title: body.title,
             body: body.body,
+            purpose: body.purpose,
             targetUrl: body.targetUrl,
         });
         return ApiResponseDto.success(result, '어드민 푸시 발송이 완료되었습니다.');
