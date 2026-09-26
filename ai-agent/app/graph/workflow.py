@@ -5,6 +5,8 @@
 배선 변경만으로 하기 위해서다.
 
   normalize → generate → pixelate → upload
+
+pixelate 는 필터의 후처리 설정이 'pixelate' 일 때만 격자를 적용하고, 아니면 그대로 통과시킨다.
 """
 
 import logging
@@ -13,11 +15,15 @@ from typing import Optional, TypedDict
 from langgraph.graph import END, StateGraph
 
 from ..adapters import pixel
+from ..adapters.references import load_references
 from ..adapters.openai_image import OpenAiImageAdapter, OpenAiImageError
 from ..adapters.storage import StorageAdapter
 from ..config import settings
 
 logger = logging.getLogger(__name__)
+
+# 후처리 설정이 없는 요청(필터별 설정 도입 전 발행된 메시지)은 예전처럼 도트로 처리한다
+DEFAULT_POST_PROCESS = {"type": "pixelate"}
 
 
 class GenerationState(TypedDict, total=False):
@@ -34,8 +40,13 @@ class GenerationState(TypedDict, total=False):
     negative_prompt: str
     model: str
     output_size: str
+    reference_object_keys: list[str]
+    input_fidelity: str
+    # {"type": "none"|"pixelate", "pixelSize": int, "paletteSize": int}
+    post_process: dict
 
     source_bytes: bytes
+    reference_bytes: list[bytes]
     generated_bytes: bytes
     final_bytes: bytes
 
@@ -83,13 +94,16 @@ class AiImageWorkflow:
     def _normalize(self, state: GenerationState) -> GenerationState:
         try:
             raw = self._storage.download(state["input_object_key"])
-            return {"source_bytes": pixel.normalize_input(raw, settings.input_max_edge)}
+            source = pixel.normalize_input(raw, settings.input_max_edge)
         except ValueError as error:
             logger.warning("[workflow] 입력 거부 job=%s: %s", state["job_id"], error)
             return {"error_code": "INPUT_TOO_LARGE"}
         except Exception as error:  # noqa: BLE001
             logger.error("[workflow] 원본 다운로드 실패 job=%s: %s", state["job_id"], error)
             return {"error_code": "INPUT_DOWNLOAD_FAILED"}
+
+        references = load_references(self._storage, state.get("reference_object_keys") or [])
+        return {"source_bytes": source, "reference_bytes": references}
 
     def _generate(self, state: GenerationState) -> GenerationState:
         try:
@@ -99,14 +113,25 @@ class AiImageWorkflow:
                 negative_prompt=state.get("negative_prompt", ""),
                 model=state["model"],
                 size=state["output_size"],
+                reference_images=state.get("reference_bytes") or [],
+                input_fidelity=state.get("input_fidelity", "low"),
             )
             return {"generated_bytes": generated}
         except OpenAiImageError as error:
             return {"error_code": error.code}
 
     def _pixelate(self, state: GenerationState) -> GenerationState:
+        options = state.get("post_process") or DEFAULT_POST_PROCESS
+        if options.get("type") != "pixelate":
+            return {"final_bytes": state["generated_bytes"]}
         try:
-            return {"final_bytes": pixel.pixelate(state["generated_bytes"])}
+            return {
+                "final_bytes": pixel.pixelate(
+                    state["generated_bytes"],
+                    pixel_size=options.get("pixelSize") or pixel.DEFAULT_PIXEL_SIZE,
+                    palette_size=options.get("paletteSize") or pixel.DEFAULT_PALETTE_SIZE,
+                )
+            }
         except Exception as error:  # noqa: BLE001
             logger.error("[workflow] 후처리 실패 job=%s: %s", state["job_id"], error)
             # 후처리는 부가 단계다. 실패해도 원본 생성물을 살려 사용자에게 결과를 준다

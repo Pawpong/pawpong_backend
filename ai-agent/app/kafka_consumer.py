@@ -1,5 +1,8 @@
 """ai-image.request.v1 구독 → 워크플로 실행 → ai-image.result.v1 발행.
 
+요청 계약(AiImageGenerationRequestedEvent) 중 referenceImageObjectKeys·inputFidelity·postProcess 는
+나중에 추가된 필드라 없을 수 있다. 없으면 레퍼런스 없음·low·도트로 처리한다.
+
 NestJS 결과 컨슈머와의 계약(AiImageGenerationResultEvent):
   { id, jobId, status: 'succeeded'|'failed', outputObjectKey?, errorCode?, completedAt }
 
@@ -98,6 +101,10 @@ class AiImageKafkaConsumer:
             "negative_prompt": event.get("negativePrompt", ""),
             "model": event.get("model", settings.openai_image_model),
             "output_size": event.get("outputSize", "1024x1024"),
+            "reference_object_keys": event.get("referenceImageObjectKeys") or [],
+            "input_fidelity": event.get("inputFidelity") or "low",
+            # 필드가 없으면 워크플로가 기존 동작(도트)으로 처리한다
+            "post_process": event.get("postProcess") or None,
         }
 
         last_error = "UNKNOWN"

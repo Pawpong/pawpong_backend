@@ -8,6 +8,9 @@ import io
 
 from PIL import Image
 
+DEFAULT_PIXEL_SIZE = 96
+DEFAULT_PALETTE_SIZE = 48
+
 
 def normalize_input(data: bytes, max_edge: int) -> bytes:
     """입력 이미지를 정규화한다.
@@ -32,7 +35,7 @@ def normalize_input(data: bytes, max_edge: int) -> bytes:
     return buffer.getvalue()
 
 
-def pixelate(data: bytes, pixel_size: int = 96, palette_size: int = 48) -> bytes:
+def pixelate(data: bytes, pixel_size: int = DEFAULT_PIXEL_SIZE, palette_size: int = DEFAULT_PALETTE_SIZE) -> bytes:
     """도트 격자로 스냅시킨다.
 
     pixel_size 는 축소 후 장축 픽셀 수 = 도트 해상도.

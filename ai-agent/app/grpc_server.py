@@ -13,6 +13,7 @@ import grpc
 
 from . import ai_agent_pb2, ai_agent_pb2_grpc
 from .adapters import pixel
+from .adapters.references import load_references
 from .adapters.openai_image import OpenAiImageAdapter, OpenAiImageError
 from .adapters.storage import StorageAdapter
 from .adapters.support import select_faqs
@@ -63,6 +64,7 @@ class AiAgentServicer(ai_agent_pb2_grpc.AiAgentServiceServicer):
         try:
             source = self._storage.download(request.input_object_key)
             normalized = pixel.normalize_input(source, settings.input_max_edge)
+            references = load_references(self._storage, request.reference_image_object_keys)
 
             generated = self._openai.edit(
                 image_bytes=normalized,
@@ -70,13 +72,15 @@ class AiAgentServicer(ai_agent_pb2_grpc.AiAgentServiceServicer):
                 negative_prompt=request.negative_prompt,
                 model=request.model,
                 size=request.output_size,
+                reference_images=references,
+                input_fidelity=request.input_fidelity or "low",
             )
 
             if request.post_process.type == "pixelate":
                 generated = pixel.pixelate(
                     generated,
-                    pixel_size=request.post_process.pixel_size or 96,
-                    palette_size=request.post_process.palette_size or 48,
+                    pixel_size=request.post_process.pixel_size or pixel.DEFAULT_PIXEL_SIZE,
+                    palette_size=request.post_process.palette_size or pixel.DEFAULT_PALETTE_SIZE,
                 )
 
             output_key = f"ai-image/preview/{uuid.uuid4().hex}.png"
