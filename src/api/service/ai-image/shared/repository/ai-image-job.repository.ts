@@ -27,7 +27,21 @@ export class AiImageJobRepository {
     }
 
     findByUserId(userId: string, limit: number): Promise<AiImageJobDocument[]> {
-        return this.jobModel.find({ userId }).sort({ createdAt: -1 }).limit(limit).lean<AiImageJobDocument[]>().exec();
+        return this.jobModel
+            .find({ userId, hiddenAt: null })
+            .sort({ createdAt: -1 })
+            .limit(limit)
+            .lean<AiImageJobDocument[]>()
+            .exec();
+    }
+
+    /** 보관함에서 숨긴다 (본인 작업만). 숨긴 작업이 있으면 true */
+    async hideForUser(jobId: string, userId: string): Promise<boolean> {
+        if (!Types.ObjectId.isValid(jobId)) return false;
+        const result = await this.jobModel
+            .updateOne({ _id: new Types.ObjectId(jobId), userId, hiddenAt: null }, { $set: { hiddenAt: new Date() } })
+            .exec();
+        return result.matchedCount > 0;
     }
 
     /**
