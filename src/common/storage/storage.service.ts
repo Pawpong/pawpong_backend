@@ -518,6 +518,29 @@ export class StorageService {
     }
 
     /**
+     * 정해진 키로 바이트를 그대로 올린다.
+     * uploadFile 과 달리 파일명을 새로 만들지 않는다 — 키 규칙을 호출 도메인이 소유할 때 쓴다.
+     */
+    async putObject(fileKey: string, body: Buffer, contentType: string): Promise<void> {
+        if (this.isTestMode) {
+            this.inMemoryObjects.set(fileKey, { body: Buffer.from(body), contentType, lastModified: new Date() });
+            return;
+        }
+
+        await this.s3.send(
+            new PutObjectCommand({
+                Bucket: this.bucketName,
+                Key: fileKey,
+                Body: body,
+                ContentType: contentType,
+                ACL: 'public-read',
+            }),
+        );
+        await this.assertUploadedObjectExists(fileKey);
+        this.logger.log(`[putObject] Uploaded: ${fileKey}`);
+    }
+
+    /**
      * Presigned Upload URL 생성
      * 클라이언트가 직접 S3로 업로드할 수 있는 URL 제공
      * @param fileKey S3 파일 키 (예: videos/raw/{uuid}.mp4)

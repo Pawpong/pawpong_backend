@@ -25,6 +25,9 @@ const ADMIN_ASSET_DIRECTORIES = {
 /** 어드민 애셋 업로드 용도 */
 export type AiImageAdminAssetPurpose = keyof typeof ADMIN_ASSET_DIRECTORIES;
 
+/** 서버 경유 업로드 상한 — AI Agent 입력 상한(AI_IMAGE_INPUT_MAX_BYTES)과 같다 */
+export const AI_IMAGE_UPLOAD_MAX_BYTES = 10 * 1024 * 1024;
+
 /** 어드민 업로드에서 허용하는 용도 목록 (DTO 검증과 Swagger 문서가 함께 참조) */
 export const AI_IMAGE_ADMIN_ASSET_PURPOSES = Object.keys(ADMIN_ASSET_DIRECTORIES) as AiImageAdminAssetPurpose[];
 

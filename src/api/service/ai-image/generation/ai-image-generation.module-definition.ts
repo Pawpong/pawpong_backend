@@ -3,6 +3,7 @@ import { AiImageUploadUrlController } from './controller/ai-image-upload-url.con
 import { AiImageGenerationController } from './controller/ai-image-generation.controller';
 import { AiImageGenerationKafkaConsumer } from './ai-image-generation-kafka.consumer';
 import { CreateAiImageUploadUrlUseCase } from './application/use-cases/create-ai-image-upload-url.use-case';
+import { UploadAiImageSourceUseCase } from './application/use-cases/upload-ai-image-source.use-case';
 import { RequestAiImageGenerationUseCase } from './application/use-cases/request-ai-image-generation.use-case';
 import { GetAiImageGenerationUseCase } from './application/use-cases/get-ai-image-generation.use-case';
 import { GetMyAiImageGenerationsUseCase } from './application/use-cases/get-my-ai-image-generations.use-case';
@@ -28,6 +29,7 @@ export const AI_IMAGE_GENERATION_MODULE_CONTROLLERS = [
 
 const AI_IMAGE_GENERATION_USE_CASE_PROVIDERS = [
     CreateAiImageUploadUrlUseCase,
+    UploadAiImageSourceUseCase,
     RequestAiImageGenerationUseCase,
     GetAiImageGenerationUseCase,
     GetMyAiImageGenerationsUseCase,

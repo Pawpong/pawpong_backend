@@ -1,5 +1,5 @@
 import { applyDecorators } from '@nestjs/common';
-import { ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiParam, ApiQuery } from '@nestjs/swagger';
 
 import { ApiController, ApiEndpoint, ApiPaginatedEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { PaginationResponseDto } from '../../../../common/dto/pagination/pagination-response.dto';
@@ -11,6 +11,7 @@ import {
 } from '../dto/response/ai-image-admin-filter-response.dto';
 import { AiImageFilterPreviewResponseDto } from '../dto/response/ai-image-filter-preview-response.dto';
 import { AiImageAdminUploadUrlResponseDto } from '../dto/response/ai-image-admin-upload-url-response.dto';
+import { AiImageAdminAssetUploadResponseDto } from '../dto/response/ai-image-admin-asset-upload-response.dto';
 import { AiImageAgentHealthResponseDto } from '../dto/response/ai-image-agent-health-response.dto';
 import { AiImageAdminJobResponseDto } from '../dto/response/ai-image-admin-job-response.dto';
 
@@ -198,6 +199,40 @@ export function ApiGenerateAiImageFilterPreviewEndpoint() {
                     errorExample: 'AI Agent에 연결할 수 없습니다. 잠시 후 다시 시도해주세요.',
                 },
             ],
+        }),
+    );
+}
+
+export function ApiUploadAiImageAdminAssetEndpoint() {
+    return applyDecorators(
+        ApiConsumes('multipart/form-data'),
+        ApiEndpoint({
+            summary: 'AI 필터 애셋 업로드',
+            description: `
+                썸네일·스타일 레퍼런스·미리보기 원본을 서버 경유로 올리고 objectKey 를 돌려줍니다.
+                버킷 CORS 가 없어 브라우저에서 presigned PUT 이 막히므로 어드민 화면은 이 API 를 씁니다.
+                jpg/png/webp, 최대 10MB.
+            `,
+            responseType: AiImageAdminAssetUploadResponseDto,
+            successDescription: '애셋 업로드 성공',
+            successMessageExample: AI_IMAGE_RESPONSE_MESSAGES.adminAssetUploaded,
+            errorResponses: [
+                {
+                    status: 400,
+                    description: '파일 누락, 잘못된 용도 또는 지원하지 않는 이미지 형식',
+                    errorExample: '지원하지 않는 이미지 형식입니다. (jpg, png, webp 만 가능)',
+                },
+            ],
+        }),
+        ApiBody({
+            schema: {
+                type: 'object',
+                required: ['file', 'purpose'],
+                properties: {
+                    file: { type: 'string', format: 'binary' },
+                    purpose: { type: 'string', enum: ['thumbnail', 'reference', 'source'] },
+                },
+            },
         }),
     );
 }

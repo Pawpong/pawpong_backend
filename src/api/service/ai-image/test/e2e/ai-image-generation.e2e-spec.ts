@@ -45,6 +45,29 @@ describe('AI 이미지 생성 종단간 테스트', () => {
         await app.close();
     });
 
+    describe('원본 서버 경유 업로드', () => {
+        it('사진을 올리면 생성 요청에 바로 쓸 수 있는 ai-image/source 키를 돌려준다', async () => {
+            const png = Buffer.from(
+                'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==',
+                'base64',
+            );
+            const response = await request(app.getHttpServer())
+                .post('/api/v2/ai-image/source')
+                .set('Authorization', `Bearer ${adopterToken}`)
+                .attach('file', png, { filename: 'pet.png', contentType: 'image/png' })
+                .expect(200);
+
+            expect(response.body.data.inputObjectKey).toMatch(/^ai-image\/source\/[0-9a-f-]+\.png$/);
+        });
+
+        it('인증 없이 올리면 401', async () => {
+            await request(app.getHttpServer())
+                .post('/api/v2/ai-image/source')
+                .attach('file', Buffer.from('x'), { filename: 'pet.png', contentType: 'image/png' })
+                .expect(401);
+        });
+    });
+
     describe('입력 검증', () => {
         it('존재하지 않는 필터로 요청 시 400', async () => {
             await request(app.getHttpServer())

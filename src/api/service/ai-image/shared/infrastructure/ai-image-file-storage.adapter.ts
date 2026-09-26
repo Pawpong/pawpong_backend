@@ -14,4 +14,8 @@ export class AiImageFileStorageAdapter implements AiImageFileStoragePort {
     generatePresignedUploadUrl(fileKey: string, expiresInSeconds: number): Promise<string> {
         return this.storageService.generatePresignedUploadUrl(fileKey, expiresInSeconds);
     }
+
+    upload(fileKey: string, body: Buffer, contentType: string): Promise<void> {
+        return this.storageService.putObject(fileKey, body, contentType);
+    }
 }
