@@ -3,6 +3,7 @@ import { CommunityPostsModule } from './posts/community-posts.module';
 import { CommunityCommentsModule } from './comments/community-comments.module';
 import { CommunityInteractionsModule } from './interactions/community-interactions.module';
 import { CommunityAuthorSyncModule } from './author-sync/community-author-sync.module';
+import { CommunityHallOfFameModule } from './hall-of-fame/community-hall-of-fame.module';
 import { CommunityReportAdminModule } from '../../admin/community/community-report-admin.module';
 
 // 커뮤니티 바운디드 컨텍스트 — 기능 슬라이스 조립만 담당한다.
@@ -13,5 +14,6 @@ export const COMMUNITY_MODULE_IMPORTS = [
     CommunityCommentsModule,
     CommunityInteractionsModule,
     CommunityAuthorSyncModule,
+    CommunityHallOfFameModule,
     CommunityReportAdminModule,
 ];

@@ -13,6 +13,7 @@ import {
     CommunityBookmarkResponseDto,
     CommunityUnsaveResponseDto,
 } from '../dto/response/community-bookmark-response.dto';
+import { CommunityHallOfFameResponseDto } from '../dto/response/community-hall-of-fame.dto';
 import { CommunityPostReportResponseDto } from '../dto/response/community-post-report-response.dto';
 import { CommunityLikeResponseDto, CommunityUnlikeResponseDto } from '../dto/response/community-like-response.dto';
 import { CommunityPostCardResponseDto } from '../dto/response/community-post-card.dto';
@@ -28,6 +29,51 @@ const POST_NOT_FOUND_RESPONSE = {
 
 export function ApiCommunityPublicController() {
     return ApiPublicController('커뮤니티');
+}
+
+export function ApiGetCurrentCommunityHallOfFameEndpoint() {
+    return ApiEndpoint({
+        summary: '이번 회차 명예의 전당',
+        description: `
+            진행 중인 회차의 좋아요 상위 게시글을 조회합니다.
+
+            ## 회차
+            - 한 달을 3회차로 나눕니다 (KST 기준): 1~10일 / 11~20일 / 21~말일
+            - periodKey 는 \`YYYY-M-N\` 형식이며 N 은 1|2|3
+            - startDate/endDate 는 UTC ISO 8601. endDate 는 다음 회차 시작 시각(배타적 상한)
+            - 회차 라벨 문구는 서버가 만들지 않습니다. startDate/endDate 로 프론트에서 포맷하세요
+
+            ## 순위
+            - 좋아요 내림차순. 동점이면 댓글 → 저장 → 먼저 올라온 글 순으로 가릅니다 (가중합 아님)
+            - 대상: 기간 내 작성된 공개(public) 활성 게시글, 임시저장 제외
+
+            ## 응답
+            - winners 는 **0~3건 가변**입니다. 해당 회차에 글이 없으면 빈 배열이며 폴백하지 않습니다
+            - photoUrl / author.profileImageUrl 은 사진이 없으면 null
+            - 아직 집계 전이어도 회차 정보와 빈 winners 로 응답합니다 (refreshedAt 이 epoch)
+        `,
+        responseType: CommunityHallOfFameResponseDto,
+        isPublic: true,
+        successDescription: '이번 회차 조회 성공',
+        successMessageExample: COMMUNITY_RESPONSE_MESSAGES.hallOfFameCurrentRetrieved,
+    });
+}
+
+export function ApiGetCommunityHallOfFameHistoryEndpoint() {
+    return ApiPaginatedEndpoint({
+        summary: '지난 회차 명예의 전당',
+        description: `
+            확정된(final) 회차만 최신순(endDate 내림차순)으로 조회합니다.
+            진행 중인 회차는 포함되지 않으며 \`/hall-of-fame/current\` 로 조회합니다.
+
+            확정된 회차는 다시 집계하지 않습니다 — 좋아요 취소가 하드 삭제라
+            재집계하면 과거 순위가 뒤집히기 때문입니다.
+        `,
+        responseType: CommunityHallOfFameResponseDto,
+        isPublic: true,
+        successDescription: '지난 회차 조회 성공',
+        successMessageExample: COMMUNITY_RESPONSE_MESSAGES.hallOfFameHistoryRetrieved,
+    });
 }
 
 export function ApiGetCommunityPostListEndpoint() {
