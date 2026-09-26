@@ -5,6 +5,7 @@ import { Model, Types } from 'mongoose';
 import { AdopterPetFavorite } from '../../../../schema/adopter-pet-favorite.schema';
 import type { AvailablePetDocument } from '../../../../schema/available-pet.schema';
 import type { AdoptionPetStatus } from '../application/ports/adoption-pet-reader.port';
+import { CONTENT_RIGHTS_VERSION, isIosAppRequest } from '../../../../common/content-rights/app-request-context';
 
 /**
  * 즐겨찾기 read-only 조회 헬퍼.
@@ -75,6 +76,7 @@ export class AdopterPetFavoriteRepository {
                 { $match: petMatch },
                 { $lookup: { from: 'breeders', localField: 'pet.breederId', foreignField: '_id', as: 'owner' } },
                 { $unwind: '$owner' },
+                ...(isIosAppRequest() ? [{ $match: { 'owner.contentRightsConsentVersion': CONTENT_RIGHTS_VERSION } }] : []),
                 { $sort: { createdAt: -1 } },
                 {
                     $facet: {

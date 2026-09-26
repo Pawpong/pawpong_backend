@@ -2,6 +2,7 @@ import { BadRequestException, Body, Delete, HttpCode, HttpStatus, Param, Patch, 
 
 import { CurrentUser } from '../../../../common/decorator/current-user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
+import { RequireContentRights } from '../../../../common/content-rights/require-content-rights.decorator';
 
 import { CreateCommunityPostUseCase } from '../application/use-cases/create-community-post.use-case';
 import { DeleteCommunityPostUseCase } from '../application/use-cases/delete-community-post.use-case';
@@ -27,6 +28,7 @@ export class CommunityPostWriteController {
     ) {}
 
     @Post('posts')
+    @RequireContentRights()
     @HttpCode(HttpStatus.OK)
     @ApiCreateCommunityPostEndpoint()
     async create(
@@ -40,6 +42,7 @@ export class CommunityPostWriteController {
     }
 
     @Patch('posts/:postId')
+    @RequireContentRights()
     @ApiUpdateCommunityPostEndpoint()
     async update(
         @CurrentUser('userId') userId: string,

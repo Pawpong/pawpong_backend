@@ -1,4 +1,5 @@
 import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { RequireContentRights } from '../../../../../common/content-rights/require-content-rights.decorator';
 import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Body, Inject, Param, Patch } from '@nestjs/common';
 
@@ -20,6 +21,7 @@ export class FeedVideoCommentUpdateController {
     ) {}
 
     @Patch('comment/:commentId')
+    @RequireContentRights()
     @ApiUpdateFeedVideoCommentEndpoint()
     async updateComment(
         @Param('commentId', new MongoObjectIdPipe('댓글')) commentId: string,

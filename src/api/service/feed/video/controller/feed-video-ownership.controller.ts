@@ -1,4 +1,5 @@
 import { ApiResponseDto } from '../../../../../common/dto/response/api-response.dto';
+import { RequireContentRights } from '../../../../../common/content-rights/require-content-rights.decorator';
 import { FEED_VIDEO_RESPONSE_MESSAGE_EXAMPLES } from '../constants/feed-video-response-messages';
 import { Delete, Param, Patch } from '@nestjs/common';
 
@@ -30,6 +31,7 @@ export class FeedVideoOwnershipController {
     }
 
     @Patch('videos/:videoId/visibility')
+    @RequireContentRights()
     @ApiToggleFeedVideoVisibilityEndpoint()
     async toggleVisibility(
         @Param('videoId', new MongoObjectIdPipe('영상')) videoId: string,

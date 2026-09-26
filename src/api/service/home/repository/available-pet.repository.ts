@@ -5,6 +5,7 @@ import { FilterQuery, Model } from 'mongoose';
 import { AvailablePet, AvailablePetDocument } from '../../../../schema/available-pet.schema';
 import { Breeder, BreederDocument } from '../../../../schema/breeder.schema';
 import type { HomeAvailablePetDocumentRecord } from '../types/home-document.type';
+import { CONTENT_RIGHTS_VERSION, isIosAppRequest } from '../../../../common/content-rights/app-request-context';
 
 /**
  * AvailablePet Repository
@@ -25,7 +26,10 @@ export class AvailablePetRepository {
      */
     async findAvailablePets(limit: number = 10): Promise<HomeAvailablePetDocumentRecord[]> {
         // 활성 상태인 브리더 ID 목록 조회
-        const activeBreeders = await this.breederModel.find({ accountStatus: 'active' }).select('_id').lean().exec();
+        const activeBreeders = await this.breederModel.find({
+            accountStatus: 'active',
+            ...(isIosAppRequest() ? { contentRightsConsentVersion: CONTENT_RIGHTS_VERSION } : {}),
+        }).select('_id').lean().exec();
         const activeBreederIds = activeBreeders.map((b) => b._id);
 
         return this.availablePetModel
@@ -43,7 +47,11 @@ export class AvailablePetRepository {
 
     async findHomeAvailablePets(limit: number): Promise<HomeAvailablePetDocumentRecord[]> {
         const activeBreeders = await this.breederModel
-            .find({ accountStatus: 'active', isTestAccount: { $ne: true } })
+            .find({
+                accountStatus: 'active',
+                isTestAccount: { $ne: true },
+                ...(isIosAppRequest() ? { contentRightsConsentVersion: CONTENT_RIGHTS_VERSION } : {}),
+            })
             .select('_id')
             .lean()
             .exec();
@@ -69,7 +77,13 @@ export class AvailablePetRepository {
      * @returns AvailablePet 또는 null
      */
     async findById(id: string): Promise<AvailablePetDocument | null> {
-        return this.availablePetModel.findById(id).exec();
+        const pet = await this.availablePetModel.findById(id).exec();
+        if (!pet || !isIosAppRequest()) return pet;
+        const breeder = await this.breederModel.exists({
+            _id: pet.breederId,
+            contentRightsConsentVersion: CONTENT_RIGHTS_VERSION,
+        });
+        return breeder ? pet : null;
     }
 
     /**
@@ -79,6 +93,10 @@ export class AvailablePetRepository {
      * @returns AvailablePet 배열
      */
     async findByBreederId(breederId: string, status?: string): Promise<AvailablePetDocument[]> {
+        if (isIosAppRequest() && !(await this.breederModel.exists({
+            _id: breederId,
+            contentRightsConsentVersion: CONTENT_RIGHTS_VERSION,
+        }))) return [];
         const query: FilterQuery<AvailablePetDocument> = { breederId, isActive: true };
         if (status) {
             query.status = status;

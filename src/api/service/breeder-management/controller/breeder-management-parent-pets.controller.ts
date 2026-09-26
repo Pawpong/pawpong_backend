@@ -3,6 +3,7 @@ import { Body, Delete, HttpCode, HttpStatus, Param, Patch, Post } from '@nestjs/
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
 import { ApiEndpoint } from '../../../../common/decorator/swagger.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
+import { RequireContentRights } from '../../../../common/content-rights/require-content-rights.decorator';
 import { AddBreederManagementParentPetUseCase } from '../application/use-cases/add-breeder-management-parent-pet.use-case';
 import { RemoveBreederManagementParentPetUseCase } from '../application/use-cases/remove-breeder-management-parent-pet.use-case';
 import { UpdateBreederManagementParentPetUseCase } from '../application/use-cases/update-breeder-management-parent-pet.use-case';
@@ -28,6 +29,7 @@ export class BreederManagementParentPetsController {
     ) {}
 
     @Post('parent-pets')
+    @RequireContentRights()
     @HttpCode(HttpStatus.OK)
     @ApiAddBreederManagementParentPetEndpoint()
     async addParentPet(
@@ -39,6 +41,7 @@ export class BreederManagementParentPetsController {
     }
 
     @Patch('parent-pets/:petId')
+    @RequireContentRights()
     @ApiUpdateBreederManagementParentPetEndpoint()
     async updateParentPet(
         @CurrentUser('userId') userId: string,

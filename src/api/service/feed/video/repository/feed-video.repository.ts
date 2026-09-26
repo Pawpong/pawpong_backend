@@ -6,14 +6,15 @@ import { Video, VideoDocument } from '../../../../../schema/video.schema';
 import { VideoStatus } from '../../../../../common/enum/video-status.enum';
 import { FeedVideoEncodingResult } from '../application/ports/feed-video-command.port';
 import type { FeedVideoDocumentRecord } from '../../types/feed-document.type';
+import { eligibleAppAuthorIds, isIosAppRequest } from '../../../../../common/content-rights/app-request-context';
 
 @Injectable()
 export class FeedVideoRepository {
     constructor(@InjectModel(Video.name) private readonly videoModel: Model<VideoDocument>) {}
 
-    findPublicFeed(skip: number, limit: number): Promise<FeedVideoDocumentRecord[]> {
+    async findPublicFeed(skip: number, limit: number): Promise<FeedVideoDocumentRecord[]> {
         return this.videoModel
-            .find({ status: VideoStatus.READY, isPublic: true })
+            .find({ status: VideoStatus.READY, isPublic: true, ...await this.appUploaderFilter() })
             .sort({ createdAt: -1 })
             .skip(skip)
             .limit(limit)
@@ -22,13 +23,13 @@ export class FeedVideoRepository {
             .exec() as Promise<FeedVideoDocumentRecord[]>;
     }
 
-    countPublicFeed(): Promise<number> {
-        return this.videoModel.countDocuments({ status: VideoStatus.READY, isPublic: true }).exec();
+    async countPublicFeed(): Promise<number> {
+        return this.videoModel.countDocuments({ status: VideoStatus.READY, isPublic: true, ...await this.appUploaderFilter() }).exec();
     }
 
-    findPopular(limit: number): Promise<FeedVideoDocumentRecord[]> {
+    async findPopular(limit: number): Promise<FeedVideoDocumentRecord[]> {
         return this.videoModel
-            .find({ status: VideoStatus.READY, isPublic: true })
+            .find({ status: VideoStatus.READY, isPublic: true, ...await this.appUploaderFilter() })
             .sort({ viewCount: -1 })
             .limit(limit)
             .populate('uploadedBy', 'name profileImageFileName businessName')
@@ -36,9 +37,9 @@ export class FeedVideoRepository {
             .exec() as Promise<FeedVideoDocumentRecord[]>;
     }
 
-    findByIdWithUploader(videoId: string): Promise<FeedVideoDocumentRecord | null> {
+    async findByIdWithUploader(videoId: string): Promise<FeedVideoDocumentRecord | null> {
         return this.videoModel
-            .findById(videoId)
+            .findOne({ _id: videoId, ...await this.appUploaderFilter() })
             .populate('uploadedBy', 'name profileImageFileName businessName')
             .lean()
             .exec() as Promise<FeedVideoDocumentRecord | null>;
@@ -65,8 +66,8 @@ export class FeedVideoRepository {
         return { videoId: video.id as string };
     }
 
-    findById(videoId: string): Promise<FeedVideoDocumentRecord | null> {
-        return this.videoModel.findById(videoId).lean().exec() as Promise<FeedVideoDocumentRecord | null>;
+    async findById(videoId: string): Promise<FeedVideoDocumentRecord | null> {
+        return this.videoModel.findOne({ _id: videoId, ...await this.appUploaderFilter() }).lean().exec() as Promise<FeedVideoDocumentRecord | null>;
     }
 
     async markAsProcessing(videoId: string): Promise<void> {
@@ -137,5 +138,10 @@ export class FeedVideoRepository {
                 },
             )
             .exec();
+    }
+
+    private async appUploaderFilter(): Promise<{ uploadedBy?: { $in: Types.ObjectId[] } }> {
+        if (!isIosAppRequest()) return {};
+        return { uploadedBy: { $in: await eligibleAppAuthorIds(this.videoModel.db) } };
     }
 }

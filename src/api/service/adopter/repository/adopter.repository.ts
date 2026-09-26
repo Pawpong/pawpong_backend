@@ -1,13 +1,14 @@
 import { DomainAuthenticationError } from '../../../../common/error/domain.error';
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { ClientSession, FilterQuery, Model } from 'mongoose';
+import { ClientSession, FilterQuery, Model, Types } from 'mongoose';
 
 import { Adopter, AdopterDocument } from '../../../../schema/adopter.schema';
 import { DomainConflictError } from '../../../../common/error/domain.error';
 import { getErrorMessage, getErrorStack, hasErrorCode } from '../../../../common/utils/error.util';
 import type { FavoriteBreederRecord } from '../application/ports/adopter-profile.port';
 import type { AdopterProfileUpdateRecord } from '../types/adopter-profile.type';
+import { CONTENT_RIGHTS_VERSION, isIosAppRequest } from '../../../../common/content-rights/app-request-context';
 
 /**
  * 입양자 데이터 접근 계층 Repository
@@ -289,9 +290,17 @@ export class AdopterRepository {
             }
 
             // addedAt 내림차순(최근 즐겨찾기 추가순) 정렬 — 어떤 소비자(adopter/profile)든 동일한 순서를 보장
-            const allFavorites = [...adopter.favoriteBreederList].sort(
+            let allFavorites = [...adopter.favoriteBreederList].sort(
                 (a, b) => (b.addedAt?.getTime?.() ?? 0) - (a.addedAt?.getTime?.() ?? 0),
             );
+            if (isIosAppRequest() && allFavorites.length > 0) {
+                const approved = await this.adopterModel.db.db!.collection('breeders').distinct('_id', {
+                    _id: { $in: allFavorites.filter((item) => Types.ObjectId.isValid(item.favoriteBreederId)).map((item) => new Types.ObjectId(item.favoriteBreederId)) },
+                    contentRightsConsentVersion: CONTENT_RIGHTS_VERSION,
+                });
+                const approvedIds = new Set(approved.map(String));
+                allFavorites = allFavorites.filter((item) => approvedIds.has(item.favoriteBreederId));
+            }
             const total = allFavorites.length;
 
             // 페이지네이션 적용

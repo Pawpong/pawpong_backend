@@ -2,6 +2,7 @@ import { Body, HttpCode, HttpStatus, Post } from '@nestjs/common';
 
 import { CurrentUser } from '../../../../common/decorator/user.decorator';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
+import { RequireContentRights } from '../../../../common/content-rights/require-content-rights.decorator';
 import { CreateAdopterReviewUseCase } from '../application/use-cases/create-adopter-review.use-case';
 import { ReportAdopterReviewUseCase } from '../application/use-cases/report-adopter-review.use-case';
 import type { AdopterReviewCreateResult, AdopterReviewReportResult } from '../application/types/adopter-result.type';
@@ -21,6 +22,7 @@ export class AdopterReviewCommandController {
     ) {}
 
     @Post('review')
+    @RequireContentRights()
     @HttpCode(HttpStatus.OK)
     @ApiCreateAdopterReviewEndpoint()
     async createReview(
