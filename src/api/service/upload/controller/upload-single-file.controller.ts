@@ -1,6 +1,7 @@
 import { Body, HttpCode, HttpStatus, Post, UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 
+import { UPLOAD_MULTER_LIMITS } from '../constants/upload-file-limits.constants';
 import { ApiResponseDto } from '../../../../common/dto/response/api-response.dto';
 import { UploadSingleFileUseCase } from '../application/use-cases/upload-single-file.use-case';
 import { UPLOAD_RESPONSE_MESSAGE_EXAMPLES } from '../constants/upload-response-messages';
@@ -16,7 +17,7 @@ export class UploadSingleFileController {
     @Post('single')
     @HttpCode(HttpStatus.OK)
     @ApiUploadSingleFileEndpoint()
-    @UseInterceptors(FileInterceptor('file'))
+    @UseInterceptors(FileInterceptor('file', { limits: UPLOAD_MULTER_LIMITS }))
     async uploadSingle(
         @UploadedFile() file: Express.Multer.File,
         @Body() requestDto: UploadFolderRequestDto,

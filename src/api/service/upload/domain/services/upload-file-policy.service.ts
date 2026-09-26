@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 
 import { DomainValidationError } from '../../../../../common/error/domain.error';
+import { UPLOAD_MAX_FILE_SIZE_BYTES } from '../../constants/upload-file-limits.constants';
 
 @Injectable()
 export class UploadFilePolicyService {
@@ -16,8 +17,8 @@ export class UploadFilePolicyService {
 
     private readonly allowedVideoMimeTypes = ['video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm'];
 
-    private readonly imageMaxSize = 100 * 1024 * 1024;
-    private readonly videoMaxSize = 100 * 1024 * 1024;
+    private readonly imageMaxSize = UPLOAD_MAX_FILE_SIZE_BYTES;
+    private readonly videoMaxSize = UPLOAD_MAX_FILE_SIZE_BYTES;
 
     ensureRepresentativePhotos(files: Express.Multer.File[]): void {
         if (!files || files.length === 0) {
@@ -35,12 +36,16 @@ export class UploadFilePolicyService {
         if (!file) {
             throw new DomainValidationError('파일이 없습니다.');
         }
+
+        this.validateMediaFile(file);
     }
 
     ensurePublicMultipleFiles(files: Express.Multer.File[]): void {
         if (!files || files.length === 0) {
             throw new DomainValidationError('파일이 없습니다.');
         }
+
+        files.forEach((file) => this.validateMediaFile(file));
     }
 
     ensurePetPhotoLimit(existingPhotoCount: number, newFileCount: number): void {
