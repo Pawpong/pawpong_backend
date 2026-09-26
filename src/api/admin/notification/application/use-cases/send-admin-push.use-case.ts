@@ -55,16 +55,25 @@ export class SendAdminPushUseCase {
     async execute(command: SendAdminPushCommand): Promise<AdminPushDispatchResult> {
         this.validator.validate(command.target);
         this.validator.validateTargetUrl(command.targetUrl);
+        if (command.purpose !== 'service' && command.purpose !== 'marketing') {
+            throw new BadRequestException('발송 목적을 선택해주세요.');
+        }
 
         const title = command.title.trim();
         const body = command.body.trim();
         if (title.length === 0) throw new BadRequestException('제목을 입력해주세요.');
         if (body.length === 0) throw new BadRequestException('본문을 입력해주세요.');
 
-        const recipients = await this.recipientReader.readRecipients(command.target);
+        const candidates = await this.recipientReader.readRecipients(command.target);
+        const recipients = command.purpose === 'marketing'
+            ? candidates.filter((recipient) => recipient.marketingAgreed === true)
+            : candidates;
 
-        if (command.target.type === 'individual' && recipients.length === 0) {
+        if (command.target.type === 'individual' && candidates.length === 0) {
             throw new BadRequestException('대상 사용자를 찾을 수 없습니다.');
+        }
+        if (command.target.type === 'individual' && recipients.length === 0) {
+            throw new BadRequestException('대상 사용자가 마케팅 수신에 동의하지 않았습니다.');
         }
 
         // 1) in-app notification doc 일괄 생성 (토큰 없는 사용자도 알림 탭에는 보이도록 모든 recipients 대상)

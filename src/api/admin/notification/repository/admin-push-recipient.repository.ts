@@ -20,14 +20,15 @@ export class AdminPushRecipientRepository {
     async listAdopters(): Promise<AdminPushRecipientSnapshot[]> {
         const docs = await this.adopterModel
             .find({ accountStatus: 'active', 'pushDeviceTokens.0': { $exists: true } })
-            .select({ _id: 1, pushDeviceTokens: 1 })
-            .lean<Array<{ _id: Types.ObjectId; pushDeviceTokens: Array<{ token: string }> }>>()
+            .select({ _id: 1, pushDeviceTokens: 1, marketingAgreed: 1 })
+            .lean<Array<{ _id: Types.ObjectId; pushDeviceTokens: Array<{ token: string }>; marketingAgreed?: boolean }>>()
             .exec();
         return docs
             .map((d) => ({
                 userId: String(d._id),
                 userRole: 'adopter' as const,
                 tokens: (d.pushDeviceTokens ?? []).map((t) => t.token).filter((t) => !!t),
+                marketingAgreed: d.marketingAgreed === true,
             }))
             .filter((r) => r.tokens.length > 0);
     }
@@ -35,14 +36,15 @@ export class AdminPushRecipientRepository {
     async listBreeders(): Promise<AdminPushRecipientSnapshot[]> {
         const docs = await this.breederModel
             .find({ accountStatus: 'active', 'pushDeviceTokens.0': { $exists: true } })
-            .select({ _id: 1, pushDeviceTokens: 1 })
-            .lean<Array<{ _id: Types.ObjectId; pushDeviceTokens: Array<{ token: string }> }>>()
+            .select({ _id: 1, pushDeviceTokens: 1, marketingAgreed: 1 })
+            .lean<Array<{ _id: Types.ObjectId; pushDeviceTokens: Array<{ token: string }>; marketingAgreed?: boolean }>>()
             .exec();
         return docs
             .map((d) => ({
                 userId: String(d._id),
                 userRole: 'breeder' as const,
                 tokens: (d.pushDeviceTokens ?? []).map((t) => t.token).filter((t) => !!t),
+                marketingAgreed: d.marketingAgreed === true,
             }))
             .filter((r) => r.tokens.length > 0);
     }
@@ -51,23 +53,23 @@ export class AdminPushRecipientRepository {
         if (!Types.ObjectId.isValid(userId)) return null;
         const doc = await this.adopterModel
             .findOne({ _id: new Types.ObjectId(userId), accountStatus: 'active' })
-            .select({ _id: 1, pushDeviceTokens: 1 })
-            .lean<{ _id: Types.ObjectId; pushDeviceTokens?: Array<{ token: string }> }>()
+            .select({ _id: 1, pushDeviceTokens: 1, marketingAgreed: 1 })
+            .lean<{ _id: Types.ObjectId; pushDeviceTokens?: Array<{ token: string }>; marketingAgreed?: boolean }>()
             .exec();
         if (!doc) return null;
         const tokens = (doc.pushDeviceTokens ?? []).map((t) => t.token).filter((t) => !!t);
-        return { userId: String(doc._id), userRole: 'adopter', tokens };
+        return { userId: String(doc._id), userRole: 'adopter', tokens, marketingAgreed: doc.marketingAgreed === true };
     }
 
     async findOneBreeder(userId: string): Promise<AdminPushRecipientSnapshot | null> {
         if (!Types.ObjectId.isValid(userId)) return null;
         const doc = await this.breederModel
             .findOne({ _id: new Types.ObjectId(userId), accountStatus: 'active' })
-            .select({ _id: 1, pushDeviceTokens: 1 })
-            .lean<{ _id: Types.ObjectId; pushDeviceTokens?: Array<{ token: string }> }>()
+            .select({ _id: 1, pushDeviceTokens: 1, marketingAgreed: 1 })
+            .lean<{ _id: Types.ObjectId; pushDeviceTokens?: Array<{ token: string }>; marketingAgreed?: boolean }>()
             .exec();
         if (!doc) return null;
         const tokens = (doc.pushDeviceTokens ?? []).map((t) => t.token).filter((t) => !!t);
-        return { userId: String(doc._id), userRole: 'breeder', tokens };
+        return { userId: String(doc._id), userRole: 'breeder', tokens, marketingAgreed: doc.marketingAgreed === true };
     }
 }

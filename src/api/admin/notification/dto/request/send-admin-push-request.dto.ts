@@ -42,6 +42,13 @@ export class SendAdminPushRequestDto {
     @Type(() => AdminPushTargetDto)
     target: AdminPushTargetDto;
 
+    @ApiProperty({
+        description: '발송 목적. 앱 홍보·이벤트 안내는 marketing을 선택하며 수신 동의자에게만 발송됩니다.',
+        enum: ['service', 'marketing'],
+    })
+    @IsEnum(['service', 'marketing'])
+    purpose: 'service' | 'marketing';
+
     @ApiProperty({ description: '제목 (≤100, trim 후 비어있을 수 없음)', example: '추석 연휴 안내' })
     @IsString()
     @IsNotEmpty()

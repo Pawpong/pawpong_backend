@@ -14,6 +14,7 @@ export type AdminPushTarget =
 
 export interface SendAdminPushCommand {
     target: AdminPushTarget;
+    purpose: 'service' | 'marketing';
     title: string;
     body: string;
     targetUrl?: string;
@@ -23,6 +24,7 @@ export interface AdminPushRecipientSnapshot {
     userId: string;
     userRole: NotificationUserRole;
     tokens: string[];
+    marketingAgreed: boolean;
 }
 
 export interface AdminPushDispatchResult {
